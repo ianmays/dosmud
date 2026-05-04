@@ -4,7 +4,7 @@
 #include "command.h"
 #include "world.h"
 
-#define CFG_BAG_MAX 5
+#define CFG_BAG_MAX 12
 
 struct Player {
     int room_id;
@@ -27,6 +27,11 @@ struct GameState {
     int room_item[CFG_ROOM_MAX];
     int bag[CFG_BAG_MAX];
     int bag_count;
+    int bag_capacity;
+    int level;
+    int xp;
+    int max_hp;
+    int damage_bonus;
     int player_hp;
     int enemy_dialogue;
     int combat_active;

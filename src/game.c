@@ -35,6 +35,36 @@ int item_id;
     return "unknown";
 }
 
+static int xp_to_next_level(level)
+int level;
+{
+    return 20 + ((level - 1) * 15);
+}
+
+static void gain_xp(game, amount)
+struct GameState *game;
+int amount;
+{
+    int needed;
+    game->xp += amount;
+    printf("You gain %d XP.\n", amount);
+    needed = xp_to_next_level(game->level);
+    while (game->xp >= needed) {
+        game->xp -= needed;
+        game->level += 1;
+        game->max_hp += 4;
+        game->damage_bonus += 1;
+        if (game->bag_capacity < CFG_BAG_MAX) {
+            game->bag_capacity += 1;
+        }
+        game->player_hp = game->max_hp;
+        printf("Level up! You are now level %d.\n", game->level);
+        printf("Max HP %d, Damage bonus +%d, Bag capacity %d.\n",
+            game->max_hp, game->damage_bonus, game->bag_capacity);
+        needed = xp_to_next_level(game->level);
+    }
+}
+
 static int bag_find_index(game, item_id)
 struct GameState *game;
 int item_id;
@@ -52,7 +82,7 @@ static int bag_add(game, item_id)
 struct GameState *game;
 int item_id;
 {
-    if (game->bag_count >= CFG_BAG_MAX) {
+    if (game->bag_count >= game->bag_capacity) {
         return 0;
     }
     game->bag[game->bag_count] = item_id;
@@ -122,6 +152,18 @@ struct GameState *game;
     if (game_is_busy_dialogue(game)) {
         return;
     }
+    printf("\n");
+    printf("                  .--.__________________.--.\n");
+    printf("                .'   /  _   _   _   _  \\   '.\n");
+    printf("               /    |  (o) (o) (o) (o) |    \\\n");
+    printf("              |     |        /\\         |     |\n");
+    printf("              |     |   .-==========-.  |     |\n");
+    printf("              |     |  /  /  /  /  / |  |     |\n");
+    printf("              |     | /__/__/__/__/  |  |     |\n");
+    printf("              |     | \\  rusty blade  /  |     |\n");
+    printf("               \\    |  '------------'   |    /\n");
+    printf("                '.  \\__________________/  .'\n");
+    printf("                  '--._______________ .--'\n");
     printf("\nA road bandit steps from cover with a hand on a rusted blade.\n");
     printf("\"Easy now. We can do this three ways.\"\n");
     printf("  [1] Refuse and fight.\n");
@@ -171,7 +213,7 @@ int choice;
 {
     int dmg;
     if (choice == 1) {
-        dmg = 2 + (rand() % 4);
+        dmg = 2 + (rand() % 4) + game->damage_bonus;
         game->enemy_hp -= dmg;
         printf("You hit the bandit for %d damage.\n", dmg);
     } else if (choice == 2) {
@@ -183,7 +225,7 @@ int choice;
         } else {
             bag_remove_item(game, ITEM_SALVE);
             game->player_hp += 5;
-            if (game->player_hp > 20) game->player_hp = 20;
+            if (game->player_hp > game->max_hp) game->player_hp = game->max_hp;
             printf("You apply salve and recover. HP now %d.\n", game->player_hp);
         }
     } else {
@@ -198,6 +240,7 @@ int choice;
         printf("The bandit falls. The body slumps into the dust.\n");
         game->corpse_present[game->player.room_id] = 1;
         game->corpse_loot[game->player.room_id] = (rand() % 2) ? ITEM_STONE : ITEM_HERB;
+        gain_xp(game, 12 + (rand() % 5));
         return;
     }
 
@@ -804,6 +847,11 @@ struct GameState *game;
     game->env_focus_kind = ENV_FOCUS_NONE;
     game->env_focus_expires_tick = 0;
     game->bag_count = 0;
+    game->bag_capacity = 5;
+    game->level = 1;
+    game->xp = 0;
+    game->max_hp = 20;
+    game->damage_bonus = 0;
     game->player_hp = 20;
     game->enemy_dialogue = 0;
     game->combat_active = 0;
@@ -823,9 +871,13 @@ void game_render(game)
 const struct GameState *game;
 {
     const struct Room *room;
+    int needed;
 
     room = &game->world.rooms[game->player.room_id];
-    printf("\n[T:%lu] %s [HP:%d]\n", game->tick, room->name, game->player_hp);
+    needed = xp_to_next_level(game->level);
+    printf("\n[T:%lu] %s [HP:%d/%d] [Lv:%d XP:%d/%d]\n",
+        game->tick, room->name, game->player_hp, game->max_hp,
+        game->level, game->xp, needed);
 }
 
 void game_print_help(void)
@@ -916,7 +968,7 @@ struct Command *cmd;
             return 1;
         }
         if (!bag_add(game, ground_item)) {
-            printf("Your bag is full (5 items max).\n");
+            printf("Your bag is full (%d items max).\n", game->bag_capacity);
             return 1;
         }
         game->room_item[room_id] = ITEM_NONE;
@@ -944,7 +996,7 @@ struct Command *cmd;
         return 1;
     }
     if (cmd->type == CMD_BAG) {
-        printf("Bag (%d/%d):", game->bag_count, CFG_BAG_MAX);
+        printf("Bag (%d/%d):", game->bag_count, game->bag_capacity);
         if (game->bag_count <= 0) {
             printf(" empty\n");
             return 1;
@@ -994,7 +1046,7 @@ struct Command *cmd;
         }
         if (cmd->arg == ITEM_SALVE) {
             game->player_hp += 5;
-            if (game->player_hp > 20) game->player_hp = 20;
+            if (game->player_hp > game->max_hp) game->player_hp = game->max_hp;
             printf("You apply the salve and recover 5 HP. HP now %d.\n",
                 game->player_hp);
             bag_remove_item(game, cmd->arg);
