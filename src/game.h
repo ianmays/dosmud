@@ -15,6 +15,9 @@ struct GameState {
     unsigned long seed;
     int running;
     int pond_dialogue;
+    int wanderer_room;
+    int wanderer_dialogue;
+    int wanderer_need_separation;
 };
 
 void game_init(struct GameState *game);

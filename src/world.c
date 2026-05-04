@@ -24,10 +24,29 @@ int w;
 void world_init(world)
 struct World *world;
 {
-    world->room_count = 3;
-    room_set(&world->rooms[WORLD_ROOM_CAMP], "Camp", "A small campfire burns quietly.", 1, -1, 2, -1);
-    room_set(&world->rooms[WORLD_ROOM_ROAD], "Road", "A dusty road extends to the horizon.", -1, 0, -1, -1);
-    room_set(&world->rooms[WORLD_ROOM_POND], "Pond", "A still pond reflects the dim sky. A frog lounges on a lily pad like he owns the place.", -1, -1, -1, 0);
+    world->room_count = 6;
+    /*
+     *        [Road]
+     *          |
+     * [Forest]-[Camp]-[Pond]
+     *          |
+     *       [Stream]
+     *          |
+     *       [Ruins]
+     */
+    room_set(&world->rooms[WORLD_ROOM_CAMP], "Camp",
+        "A small campfire burns quietly.", 1, -1, 2, 3);
+    room_set(&world->rooms[WORLD_ROOM_ROAD], "Road",
+        "A dusty road stretches toward pale hills.", -1, 0, -1, -1);
+    room_set(&world->rooms[WORLD_ROOM_POND], "Pond",
+        "A still pond reflects the dim sky. A frog lounges on a lily pad like he owns the place.",
+        -1, -1, -1, 0);
+    room_set(&world->rooms[WORLD_ROOM_FOREST], "Forest",
+        "Needles soften your steps; distant branches knit the light.", -1, 5, 0, -1);
+    room_set(&world->rooms[WORLD_ROOM_STREAM], "Stream",
+        "Cold water chatters over stones. Moss holds every splinter of sound.", 3, 4, -1, -1);
+    room_set(&world->rooms[WORLD_ROOM_RUINS], "Ruins",
+        "Broken columns argue with the sky; carved letters sleep under dust.", 5, -1, -1, -1);
 }
 
 void world_step(world, tick)

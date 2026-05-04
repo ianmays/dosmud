@@ -126,5 +126,5 @@ int type;
 
 const char *command_help_text(void)
 {
-    return "Commands: look, move <dir>, wait, talk (at Pond), 1/2/3 or reply <1-3>, help, quit";
+    return "Commands: look, move <dir>, wait, talk (Pond frog), 1/2/3 or reply <1-3> (frog/traveler), help, quit";
 }

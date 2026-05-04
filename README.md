@@ -46,12 +46,26 @@ That invokes `wcl` with the same flags as in the batch file and writes `dosmud.e
 6. Enter `move north` (from camp) -> room changes, tick increments by 1.
 7. Enter `quit` -> program exits.
 
+## World (6 areas)
+
+Approximate map:
+
+- **Camp** — central; north to **Road**, east to **Pond**, west to **Forest**.
+- **Forest** — south to **Stream**, east back to Camp.
+- **Stream** — north to Forest, south to **Ruins**.
+- **Ruins** — north to Stream. (A roaming adventurer starts here and wanders at random each time you `move` or `wait`.)
+- **Road** — south to Camp.
+- **Pond** — west to Camp; `talk` for the frog (also `1`/`2`/`3` / `reply`).
+
+When you end up in the same room as the wanderer, they stop you for a short chat (same reply keys as the frog). You will not get repeat bump dialogue until you are in a *different* room from them at least once.
+
 ## Current command set
 
 - `look`
 - `move <north|south|east|west>`
 - `wait`
-- `talk` (at the Pond: branching chat with the frog; answer with `1`/`2`/`3` or `reply <1-3>`)
+- `talk` (at the **Pond**: branching chat with the frog; answer with `1`/`2`/`3` or `reply <1-3>`)
+- `1` / `2` / `3` or `reply <n>` when the **frog** or **traveler** is waiting for an answer
 - `help`
 - `quit`
 

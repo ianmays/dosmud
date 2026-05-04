@@ -13,5 +13,8 @@
 #define WORLD_ROOM_CAMP 0
 #define WORLD_ROOM_ROAD 1
 #define WORLD_ROOM_POND 2
+#define WORLD_ROOM_FOREST 3
+#define WORLD_ROOM_RUINS 4
+#define WORLD_ROOM_STREAM 5
 
 #endif

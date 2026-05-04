@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 #include "game.h"
 
 static void art_room_camp(void)
@@ -63,6 +65,81 @@ static void art_room_pond(void)
     printf("             (the frog's lily pad throne)\n");
 }
 
+static void art_room_forest(void)
+{
+    printf("                        /\\  /\\  /\\\n");
+    printf("                       /  \\/  \\/  \\\n");
+    printf("                      /    \\  /    \\\n");
+    printf("                     /______\\/______\\\n");
+    printf("                    /~ ~ ~ ~ ~ ~ ~ ~ ~\\\n");
+    printf("                   /~  ~  ~  ~  ~  ~  ~\\\n");
+    printf("                  /~   ~   ~   ~   ~   ~\\\n");
+    printf("         /\\      /~  ~  ~  ~  ~  ~  ~  ~\\\n");
+    printf("        /  \\    /________________________\\\n");
+    printf("       /    \\  /| | | | | | | | | | | | | \\\n");
+    printf("      /______\\/ | | | | | | | | | | | | | | \\\n");
+    printf("     /|  ||  |\\  | | | | | | | | | | | | |  \\\n");
+    printf("    / |  ||  | \\___________________________\\\n");
+    printf("   /  |__||__|  \\  (shadows hold their breath)  \\\n");
+    printf("  /________________\\__________________________\\\n");
+}
+
+static void art_room_stream(void)
+{
+    printf("            .     .     .     .     .     .\n");
+    printf("         .     .     .     .     .     .\n");
+    printf("      ~~~~~~~~   ~~~~   ~~~~   ~~~~   ~~~~~~~~\n");
+    printf("   ~~~~   ~~~~~   ~~~~~   ~~~~~   ~~~~~   ~~~~\n");
+    printf("  ~~~~~  ~~~~~  ~~~~~  ~~~~~  ~~~~~  ~~~~~  ~~~~~\n");
+    printf(" ~~~~  ~~~~  ~~~~  ~~~~  ~~~~  ~~~~  ~~~~  ~~~~\n");
+    printf("  ~~~~  ~~~~  ~~~~  ~~~~  ~~~~  ~~~~  ~~~~  ~~~~\n");
+    printf("   ~~~~  ~~~~  ~~~~  ~~~~  ~~~~  ~~~~  ~~~~\n");
+    printf("     ~~~~  ~~~~  ~~~~  ~~~~  ~~~~  ~~~~\n");
+    printf("   @==@==@==@==@==@==@==@==@==@==@==@==@==@==@==@\n");
+    printf("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    printf(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    printf("   (the current is patient; the stones are not)\n");
+}
+
+static void art_room_ruins(void)
+{
+    printf("                    |     |     |\n");
+    printf("                    |     |     |\n");
+    printf("                 ___|_____|_____|___\n");
+    printf("                /   |     |     |   \\\n");
+    printf("               /    |  |  |  |  |    \\\n");
+    printf("              /_____|__|__|__|__|_____\\\n");
+    printf("             /|  |  |  |  |  |  |  |  |\\\n");
+    printf("            / |  |  |  |  |  |  |  |  | \\\n");
+    printf("           /  |__|__|__|__|__|__|__|__|  | \\\n");
+    printf("          /   |  |  |  |  |  |  |  |  |   | \\\n");
+    printf("         /____|__|__|__|__|__|__|__|__|____| \\\n");
+    printf("        / |    |    |    |    |    |    |    | \\\n");
+    printf("       /__|____|____|____|____|____|____|____|__\\\n");
+    printf("      /___________________________________________\\\n");
+    printf("                    (time chipped the capitals)\n");
+}
+
+static void art_wanderer(void)
+{
+    printf("                        __\n");
+    printf("                    _.-'  '-._\n");
+    printf("                 .-'  |##|  '-.\n");
+    printf("                / (|  /  \\  |) \\\n");
+    printf("               |   |  o  o  |   |\n");
+    printf("               |   |   >>   |   |\n");
+    printf("               |   |  /  \\  |   |\n");
+    printf("               |    `------'    |\n");
+    printf("               |   /|      |\\   |\n");
+    printf("               |  / |      | \\  |\n");
+    printf("               '._/ |______| \\_.'\n");
+    printf("                  /___||___\\\n");
+    printf("                 /____||____\\\n");
+    printf("                /_____/  \\_____\\\n");
+    printf("               /________________\\\n");
+    printf("              ( a fellow tourist of misfortune )\n");
+}
+
 static void art_frog_portrait(void)
 {
     printf("                                _.--._\n");
@@ -97,6 +174,18 @@ int room_id;
         art_room_pond();
         return;
     }
+    if (room_id == WORLD_ROOM_FOREST) {
+        art_room_forest();
+        return;
+    }
+    if (room_id == WORLD_ROOM_STREAM) {
+        art_room_stream();
+        return;
+    }
+    if (room_id == WORLD_ROOM_RUINS) {
+        art_room_ruins();
+        return;
+    }
 }
 
 void game_print_location_art(room_id)
@@ -104,6 +193,78 @@ int room_id;
 {
     printf("\n");
     art_for_room(room_id);
+}
+
+static void wanderer_update_separation(game)
+struct GameState *game;
+{
+    if (game->player.room_id != game->wanderer_room) {
+        game->wanderer_need_separation = 0;
+    }
+}
+
+static void wanderer_step(game)
+struct GameState *game;
+{
+    struct Room *r;
+    int dirs[CFG_DIR_MAX];
+    int n;
+    int i;
+    int pick;
+
+    if (game->world.room_count <= 0) {
+        return;
+    }
+    if (game->wanderer_room < 0 || game->wanderer_room >= game->world.room_count) {
+        return;
+    }
+    r = &game->world.rooms[game->wanderer_room];
+    n = 0;
+    for (i = 0; i < DIR_NONE; ++i) {
+        if (r->exits[i] >= 0) {
+            dirs[n] = i;
+            ++n;
+        }
+    }
+    if (n <= 0) {
+        return;
+    }
+    pick = rand() % n;
+    game->wanderer_room = r->exits[dirs[pick]];
+}
+
+static void wanderer_begin_encounter(game)
+struct GameState *game;
+{
+    if (game->wanderer_need_separation) {
+        return;
+    }
+    game->pond_dialogue = 0;
+    printf("\n");
+    art_wanderer();
+    printf("\nYou nearly bump into a hooded traveler. They straighten with a tired grin.\n");
+    printf("\"Easy there—I'm an adventurer too, working odd jobs between towns. ");
+    printf("What are you doing out here?\"\n");
+    printf("  [1] Looking for trouble worth the trouble.\n");
+    printf("  [2] Passing through—keeping my boots honest.\n");
+    printf("  [3] That's my business.\n");
+    printf("(Answer with 1, 2, 3, or reply <n>.)\n");
+    game->wanderer_dialogue = 1;
+    game->wanderer_need_separation = 1;
+}
+
+static void wanderer_apply_reply(choice)
+int choice;
+{
+    if (choice == 1) {
+        printf("\nThey nod, amused. \"Bold. Don't trip over your own story.\"\n");
+        return;
+    }
+    if (choice == 2) {
+        printf("\nThey relax a fraction. \"Good. Miles keep liars honest.\"\n");
+        return;
+    }
+    printf("\nThey raise both hands. \"Fair. The road spies on everyone anyway.\"\n");
 }
 
 static void frog_dialogue_intro(void)
@@ -175,6 +336,10 @@ struct GameState *game;
     game->seed = 1;
     game->running = 1;
     game->pond_dialogue = 0;
+    game->wanderer_room = WORLD_ROOM_RUINS;
+    game->wanderer_dialogue = 0;
+    game->wanderer_need_separation = 0;
+    srand((unsigned int)time(NULL));
 }
 
 void game_render(game)
@@ -218,11 +383,16 @@ struct Command *cmd;
         }
         game->player.room_id = world_move(&game->world, game->player.room_id, cmd->dir);
         game->pond_dialogue = 0;
+        game->wanderer_dialogue = 0;
         printf("You move %s.\n", world_dir_name(cmd->dir));
         do_look(game);
         return 1;
     }
     if (cmd->type == CMD_TALK) {
+        if (game->wanderer_dialogue == 1) {
+            printf("The traveler is waiting for an answer (1/2/3).\n");
+            return 1;
+        }
         if (game->player.room_id != WORLD_ROOM_POND) {
             printf("Nobody here wants to talk.\n");
             return 1;
@@ -232,6 +402,15 @@ struct Command *cmd;
         return 1;
     }
     if (cmd->type == CMD_REPLY) {
+        if (game->wanderer_dialogue == 1) {
+            if (cmd->arg < 1 || cmd->arg > 3) {
+                printf("Pick 1, 2, or 3.\n");
+                return 1;
+            }
+            wanderer_apply_reply(cmd->arg);
+            game->wanderer_dialogue = 0;
+            return 1;
+        }
         if (game->pond_dialogue != 1) {
             printf("Nobody is waiting for an answer.\n");
             return 1;
@@ -269,6 +448,22 @@ char *line;
 
     if (command_advances_time(cmd.type)) {
         game->tick += 1;
+        wanderer_update_separation(game);
+        if (cmd.type == CMD_MOVE) {
+            if (game->player.room_id == game->wanderer_room) {
+                wanderer_begin_encounter(game);
+            } else {
+                wanderer_step(game);
+                if (game->player.room_id == game->wanderer_room) {
+                    wanderer_begin_encounter(game);
+                }
+            }
+        } else if (cmd.type == CMD_WAIT) {
+            wanderer_step(game);
+            if (game->player.room_id == game->wanderer_room) {
+                wanderer_begin_encounter(game);
+            }
+        }
         world_step(&game->world, game->tick);
     }
 
