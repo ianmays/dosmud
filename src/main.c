@@ -121,7 +121,8 @@ int main(void)
         ran_tick = 0;
         while ((now_time - last_tick_time) >= idle_tick_seconds && game.running) {
             if (game.wanderer_dialogue == 1 || game.enemy_dialogue == 1 ||
-                    game.combat_active == 1 || game.pond_dialogue == 1) {
+                    game.combat_active == 1 || game.pond_dialogue == 1 ||
+                    game.npc_dialogue != 0) {
                 last_tick_time = now_time;
                 break;
             }

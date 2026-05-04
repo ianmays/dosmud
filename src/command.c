@@ -141,6 +141,10 @@ struct Command *out_cmd;
         out_cmd->arg = parse_item_word(word2);
         return out_cmd->arg != 0;
     }
+    if (strcmp(word1, "loot") == 0) {
+        out_cmd->type = CMD_LOOT;
+        return 1;
+    }
     if (strcmp(word1, "reply") == 0) {
         if (count < 2) {
             return 0;
@@ -202,10 +206,11 @@ int type;
     if (type == CMD_EAT) return 1;
     if (type == CMD_USE) return 1;
     if (type == CMD_CRAFT) return 1;
+    if (type == CMD_LOOT) return 1;
     return 0;
 }
 
 const char *command_help_text(void)
 {
-    return "Commands: look, inspect [rustle|creak|water|grit], take/drop <item>, bag, eat/use <item>, craft <item>, move <dir>, wait, talk, 1/2/3 or reply <1-3>, help, quit";
+    return "Commands: look, inspect [rustle|creak|water|grit], take/drop <item>, bag, eat/use <item>, craft <item>, loot, move <dir>, wait, talk, 1/2/3 or reply <1-3>, help, quit";
 }

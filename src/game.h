@@ -32,6 +32,11 @@ struct GameState {
     int combat_active;
     int enemy_hp;
     int combat_defending;
+    int corpse_present[CFG_ROOM_MAX];
+    int corpse_loot[CFG_ROOM_MAX];
+    int npc_dialogue;
+    int wanderer_active;
+    unsigned long wanderer_return_tick;
 };
 
 void game_init(struct GameState *game);

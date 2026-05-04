@@ -101,8 +101,18 @@ struct GameState *game;
 {
     if (game->wanderer_dialogue == 1) return 1;
     if (game->pond_dialogue == 1) return 1;
+    if (game->npc_dialogue != 0) return 1;
     if (game->enemy_dialogue == 1) return 1;
     if (game->combat_active == 1) return 1;
+    return 0;
+}
+
+static int npc_in_room(room_id)
+int room_id;
+{
+    if (room_id == WORLD_ROOM_TOWER) return 1;  /* watchman */
+    if (room_id == WORLD_ROOM_ORCHARD) return 2;/* herbalist */
+    if (room_id == WORLD_ROOM_CATACOMBS) return 3; /* archivist */
     return 0;
 }
 
@@ -185,11 +195,9 @@ int choice;
         game->enemy_hp = 0;
         game->combat_active = 0;
         game->combat_defending = 0;
-        printf("The bandit breaks and flees. You win.\n");
-        if (game->room_item[game->player.room_id] == ITEM_NONE) {
-            game->room_item[game->player.room_id] = ITEM_STONE;
-            printf("A stone token drops where they stood.\n");
-        }
+        printf("The bandit falls. The body slumps into the dust.\n");
+        game->corpse_present[game->player.room_id] = 1;
+        game->corpse_loot[game->player.room_id] = (rand() % 2) ? ITEM_STONE : ITEM_HERB;
         return;
     }
 
@@ -215,6 +223,9 @@ struct GameState *game;
     game->room_item[WORLD_ROOM_STREAM] = ITEM_REED;
     game->room_item[WORLD_ROOM_MARSH] = ITEM_REED;
     game->room_item[WORLD_ROOM_MEADOW] = ITEM_BERRY;
+    game->room_item[WORLD_ROOM_ORCHARD] = ITEM_BERRY;
+    game->room_item[WORLD_ROOM_CANYON] = ITEM_STONE;
+    game->room_item[WORLD_ROOM_CAVE] = ITEM_HERB;
 }
 
 static void maybe_spawn_room_item(game)
@@ -444,6 +455,60 @@ static void art_room_meadow(void)
     printf("            (seed heads bend in the wind)\n");
 }
 
+static void art_room_canyon(void)
+{
+    printf("            /\\                         /\\\n");
+    printf("           /  \\      __      __       /  \\\n");
+    printf("          / /\\ \\____/  \\____/  \\_____/ /\\ \\\n");
+    printf("         / /  \\________________________/  \\ \\\n");
+    printf("        /_/    /  /  /  /  /  /  /  /    \\_\\\n");
+    printf("        ||    /__/__/__/__/__/__/__/      ||\n");
+    printf("        ||                                   ||\n");
+    printf("~~~~~~~~||~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~||~~~~~~~~\n");
+}
+
+static void art_room_tower(void)
+{
+    printf("                       /\\\n");
+    printf("                      /  \\\n");
+    printf("                     /____\\\n");
+    printf("                   __| [] |__\n");
+    printf("                  /  |    |  \\\n");
+    printf("                 /___|____|___\\\n");
+    printf("                    / || \\\n");
+    printf("                   /  ||  \\\n");
+    printf("                  /___||___\\\n");
+    printf("                 /____||____\\\n");
+    printf("              (watchfire long gone cold)\n");
+}
+
+static void art_room_orchard(void)
+{
+    printf("          &&&        &&&        &&&\n");
+    printf("       &&&&&&&    &&&&&&&    &&&&&&&\n");
+    printf("      &&&&&&&&&  &&&&&&&&&  &&&&&&&&&\n");
+    printf("         ||||        ||||        ||||\n");
+    printf("         ||||        ||||        ||||\n");
+    printf("      .-.||||.-.  .-.||||.-.  .-.||||.-.\n");
+    printf("     (o o)  (o o)(o o)  (o o)(o o)  (o o)\n");
+    printf("      '-'    '-'  '-'    '-'  '-'    '-'\n");
+    printf("             (fallen fruit scents the air)\n");
+}
+
+static void art_room_cave(void)
+{
+    printf("                 ______________________\n");
+    printf("            _.-'                      '-._\n");
+    printf("         .-'    .--.            .--.      '-.\n");
+    printf("        /      /    \\          /    \\        \\\n");
+    printf("       /______/______\\________/______\\________\\\n");
+    printf("       |   .-.    .-.    .-.    .-.    .-.   |\n");
+    printf("       |  (   )  (   )  (   )  (   )  (   )  |\n");
+    printf("       |   '-'    '-'    '-'    '-'    '-'   |\n");
+    printf("       |______________________________________|\n");
+    printf("              (drips mark patient time)\n");
+}
+
 static void art_wanderer(void)
 {
     printf("                        .-''''-.\n");
@@ -534,6 +599,22 @@ int room_id;
     }
     if (room_id == WORLD_ROOM_MEADOW) {
         art_room_meadow();
+        return;
+    }
+    if (room_id == WORLD_ROOM_CANYON) {
+        art_room_canyon();
+        return;
+    }
+    if (room_id == WORLD_ROOM_TOWER) {
+        art_room_tower();
+        return;
+    }
+    if (room_id == WORLD_ROOM_ORCHARD) {
+        art_room_orchard();
+        return;
+    }
+    if (room_id == WORLD_ROOM_CAVE) {
+        art_room_cave();
         return;
     }
 }
@@ -677,6 +758,12 @@ struct GameState *game;
             item_name(game->room_item[game->player.room_id]),
             item_name(game->room_item[game->player.room_id]));
     }
+    if (game->corpse_present[game->player.room_id]) {
+        printf("A bandit corpse lies here. (loot)\n");
+    }
+    if (npc_in_room(game->player.room_id) != 0) {
+        printf("Someone nearby might talk. (talk)\n");
+    }
     if (game->env_focus_active &&
             game->env_focus_room == game->player.room_id &&
             game->tick < game->env_focus_expires_tick) {
@@ -701,6 +788,8 @@ struct GameState *game;
 void game_init(game)
 struct GameState *game;
 {
+    int i;
+    srand((unsigned int)time(NULL));
     world_init(&game->world);
     game->player.room_id = 0;
     game->tick = 0;
@@ -720,8 +809,14 @@ struct GameState *game;
     game->combat_active = 0;
     game->enemy_hp = 0;
     game->combat_defending = 0;
+    game->npc_dialogue = 0;
+    game->wanderer_active = 1;
+    game->wanderer_return_tick = 0;
+    for (i = 0; i < CFG_ROOM_MAX; ++i) {
+        game->corpse_present[i] = 0;
+        game->corpse_loot[i] = ITEM_NONE;
+    }
     seed_world_items(game);
-    srand((unsigned int)time(NULL));
 }
 
 void game_render(game)
@@ -780,8 +875,29 @@ struct Command *cmd;
         game->player.room_id = world_move(&game->world, game->player.room_id, cmd->dir);
         game->pond_dialogue = 0;
         game->wanderer_dialogue = 0;
+        game->npc_dialogue = 0;
         printf("You move %s.\n", world_dir_name(cmd->dir));
         do_look(game);
+        return 1;
+    }
+    if (cmd->type == CMD_LOOT) {
+        room_id = game->player.room_id;
+        if (!game->corpse_present[room_id]) {
+            printf("There is no body here to loot.\n");
+            return 1;
+        }
+        ground_item = game->corpse_loot[room_id];
+        if (ground_item == ITEM_NONE) {
+            printf("The body has already been stripped clean.\n");
+            return 1;
+        }
+        if (!bag_add(game, ground_item)) {
+            printf("Your bag is full. Drop something first.\n");
+            return 1;
+        }
+        printf("You loot a %s from the body.\n", item_name(ground_item));
+        game->corpse_loot[room_id] = ITEM_NONE;
+        game->corpse_present[room_id] = 0;
         return 1;
     }
     if (cmd->type == CMD_TAKE) {
@@ -975,6 +1091,36 @@ struct Command *cmd;
             printf("The traveler is waiting for an answer (1/2/3).\n");
             return 1;
         }
+        if (game->player.room_id == WORLD_ROOM_TOWER) {
+            printf("A one-eyed watchman leans on the parapet.\n");
+            printf("\"Storms come from the canyon. You carry a torch?\"\n");
+            printf("  [1] Ask for warning signs.\n");
+            printf("  [2] Offer to share a meal.\n");
+            printf("  [3] Say nothing and move on.\n");
+            printf("(Answer with 1, 2, 3, or reply <n>.)\n");
+            game->npc_dialogue = 2;
+            return 1;
+        }
+        if (game->player.room_id == WORLD_ROOM_ORCHARD) {
+            printf("An herbalist kneels among fallen fruit.\n");
+            printf("\"Need a field remedy or just company?\"\n");
+            printf("  [1] Ask for medicine advice.\n");
+            printf("  [2] Trade gossip from the road.\n");
+            printf("  [3] Leave politely.\n");
+            printf("(Answer with 1, 2, 3, or reply <n>.)\n");
+            game->npc_dialogue = 3;
+            return 1;
+        }
+        if (game->player.room_id == WORLD_ROOM_CATACOMBS) {
+            printf("A dust-caked archivist lights a stub candle.\n");
+            printf("\"Speak quickly. Stone remembers everything.\"\n");
+            printf("  [1] Ask about the ruins.\n");
+            printf("  [2] Ask about safer routes.\n");
+            printf("  [3] Thank them and leave.\n");
+            printf("(Answer with 1, 2, 3, or reply <n>.)\n");
+            game->npc_dialogue = 4;
+            return 1;
+        }
         if (game->player.room_id != WORLD_ROOM_POND) {
             printf("Nobody here wants to talk.\n");
             return 1;
@@ -986,6 +1132,27 @@ struct Command *cmd;
     if (cmd->type == CMD_REPLY) {
         if (game->combat_active == 1) {
             combat_resolve_reply(game, cmd->arg);
+            return 1;
+        }
+        if (game->npc_dialogue == 2) {
+            if (cmd->arg == 1) printf("He points west. \"If crows go quiet, squall in ten minutes.\"\n");
+            else if (cmd->arg == 2) printf("He accepts, then hands you dried herbs. \"Stay upright.\"\n");
+            else printf("He nods once and returns to the horizon.\n");
+            game->npc_dialogue = 0;
+            return 1;
+        }
+        if (game->npc_dialogue == 3) {
+            if (cmd->arg == 1) printf("She mutters ratios: \"Two berries, one herb, crush fine.\"\n");
+            else if (cmd->arg == 2) printf("She laughs. \"Road stories always cost extra.\"\n");
+            else printf("She waves without looking up.\n");
+            game->npc_dialogue = 0;
+            return 1;
+        }
+        if (game->npc_dialogue == 4) {
+            if (cmd->arg == 1) printf("Archivist: \"The top stones cracked first. The foundations were already wrong.\"\n");
+            else if (cmd->arg == 2) printf("Archivist: \"Follow running water; dead tunnels lie to travelers.\"\n");
+            else printf("Archivist: \"Go, then. Before the candle quits.\"\n");
+            game->npc_dialogue = 0;
             return 1;
         }
         if (game->enemy_dialogue == 1) {
@@ -1025,6 +1192,9 @@ struct Command *cmd;
             }
             wanderer_apply_reply(cmd->arg);
             game->wanderer_dialogue = 0;
+            game->wanderer_active = 0;
+            game->wanderer_room = -1;
+            game->wanderer_return_tick = game->tick + 8 + (rand() % 16);
             return 1;
         }
         if (game->pond_dialogue != 1) {
@@ -1123,21 +1293,27 @@ int wanderer_moves_first;
 
     game->tick += 1;
     wanderer_update_separation(game);
-    old_wanderer_room = game->wanderer_room;
-
-    if (wanderer_moves_first) {
-        wanderer_step(game);
+    if (!game->wanderer_active && game->tick >= game->wanderer_return_tick) {
+        game->wanderer_active = 1;
+        game->wanderer_room = rand() % game->world.room_count;
     }
-    if (game->player.room_id == game->wanderer_room) {
-        wanderer_begin_encounter(game);
-    } else if (!wanderer_moves_first) {
-        wanderer_step(game);
+
+    old_wanderer_room = game->wanderer_room;
+    if (game->wanderer_active) {
+        if (wanderer_moves_first) {
+            wanderer_step(game);
+        }
         if (game->player.room_id == game->wanderer_room) {
             wanderer_begin_encounter(game);
+        } else if (!wanderer_moves_first) {
+            wanderer_step(game);
+            if (game->player.room_id == game->wanderer_room) {
+                wanderer_begin_encounter(game);
+            }
+        } else if (old_wanderer_room != game->wanderer_room &&
+                game->player.room_id == game->wanderer_room) {
+            wanderer_begin_encounter(game);
         }
-    } else if (old_wanderer_room != game->wanderer_room &&
-            game->player.room_id == game->wanderer_room) {
-        wanderer_begin_encounter(game);
     }
 
     world_step(&game->world, game->tick);

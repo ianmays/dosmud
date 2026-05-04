@@ -19,7 +19,8 @@ enum CommandType {
     CMD_BAG,
     CMD_EAT,
     CMD_USE,
-    CMD_CRAFT
+    CMD_CRAFT,
+    CMD_LOOT
 };
 
 struct Command {
