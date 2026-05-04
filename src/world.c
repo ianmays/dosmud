@@ -25,9 +25,9 @@ void world_init(world)
 struct World *world;
 {
     world->room_count = 3;
-    room_set(&world->rooms[0], "Camp", "A small campfire burns quietly.", 1, -1, 2, -1);
-    room_set(&world->rooms[1], "Road", "A dusty road extends to the horizon.", -1, 0, -1, -1);
-    room_set(&world->rooms[2], "Pond", "A still pond reflects the dim sky.", -1, -1, -1, 0);
+    room_set(&world->rooms[WORLD_ROOM_CAMP], "Camp", "A small campfire burns quietly.", 1, -1, 2, -1);
+    room_set(&world->rooms[WORLD_ROOM_ROAD], "Road", "A dusty road extends to the horizon.", -1, 0, -1, -1);
+    room_set(&world->rooms[WORLD_ROOM_POND], "Pond", "A still pond reflects the dim sky. A frog lounges on a lily pad like he owns the place.", -1, -1, -1, 0);
 }
 
 void world_step(world, tick)

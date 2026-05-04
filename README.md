@@ -51,5 +51,7 @@ That invokes `wcl` with the same flags as in the batch file and writes `dosmud.e
 - `look`
 - `move <north|south|east|west>`
 - `wait`
+- `talk` (at the Pond: branching chat with the frog; answer with `1`/`2`/`3` or `reply <1-3>`)
 - `help`
 - `quit`
+

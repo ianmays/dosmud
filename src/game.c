@@ -1,6 +1,39 @@
 #include <stdio.h>
 #include "game.h"
 
+static void frog_dialogue_intro(void)
+{
+    printf("\nA damp frog wearing an imaginary crown clears his throat.\n");
+    printf("\"Official pond hours are whenever I say they are. Pick a vibe:\"\n");
+    printf("  [1] Bow and wish him a nice pond.\n");
+    printf("  [2] Insult his lily pad.\n");
+    printf("  [3] Ask if he is a wizard, a snack, or both.\n");
+    printf("(Answer with 1, 2, 3, or reply <n>.)\n");
+}
+
+static void frog_dialogue_branch(choice)
+int choice;
+{
+    if (choice == 1) {
+        printf("\nYou bow. The frog salutes with a webbed hand.\n");
+        printf("\"Finally—someone whose parents finished the tutorial. ");
+        printf("Wisdom of the pond: the water is wet, the mud is judgy, ");
+        printf("and I am technically management. You're welcome. Ribbit.\"\n");
+        return;
+    }
+    if (choice == 2) {
+        printf("\nYou call his lily pad 'discount turf.' ");
+        printf("The frog clutches his chest like you stabbed Shakespeare.\n");
+        printf("\"Rude! Delicious! That's how you get warts—not magic, ");
+        printf("just bad networking. Also you're banned from handsomeness.\"\n");
+        return;
+    }
+    printf("\nYou lean in and whisper that the moon is 'basically a lid.'\n");
+    printf("The frog nods with the gravity of a tiny judge.\n");
+    printf("\"The moon knows what it did. I'm not allowed to say which phase. ");
+    printf("If anyone asks, you hallucinated this conversation. For tax reasons.\"\n");
+}
+
 static void do_look(game)
 struct GameState *game;
 {
@@ -27,6 +60,7 @@ struct GameState *game;
     game->tick = 0;
     game->seed = 1;
     game->running = 1;
+    game->pond_dialogue = 0;
 }
 
 void game_render(game)
@@ -69,7 +103,30 @@ struct Command *cmd;
             return 0;
         }
         game->player.room_id = world_move(&game->world, game->player.room_id, cmd->dir);
+        game->pond_dialogue = 0;
         printf("You move %s.\n", world_dir_name(cmd->dir));
+        return 1;
+    }
+    if (cmd->type == CMD_TALK) {
+        if (game->player.room_id != WORLD_ROOM_POND) {
+            printf("Nobody here wants to talk.\n");
+            return 1;
+        }
+        frog_dialogue_intro();
+        game->pond_dialogue = 1;
+        return 1;
+    }
+    if (cmd->type == CMD_REPLY) {
+        if (game->pond_dialogue != 1) {
+            printf("Nobody is waiting for an answer.\n");
+            return 1;
+        }
+        if (cmd->arg < 1 || cmd->arg > 3) {
+            printf("Pick 1, 2, or 3.\n");
+            return 1;
+        }
+        frog_dialogue_branch(cmd->arg);
+        game->pond_dialogue = 0;
         return 1;
     }
 

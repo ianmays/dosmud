@@ -10,4 +10,8 @@
 
 #define CFG_DIR_MAX   4
 
+#define WORLD_ROOM_CAMP 0
+#define WORLD_ROOM_ROAD 1
+#define WORLD_ROOM_POND 2
+
 #endif

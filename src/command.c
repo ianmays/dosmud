@@ -33,6 +33,7 @@ struct Command *out_cmd;
 
     out_cmd->type = CMD_INVALID;
     out_cmd->dir = DIR_NONE;
+    out_cmd->arg = 0;
 
     count = sscanf(line, "%15s %15s", word1, word2);
     if (count <= 0) {
@@ -58,6 +59,36 @@ struct Command *out_cmd;
     }
     if (strcmp(word1, "quit") == 0 || strcmp(word1, "exit") == 0) {
         out_cmd->type = CMD_QUIT;
+        return 1;
+    }
+    if (strcmp(word1, "talk") == 0 || strcmp(word1, "speak") == 0) {
+        out_cmd->type = CMD_TALK;
+        return 1;
+    }
+    if (strcmp(word1, "reply") == 0) {
+        if (count < 2) {
+            return 0;
+        }
+        if (strcmp(word2, "1") == 0) {
+            out_cmd->type = CMD_REPLY;
+            out_cmd->arg = 1;
+            return 1;
+        }
+        if (strcmp(word2, "2") == 0) {
+            out_cmd->type = CMD_REPLY;
+            out_cmd->arg = 2;
+            return 1;
+        }
+        if (strcmp(word2, "3") == 0) {
+            out_cmd->type = CMD_REPLY;
+            out_cmd->arg = 3;
+            return 1;
+        }
+        return 0;
+    }
+    if (strlen(word1) == 1 && word1[0] >= '1' && word1[0] <= '3') {
+        out_cmd->type = CMD_REPLY;
+        out_cmd->arg = (int)(word1[0] - '0');
         return 1;
     }
 
@@ -95,5 +126,5 @@ int type;
 
 const char *command_help_text(void)
 {
-    return "Commands: look, move <north|south|east|west>, wait, help, quit";
+    return "Commands: look, move <dir>, wait, talk (at Pond), 1/2/3 or reply <1-3>, help, quit";
 }

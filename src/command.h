@@ -10,12 +10,15 @@ enum CommandType {
     CMD_MOVE,
     CMD_WAIT,
     CMD_HELP,
-    CMD_QUIT
+    CMD_QUIT,
+    CMD_TALK,
+    CMD_REPLY
 };
 
 struct Command {
     int type;
     int dir;
+    int arg;
 };
 
 int command_parse(char *line, struct Command *out_cmd);

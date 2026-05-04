@@ -14,6 +14,7 @@ struct GameState {
     unsigned long tick;
     unsigned long seed;
     int running;
+    int pond_dialogue;
 };
 
 void game_init(struct GameState *game);
