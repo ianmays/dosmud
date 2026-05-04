@@ -3,6 +3,12 @@
 #include <time.h>
 #include "game.h"
 
+#define ENV_FOCUS_NONE 0
+#define ENV_FOCUS_RUSTLE 1
+#define ENV_FOCUS_CREAK 2
+#define ENV_FOCUS_WATER 3
+#define ENV_FOCUS_GRIT 4
+
 static void art_room_camp(void)
 {
     printf("                *          .            *\n");
@@ -430,6 +436,19 @@ struct GameState *game;
         }
     }
     printf("\n");
+    if (game->env_focus_active &&
+            game->env_focus_room == game->player.room_id &&
+            game->tick < game->env_focus_expires_tick) {
+        if (game->env_focus_kind == ENV_FOCUS_RUSTLE) {
+            printf("Something is rustling nearby. (inspect rustle)\n");
+        } else if (game->env_focus_kind == ENV_FOCUS_CREAK) {
+            printf("You can track the source of the creaking. (inspect creak)\n");
+        } else if (game->env_focus_kind == ENV_FOCUS_WATER) {
+            printf("You can follow the moving water sound. (inspect water)\n");
+        } else if (game->env_focus_kind == ENV_FOCUS_GRIT) {
+            printf("Fresh grit skids nearby. (inspect grit)\n");
+        }
+    }
 }
 
 void game_describe_current_room(game)
@@ -450,6 +469,10 @@ struct GameState *game;
     game->wanderer_room = WORLD_ROOM_RUINS;
     game->wanderer_dialogue = 0;
     game->wanderer_need_separation = 0;
+    game->env_focus_active = 0;
+    game->env_focus_room = -1;
+    game->env_focus_kind = ENV_FOCUS_NONE;
+    game->env_focus_expires_tick = 0;
     srand((unsigned int)time(NULL));
 }
 
@@ -497,6 +520,36 @@ struct Command *cmd;
         game->wanderer_dialogue = 0;
         printf("You move %s.\n", world_dir_name(cmd->dir));
         do_look(game);
+        return 1;
+    }
+    if (cmd->type == CMD_INSPECT) {
+        if (!game->env_focus_active ||
+                game->env_focus_room != game->player.room_id ||
+                game->tick >= game->env_focus_expires_tick) {
+            printf("Nothing here stands out right now.\n");
+            game->env_focus_active = 0;
+            game->env_focus_room = -1;
+            game->env_focus_kind = ENV_FOCUS_NONE;
+            game->env_focus_expires_tick = 0;
+            return 1;
+        }
+        if (cmd->arg != 0 && cmd->arg != game->env_focus_kind) {
+            printf("That is not what is drawing your attention.\n");
+            return 1;
+        }
+        if (game->env_focus_kind == ENV_FOCUS_RUSTLE) {
+            printf("You part the brush and startle a hare into a low sprint.\n");
+        } else if (game->env_focus_kind == ENV_FOCUS_CREAK) {
+            printf("An old branch rocks against another, groaning like timber.\n");
+        } else if (game->env_focus_kind == ENV_FOCUS_WATER) {
+            printf("You find a thin runnel cutting fresh lines through mud.\n");
+        } else if (game->env_focus_kind == ENV_FOCUS_GRIT) {
+            printf("New tracks cross the grit: light, quick, and already fading.\n");
+        }
+        game->env_focus_active = 0;
+        game->env_focus_room = -1;
+        game->env_focus_kind = ENV_FOCUS_NONE;
+        game->env_focus_expires_tick = 0;
         return 1;
     }
     if (cmd->type == CMD_TALK) {
@@ -554,7 +607,13 @@ static void maybe_emit_atmosphere(game)
 struct GameState *game;
 {
     int roll;
-    (void)game;
+
+    if (game->env_focus_active && game->tick >= game->env_focus_expires_tick) {
+        game->env_focus_active = 0;
+        game->env_focus_room = -1;
+        game->env_focus_kind = ENV_FOCUS_NONE;
+        game->env_focus_expires_tick = 0;
+    }
 
     roll = rand() % 100;
     if (roll < 35) {
@@ -563,18 +622,34 @@ struct GameState *game;
     }
     if (roll < 55) {
         printf("\nSomething small rustles just out of sight.\n");
+        game->env_focus_active = 1;
+        game->env_focus_room = game->player.room_id;
+        game->env_focus_kind = ENV_FOCUS_RUSTLE;
+        game->env_focus_expires_tick = game->tick + 3;
         return;
     }
     if (roll < 70) {
         printf("\nA distant creak rolls across the landscape.\n");
+        game->env_focus_active = 1;
+        game->env_focus_room = game->player.room_id;
+        game->env_focus_kind = ENV_FOCUS_CREAK;
+        game->env_focus_expires_tick = game->tick + 3;
         return;
     }
     if (roll < 82) {
         printf("\nYou hear water moving somewhere beyond the path.\n");
+        game->env_focus_active = 1;
+        game->env_focus_room = game->player.room_id;
+        game->env_focus_kind = ENV_FOCUS_WATER;
+        game->env_focus_expires_tick = game->tick + 3;
         return;
     }
     if (roll < 92) {
         printf("\nLoose grit skips over stone under an uncertain breeze.\n");
+        game->env_focus_active = 1;
+        game->env_focus_room = game->player.room_id;
+        game->env_focus_kind = ENV_FOCUS_GRIT;
+        game->env_focus_expires_tick = game->tick + 3;
         return;
     }
 }

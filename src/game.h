@@ -18,6 +18,10 @@ struct GameState {
     int wanderer_room;
     int wanderer_dialogue;
     int wanderer_need_separation;
+    int env_focus_active;
+    int env_focus_room;
+    int env_focus_kind;
+    unsigned long env_focus_expires_tick;
 };
 
 void game_init(struct GameState *game);

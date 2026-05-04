@@ -12,7 +12,8 @@ enum CommandType {
     CMD_HELP,
     CMD_QUIT,
     CMD_TALK,
-    CMD_REPLY
+    CMD_REPLY,
+    CMD_INSPECT
 };
 
 struct Command {

@@ -65,6 +65,31 @@ struct Command *out_cmd;
         out_cmd->type = CMD_TALK;
         return 1;
     }
+    if (strcmp(word1, "inspect") == 0 || strcmp(word1, "examine") == 0 ||
+            strcmp(word1, "investigate") == 0) {
+        out_cmd->type = CMD_INSPECT;
+        if (count < 2) {
+            out_cmd->arg = 0;
+            return 1;
+        }
+        if (strcmp(word2, "rustle") == 0 || strcmp(word2, "reeds") == 0) {
+            out_cmd->arg = 1;
+            return 1;
+        }
+        if (strcmp(word2, "creak") == 0 || strcmp(word2, "timbers") == 0) {
+            out_cmd->arg = 2;
+            return 1;
+        }
+        if (strcmp(word2, "water") == 0 || strcmp(word2, "current") == 0) {
+            out_cmd->arg = 3;
+            return 1;
+        }
+        if (strcmp(word2, "grit") == 0 || strcmp(word2, "tracks") == 0) {
+            out_cmd->arg = 4;
+            return 1;
+        }
+        return 0;
+    }
     if (strcmp(word1, "reply") == 0) {
         if (count < 2) {
             return 0;
@@ -126,5 +151,5 @@ int type;
 
 const char *command_help_text(void)
 {
-    return "Commands: look, move <dir>, wait, talk (Pond frog), 1/2/3 or reply <1-3> (frog/traveler), help, quit";
+    return "Commands: look, inspect [rustle|creak|water|grit], move <dir>, wait, talk (Pond frog), 1/2/3 or reply <1-3> (frog/traveler), help, quit";
 }

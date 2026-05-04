@@ -70,6 +70,7 @@ The roaming adventurer keeps moving as time passes, even if you do not enter a c
 ## Current command set
 
 - `look`
+- `inspect [rustle|creak|water|grit]` for short-lived environmental clues that appear/disappear as ambient events happen
 - `move <north|south|east|west>`
 - `wait`
 - `talk` (at the **Pond**: branching chat with the frog; answer with `1`/`2`/`3` or `reply <1-3>`)
