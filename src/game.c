@@ -9,6 +9,135 @@
 #define ENV_FOCUS_WATER 3
 #define ENV_FOCUS_GRIT 4
 
+#define ITEM_NONE 0
+#define ITEM_BERRY 1
+#define ITEM_STICK 2
+#define ITEM_REED 3
+#define ITEM_STONE 4
+#define ITEM_HERB 5
+#define ITEM_FISH 6
+#define ITEM_TORCH 7
+#define ITEM_SALVE 8
+#define ITEM_SPEAR 9
+
+static const char *item_name(item_id)
+int item_id;
+{
+    if (item_id == ITEM_BERRY) return "berry";
+    if (item_id == ITEM_STICK) return "stick";
+    if (item_id == ITEM_REED) return "reed";
+    if (item_id == ITEM_STONE) return "stone";
+    if (item_id == ITEM_HERB) return "herb";
+    if (item_id == ITEM_FISH) return "fish";
+    if (item_id == ITEM_TORCH) return "torch";
+    if (item_id == ITEM_SALVE) return "salve";
+    if (item_id == ITEM_SPEAR) return "spear";
+    return "unknown";
+}
+
+static int bag_find_index(game, item_id)
+struct GameState *game;
+int item_id;
+{
+    int i;
+    for (i = 0; i < game->bag_count; ++i) {
+        if (game->bag[i] == item_id) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+static int bag_add(game, item_id)
+struct GameState *game;
+int item_id;
+{
+    if (game->bag_count >= CFG_BAG_MAX) {
+        return 0;
+    }
+    game->bag[game->bag_count] = item_id;
+    game->bag_count += 1;
+    return 1;
+}
+
+static int bag_remove_index(game, index)
+struct GameState *game;
+int index;
+{
+    int i;
+    if (index < 0 || index >= game->bag_count) {
+        return ITEM_NONE;
+    }
+    for (i = index; i < game->bag_count - 1; ++i) {
+        game->bag[i] = game->bag[i + 1];
+    }
+    game->bag_count -= 1;
+    game->bag[game->bag_count] = ITEM_NONE;
+    return 1;
+}
+
+static int bag_remove_item(game, item_id)
+struct GameState *game;
+int item_id;
+{
+    int idx;
+    idx = bag_find_index(game, item_id);
+    if (idx < 0) {
+        return 0;
+    }
+    return bag_remove_index(game, idx);
+}
+
+static int item_is_edible(item_id)
+int item_id;
+{
+    if (item_id == ITEM_BERRY) return 1;
+    if (item_id == ITEM_FISH) return 1;
+    return 0;
+}
+
+static void seed_world_items(game)
+struct GameState *game;
+{
+    int i;
+    for (i = 0; i < CFG_ROOM_MAX; ++i) {
+        game->room_item[i] = ITEM_NONE;
+    }
+    game->room_item[WORLD_ROOM_CAMP] = ITEM_STICK;
+    game->room_item[WORLD_ROOM_ROAD] = ITEM_STONE;
+    game->room_item[WORLD_ROOM_POND] = ITEM_FISH;
+    game->room_item[WORLD_ROOM_FOREST] = ITEM_HERB;
+    game->room_item[WORLD_ROOM_RUINS] = ITEM_STONE;
+    game->room_item[WORLD_ROOM_STREAM] = ITEM_REED;
+    game->room_item[WORLD_ROOM_MARSH] = ITEM_REED;
+    game->room_item[WORLD_ROOM_MEADOW] = ITEM_BERRY;
+}
+
+static void maybe_spawn_room_item(game)
+struct GameState *game;
+{
+    int room_id;
+    int roll;
+    room_id = game->player.room_id;
+    if (room_id < 0 || room_id >= game->world.room_count) {
+        return;
+    }
+    if (game->room_item[room_id] != ITEM_NONE) {
+        return;
+    }
+    if ((rand() % 100) >= 20) {
+        return;
+    }
+    roll = rand() % 100;
+    if (roll < 25) game->room_item[room_id] = ITEM_BERRY;
+    else if (roll < 45) game->room_item[room_id] = ITEM_STICK;
+    else if (roll < 65) game->room_item[room_id] = ITEM_REED;
+    else if (roll < 80) game->room_item[room_id] = ITEM_STONE;
+    else if (roll < 92) game->room_item[room_id] = ITEM_HERB;
+    else game->room_item[room_id] = ITEM_FISH;
+    printf("A %s catches your eye nearby.\n", item_name(game->room_item[room_id]));
+}
+
 static void art_room_camp(void)
 {
     printf("                *          .            *\n");
@@ -436,6 +565,11 @@ struct GameState *game;
         }
     }
     printf("\n");
+    if (game->room_item[game->player.room_id] != ITEM_NONE) {
+        printf("On the ground: %s. (take %s)\n",
+            item_name(game->room_item[game->player.room_id]),
+            item_name(game->room_item[game->player.room_id]));
+    }
     if (game->env_focus_active &&
             game->env_focus_room == game->player.room_id &&
             game->tick < game->env_focus_expires_tick) {
@@ -473,6 +607,8 @@ struct GameState *game;
     game->env_focus_room = -1;
     game->env_focus_kind = ENV_FOCUS_NONE;
     game->env_focus_expires_tick = 0;
+    game->bag_count = 0;
+    seed_world_items(game);
     srand((unsigned int)time(NULL));
 }
 
@@ -494,6 +630,10 @@ static int apply_command(game, cmd)
 struct GameState *game;
 struct Command *cmd;
 {
+    int room_id;
+    int ground_item;
+    int i;
+
     if (cmd->type == CMD_LOOK) {
         do_look(game);
         return 1;
@@ -520,6 +660,135 @@ struct Command *cmd;
         game->wanderer_dialogue = 0;
         printf("You move %s.\n", world_dir_name(cmd->dir));
         do_look(game);
+        return 1;
+    }
+    if (cmd->type == CMD_TAKE) {
+        room_id = game->player.room_id;
+        ground_item = game->room_item[room_id];
+        if (ground_item == ITEM_NONE) {
+            printf("There is nothing here to take.\n");
+            return 1;
+        }
+        if (cmd->arg != ground_item) {
+            printf("You cannot take that from here.\n");
+            return 1;
+        }
+        if (!bag_add(game, ground_item)) {
+            printf("Your bag is full (5 items max).\n");
+            return 1;
+        }
+        game->room_item[room_id] = ITEM_NONE;
+        printf("You pick up the %s.\n", item_name(ground_item));
+        return 1;
+    }
+    if (cmd->type == CMD_DROP) {
+        room_id = game->player.room_id;
+        if (bag_find_index(game, cmd->arg) < 0) {
+            printf("You are not carrying a %s.\n", item_name(cmd->arg));
+            return 1;
+        }
+        if (game->room_item[room_id] != ITEM_NONE) {
+            printf("The ground here is already occupied by a %s.\n",
+                item_name(game->room_item[room_id]));
+            return 1;
+        }
+        bag_remove_item(game, cmd->arg);
+        game->room_item[room_id] = cmd->arg;
+        printf("You drop the %s.\n", item_name(cmd->arg));
+        return 1;
+    }
+    if (cmd->type == CMD_BAG) {
+        printf("Bag (%d/%d):", game->bag_count, CFG_BAG_MAX);
+        if (game->bag_count <= 0) {
+            printf(" empty\n");
+            return 1;
+        }
+        for (i = 0; i < game->bag_count; ++i) {
+            printf(" %s", item_name(game->bag[i]));
+            if (i < game->bag_count - 1) {
+                printf(",");
+            }
+        }
+        printf("\n");
+        return 1;
+    }
+    if (cmd->type == CMD_EAT) {
+        if (bag_find_index(game, cmd->arg) < 0) {
+            printf("You are not carrying a %s.\n", item_name(cmd->arg));
+            return 1;
+        }
+        if (!item_is_edible(cmd->arg)) {
+            printf("You cannot eat the %s.\n", item_name(cmd->arg));
+            return 1;
+        }
+        bag_remove_item(game, cmd->arg);
+        if (cmd->arg == ITEM_BERRY) {
+            printf("You eat the berry. Tart, but fresh.\n");
+        } else {
+            printf("You eat the fish. Not ideal raw, but nourishing.\n");
+        }
+        return 1;
+    }
+    if (cmd->type == CMD_USE) {
+        if (bag_find_index(game, cmd->arg) < 0) {
+            printf("You are not carrying a %s.\n", item_name(cmd->arg));
+            return 1;
+        }
+        if (cmd->arg == ITEM_TORCH) {
+            printf("You raise the torch; nearby details sharpen in warm light.\n");
+            return 1;
+        }
+        if (cmd->arg == ITEM_SALVE) {
+            printf("You apply the salve. The sting fades.\n");
+            bag_remove_item(game, cmd->arg);
+            return 1;
+        }
+        if (cmd->arg == ITEM_SPEAR) {
+            printf("You test the spear's weight. Balanced enough.\n");
+            return 1;
+        }
+        printf("You cannot find a practical use for the %s right now.\n",
+            item_name(cmd->arg));
+        return 1;
+    }
+    if (cmd->type == CMD_CRAFT) {
+        if (cmd->arg == ITEM_TORCH) {
+            if (bag_find_index(game, ITEM_STICK) < 0 ||
+                    bag_find_index(game, ITEM_REED) < 0) {
+                printf("Craft torch needs: stick + reed.\n");
+                return 1;
+            }
+            bag_remove_item(game, ITEM_STICK);
+            bag_remove_item(game, ITEM_REED);
+            bag_add(game, ITEM_TORCH);
+            printf("You bind a makeshift torch.\n");
+            return 1;
+        }
+        if (cmd->arg == ITEM_SALVE) {
+            if (bag_find_index(game, ITEM_HERB) < 0 ||
+                    bag_find_index(game, ITEM_BERRY) < 0) {
+                printf("Craft salve needs: herb + berry.\n");
+                return 1;
+            }
+            bag_remove_item(game, ITEM_HERB);
+            bag_remove_item(game, ITEM_BERRY);
+            bag_add(game, ITEM_SALVE);
+            printf("You mash a basic healing salve.\n");
+            return 1;
+        }
+        if (cmd->arg == ITEM_SPEAR) {
+            if (bag_find_index(game, ITEM_STICK) < 0 ||
+                    bag_find_index(game, ITEM_STONE) < 0) {
+                printf("Craft spear needs: stick + stone.\n");
+                return 1;
+            }
+            bag_remove_item(game, ITEM_STICK);
+            bag_remove_item(game, ITEM_STONE);
+            bag_add(game, ITEM_SPEAR);
+            printf("You lash a stone point to the stick and craft a spear.\n");
+            return 1;
+        }
+        printf("You do not know how to craft that.\n");
         return 1;
     }
     if (cmd->type == CMD_INSPECT) {
@@ -626,6 +895,10 @@ struct GameState *game;
         game->env_focus_room = game->player.room_id;
         game->env_focus_kind = ENV_FOCUS_RUSTLE;
         game->env_focus_expires_tick = game->tick + 3;
+        if (game->room_item[game->player.room_id] == ITEM_NONE && (rand() % 100) < 50) {
+            game->room_item[game->player.room_id] = ITEM_BERRY;
+            printf("A berry drops from the brush.\n");
+        }
         return;
     }
     if (roll < 70) {
@@ -642,6 +915,10 @@ struct GameState *game;
         game->env_focus_room = game->player.room_id;
         game->env_focus_kind = ENV_FOCUS_WATER;
         game->env_focus_expires_tick = game->tick + 3;
+        if (game->room_item[game->player.room_id] == ITEM_NONE && (rand() % 100) < 50) {
+            game->room_item[game->player.room_id] = ITEM_REED;
+            printf("A loose reed drifts to your feet.\n");
+        }
         return;
     }
     if (roll < 92) {
@@ -652,6 +929,7 @@ struct GameState *game;
         game->env_focus_expires_tick = game->tick + 3;
         return;
     }
+    maybe_spawn_room_item(game);
 }
 
 static void advance_world_tick(game, wanderer_moves_first)

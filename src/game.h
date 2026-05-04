@@ -4,6 +4,8 @@
 #include "command.h"
 #include "world.h"
 
+#define CFG_BAG_MAX 5
+
 struct Player {
     int room_id;
 };
@@ -22,6 +24,9 @@ struct GameState {
     int env_focus_room;
     int env_focus_kind;
     unsigned long env_focus_expires_tick;
+    int room_item[CFG_ROOM_MAX];
+    int bag[CFG_BAG_MAX];
+    int bag_count;
 };
 
 void game_init(struct GameState *game);

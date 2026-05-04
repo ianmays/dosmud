@@ -71,6 +71,11 @@ The roaming adventurer keeps moving as time passes, even if you do not enter a c
 
 - `look`
 - `inspect [rustle|creak|water|grit]` for short-lived environmental clues that appear/disappear as ambient events happen
+- `take <item>` / `drop <item>`
+- `bag` (inventory, max 5 carried items)
+- `eat <item>` (food items)
+- `use <item>`
+- `craft <torch|salve|spear>` from carried materials
 - `move <north|south|east|west>`
 - `wait`
 - `talk` (at the **Pond**: branching chat with the frog; answer with `1`/`2`/`3` or `reply <1-3>`)

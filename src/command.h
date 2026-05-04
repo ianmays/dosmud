@@ -13,7 +13,13 @@ enum CommandType {
     CMD_QUIT,
     CMD_TALK,
     CMD_REPLY,
-    CMD_INSPECT
+    CMD_INSPECT,
+    CMD_TAKE,
+    CMD_DROP,
+    CMD_BAG,
+    CMD_EAT,
+    CMD_USE,
+    CMD_CRAFT
 };
 
 struct Command {
