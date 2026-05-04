@@ -120,6 +120,72 @@ static void art_room_ruins(void)
     printf("                    (time chipped the capitals)\n");
 }
 
+static void art_room_cliff(void)
+{
+    printf("                       /^\\\n");
+    printf("                      /   \\\n");
+    printf("                     /  ^  \\\n");
+    printf("                    /  / \\  \\\n");
+    printf("                   /__/___\\__\\\n");
+    printf("                   |  _   _  |\n");
+    printf("                   | | | | | |\n");
+    printf("                   | |_| |_| |\n");
+    printf("                   |  _   _  |\n");
+    printf("~~~~~~~~~~~~~~~~~~~|_| |_| |_|~~~~~~~~~~~~~~~~~~~\n");
+}
+
+static void art_room_marsh(void)
+{
+    printf("      ~~~   ~~~   ~~~   ~~~   ~~~\n");
+    printf("   ~~~   ~~~   ~~~   ~~~   ~~~   ~~~\n");
+    printf("      ||    ||    ||    ||    ||\n");
+    printf("      ||    ||    ||    ||    ||\n");
+    printf("    __||____||____||____||____||__\n");
+    printf("   /~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\\\n");
+    printf("   \\________________________________/\n");
+}
+
+static void art_room_grove(void)
+{
+    printf("          &&& &&  & &&\n");
+    printf("      && &\\/&\\|& ()|/ @, &&\n");
+    printf("      &\\/(/&/&||/& /_/)_&/_&\n");
+    printf("   &() &\\/&|()|/&\\/ '%%\" & ()\n");
+    printf("  &_\\_&&_\\ |& |&&/&__%%_/_& &&\n");
+    printf("&&   && & &| &| /& & %% ()& /&&\n");
+    printf(" ()&_---()&\\&\\|&&-&&--%%---()~\n");
+}
+
+static void art_room_bridge(void)
+{
+    printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    printf("      ||             ||\n");
+    printf("======||=============||======\n");
+    printf("      ||             ||\n");
+    printf("      ||             ||\n");
+    printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+}
+
+static void art_room_catacombs(void)
+{
+    printf("   ______________________________________\n");
+    printf("  /_____________________________________/|\n");
+    printf("  |  []   []   []   []   []   []   []  | |\n");
+    printf("  |                                      | |\n");
+    printf("  |  []   []   []   []   []   []   []  | |\n");
+    printf("  |______________________________________|/\n");
+}
+
+static void art_room_meadow(void)
+{
+    printf("       \\ | /            \\ | /\n");
+    printf("     '.  *  .'        '.  *  .'\n");
+    printf("  --  *  *  *  --  --  *  *  *  --\n");
+    printf("     .'  *  '.        .'  *  .'\n");
+    printf("       / | \\            / | \\\n");
+    printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+}
+
 static void art_wanderer(void)
 {
     printf("                        __\n");
@@ -184,6 +250,30 @@ int room_id;
     }
     if (room_id == WORLD_ROOM_RUINS) {
         art_room_ruins();
+        return;
+    }
+    if (room_id == WORLD_ROOM_CLIFF) {
+        art_room_cliff();
+        return;
+    }
+    if (room_id == WORLD_ROOM_MARSH) {
+        art_room_marsh();
+        return;
+    }
+    if (room_id == WORLD_ROOM_GROVE) {
+        art_room_grove();
+        return;
+    }
+    if (room_id == WORLD_ROOM_BRIDGE) {
+        art_room_bridge();
+        return;
+    }
+    if (room_id == WORLD_ROOM_CATACOMBS) {
+        art_room_catacombs();
+        return;
+    }
+    if (room_id == WORLD_ROOM_MEADOW) {
+        art_room_meadow();
         return;
     }
 }
@@ -427,6 +517,77 @@ struct Command *cmd;
     return 0;
 }
 
+static void maybe_emit_animal_noise(game)
+struct GameState *game;
+{
+    if ((game->tick % 2UL) != 0UL) {
+        return;
+    }
+    if ((rand() % 100) >= 75) {
+        return;
+    }
+    printf("\n%s\n", world_room_animal_noise(&game->world, game->player.room_id));
+}
+
+static void maybe_emit_atmosphere(game)
+struct GameState *game;
+{
+    int roll;
+    (void)game;
+
+    roll = rand() % 100;
+    if (roll < 35) {
+        printf("\nA cool gust threads through the area and fades.\n");
+        return;
+    }
+    if (roll < 55) {
+        printf("\nSomething small rustles just out of sight.\n");
+        return;
+    }
+    if (roll < 70) {
+        printf("\nA distant creak rolls across the landscape.\n");
+        return;
+    }
+    if (roll < 82) {
+        printf("\nYou hear water moving somewhere beyond the path.\n");
+        return;
+    }
+    if (roll < 92) {
+        printf("\nLoose grit skips over stone under an uncertain breeze.\n");
+        return;
+    }
+}
+
+static void advance_world_tick(game, wanderer_moves_first)
+struct GameState *game;
+int wanderer_moves_first;
+{
+    int old_wanderer_room;
+
+    game->tick += 1;
+    wanderer_update_separation(game);
+    old_wanderer_room = game->wanderer_room;
+
+    if (wanderer_moves_first) {
+        wanderer_step(game);
+    }
+    if (game->player.room_id == game->wanderer_room) {
+        wanderer_begin_encounter(game);
+    } else if (!wanderer_moves_first) {
+        wanderer_step(game);
+        if (game->player.room_id == game->wanderer_room) {
+            wanderer_begin_encounter(game);
+        }
+    } else if (old_wanderer_room != game->wanderer_room &&
+            game->player.room_id == game->wanderer_room) {
+        wanderer_begin_encounter(game);
+    }
+
+    world_step(&game->world, game->tick);
+    maybe_emit_animal_noise(game);
+    maybe_emit_atmosphere(game);
+}
+
 int game_process_input(game, line)
 struct GameState *game;
 char *line;
@@ -447,25 +608,18 @@ char *line;
     }
 
     if (command_advances_time(cmd.type)) {
-        game->tick += 1;
-        wanderer_update_separation(game);
         if (cmd.type == CMD_MOVE) {
-            if (game->player.room_id == game->wanderer_room) {
-                wanderer_begin_encounter(game);
-            } else {
-                wanderer_step(game);
-                if (game->player.room_id == game->wanderer_room) {
-                    wanderer_begin_encounter(game);
-                }
-            }
-        } else if (cmd.type == CMD_WAIT) {
-            wanderer_step(game);
-            if (game->player.room_id == game->wanderer_room) {
-                wanderer_begin_encounter(game);
-            }
+            advance_world_tick(game, 0);
+        } else {
+            advance_world_tick(game, 1);
         }
-        world_step(&game->world, game->tick);
     }
 
     return 1;
+}
+
+void game_background_step(game)
+struct GameState *game;
+{
+    advance_world_tick(game, 1);
 }

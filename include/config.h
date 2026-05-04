@@ -4,7 +4,7 @@
 #define CFG_INPUT_MAX 80
 #define CFG_WORD_MAX  16
 
-#define CFG_ROOM_MAX  8
+#define CFG_ROOM_MAX  16
 #define CFG_NAME_MAX  24
 #define CFG_DESC_MAX  128
 
@@ -16,5 +16,11 @@
 #define WORLD_ROOM_FOREST 3
 #define WORLD_ROOM_RUINS 4
 #define WORLD_ROOM_STREAM 5
+#define WORLD_ROOM_CLIFF 6
+#define WORLD_ROOM_MARSH 7
+#define WORLD_ROOM_GROVE 8
+#define WORLD_ROOM_BRIDGE 9
+#define WORLD_ROOM_CATACOMBS 10
+#define WORLD_ROOM_MEADOW 11
 
 #endif

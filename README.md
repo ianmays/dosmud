@@ -1,14 +1,14 @@
 # dosmud
 
-Minimal DOS-first MUD-like prototype in ANSI C with a strict turn model:
-the world only advances after an advancing player action.
+Minimal DOS-first MUD-like prototype in ANSI C. The world now advances in
+real time while waiting for input, and also advances on `move`/`wait`.
 
 ## Design rules
 
 - Keep source compatible with conservative ANSI C/K&R-era compilers.
 - Avoid dynamic allocation in early milestones.
 - Use fixed-size buffers and compile-time caps from `include/config.h`.
-- Advance world time only for `move` and `wait`.
+- Keep world simulation deterministic per tick and event-safe in a text console.
 
 ## Build — local (development / sanity check)
 
@@ -46,18 +46,26 @@ That invokes `wcl` with the same flags as in the batch file and writes `dosmud.e
 6. Enter `move north` (from camp) -> room changes, tick increments by 1.
 7. Enter `quit` -> program exits.
 
-## World (6 areas)
+## World (12 areas)
 
 Approximate map:
 
-- **Camp** — central; north to **Road**, east to **Pond**, west to **Forest**.
-- **Forest** — south to **Stream**, east back to Camp.
-- **Stream** — north to Forest, south to **Ruins**.
-- **Ruins** — north to Stream. (A roaming adventurer starts here and wanders at random each time you `move` or `wait`.)
-- **Road** — south to Camp.
-- **Pond** — west to Camp; `talk` for the frog (also `1`/`2`/`3` / `reply`).
+- **Camp** — north: Road, south: Meadow, east: Pond, west: Forest.
+- **Road** — north: Cliff, south: Camp.
+- **Pond** — west: Camp, east: Marsh.
+- **Forest** — east: Camp, west: Grove, south: Stream.
+- **Stream** — north: Forest, south: Ruins, east: Bridge.
+- **Ruins** — north: Stream, south: Catacombs.
+- **Cliff** — south: Road.
+- **Marsh** — west: Pond.
+- **Grove** — east: Forest.
+- **Bridge** — west: Stream.
+- **Catacombs** — north: Ruins.
+- **Meadow** — north: Camp.
 
-When you end up in the same room as the wanderer, they stop you for a short chat (same reply keys as the frog). You will not get repeat bump dialogue until you are in a *different* room from them at least once.
+Each area has a resident animal that periodically emits ambient noise.
+
+The roaming adventurer keeps moving as time passes, even if you do not enter a command. If they enter your room, they proactively start a short chat (same reply keys as the frog). You will not get repeat bump dialogue until you are in a *different* room from them at least once.
 
 ## Current command set
 
@@ -68,4 +76,3 @@ When you end up in the same room as the wanderer, they stop you for a short chat
 - `1` / `2` / `3` or `reply <n>` when the **frog** or **traveler** is waiting for an answer
 - `help`
 - `quit`
-
