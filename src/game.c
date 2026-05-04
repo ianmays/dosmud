@@ -96,6 +96,110 @@ int item_id;
     return 0;
 }
 
+static int game_is_busy_dialogue(game)
+struct GameState *game;
+{
+    if (game->wanderer_dialogue == 1) return 1;
+    if (game->pond_dialogue == 1) return 1;
+    if (game->enemy_dialogue == 1) return 1;
+    if (game->combat_active == 1) return 1;
+    return 0;
+}
+
+static void enemy_begin_encounter(game)
+struct GameState *game;
+{
+    if (game_is_busy_dialogue(game)) {
+        return;
+    }
+    printf("\nA road bandit steps from cover with a hand on a rusted blade.\n");
+    printf("\"Easy now. We can do this three ways.\"\n");
+    printf("  [1] Refuse and fight.\n");
+    printf("  [2] Hand over one item from your bag.\n");
+    printf("  [3] Talk it down and part ways.\n");
+    printf("(Answer with 1, 2, 3, or reply <n>.)\n");
+    game->enemy_dialogue = 1;
+}
+
+static void combat_start(game)
+struct GameState *game;
+{
+    game->enemy_dialogue = 0;
+    game->combat_active = 1;
+    game->enemy_hp = 8 + (rand() % 5);
+    game->combat_defending = 0;
+    printf("Combat starts. You HP: %d, Bandit HP: %d.\n",
+        game->player_hp, game->enemy_hp);
+    printf("Choose: [1] Attack  [2] Defend  [3] Use salve\n");
+}
+
+static void combat_enemy_turn(game)
+struct GameState *game;
+{
+    int dmg;
+    dmg = 1 + (rand() % 4);
+    if (game->combat_defending) {
+        dmg -= 2;
+        if (dmg < 0) dmg = 0;
+    }
+    if (dmg > 0) {
+        game->player_hp -= dmg;
+    }
+    printf("The bandit strikes for %d damage.\n", dmg);
+    if (game->player_hp <= 0) {
+        game->player_hp = 0;
+        printf("You collapse. The road takes everything.\n");
+        game->running = 0;
+        return;
+    }
+    printf("You HP: %d, Bandit HP: %d.\n", game->player_hp, game->enemy_hp);
+}
+
+static void combat_resolve_reply(game, choice)
+struct GameState *game;
+int choice;
+{
+    int dmg;
+    if (choice == 1) {
+        dmg = 2 + (rand() % 4);
+        game->enemy_hp -= dmg;
+        printf("You hit the bandit for %d damage.\n", dmg);
+    } else if (choice == 2) {
+        game->combat_defending = 1;
+        printf("You brace for the incoming strike.\n");
+    } else if (choice == 3) {
+        if (bag_find_index(game, ITEM_SALVE) < 0) {
+            printf("You fumble for a salve, but you have none.\n");
+        } else {
+            bag_remove_item(game, ITEM_SALVE);
+            game->player_hp += 5;
+            if (game->player_hp > 20) game->player_hp = 20;
+            printf("You apply salve and recover. HP now %d.\n", game->player_hp);
+        }
+    } else {
+        printf("Pick 1, 2, or 3.\n");
+        return;
+    }
+
+    if (game->enemy_hp <= 0) {
+        game->enemy_hp = 0;
+        game->combat_active = 0;
+        game->combat_defending = 0;
+        printf("The bandit breaks and flees. You win.\n");
+        if (game->room_item[game->player.room_id] == ITEM_NONE) {
+            game->room_item[game->player.room_id] = ITEM_STONE;
+            printf("A stone token drops where they stood.\n");
+        }
+        return;
+    }
+
+    combat_enemy_turn(game);
+    game->combat_defending = 0;
+    if (game->running && game->combat_active) {
+        printf("Choose: [1] Attack  [2] Defend  [3] Use salve\n");
+    }
+}
+
 static void seed_world_items(game)
 struct GameState *game;
 {
@@ -482,6 +586,9 @@ struct GameState *game;
 static void wanderer_begin_encounter(game)
 struct GameState *game;
 {
+    if (game_is_busy_dialogue(game)) {
+        return;
+    }
     if (game->wanderer_need_separation) {
         return;
     }
@@ -608,6 +715,11 @@ struct GameState *game;
     game->env_focus_kind = ENV_FOCUS_NONE;
     game->env_focus_expires_tick = 0;
     game->bag_count = 0;
+    game->player_hp = 20;
+    game->enemy_dialogue = 0;
+    game->combat_active = 0;
+    game->enemy_hp = 0;
+    game->combat_defending = 0;
     seed_world_items(game);
     srand((unsigned int)time(NULL));
 }
@@ -618,7 +730,7 @@ const struct GameState *game;
     const struct Room *room;
 
     room = &game->world.rooms[game->player.room_id];
-    printf("\n[T:%lu] %s\n", game->tick, room->name);
+    printf("\n[T:%lu] %s [HP:%d]\n", game->tick, room->name, game->player_hp);
 }
 
 void game_print_help(void)
@@ -633,6 +745,16 @@ struct Command *cmd;
     int room_id;
     int ground_item;
     int i;
+
+    if ((game->enemy_dialogue == 1 || game->combat_active == 1) &&
+            cmd->type != CMD_REPLY &&
+            cmd->type != CMD_LOOK &&
+            cmd->type != CMD_BAG &&
+            cmd->type != CMD_HELP &&
+            cmd->type != CMD_QUIT) {
+        printf("The bandit is waiting on your move (reply 1/2/3).\n");
+        return 0;
+    }
 
     if (cmd->type == CMD_LOOK) {
         do_look(game);
@@ -663,6 +785,10 @@ struct Command *cmd;
         return 1;
     }
     if (cmd->type == CMD_TAKE) {
+        if (game->combat_active) {
+            printf("You cannot rummage through gear mid-fight.\n");
+            return 1;
+        }
         room_id = game->player.room_id;
         ground_item = game->room_item[room_id];
         if (ground_item == ITEM_NONE) {
@@ -682,6 +808,10 @@ struct Command *cmd;
         return 1;
     }
     if (cmd->type == CMD_DROP) {
+        if (game->combat_active) {
+            printf("Not while a blade is in your face.\n");
+            return 1;
+        }
         room_id = game->player.room_id;
         if (bag_find_index(game, cmd->arg) < 0) {
             printf("You are not carrying a %s.\n", item_name(cmd->arg));
@@ -713,6 +843,10 @@ struct Command *cmd;
         return 1;
     }
     if (cmd->type == CMD_EAT) {
+        if (game->combat_active) {
+            printf("You cannot eat calmly during combat.\n");
+            return 1;
+        }
         if (bag_find_index(game, cmd->arg) < 0) {
             printf("You are not carrying a %s.\n", item_name(cmd->arg));
             return 1;
@@ -730,6 +864,10 @@ struct Command *cmd;
         return 1;
     }
     if (cmd->type == CMD_USE) {
+        if (game->combat_active) {
+            printf("In combat, use reply 1/2/3 for your turn.\n");
+            return 1;
+        }
         if (bag_find_index(game, cmd->arg) < 0) {
             printf("You are not carrying a %s.\n", item_name(cmd->arg));
             return 1;
@@ -739,7 +877,10 @@ struct Command *cmd;
             return 1;
         }
         if (cmd->arg == ITEM_SALVE) {
-            printf("You apply the salve. The sting fades.\n");
+            game->player_hp += 5;
+            if (game->player_hp > 20) game->player_hp = 20;
+            printf("You apply the salve and recover 5 HP. HP now %d.\n",
+                game->player_hp);
             bag_remove_item(game, cmd->arg);
             return 1;
         }
@@ -752,6 +893,10 @@ struct Command *cmd;
         return 1;
     }
     if (cmd->type == CMD_CRAFT) {
+        if (game->combat_active) {
+            printf("You cannot craft while fighting.\n");
+            return 1;
+        }
         if (cmd->arg == ITEM_TORCH) {
             if (bag_find_index(game, ITEM_STICK) < 0 ||
                     bag_find_index(game, ITEM_REED) < 0) {
@@ -822,6 +967,10 @@ struct Command *cmd;
         return 1;
     }
     if (cmd->type == CMD_TALK) {
+        if (game->enemy_dialogue == 1 || game->combat_active == 1) {
+            printf("The bandit has your full attention right now.\n");
+            return 1;
+        }
         if (game->wanderer_dialogue == 1) {
             printf("The traveler is waiting for an answer (1/2/3).\n");
             return 1;
@@ -835,6 +984,40 @@ struct Command *cmd;
         return 1;
     }
     if (cmd->type == CMD_REPLY) {
+        if (game->combat_active == 1) {
+            combat_resolve_reply(game, cmd->arg);
+            return 1;
+        }
+        if (game->enemy_dialogue == 1) {
+            if (cmd->arg == 1) {
+                combat_start(game);
+                return 1;
+            }
+            if (cmd->arg == 2) {
+                if (game->bag_count <= 0) {
+                    printf("Your bag is empty. The bandit laughs and attacks.\n");
+                    combat_start(game);
+                    return 1;
+                }
+                printf("You hand over your %s. The bandit backs off and leaves.\n",
+                    item_name(game->bag[0]));
+                bag_remove_index(game, 0);
+                game->enemy_dialogue = 0;
+                return 1;
+            }
+            if (cmd->arg == 3) {
+                if ((rand() % 100) < 60) {
+                    printf("You keep your voice steady. The bandit grunts and withdraws.\n");
+                    game->enemy_dialogue = 0;
+                } else {
+                    printf("Your pitch fails. The bandit lunges.\n");
+                    combat_start(game);
+                }
+                return 1;
+            }
+            printf("Pick 1, 2, or 3.\n");
+            return 1;
+        }
         if (game->wanderer_dialogue == 1) {
             if (cmd->arg < 1 || cmd->arg > 3) {
                 printf("Pick 1, 2, or 3.\n");
@@ -960,6 +1143,9 @@ int wanderer_moves_first;
     world_step(&game->world, game->tick);
     maybe_emit_animal_noise(game);
     maybe_emit_atmosphere(game);
+    if (!game_is_busy_dialogue(game) && (rand() % 100) < 14) {
+        enemy_begin_encounter(game);
+    }
 }
 
 int game_process_input(game, line)

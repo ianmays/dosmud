@@ -27,6 +27,11 @@ struct GameState {
     int room_item[CFG_ROOM_MAX];
     int bag[CFG_BAG_MAX];
     int bag_count;
+    int player_hp;
+    int enemy_dialogue;
+    int combat_active;
+    int enemy_hp;
+    int combat_defending;
 };
 
 void game_init(struct GameState *game);
