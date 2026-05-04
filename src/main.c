@@ -12,6 +12,7 @@ int main(void)
 
     printf("dosmud prototype\n");
     printf("Type 'help' for commands.\n");
+    game_describe_current_room(&game);
     game_render(&game);
 
     while (game.running) {

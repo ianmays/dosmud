@@ -20,6 +20,8 @@ struct GameState {
 void game_init(struct GameState *game);
 void game_render(const struct GameState *game);
 void game_print_help(void);
+void game_print_location_art(int room_id);
+void game_describe_current_room(struct GameState *game);
 int game_process_input(struct GameState *game, char *line);
 
 #endif

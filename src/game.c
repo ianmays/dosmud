@@ -1,8 +1,115 @@
 #include <stdio.h>
 #include "game.h"
 
+static void art_room_camp(void)
+{
+    printf("                    .       *        .        *\n");
+    printf("         *    .         .        .        .         *\n");
+    printf("                           _..---.._\n");
+    printf("                        .-'  _   _  '-.\n");
+    printf("                       /    (o)_(o)    \\\n");
+    printf("                      ;       ___       ;\n");
+    printf("                      |     .'___'.     |\n");
+    printf("                      |    / /   \\ \\    |\n");
+    printf("            /\\        ;    | |   | |    ;        /\\\n");
+    printf("           /  \\       /\\   |_|___|_|   /\\       /  \\\n");
+    printf("          /____\\     /  '-.  ____  .-'  \\     /____\\\n");
+    printf("         /|    |\\___/_____/\\/____\\/\\_____\\___/|    |\\\n");
+    printf("        /_|____|_\\_____________________________/_|____|_\\\n");
+    printf("          /_/\\_\\     ~   ~   ~  ~  ~   ~      /_/\\_\\\n");
+    printf("         /_/  \\_\\  ~  ~  ~   ~  ~   ~  ~  ~  /_/  \\_\\\n");
+    printf("                    (fire pops cheerfully)\n");
+}
+
+static void art_room_road(void)
+{
+    printf("                    .-^^-.                   .-^^-.\n");
+    printf("                 .-'_    '-.             .-'    _'-.\n");
+    printf("                /  ( )      \\           /      ( )  \\\n");
+    printf("               /______________\\         /______________\\\n");
+    printf("                         \\                    /\n");
+    printf("                          \\                  /\n");
+    printf("                           \\                /\n");
+    printf("                            \\              /\n");
+    printf("                             \\            /\n");
+    printf("                              \\          /\n");
+    printf("_______________________________\\________/_______________________________\n");
+    printf("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\n");
+    printf("  .   .  .   .   .   .   .   .   .   .   .   .   .   .\n");
+    printf("   .   .   .   .   .   .   .   .   .   .   .   .   .\n");
+    printf("    .   .   .   .   .   .   .   .   .   .   .   .\n");
+    printf("     .   .   .   .   .   .   .   .   .   .   .\n");
+    printf("      .   .   .   .   .   .   .   .   .   .\n");
+    printf("       '-----------------------------------'\n");
+}
+
+static void art_room_pond(void)
+{
+    printf("                    _.-~~~~~~~~~~-._\n");
+    printf("                .-~'  ~  ~  ~  ~   '~-.\n");
+    printf("             .-'  ~   ~  ~  ~   ~  ~  '-.\n");
+    printf("           .' ~  ~   ~   ~   ~   ~   ~   '.\n");
+    printf("          /  ~   ~  ~  ~  ~  ~  ~  ~  ~    \\\n");
+    printf("         /____________________________________\\\n");
+    printf("         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    printf("      ~~~  ~~~   ~~~   ~~~   ~~~   ~~~   ~~~  ~~~\n");
+    printf("    ~~     ~      ~     ~     ~     ~      ~    ~~\n");
+    printf("      ~      .-''''-.             .-''''-.     ~\n");
+    printf("         ~  /  .--.  \\  .---.    /  .--.  \\  ~\n");
+    printf("       ~   |  (o  o)  || o o |  |  (o  o)  |   ~\n");
+    printf("      ~     \\   --   /  | ^ |    \\   --   /    ~\n");
+    printf("        ~    '-.__.-'   '---'     '-.__.-'   ~\n");
+    printf("          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    printf("             (the frog's lily pad throne)\n");
+}
+
+static void art_frog_portrait(void)
+{
+    printf("                                _.--._\n");
+    printf("                             .-'  ||  '-.\n");
+    printf("                            /   .-''-.   \\\n");
+    printf("                           /   /_    _\\   \\\n");
+    printf("                           |  |  o  o  |  |\n");
+    printf("                           |  |   __   |  |\n");
+    printf("                           |  |  (__)  |  |\n");
+    printf("                           |   \\  --  /   |\n");
+    printf("                           |    '----'    |\n");
+    printf("                          /|   .-====-.   |\\\n");
+    printf("                         /_|__/  /\\  \\ \\__|_\\\n");
+    printf("                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    printf("                   ~~~~~   ~~~~~   ~~~~~   ~~~~~   ~~~~\n");
+    printf("                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    printf("                     (His Majesty, CEO of Pond Ops)\n");
+}
+
+static void art_for_room(room_id)
+int room_id;
+{
+    if (room_id == WORLD_ROOM_CAMP) {
+        art_room_camp();
+        return;
+    }
+    if (room_id == WORLD_ROOM_ROAD) {
+        art_room_road();
+        return;
+    }
+    if (room_id == WORLD_ROOM_POND) {
+        art_room_pond();
+        return;
+    }
+}
+
+void game_print_location_art(room_id)
+int room_id;
+{
+    printf("\n");
+    art_for_room(room_id);
+}
+
 static void frog_dialogue_intro(void)
 {
+    printf("\n");
+    art_frog_portrait();
     printf("\nA damp frog wearing an imaginary crown clears his throat.\n");
     printf("\"Official pond hours are whenever I say they are. Pick a vibe:\"\n");
     printf("  [1] Bow and wish him a nice pond.\n");
@@ -41,6 +148,7 @@ struct GameState *game;
     int dir;
 
     room = &game->world.rooms[game->player.room_id];
+    game_print_location_art(game->player.room_id);
     printf("\n%s\n", room->name);
     printf("%s\n", room->desc);
     printf("Exits:");
@@ -50,6 +158,12 @@ struct GameState *game;
         }
     }
     printf("\n");
+}
+
+void game_describe_current_room(game)
+struct GameState *game;
+{
+    do_look(game);
 }
 
 void game_init(game)
@@ -105,6 +219,7 @@ struct Command *cmd;
         game->player.room_id = world_move(&game->world, game->player.room_id, cmd->dir);
         game->pond_dialogue = 0;
         printf("You move %s.\n", world_dir_name(cmd->dir));
+        do_look(game);
         return 1;
     }
     if (cmd->type == CMD_TALK) {
