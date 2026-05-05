@@ -5,7 +5,7 @@
 #include "invent.h"
 #include "items.h"
 
-static int xp_to_next_level(int level)
+int game_xp_to_next_level(int level)
 {
     return 20 + ((level - 1) * 15);
 }
@@ -15,7 +15,7 @@ static void gain_xp(struct GameState *game, int amount)
     int needed;
     game->xp += amount;
     render_xp_gained(amount);
-    needed = xp_to_next_level(game->level);
+    needed = game_xp_to_next_level(game->level);
     while (game->xp >= needed) {
         game->xp -= needed;
         game->level += 1;
@@ -27,7 +27,7 @@ static void gain_xp(struct GameState *game, int amount)
         game->player_hp = game->max_hp;
         render_level_up(game->level, game->max_hp, game->damage_bonus,
             game->bag_capacity);
-        needed = xp_to_next_level(game->level);
+        needed = game_xp_to_next_level(game->level);
     }
 }
 

@@ -5,11 +5,6 @@
 #include "command.h"
 #include "world.h"
 
-static int hud_xp_to_next(int level)
-{
-    return 20 + ((level - 1) * 15);
-}
-
 static void art_room_camp(void)
 {
     printf("                *          .            *\n");
@@ -429,7 +424,7 @@ void game_render(const struct GameState *game)
     int needed;
 
     room = &game->world.rooms[game->player.room_id];
-    needed = hud_xp_to_next(game->level);
+    needed = game_xp_to_next_level(game->level);
     printf("\n[T:%lu] %s [HP:%d/%d] [Lv:%d XP:%d/%d]\n",
         game->tick, room->name, game->player_hp, game->max_hp,
         game->level, game->xp, needed);

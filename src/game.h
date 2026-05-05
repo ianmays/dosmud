@@ -49,4 +49,7 @@ void game_describe_current_room(struct GameState *game);
 int game_process_input(struct GameState *game, char *line);
 void game_background_step(struct GameState *game);
 
+/* Total XP required to complete one level-up from the given level (HUD + rules). */
+int game_xp_to_next_level(int level);
+
 #endif
