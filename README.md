@@ -1,7 +1,6 @@
 # dosmud
 
-Minimal DOS-first MUD-like prototype in ANSI C. The world now advances in
-real time while waiting for input, and also advances on `move`/`wait`.
+Minimal DOS-first MUD-like prototype in ANSI C.
 
 ## Design rules
 
@@ -31,7 +30,7 @@ The release target is a **DOS** executable built with **Open Watcom** on Windows
 2. From the project root, run:
 
 ```bat
-build_dos.bat
+build.bat
 ```
 
 That invokes `wcl` with the same flags as in the batch file and writes `dosmud.exe` in the project directory.
