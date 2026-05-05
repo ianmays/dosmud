@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include "game.h"
-#include "game_inventory.h"
+#include "invent.h"
 #include "items.h"
 
 #define ENV_FOCUS_NONE 0

@@ -1,5 +1,8 @@
-#ifndef GAME_INVENTORY_H
-#define GAME_INVENTORY_H
+/* Inventory module API. Header is invent.h (not game_inventory.h) so the filename
+ * stays within DOS 8.3 (8+3); "game_inventory.h" is too long for classic FAT. */
+
+#ifndef INVENT_H
+#define INVENT_H
 
 struct GameState;
 

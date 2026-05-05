@@ -1,5 +1,7 @@
+/* Inventory implementation (DOS-friendly 8.3 name invent.c). */
+
 #include <stdio.h>
-#include "game_inventory.h"
+#include "invent.h"
 #include "game.h"
 #include "items.h"
 
