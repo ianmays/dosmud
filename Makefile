@@ -1,6 +1,6 @@
 # Host-only sanity check (GCC). Release DOS build: see build_dos.bat + Open Watcom.
 CC ?= gcc
-CFLAGS ?= -Wall -Wextra -Werror -std=c89 -pedantic -Iinclude -Isrc
+CFLAGS ?= -Wall -Wextra -Werror -Wshadow -std=c89 -pedantic -Iinclude -Isrc 
 
 SRC = src/main.c src/game.c src/command.c src/world.c
 BIN = dosmud
