@@ -1,0 +1,37 @@
+#include <string.h>
+#include "items.h"
+
+int item_from_word(char *word)
+{
+    if (strcmp(word, "berry") == 0 || strcmp(word, "berries") == 0) return ITEM_BERRY;
+    if (strcmp(word, "stick") == 0) return ITEM_STICK;
+    if (strcmp(word, "reed") == 0 || strcmp(word, "reeds") == 0) return ITEM_REED;
+    if (strcmp(word, "stone") == 0) return ITEM_STONE;
+    if (strcmp(word, "herb") == 0 || strcmp(word, "herbs") == 0) return ITEM_HERB;
+    if (strcmp(word, "fish") == 0) return ITEM_FISH;
+    if (strcmp(word, "torch") == 0) return ITEM_TORCH;
+    if (strcmp(word, "salve") == 0) return ITEM_SALVE;
+    if (strcmp(word, "spear") == 0) return ITEM_SPEAR;
+    return ITEM_NONE;
+}
+
+const char *item_name(int item_id)
+{
+    if (item_id == ITEM_BERRY) return "berry";
+    if (item_id == ITEM_STICK) return "stick";
+    if (item_id == ITEM_REED) return "reed";
+    if (item_id == ITEM_STONE) return "stone";
+    if (item_id == ITEM_HERB) return "herb";
+    if (item_id == ITEM_FISH) return "fish";
+    if (item_id == ITEM_TORCH) return "torch";
+    if (item_id == ITEM_SALVE) return "salve";
+    if (item_id == ITEM_SPEAR) return "spear";
+    return "unknown";
+}
+
+int item_is_edible(int item_id)
+{
+    if (item_id == ITEM_BERRY) return 1;
+    if (item_id == ITEM_FISH) return 1;
+    return 0;
+}
