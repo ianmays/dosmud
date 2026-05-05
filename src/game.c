@@ -2,37 +2,13 @@
 #include <stdlib.h>
 #include <time.h>
 #include "game.h"
+#include "items.h"
 
 #define ENV_FOCUS_NONE 0
 #define ENV_FOCUS_RUSTLE 1
 #define ENV_FOCUS_CREAK 2
 #define ENV_FOCUS_WATER 3
 #define ENV_FOCUS_GRIT 4
-
-#define ITEM_NONE 0
-#define ITEM_BERRY 1
-#define ITEM_STICK 2
-#define ITEM_REED 3
-#define ITEM_STONE 4
-#define ITEM_HERB 5
-#define ITEM_FISH 6
-#define ITEM_TORCH 7
-#define ITEM_SALVE 8
-#define ITEM_SPEAR 9
-
-static const char *item_name(int item_id)
-{
-    if (item_id == ITEM_BERRY) return "berry";
-    if (item_id == ITEM_STICK) return "stick";
-    if (item_id == ITEM_REED) return "reed";
-    if (item_id == ITEM_STONE) return "stone";
-    if (item_id == ITEM_HERB) return "herb";
-    if (item_id == ITEM_FISH) return "fish";
-    if (item_id == ITEM_TORCH) return "torch";
-    if (item_id == ITEM_SALVE) return "salve";
-    if (item_id == ITEM_SPEAR) return "spear";
-    return "unknown";
-}
 
 static int xp_to_next_level(int level)
 {
@@ -104,13 +80,6 @@ static int bag_remove_item(struct GameState *game, int item_id)
         return 0;
     }
     return bag_remove_index(game, idx);
-}
-
-static int item_is_edible(int item_id)
-{
-    if (item_id == ITEM_BERRY) return 1;
-    if (item_id == ITEM_FISH) return 1;
-    return 0;
 }
 
 static int game_is_busy_dialogue(struct GameState *game)

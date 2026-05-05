@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "command.h"
+#include "items.h"
 
 static void lower_inplace(char *s)
 {
@@ -18,20 +19,6 @@ static int parse_dir(char *word)
     if (strcmp(word, "east") == 0 || strcmp(word, "e") == 0) return DIR_EAST;
     if (strcmp(word, "west") == 0 || strcmp(word, "w") == 0) return DIR_WEST;
     return DIR_NONE;
-}
-
-static int parse_item_word(char *word)
-{
-    if (strcmp(word, "berry") == 0 || strcmp(word, "berries") == 0) return 1;
-    if (strcmp(word, "stick") == 0) return 2;
-    if (strcmp(word, "reed") == 0 || strcmp(word, "reeds") == 0) return 3;
-    if (strcmp(word, "stone") == 0) return 4;
-    if (strcmp(word, "herb") == 0 || strcmp(word, "herbs") == 0) return 5;
-    if (strcmp(word, "fish") == 0) return 6;
-    if (strcmp(word, "torch") == 0) return 7;
-    if (strcmp(word, "salve") == 0) return 8;
-    if (strcmp(word, "spear") == 0) return 9;
-    return 0;
 }
 
 int command_parse(char *line, struct Command *out_cmd)
@@ -104,14 +91,14 @@ int command_parse(char *line, struct Command *out_cmd)
             strcmp(word1, "pickup") == 0) {
         out_cmd->type = CMD_TAKE;
         if (count < 2) return 0;
-        out_cmd->arg = parse_item_word(word2);
-        return out_cmd->arg != 0;
+        out_cmd->arg = item_from_word(word2);
+        return out_cmd->arg != ITEM_NONE;
     }
     if (strcmp(word1, "drop") == 0) {
         out_cmd->type = CMD_DROP;
         if (count < 2) return 0;
-        out_cmd->arg = parse_item_word(word2);
-        return out_cmd->arg != 0;
+        out_cmd->arg = item_from_word(word2);
+        return out_cmd->arg != ITEM_NONE;
     }
     if (strcmp(word1, "bag") == 0 || strcmp(word1, "inventory") == 0 ||
             strcmp(word1, "inv") == 0) {
@@ -121,20 +108,20 @@ int command_parse(char *line, struct Command *out_cmd)
     if (strcmp(word1, "eat") == 0) {
         out_cmd->type = CMD_EAT;
         if (count < 2) return 0;
-        out_cmd->arg = parse_item_word(word2);
-        return out_cmd->arg != 0;
+        out_cmd->arg = item_from_word(word2);
+        return out_cmd->arg != ITEM_NONE;
     }
     if (strcmp(word1, "use") == 0) {
         out_cmd->type = CMD_USE;
         if (count < 2) return 0;
-        out_cmd->arg = parse_item_word(word2);
-        return out_cmd->arg != 0;
+        out_cmd->arg = item_from_word(word2);
+        return out_cmd->arg != ITEM_NONE;
     }
     if (strcmp(word1, "craft") == 0 || strcmp(word1, "build") == 0) {
         out_cmd->type = CMD_CRAFT;
         if (count < 2) return 0;
-        out_cmd->arg = parse_item_word(word2);
-        return out_cmd->arg != 0;
+        out_cmd->arg = item_from_word(word2);
+        return out_cmd->arg != ITEM_NONE;
     }
     if (strcmp(word1, "loot") == 0) {
         out_cmd->type = CMD_LOOT;

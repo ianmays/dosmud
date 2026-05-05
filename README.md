@@ -42,25 +42,38 @@ That invokes `wcl` with the same flags as in the batch file and writes `dosmud.e
 3. Enter invalid command (example: `xyz`) -> error, tick unchanged.
 4. Enter `look` -> room details, tick unchanged.
 5. Enter `wait` -> tick increments by exactly 1.
-6. Enter `move north` (from camp) -> room changes, tick increments by 1.
+6. Enter `look`, pick any listed exit direction, then `move <that-direction>` -> room changes, tick increments by 1.
 7. Enter `quit` -> program exits.
 
-## World (12 areas)
+## World (16 areas, procedural layout)
 
-Approximate map:
+The game now uses a 16-room world (`CFG_ROOM_MAX`) with a procedurally linked layout on each run.
+Room names are stable, but exact directional exits vary based on random linking.
 
-- **Camp** — north: Road, south: Meadow, east: Pond, west: Forest.
-- **Road** — north: Cliff, south: Camp.
-- **Pond** — west: Camp, east: Marsh.
-- **Forest** — east: Camp, west: Grove, south: Stream.
-- **Stream** — north: Forest, south: Ruins, east: Bridge.
-- **Ruins** — north: Stream, south: Catacombs.
-- **Cliff** — south: Road.
-- **Marsh** — west: Pond.
-- **Grove** — east: Forest.
-- **Bridge** — west: Stream.
-- **Catacombs** — north: Ruins.
-- **Meadow** — north: Camp.
+Current room set:
+
+- **Camp**
+- **Road**
+- **Pond**
+- **Forest**
+- **Ruins**
+- **Stream**
+- **Cliff**
+- **Marsh**
+- **Grove**
+- **Bridge**
+- **Catacombs**
+- **Meadow**
+- **Canyon**
+- **Tower**
+- **Orchard**
+- **Cave**
+
+Notes:
+
+- A stable "spine" path is built first (including Camp, Road, Tower, Bridge, and selected wilds/ruins rooms), then the rest are attached to available exits.
+- Pond and Orchard are forced to be east/west neighbors when both slots are available.
+- In `TEST_MODE`, startup seed is fixed, so world generation is deterministic for repeatable tests.
 
 Each area has a resident animal that periodically emits ambient noise.
 
@@ -75,7 +88,9 @@ The roaming adventurer keeps moving as time passes, even if you do not enter a c
 - `eat <item>` (food items)
 - `use <item>`
 - `craft <torch|salve|spear>` from carried materials
+- `loot` (during specific encounter outcomes)
 - `move <north|south|east|west>`
+- direction shorthand (`n`, `s`, `e`, `w`) also works
 - `wait`
 - `talk` (at the **Pond**: branching chat with the frog; answer with `1`/`2`/`3` or `reply <1-3>`)
 - `1` / `2` / `3` or `reply <n>` when the **frog** or **traveler** is waiting for an answer
