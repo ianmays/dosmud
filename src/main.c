@@ -80,7 +80,7 @@ int out_size;
 
 int main(void)
 {
-    struct GameState game;
+    static struct GameState game;
     char line[CFG_INPUT_MAX];
     time_t last_tick_time;
     time_t now_time;
