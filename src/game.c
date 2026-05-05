@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include "game.h"
+#include "grendr.h"
 #include "invent.h"
 #include "items.h"
 

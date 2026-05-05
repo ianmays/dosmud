@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "game_render.h"
+#include "grendr.h"
 #include "game.h"
 #include "items.h"
 #include "command.h"

@@ -4,6 +4,7 @@
 #include <time.h>
 #include "config.h"
 #include "game.h"
+#include "grendr.h"
 
 #ifdef __WATCOMC__
 #include <conio.h>
