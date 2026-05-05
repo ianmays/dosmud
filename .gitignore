@@ -1,5 +1,6 @@
 /dosmud
 /dosmud.exe
+output.txt
 *.o
 *.obj
 *.ps1
