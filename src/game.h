@@ -49,6 +49,4 @@ void game_describe_current_room(struct GameState *game);
 int game_process_input(struct GameState *game, char *line);
 void game_background_step(struct GameState *game);
 
-#include "game_render.h"
-
 #endif

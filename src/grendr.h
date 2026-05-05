@@ -1,6 +1,7 @@
-#ifndef GAME_RENDER_H
-#define GAME_RENDER_H
+#ifndef GRENDR_H
+#define GRENDR_H
 
+/* Game render / UI layer. Source files are grendr.* so DOS 8.3 hosts can open them. */
 /* Stored in GameState.env_focus_kind; keep in sync with game logic. */
 #define GAME_ENV_NONE 0
 #define GAME_ENV_RUSTLE 1
@@ -72,4 +73,4 @@ void render_msg_intimidate_fail(void);
 void render_msg_pick_123(void);
 void render_msg_nobody_waiting_reply(void);
 
-#endif
+#endif /* GRENDR_H */
