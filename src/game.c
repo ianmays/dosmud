@@ -832,7 +832,6 @@ void game_init(game)
 struct GameState *game;
 {
     int i;
-    srand((unsigned int)time(NULL));
     world_init(&game->world);
     game->player.room_id = 0;
     game->tick = 0;

@@ -8,7 +8,7 @@ BIN = dosmud
 all: $(BIN)
 
 $(BIN): $(SRC)
-	$(CC) $(CFLAGS) -o $(BIN) $(SRC)
+	$(CC) $(CFLAGS) -DTEST_MODE -o $(BIN) $(SRC)
 
 clean:
 	rm -f $(BIN)

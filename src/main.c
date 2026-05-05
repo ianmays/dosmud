@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
@@ -88,6 +89,13 @@ int main(void)
     int ran_tick;
     const time_t idle_tick_seconds = 20;
 
+    #ifdef TEST_MODE
+        printf("TEST MODE\n");
+        srand(1234);
+    #else
+        srand(time(NULL));
+    #endif
+    
     game_init(&game);
     last_tick_time = time(NULL);
 
