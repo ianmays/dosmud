@@ -19,9 +19,7 @@ static void print_prompt(void)
     fflush(stdout);
 }
 
-static int poll_line_nonblocking(out_line, out_size)
-char *out_line;
-int out_size;
+static int poll_line_nonblocking(char *out_line, int out_size)
 {
 #ifdef __WATCOMC__
     static char buf[CFG_INPUT_MAX];

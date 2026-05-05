@@ -3,8 +3,7 @@
 #include <string.h>
 #include "command.h"
 
-static void lower_inplace(s)
-char *s;
+static void lower_inplace(char *s)
 {
     while (*s) {
         *s = (char)tolower((unsigned char)*s);
@@ -12,8 +11,7 @@ char *s;
     }
 }
 
-static int parse_dir(word)
-char *word;
+static int parse_dir(char *word)
 {
     if (strcmp(word, "north") == 0 || strcmp(word, "n") == 0) return DIR_NORTH;
     if (strcmp(word, "south") == 0 || strcmp(word, "s") == 0) return DIR_SOUTH;
@@ -22,8 +20,7 @@ char *word;
     return DIR_NONE;
 }
 
-static int parse_item_word(word)
-char *word;
+static int parse_item_word(char *word)
 {
     if (strcmp(word, "berry") == 0 || strcmp(word, "berries") == 0) return 1;
     if (strcmp(word, "stick") == 0) return 2;
@@ -37,9 +34,7 @@ char *word;
     return 0;
 }
 
-int command_parse(line, out_cmd)
-char *line;
-struct Command *out_cmd;
+int command_parse(char *line, struct Command *out_cmd)
 {
     char word1[CFG_WORD_MAX];
     char word2[CFG_WORD_MAX];
@@ -196,8 +191,7 @@ struct Command *out_cmd;
     return 0;
 }
 
-int command_advances_time(type)
-int type;
+int command_advances_time(int type)
 {
     if (type == CMD_WAIT) return 1;
     if (type == CMD_MOVE) return 1;

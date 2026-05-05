@@ -2,12 +2,8 @@
 #include <string.h>
 #include "world.h"
 
-static void room_set_meta(room, name, desc, animal, animal_noise)
-struct Room *room;
-char *name;
-char *desc;
-char *animal;
-char *animal_noise;
+static void room_set_meta(struct Room *room, char *name, char *desc,
+    char *animal, char *animal_noise)
 {
     int i;
     strncpy(room->name, name, CFG_NAME_MAX - 1);
@@ -23,11 +19,7 @@ char *animal_noise;
     }
 }
 
-static void world_link2(world, a, b, dir_from_a)
-struct World *world;
-int a;
-int b;
-int dir_from_a;
+static void world_link2(struct World *world, int a, int b, int dir_from_a)
 {
     int reverse;
     if (dir_from_a == DIR_NORTH) reverse = DIR_SOUTH;
@@ -39,8 +31,7 @@ int dir_from_a;
     world->rooms[b].exits[reverse] = a;
 }
 
-static int random_slot(room)
-struct Room *room;
+static int random_slot(struct Room *room)
 {
     int dirs[CFG_DIR_MAX];
     int n;
@@ -56,8 +47,7 @@ struct Room *room;
     return dirs[rand() % n];
 }
 
-void world_init(world)
-struct World *world;
+void world_init(struct World *world)
 {
     int i;
     int wilds[7];
@@ -215,18 +205,13 @@ struct World *world;
     }
 }
 
-void world_step(world, tick)
-struct World *world;
-unsigned long tick;
+void world_step(struct World *world, unsigned long tick)
 {
     (void)world;
     (void)tick;
 }
 
-int world_can_move(world, room_id, dir)
-struct World *world;
-int room_id;
-int dir;
+int world_can_move(struct World *world, int room_id, int dir)
 {
     if (room_id < 0 || room_id >= world->room_count) {
         return 0;
@@ -237,10 +222,7 @@ int dir;
     return world->rooms[room_id].exits[dir] >= 0;
 }
 
-int world_move(world, room_id, dir)
-struct World *world;
-int room_id;
-int dir;
+int world_move(struct World *world, int room_id, int dir)
 {
     if (!world_can_move(world, room_id, dir)) {
         return room_id;
@@ -248,8 +230,7 @@ int dir;
     return world->rooms[room_id].exits[dir];
 }
 
-const char *world_dir_name(dir)
-int dir;
+const char *world_dir_name(int dir)
 {
     if (dir == DIR_NORTH) return "north";
     if (dir == DIR_SOUTH) return "south";
@@ -258,9 +239,7 @@ int dir;
     return "unknown";
 }
 
-const char *world_room_animal(world, room_id)
-struct World *world;
-int room_id;
+const char *world_room_animal(struct World *world, int room_id)
 {
     if (room_id < 0 || room_id >= world->room_count) {
         return "something";
@@ -268,9 +247,7 @@ int room_id;
     return world->rooms[room_id].animal;
 }
 
-const char *world_room_animal_noise(world, room_id)
-struct World *world;
-int room_id;
+const char *world_room_animal_noise(struct World *world, int room_id)
 {
     if (room_id < 0 || room_id >= world->room_count) {
         return "You hear a distant animal noise.";

@@ -20,8 +20,7 @@
 #define ITEM_SALVE 8
 #define ITEM_SPEAR 9
 
-static const char *item_name(item_id)
-int item_id;
+static const char *item_name(int item_id)
 {
     if (item_id == ITEM_BERRY) return "berry";
     if (item_id == ITEM_STICK) return "stick";
@@ -35,15 +34,12 @@ int item_id;
     return "unknown";
 }
 
-static int xp_to_next_level(level)
-int level;
+static int xp_to_next_level(int level)
 {
     return 20 + ((level - 1) * 15);
 }
 
-static void gain_xp(game, amount)
-struct GameState *game;
-int amount;
+static void gain_xp(struct GameState *game, int amount)
 {
     int needed;
     game->xp += amount;
@@ -65,9 +61,7 @@ int amount;
     }
 }
 
-static int bag_find_index(game, item_id)
-struct GameState *game;
-int item_id;
+static int bag_find_index(struct GameState *game, int item_id)
 {
     int i;
     for (i = 0; i < game->bag_count; ++i) {
@@ -78,9 +72,7 @@ int item_id;
     return -1;
 }
 
-static int bag_add(game, item_id)
-struct GameState *game;
-int item_id;
+static int bag_add(struct GameState *game, int item_id)
 {
     if (game->bag_count >= game->bag_capacity) {
         return 0;
@@ -90,9 +82,7 @@ int item_id;
     return 1;
 }
 
-static int bag_remove_index(game, index)
-struct GameState *game;
-int index;
+static int bag_remove_index(struct GameState *game, int index)
 {
     int i;
     if (index < 0 || index >= game->bag_count) {
@@ -106,9 +96,7 @@ int index;
     return 1;
 }
 
-static int bag_remove_item(game, item_id)
-struct GameState *game;
-int item_id;
+static int bag_remove_item(struct GameState *game, int item_id)
 {
     int idx;
     idx = bag_find_index(game, item_id);
@@ -118,16 +106,14 @@ int item_id;
     return bag_remove_index(game, idx);
 }
 
-static int item_is_edible(item_id)
-int item_id;
+static int item_is_edible(int item_id)
 {
     if (item_id == ITEM_BERRY) return 1;
     if (item_id == ITEM_FISH) return 1;
     return 0;
 }
 
-static int game_is_busy_dialogue(game)
-struct GameState *game;
+static int game_is_busy_dialogue(struct GameState *game)
 {
     if (game->wanderer_dialogue == 1) return 1;
     if (game->pond_dialogue == 1) return 1;
@@ -137,8 +123,7 @@ struct GameState *game;
     return 0;
 }
 
-static int npc_in_room(room_id)
-int room_id;
+static int npc_in_room(int room_id)
 {
     if (room_id == WORLD_ROOM_TOWER) return 1;  /* watchman */
     if (room_id == WORLD_ROOM_ORCHARD) return 2;/* herbalist */
@@ -146,8 +131,7 @@ int room_id;
     return 0;
 }
 
-static void enemy_begin_encounter(game)
-struct GameState *game;
+static void enemy_begin_encounter(struct GameState *game)
 {
     if (game_is_busy_dialogue(game)) {
         return;
@@ -173,8 +157,7 @@ struct GameState *game;
     game->enemy_dialogue = 1;
 }
 
-static void combat_start(game)
-struct GameState *game;
+static void combat_start(struct GameState *game)
 {
     game->enemy_dialogue = 0;
     game->combat_active = 1;
@@ -185,8 +168,7 @@ struct GameState *game;
     printf("Choose: [1] Attack  [2] Defend  [3] Use salve\n");
 }
 
-static void combat_enemy_turn(game)
-struct GameState *game;
+static void combat_enemy_turn(struct GameState *game)
 {
     int dmg;
     dmg = 1 + (rand() % 4);
@@ -207,9 +189,7 @@ struct GameState *game;
     printf("You HP: %d, Bandit HP: %d.\n", game->player_hp, game->enemy_hp);
 }
 
-static void combat_resolve_reply(game, choice)
-struct GameState *game;
-int choice;
+static void combat_resolve_reply(struct GameState *game, int choice)
 {
     int dmg;
     if (choice == 1) {
@@ -251,8 +231,7 @@ int choice;
     }
 }
 
-static void seed_world_items(game)
-struct GameState *game;
+static void seed_world_items(struct GameState *game)
 {
     int i;
     for (i = 0; i < CFG_ROOM_MAX; ++i) {
@@ -271,8 +250,7 @@ struct GameState *game;
     game->room_item[WORLD_ROOM_CAVE] = ITEM_HERB;
 }
 
-static void maybe_spawn_room_item(game)
-struct GameState *game;
+static void maybe_spawn_room_item(struct GameState *game)
 {
     int room_id;
     int roll;
@@ -593,8 +571,7 @@ static void art_frog_portrait(void)
     printf("                (His Majesty, Pond Operations)\n");
 }
 
-static void art_for_room(room_id)
-int room_id;
+static void art_for_room(int room_id)
 {
     if (room_id == WORLD_ROOM_CAMP) {
         art_room_camp();
@@ -662,23 +639,20 @@ int room_id;
     }
 }
 
-void game_print_location_art(room_id)
-int room_id;
+void game_print_location_art(int room_id)
 {
     printf("\n");
     art_for_room(room_id);
 }
 
-static void wanderer_update_separation(game)
-struct GameState *game;
+static void wanderer_update_separation(struct GameState *game)
 {
     if (game->player.room_id != game->wanderer_room) {
         game->wanderer_need_separation = 0;
     }
 }
 
-static void wanderer_step(game)
-struct GameState *game;
+static void wanderer_step(struct GameState *game)
 {
     struct Room *r;
     int dirs[CFG_DIR_MAX];
@@ -707,8 +681,7 @@ struct GameState *game;
     game->wanderer_room = r->exits[dirs[pick]];
 }
 
-static void wanderer_begin_encounter(game)
-struct GameState *game;
+static void wanderer_begin_encounter(struct GameState *game)
 {
     if (game_is_busy_dialogue(game)) {
         return;
@@ -730,8 +703,7 @@ struct GameState *game;
     game->wanderer_need_separation = 1;
 }
 
-static void wanderer_apply_reply(choice)
-int choice;
+static void wanderer_apply_reply(int choice)
 {
     if (choice == 1) {
         printf("\nThey nod, amused. \"Bold. Don't trip over your own story.\"\n");
@@ -756,8 +728,7 @@ static void frog_dialogue_intro(void)
     printf("(Answer with 1, 2, 3, or reply <n>.)\n");
 }
 
-static void frog_dialogue_branch(choice)
-int choice;
+static void frog_dialogue_branch(int choice)
 {
     if (choice == 1) {
         printf("\nYou bow. The frog salutes with a webbed hand.\n");
@@ -779,8 +750,7 @@ int choice;
     printf("If anyone asks, you hallucinated this conversation. For tax reasons.\"\n");
 }
 
-static void do_look(game)
-struct GameState *game;
+static void do_look(struct GameState *game)
 {
     struct Room *room;
     int dir;
@@ -822,14 +792,12 @@ struct GameState *game;
     }
 }
 
-void game_describe_current_room(game)
-struct GameState *game;
+void game_describe_current_room(struct GameState *game)
 {
     do_look(game);
 }
 
-void game_init(game)
-struct GameState *game;
+void game_init(struct GameState *game)
 {
     int i;
     world_init(&game->world);
@@ -866,8 +834,7 @@ struct GameState *game;
     seed_world_items(game);
 }
 
-void game_render(game)
-const struct GameState *game;
+void game_render(const struct GameState *game)
 {
     const struct Room *room;
     int needed;
@@ -884,9 +851,7 @@ void game_print_help(void)
     printf("%s\n", command_help_text());
 }
 
-static int apply_command(game, cmd)
-struct GameState *game;
-struct Command *cmd;
+static int apply_command(struct GameState *game, struct Command *cmd)
 {
     int room_id;
     int ground_item;
@@ -1264,8 +1229,7 @@ struct Command *cmd;
     return 0;
 }
 
-static void maybe_emit_animal_noise(game)
-struct GameState *game;
+static void maybe_emit_animal_noise(struct GameState *game)
 {
     if ((game->tick % 2UL) != 0UL) {
         return;
@@ -1276,8 +1240,7 @@ struct GameState *game;
     printf("\n%s\n", world_room_animal_noise(&game->world, game->player.room_id));
 }
 
-static void maybe_emit_atmosphere(game)
-struct GameState *game;
+static void maybe_emit_atmosphere(struct GameState *game)
 {
     int roll;
 
@@ -1336,9 +1299,7 @@ struct GameState *game;
     maybe_spawn_room_item(game);
 }
 
-static void advance_world_tick(game, wanderer_moves_first)
-struct GameState *game;
-int wanderer_moves_first;
+static void advance_world_tick(struct GameState *game, int wanderer_moves_first)
 {
     int old_wanderer_room;
 
@@ -1375,9 +1336,7 @@ int wanderer_moves_first;
     }
 }
 
-int game_process_input(game, line)
-struct GameState *game;
-char *line;
+int game_process_input(struct GameState *game, char *line)
 {
     struct Command cmd;
     int parsed;
@@ -1405,8 +1364,7 @@ char *line;
     return 1;
 }
 
-void game_background_step(game)
-struct GameState *game;
+void game_background_step(struct GameState *game)
 {
     advance_world_tick(game, 1);
 }
