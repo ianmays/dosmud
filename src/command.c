@@ -3,6 +3,7 @@
 #include <string.h>
 #include "command.h"
 #include "items.h"
+#include "txtres.h"
 
 static void lower_inplace(char *s)
 {
@@ -193,5 +194,5 @@ int command_advances_time(int type)
 
 const char *command_help_text(void)
 {
-    return "Commands: look, inspect [rustle|creak|water|grit], take/drop <item>, bag, eat/use <item>, craft <item>, loot, move <dir>, wait, talk, 1/2/3 or reply <1-3>, help, quit";
+    return TXT_COMMAND_HELP;
 }

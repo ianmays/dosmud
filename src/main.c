@@ -5,6 +5,7 @@
 #include "config.h"
 #include "game.h"
 #include "grendr.h"
+#include "txtres.h"
 
 #ifdef __WATCOMC__
 #include <conio.h>
@@ -16,7 +17,7 @@
 
 static void print_prompt(void)
 {
-    printf("\n> ");
+    printf("%s", TXT_MAIN_PROMPT);
     fflush(stdout);
 }
 
@@ -89,7 +90,7 @@ int main(void)
     const time_t idle_tick_seconds = 20;
 
     #ifdef TEST_MODE
-        printf("TEST MODE\n");
+        printf("%s\n", TXT_MAIN_TEST_MODE);
         srand(1234);
     #else
         srand(time(NULL));
@@ -98,8 +99,8 @@ int main(void)
     game_init(&game);
     last_tick_time = time(NULL);
 
-    printf("dosmud prototype\n");
-    printf("Type 'help' for commands.\n");
+    printf("%s\n", TXT_MAIN_TITLE);
+    printf("%s\n", TXT_MAIN_HELP_HINT);
     game_describe_current_room(&game);
     game_render(&game);
     print_prompt();
@@ -143,6 +144,6 @@ int main(void)
         }
     }
 
-    printf("bye\n");
+    printf("%s\n", TXT_MAIN_BYE);
     return 0;
 }

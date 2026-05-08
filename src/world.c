@@ -1,9 +1,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include "world.h"
+#include "txtres.h"
 
-static void room_set_meta(struct Room *room, char *name, char *desc,
-    char *animal, char *animal_noise)
+static void room_set_meta(struct Room *room, const char *name, const char *desc,
+    const char *animal, const char *animal_noise)
 {
     int i;
     strncpy(room->name, name, CFG_NAME_MAX - 1);
@@ -58,54 +59,13 @@ void world_init(struct World *world)
 
     world->room_count = 16;
 
-    room_set_meta(&world->rooms[WORLD_ROOM_CAMP], "Camp",
-        "A small campfire burns quietly.", "cricket",
-        "A cricket chirps from beside the coals.");
-    room_set_meta(&world->rooms[WORLD_ROOM_ROAD], "Road",
-        "A dusty road stretches toward pale hills.", "crow",
-        "A crow caws from a leaning signpost.");
-    room_set_meta(&world->rooms[WORLD_ROOM_POND], "Pond",
-        "A still pond reflects the dim sky.", "frog",
-        "A frog lets out a smug, wet ribbit.");
-    room_set_meta(&world->rooms[WORLD_ROOM_FOREST], "Forest",
-        "Needles soften your steps; distant branches knit the light.", "owl",
-        "An owl hoots once, then holds the dark still.");
-    room_set_meta(&world->rooms[WORLD_ROOM_RUINS], "Ruins",
-        "Broken columns argue with the sky.", "lizard",
-        "A wall lizard clicks between cracked stones.");
-    room_set_meta(&world->rooms[WORLD_ROOM_STREAM], "Stream",
-        "Cold water chatters over stones.", "otter",
-        "An otter splashes and chatters downstream.");
-    room_set_meta(&world->rooms[WORLD_ROOM_CLIFF], "Cliff",
-        "Wind gnaws at the cliff edge.", "hawk",
-        "A hawk screams high overhead.");
-    room_set_meta(&world->rooms[WORLD_ROOM_MARSH], "Marsh",
-        "Reeds lean over black water.", "heron",
-        "A heron rattles through the reeds.");
-    room_set_meta(&world->rooms[WORLD_ROOM_GROVE], "Grove",
-        "Old trees ring a quiet clearing.", "fox",
-        "A fox yips from behind the roots.");
-    room_set_meta(&world->rooms[WORLD_ROOM_BRIDGE], "Bridge",
-        "A narrow timber bridge bows over the stream.", "kingfisher",
-        "A kingfisher snaps its beak and dives.");
-    room_set_meta(&world->rooms[WORLD_ROOM_CATACOMBS], "Catacombs",
-        "Cold tunnels run under the ruins.", "rat",
-        "Rats skitter and squeak through the dark.");
-    room_set_meta(&world->rooms[WORLD_ROOM_MEADOW], "Meadow",
-        "Tall grass moves in waves around standing stones.", "hare",
-        "A hare thumps through the grass nearby.");
-    room_set_meta(&world->rooms[WORLD_ROOM_CANYON], "Canyon",
-        "Red stone walls hold old heat and thin echoes.", "vulture",
-        "A vulture croaks from the upper rim.");
-    room_set_meta(&world->rooms[WORLD_ROOM_TOWER], "Tower",
-        "A watchtower leans above weathered stairs.", "raven",
-        "A raven taps at cracked slate.");
-    room_set_meta(&world->rooms[WORLD_ROOM_ORCHARD], "Orchard",
-        "Crooked fruit trees crowd a forgotten lane.", "thrush",
-        "A thrush trills from the orchard rows.");
-    room_set_meta(&world->rooms[WORLD_ROOM_CAVE], "Cave",
-        "A limestone cave breathes cold air from below.", "bat",
-        "Bats chirr overhead in brief bursts.");
+    for (i = 0; i < CFG_ROOM_MAX; ++i) {
+        room_set_meta(&world->rooms[i],
+            g_room_names[i],
+            g_room_descs[i],
+            g_room_animals[i],
+            g_room_noises[i]);
+    }
 
     wilds[0] = WORLD_ROOM_FOREST;
     wilds[1] = WORLD_ROOM_MEADOW;
@@ -232,17 +192,13 @@ int world_move(struct World *world, int room_id, int dir)
 
 const char *world_dir_name(int dir)
 {
-    if (dir == DIR_NORTH) return "north";
-    if (dir == DIR_SOUTH) return "south";
-    if (dir == DIR_EAST) return "east";
-    if (dir == DIR_WEST) return "west";
-    return "unknown";
+    return txtres_dir_name(dir);
 }
 
 const char *world_room_animal(struct World *world, int room_id)
 {
     if (room_id < 0 || room_id >= world->room_count) {
-        return "something";
+        return TXT_ROOM_ANIMAL_FALLBACK;
     }
     return world->rooms[room_id].animal;
 }
@@ -250,7 +206,7 @@ const char *world_room_animal(struct World *world, int room_id)
 const char *world_room_animal_noise(struct World *world, int room_id)
 {
     if (room_id < 0 || room_id >= world->room_count) {
-        return "You hear a distant animal noise.";
+        return TXT_ROOM_NOISE_FALLBACK;
     }
     return world->rooms[room_id].animal_noise;
 }
