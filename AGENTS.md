@@ -54,10 +54,10 @@ Guidance for AI/code agents working in this repository.
   - common commands
   - minimal setup steps
   - high-level artifact outcomes
-- `PROJECT_GUIDE.md` = authoritative implementation details:
-  - Makefile target contract
-  - DOS pipeline behavior
-  - architecture rationale and subsystem guidance
+- `/docs/index.md` = manual entrypoint
+- `/docs/architecture.md` = architecture rationale and subsystem guidance
+- `/docs/testing.md` = build/test command contract and environment model
+- `/docs/contributing.md` = contribution process and PR expectations
 - When adding docs, link between files instead of repeating long sections.
 
 ## Editing and Change Hygiene
