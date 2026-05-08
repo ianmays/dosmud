@@ -31,7 +31,9 @@ Long-form project documentation lives in `/docs`:
 - [Manual Index](docs/index.md)
 - [Architecture](docs/architecture.md)
 - [Testing](docs/testing.md)
-- [Contributing](docs/contributing.md)
+- [Contributing](docs/contributor-guide.md)
+
+The manual is deployed as [Github Pages](https://ianmays.github.io/dosmud/).
 
 ## Repository docs at root
 
