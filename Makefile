@@ -23,8 +23,12 @@ test:
 	$(MAKE) clean && $(CC) $(TEST_CFLAGS) -o $(BIN) $(SRC)
 
 # deterministic tests
-test-run: test
-	./$(BIN) < tests/input.txt > tests/output.txt
+test-run:
+	./$(BIN) < tests/smoke.input > tests/smoke.output
+	
+	diff -u \
+		tests/smoke.expect \
+		tests/smoke.output
 
 clean:
 	rm -f $(BIN)
