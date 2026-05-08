@@ -5,7 +5,7 @@ Thanks for contributing.
 ## Development Principles
 
 - Keep code ANSI C89 / ISO C90 compatible.
-- Keep gameplay deterministic and avoid hidden state.
+- Keep gameplay deterministic for identical seed + inputs.
 - Prefer simple, explicit, procedural code over heavy abstractions.
 - Preserve compatibility with both GCC and Open Watcom.
 
