@@ -6,7 +6,7 @@ This manual is the canonical project documentation set for architecture, testing
 
 - [Architecture](architecture.md)
 - [Testing](testing.md)
-- [Contributing](contributing.md)
+- [Contributor Guide](contributor-guide.md)
 
 ## Scope
 

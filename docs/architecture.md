@@ -78,6 +78,15 @@ Commands mutate game state, world ticks mutate simulation state, and rendering o
 
 - text rendering only
 - no gameplay mutation
+- player-facing lines and format strings come from [`txtres.c`](../src/txtres.c) (`TXT_*` constants and `g_room_*` arrays), not scattered literals
+
+## `txtres.c` / `txtres.h`
+
+- single home for **static player-facing copy**: dialogue and menu text, room names/descriptions/animal noise strings, art captions, combat and atmosphere lines, inventory feedback, shell strings (`main`), and the command help blurb
+- **Exported globals**, not thin getters: `extern const char *const TXT_…` for individual strings and `g_room_names[]`, `g_room_descs[]`, `g_room_animals[]`, `g_room_noises[]`, `g_room_art_captions[]` for room-indexed tables
+- **Functions only where selection matters**: e.g. `txtres_dir_name(int dir)`, `txtres_wanderer_reply`, and NPC reply helpers that branch on a numeric choice
+- **C89/DOS constraints**: no heap allocation; tables sized with existing `CFG_*` limits; module is linked from both the Linux [`Makefile`](../Makefile) and [`build.bat`](../build.bat)
+- **Out of scope here**: command tokens and parser synonyms stay in `command.c` / `items.c` so parsing behavior does not drift
 
 ## `invent.c`
 
