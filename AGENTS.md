@@ -69,6 +69,7 @@ Guidance for AI/code agents working in this repository.
   - `prepare-dos.ps1`
   - `build.bat`
 - Prefer small, reviewable commits with clear intent.
+- Always check for needed documentation updates/additions/removals when making changes.
 
 ## When in Doubt
 

@@ -397,15 +397,15 @@ tests/
 Pattern:
 
 ```text
-input.txt
-expected.txt
+test.input
+test.expect
 ```
 
 Run:
 
 ```text
-dosmud < input.txt > output.txt
-diff output.txt expected.txt
+dosmud < test.input > test.output
+diff test.output test.expect
 ```
 
 ---
