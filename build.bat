@@ -22,6 +22,7 @@ if exist invent.obj del invent.obj
 if exist command.obj del command.obj
 if exist world.obj del world.obj
 if exist items.obj del items.obj
+if exist txtres.obj del txtres.obj
 if exist dosmud.exe del dosmud.exe
 
 echo Compiling main.c ... >> %LOG%
@@ -59,10 +60,15 @@ echo Compiling items.c ...
 wcl %WFL% -c -fo=items.obj src\items.c >> %LOG%
 if errorlevel 1 goto wcl_bad
 
+echo Compiling txtres.c ... >> %LOG%
+echo Compiling txtres.c ...
+wcl %WFL% -c -fo=txtres.obj src\txtres.c >> %LOG%
+if errorlevel 1 goto wcl_bad
+
 echo Linking dosmud.exe ... >> %LOG%
 echo Linking dosmud.exe ...
 REM No -I here: link only; line stays under 127 chars.
-wcl -bt=dos -fe=dosmud.exe main.obj game.obj grendr.obj invent.obj command.obj world.obj items.obj >> %LOG%
+wcl -bt=dos -fe=dosmud.exe main.obj game.obj grendr.obj invent.obj command.obj world.obj items.obj txtres.obj >> %LOG%
 if errorlevel 1 goto wcl_bad
 
 echo. >> %LOG%

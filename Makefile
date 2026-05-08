@@ -4,7 +4,7 @@ BASE_CFLAGS = -Wall -Wextra -Wshadow -Wstrict-prototypes -Wmissing-prototypes -s
 DEV_CFLAGS = $(BASE_CFLAGS)
 TEST_MODE_FLAG = TEST_MODE
 TEST_CFLAGS = $(BASE_CFLAGS) -Werror -D$(TEST_MODE_FLAG)
-SRC = src/main.c src/game.c src/grendr.c src/invent.c src/command.c src/world.c src/items.c
+SRC = src/main.c src/game.c src/grendr.c src/invent.c src/command.c src/world.c src/items.c src/txtres.c
 BIN = dosmud
 
 all-build: $(BIN)

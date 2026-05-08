@@ -4,6 +4,7 @@
 #include "items.h"
 #include "command.h"
 #include "world.h"
+#include "txtres.h"
 
 static void art_room_camp(void)
 {
@@ -27,7 +28,7 @@ static void art_room_camp(void)
     printf("                       '. | .'\n");
     printf("                         \\|/\n");
     printf("                         / \\\n");
-    printf("                    (campfire at first watch)\n");
+    printf("                    %s\n", g_room_art_captions[WORLD_ROOM_CAMP]);
 }
 
 static void art_room_road(void)
@@ -47,7 +48,7 @@ static void art_room_road(void)
     printf("  .     .      .     .      .     .      .     .\n");
     printf("    .      .      .      .      .      .      .\n");
     printf("      .      .      .      .      .      .\n");
-    printf("                  (wagon ruts hold rain)\n");
+    printf("                  %s\n", g_room_art_captions[WORLD_ROOM_ROAD]);
 }
 
 static void art_room_pond(void)
@@ -67,7 +68,7 @@ static void art_room_pond(void)
     printf("      |   --   |      |  (____)  |       |   --   |\n");
     printf("      \\  '__' /        \\  '--'  /        \\  '__' /\n");
     printf("       '.___.'          '.___.'           '.___.'\n");
-    printf("                (reeds whisper across water)\n");
+    printf("                %s\n", g_room_art_captions[WORLD_ROOM_POND]);
 }
 
 static void art_room_forest(void)
@@ -85,7 +86,7 @@ static void art_room_forest(void)
     printf("                  |||\n");
     printf("            ______|||______\n");
     printf("           /_____/////_____\\\n");
-    printf("              (needles dampen every footfall)\n");
+    printf("              %s\n", g_room_art_captions[WORLD_ROOM_FOREST]);
 }
 
 static void art_room_stream(void)
@@ -100,7 +101,7 @@ static void art_room_stream(void)
     printf("      o   o     o    o     o    o     o    o\n");
     printf("    _/|\\_/|\\___/|\\__/|\\___/|\\__/|\\___/|\\__/|\\_\n");
     printf("   /____________________________________________\\\n");
-    printf("              (stones split the current)\n");
+    printf("              %s\n", g_room_art_captions[WORLD_ROOM_STREAM]);
 }
 
 static void art_room_ruins(void)
@@ -118,7 +119,7 @@ static void art_room_ruins(void)
     printf("           |___________________________________|\n");
     printf("          / / / / / / / / / / / / / / / / / / /\n");
     printf("         /_/ /_/ /_/ /_/ /_/ /_/ /_/ /_/ /_/ /_\n");
-    printf("                (columns eroded by years)\n");
+    printf("                %s\n", g_room_art_captions[WORLD_ROOM_RUINS]);
 }
 
 static void art_room_cliff(void)
@@ -133,7 +134,7 @@ static void art_room_cliff(void)
     printf("             ||   ____            ____   ||\n");
     printf("             ||  / __ \\__________/ __ \\  ||\n");
     printf("             ||_/ /  \\____________/  \\_\\_||\n");
-    printf("~~~~~~~~~~~~~~~~~~ wind-scoured ledge ~~~~~~~~~~~~~~~~~~\n");
+    printf("~~~~~~~~~~~~~~~~~~ %s ~~~~~~~~~~~~~~~~~~\n", g_room_art_captions[WORLD_ROOM_CLIFF]);
 }
 
 static void art_room_marsh(void)
@@ -146,7 +147,7 @@ static void art_room_marsh(void)
     printf("|  _..-||-.._  ||  _..-||-.._  || |\n");
     printf("|.'    ||    '.||.'    ||    '.|| |\n");
     printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-    printf("           (mud pulls at your boots)\n");
+    printf("           %s\n", g_room_art_captions[WORLD_ROOM_MARSH]);
 }
 
 static void art_room_grove(void)
@@ -163,7 +164,7 @@ static void art_room_grove(void)
     printf("        '.      '-.__.-'      .'      .'\n");
     printf("          '-._              _.-'  _.-'\n");
     printf("               '----------'   .-'\n");
-    printf("                 (an old growth ring)\n");
+    printf("                 %s\n", g_room_art_captions[WORLD_ROOM_GROVE]);
 }
 
 static void art_room_bridge(void)
@@ -191,7 +192,7 @@ static void art_room_catacombs(void)
     printf("       |    |___| |___| |___| |___| |___|   |\n");
     printf("       |    |   | |   | |   | |   | |   |   |\n");
     printf("        \\___________________________________/\n");
-    printf("                 (air tastes of chalk)\n");
+    printf("                 %s\n", g_room_art_captions[WORLD_ROOM_CATACOMBS]);
 }
 
 static void art_room_meadow(void)
@@ -204,7 +205,7 @@ static void art_room_meadow(void)
     printf("     .             .      .              .\n");
     printf("  .     .      .      .      .      .      .\n");
     printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-    printf("            (seed heads bend in the wind)\n");
+    printf("            %s\n", g_room_art_captions[WORLD_ROOM_MEADOW]);
 }
 
 static void art_room_canyon(void)
@@ -231,7 +232,7 @@ static void art_room_tower(void)
     printf("                   /  ||  \\\n");
     printf("                  /___||___\\\n");
     printf("                 /____||____\\\n");
-    printf("              (watchfire long gone cold)\n");
+    printf("              %s\n", g_room_art_captions[WORLD_ROOM_TOWER]);
 }
 
 static void art_room_orchard(void)
@@ -244,7 +245,7 @@ static void art_room_orchard(void)
     printf("      .-.||||.-.  .-.||||.-.  .-.||||.-.\n");
     printf("     (o o)  (o o)(o o)  (o o)(o o)  (o o)\n");
     printf("      '-'    '-'  '-'    '-'  '-'    '-'\n");
-    printf("             (fallen fruit scents the air)\n");
+    printf("             %s\n", g_room_art_captions[WORLD_ROOM_ORCHARD]);
 }
 
 static void art_room_cave(void)
@@ -258,7 +259,7 @@ static void art_room_cave(void)
     printf("       |  (   )  (   )  (   )  (   )  (   )  |\n");
     printf("       |   '-'    '-'    '-'    '-'    '-'   |\n");
     printf("       |______________________________________|\n");
-    printf("              (drips mark patient time)\n");
+    printf("              %s\n", g_room_art_captions[WORLD_ROOM_CAVE]);
 }
 
 static void art_wanderer(void)
@@ -280,7 +281,7 @@ static void art_wanderer(void)
     printf("                    | /__|____|__\\ |\n");
     printf("                    |/___/    \\___\\|\n");
     printf("                   /____/      \\____\\\n");
-    printf("              (cloak wet with road mist)\n");
+    printf("              %s\n", TXT_WANDERER_ART_CAPTION);
 }
 
 static void art_frog_portrait(void)
@@ -299,7 +300,7 @@ static void art_frog_portrait(void)
     printf("                  __|__   _/_____|\\_   __|__\n");
     printf("               .-'____ '-/  /\\ /\\  \\-' ____'-.\n");
     printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-    printf("                (His Majesty, Pond Operations)\n");
+    printf("                %s\n", TXT_FROG_ART_CAPTION);
 }
 
 static void art_for_room(int room_id)
@@ -385,7 +386,7 @@ void render_room_look(struct GameState *game, int npc_in_room_hint)
     game_print_location_art(game->player.room_id);
     printf("\n%s\n", room->name);
     printf("%s\n", room->desc);
-    printf("Exits:");
+    printf("%s", TXT_UI_EXITS_LABEL);
     for (dir = 0; dir < DIR_NONE; ++dir) {
         if (room->exits[dir] >= 0) {
             printf(" %s", world_dir_name(dir));
@@ -393,27 +394,27 @@ void render_room_look(struct GameState *game, int npc_in_room_hint)
     }
     printf("\n");
     if (game->room_item[game->player.room_id] != ITEM_NONE) {
-        printf("On the ground: %s. (take %s)\n",
+        printf(TXT_UI_GROUND_ITEM_FMT,
             item_name(game->room_item[game->player.room_id]),
             item_name(game->room_item[game->player.room_id]));
     }
     if (game->corpse_present[game->player.room_id]) {
-        printf("A bandit corpse lies here. (loot)\n");
+        printf("%s", TXT_UI_BANDIT_CORPSE);
     }
     if (npc_in_room_hint != 0) {
-        printf("Someone nearby might talk. (talk)\n");
+        printf("%s", TXT_UI_NPC_HINT);
     }
     if (game->env_focus_active &&
             game->env_focus_room == game->player.room_id &&
             game->tick < game->env_focus_expires_tick) {
         if (game->env_focus_kind == GAME_ENV_RUSTLE) {
-            printf("Something is rustling nearby. (inspect rustle)\n");
+            printf("%s", TXT_UI_FOCUS_RUSTLE);
         } else if (game->env_focus_kind == GAME_ENV_CREAK) {
-            printf("You can track the source of the creaking. (inspect creak)\n");
+            printf("%s", TXT_UI_FOCUS_CREAK);
         } else if (game->env_focus_kind == GAME_ENV_WATER) {
-            printf("You can follow the moving water sound. (inspect water)\n");
+            printf("%s", TXT_UI_FOCUS_WATER);
         } else if (game->env_focus_kind == GAME_ENV_GRIT) {
-            printf("Fresh grit skids nearby. (inspect grit)\n");
+            printf("%s", TXT_UI_FOCUS_GRIT);
         }
     }
 }
@@ -425,7 +426,7 @@ void game_render(const struct GameState *game)
 
     room = &game->world.rooms[game->player.room_id];
     needed = game_xp_to_next_level(game->level);
-    printf("\n[T:%lu] %s [HP:%d/%d] [Lv:%d XP:%d/%d]\n",
+    printf(TXT_HUD_FMT,
         game->tick, room->name, game->player_hp, game->max_hp,
         game->level, game->xp, needed);
 }
@@ -449,85 +450,85 @@ void render_bandit_encounter_open(void)
     printf("               \\    |  '------------'   |    /\n");
     printf("                '.  \\__________________/  .'\n");
     printf("                  '--._______________ .--'\n");
-    printf("\nA road bandit steps from cover with a hand on a rusted blade.\n");
-    printf("\"Easy now. We can do this three ways.\"\n");
-    printf("  [1] Refuse and fight.\n");
-    printf("  [2] Hand over one item from your bag.\n");
-    printf("  [3] Talk it down and part ways.\n");
-    printf("(Answer with 1, 2, 3, or reply <n>.)\n");
+    printf("%s", TXT_BANDIT_OPEN_INTRO);
+    printf("%s", TXT_BANDIT_OPEN_QUOTE);
+    printf("%s", TXT_BANDIT_OPEN_OPT1);
+    printf("%s", TXT_BANDIT_OPEN_OPT2);
+    printf("%s", TXT_BANDIT_OPEN_OPT3);
+    printf("%s", TXT_REPLY_PROMPT);
 }
 
 void render_combat_start(int player_hp, int enemy_hp)
 {
-    printf("Combat starts. You HP: %d, Bandit HP: %d.\n", player_hp, enemy_hp);
-    printf("Choose: [1] Attack  [2] Defend  [3] Use salve\n");
+    printf(TXT_COMBAT_START_FMT, player_hp, enemy_hp);
+    printf("%s", TXT_COMBAT_MENU);
 }
 
 void render_combat_enemy_strike(int dmg)
 {
-    printf("The bandit strikes for %d damage.\n", dmg);
+    printf(TXT_COMBAT_ENEMY_STRIKE_FMT, dmg);
 }
 
 void render_combat_player_fallen(void)
 {
-    printf("You collapse. The road takes everything.\n");
+    printf("%s", TXT_COMBAT_PLAYER_FALLEN);
 }
 
 void render_combat_status_line(int player_hp, int enemy_hp)
 {
-    printf("You HP: %d, Bandit HP: %d.\n", player_hp, enemy_hp);
+    printf(TXT_COMBAT_STATUS_FMT, player_hp, enemy_hp);
 }
 
 void render_combat_player_hit(int dmg)
 {
-    printf("You hit the bandit for %d damage.\n", dmg);
+    printf(TXT_COMBAT_PLAYER_HIT_FMT, dmg);
 }
 
 void render_combat_braced(void)
 {
-    printf("You brace for the incoming strike.\n");
+    printf("%s", TXT_COMBAT_BRACED);
 }
 
 void render_combat_no_salve_bag(void)
 {
-    printf("You fumble for a salve, but you have none.\n");
+    printf("%s", TXT_COMBAT_NO_SALVE);
 }
 
 void render_combat_salve_in_combat(int hp)
 {
-    printf("You apply salve and recover. HP now %d.\n", hp);
+    printf(TXT_COMBAT_SALVE_FMT, hp);
 }
 
 void render_combat_invalid_choice(void)
 {
-    printf("Pick 1, 2, or 3.\n");
+    printf("%s", TXT_PICK_123);
 }
 
 void render_combat_bandit_defeated(void)
 {
-    printf("The bandit falls. The body slumps into the dust.\n");
+    printf("%s", TXT_COMBAT_BANDIT_DEFEATED);
 }
 
 void render_combat_menu(void)
 {
-    printf("Choose: [1] Attack  [2] Defend  [3] Use salve\n");
+    printf("%s", TXT_COMBAT_MENU);
 }
 
 void render_xp_gained(int amount)
 {
-    printf("You gain %d XP.\n", amount);
+    printf(TXT_XP_GAIN_FMT, amount);
 }
 
 void render_level_up(int level, int max_hp, int damage_bonus, int bag_capacity)
 {
-    printf("Level up! You are now level %d.\n", level);
-    printf("Max HP %d, Damage bonus +%d, Bag capacity %d.\n",
+    printf(TXT_LEVEL_UP_FMT, level);
+    printf(TXT_LEVEL_STATS_FMT,
         max_hp, damage_bonus, bag_capacity);
 }
 
 void render_nearby_item_notice(const char *item_name)
 {
-    printf("A %s catches your eye nearby.\n", item_name);
+    printf(TXT_NEARBY_ITEM_FMT, item_name);
 }
 
 void render_animal_noise_line(const char *line)
@@ -537,258 +538,226 @@ void render_animal_noise_line(const char *line)
 
 void render_atmosphere_gust(void)
 {
-    printf("\nA cool gust threads through the area and fades.\n");
+    printf("%s", TXT_ATMO_GUST);
 }
 
 void render_atmosphere_rustle(void)
 {
-    printf("\nSomething small rustles just out of sight.\n");
+    printf("%s", TXT_ATMO_RUSTLE);
 }
 
 void render_atmosphere_berry_drop(void)
 {
-    printf("A berry drops from the brush.\n");
+    printf("%s", TXT_ATMO_BERRY_DROP);
 }
 
 void render_atmosphere_creak(void)
 {
-    printf("\nA distant creak rolls across the landscape.\n");
+    printf("%s", TXT_ATMO_CREAK);
 }
 
 void render_atmosphere_water(void)
 {
-    printf("\nYou hear water moving somewhere beyond the path.\n");
+    printf("%s", TXT_ATMO_WATER);
 }
 
 void render_atmosphere_reed_drop(void)
 {
-    printf("A loose reed drifts to your feet.\n");
+    printf("%s", TXT_ATMO_REED_DROP);
 }
 
 void render_atmosphere_grit(void)
 {
-    printf("\nLoose grit skips over stone under an uncertain breeze.\n");
+    printf("%s", TXT_ATMO_GRIT);
 }
 
 void render_wanderer_scene(void)
 {
     printf("\n");
     art_wanderer();
-    printf("\nYou nearly bump into a hooded traveler. They straighten with a tired grin.\n");
-    printf("\"Easy there—I'm an adventurer too, working odd jobs between towns. ");
-    printf("What are you doing out here?\"\n");
-    printf("  [1] Looking for trouble worth the trouble.\n");
-    printf("  [2] Passing through—keeping my boots honest.\n");
-    printf("  [3] That's my business.\n");
-    printf("(Answer with 1, 2, 3, or reply <n>.)\n");
+    printf("%s", TXT_WANDERER_INTRO);
+    printf("%s", TXT_WANDERER_QUOTE_A);
+    printf("%s", TXT_WANDERER_QUOTE_B);
+    printf("%s", TXT_WANDERER_OPT1);
+    printf("%s", TXT_WANDERER_OPT2);
+    printf("%s", TXT_WANDERER_OPT3);
+    printf("%s", TXT_REPLY_PROMPT);
 }
 
 void render_wanderer_reply(int choice)
 {
-    if (choice == 1) {
-        printf("\nThey nod, amused. \"Bold. Don't trip over your own story.\"\n");
-        return;
-    }
-    if (choice == 2) {
-        printf("\nThey relax a fraction. \"Good. Miles keep liars honest.\"\n");
-        return;
-    }
-    printf("\nThey raise both hands. \"Fair. The road spies on everyone anyway.\"\n");
+    printf("%s", txtres_wanderer_reply(choice));
 }
 
 void render_frog_dialogue_intro(void)
 {
     printf("\n");
     art_frog_portrait();
-    printf("\nA damp frog wearing an imaginary crown clears his throat.\n");
-    printf("\"Official pond hours are whenever I say they are. Pick a vibe:\"\n");
-    printf("  [1] Bow and wish him a nice pond.\n");
-    printf("  [2] Insult his lily pad.\n");
-    printf("  [3] Ask if he is a wizard, a snack, or both.\n");
-    printf("(Answer with 1, 2, 3, or reply <n>.)\n");
+    printf("%s", TXT_FROG_INTRO);
+    printf("%s", TXT_FROG_QUOTE);
+    printf("%s", TXT_FROG_OPT1);
+    printf("%s", TXT_FROG_OPT2);
+    printf("%s", TXT_FROG_OPT3);
+    printf("%s", TXT_REPLY_PROMPT);
 }
 
 void render_frog_dialogue_branch(int choice)
 {
     if (choice == 1) {
-        printf("\nYou bow. The frog salutes with a webbed hand.\n");
-        printf("\"Finally—someone whose parents finished the tutorial. ");
-        printf("Wisdom of the pond: the water is wet, the mud is judgy, ");
-        printf("and I am technically management. You're welcome. Ribbit.\"\n");
+        printf("%s", TXT_FROG_REPLY_A1);
+        printf("%s", TXT_FROG_REPLY_A2);
+        printf("%s", TXT_FROG_REPLY_A3);
         return;
     }
     if (choice == 2) {
-        printf("\nYou call his lily pad 'discount turf.' ");
-        printf("The frog clutches his chest like you stabbed Shakespeare.\n");
-        printf("\"Rude! Delicious! That's how you get warts—not magic, ");
-        printf("just bad networking. Also you're banned from handsomeness.\"\n");
+        printf("%s", TXT_FROG_REPLY_B1);
+        printf("%s", TXT_FROG_REPLY_B2);
+        printf("%s", TXT_FROG_REPLY_B3);
         return;
     }
-    printf("\nYou lean in and whisper that the moon is 'basically a lid.'\n");
-    printf("The frog nods with the gravity of a tiny judge.\n");
-    printf("\"The moon knows what it did. I'm not allowed to say which phase. ");
-    printf("If anyone asks, you hallucinated this conversation. For tax reasons.\"\n");
+    printf("%s", TXT_FROG_REPLY_C1);
+    printf("%s", TXT_FROG_REPLY_C2);
+    printf("%s", TXT_FROG_REPLY_C3);
 }
 
 void render_msg_bandit_waiting_reply(void)
 {
-    printf("The bandit is waiting on your move (reply 1/2/3).\n");
+    printf("%s", TXT_MSG_BANDIT_WAITING);
 }
 
 void render_msg_unknown_command(void)
 {
-    printf("Unknown command. Type 'help'.\n");
+    printf("%s", TXT_MSG_UNKNOWN_COMMAND);
 }
 
 void render_msg_wait(void)
 {
-    printf("You wait.\n");
+    printf("%s", TXT_MSG_WAIT);
 }
 
 void render_msg_cannot_move(const char *dir_name)
 {
-    printf("You cannot move %s from here.\n", dir_name);
+    printf(TXT_MSG_CANNOT_MOVE_FMT, dir_name);
 }
 
 void render_msg_moved(const char *dir_name)
 {
-    printf("You move %s.\n", dir_name);
+    printf(TXT_MSG_MOVED_FMT, dir_name);
 }
 
 void render_msg_inspect_nothing(void)
 {
-    printf("Nothing here stands out right now.\n");
+    printf("%s", TXT_MSG_INSPECT_NOTHING);
 }
 
 void render_msg_inspect_wrong_focus(void)
 {
-    printf("That is not what is drawing your attention.\n");
+    printf("%s", TXT_MSG_INSPECT_WRONG_FOCUS);
 }
 
 void render_msg_inspect_rustle(void)
 {
-    printf("You part the brush and startle a hare into a low sprint.\n");
+    printf("%s", TXT_MSG_INSPECT_RUSTLE);
 }
 
 void render_msg_inspect_creak(void)
 {
-    printf("An old branch rocks against another, groaning like timber.\n");
+    printf("%s", TXT_MSG_INSPECT_CREAK);
 }
 
 void render_msg_inspect_water(void)
 {
-    printf("You find a thin runnel cutting fresh lines through mud.\n");
+    printf("%s", TXT_MSG_INSPECT_WATER);
 }
 
 void render_msg_inspect_grit(void)
 {
-    printf("New tracks cross the grit: light, quick, and already fading.\n");
+    printf("%s", TXT_MSG_INSPECT_GRIT);
 }
 
 void render_msg_bandit_blocks_talk(void)
 {
-    printf("The bandit has your full attention right now.\n");
+    printf("%s", TXT_MSG_BANDIT_BLOCKS_TALK);
 }
 
 void render_msg_traveler_waiting(void)
 {
-    printf("The traveler is waiting for an answer (1/2/3).\n");
+    printf("%s", TXT_MSG_TRAVELER_WAITING);
 }
 
 void render_msg_watchman_talk(void)
 {
-    printf("A one-eyed watchman leans on the parapet.\n");
-    printf("\"Storms come from the canyon. You carry a torch?\"\n");
-    printf("  [1] Ask for warning signs.\n");
-    printf("  [2] Offer to share a meal.\n");
-    printf("  [3] Say nothing and move on.\n");
-    printf("(Answer with 1, 2, 3, or reply <n>.)\n");
+    printf("%s", TXT_MSG_WATCHMAN_TALK_1);
+    printf("%s", TXT_MSG_WATCHMAN_TALK_2);
+    printf("%s", TXT_MSG_WATCHMAN_TALK_3);
+    printf("%s", TXT_MSG_WATCHMAN_TALK_4);
+    printf("%s", TXT_REPLY_PROMPT);
 }
 
 void render_msg_herbalist_talk(void)
 {
-    printf("An herbalist kneels among fallen fruit.\n");
-    printf("\"Need a field remedy or just company?\"\n");
-    printf("  [1] Ask for medicine advice.\n");
-    printf("  [2] Trade gossip from the road.\n");
-    printf("  [3] Leave politely.\n");
-    printf("(Answer with 1, 2, 3, or reply <n>.)\n");
+    printf("%s", TXT_MSG_HERBALIST_TALK_1);
+    printf("%s", TXT_MSG_HERBALIST_TALK_2);
+    printf("%s", TXT_MSG_HERBALIST_TALK_3);
+    printf("%s", TXT_MSG_HERBALIST_TALK_4);
+    printf("%s", TXT_REPLY_PROMPT);
 }
 
 void render_msg_archivist_talk(void)
 {
-    printf("A dust-caked archivist lights a stub candle.\n");
-    printf("\"Speak quickly. Stone remembers everything.\"\n");
-    printf("  [1] Ask about the ruins.\n");
-    printf("  [2] Ask about safer routes.\n");
-    printf("  [3] Thank them and leave.\n");
-    printf("(Answer with 1, 2, 3, or reply <n>.)\n");
+    printf("%s", TXT_MSG_ARCHIVIST_TALK_1);
+    printf("%s", TXT_MSG_ARCHIVIST_TALK_2);
+    printf("%s", TXT_MSG_ARCHIVIST_TALK_3);
+    printf("%s", TXT_MSG_ARCHIVIST_TALK_4);
+    printf("%s", TXT_REPLY_PROMPT);
 }
 
 void render_msg_nobody_talk(void)
 {
-    printf("Nobody here wants to talk.\n");
+    printf("%s", TXT_MSG_NOBODY_TALK);
 }
 
 void render_msg_watchman_reply(int arg)
 {
-    if (arg == 1) {
-        printf("He points west. \"If crows go quiet, squall in ten minutes.\"\n");
-    } else if (arg == 2) {
-        printf("He accepts, then hands you dried herbs. \"Stay upright.\"\n");
-    } else {
-        printf("He nods once and returns to the horizon.\n");
-    }
+    printf("%s", txtres_msg_watchman_reply(arg));
 }
 
 void render_msg_herbalist_reply(int arg)
 {
-    if (arg == 1) {
-        printf("She mutters ratios: \"Two berries, one herb, crush fine.\"\n");
-    } else if (arg == 2) {
-        printf("She laughs. \"Road stories always cost extra.\"\n");
-    } else {
-        printf("She waves without looking up.\n");
-    }
+    printf("%s", txtres_msg_herbalist_reply(arg));
 }
 
 void render_msg_archivist_reply(int arg)
 {
-    if (arg == 1) {
-        printf("Archivist: \"The top stones cracked first. The foundations were already wrong.\"\n");
-    } else if (arg == 2) {
-        printf("Archivist: \"Follow running water; dead tunnels lie to travelers.\"\n");
-    } else {
-        printf("Archivist: \"Go, then. Before the candle quits.\"\n");
-    }
+    printf("%s", txtres_msg_archivist_reply(arg));
 }
 
 void render_msg_hand_over_item(const char *item_name)
 {
-    printf("You hand over your %s. The bandit backs off and leaves.\n", item_name);
+    printf(TXT_MSG_HAND_OVER_ITEM_FMT, item_name);
 }
 
 void render_msg_bag_empty_bandit(void)
 {
-    printf("Your bag is empty. The bandit laughs and attacks.\n");
+    printf("%s", TXT_MSG_BAG_EMPTY_BANDIT);
 }
 
 void render_msg_intimidate_success(void)
 {
-    printf("You keep your voice steady. The bandit grunts and withdraws.\n");
+    printf("%s", TXT_MSG_INTIMIDATE_SUCCESS);
 }
 
 void render_msg_intimidate_fail(void)
 {
-    printf("Your pitch fails. The bandit lunges.\n");
+    printf("%s", TXT_MSG_INTIMIDATE_FAIL);
 }
 
 void render_msg_pick_123(void)
 {
-    printf("Pick 1, 2, or 3.\n");
+    printf("%s", TXT_PICK_123);
 }
 
 void render_msg_nobody_waiting_reply(void)
 {
-    printf("Nobody is waiting for an answer.\n");
+    printf("%s", TXT_MSG_NOBODY_WAITING);
 }
