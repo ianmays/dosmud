@@ -1,0 +1,7 @@
+$projectname = "project-name"
+$source = "\\wsl$\..\$projectname"
+$mountpoint = "C:\..\mount-point"
+$projectdirectory = "projects\$projectname"
+$destination = "$mountpoint\$projectdirectory"
+$dospath = "C:\..\dos-path\"
+$dosexecutable = "dos-executable"
