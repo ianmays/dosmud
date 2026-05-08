@@ -39,3 +39,4 @@ The manual is deployed as [Github Pages](https://ianmays.github.io/dosmud/).
 
 - `CONTRIBUTING.md` points to contributor workflow guidance.
 - `AGENTS.md` contains repository guidance for coding agents.
+- `DEV_PLAN.md` keeps track of upcoming development phases. 
