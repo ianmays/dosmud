@@ -77,4 +77,3 @@ echo Build FAILED. See %LOG%
 
 :wcl_done
 echo Full transcript: %LOG%
-pause
