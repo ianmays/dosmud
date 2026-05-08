@@ -173,7 +173,7 @@ const char *const TXT_MSG_INSPECT_RUSTLE = "You part the brush and startle a har
 const char *const TXT_MSG_INSPECT_CREAK = "An old branch rocks against another, groaning like timber.\n";
 const char *const TXT_MSG_INSPECT_WATER = "You find a thin runnel cutting fresh lines through mud.\n";
 const char *const TXT_MSG_INSPECT_GRIT = "New tracks cross the grit: light, quick, and already fading.\n";
-const char *const TXT_MSG_BANDIT_BLOCKS_TALK = "The bandit has your full attention right now.\n";
+const char *const TXT_MSG_BANDIT_BLOCK_TALK = "The bandit has your full attention right now.\n";
 const char *const TXT_MSG_TRAVELER_WAITING = "The traveler is waiting for an answer (1/2/3).\n";
 const char *const TXT_MSG_NOBODY_TALK = "Nobody here wants to talk.\n";
 const char *const TXT_MSG_HAND_OVER_ITEM_FMT = "You hand over your %s. The bandit backs off and leaves.\n";
@@ -182,18 +182,18 @@ const char *const TXT_MSG_INTIMIDATE_SUCCESS = "You keep your voice steady. The 
 const char *const TXT_MSG_INTIMIDATE_FAIL = "Your pitch fails. The bandit lunges.\n";
 const char *const TXT_MSG_NOBODY_WAITING = "Nobody is waiting for an answer.\n";
 
-const char *const TXT_MSG_WATCHMAN_TALK_1 = "A one-eyed watchman leans on the parapet.\n";
-const char *const TXT_MSG_WATCHMAN_TALK_2 = "\"Storms come from the canyon. You carry a torch?\"\n";
-const char *const TXT_MSG_WATCHMAN_TALK_3 = "  [1] Ask for warning signs.\n  [2] Offer to share a meal.\n";
-const char *const TXT_MSG_WATCHMAN_TALK_4 = "  [3] Say nothing and move on.\n";
-const char *const TXT_MSG_HERBALIST_TALK_1 = "An herbalist kneels among fallen fruit.\n";
-const char *const TXT_MSG_HERBALIST_TALK_2 = "\"Need a field remedy or just company?\"\n";
-const char *const TXT_MSG_HERBALIST_TALK_3 = "  [1] Ask for medicine advice.\n  [2] Trade gossip from the road.\n";
-const char *const TXT_MSG_HERBALIST_TALK_4 = "  [3] Leave politely.\n";
-const char *const TXT_MSG_ARCHIVIST_TALK_1 = "A dust-caked archivist lights a stub candle.\n";
-const char *const TXT_MSG_ARCHIVIST_TALK_2 = "\"Speak quickly. Stone remembers everything.\"\n";
-const char *const TXT_MSG_ARCHIVIST_TALK_3 = "  [1] Ask about the ruins.\n  [2] Ask about safer routes.\n";
-const char *const TXT_MSG_ARCHIVIST_TALK_4 = "  [3] Thank them and leave.\n";
+const char *const TXT_MSG_WATCHMAN_TALK_LINE1 = "A one-eyed watchman leans on the parapet.\n";
+const char *const TXT_MSG_WATCHMAN_TALK_LINE2 = "\"Storms come from the canyon. You carry a torch?\"\n";
+const char *const TXT_MSG_WATCHMAN_TALK_LINE3 = "  [1] Ask for warning signs.\n  [2] Offer to share a meal.\n";
+const char *const TXT_MSG_WATCHMAN_TALK_LINE4 = "  [3] Say nothing and move on.\n";
+const char *const TXT_MSG_HERBALIST_TALK_LINE1 = "An herbalist kneels among fallen fruit.\n";
+const char *const TXT_MSG_HERBALIST_TALK_LINE2 = "\"Need a field remedy or just company?\"\n";
+const char *const TXT_MSG_HERBALIST_TALK_LINE3 = "  [1] Ask for medicine advice.\n  [2] Trade gossip from the road.\n";
+const char *const TXT_MSG_HERBALIST_TALK_LINE4 = "  [3] Leave politely.\n";
+const char *const TXT_MSG_ARCHIVIST_TALK_LINE1 = "A dust-caked archivist lights a stub candle.\n";
+const char *const TXT_MSG_ARCHIVIST_TALK_LINE2 = "\"Speak quickly. Stone remembers everything.\"\n";
+const char *const TXT_MSG_ARCHIVIST_TALK_LINE3 = "  [1] Ask about the ruins.\n  [2] Ask about safer routes.\n";
+const char *const TXT_MSG_ARCHIVIST_TALK_LINE4 = "  [3] Thank them and leave.\n";
 
 const char *txtres_msg_watchman_reply(int arg)
 {
@@ -218,10 +218,10 @@ const char *txtres_msg_archivist_reply(int arg)
 
 const char *const TXT_INV_NO_BODY_LOOT = "There is no body here to loot.\n";
 const char *const TXT_INV_BODY_STRIPPED = "The body has already been stripped clean.\n";
-const char *const TXT_INV_BAG_FULL_DROP_FIRST = "Your bag is full. Drop something first.\n";
+const char *const TXT_INV_BAG_FULL_DROP = "Your bag is full. Drop something first.\n";
 const char *const TXT_INV_LOOT_FMT = "You loot a %s from the body.\n";
 const char *const TXT_INV_NO_RUMMAGE_COMBAT = "You cannot rummage through gear mid-fight.\n";
-const char *const TXT_INV_NOTHING_TAKE = "There is nothing here to take.\n";
+const char *const TXT_INV_TAKE_NOTHING = "There is nothing here to take.\n";
 const char *const TXT_INV_CANNOT_TAKE_HERE = "You cannot take that from here.\n";
 const char *const TXT_INV_BAG_FULL_FMT = "Your bag is full (%d items max).\n";
 const char *const TXT_INV_PICKUP_FMT = "You pick up the %s.\n";

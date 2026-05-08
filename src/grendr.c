@@ -677,7 +677,7 @@ void render_msg_inspect_grit(void)
 
 void render_msg_bandit_blocks_talk(void)
 {
-    printf("%s", TXT_MSG_BANDIT_BLOCKS_TALK);
+    printf("%s", TXT_MSG_BANDIT_BLOCK_TALK);
 }
 
 void render_msg_traveler_waiting(void)
@@ -687,28 +687,28 @@ void render_msg_traveler_waiting(void)
 
 void render_msg_watchman_talk(void)
 {
-    printf("%s", TXT_MSG_WATCHMAN_TALK_1);
-    printf("%s", TXT_MSG_WATCHMAN_TALK_2);
-    printf("%s", TXT_MSG_WATCHMAN_TALK_3);
-    printf("%s", TXT_MSG_WATCHMAN_TALK_4);
+    printf("%s", TXT_MSG_WATCHMAN_TALK_LINE1);
+    printf("%s", TXT_MSG_WATCHMAN_TALK_LINE2);
+    printf("%s", TXT_MSG_WATCHMAN_TALK_LINE3);
+    printf("%s", TXT_MSG_WATCHMAN_TALK_LINE4);
     printf("%s", TXT_REPLY_PROMPT);
 }
 
 void render_msg_herbalist_talk(void)
 {
-    printf("%s", TXT_MSG_HERBALIST_TALK_1);
-    printf("%s", TXT_MSG_HERBALIST_TALK_2);
-    printf("%s", TXT_MSG_HERBALIST_TALK_3);
-    printf("%s", TXT_MSG_HERBALIST_TALK_4);
+    printf("%s", TXT_MSG_HERBALIST_TALK_LINE1);
+    printf("%s", TXT_MSG_HERBALIST_TALK_LINE2);
+    printf("%s", TXT_MSG_HERBALIST_TALK_LINE3);
+    printf("%s", TXT_MSG_HERBALIST_TALK_LINE4);
     printf("%s", TXT_REPLY_PROMPT);
 }
 
 void render_msg_archivist_talk(void)
 {
-    printf("%s", TXT_MSG_ARCHIVIST_TALK_1);
-    printf("%s", TXT_MSG_ARCHIVIST_TALK_2);
-    printf("%s", TXT_MSG_ARCHIVIST_TALK_3);
-    printf("%s", TXT_MSG_ARCHIVIST_TALK_4);
+    printf("%s", TXT_MSG_ARCHIVIST_TALK_LINE1);
+    printf("%s", TXT_MSG_ARCHIVIST_TALK_LINE2);
+    printf("%s", TXT_MSG_ARCHIVIST_TALK_LINE3);
+    printf("%s", TXT_MSG_ARCHIVIST_TALK_LINE4);
     printf("%s", TXT_REPLY_PROMPT);
 }
 
