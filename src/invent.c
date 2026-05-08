@@ -67,7 +67,7 @@ int game_inv_cmd_loot(struct GameState *game)
         return 1;
     }
     if (!game_inv_bag_add(game, ground_item)) {
-        printf("%s", TXT_INV_BAG_FULL_DROP_FIRST);
+        printf("%s", TXT_INV_BAG_FULL_DROP);
         return 1;
     }
     printf(TXT_INV_LOOT_FMT, item_name(ground_item));
@@ -88,7 +88,7 @@ int game_inv_cmd_take(struct GameState *game, int item_arg)
     room_id = game->player.room_id;
     ground_item = game->room_item[room_id];
     if (ground_item == ITEM_NONE) {
-        printf("%s", TXT_INV_NOTHING_TAKE);
+        printf("%s", TXT_INV_TAKE_NOTHING);
         return 1;
     }
     if (item_arg != ground_item) {
