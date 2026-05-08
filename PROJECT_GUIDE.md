@@ -135,6 +135,8 @@ style engine design.
 
 # Build Targets
 
+This section is the authoritative build reference. Keep `README.md` focused on quick-start usage and keep detailed workflow behavior here.
+
 ## GCC/Linux Build
 
 Purpose:
@@ -145,7 +147,7 @@ Purpose:
 Example:
 
 ```sh
-make
+make build
 ./dosmud
 ```
 
@@ -153,22 +155,61 @@ This is NOT the primary shipping target.
 
 ---
 
-## OpenWatcom DOS Build
+## Makefile command contract
+
+Primary targets:
+- `make build` -> native GCC development build
+- `make test` -> native GCC strict/test build (`-Werror`, `-DTEST_MODE`)
+- `make test-run` -> runs `./dosmud < tests/input.txt > tests/output.txt`
+- `make all-build` -> runs `clean`, then DOS prep/invocation, then native build
+- `make all-test` -> runs `clean`, then DOS prep/invocation with `MODE=TEST_MODE`, then strict native build
+- `make prepare-dos` -> PowerShell-based DOS preparation and launch flow only
+
+Note:
+- `all-build` and `all-test` intentionally verify both build paths in one deterministic command sequence.
+
+---
+
+## OpenWatcom DOS Build Pipeline
 
 Purpose:
 - real target platform
 - compatibility validation
+- parity checks against native flow
 
-Example:
+Primary entrypoint (from host shell):
+
+```sh
+make prepare-dos
+```
+
+Optional deterministic mode:
+
+```sh
+make prepare-dos MODE=TEST_MODE
+```
+
+Pipeline:
+1. `prepare-dos.ps1` loads machine-local settings from `prepare-dos.local.ps1` (template: `prepare-dos.local.example.ps1`).
+2. It mirrors project files into the configured DOS mount destination.
+3. It starts the configured DOS executable and runs `build.bat` (optionally with `TEST_MODE`).
+4. `build.bat` compiles each C file to `.obj`, links `dosmud.exe`, and writes `build.log`.
+
+Environment/path model:
+- run `make` from Linux, while `prepare-dos.ps1` and the emulator run from Windows.
+- configure `$source` as a Windows-reachable path to the Linux project location.
+- configure `$mountpoint`, `$destination`, and `$dospath` as Windows-side paths used by the emulator.
+
+Direct in-environment fallback:
 
 ```bat
 build.bat
 ```
 
-Uses:
-- DOS/4GW
-- 32-bit DOS mode
-- ANSI C89 compatibility
+Output expectations:
+- native targets produce `dosmud`
+- DOS target produces `dosmud.exe`
+- DOS build transcript is stored in `build.log`
 
 ---
 
