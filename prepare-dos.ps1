@@ -28,4 +28,4 @@ $buildArgs = if ($Mode) { " $Mode" } else { "" }
   -c "c:" `
   -c "cd $projectdirectory" `
   -c "call build.bat$buildArgs" `
-  -c "dosmud.exe"
+  -c "$projectname.exe"
