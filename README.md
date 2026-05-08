@@ -9,31 +9,75 @@ Minimal DOS-first MUD-like prototype in ANSI C.
 - Use fixed-size buffers and compile-time caps from `include/config.h`.
 - Keep world simulation deterministic per tick and event-safe in a text console.
 
-## Build — local (development / sanity check)
+## Build targets at a glance
 
-Use the root `Makefile` on a Unix-like host (Linux, macOS, WSL, etc.) with **GCC** to compile and run a native binary for quick testing. This is **not** the shipped DOS build.
+- Native iteration build (GCC on Linux/macOS/WSL): `make build`
+- Native strict/test build (GCC + `TEST_MODE` + `-Werror`): `make test`
+- Native strict/test run against scripted input: `make test-run`
+- DOS-prep + native build in one command: `make all-build`
+- DOS-prep + strict native test build in one command: `make all-test`
+- DOS prep/build launcher only (PowerShell script): `make prepare-dos`
+
+For implementation details of the build pipeline, see `PROJECT_GUIDE.md` ("Build Targets").
+
+## Build — native (development / sanity check)
+
+Use the root `Makefile` on a Unix-like host (Linux, macOS, WSL, etc.) with **GCC** to compile and run a native binary for fast iteration. This is **not** the shipped DOS executable.
 
 ```sh
-make
+make build
 ./dosmud
 ```
+
+For stricter compile checks used by CI-style local testing:
+
+```sh
+make test
+make test-run
+```
+
+Cleanup:
 
 ```sh
 make clean   # remove ./dosmud
 ```
 
-## Build — DOS (Open Watcom, Windows)
+## Build — DOS prep/invocation (Open Watcom via PowerShell)
 
-The release target is a **DOS** executable built with **Open Watcom** on Windows.
+The DOS flow is launched through `prepare-dos.ps1`, usually via:
 
-1. Open a shell where Watcom tools are on `PATH` (run `owsetenv.bat` once per session, or use the “Open Watcom Build Environment” shortcut if your install provides it).
-2. From the project root, run:
-
-```bat
-build.bat
+```sh
+make prepare-dos
 ```
 
-That invokes `wcl` with the same flags as in the batch file and writes `dosmud.exe` in the project directory.
+Typical environment split:
+- `make` is run from a Linux shell.
+- `prepare-dos.ps1` executes through Windows PowerShell.
+- the DOS emulator process is launched from the Windows side.
+
+`prepare-dos.ps1` requires a local config file that is intentionally not committed:
+
+1. Copy `prepare-dos.local.example.ps1` to `prepare-dos.local.ps1`.
+2. Set values for your machine (`$projectname`, `$source`, `$mountpoint`, `$projectdirectory`, `$destination`, `$dospath`, `$dosexecutable`).
+3. Re-run `make prepare-dos`.
+
+Path format guidance:
+- `$source` should be a Windows-reachable path to the Linux-hosted project files (for example via a network/UNC share).
+- `$mountpoint`, `$destination`, and `$dospath` should be Windows paths visible to the emulator.
+
+Optional test-mode DOS invocation:
+
+```sh
+make prepare-dos MODE=TEST_MODE
+```
+
+That passes `-Mode TEST_MODE` into `prepare-dos.ps1`, which forwards `TEST_MODE` to `build.bat`.
+
+## Build artifacts and logs
+
+- `./dosmud` is the native GCC artifact.
+- `./dosmud.exe` and `./build.log` come from the DOS/Open Watcom path.
+- For exact DOS pipeline steps and fallback `build.bat` usage, see `PROJECT_GUIDE.md`.
 
 ## Manual verification script
 
