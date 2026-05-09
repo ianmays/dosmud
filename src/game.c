@@ -126,10 +126,14 @@ static void combat_resolve_reply(struct GameState *game, int choice)
             roll = rand() % CFG_ROLL_PERCENT_RANGE;
             if (roll < CFG_COMBAT_CORPSE_LOOT_SPEAR_BELOW) {
                 loot_item = ITEM_SPEAR;
-            } else if (roll < CFG_COMBAT_CORPSE_LOOT_STONE_BELOW) {
-                loot_item = ITEM_STONE;
-            } else {
+            } else if (roll < CFG_COMBAT_CORPSE_LOOT_STICK_BELOW) {
+                loot_item = ITEM_STICK;
+            } else if (roll < CFG_COMBAT_CORPSE_LOOT_BERRY_BELOW) {
+                loot_item = ITEM_BERRY;
+            } else if (roll < CFG_COMBAT_CORPSE_LOOT_HERB_BELOW) {
                 loot_item = ITEM_HERB;
+            } else {
+                loot_item = ITEM_FISH;
             }
             game->corpse_loot[game->player.room_id] = loot_item;
         }

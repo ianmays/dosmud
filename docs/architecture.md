@@ -88,6 +88,7 @@ Conventions:
 - add new gameplay/procedural tuning knobs here as `CFG_*` macros
 - keep related values grouped and commented
 - separate gameplay tuning from main-loop/test-harness settings
+- distinguish tuning for NPC corpse loot (`CFG_COMBAT_CORPSE_LOOT_*`, portable items) from ambient room finds (`CFG_ROOM_SPAWN_*`, terrain-driven junk like stone)
 - `TEST_MODE` seeds libc RNG with `CFG_TEST_RAND_SEED` for deterministic snapshot output
 
 ## `grendr`

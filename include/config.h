@@ -48,12 +48,14 @@
 #define CFG_SALVE_HEAL_AMOUNT 5
 
 /*
- * Bandit corpse loot: roll = rand() % CFG_ROLL_PERCENT_RANGE (same scheme as
- * room item spawns). Thresholds are cumulative and strictly increasing;
- * herb is the remainder bucket after stone.
+ * Bandit corpse loot: portable items an ambusher might carry (weapon, rations,
+ * small forage). Same d100 cumulative threshold scheme as room spawns; fish is
+ * the remainder bucket. Heavy ambient junk like loose stone is not rolled here.
  */
-#define CFG_COMBAT_CORPSE_LOOT_SPEAR_BELOW 28
-#define CFG_COMBAT_CORPSE_LOOT_STONE_BELOW 64
+#define CFG_COMBAT_CORPSE_LOOT_SPEAR_BELOW 26
+#define CFG_COMBAT_CORPSE_LOOT_STICK_BELOW 46
+#define CFG_COMBAT_CORPSE_LOOT_BERRY_BELOW 66
+#define CFG_COMBAT_CORPSE_LOOT_HERB_BELOW 86
 
 /* Bandit / ambient encounters */
 #define CFG_BANDIT_INTIMIDATE_SUCCESS_BELOW 60
