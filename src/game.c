@@ -119,8 +119,24 @@ static void combat_resolve_reply(struct GameState *game, int choice)
         game->combat_defending = 0;
         render_combat_bandit_defeated();
         game->corpse_present[game->player.room_id] = 1;
-        game->corpse_loot[game->player.room_id] =
-            (rand() % CFG_COMBAT_CORPSE_LOOT_COIN_SIDES) ? ITEM_STONE : ITEM_HERB;
+        {
+            int roll;
+            int loot_item;
+
+            roll = rand() % CFG_ROLL_PERCENT_RANGE;
+            if (roll < CFG_COMBAT_CORPSE_LOOT_SPEAR_BELOW) {
+                loot_item = ITEM_SPEAR;
+            } else if (roll < CFG_COMBAT_CORPSE_LOOT_STICK_BELOW) {
+                loot_item = ITEM_STICK;
+            } else if (roll < CFG_COMBAT_CORPSE_LOOT_BERRY_BELOW) {
+                loot_item = ITEM_BERRY;
+            } else if (roll < CFG_COMBAT_CORPSE_LOOT_HERB_BELOW) {
+                loot_item = ITEM_HERB;
+            } else {
+                loot_item = ITEM_FISH;
+            }
+            game->corpse_loot[game->player.room_id] = loot_item;
+        }
         gain_xp(game, CFG_COMBAT_KILL_XP_BASE + (rand() % CFG_COMBAT_KILL_XP_SPREAD));
         return;
     }

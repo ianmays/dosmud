@@ -48,10 +48,14 @@
 #define CFG_SALVE_HEAL_AMOUNT 5
 
 /*
- * Corpse loot: rand() % CFG_COMBAT_CORPSE_LOOT_COIN_SIDES picks the branch.
- * Value 2 is a fair two-outcome split; other values change the distribution.
+ * Bandit corpse loot: portable items an ambusher might carry (weapon, rations,
+ * small forage). Same d100 cumulative threshold scheme as room spawns; fish is
+ * the remainder bucket. Heavy ambient junk like loose stone is not rolled here.
  */
-#define CFG_COMBAT_CORPSE_LOOT_COIN_SIDES 2
+#define CFG_COMBAT_CORPSE_LOOT_SPEAR_BELOW 26
+#define CFG_COMBAT_CORPSE_LOOT_STICK_BELOW 46
+#define CFG_COMBAT_CORPSE_LOOT_BERRY_BELOW 66
+#define CFG_COMBAT_CORPSE_LOOT_HERB_BELOW 86
 
 /* Bandit / ambient encounters */
 #define CFG_BANDIT_INTIMIDATE_SUCCESS_BELOW 60
