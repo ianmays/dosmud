@@ -4,8 +4,6 @@
 #include "command.h"
 #include "world.h"
 
-#define CFG_BAG_MAX 12
-
 struct Player {
     int room_id;
 };

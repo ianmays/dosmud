@@ -185,7 +185,7 @@ int game_inv_cmd_use(struct GameState *game, int item_arg)
         return 1;
     }
     if (item_arg == ITEM_SALVE) {
-        game->player_hp += 5;
+        game->player_hp += CFG_SALVE_HEAL_AMOUNT;
         if (game->player_hp > game->max_hp) game->player_hp = game->max_hp;
         printf(TXT_INV_USE_SALVE_FMT,
             game->player_hp);

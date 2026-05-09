@@ -51,13 +51,13 @@ static int random_slot(struct Room *room)
 void world_init(struct World *world)
 {
     int i;
-    int wilds[7];
-    int ruins[5];
-    int base_path[16];
+    int wilds[CFG_WORLD_WILDS_COUNT];
+    int ruins[CFG_WORLD_RUINS_COUNT];
+    int base_path[CFG_ROOM_MAX];
     int path_len;
     int dir;
 
-    world->room_count = 16;
+    world->room_count = CFG_ROOM_MAX;
 
     for (i = 0; i < CFG_ROOM_MAX; ++i) {
         room_set_meta(&world->rooms[i],
@@ -81,18 +81,18 @@ void world_init(struct World *world)
     ruins[3] = WORLD_ROOM_CANYON;
     ruins[4] = WORLD_ROOM_CAVE;
 
-    for (i = 0; i < 7; ++i) {
+    for (i = 0; i < CFG_WORLD_WILDS_COUNT; ++i) {
         int j;
-        j = rand() % 7;
+        j = rand() % CFG_WORLD_WILDS_COUNT;
         {
             int t = wilds[i];
             wilds[i] = wilds[j];
             wilds[j] = t;
         }
     }
-    for (i = 0; i < 5; ++i) {
+    for (i = 0; i < CFG_WORLD_RUINS_COUNT; ++i) {
         int j;
-        j = rand() % 5;
+        j = rand() % CFG_WORLD_RUINS_COUNT;
         {
             int t = ruins[i];
             ruins[i] = ruins[j];
@@ -117,7 +117,7 @@ void world_init(struct World *world)
         world_link2(world, base_path[i], base_path[i + 1], dir);
     }
 
-    for (i = 2; i < 7; ++i) {
+    for (i = CFG_WORLD_WILD_BRANCH_START_INDEX; i < CFG_WORLD_WILDS_COUNT; ++i) {
         int anchor;
         anchor = base_path[rand() % path_len];
         dir = random_slot(&world->rooms[anchor]);
@@ -126,9 +126,9 @@ void world_init(struct World *world)
         }
     }
 
-    for (i = 3; i < 5; ++i) {
+    for (i = CFG_WORLD_RUIN_BRANCH_START_INDEX; i < CFG_WORLD_RUINS_COUNT; ++i) {
         int anchor;
-        anchor = ruins[rand() % 3];
+        anchor = ruins[rand() % CFG_WORLD_RUIN_ANCHOR_POOL];
         dir = random_slot(&world->rooms[anchor]);
         if (dir >= 0) {
             world_link2(world, anchor, ruins[i], dir);

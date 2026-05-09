@@ -87,11 +87,11 @@ int main(void)
     time_t now_time;
     int poll_rc;
     int ran_tick;
-    const time_t idle_tick_seconds = 20;
+    const time_t idle_tick_seconds = (time_t)CFG_MAIN_IDLE_TICK_SECONDS;
 
     #ifdef TEST_MODE
         printf("%s\n", TXT_MAIN_TEST_MODE);
-        srand(1234);
+        srand(CFG_TEST_RAND_SEED);
     #else
         srand(time(NULL));
     #endif

@@ -7,7 +7,7 @@
 
 int game_xp_to_next_level(int level)
 {
-    return 20 + ((level - 1) * 15);
+    return CFG_XP_LEVEL_BASE + ((level - 1) * CFG_XP_LEVEL_PER_LEVEL);
 }
 
 static void gain_xp(struct GameState *game, int amount)
@@ -19,10 +19,10 @@ static void gain_xp(struct GameState *game, int amount)
     while (game->xp >= needed) {
         game->xp -= needed;
         game->level += 1;
-        game->max_hp += 4;
-        game->damage_bonus += 1;
+        game->max_hp += CFG_LEVELUP_MAX_HP_DELTA;
+        game->damage_bonus += CFG_LEVELUP_DAMAGE_BONUS_DELTA;
         if (game->bag_capacity < CFG_BAG_MAX) {
-            game->bag_capacity += 1;
+            game->bag_capacity += CFG_LEVELUP_BAG_CAPACITY_DELTA;
         }
         game->player_hp = game->max_hp;
         render_level_up(game->level, game->max_hp, game->damage_bonus,
@@ -62,7 +62,7 @@ static void combat_start(struct GameState *game)
 {
     game->enemy_dialogue = 0;
     game->combat_active = 1;
-    game->enemy_hp = 8 + (rand() % 5);
+    game->enemy_hp = CFG_COMBAT_ENEMY_HP_BASE + (rand() % CFG_COMBAT_ENEMY_HP_SPREAD);
     game->combat_defending = 0;
     render_combat_start(game->player_hp, game->enemy_hp);
 }
@@ -70,9 +70,9 @@ static void combat_start(struct GameState *game)
 static void combat_enemy_turn(struct GameState *game)
 {
     int dmg;
-    dmg = 1 + (rand() % 4);
+    dmg = CFG_COMBAT_ENEMY_DMG_BASE + (rand() % CFG_COMBAT_ENEMY_DMG_SPREAD);
     if (game->combat_defending) {
-        dmg -= 2;
+        dmg -= CFG_COMBAT_DEFEND_DAMAGE_REDUCTION;
         if (dmg < 0) dmg = 0;
     }
     if (dmg > 0) {
@@ -92,7 +92,8 @@ static void combat_resolve_reply(struct GameState *game, int choice)
 {
     int dmg;
     if (choice == 1) {
-        dmg = 2 + (rand() % 4) + game->damage_bonus;
+        dmg = CFG_COMBAT_PLAYER_HIT_BASE + (rand() % CFG_COMBAT_PLAYER_HIT_SPREAD) +
+            game->damage_bonus;
         game->enemy_hp -= dmg;
         render_combat_player_hit(dmg);
     } else if (choice == 2) {
@@ -103,7 +104,7 @@ static void combat_resolve_reply(struct GameState *game, int choice)
             render_combat_no_salve_bag();
         } else {
             game_inv_bag_remove_item(game, ITEM_SALVE);
-            game->player_hp += 5;
+            game->player_hp += CFG_SALVE_HEAL_AMOUNT;
             if (game->player_hp > game->max_hp) game->player_hp = game->max_hp;
             render_combat_salve_in_combat(game->player_hp);
         }
@@ -118,8 +119,9 @@ static void combat_resolve_reply(struct GameState *game, int choice)
         game->combat_defending = 0;
         render_combat_bandit_defeated();
         game->corpse_present[game->player.room_id] = 1;
-        game->corpse_loot[game->player.room_id] = (rand() % 2) ? ITEM_STONE : ITEM_HERB;
-        gain_xp(game, 12 + (rand() % 5));
+        game->corpse_loot[game->player.room_id] =
+            (rand() % CFG_COMBAT_CORPSE_LOOT_COIN_SIDES) ? ITEM_STONE : ITEM_HERB;
+        gain_xp(game, CFG_COMBAT_KILL_XP_BASE + (rand() % CFG_COMBAT_KILL_XP_SPREAD));
         return;
     }
 
@@ -160,15 +162,15 @@ static void maybe_spawn_room_item(struct GameState *game)
     if (game->room_item[room_id] != ITEM_NONE) {
         return;
     }
-    if ((rand() % 100) >= 20) {
+    if ((rand() % CFG_ROLL_PERCENT_RANGE) >= CFG_ROOM_ITEM_SPAWN_GATE) {
         return;
     }
-    roll = rand() % 100;
-    if (roll < 25) game->room_item[room_id] = ITEM_BERRY;
-    else if (roll < 45) game->room_item[room_id] = ITEM_STICK;
-    else if (roll < 65) game->room_item[room_id] = ITEM_REED;
-    else if (roll < 80) game->room_item[room_id] = ITEM_STONE;
-    else if (roll < 92) game->room_item[room_id] = ITEM_HERB;
+    roll = rand() % CFG_ROLL_PERCENT_RANGE;
+    if (roll < CFG_ROOM_SPAWN_ROLL_BERRY_BELOW) game->room_item[room_id] = ITEM_BERRY;
+    else if (roll < CFG_ROOM_SPAWN_ROLL_STICK_BELOW) game->room_item[room_id] = ITEM_STICK;
+    else if (roll < CFG_ROOM_SPAWN_ROLL_REED_BELOW) game->room_item[room_id] = ITEM_REED;
+    else if (roll < CFG_ROOM_SPAWN_ROLL_STONE_BELOW) game->room_item[room_id] = ITEM_STONE;
+    else if (roll < CFG_ROOM_SPAWN_ROLL_HERB_BELOW) game->room_item[room_id] = ITEM_HERB;
     else game->room_item[room_id] = ITEM_FISH;
     render_nearby_item_notice(item_name(game->room_item[room_id]));
 }
@@ -254,7 +256,7 @@ void game_init(struct GameState *game)
     world_init(&game->world);
     game->player.room_id = 0;
     game->tick = 0;
-    game->seed = 1;
+    game->seed = CFG_GAME_INIT_SEED;
     game->running = 1;
     game->pond_dialogue = 0;
     game->wanderer_room = WORLD_ROOM_RUINS;
@@ -265,12 +267,12 @@ void game_init(struct GameState *game)
     game->env_focus_kind = GAME_ENV_NONE;
     game->env_focus_expires_tick = 0;
     game->bag_count = 0;
-    game->bag_capacity = 5;
-    game->level = 1;
-    game->xp = 0;
-    game->max_hp = 20;
-    game->damage_bonus = 0;
-    game->player_hp = 20;
+    game->bag_capacity = CFG_START_BAG_CAPACITY;
+    game->level = CFG_START_LEVEL;
+    game->xp = CFG_START_XP;
+    game->max_hp = CFG_START_MAX_HP;
+    game->damage_bonus = CFG_START_DAMAGE_BONUS;
+    game->player_hp = CFG_START_MAX_HP;
     game->enemy_dialogue = 0;
     game->combat_active = 0;
     game->enemy_hp = 0;
@@ -446,7 +448,7 @@ static int apply_command(struct GameState *game, struct Command *cmd)
                 return 1;
             }
             if (cmd->arg == 3) {
-                if ((rand() % 100) < 60) {
+                if ((rand() % CFG_ROLL_PERCENT_RANGE) < CFG_BANDIT_INTIMIDATE_SUCCESS_BELOW) {
                     render_msg_intimidate_success();
                     game->enemy_dialogue = 0;
                 } else {
@@ -467,7 +469,8 @@ static int apply_command(struct GameState *game, struct Command *cmd)
             game->wanderer_dialogue = 0;
             game->wanderer_active = 0;
             game->wanderer_room = -1;
-            game->wanderer_return_tick = game->tick + 8 + (rand() % 16);
+            game->wanderer_return_tick = game->tick + CFG_WANDERER_RETURN_DELAY_BASE +
+                (rand() % CFG_WANDERER_RETURN_DELAY_SPREAD);
             return 1;
         }
         if (game->pond_dialogue != 1) {
@@ -488,10 +491,10 @@ static int apply_command(struct GameState *game, struct Command *cmd)
 
 static void maybe_emit_animal_noise(struct GameState *game)
 {
-    if ((game->tick % 2UL) != 0UL) {
+    if ((game->tick % (unsigned long)CFG_ANIMAL_NOISE_TICK_PERIOD) != 0UL) {
         return;
     }
-    if ((rand() % 100) >= 75) {
+    if ((rand() % CFG_ROLL_PERCENT_RANGE) >= CFG_ANIMAL_NOISE_SKIP_ROLL_GE) {
         return;
     }
     render_animal_noise_line(
@@ -509,49 +512,51 @@ static void maybe_emit_atmosphere(struct GameState *game)
         game->env_focus_expires_tick = 0;
     }
 
-    roll = rand() % 100;
-    if (roll < 35) {
+    roll = rand() % CFG_ROLL_PERCENT_RANGE;
+    if (roll < CFG_ATMOSPHERE_ROLL_GUST_BELOW) {
         render_atmosphere_gust();
         return;
     }
-    if (roll < 55) {
+    if (roll < CFG_ATMOSPHERE_ROLL_RUSTLE_BELOW) {
         render_atmosphere_rustle();
         game->env_focus_active = 1;
         game->env_focus_room = game->player.room_id;
         game->env_focus_kind = GAME_ENV_RUSTLE;
-        game->env_focus_expires_tick = game->tick + 3;
-        if (game->room_item[game->player.room_id] == ITEM_NONE && (rand() % 100) < 50) {
+        game->env_focus_expires_tick = game->tick + CFG_ENV_FOCUS_DURATION_TICKS;
+        if (game->room_item[game->player.room_id] == ITEM_NONE &&
+                (rand() % CFG_ROLL_PERCENT_RANGE) < CFG_ATMOSPHERE_FOCUS_EXTRA_ITEM_BELOW) {
             game->room_item[game->player.room_id] = ITEM_BERRY;
             render_atmosphere_berry_drop();
         }
         return;
     }
-    if (roll < 70) {
+    if (roll < CFG_ATMOSPHERE_ROLL_CREAK_BELOW) {
         render_atmosphere_creak();
         game->env_focus_active = 1;
         game->env_focus_room = game->player.room_id;
         game->env_focus_kind = GAME_ENV_CREAK;
-        game->env_focus_expires_tick = game->tick + 3;
+        game->env_focus_expires_tick = game->tick + CFG_ENV_FOCUS_DURATION_TICKS;
         return;
     }
-    if (roll < 82) {
+    if (roll < CFG_ATMOSPHERE_ROLL_WATER_BELOW) {
         render_atmosphere_water();
         game->env_focus_active = 1;
         game->env_focus_room = game->player.room_id;
         game->env_focus_kind = GAME_ENV_WATER;
-        game->env_focus_expires_tick = game->tick + 3;
-        if (game->room_item[game->player.room_id] == ITEM_NONE && (rand() % 100) < 50) {
+        game->env_focus_expires_tick = game->tick + CFG_ENV_FOCUS_DURATION_TICKS;
+        if (game->room_item[game->player.room_id] == ITEM_NONE &&
+                (rand() % CFG_ROLL_PERCENT_RANGE) < CFG_ATMOSPHERE_FOCUS_EXTRA_ITEM_BELOW) {
             game->room_item[game->player.room_id] = ITEM_REED;
             render_atmosphere_reed_drop();
         }
         return;
     }
-    if (roll < 92) {
+    if (roll < CFG_ATMOSPHERE_ROLL_GRIT_BELOW) {
         render_atmosphere_grit();
         game->env_focus_active = 1;
         game->env_focus_room = game->player.room_id;
         game->env_focus_kind = GAME_ENV_GRIT;
-        game->env_focus_expires_tick = game->tick + 3;
+        game->env_focus_expires_tick = game->tick + CFG_ENV_FOCUS_DURATION_TICKS;
         return;
     }
     maybe_spawn_room_item(game);
@@ -589,7 +594,8 @@ static void advance_world_tick(struct GameState *game, int wanderer_moves_first)
     world_step(&game->world, game->tick);
     maybe_emit_animal_noise(game);
     maybe_emit_atmosphere(game);
-    if (!game_is_busy_dialogue(game) && (rand() % 100) < 14) {
+    if (!game_is_busy_dialogue(game) &&
+            (rand() % CFG_ROLL_PERCENT_RANGE) < CFG_BANDIT_ENCOUNTER_CHANCE_BELOW) {
         enemy_begin_encounter(game);
     }
 }
