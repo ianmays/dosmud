@@ -133,10 +133,10 @@ const char *const TXT_ATMO_GRIT = "\nLoose grit skips over stone under an uncert
 
 const char *const TXT_WANDERER_INTRO = "\nYou nearly bump into a hooded traveler. They straighten with a tired grin.\n";
 const char *const TXT_WANDERER_ART_CAPTION = "(cloak wet with road mist)";
-const char *const TXT_WANDERER_QUOTE_A = "\"Easy there—I'm an adventurer too, working odd jobs between towns. ";
+const char *const TXT_WANDERER_QUOTE_A = "\"Easy there, I'm an adventurer too, working odd jobs between towns. ";
 const char *const TXT_WANDERER_QUOTE_B = "What are you doing out here?\"\n";
 const char *const TXT_WANDERER_OPT1 = "  [1] Looking for trouble worth the trouble.\n";
-const char *const TXT_WANDERER_OPT2 = "  [2] Passing through—keeping my boots honest.\n";
+const char *const TXT_WANDERER_OPT2 = "  [2] Passing through, keeping my boots honest.\n";
 const char *const TXT_WANDERER_OPT3 = "  [3] That's my business.\n";
 
 const char *txtres_wanderer_reply(int choice)
@@ -153,11 +153,11 @@ const char *const TXT_FROG_OPT1 = "  [1] Bow and wish him a nice pond.\n";
 const char *const TXT_FROG_OPT2 = "  [2] Insult his lily pad.\n";
 const char *const TXT_FROG_OPT3 = "  [3] Ask if he is a wizard, a snack, or both.\n";
 const char *const TXT_FROG_REPLY_A1 = "\nYou bow. The frog salutes with a webbed hand.\n";
-const char *const TXT_FROG_REPLY_A2 = "\"Finally—someone whose parents finished the tutorial. ";
+const char *const TXT_FROG_REPLY_A2 = "\"Finally, someone whose parents finished the tutorial. ";
 const char *const TXT_FROG_REPLY_A3 = "Wisdom of the pond: the water is wet, the mud is judgy, and I am technically management. You're welcome. Ribbit.\"\n";
 const char *const TXT_FROG_REPLY_B1 = "\nYou call his lily pad 'discount turf.' ";
 const char *const TXT_FROG_REPLY_B2 = "The frog clutches his chest like you stabbed Shakespeare.\n";
-const char *const TXT_FROG_REPLY_B3 = "\"Rude! Delicious! That's how you get warts—not magic, just bad networking. Also you're banned from handsomeness.\"\n";
+const char *const TXT_FROG_REPLY_B3 = "\"Rude! Delicious! That's how you get warts - not magic, just bad networking. Also you're banned from handsomeness.\"\n";
 const char *const TXT_FROG_REPLY_C1 = "\nYou lean in and whisper that the moon is 'basically a lid.'\n";
 const char *const TXT_FROG_REPLY_C2 = "The frog nods with the gravity of a tiny judge.\n";
 const char *const TXT_FROG_REPLY_C3 = "\"The moon knows what it did. I'm not allowed to say which phase. If anyone asks, you hallucinated this conversation. For tax reasons.\"\n";
