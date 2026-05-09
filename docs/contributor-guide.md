@@ -50,6 +50,7 @@ For full command semantics and environment model, see [Testing](testing.md).
 - Keep commits focused and reviewable.
 - Avoid unrelated refactors in the same PR.
 - Update docs when behavior, command flow, or setup expectations change.
+- Commit messages should be concise and use bullet points rather than sentences if needed - first character should be lower-case
 
 ## Documentation ownership
 

@@ -2,6 +2,14 @@
 
 Guidance for AI/code agents working in this repository.
 
+## IMPORTANT - Read these non-negotiables first
+
+- Always create a branch before making changes.
+- Always check for needed documentation updates/additions/removals when making changes - ensure documentation style remains consistent (e.g. if everything else is listed as bullet-points - then use bullet points).
+- Commit messages should be concise and use bullet points rather than sentences if needed - first character should be lower-case
+- Always raise draft PRs
+- If you have already opened a PR, include pushing the next set of updates to the branch in any Plan.
+
 ## Purpose
 
 - Keep changes aligned with DOS-first goals and deterministic ANSI C design.
@@ -69,7 +77,6 @@ Guidance for AI/code agents working in this repository.
   - `prepare-dos.ps1`
   - `build.bat`
 - Prefer small, reviewable commits with clear intent.
-- Always check for needed documentation updates/additions/removals when making changes.
 
 ## When in Doubt
 
