@@ -83,3 +83,13 @@ Guidance for AI/code agents working in this repository.
 - Choose the simpler implementation.
 - Favor deterministic behavior and explicit ownership boundaries.
 - Keep DOS/Open Watcom compatibility ahead of convenience features.
+
+## Cursor Cloud specific instructions
+
+- Only system dependencies needed: `gcc` and `make` (both pre-installed on Ubuntu-based VMs).
+- No package managers, containers, or external services required.
+- The full dev loop is: `make build`, `make test`, `make test-run` (see `docs/testing.md` for details).
+- `make test` compiles with `-Werror -DTEST_MODE` (deterministic seed); `make test-run` feeds `tests/smoke.input` and diffs output against `tests/smoke.expect`.
+- The binary `./dosmud` is a terminal-interactive text game; pipe commands via stdin for scripted testing.
+- `make prepare-dos` and `make all-build`/`all-test` require PowerShell and are not available in Cloud Agent VMs — skip DOS-path targets.
+- There is no lint tool beyond GCC's `-Wall -Wextra -Wshadow -Werror -pedantic` (enforced by `make test`).
