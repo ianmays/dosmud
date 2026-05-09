@@ -66,7 +66,7 @@ Guidance for AI/code agents working in this repository.
 - `/docs/index.md` = manual entrypoint
 - `/docs/architecture.md` = architecture rationale and subsystem guidance
 - `/docs/testing.md` = build/test command contract and environment model
-- `/docs/contributing.md` = contribution process and PR expectations
+- `/docs/contributor-guide.md` = contribution process and PR expectations
 - When adding docs, link between files instead of repeating long sections.
 
 ## Editing and Change Hygiene
