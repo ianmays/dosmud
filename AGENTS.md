@@ -9,6 +9,7 @@ Guidance for AI/code agents working in this repository.
 - Commit messages should be concise and use bullet points rather than sentences if needed - first character should be lower-case
 - Always raise draft PRs
 - If you have already opened a PR, include pushing the next set of updates to the branch in any Plan.
+- If picking-up an Issue from the Dosmud project to work on - manage the status in Github, likewise always check if an Issue exists for what you're working on - ensure all relevant issues are linked to PRs
 
 ## Purpose
 
