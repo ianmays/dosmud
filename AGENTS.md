@@ -9,6 +9,8 @@ Guidance for AI/code agents working in this repository.
 - Commit messages should be concise and use bullet points rather than sentences if needed - first character should be lower-case
 - Always raise draft PRs
 - If you have already opened a PR, include pushing the next set of updates to the branch in any Plan.
+- Always check if an Issue exists for what you're working on - ensure all relevant issues are linked to PRs
+- If picking up an Issue from the dosmud project to work on - manage the status in GitHub
 
 ## Purpose
 
@@ -65,7 +67,7 @@ Guidance for AI/code agents working in this repository.
 - `/docs/index.md` = manual entrypoint
 - `/docs/architecture.md` = architecture rationale and subsystem guidance
 - `/docs/testing.md` = build/test command contract and environment model
-- `/docs/contributing.md` = contribution process and PR expectations
+- `/docs/contributor-guide.md` = contribution process and PR expectations
 - When adding docs, link between files instead of repeating long sections.
 
 ## Editing and Change Hygiene
