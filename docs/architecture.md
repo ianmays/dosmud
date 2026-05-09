@@ -76,9 +76,19 @@ Commands mutate game state, world ticks mutate simulation state, and rendering o
 
 ## Configuration (`config.h`)
 
-[`include/config.h`](../include/config.h) is the compile-time home for **`CFG_*`** constants: structural limits (buffers, `CFG_ROOM_MAX`, `CFG_BAG_MAX`, etc.), **gameplay tuning** (progression, combat, ambient spawns, atmosphere, wanderer timing), **world-generation numeric policy** (counts and loop bounds used by [`world_init`](../src/world.c)), and **`WORLD_ROOM_*`** room IDs.
+[`include/config.h`](../include/config.h) is the compile-time home for:
 
-**Convention:** add new balance or procedural knobs here as macros; keep related values grouped and commented. Separate **gameplay design** numbers from **main-loop / test-harness** settings (for example idle polling interval and the deterministic RNG seed used when building with `TEST_MODE`). Build modes and the smoke test workflow are described in [Testing](testing.md). In `TEST_MODE`, [`main`](../src/main.c) seeds libc RNG with `CFG_TEST_RAND_SEED` so runs match golden output; that seed may later move to a command-line option, so do not assume it will always live only in the header.
+- structural limits (`CFG_ROOM_MAX`, `CFG_BAG_MAX`, buffers, etc.)
+- gameplay tuning (combat, progression, ambient systems, wanderer timing)
+- world-generation numeric policy (`world_init` counts and loop bounds)
+- `WORLD_ROOM_*` room IDs
+
+Conventions:
+
+- add new gameplay/procedural tuning knobs here as `CFG_*` macros
+- keep related values grouped and commented
+- separate gameplay tuning from main-loop/test-harness settings
+- `TEST_MODE` seeds libc RNG with `CFG_TEST_RAND_SEED` for deterministic snapshot output
 
 ## `grendr`
 
