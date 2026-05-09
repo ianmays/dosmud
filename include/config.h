@@ -30,8 +30,8 @@
 #define CFG_START_LEVEL 1
 #define CFG_START_DAMAGE_BONUS 0
 #define CFG_START_XP 0
-
-#define CFG_GAME_INIT_SEED 1U
+/* Stored on GameState; not the libc RNG seed (see main.c / TEST_MODE). */
+#define CFG_GAME_INIT_SEED 1UL
 
 /* Combat */
 #define CFG_COMBAT_ENEMY_HP_BASE 8
@@ -41,10 +41,17 @@
 #define CFG_COMBAT_DEFEND_DAMAGE_REDUCTION 2
 #define CFG_COMBAT_PLAYER_HIT_BASE 2
 #define CFG_COMBAT_PLAYER_HIT_SPREAD 4
-#define CFG_SALVE_HEAL_AMOUNT 5
 #define CFG_COMBAT_KILL_XP_BASE 12
 #define CFG_COMBAT_KILL_XP_SPREAD 5
-#define CFG_COMBAT_CORPSE_LOOT_MOD 2
+
+/* Item effects (used in combat and inventory) */
+#define CFG_SALVE_HEAL_AMOUNT 5
+
+/*
+ * Corpse loot: rand() % CFG_COMBAT_CORPSE_LOOT_COIN_SIDES picks the branch.
+ * Value 2 is a fair two-outcome split; other values change the distribution.
+ */
+#define CFG_COMBAT_CORPSE_LOOT_COIN_SIDES 2
 
 /* Bandit / ambient encounters */
 #define CFG_BANDIT_INTIMIDATE_SUCCESS_BELOW 60
@@ -52,6 +59,10 @@
 
 /* Room item spawn (tick hook) */
 #define CFG_ROOM_ITEM_SPAWN_GATE 20
+/*
+ * Cumulative thresholds for maybe_spawn_room_item: must be strictly
+ * increasing, each < CFG_ROLL_PERCENT_RANGE; fish is the remainder bucket.
+ */
 #define CFG_ROOM_SPAWN_ROLL_BERRY_BELOW 25
 #define CFG_ROOM_SPAWN_ROLL_STICK_BELOW 45
 #define CFG_ROOM_SPAWN_ROLL_REED_BELOW 65
@@ -73,19 +84,35 @@
 #define CFG_WANDERER_RETURN_DELAY_BASE 8
 #define CFG_WANDERER_RETURN_DELAY_SPREAD 16
 
-/* Main loop (real-time idle pacing) */
+/* --- Main loop and test harness --- */
+
 #define CFG_MAIN_IDLE_TICK_SECONDS 20
 
-/* Deterministic test builds */
+/*
+ * libc RNG seed when building with -DTEST_MODE (see Makefile).
+ * May become a command-line argument later; do not assume header-only forever.
+ */
 #define CFG_TEST_RAND_SEED 1234
 
 /* --- World generation --- */
 
 #define CFG_WORLD_WILDS_COUNT 7
 #define CFG_WORLD_RUINS_COUNT 5
-#define CFG_WORLD_RUIN_ANCHOR_POOL 3
+/*
+ * Must match world_init: count of wilds[] entries placed on base_path before
+ * the wild-branch loop (currently two: wilds[0], wilds[1]).
+ */
 #define CFG_WORLD_WILD_BRANCH_START_INDEX 2
+/*
+ * Must match world_init: count of ruins[] entries on the spine before ruin
+ * branches (currently three: ruins[0]..ruins[2] on base_path).
+ */
 #define CFG_WORLD_RUIN_BRANCH_START_INDEX 3
+/*
+ * Spine ruins used as anchors for rand() % pool in the ruin-branch loop;
+ * must match the ruin count on the spine above (currently 3).
+ */
+#define CFG_WORLD_RUIN_ANCHOR_POOL 3
 
 #define WORLD_ROOM_CAMP 0
 #define WORLD_ROOM_ROAD 1

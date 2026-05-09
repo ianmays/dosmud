@@ -120,7 +120,7 @@ static void combat_resolve_reply(struct GameState *game, int choice)
         render_combat_bandit_defeated();
         game->corpse_present[game->player.room_id] = 1;
         game->corpse_loot[game->player.room_id] =
-            (rand() % CFG_COMBAT_CORPSE_LOOT_MOD) ? ITEM_STONE : ITEM_HERB;
+            (rand() % CFG_COMBAT_CORPSE_LOOT_COIN_SIDES) ? ITEM_STONE : ITEM_HERB;
         gain_xp(game, CFG_COMBAT_KILL_XP_BASE + (rand() % CFG_COMBAT_KILL_XP_SPREAD));
         return;
     }

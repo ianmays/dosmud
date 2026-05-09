@@ -74,6 +74,12 @@ Commands mutate game state, world ticks mutate simulation state, and rendering o
 - procedural world generation
 - movement validation
 
+## Configuration (`config.h`)
+
+[`include/config.h`](../include/config.h) is the compile-time home for **`CFG_*`** constants: structural limits (buffers, `CFG_ROOM_MAX`, `CFG_BAG_MAX`, etc.), **gameplay tuning** (progression, combat, ambient spawns, atmosphere, wanderer timing), **world-generation numeric policy** (counts and loop bounds used by [`world_init`](../src/world.c)), and **`WORLD_ROOM_*`** room IDs.
+
+**Convention:** add new balance or procedural knobs here as macros; keep related values grouped and commented. Separate **gameplay design** numbers from **main-loop / test-harness** settings (for example idle polling interval and the deterministic RNG seed used when building with `TEST_MODE`). Build modes and the smoke test workflow are described in [Testing](testing.md). In `TEST_MODE`, [`main`](../src/main.c) seeds libc RNG with `CFG_TEST_RAND_SEED` so runs match golden output; that seed may later move to a command-line option, so do not assume it will always live only in the header.
+
 ## `grendr`
 
 - text rendering only
