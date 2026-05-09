@@ -48,10 +48,12 @@
 #define CFG_SALVE_HEAL_AMOUNT 5
 
 /*
- * Corpse loot: rand() % CFG_COMBAT_CORPSE_LOOT_COIN_SIDES picks the branch.
- * Value 2 is a fair two-outcome split; other values change the distribution.
+ * Bandit corpse loot: roll = rand() % CFG_ROLL_PERCENT_RANGE (same scheme as
+ * room item spawns). Thresholds are cumulative and strictly increasing;
+ * herb is the remainder bucket after stone.
  */
-#define CFG_COMBAT_CORPSE_LOOT_COIN_SIDES 2
+#define CFG_COMBAT_CORPSE_LOOT_SPEAR_BELOW 28
+#define CFG_COMBAT_CORPSE_LOOT_STONE_BELOW 64
 
 /* Bandit / ambient encounters */
 #define CFG_BANDIT_INTIMIDATE_SUCCESS_BELOW 60
