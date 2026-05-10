@@ -625,6 +625,26 @@ void render_msg_bandit_waiting_reply(void)
     printf("%s", TXT_MSG_BANDIT_WAITING);
 }
 
+void render_msg_bandit_waiting_handover_pick(void)
+{
+    printf("%s", TXT_MSG_BANDIT_WAITING_HANDOVER);
+}
+
+void render_bandit_handover_pick_prompt(void)
+{
+    printf("%s", TXT_BANDIT_HANDOVER_PICK_PROMPT);
+}
+
+void render_msg_bandit_give_not_carrying(void)
+{
+    printf("%s", TXT_MSG_BANDIT_GIVE_NOT_CARRYING);
+}
+
+void render_msg_give_wrong_context(void)
+{
+    printf("%s", TXT_MSG_GIVE_WRONG_CONTEXT);
+}
+
 void render_msg_unknown_command(void)
 {
     printf("%s", TXT_MSG_UNKNOWN_COMMAND);

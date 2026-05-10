@@ -16,7 +16,7 @@ Purpose:
 
 - `make build`: native GCC development build
 - `make test`: strict deterministic compile path (`-Werror`, `-DTEST_MODE`)
-- `make test-run`: scripted input regression pass
+- `make test-run`: scripted input regression pass (`tests/smoke.*`, `tests/bandit_handover.*`)
 
 ## DOS/Open Watcom validation path
 
@@ -69,3 +69,4 @@ In `prepare-dos.local.ps1`:
 5. Enter `wait`; tick increments by exactly 1.
 6. Enter `look`, then `move <listed-direction>`; room changes and tick increments by 1.
 7. Enter `quit`; process exits cleanly.
+8. Bandit hand-over (optional): from a room where a bandit encounter triggers with at least one bag item, enter `2`, then `give <item>` matching something you carry; the bandit should leave and the item should be removed.

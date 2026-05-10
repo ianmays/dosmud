@@ -31,6 +31,7 @@ extern const char *const TXT_HELP_CRAFT;
 extern const char *const TXT_HELP_LOOT;
 extern const char *const TXT_HELP_TALK;
 extern const char *const TXT_HELP_REPLY;
+extern const char *const TXT_HELP_GIVE;
 extern const char *const TXT_HELP_QUIT;
 extern const char *const TXT_HELP_HELP;
 
@@ -101,6 +102,10 @@ extern const char *const TXT_FROG_REPLY_C2;
 extern const char *const TXT_FROG_REPLY_C3;
 
 extern const char *const TXT_MSG_BANDIT_WAITING;
+extern const char *const TXT_MSG_BANDIT_WAITING_HANDOVER;
+extern const char *const TXT_BANDIT_HANDOVER_PICK_PROMPT;
+extern const char *const TXT_MSG_BANDIT_GIVE_NOT_CARRYING;
+extern const char *const TXT_MSG_GIVE_WRONG_CONTEXT;
 extern const char *const TXT_MSG_UNKNOWN_COMMAND;
 extern const char *const TXT_MSG_WAIT;
 extern const char *const TXT_MSG_CANNOT_MOVE_FMT;
