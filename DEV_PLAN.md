@@ -46,7 +46,7 @@ Make the project strictly ANSI C89 clean and warning-clean.
 
 ### 1. Remove all K&R function definitions
 
-Done — no K&R definitions remain in `src/`.
+✅ Done — no K&R definitions remain in `src/`.
 
 Replace:
 
@@ -67,7 +67,7 @@ Everywhere.
 
 ### 2. Enforce strict C89 compilation
 
-Done — flags live in the `Makefile`.
+✅ Done — flags live in the `Makefile`.
 
 GCC:
 
@@ -91,7 +91,7 @@ Tests/CI only:
 
 ### 3. Ensure OpenWatcom parity
 
-Done — `make prepare-dos` covers the OpenWatcom path; ongoing discipline.
+✅ Done — `make prepare-dos` covers the OpenWatcom path; ongoing discipline.
 
 Goal:
 - no GCC-only behaviour
@@ -103,7 +103,7 @@ Build both targets regularly.
 
 ### 4. Remove mixed declarations/statements
 
-Done — enforced by `-pedantic`.
+✅ Done — enforced by `-pedantic`.
 
 Bad:
 
@@ -123,7 +123,7 @@ foo();
 
 ### 5. Replace C99 comments
 
-Done — no `//` comments remain in `src/`.
+✅ Done — no `//` comments remain in `src/`.
 
 Remove:
 
@@ -164,7 +164,7 @@ Document assumptions.
 
 ### 7. Centralise constants
 
-Done — see #33; values live in `include/config.h`.
+✅ Done — see #33; values live in `include/config.h`.
 
 Move gameplay tuning values into config headers.
 
@@ -591,9 +591,9 @@ Then safely add:
 - factions (#9)
 - economy (#50)
 - weather (#51)
-- procedural encounters
+- procedural encounters (#54)
 - NPC schedules (#52)
-- larger worlds
+- larger worlds (#55)
 - persistence systems (#16)
 
 without architectural collapse.
