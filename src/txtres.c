@@ -60,10 +60,10 @@ const char *const g_room_art_captions[CFG_ROOM_MAX] = {
     "wind-scoured ledge",
     "(mud pulls at your boots)",
     "(an old growth ring)",
-    "",
+    "(planks hum underfoot)",
     "(air tastes of chalk)",
     "(seed heads bend in the wind)",
-    "",
+    "(echoes climb the slot)",
     "(watchfire long gone cold)",
     "(fallen fruit scents the air)",
     "(drips mark patient time)"
@@ -215,6 +215,10 @@ const char *const TXT_FROG_REPLY_B3 = "\"Rude! Delicious! That's how you get war
 const char *const TXT_FROG_REPLY_C1 = "\nYou lean in and whisper that the moon is 'basically a lid.'\n";
 const char *const TXT_FROG_REPLY_C2 = "The frog nods with the gravity of a tiny judge.\n";
 const char *const TXT_FROG_REPLY_C3 = "\"The moon knows what it did. I'm not allowed to say which phase. If anyone asks, you hallucinated this conversation. For tax reasons.\"\n";
+
+const char *const TXT_WATCHMAN_ART_CAPTION = "(wind-tanned lookout)";
+const char *const TXT_HERBALIST_ART_CAPTION = "(hands stained green)";
+const char *const TXT_ARCHIVIST_ART_CAPTION = "(ink under every nail)";
 
 const char *const TXT_MSG_BANDIT_WAITING = "The bandit is waiting on your move (reply 1/2/3).\n";
 const char *const TXT_MSG_BANDIT_WAITING_HANDOVER =
