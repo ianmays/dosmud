@@ -16,7 +16,7 @@ Guidance for AI/code agents working in this repository.
 - Always add the `agent` label to any issue you create.
 - Always add Issues to the dosmud Github project
 - If a PR already exists, include pushing follow-up updates to the branch in any implementation plan.
-- When asked to pick up a new issue (possibly under a specific label), ensure you pick the top issue according to the dosmud Github project
+- When asked to pick up a new issue (possibly under a specific label), ensure you pick the top issue according to the dosmud Github project - you should only pull from the tickets that exist in the 'Agent-ready' column
 
 ## Purpose
 
