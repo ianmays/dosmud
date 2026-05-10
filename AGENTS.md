@@ -4,6 +4,7 @@ Guidance for AI/code agents working in this repository.
 
 ## IMPORTANT - Read these non-negotiables first
 
+- Never, ever, use em dash, we only use '-'
 - Always create a branch before making changes.
 - Always raise draft PRs.
 - Always check for needed documentation updates/additions/removals when making changes.
@@ -17,6 +18,14 @@ Guidance for AI/code agents working in this repository.
 - Always add Issues to the dosmud Github project
 - If a PR already exists, include pushing follow-up updates to the branch in any implementation plan.
 - When asked to pick up a new issue (possibly under a specific label), ensure you pick the top issue according to the dosmud Github project - you should only pull from the tickets that exist in the 'Agent-ready' column
+
+### GitHub project `Status` column (dosmud project)
+
+Keep each issue’s card aligned with real progress. Do not skip **In progress** on the way to **Review**:
+
+- **In progress** — set as soon as work on the issue begins (e.g. branch created or first commit), and keep it there until the linked PR is opened.
+- **Review** — set when you open the draft PR that links the issue (first time the work is on the board as a PR).
+- **Done** — set only **after** that PR has merged (and close the issue when the work is finished).
 
 ## Purpose
 
