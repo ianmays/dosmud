@@ -19,6 +19,7 @@ Guidance for AI/code agents working in this repository.
 - If a PR already exists, include pushing follow-up updates to the branch in any implementation plan.
 - When asked to pick up a new issue (possibly under a specific label), ensure you pick the top issue according to the dosmud Github project - you should only pull from the tickets that exist in the 'Agent-ready' column
 - Switch back to main, pull, and delete other branches locally when done with a task
+- If the task done existed in the DEV_PLAN.md, mark it as done
 
 ### GitHub project `Status` column (dosmud project)
 
