@@ -13,6 +13,7 @@ struct GameState;
 
 void game_print_location_art(int room_id);
 void render_room_look(struct GameState *game, int npc_in_room_hint);
+void render_exploration_map(struct GameState *game);
 void game_render(const struct GameState *game);
 void game_print_help(int topic);
 

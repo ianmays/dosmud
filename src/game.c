@@ -271,6 +271,11 @@ static void do_look(struct GameState *game)
     render_room_look(game, npc_in_room(game->player.room_id));
 }
 
+static void do_map(struct GameState *game)
+{
+    render_exploration_map(game);
+}
+
 void game_describe_current_room(struct GameState *game)
 {
     do_look(game);
@@ -310,7 +315,9 @@ void game_init(struct GameState *game)
     for (i = 0; i < CFG_ROOM_MAX; ++i) {
         game->corpse_present[i] = 0;
         game->corpse_loot[i] = ITEM_NONE;
+        game->room_explored[i] = 0;
     }
+    game->room_explored[game->player.room_id] = 1;
     seed_world_items(game);
 }
 
@@ -319,6 +326,7 @@ static int apply_command(struct GameState *game, struct Command *cmd)
     if (game->combat_active == 1 &&
             cmd->type != CMD_REPLY &&
             cmd->type != CMD_LOOK &&
+            cmd->type != CMD_MAP &&
             cmd->type != CMD_BAG &&
             cmd->type != CMD_HELP &&
             cmd->type != CMD_QUIT) {
@@ -329,6 +337,7 @@ static int apply_command(struct GameState *game, struct Command *cmd)
     if (game->enemy_dialogue == 1 &&
             cmd->type != CMD_REPLY &&
             cmd->type != CMD_LOOK &&
+            cmd->type != CMD_MAP &&
             cmd->type != CMD_BAG &&
             cmd->type != CMD_HELP &&
             cmd->type != CMD_QUIT &&
@@ -343,6 +352,10 @@ static int apply_command(struct GameState *game, struct Command *cmd)
 
     if (cmd->type == CMD_LOOK) {
         do_look(game);
+        return 1;
+    }
+    if (cmd->type == CMD_MAP) {
+        do_map(game);
         return 1;
     }
     if (cmd->type == CMD_HELP) {
@@ -363,6 +376,7 @@ static int apply_command(struct GameState *game, struct Command *cmd)
             return 0;
         }
         game->player.room_id = world_move(&game->world, game->player.room_id, cmd->dir);
+        game->room_explored[game->player.room_id] = 1;
         game->pond_dialogue = 0;
         game->wanderer_dialogue = 0;
         game->npc_dialogue = 0;

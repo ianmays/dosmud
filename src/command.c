@@ -67,6 +67,9 @@ static int help_topic_from_word(const char *w)
     if (strcmp(w, "quit") == 0 || strcmp(w, "exit") == 0) {
         return CMD_HELP_TOPIC_QUIT;
     }
+    if (strcmp(w, "map") == 0 || strcmp(w, "m") == 0) {
+        return CMD_HELP_TOPIC_MAP;
+    }
     if (strcmp(w, "help") == 0 || strcmp(w, "?") == 0) {
         return CMD_HELP_TOPIC_HELP;
     }
@@ -105,6 +108,10 @@ int command_parse(char *line, struct Command *out_cmd)
 
     if (strcmp(word1, "look") == 0 || strcmp(word1, "l") == 0) {
         out_cmd->type = CMD_LOOK;
+        return 1;
+    }
+    if (strcmp(word1, "map") == 0 || strcmp(word1, "m") == 0) {
+        out_cmd->type = CMD_MAP;
         return 1;
     }
     if (strcmp(word1, "wait") == 0 || strcmp(word1, ".") == 0) {
@@ -307,6 +314,8 @@ const char *command_help_line(int topic)
         return TXT_HELP_QUIT;
     case CMD_HELP_TOPIC_HELP:
         return TXT_HELP_HELP;
+    case CMD_HELP_TOPIC_MAP:
+        return TXT_HELP_MAP;
     default:
         return TXT_HELP_TOPIC_UNKNOWN;
     }

@@ -23,6 +23,7 @@
 #define CMD_HELP_TOPIC_QUIT 14
 #define CMD_HELP_TOPIC_HELP 15
 #define CMD_HELP_TOPIC_GIVE 16
+#define CMD_HELP_TOPIC_MAP 17
 
 enum CommandType {
     CMD_INVALID = 0,
@@ -41,7 +42,8 @@ enum CommandType {
     CMD_USE,
     CMD_CRAFT,
     CMD_LOOT,
-    CMD_GIVE
+    CMD_GIVE,
+    CMD_MAP
 };
 
 struct Command {

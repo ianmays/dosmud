@@ -88,7 +88,7 @@ const char *const TXT_MAIN_PROMPT = "\n> ";
 const char *const TXT_MAIN_BYE = "bye";
 
 const char *const TXT_COMMAND_HELP =
-    "Commands: look, inspect [rustle|creak|water|grit], take/drop/give <item>, bag, eat/use <item>, craft <item>, loot, move <dir>, wait, talk, 1/2/3 or reply <1-3>, help [topic], quit";
+    "Commands: look, map, inspect [rustle|creak|water|grit], take/drop/give <item>, bag, eat/use <item>, craft <item>, loot, move <dir>, wait, talk, 1/2/3 or reply <1-3>, help [topic], quit";
 
 const char *const TXT_HELP_TOPIC_UNKNOWN =
     "No help for that topic. Type 'help' for the full command list.";
@@ -140,6 +140,16 @@ const char *const TXT_HELP_QUIT =
 
 const char *const TXT_HELP_HELP =
     "help or ? lists all commands; help <topic> explains one (e.g. help craft).";
+
+const char *const TXT_HELP_MAP =
+    "map (m) - show a small grid of rooms you have visited (compass is approximate).";
+
+const char *const TXT_MAP_HEADER = "Explored locations:\n";
+
+const char *const TXT_MAP_LEGEND =
+    "(@ = you, letter = first initial of a visited place.)\n";
+
+const char *const TXT_MAP_NONE_EXPLORED = "You have not mapped any ground yet.\n";
 
 const char *const TXT_UI_EXITS_LABEL = "Exits:";
 const char *const TXT_UI_GROUND_ITEM_FMT = "On the ground: %s. (take %s)\n";
