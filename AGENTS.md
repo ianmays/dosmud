@@ -12,7 +12,8 @@ Guidance for AI/code agents working in this repository.
 - Always check if a corresponding GitHub Issue exists before starting work (see: dosmud GitHub project).
 - Ensure all relevant Issues are linked to PRs.
 - Manage issue status in GitHub.
-- If no Issue exists, create one and label it appropriately (`gameplay`, `non-functional`, `tooling`, etc.)
+- If no Issue exists, create one and label it appropriately (`gameplay`, `non-functional`, `tooling`, etc)
+- Always add the `agent` label to any issue you create.
 - If a PR already exists, include pushing follow-up updates to the branch in any implementation plan.
 
 ## Purpose
