@@ -88,7 +88,55 @@ const char *const TXT_MAIN_PROMPT = "\n> ";
 const char *const TXT_MAIN_BYE = "bye";
 
 const char *const TXT_COMMAND_HELP =
-    "Commands: look, inspect [rustle|creak|water|grit], take/drop <item>, bag, eat/use <item>, craft <item>, loot, move <dir>, wait, talk, 1/2/3 or reply <1-3>, help, quit";
+    "Commands: look, inspect [rustle|creak|water|grit], take/drop <item>, bag, eat/use <item>, craft <item>, loot, move <dir>, wait, talk, 1/2/3 or reply <1-3>, help [topic], quit";
+
+const char *const TXT_HELP_TOPIC_UNKNOWN =
+    "No help for that topic. Type 'help' for the full command list.";
+
+const char *const TXT_HELP_LOOK =
+    "look (l) - describe the current room, exits, ground items, and prompts.";
+
+const char *const TXT_HELP_MOVE =
+    "move <dir> or go <dir>, or n/s/e/w alone - travel when an exit exists.";
+
+const char *const TXT_HELP_WAIT =
+    "wait (.) - pass time without moving; the world tick advances.";
+
+const char *const TXT_HELP_INSPECT =
+    "inspect <rustle|creak|water|grit> - follow a clue after look. Synonyms: examine, investigate.";
+
+const char *const TXT_HELP_TAKE =
+    "take <item> (get, pickup) - pick up the named item from the ground into your bag.";
+
+const char *const TXT_HELP_DROP =
+    "drop <item> - place an item from your bag on the ground here.";
+
+const char *const TXT_HELP_BAG =
+    "bag (inventory, inv) - list what you are carrying.";
+
+const char *const TXT_HELP_EAT =
+    "eat <item> - consume edible food from your bag.";
+
+const char *const TXT_HELP_USE =
+    "use <item> - use a tool or consumable from your bag (torch, salve, spear).";
+
+const char *const TXT_HELP_CRAFT =
+    "craft <item> or build <item> - torch needs stick+reed, salve needs herb+berry, spear needs stick+stone (all in bag). Not while fighting.";
+
+const char *const TXT_HELP_LOOT =
+    "loot - take gear from a bandit corpse here when the ground has no other item.";
+
+const char *const TXT_HELP_TALK =
+    "talk (speak) - speak with an NPC in the room or advance certain encounters.";
+
+const char *const TXT_HELP_REPLY =
+    "1, 2, 3, or reply <1-3> - answer during bandit dialogue or combat.";
+
+const char *const TXT_HELP_QUIT =
+    "quit or exit - leave the game.";
+
+const char *const TXT_HELP_HELP =
+    "help or ? lists all commands; help <topic> explains one (e.g. help craft).";
 
 const char *const TXT_UI_EXITS_LABEL = "Exits:";
 const char *const TXT_UI_GROUND_ITEM_FMT = "On the ground: %s. (take %s)\n";

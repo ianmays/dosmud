@@ -17,6 +17,22 @@ extern const char *const TXT_MAIN_PROMPT;
 extern const char *const TXT_MAIN_BYE;
 
 extern const char *const TXT_COMMAND_HELP;
+extern const char *const TXT_HELP_TOPIC_UNKNOWN;
+extern const char *const TXT_HELP_LOOK;
+extern const char *const TXT_HELP_MOVE;
+extern const char *const TXT_HELP_WAIT;
+extern const char *const TXT_HELP_INSPECT;
+extern const char *const TXT_HELP_TAKE;
+extern const char *const TXT_HELP_DROP;
+extern const char *const TXT_HELP_BAG;
+extern const char *const TXT_HELP_EAT;
+extern const char *const TXT_HELP_USE;
+extern const char *const TXT_HELP_CRAFT;
+extern const char *const TXT_HELP_LOOT;
+extern const char *const TXT_HELP_TALK;
+extern const char *const TXT_HELP_REPLY;
+extern const char *const TXT_HELP_QUIT;
+extern const char *const TXT_HELP_HELP;
 
 extern const char *const TXT_UI_EXITS_LABEL;
 extern const char *const TXT_UI_GROUND_ITEM_FMT;
