@@ -103,6 +103,10 @@ extern const char *const TXT_FROG_REPLY_C1;
 extern const char *const TXT_FROG_REPLY_C2;
 extern const char *const TXT_FROG_REPLY_C3;
 
+extern const char *const TXT_WATCHMAN_ART_CAPTION;
+extern const char *const TXT_HERBALIST_ART_CAPTION;
+extern const char *const TXT_ARCHIVIST_ART_CAPTION;
+
 extern const char *const TXT_MSG_BANDIT_WAITING;
 extern const char *const TXT_MSG_BANDIT_WAITING_HANDOVER;
 extern const char *const TXT_BANDIT_HANDOVER_PICK_PROMPT;

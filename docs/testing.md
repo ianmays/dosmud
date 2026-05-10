@@ -16,7 +16,7 @@ Purpose:
 
 - `make build`: native GCC development build
 - `make test`: strict deterministic compile path (`-Werror`, `-DTEST_MODE`)
-- `make test-run`: scripted input regression pass (`tests/smoke.*`, `tests/bandit_handover.*`, `tests/area_items.*`)
+- `make test-run`: scripted input regression pass (`tests/smoke.*`, `tests/bandit_handover.*`, `tests/area_items.*`, `tests/ascii_art_gameplay.*`)
 
 ## DOS/Open Watcom validation path
 

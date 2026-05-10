@@ -178,6 +178,7 @@ static void art_room_bridge(void)
     printf("      ||_/_________________________________\\_||\n");
     printf("      ||/                                   \\||\n");
     printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  ~~~~~~~~~~~~~~~~\n");
+    printf("             %s\n", g_room_art_captions[WORLD_ROOM_BRIDGE]);
 }
 
 static void art_room_catacombs(void)
@@ -218,6 +219,7 @@ static void art_room_canyon(void)
     printf("        ||    /__/__/__/__/__/__/__/      ||\n");
     printf("        ||                                   ||\n");
     printf("~~~~~~~~||~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~||~~~~~~~~\n");
+    printf("            %s\n", g_room_art_captions[WORLD_ROOM_CANYON]);
 }
 
 static void art_room_tower(void)
@@ -282,6 +284,57 @@ static void art_wanderer(void)
     printf("                    |/___/    \\___\\|\n");
     printf("                   /____/      \\____\\\n");
     printf("              %s\n", TXT_WANDERER_ART_CAPTION);
+}
+
+static void art_watchman_portrait(void)
+{
+    printf("                           ____\n");
+    printf("                        .-'    '-.\n");
+    printf("                       /   ( )      \\\n");
+    printf("                      |    --        |\n");
+    printf("                      |   /||||\\      |\n");
+    printf("                      |  /||||||\\     |\n");
+    printf("                      | | [][][] |    |\n");
+    printf("                      | |________|    |\n");
+    printf("                      |____||||________|\n");
+    printf("                     /_____||||________\\\n");
+    printf("                    /______|  |________\\\n");
+    printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    printf("              %s\n", TXT_WATCHMAN_ART_CAPTION);
+}
+
+static void art_herbalist_portrait(void)
+{
+    printf("                         __________\n");
+    printf("                      .-'          '-.\n");
+    printf("                     /    ()    ()    \\\n");
+    printf("                    |      \\__/       |\n");
+    printf("                    |    .--||--.     |\n");
+    printf("                    |   /   ||   \\    |\n");
+    printf("                    |  | [][][][] |   |\n");
+    printf("                    |   \\________/    |\n");
+    printf("                    |______||||________|\n");
+    printf("                   /_______||||________\\\n");
+    printf("                  /________|  |________\\\n");
+    printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    printf("              %s\n", TXT_HERBALIST_ART_CAPTION);
+}
+
+static void art_archivist_portrait(void)
+{
+    printf("                         _______\n");
+    printf("                      .-'       '-.\n");
+    printf("                     /   ___   ___  \\\n");
+    printf("                    |   |__| |__|   |\n");
+    printf("                    |    ________    |\n");
+    printf("                    |   |~~~~~~~~|   |\n");
+    printf("                    |   | candle |   |\n");
+    printf("                    |   |________|   |\n");
+    printf("                    |______||||______|\n");
+    printf("                   /______||||______\\\n");
+    printf("                  /_______|  |_______\\\n");
+    printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    printf("              %s\n", TXT_ARCHIVIST_ART_CAPTION);
 }
 
 static void art_frog_portrait(void)
@@ -731,6 +784,9 @@ void render_msg_traveler_waiting(void)
 
 void render_msg_watchman_talk(void)
 {
+    printf("\n");
+    art_watchman_portrait();
+    printf("\n");
     printf("%s", TXT_MSG_WATCHMAN_TALK_LINE1);
     printf("%s", TXT_MSG_WATCHMAN_TALK_LINE2);
     printf("%s", TXT_MSG_WATCHMAN_TALK_LINE3);
@@ -740,6 +796,9 @@ void render_msg_watchman_talk(void)
 
 void render_msg_herbalist_talk(void)
 {
+    printf("\n");
+    art_herbalist_portrait();
+    printf("\n");
     printf("%s", TXT_MSG_HERBALIST_TALK_LINE1);
     printf("%s", TXT_MSG_HERBALIST_TALK_LINE2);
     printf("%s", TXT_MSG_HERBALIST_TALK_LINE3);
@@ -749,6 +808,9 @@ void render_msg_herbalist_talk(void)
 
 void render_msg_archivist_talk(void)
 {
+    printf("\n");
+    art_archivist_portrait();
+    printf("\n");
     printf("%s", TXT_MSG_ARCHIVIST_TALK_LINE1);
     printf("%s", TXT_MSG_ARCHIVIST_TALK_LINE2);
     printf("%s", TXT_MSG_ARCHIVIST_TALK_LINE3);
