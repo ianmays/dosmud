@@ -1,11 +1,6 @@
-north
-take stone
-wield stone
-south
 take stick
 wield stick
 bag
-unwield
-bag
-unwield
+1
+1
 quit
