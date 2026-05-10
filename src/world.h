@@ -22,6 +22,13 @@ struct Room {
 struct World {
     struct Room rooms[CFG_ROOM_MAX];
     int room_count;
+    /*
+     * Logical grid positions for ASCII map (derived during world_init when rooms
+     * are linked; may overlap if the random graph folds).
+     */
+    int map_x[CFG_ROOM_MAX];
+    int map_y[CFG_ROOM_MAX];
+    unsigned char map_ready[CFG_ROOM_MAX];
 };
 
 void world_init(struct World *world);

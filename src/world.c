@@ -20,6 +20,61 @@ static void room_set_meta(struct Room *room, const char *name, const char *desc,
     }
 }
 
+static int dir_delta_x(int dir)
+{
+    if (dir == DIR_EAST) return 1;
+    if (dir == DIR_WEST) return -1;
+    return 0;
+}
+
+static int dir_delta_y(int dir)
+{
+    if (dir == DIR_NORTH) return -1;
+    if (dir == DIR_SOUTH) return 1;
+    return 0;
+}
+
+/*
+ * Assign a room to map coordinates; nudges slightly if another room already
+ * occupies the same cell (rare for this generator).
+ */
+static void world_assign_cell(struct World *world, int rid, int x, int y)
+{
+    int ox;
+    int oy;
+    int bump;
+    ox = x;
+    oy = y;
+    bump = 0;
+    while (bump < CFG_ROOM_MAX * 8) {
+        int k;
+        int clash;
+
+        clash = 0;
+        for (k = 0; k < CFG_ROOM_MAX; ++k) {
+            if (k == rid) {
+                continue;
+            }
+            if (!world->map_ready[k]) {
+                continue;
+            }
+            if (world->map_x[k] == ox && world->map_y[k] == oy) {
+                clash = 1;
+                break;
+            }
+        }
+        if (!clash) {
+            break;
+        }
+        bump++;
+        ox = x + (bump % 5) - 2;
+        oy = y + ((bump / 5) % 5) - 2;
+    }
+    world->map_x[rid] = ox;
+    world->map_y[rid] = oy;
+    world->map_ready[rid] = 1;
+}
+
 static void world_link2(struct World *world, int a, int b, int dir_from_a)
 {
     int reverse;
@@ -30,6 +85,20 @@ static void world_link2(struct World *world, int a, int b, int dir_from_a)
 
     world->rooms[a].exits[dir_from_a] = b;
     world->rooms[b].exits[reverse] = a;
+
+    if (world->map_ready[a]) {
+        if (!world->map_ready[b]) {
+            world_assign_cell(world, b,
+                world->map_x[a] + dir_delta_x(dir_from_a),
+                world->map_y[a] + dir_delta_y(dir_from_a));
+        }
+    } else if (world->map_ready[b]) {
+        if (!world->map_ready[a]) {
+            world_assign_cell(world, a,
+                world->map_x[b] + dir_delta_x(reverse),
+                world->map_y[b] + dir_delta_y(reverse));
+        }
+    }
 }
 
 static int random_slot(struct Room *room)
@@ -65,6 +134,9 @@ void world_init(struct World *world)
             g_room_descs[i],
             g_room_animals[i],
             g_room_noises[i]);
+        world->map_x[i] = 0;
+        world->map_y[i] = 0;
+        world->map_ready[i] = 0;
     }
 
     wilds[0] = WORLD_ROOM_FOREST;
@@ -110,6 +182,8 @@ void world_init(struct World *world)
     base_path[path_len++] = ruins[0];
     base_path[path_len++] = ruins[1];
     base_path[path_len++] = ruins[2];
+
+    world_assign_cell(world, base_path[0], 0, 0);
 
     for (i = 0; i < path_len - 1; ++i) {
         dir = random_slot(&world->rooms[base_path[i]]);

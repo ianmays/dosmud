@@ -866,3 +866,86 @@ void render_msg_nobody_waiting_reply(void)
 {
     printf("%s", TXT_MSG_NOBODY_WAITING);
 }
+
+void render_exploration_map(struct GameState *game)
+{
+    int min_x;
+    int max_x;
+    int min_y;
+    int max_y;
+    int i;
+    int any;
+    int px;
+    int py;
+
+    any = 0;
+    min_x = 0;
+    max_x = 0;
+    min_y = 0;
+    max_y = 0;
+    for (i = 0; i < game->world.room_count; ++i) {
+        if (!game->room_explored[i]) {
+            continue;
+        }
+        if (!game->world.map_ready[i]) {
+            continue;
+        }
+        if (!any) {
+            min_x = game->world.map_x[i];
+            max_x = game->world.map_x[i];
+            min_y = game->world.map_y[i];
+            max_y = game->world.map_y[i];
+            any = 1;
+        } else {
+            if (game->world.map_x[i] < min_x) min_x = game->world.map_x[i];
+            if (game->world.map_x[i] > max_x) max_x = game->world.map_x[i];
+            if (game->world.map_y[i] < min_y) min_y = game->world.map_y[i];
+            if (game->world.map_y[i] > max_y) max_y = game->world.map_y[i];
+        }
+    }
+    if (!any) {
+        printf("%s", TXT_MAP_NONE_EXPLORED);
+        return;
+    }
+    printf("%s", TXT_MAP_HEADER);
+    for (py = min_y; py <= max_y; ++py) {
+        int first_cell;
+
+        first_cell = 1;
+        for (px = min_x; px <= max_x; ++px) {
+            int rid;
+            int k;
+            char ch;
+
+            rid = -1;
+            for (k = 0; k < game->world.room_count; ++k) {
+                if (!game->room_explored[k]) {
+                    continue;
+                }
+                if (!game->world.map_ready[k]) {
+                    continue;
+                }
+                if (game->world.map_x[k] != px || game->world.map_y[k] != py) {
+                    continue;
+                }
+                if (rid < 0 || k < rid) {
+                    rid = k;
+                }
+            }
+            if (rid < 0) {
+                ch = ' ';
+            } else if (rid == game->player.room_id) {
+                ch = '@';
+            } else {
+                ch = g_room_names[rid][0];
+            }
+            if (!first_cell) {
+                printf(" ");
+            }
+            first_cell = 0;
+            printf("%c", ch);
+        }
+        printf("\n");
+    }
+    printf("%s", TXT_MAP_LEGEND);
+}

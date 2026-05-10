@@ -73,6 +73,7 @@ Commands mutate game state, world ticks mutate simulation state, and rendering o
 - room graph data and connectivity
 - procedural world generation
 - movement validation
+- logical map coordinates assigned when rooms are linked (used only for the exploration map display)
 
 ## Configuration (`config.h`)
 

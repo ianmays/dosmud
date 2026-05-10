@@ -34,6 +34,10 @@ extern const char *const TXT_HELP_REPLY;
 extern const char *const TXT_HELP_GIVE;
 extern const char *const TXT_HELP_QUIT;
 extern const char *const TXT_HELP_HELP;
+extern const char *const TXT_HELP_MAP;
+extern const char *const TXT_MAP_HEADER;
+extern const char *const TXT_MAP_LEGEND;
+extern const char *const TXT_MAP_NONE_EXPLORED;
 
 extern const char *const TXT_UI_EXITS_LABEL;
 extern const char *const TXT_UI_GROUND_ITEM_FMT;

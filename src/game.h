@@ -41,6 +41,7 @@ struct GameState {
     int npc_dialogue;
     int wanderer_active;
     unsigned long wanderer_return_tick;
+    unsigned char room_explored[CFG_ROOM_MAX];
 };
 
 void game_init(struct GameState *game);
