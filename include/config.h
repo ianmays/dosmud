@@ -11,6 +11,8 @@
 #define CFG_DIR_MAX   4
 
 #define CFG_BAG_MAX   12
+/* How many objects can sit on the ground in one room (drops, forage, ambient). */
+#define CFG_AREA_ITEM_SLOTS 4
 
 /* Uniform roll range for d100-style probability checks (0 .. RANGE-1). */
 #define CFG_ROLL_PERCENT_RANGE 100

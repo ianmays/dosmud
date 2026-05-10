@@ -32,6 +32,10 @@ test-run:
 	diff -u \
 		tests/bandit_handover.expect \
 		tests/bandit_handover.output
+	./$(BIN) < tests/area_items.input > tests/area_items.output
+	diff -u \
+		tests/area_items.expect \
+		tests/area_items.output
 
 clean:
 	rm -f $(BIN)
