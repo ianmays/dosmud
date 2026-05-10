@@ -2,24 +2,26 @@
 
 Guidance for AI/code agents working in this repository.
 
-## IMPORTANT - Read these non-negotiables first
+## NON-NEGOTIABLE REQUIREMENTS
 
-- Never, ever, use em dash, we only use '-'
-- Always create a branch before making changes.
-- Always raise draft PRs.
-- Always check for needed documentation updates/additions/removals when making changes.
-- Keep documentation style consistent with surrounding files.
-- Commit messages should be concise; use bullet points rather than sentences if needed; first character should be lower-case.
-- Always check if a corresponding GitHub Issue exists before starting work (see: dosmud GitHub project).
-- Ensure all relevant Issues are linked to PRs.
-- Manage issue status in GitHub - ensure Issue status and Issue project status are aligned
-- If no Issue exists, create one and label it appropriately (`gameplay`, `non-functional`, `tooling`, etc)
-- Always add the `agent` label to any issue you create.
-- Always add Issues to the dosmud Github project
-- If a PR already exists, include pushing follow-up updates to the branch in any implementation plan.
-- When asked to pick up a new issue (possibly under a specific label), ensure you pick the top issue according to the dosmud Github project - you should only pull from the tickets that exist in the 'Agent-ready' column
-- Switch back to main, pull, and delete other branches locally when done with a task
-- If the task done existed in the DEV_PLAN.md, mark it as done
+- ALWAYS check if a corresponding GitHub Issue exists before starting work (see: dosmud GitHub project)
+- ALWAYS manage issue status in GitHub (NEVER skip straight to **Review** - see 'Github project `status` column (dosmud project)' below) - ALWAYS ensure Issue status and Issue project status are aligned
+- ALWAYS ensure all relevant Issues are linked to PRs
+- If no Issue exists, ALWAYS create one and label it appropriately (`gameplay`, `non-functional`, `tooling`, etc)
+- ALWAYS add the `agent` label to any issue you create
+- ALWAYS add Issues to the dosmud Github project
+- NEVER, ever, use em dash, we only use '-'
+- ALWAYS create a branch before making changes
+- ALWAYS raise draft PRs
+- ALWAYS check for needed documentation updates/additions/removals when making changes
+- ALWAYS keep documentation style consistent with surrounding files
+- ALWAYS make commit messages concise; use bullet points rather than sentences if needed; first character is ALWAYS lower-case
+- If a PR already exists, ALWAYS include pushing follow-up updates to the branch in any implementation plan
+- When asked to pick up a new issue (possibly under a specific label), ALWAYS ensure you pick the top issue according to the dosmud Github project - ALWAYS ensure you only pull from the tickets that exist in the 'Agent-ready' column
+- ALWAYS switch back to main, pull, and delete other branches locally when done with a task
+- If the task done existed in the DEV_PLAN.md, ALWAYS mark it as done
+- ALWAYS write a test for a new gameplay feature
+- ALWAYS ensure PR labels match issue labels
 
 ### GitHub project `Status` column (dosmud project)
 
