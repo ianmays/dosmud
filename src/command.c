@@ -70,6 +70,9 @@ static int help_topic_from_word(const char *w)
     if (strcmp(w, "map") == 0 || strcmp(w, "m") == 0) {
         return CMD_HELP_TOPIC_MAP;
     }
+    if (strcmp(w, "wield") == 0 || strcmp(w, "unwield") == 0) {
+        return CMD_HELP_TOPIC_WIELD;
+    }
     if (strcmp(w, "help") == 0 || strcmp(w, "?") == 0) {
         return CMD_HELP_TOPIC_HELP;
     }
@@ -206,6 +209,16 @@ int command_parse(char *line, struct Command *out_cmd)
         out_cmd->type = CMD_LOOT;
         return 1;
     }
+    if (strcmp(word1, "unwield") == 0) {
+        out_cmd->type = CMD_UNWIELD;
+        return 1;
+    }
+    if (strcmp(word1, "wield") == 0) {
+        out_cmd->type = CMD_WIELD;
+        if (count < 2) return 0;
+        out_cmd->arg = item_from_word(word2);
+        return out_cmd->arg != ITEM_NONE;
+    }
     if (strcmp(word1, "reply") == 0) {
         if (count < 2) {
             return 0;
@@ -316,6 +329,8 @@ const char *command_help_line(int topic)
         return TXT_HELP_HELP;
     case CMD_HELP_TOPIC_MAP:
         return TXT_HELP_MAP;
+    case CMD_HELP_TOPIC_WIELD:
+        return TXT_HELP_WIELD;
     default:
         return TXT_HELP_TOPIC_UNKNOWN;
     }

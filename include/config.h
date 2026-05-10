@@ -48,6 +48,9 @@
 
 /* Item effects (used in combat and inventory) */
 #define CFG_SALVE_HEAL_AMOUNT 5
+/* Added to attack damage when wielding a melee weapon (reply 1 in combat). */
+#define CFG_WEAPON_STICK_DAMAGE_BONUS 1
+#define CFG_WEAPON_SPEAR_DAMAGE_BONUS 3
 
 /*
  * Bandit corpse loot: portable items an ambusher might carry (weapon, rations,

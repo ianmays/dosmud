@@ -23,5 +23,7 @@ int game_inv_cmd_bag(struct GameState *game);
 int game_inv_cmd_eat(struct GameState *game, int item_arg);
 int game_inv_cmd_use(struct GameState *game, int item_arg);
 int game_inv_cmd_craft(struct GameState *game, int item_arg);
+int game_inv_cmd_wield(struct GameState *game, int item_arg);
+int game_inv_cmd_unwield(struct GameState *game);
 
 #endif

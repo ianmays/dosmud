@@ -108,6 +108,7 @@ Conventions:
 
 - bag/inventory state mutation
 - item use and crafting behavior
+- wield/unwield commands track `weapon_equipped` on `GameState`; combat adds `item_weapon_damage_bonus` when attacking with a carried weapon still in the bag
 
 ## `items`
 

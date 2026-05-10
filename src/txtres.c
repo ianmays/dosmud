@@ -88,7 +88,7 @@ const char *const TXT_MAIN_PROMPT = "\n> ";
 const char *const TXT_MAIN_BYE = "bye";
 
 const char *const TXT_COMMAND_HELP =
-    "Commands: look, map, inspect [rustle|creak|water|grit], take/drop/give <item>, bag, eat/use <item>, craft <item>, loot, move <dir>, wait, talk, 1/2/3 or reply <1-3>, help [topic], quit";
+    "Commands: look, map, inspect [rustle|creak|water|grit], take/drop/give <item>, bag, wield <weapon>, unwield, eat/use <item>, craft <item>, loot, move <dir>, wait, talk, 1/2/3 or reply <1-3>, help [topic], quit";
 
 const char *const TXT_HELP_TOPIC_UNKNOWN =
     "No help for that topic. Type 'help' for the full command list.";
@@ -143,6 +143,9 @@ const char *const TXT_HELP_HELP =
 
 const char *const TXT_HELP_MAP =
     "map (m) - show a small grid of rooms you have visited (compass is approximate).";
+
+const char *const TXT_HELP_WIELD =
+    "wield <stick|spear> - ready a carried weapon for combat attacks (bonus damage). unwield - put it away.";
 
 const char *const TXT_MAP_HEADER = "Explored locations:\n";
 
@@ -323,3 +326,8 @@ const char *const TXT_INV_CRAFT_SALVE = "You mash a basic healing salve.\n";
 const char *const TXT_INV_NEED_SPEAR = "Craft spear needs: stick + stone.\n";
 const char *const TXT_INV_CRAFT_SPEAR = "You lash a stone point to the stick and craft a spear.\n";
 const char *const TXT_INV_CRAFT_UNKNOWN = "You do not know how to craft that.\n";
+const char *const TXT_INV_BAG_WIELDING_FMT = "Wielding: %s\n";
+const char *const TXT_INV_WIELD_NOT_WEAPON = "That is not something you can wield as a weapon.\n";
+const char *const TXT_INV_WIELD_FMT = "You ready the %s.\n";
+const char *const TXT_INV_UNWIELD = "You sling your weapon aside.\n";
+const char *const TXT_INV_UNWIELD_EMPTY = "You have nothing wielded.\n";

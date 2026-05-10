@@ -40,6 +40,10 @@ test-run:
 	diff -u \
 		tests/map.expect \
 		tests/map.output
+	./$(BIN) < tests/equipment.input > tests/equipment.output
+	diff -u \
+		tests/equipment.expect \
+		tests/equipment.output
 
 clean:
 	rm -f $(BIN)
