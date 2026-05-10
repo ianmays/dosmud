@@ -418,6 +418,8 @@ tests/
 
 ## Snapshot testing
 
+Tracking: #66 (better test setup), #40 (more test coverage).
+
 Pattern:
 
 ```text
