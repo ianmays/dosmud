@@ -47,6 +47,10 @@ void render_frog_dialogue_intro(void);
 void render_frog_dialogue_branch(int choice);
 
 void render_msg_bandit_waiting_reply(void);
+void render_msg_bandit_waiting_handover_pick(void);
+void render_bandit_handover_pick_prompt(void);
+void render_msg_bandit_give_not_carrying(void);
+void render_msg_give_wrong_context(void);
 void render_msg_unknown_command(void);
 void render_msg_wait(void);
 void render_msg_cannot_move(const char *dir_name);

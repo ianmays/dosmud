@@ -88,7 +88,7 @@ const char *const TXT_MAIN_PROMPT = "\n> ";
 const char *const TXT_MAIN_BYE = "bye";
 
 const char *const TXT_COMMAND_HELP =
-    "Commands: look, inspect [rustle|creak|water|grit], take/drop <item>, bag, eat/use <item>, craft <item>, loot, move <dir>, wait, talk, 1/2/3 or reply <1-3>, help [topic], quit";
+    "Commands: look, inspect [rustle|creak|water|grit], take/drop/give <item>, bag, eat/use <item>, craft <item>, loot, move <dir>, wait, talk, 1/2/3 or reply <1-3>, help [topic], quit";
 
 const char *const TXT_HELP_TOPIC_UNKNOWN =
     "No help for that topic. Type 'help' for the full command list.";
@@ -130,7 +130,10 @@ const char *const TXT_HELP_TALK =
     "talk (speak) - speak with an NPC in the room or advance certain encounters.";
 
 const char *const TXT_HELP_REPLY =
-    "1, 2, 3, or reply <1-3> - answer during bandit dialogue or combat.";
+    "1, 2, 3, or reply <1-3> - answer during bandit dialogue or combat. After choosing 2, use give <item> to surrender one carried item.";
+
+const char *const TXT_HELP_GIVE =
+    "give <item> - after choosing [2] during a bandit standoff, surrender one item you carry (same names as take/drop).";
 
 const char *const TXT_HELP_QUIT =
     "quit or exit - leave the game.";
@@ -150,7 +153,8 @@ const char *const TXT_UI_FOCUS_GRIT = "Fresh grit skids nearby. (inspect grit)\n
 const char *const TXT_BANDIT_OPEN_INTRO = "\nA road bandit steps from cover with a hand on a rusted blade.\n";
 const char *const TXT_BANDIT_OPEN_QUOTE = "\"Easy now. We can do this three ways.\"\n";
 const char *const TXT_BANDIT_OPEN_OPT1 = "  [1] Refuse and fight.\n";
-const char *const TXT_BANDIT_OPEN_OPT2 = "  [2] Hand over one item from your bag.\n";
+const char *const TXT_BANDIT_OPEN_OPT2 =
+    "  [2] Hand over one item from your bag (choose reply 2, then give <item>).\n";
 const char *const TXT_BANDIT_OPEN_OPT3 = "  [3] Talk it down and part ways.\n";
 const char *const TXT_REPLY_PROMPT = "(Answer with 1, 2, 3, or reply <n>.)\n";
 
@@ -211,6 +215,12 @@ const char *const TXT_FROG_REPLY_C2 = "The frog nods with the gravity of a tiny 
 const char *const TXT_FROG_REPLY_C3 = "\"The moon knows what it did. I'm not allowed to say which phase. If anyone asks, you hallucinated this conversation. For tax reasons.\"\n";
 
 const char *const TXT_MSG_BANDIT_WAITING = "The bandit is waiting on your move (reply 1/2/3).\n";
+const char *const TXT_MSG_BANDIT_WAITING_HANDOVER =
+    "The bandit waits for you to name what you hand over: give <item> (try bag).\n";
+const char *const TXT_BANDIT_HANDOVER_PICK_PROMPT =
+    "The bandit watches your hands. Name what you surrender with give <item>.\n";
+const char *const TXT_MSG_BANDIT_GIVE_NOT_CARRYING = "You are not carrying that. Pick something from your bag.\n";
+const char *const TXT_MSG_GIVE_WRONG_CONTEXT = "Nobody here is asking you for a hand-out.\n";
 const char *const TXT_MSG_UNKNOWN_COMMAND = "Unknown command. Type 'help'.\n";
 const char *const TXT_MSG_WAIT = "You wait.\n";
 const char *const TXT_MSG_CANNOT_MOVE_FMT = "You cannot move %s from here.\n";

@@ -25,10 +25,13 @@ test:
 # deterministic tests
 test-run:
 	./$(BIN) < tests/smoke.input > tests/smoke.output
-	
 	diff -u \
 		tests/smoke.expect \
 		tests/smoke.output
+	./$(BIN) < tests/bandit_handover.input > tests/bandit_handover.output
+	diff -u \
+		tests/bandit_handover.expect \
+		tests/bandit_handover.output
 
 clean:
 	rm -f $(BIN)
