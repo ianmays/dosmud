@@ -35,6 +35,7 @@ extern const char *const TXT_HELP_GIVE;
 extern const char *const TXT_HELP_QUIT;
 extern const char *const TXT_HELP_HELP;
 extern const char *const TXT_HELP_MAP;
+extern const char *const TXT_HELP_WIELD;
 extern const char *const TXT_MAP_HEADER;
 extern const char *const TXT_MAP_LEGEND;
 extern const char *const TXT_MAP_NONE_EXPLORED;
@@ -183,5 +184,10 @@ extern const char *const TXT_INV_CRAFT_SALVE;
 extern const char *const TXT_INV_NEED_SPEAR;
 extern const char *const TXT_INV_CRAFT_SPEAR;
 extern const char *const TXT_INV_CRAFT_UNKNOWN;
+extern const char *const TXT_INV_BAG_WIELDING_FMT;
+extern const char *const TXT_INV_WIELD_NOT_WEAPON;
+extern const char *const TXT_INV_WIELD_FMT;
+extern const char *const TXT_INV_UNWIELD;
+extern const char *const TXT_INV_UNWIELD_EMPTY;
 
 #endif

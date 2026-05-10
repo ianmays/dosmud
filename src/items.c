@@ -1,4 +1,5 @@
 #include <string.h>
+#include "config.h"
 #include "items.h"
 
 int item_from_word(char *word)
@@ -33,5 +34,19 @@ int item_is_edible(int item_id)
 {
     if (item_id == ITEM_BERRY) return 1;
     if (item_id == ITEM_FISH) return 1;
+    return 0;
+}
+
+int item_is_weapon(int item_id)
+{
+    if (item_id == ITEM_STICK) return 1;
+    if (item_id == ITEM_SPEAR) return 1;
+    return 0;
+}
+
+int item_weapon_damage_bonus(int item_id)
+{
+    if (item_id == ITEM_STICK) return CFG_WEAPON_STICK_DAMAGE_BONUS;
+    if (item_id == ITEM_SPEAR) return CFG_WEAPON_SPEAR_DAMAGE_BONUS;
     return 0;
 }

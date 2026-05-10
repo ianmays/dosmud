@@ -96,6 +96,12 @@ static void combat_resolve_reply(struct GameState *game, int choice)
     if (choice == 1) {
         dmg = CFG_COMBAT_PLAYER_HIT_BASE + (rand() % CFG_COMBAT_PLAYER_HIT_SPREAD) +
             game->damage_bonus;
+        if (game->weapon_equipped != ITEM_NONE &&
+                game_inv_bag_find_index(game, game->weapon_equipped) >= 0) {
+            dmg += item_weapon_damage_bonus(game->weapon_equipped);
+        } else if (game->weapon_equipped != ITEM_NONE) {
+            game->weapon_equipped = ITEM_NONE;
+        }
         game->enemy_hp -= dmg;
         render_combat_player_hit(dmg);
     } else if (choice == 2) {
@@ -303,6 +309,7 @@ void game_init(struct GameState *game)
     game->xp = CFG_START_XP;
     game->max_hp = CFG_START_MAX_HP;
     game->damage_bonus = CFG_START_DAMAGE_BONUS;
+    game->weapon_equipped = ITEM_NONE;
     game->player_hp = CFG_START_MAX_HP;
     game->enemy_dialogue = 0;
     game->enemy_handover_pick = 0;
@@ -328,6 +335,8 @@ static int apply_command(struct GameState *game, struct Command *cmd)
             cmd->type != CMD_LOOK &&
             cmd->type != CMD_MAP &&
             cmd->type != CMD_BAG &&
+            cmd->type != CMD_WIELD &&
+            cmd->type != CMD_UNWIELD &&
             cmd->type != CMD_HELP &&
             cmd->type != CMD_QUIT) {
         render_msg_bandit_waiting_reply();
@@ -339,6 +348,8 @@ static int apply_command(struct GameState *game, struct Command *cmd)
             cmd->type != CMD_LOOK &&
             cmd->type != CMD_MAP &&
             cmd->type != CMD_BAG &&
+            cmd->type != CMD_WIELD &&
+            cmd->type != CMD_UNWIELD &&
             cmd->type != CMD_HELP &&
             cmd->type != CMD_QUIT &&
             !(game->enemy_handover_pick == 1 && cmd->type == CMD_GIVE)) {
@@ -410,6 +421,12 @@ static int apply_command(struct GameState *game, struct Command *cmd)
     }
     if (cmd->type == CMD_BAG) {
         return game_inv_cmd_bag(game);
+    }
+    if (cmd->type == CMD_WIELD) {
+        return game_inv_cmd_wield(game, cmd->arg);
+    }
+    if (cmd->type == CMD_UNWIELD) {
+        return game_inv_cmd_unwield(game);
     }
     if (cmd->type == CMD_EAT) {
         return game_inv_cmd_eat(game, cmd->arg);
