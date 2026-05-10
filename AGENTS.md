@@ -11,10 +11,12 @@ Guidance for AI/code agents working in this repository.
 - Commit messages should be concise; use bullet points rather than sentences if needed; first character should be lower-case.
 - Always check if a corresponding GitHub Issue exists before starting work (see: dosmud GitHub project).
 - Ensure all relevant Issues are linked to PRs.
-- Manage issue status in GitHub.
+- Manage issue status in GitHub - ensure Issue status and Issue project status are aligned
 - If no Issue exists, create one and label it appropriately (`gameplay`, `non-functional`, `tooling`, etc)
 - Always add the `agent` label to any issue you create.
+- Always add Issues to the dosmud Github project
 - If a PR already exists, include pushing follow-up updates to the branch in any implementation plan.
+- When asked to pick up a new issue (possibly under a specific label), ensure you pick the top issue according to the dosmud Github project
 
 ## Purpose
 
