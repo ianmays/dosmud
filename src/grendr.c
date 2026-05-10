@@ -431,9 +431,9 @@ void game_render(const struct GameState *game)
         game->level, game->xp, needed);
 }
 
-void game_print_help(void)
+void game_print_help(int topic)
 {
-    printf("%s\n", command_help_text());
+    printf("%s\n", command_help_line(topic));
 }
 
 void render_bandit_encounter_open(void)

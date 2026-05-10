@@ -13,6 +13,63 @@ static void lower_inplace(char *s)
     }
 }
 
+static int help_topic_from_word(const char *w)
+{
+    if (strcmp(w, "look") == 0 || strcmp(w, "l") == 0) {
+        return CMD_HELP_TOPIC_LOOK;
+    }
+    if (strcmp(w, "move") == 0 || strcmp(w, "go") == 0 ||
+            strcmp(w, "north") == 0 || strcmp(w, "n") == 0 ||
+            strcmp(w, "south") == 0 || strcmp(w, "s") == 0 ||
+            strcmp(w, "east") == 0 || strcmp(w, "e") == 0 ||
+            strcmp(w, "west") == 0 || strcmp(w, "w") == 0) {
+        return CMD_HELP_TOPIC_MOVE;
+    }
+    if (strcmp(w, "wait") == 0 || strcmp(w, ".") == 0) {
+        return CMD_HELP_TOPIC_WAIT;
+    }
+    if (strcmp(w, "inspect") == 0 || strcmp(w, "examine") == 0 ||
+            strcmp(w, "investigate") == 0) {
+        return CMD_HELP_TOPIC_INSPECT;
+    }
+    if (strcmp(w, "take") == 0 || strcmp(w, "get") == 0 ||
+            strcmp(w, "pickup") == 0) {
+        return CMD_HELP_TOPIC_TAKE;
+    }
+    if (strcmp(w, "drop") == 0) {
+        return CMD_HELP_TOPIC_DROP;
+    }
+    if (strcmp(w, "bag") == 0 || strcmp(w, "inventory") == 0 ||
+            strcmp(w, "inv") == 0) {
+        return CMD_HELP_TOPIC_BAG;
+    }
+    if (strcmp(w, "eat") == 0) {
+        return CMD_HELP_TOPIC_EAT;
+    }
+    if (strcmp(w, "use") == 0) {
+        return CMD_HELP_TOPIC_USE;
+    }
+    if (strcmp(w, "craft") == 0 || strcmp(w, "build") == 0) {
+        return CMD_HELP_TOPIC_CRAFT;
+    }
+    if (strcmp(w, "loot") == 0) {
+        return CMD_HELP_TOPIC_LOOT;
+    }
+    if (strcmp(w, "talk") == 0 || strcmp(w, "speak") == 0) {
+        return CMD_HELP_TOPIC_TALK;
+    }
+    if (strcmp(w, "reply") == 0 || strcmp(w, "choices") == 0) {
+        return CMD_HELP_TOPIC_REPLY;
+    }
+    if (strcmp(w, "quit") == 0 || strcmp(w, "exit") == 0) {
+        return CMD_HELP_TOPIC_QUIT;
+    }
+    if (strcmp(w, "help") == 0 || strcmp(w, "?") == 0) {
+        return CMD_HELP_TOPIC_HELP;
+    }
+    return CMD_HELP_TOPIC_UNKNOWN;
+}
+
 static int parse_dir(char *word)
 {
     if (strcmp(word, "north") == 0 || strcmp(word, "n") == 0) return DIR_NORTH;
@@ -53,6 +110,11 @@ int command_parse(char *line, struct Command *out_cmd)
     }
     if (strcmp(word1, "help") == 0 || strcmp(word1, "?") == 0) {
         out_cmd->type = CMD_HELP;
+        if (count < 2) {
+            out_cmd->arg = CMD_HELP_TOPIC_GENERAL;
+        } else {
+            out_cmd->arg = help_topic_from_word(word2);
+        }
         return 1;
     }
     if (strcmp(word1, "quit") == 0 || strcmp(word1, "exit") == 0) {
@@ -195,4 +257,46 @@ int command_advances_time(int type)
 const char *command_help_text(void)
 {
     return TXT_COMMAND_HELP;
+}
+
+const char *command_help_line(int topic)
+{
+    switch (topic) {
+    case CMD_HELP_TOPIC_GENERAL:
+        return TXT_COMMAND_HELP;
+    case CMD_HELP_TOPIC_UNKNOWN:
+        return TXT_HELP_TOPIC_UNKNOWN;
+    case CMD_HELP_TOPIC_LOOK:
+        return TXT_HELP_LOOK;
+    case CMD_HELP_TOPIC_MOVE:
+        return TXT_HELP_MOVE;
+    case CMD_HELP_TOPIC_WAIT:
+        return TXT_HELP_WAIT;
+    case CMD_HELP_TOPIC_INSPECT:
+        return TXT_HELP_INSPECT;
+    case CMD_HELP_TOPIC_TAKE:
+        return TXT_HELP_TAKE;
+    case CMD_HELP_TOPIC_DROP:
+        return TXT_HELP_DROP;
+    case CMD_HELP_TOPIC_BAG:
+        return TXT_HELP_BAG;
+    case CMD_HELP_TOPIC_EAT:
+        return TXT_HELP_EAT;
+    case CMD_HELP_TOPIC_USE:
+        return TXT_HELP_USE;
+    case CMD_HELP_TOPIC_CRAFT:
+        return TXT_HELP_CRAFT;
+    case CMD_HELP_TOPIC_LOOT:
+        return TXT_HELP_LOOT;
+    case CMD_HELP_TOPIC_TALK:
+        return TXT_HELP_TALK;
+    case CMD_HELP_TOPIC_REPLY:
+        return TXT_HELP_REPLY;
+    case CMD_HELP_TOPIC_QUIT:
+        return TXT_HELP_QUIT;
+    case CMD_HELP_TOPIC_HELP:
+        return TXT_HELP_HELP;
+    default:
+        return TXT_HELP_TOPIC_UNKNOWN;
+    }
 }

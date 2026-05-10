@@ -14,7 +14,7 @@ struct GameState;
 void game_print_location_art(int room_id);
 void render_room_look(struct GameState *game, int npc_in_room_hint);
 void game_render(const struct GameState *game);
-void game_print_help(void);
+void game_print_help(int topic);
 
 void render_bandit_encounter_open(void);
 void render_combat_start(int player_hp, int enemy_hp);
