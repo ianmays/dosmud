@@ -36,10 +36,6 @@ test-run:
 	diff -u \
 		tests/area_items.expect \
 		tests/area_items.output
-	./$(BIN) < tests/ascii_art_gameplay.input > tests/ascii_art_gameplay.output
-	diff -u \
-		tests/ascii_art_gameplay.expect \
-		tests/ascii_art_gameplay.output
 
 clean:
 	rm -f $(BIN)

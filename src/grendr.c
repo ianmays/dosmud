@@ -290,15 +290,14 @@ static void art_watchman_portrait(void)
 {
     printf("                           ____\n");
     printf("                        .-'    '-.\n");
-    printf("                       /   ( )      \\\n");
-    printf("                      |    --        |\n");
-    printf("                      |   /||||\\      |\n");
-    printf("                      |  /||||||\\     |\n");
-    printf("                      | | [][][] |    |\n");
-    printf("                      | |________|    |\n");
-    printf("                      |____||||________|\n");
-    printf("                     /_____||||________\\\n");
-    printf("                    /______|  |________\\\n");
+    printf("                       /   (o)  .---.   \\\n");
+    printf("                      |    |   |//|    |\n");
+    printf("                      |    \\~~~+~~/    |\n");
+    printf("                      |     \\____/     |\n");
+    printf("                      |      |  |      |\n");
+    printf("                      |______|__|______|\n");
+    printf("                     /______||||______\\\n");
+    printf("                    /_______|__|_______\\\n");
     printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
     printf("              %s\n", TXT_WATCHMAN_ART_CAPTION);
 }
