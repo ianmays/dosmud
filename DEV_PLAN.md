@@ -46,6 +46,8 @@ Make the project strictly ANSI C89 clean and warning-clean.
 
 ### 1. Remove all K&R function definitions
 
+✅ Done — no K&R definitions remain in `src/`.
+
 Replace:
 
 ```c
@@ -64,6 +66,8 @@ Everywhere.
 ---
 
 ### 2. Enforce strict C89 compilation
+
+✅ Done — flags live in the `Makefile`.
 
 GCC:
 
@@ -87,6 +91,8 @@ Tests/CI only:
 
 ### 3. Ensure OpenWatcom parity
 
+✅ Done — `make prepare-dos` covers the OpenWatcom path; ongoing discipline.
+
 Goal:
 - no GCC-only behaviour
 - no implicit compiler extensions
@@ -96,6 +102,8 @@ Build both targets regularly.
 ---
 
 ### 4. Remove mixed declarations/statements
+
+✅ Done — enforced by `-pedantic`.
 
 Bad:
 
@@ -115,6 +123,8 @@ foo();
 
 ### 5. Replace C99 comments
 
+✅ Done — no `//` comments remain in `src/`.
+
 Remove:
 
 ```c
@@ -130,6 +140,8 @@ Use:
 ---
 
 ### 6. Introduce compatibility typedefs
+
+Tracking: #41.
 
 Create:
 
@@ -152,6 +164,8 @@ Document assumptions.
 
 ### 7. Centralise constants
 
+✅ Done — see #33; values live in `include/config.h`.
+
 Move gameplay tuning values into config headers.
 
 Example:
@@ -164,6 +178,8 @@ Example:
 ---
 
 # Phase 2 — Split `game.c`
+
+Tracking: #42.
 
 ## Goal
 
@@ -248,6 +264,8 @@ Own:
 
 # Phase 3 — Replace Flag Soup with State Machines
 
+Tracking: #43.
+
 ## Goal
 
 Prevent invalid state combinations.
@@ -297,6 +315,8 @@ Only one major mode active at a time.
 
 # Phase 4 — Formalise Engine Boundaries
 
+Tracking: #44.
+
 ## Goal
 
 Separate:
@@ -334,6 +354,8 @@ Input/timing/system integration only.
 ---
 
 # Phase 5 — Introduce Platform Layer
+
+Tracking: #45.
 
 ## Goal
 
@@ -375,6 +397,8 @@ exist.
 ---
 
 # Phase 6 — Deterministic Test Harness
+
+Tracking: #40 (general test improvements), #46 (runtime `--seed` argument).
 
 ## Goal
 
@@ -434,6 +458,8 @@ Examples:
 
 # Phase 7 — Event Queue Architecture
 
+Tracking: #47.
+
 ## Goal
 
 Decouple simulation from rendering.
@@ -485,6 +511,8 @@ This is the biggest architectural upgrade in the entire roadmap.
 
 # Phase 8 — Save/Load System
 
+Tracking: #16.
+
 ## Goal
 
 Stabilise persistent state ownership.
@@ -519,6 +547,8 @@ Avoid:
 ---
 
 # Phase 9 — SDL Renderer
+
+Tracking: #48.
 
 ## Goal
 
@@ -557,14 +587,14 @@ NOT:
 Only after architecture stabilises.
 
 Then safely add:
-- quests
-- factions
-- economy
-- weather
-- procedural encounters
-- NPC schedules
-- larger worlds
-- persistence systems
+- quests (#49)
+- factions (#9)
+- economy (#50)
+- weather (#51)
+- procedural encounters (#54)
+- NPC schedules (#52)
+- larger worlds (#55)
+- persistence systems (#16)
 
 without architectural collapse.
 
