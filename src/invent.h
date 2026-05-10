@@ -6,6 +6,11 @@
 
 struct GameState;
 
+/* Places item_id on the ground if a slot is free; returns 1 if stored. */
+int game_room_ground_try_add(struct GameState *game, int room_id, int item_id);
+/* Returns 1 when at least one ground slot is empty in this room. */
+int game_room_ground_has_space(struct GameState *game, int room_id);
+
 int game_inv_bag_find_index(struct GameState *game, int item_id);
 int game_inv_bag_add(struct GameState *game, int item_id);
 int game_inv_bag_remove_index(struct GameState *game, int index);

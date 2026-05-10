@@ -1,10 +1,76 @@
 /* Inventory implementation (DOS-friendly 8.3 name invent.c). */
 
 #include <stdio.h>
+#include "config.h"
 #include "invent.h"
 #include "game.h"
 #include "items.h"
 #include "txtres.h"
+
+int game_room_ground_try_add(struct GameState *game, int room_id, int item_id)
+{
+    int s;
+    for (s = 0; s < CFG_AREA_ITEM_SLOTS; ++s) {
+        if (game->room_item[room_id][s] == ITEM_NONE) {
+            game->room_item[room_id][s] = item_id;
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int game_room_ground_has_space(struct GameState *game, int room_id)
+{
+    int s;
+    for (s = 0; s < CFG_AREA_ITEM_SLOTS; ++s) {
+        if (game->room_item[room_id][s] == ITEM_NONE) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+static int room_ground_is_empty(struct GameState *game, int room_id)
+{
+    int s;
+    for (s = 0; s < CFG_AREA_ITEM_SLOTS; ++s) {
+        if (game->room_item[room_id][s] != ITEM_NONE) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+static int room_find_item_slot(struct GameState *game, int room_id, int item_id)
+{
+    int s;
+    for (s = 0; s < CFG_AREA_ITEM_SLOTS; ++s) {
+        if (game->room_item[room_id][s] == item_id) {
+            return s;
+        }
+    }
+    return -1;
+}
+
+static int room_first_free_slot(struct GameState *game, int room_id)
+{
+    int s;
+    for (s = 0; s < CFG_AREA_ITEM_SLOTS; ++s) {
+        if (game->room_item[room_id][s] == ITEM_NONE) {
+            return s;
+        }
+    }
+    return -1;
+}
+
+static void room_remove_slot_compact(struct GameState *game, int room_id, int slot)
+{
+    int s;
+    for (s = slot; s < CFG_AREA_ITEM_SLOTS - 1; ++s) {
+        game->room_item[room_id][s] = game->room_item[room_id][s + 1];
+    }
+    game->room_item[room_id][CFG_AREA_ITEM_SLOTS - 1] = ITEM_NONE;
+}
 
 int game_inv_bag_find_index(struct GameState *game, int item_id)
 {
@@ -80,26 +146,28 @@ int game_inv_cmd_take(struct GameState *game, int item_arg)
 {
     int room_id;
     int ground_item;
+    int slot;
 
     if (game->combat_active) {
         printf("%s", TXT_INV_NO_RUMMAGE_COMBAT);
         return 1;
     }
     room_id = game->player.room_id;
-    ground_item = game->room_item[room_id];
-    if (ground_item == ITEM_NONE) {
+    if (room_ground_is_empty(game, room_id)) {
         printf("%s", TXT_INV_TAKE_NOTHING);
         return 1;
     }
-    if (item_arg != ground_item) {
+    slot = room_find_item_slot(game, room_id, item_arg);
+    if (slot < 0) {
         printf("%s", TXT_INV_CANNOT_TAKE_HERE);
         return 1;
     }
+    ground_item = game->room_item[room_id][slot];
     if (!game_inv_bag_add(game, ground_item)) {
         printf(TXT_INV_BAG_FULL_FMT, game->bag_capacity);
         return 1;
     }
-    game->room_item[room_id] = ITEM_NONE;
+    room_remove_slot_compact(game, room_id, slot);
     printf(TXT_INV_PICKUP_FMT, item_name(ground_item));
     return 1;
 }
@@ -107,6 +175,7 @@ int game_inv_cmd_take(struct GameState *game, int item_arg)
 int game_inv_cmd_drop(struct GameState *game, int item_arg)
 {
     int room_id;
+    int slot;
 
     if (game->combat_active) {
         printf("%s", TXT_INV_NO_DROP_COMBAT);
@@ -117,13 +186,13 @@ int game_inv_cmd_drop(struct GameState *game, int item_arg)
         printf(TXT_INV_NOT_CARRYING_FMT, item_name(item_arg));
         return 1;
     }
-    if (game->room_item[room_id] != ITEM_NONE) {
-        printf(TXT_INV_GROUND_OCCUPIED_FMT,
-            item_name(game->room_item[room_id]));
+    slot = room_first_free_slot(game, room_id);
+    if (slot < 0) {
+        printf(TXT_INV_GROUND_FULL_FMT, CFG_AREA_ITEM_SLOTS);
         return 1;
     }
     game_inv_bag_remove_item(game, item_arg);
-    game->room_item[room_id] = item_arg;
+    game->room_item[room_id][slot] = item_arg;
     printf(TXT_INV_DROP_FMT, item_name(item_arg));
     return 1;
 }
