@@ -22,7 +22,7 @@ struct GameState {
     int env_focus_room;
     int env_focus_kind;
     unsigned long env_focus_expires_tick;
-    int room_item[CFG_ROOM_MAX];
+    int room_item[CFG_ROOM_MAX][CFG_AREA_ITEM_SLOTS];
     int bag[CFG_BAG_MAX];
     int bag_count;
     int bag_capacity;

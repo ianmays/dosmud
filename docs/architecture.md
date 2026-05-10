@@ -78,7 +78,7 @@ Commands mutate game state, world ticks mutate simulation state, and rendering o
 
 [`include/config.h`](../include/config.h) is the compile-time home for:
 
-- structural limits (`CFG_ROOM_MAX`, `CFG_BAG_MAX`, buffers, etc.)
+- structural limits (`CFG_ROOM_MAX`, `CFG_BAG_MAX`, `CFG_AREA_ITEM_SLOTS` ground slots per room, buffers, etc.)
 - gameplay tuning (combat and bandit corpse loot thresholds, progression, ambient systems, wanderer timing)
 - world-generation numeric policy (`world_init` counts and loop bounds)
 - `WORLD_ROOM_*` room IDs

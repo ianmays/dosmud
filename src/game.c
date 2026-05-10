@@ -153,44 +153,52 @@ static void combat_resolve_reply(struct GameState *game, int choice)
 static void seed_world_items(struct GameState *game)
 {
     int i;
+    int s;
     for (i = 0; i < CFG_ROOM_MAX; ++i) {
-        game->room_item[i] = ITEM_NONE;
+        for (s = 0; s < CFG_AREA_ITEM_SLOTS; ++s) {
+            game->room_item[i][s] = ITEM_NONE;
+        }
     }
-    game->room_item[WORLD_ROOM_CAMP] = ITEM_STICK;
-    game->room_item[WORLD_ROOM_ROAD] = ITEM_STONE;
-    game->room_item[WORLD_ROOM_POND] = ITEM_FISH;
-    game->room_item[WORLD_ROOM_FOREST] = ITEM_HERB;
-    game->room_item[WORLD_ROOM_RUINS] = ITEM_STONE;
-    game->room_item[WORLD_ROOM_STREAM] = ITEM_REED;
-    game->room_item[WORLD_ROOM_MARSH] = ITEM_REED;
-    game->room_item[WORLD_ROOM_MEADOW] = ITEM_BERRY;
-    game->room_item[WORLD_ROOM_ORCHARD] = ITEM_BERRY;
-    game->room_item[WORLD_ROOM_CANYON] = ITEM_STONE;
-    game->room_item[WORLD_ROOM_CAVE] = ITEM_HERB;
+    game->room_item[WORLD_ROOM_CAMP][0] = ITEM_STICK;
+    game->room_item[WORLD_ROOM_ROAD][0] = ITEM_STONE;
+    game->room_item[WORLD_ROOM_POND][0] = ITEM_FISH;
+    game->room_item[WORLD_ROOM_FOREST][0] = ITEM_HERB;
+    game->room_item[WORLD_ROOM_RUINS][0] = ITEM_STONE;
+    game->room_item[WORLD_ROOM_STREAM][0] = ITEM_REED;
+    game->room_item[WORLD_ROOM_MARSH][0] = ITEM_REED;
+    game->room_item[WORLD_ROOM_MEADOW][0] = ITEM_BERRY;
+    game->room_item[WORLD_ROOM_ORCHARD][0] = ITEM_BERRY;
+    game->room_item[WORLD_ROOM_CANYON][0] = ITEM_STONE;
+    game->room_item[WORLD_ROOM_CAVE][0] = ITEM_HERB;
 }
 
 static void maybe_spawn_room_item(struct GameState *game)
 {
     int room_id;
     int roll;
+    int spawned;
+
     room_id = game->player.room_id;
     if (room_id < 0 || room_id >= game->world.room_count) {
         return;
     }
-    if (game->room_item[room_id] != ITEM_NONE) {
+    if (!game_room_ground_has_space(game, room_id)) {
         return;
     }
     if ((rand() % CFG_ROLL_PERCENT_RANGE) >= CFG_ROOM_ITEM_SPAWN_GATE) {
         return;
     }
     roll = rand() % CFG_ROLL_PERCENT_RANGE;
-    if (roll < CFG_ROOM_SPAWN_ROLL_BERRY_BELOW) game->room_item[room_id] = ITEM_BERRY;
-    else if (roll < CFG_ROOM_SPAWN_ROLL_STICK_BELOW) game->room_item[room_id] = ITEM_STICK;
-    else if (roll < CFG_ROOM_SPAWN_ROLL_REED_BELOW) game->room_item[room_id] = ITEM_REED;
-    else if (roll < CFG_ROOM_SPAWN_ROLL_STONE_BELOW) game->room_item[room_id] = ITEM_STONE;
-    else if (roll < CFG_ROOM_SPAWN_ROLL_HERB_BELOW) game->room_item[room_id] = ITEM_HERB;
-    else game->room_item[room_id] = ITEM_FISH;
-    render_nearby_item_notice(item_name(game->room_item[room_id]));
+    if (roll < CFG_ROOM_SPAWN_ROLL_BERRY_BELOW) spawned = ITEM_BERRY;
+    else if (roll < CFG_ROOM_SPAWN_ROLL_STICK_BELOW) spawned = ITEM_STICK;
+    else if (roll < CFG_ROOM_SPAWN_ROLL_REED_BELOW) spawned = ITEM_REED;
+    else if (roll < CFG_ROOM_SPAWN_ROLL_STONE_BELOW) spawned = ITEM_STONE;
+    else if (roll < CFG_ROOM_SPAWN_ROLL_HERB_BELOW) spawned = ITEM_HERB;
+    else spawned = ITEM_FISH;
+    if (!game_room_ground_try_add(game, room_id, spawned)) {
+        return;
+    }
+    render_nearby_item_notice(item_name(spawned));
 }
 
 static void wanderer_update_separation(struct GameState *game)
@@ -572,10 +580,11 @@ static void maybe_emit_atmosphere(struct GameState *game)
         game->env_focus_room = game->player.room_id;
         game->env_focus_kind = GAME_ENV_RUSTLE;
         game->env_focus_expires_tick = game->tick + CFG_ENV_FOCUS_DURATION_TICKS;
-        if (game->room_item[game->player.room_id] == ITEM_NONE &&
+        if (game_room_ground_has_space(game, game->player.room_id) &&
                 (rand() % CFG_ROLL_PERCENT_RANGE) < CFG_ATMOSPHERE_FOCUS_EXTRA_ITEM_BELOW) {
-            game->room_item[game->player.room_id] = ITEM_BERRY;
-            render_atmosphere_berry_drop();
+            if (game_room_ground_try_add(game, game->player.room_id, ITEM_BERRY)) {
+                render_atmosphere_berry_drop();
+            }
         }
         return;
     }
@@ -593,10 +602,11 @@ static void maybe_emit_atmosphere(struct GameState *game)
         game->env_focus_room = game->player.room_id;
         game->env_focus_kind = GAME_ENV_WATER;
         game->env_focus_expires_tick = game->tick + CFG_ENV_FOCUS_DURATION_TICKS;
-        if (game->room_item[game->player.room_id] == ITEM_NONE &&
+        if (game_room_ground_has_space(game, game->player.room_id) &&
                 (rand() % CFG_ROLL_PERCENT_RANGE) < CFG_ATMOSPHERE_FOCUS_EXTRA_ITEM_BELOW) {
-            game->room_item[game->player.room_id] = ITEM_REED;
-            render_atmosphere_reed_drop();
+            if (game_room_ground_try_add(game, game->player.room_id, ITEM_REED)) {
+                render_atmosphere_reed_drop();
+            }
         }
         return;
     }

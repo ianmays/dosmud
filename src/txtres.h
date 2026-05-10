@@ -37,6 +37,8 @@ extern const char *const TXT_HELP_HELP;
 
 extern const char *const TXT_UI_EXITS_LABEL;
 extern const char *const TXT_UI_GROUND_ITEM_FMT;
+extern const char *const TXT_UI_GROUND_ITEMS_HEADER;
+extern const char *const TXT_UI_GROUND_ITEM_LINE_FMT;
 extern const char *const TXT_UI_BANDIT_CORPSE;
 extern const char *const TXT_UI_NPC_HINT;
 extern const char *const TXT_UI_FOCUS_RUSTLE;
@@ -152,7 +154,7 @@ extern const char *const TXT_INV_BAG_FULL_FMT;
 extern const char *const TXT_INV_PICKUP_FMT;
 extern const char *const TXT_INV_NO_DROP_COMBAT;
 extern const char *const TXT_INV_NOT_CARRYING_FMT;
-extern const char *const TXT_INV_GROUND_OCCUPIED_FMT;
+extern const char *const TXT_INV_GROUND_FULL_FMT;
 extern const char *const TXT_INV_DROP_FMT;
 extern const char *const TXT_INV_BAG_HEADER_FMT;
 extern const char *const TXT_INV_BAG_EMPTY;

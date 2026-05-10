@@ -109,7 +109,7 @@ const char *const TXT_HELP_TAKE =
     "take <item> (get, pickup) - pick up the named item from the ground into your bag.";
 
 const char *const TXT_HELP_DROP =
-    "drop <item> - place an item from your bag on the ground here.";
+    "drop <item> - place an item from your bag on the ground here (several items fit until the area is full).";
 
 const char *const TXT_HELP_BAG =
     "bag (inventory, inv) - list what you are carrying.";
@@ -124,7 +124,7 @@ const char *const TXT_HELP_CRAFT =
     "craft <item> or build <item> - torch needs stick+reed, salve needs herb+berry, spear needs stick+stone (all in bag). Not while fighting.";
 
 const char *const TXT_HELP_LOOT =
-    "loot - take gear from a bandit corpse here when the ground has no other item.";
+    "loot - take gear from a bandit corpse.";
 
 const char *const TXT_HELP_TALK =
     "talk (speak) - speak with an NPC in the room or advance certain encounters.";
@@ -143,6 +143,8 @@ const char *const TXT_HELP_HELP =
 
 const char *const TXT_UI_EXITS_LABEL = "Exits:";
 const char *const TXT_UI_GROUND_ITEM_FMT = "On the ground: %s. (take %s)\n";
+const char *const TXT_UI_GROUND_ITEMS_HEADER = "On the ground:\n";
+const char *const TXT_UI_GROUND_ITEM_LINE_FMT = "  %s (take %s)\n";
 const char *const TXT_UI_BANDIT_CORPSE = "A bandit corpse lies here. (loot)\n";
 const char *const TXT_UI_NPC_HINT = "Someone nearby might talk. (talk)\n";
 const char *const TXT_UI_FOCUS_RUSTLE = "Something is rustling nearby. (inspect rustle)\n";
@@ -285,7 +287,8 @@ const char *const TXT_INV_BAG_FULL_FMT = "Your bag is full (%d items max).\n";
 const char *const TXT_INV_PICKUP_FMT = "You pick up the %s.\n";
 const char *const TXT_INV_NO_DROP_COMBAT = "Not while a blade is in your face.\n";
 const char *const TXT_INV_NOT_CARRYING_FMT = "You are not carrying a %s.\n";
-const char *const TXT_INV_GROUND_OCCUPIED_FMT = "The ground here is already occupied by a %s.\n";
+const char *const TXT_INV_GROUND_FULL_FMT =
+    "The ground here cannot hold more than %d items.\n";
 const char *const TXT_INV_DROP_FMT = "You drop the %s.\n";
 const char *const TXT_INV_BAG_HEADER_FMT = "Bag (%d/%d):";
 const char *const TXT_INV_BAG_EMPTY = " empty\n";

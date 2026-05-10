@@ -1,0 +1,9 @@
+take stick
+3
+south
+take reed
+north
+drop stick
+drop reed
+look
+quit

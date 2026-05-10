@@ -381,8 +381,13 @@ void render_room_look(struct GameState *game, int npc_in_room_hint)
 {
     struct Room *room;
     int dir;
+    int rid;
+    int s;
+    int ground_count;
+    int first_ground;
 
     room = &game->world.rooms[game->player.room_id];
+    rid = game->player.room_id;
     game_print_location_art(game->player.room_id);
     printf("\n%s\n", room->name);
     printf("%s\n", room->desc);
@@ -393,10 +398,29 @@ void render_room_look(struct GameState *game, int npc_in_room_hint)
         }
     }
     printf("\n");
-    if (game->room_item[game->player.room_id] != ITEM_NONE) {
+    ground_count = 0;
+    first_ground = ITEM_NONE;
+    for (s = 0; s < CFG_AREA_ITEM_SLOTS; ++s) {
+        if (game->room_item[rid][s] != ITEM_NONE) {
+            if (ground_count == 0) {
+                first_ground = game->room_item[rid][s];
+            }
+            ground_count += 1;
+        }
+    }
+    if (ground_count == 1) {
         printf(TXT_UI_GROUND_ITEM_FMT,
-            item_name(game->room_item[game->player.room_id]),
-            item_name(game->room_item[game->player.room_id]));
+            item_name(first_ground),
+            item_name(first_ground));
+    } else if (ground_count > 1) {
+        printf("%s", TXT_UI_GROUND_ITEMS_HEADER);
+        for (s = 0; s < CFG_AREA_ITEM_SLOTS; ++s) {
+            if (game->room_item[rid][s] != ITEM_NONE) {
+                printf(TXT_UI_GROUND_ITEM_LINE_FMT,
+                    item_name(game->room_item[rid][s]),
+                    item_name(game->room_item[rid][s]));
+            }
+        }
     }
     if (game->corpse_present[game->player.room_id]) {
         printf("%s", TXT_UI_BANDIT_CORPSE);
