@@ -124,7 +124,7 @@ const char *const TXT_HELP_CRAFT =
     "craft <item> or build <item> - torch needs stick+reed, salve needs herb+berry, spear needs stick+stone (all in bag). Not while fighting.";
 
 const char *const TXT_HELP_LOOT =
-    "loot - take gear from a bandit corpse here.";
+    "loot - take gear from a bandit corpse.";
 
 const char *const TXT_HELP_TALK =
     "talk (speak) - speak with an NPC in the room or advance certain encounters.";
