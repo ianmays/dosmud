@@ -1,25 +1,28 @@
-# Contributing
+# Contributor Guide
 
 Thanks for contributing to dosmud.
 
-## Development principles
+## Development Principles
 
 - Keep code ANSI C89 / ISO C90 compatible.
+- Preserve compatibility with both GCC and OpenWatcom.
 - Keep gameplay deterministic for identical seed + inputs.
 - Prefer simple, explicit, procedural code over heavy abstractions.
-- Preserve compatibility with GCC and Open Watcom.
+- Avoid unrelated refactors in the same PR.
 
-## Pull requests are required
+## Pull Requests Required
 
-Changes should be merged via Pull Request (no direct pushes to `main`) so CI can run build and basic test checks.
+Changes should be merged through Pull Requests rather than direct pushes to `main`.
 
-PR checklist:
+Recommended workflow:
 
-- clear title and summary of why the change is needed
-- local commands run and outcomes
-- notes for DOS/Open Watcom validation when relevant
+- create a focused branch
+- open a draft PR early
+- link relevant GitHub Issues
+- keep commits small and reviewable
+- update documentation when behavior or workflows change
 
-## Local validation before opening a PR
+## Local Validation Before Opening a PR
 
 Run:
 
@@ -29,31 +32,33 @@ make test
 make test-run
 ```
 
-If your changes affect build flow, startup/runtime pathing, or DOS behavior:
+If your changes affect build flow, DOS runtime behavior, or orchestration scripts:
 
 ```sh
 make prepare-dos
 make prepare-dos MODE=TEST_MODE
 ```
 
-Recommended for build/tooling changes:
+Recommended for broader tooling/build validation:
 
 ```sh
 make all-build
 make all-test
 ```
 
-For full command semantics and environment model, see [Testing](testing.md).
+For detailed environment and workflow information, see `testing.md`.
 
-## Commit and scope hygiene
+## Commit Style
 
-- Keep commits focused and reviewable.
-- Avoid unrelated refactors in the same PR.
-- Update docs when behavior, command flow, or setup expectations change.
-- Commit messages should be concise and use bullet points rather than sentences if needed - first character should be lower-case
+- Keep commit messages concise.
+- Use bullet points rather than long prose if needed.
+- Start commit messages with a lower-case character.
+- Keep commits logically focused and easy to review.
 
-## Documentation ownership
+## Documentation Ownership
 
-- `README.md` is the quick-start entrypoint.
-- `/docs` pages are the long-form canonical manual.
-- Prefer links across pages rather than duplicating long command lists.
+- `README.md` = quick-start entrypoint.
+- `/docs` = long-form canonical documentation.
+- `architecture.md` = subsystem and design guidance.
+- `testing.md` = deterministic testing and build workflow.
+- Prefer linking across documents rather than duplicating long sections.

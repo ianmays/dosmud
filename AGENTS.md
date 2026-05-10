@@ -5,23 +5,26 @@ Guidance for AI/code agents working in this repository.
 ## IMPORTANT - Read these non-negotiables first
 
 - Always create a branch before making changes.
-- Always check for needed documentation updates/additions/removals when making changes - ensure documentation style remains consistent (e.g. if everything else is listed as bullet-points - then use bullet points).
-- Commit messages should be concise and use bullet points rather than sentences if needed - first character should be lower-case
-- Always raise draft PRs
-- If you have already opened a PR, include pushing the next set of updates to the branch in any Plan.
-- Always check if an Issue exists for what you're working on - ensure all relevant issues are linked to PRs
-- If picking up an Issue from the dosmud project to work on - manage the status in GitHub
+- Always raise draft PRs.
+- Always check for needed documentation updates/additions/removals when making changes.
+- Keep documentation style consistent with surrounding files.
+- Commit messages should be concise; use bullet points rather than sentences if needed; first character should be lower-case.
+- Always check if a corresponding GitHub Issue exists before starting work (see: dosmud GitHub project).
+- Ensure all relevant Issues are linked to PRs.
+- Manage issue status in GitHub.
+- If no Issue exists, create one and label it appropriately (`gameplay`, `non-functional`, `tooling`, etc.)
+- If a PR already exists, include pushing follow-up updates to the branch in any implementation plan.
 
 ## Purpose
 
 - Keep changes aligned with DOS-first goals and deterministic ANSI C design.
-- Preserve fast local iteration on Linux while validating DOS/Open Watcom compatibility.
+- Preserve fast local iteration on Linux while validating DOS/OpenWatcom compatibility.
 - Avoid architectural drift and documentation duplication.
 
 ## Non-Negotiable Technical Constraints
 
 - Target language: ANSI C89 / ISO C90.
-- Must remain compatible with both GCC and Open Watcom.
+- Must remain compatible with both GCC and OpenWatcom.
 - Prefer fixed-size arrays and static storage.
 - Avoid dynamic allocation unless explicitly justified.
 - Avoid recursion.
@@ -38,60 +41,61 @@ Guidance for AI/code agents working in this repository.
 
 ## Build and Validation Workflow
 
-- Native Linux build loop:
-  - `make build`
-  - `make test`
-  - `make test-run`
-- Cross-path validation when touching build/runtime behavior:
-  - `make all-build`
-  - `make all-test`
-- DOS flow entrypoint:
-  - `make prepare-dos` (uses `prepare-dos.ps1`)
-  - optional deterministic mode: `make prepare-dos MODE=TEST_MODE`
+Primary local validation loop:
+
+- `make build`
+- `make test`
+- `make test-run`
+
+Cross-path validation when touching build/runtime behavior:
+
+- `make all-build`
+- `make all-test`
+
+DOS flow entrypoint:
+
+- `make prepare-dos`
+- deterministic DOS mode: `make prepare-dos MODE=TEST_MODE`
 
 ## Environment Model for DOS Flow
 
-- `make` is executed from Linux.
-- PowerShell tooling (`prepare-dos.ps1`) executes via Windows PowerShell.
-- DOS emulator is launched on the Windows side.
-- In `prepare-dos.local.ps1`:
-  - `$source` should be a Windows-reachable path to Linux project files.
-  - `$mountpoint`, `$destination`, `$dospath` should be Windows-side paths visible to the emulator.
+- `make` executes from Linux/WSL.
+- `prepare-dos.ps1` executes through Windows PowerShell.
+- DOSBox-X launches on the Windows side.
+- `prepare-dos.local.ps1` stores machine-specific Windows/WSL path configuration.
+- Do not assume the repository lives under `/mnt/c`.
 
-## Documentation Ownership (Do Not Duplicate)
+## Documentation Ownership
 
-- `README.md` = quick-start/operator usage:
-  - common commands
-  - minimal setup steps
-  - high-level artifact outcomes
-- `/docs/index.md` = manual entrypoint
-- `/docs/architecture.md` = architecture rationale and subsystem guidance
-- `/docs/testing.md` = build/test command contract and environment model
-- `/docs/contributor-guide.md` = contribution process and PR expectations
-- When adding docs, link between files instead of repeating long sections.
+- `README.md` = quick-start/operator usage.
+- `/docs/index.md` = documentation entrypoint.
+- `/docs/architecture.md` = subsystem boundaries and architecture rationale.
+- `/docs/testing.md` = build/test workflow and deterministic testing model.
+- `/docs/contributor-guide.md` = contributor workflow and PR expectations.
+- Prefer links between documents instead of duplicating long instructions.
 
 ## Editing and Change Hygiene
 
-- Make focused changes; do not refactor unrelated areas opportunistically.
-- Preserve existing naming, file layout, and style unless asked otherwise.
-- If you modify build docs or scripts, verify wording against:
-  - `Makefile`
-  - `prepare-dos.ps1`
-  - `build.bat`
+- Make focused changes; avoid unrelated opportunistic refactors.
+- Preserve existing naming, file layout, and style unless explicitly asked otherwise.
+- Verify build/tooling documentation against actual scripts and Make targets.
 - Prefer small, reviewable commits with clear intent.
+
+## Cursor Cloud Instructions
+
+- Expected environment: Ubuntu-based Linux VM.
+- Required dependencies: `gcc` and `make`.
+- Full supported loop:
+  - `make build`
+  - `make test`
+  - `make test-run`
+- `make test` builds with `-Werror -DTEST_MODE`.
+- `make test-run` pipes scripted input and diffs against snapshot output.
+- `make prepare-dos` and DOS-path validation targets are unavailable in cloud VMs.
+- No lint tooling exists beyond GCC warning enforcement.
 
 ## When in Doubt
 
 - Choose the simpler implementation.
 - Favor deterministic behavior and explicit ownership boundaries.
-- Keep DOS/Open Watcom compatibility ahead of convenience features.
-
-## Cursor Cloud specific instructions
-
-- Only system dependencies needed: `gcc` and `make` (both pre-installed on Ubuntu-based VMs).
-- No package managers, containers, or external services required.
-- The full dev loop is: `make build`, `make test`, `make test-run` (see `docs/testing.md` for details).
-- `make test` compiles with `-Werror -DTEST_MODE` (deterministic seed); `make test-run` feeds `tests/smoke.input` and diffs output against `tests/smoke.expect`.
-- The binary `./dosmud` is a terminal-interactive text game; pipe commands via stdin for scripted testing.
-- `make prepare-dos` and `make all-build`/`all-test` require PowerShell and are not available in Cloud Agent VMs — skip DOS-path targets.
-- There is no lint tool beyond GCC's `-Wall -Wextra -Wshadow -Werror -pedantic` (enforced by `make test`).
+- Prioritize DOS/OpenWatcom compatibility over convenience features.

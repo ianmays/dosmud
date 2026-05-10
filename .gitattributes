@@ -1,3 +1,4 @@
 *.input text eol=lf
 *.expected text eol=lf
 *.output text eol=lf
+*.md text eol=lf
