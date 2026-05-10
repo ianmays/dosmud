@@ -32,6 +32,7 @@ struct GameState {
     int damage_bonus;
     int player_hp;
     int enemy_dialogue;
+    int enemy_handover_pick;
     int combat_active;
     int enemy_hp;
     int combat_defending;

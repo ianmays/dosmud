@@ -56,11 +56,13 @@ static void enemy_begin_encounter(struct GameState *game)
     }
     render_bandit_encounter_open();
     game->enemy_dialogue = 1;
+    game->enemy_handover_pick = 0;
 }
 
 static void combat_start(struct GameState *game)
 {
     game->enemy_dialogue = 0;
+    game->enemy_handover_pick = 0;
     game->combat_active = 1;
     game->enemy_hp = CFG_COMBAT_ENEMY_HP_BASE + (rand() % CFG_COMBAT_ENEMY_HP_SPREAD);
     game->combat_defending = 0;
@@ -290,6 +292,7 @@ void game_init(struct GameState *game)
     game->damage_bonus = CFG_START_DAMAGE_BONUS;
     game->player_hp = CFG_START_MAX_HP;
     game->enemy_dialogue = 0;
+    game->enemy_handover_pick = 0;
     game->combat_active = 0;
     game->enemy_hp = 0;
     game->combat_defending = 0;
@@ -305,13 +308,28 @@ void game_init(struct GameState *game)
 
 static int apply_command(struct GameState *game, struct Command *cmd)
 {
-    if ((game->enemy_dialogue == 1 || game->combat_active == 1) &&
+    if (game->combat_active == 1 &&
             cmd->type != CMD_REPLY &&
             cmd->type != CMD_LOOK &&
             cmd->type != CMD_BAG &&
             cmd->type != CMD_HELP &&
             cmd->type != CMD_QUIT) {
         render_msg_bandit_waiting_reply();
+        return 0;
+    }
+
+    if (game->enemy_dialogue == 1 &&
+            cmd->type != CMD_REPLY &&
+            cmd->type != CMD_LOOK &&
+            cmd->type != CMD_BAG &&
+            cmd->type != CMD_HELP &&
+            cmd->type != CMD_QUIT &&
+            !(game->enemy_handover_pick == 1 && cmd->type == CMD_GIVE)) {
+        if (game->enemy_handover_pick == 1) {
+            render_msg_bandit_waiting_handover_pick();
+        } else {
+            render_msg_bandit_waiting_reply();
+        }
         return 0;
     }
 
@@ -352,6 +370,21 @@ static int apply_command(struct GameState *game, struct Command *cmd)
     }
     if (cmd->type == CMD_DROP) {
         return game_inv_cmd_drop(game, cmd->arg);
+    }
+    if (cmd->type == CMD_GIVE) {
+        if (game->enemy_dialogue == 1 && game->enemy_handover_pick == 1) {
+            if (game_inv_bag_find_index(game, cmd->arg) < 0) {
+                render_msg_bandit_give_not_carrying();
+                return 1;
+            }
+            render_msg_hand_over_item(item_name(cmd->arg));
+            game_inv_bag_remove_item(game, cmd->arg);
+            game->enemy_dialogue = 0;
+            game->enemy_handover_pick = 0;
+            return 1;
+        }
+        render_msg_give_wrong_context();
+        return 1;
     }
     if (cmd->type == CMD_BAG) {
         return game_inv_cmd_bag(game);
@@ -458,12 +491,12 @@ static int apply_command(struct GameState *game, struct Command *cmd)
                     combat_start(game);
                     return 1;
                 }
-                render_msg_hand_over_item(item_name(game->bag[0]));
-                game_inv_bag_remove_index(game, 0);
-                game->enemy_dialogue = 0;
+                game->enemy_handover_pick = 1;
+                render_bandit_handover_pick_prompt();
                 return 1;
             }
             if (cmd->arg == 3) {
+                game->enemy_handover_pick = 0;
                 if ((rand() % CFG_ROLL_PERCENT_RANGE) < CFG_BANDIT_INTIMIDATE_SUCCESS_BELOW) {
                     render_msg_intimidate_success();
                     game->enemy_dialogue = 0;

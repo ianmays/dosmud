@@ -55,6 +55,9 @@ static int help_topic_from_word(const char *w)
     if (strcmp(w, "loot") == 0) {
         return CMD_HELP_TOPIC_LOOT;
     }
+    if (strcmp(w, "give") == 0) {
+        return CMD_HELP_TOPIC_GIVE;
+    }
     if (strcmp(w, "talk") == 0 || strcmp(w, "speak") == 0) {
         return CMD_HELP_TOPIC_TALK;
     }
@@ -159,6 +162,12 @@ int command_parse(char *line, struct Command *out_cmd)
     }
     if (strcmp(word1, "drop") == 0) {
         out_cmd->type = CMD_DROP;
+        if (count < 2) return 0;
+        out_cmd->arg = item_from_word(word2);
+        return out_cmd->arg != ITEM_NONE;
+    }
+    if (strcmp(word1, "give") == 0) {
+        out_cmd->type = CMD_GIVE;
         if (count < 2) return 0;
         out_cmd->arg = item_from_word(word2);
         return out_cmd->arg != ITEM_NONE;
@@ -292,6 +301,8 @@ const char *command_help_line(int topic)
         return TXT_HELP_TALK;
     case CMD_HELP_TOPIC_REPLY:
         return TXT_HELP_REPLY;
+    case CMD_HELP_TOPIC_GIVE:
+        return TXT_HELP_GIVE;
     case CMD_HELP_TOPIC_QUIT:
         return TXT_HELP_QUIT;
     case CMD_HELP_TOPIC_HELP:
