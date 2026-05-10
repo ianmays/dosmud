@@ -147,7 +147,7 @@ const char *const TXT_HELP_MAP =
 const char *const TXT_MAP_HEADER = "Explored locations:\n";
 
 const char *const TXT_MAP_LEGEND =
-    "(@ = you, letter = first initial of a visited place; blank = no visited room in that cell.)\n";
+    "(@ = you, letter = first initial of a visited place.)\n";
 
 const char *const TXT_MAP_NONE_EXPLORED = "You have not mapped any ground yet.\n";
 

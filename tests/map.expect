@@ -33,7 +33,7 @@ On the ground: stick. (take stick)
 
 > Explored locations:
 @
-(@ = you, letter = first initial of a visited place; blank = no visited room in that cell.)
+(@ = you, letter = first initial of a visited place.)
 
 [T:0] Camp [HP:20/20] [Lv:1 XP:0/20]
 
@@ -87,7 +87,7 @@ A road bandit steps from cover with a hand on a rusted blade.
 > Explored locations:
 @
 C
-(@ = you, letter = first initial of a visited place; blank = no visited room in that cell.)
+(@ = you, letter = first initial of a visited place.)
 
 [T:1] Road [HP:20/20] [Lv:1 XP:0/20]
 
