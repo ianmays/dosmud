@@ -4,6 +4,7 @@ Guidance for AI/code agents working in this repository.
 
 ## IMPORTANT - Read these non-negotiables first
 
+- Never, ever, use em dash, we only use '-'
 - Always create a branch before making changes.
 - Always raise draft PRs.
 - Always check for needed documentation updates/additions/removals when making changes.
