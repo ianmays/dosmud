@@ -63,7 +63,7 @@ In `prepare-dos.local.ps1`:
 ## Manual gameplay verification checklist
 
 1. Start program, confirm initial tick `[T:0]`.
-2. Enter `help`; tick remains unchanged.
+2. Enter `help`; tick remains unchanged. Enter `help craft` (or another topic); tick remains unchanged and a single-topic line prints.
 3. Enter invalid command (for example `xyz`); tick remains unchanged.
 4. Enter `look`; tick remains unchanged.
 5. Enter `wait`; tick increments by exactly 1.

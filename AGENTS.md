@@ -23,9 +23,9 @@ Guidance for AI/code agents working in this repository.
 
 Keep each issue’s card aligned with real progress. Do not skip **In progress** on the way to **Review**:
 
-- **In progress** — set as soon as work on the issue begins (e.g. branch created or first commit), and keep it there until the linked PR is opened.
-- **Review** — set when you open the draft PR that links the issue (first time the work is on the board as a PR).
-- **Done** — set only **after** that PR has merged (and close the issue when the work is finished).
+- **In progress** - set as soon as work on the issue begins (e.g. branch created or first commit), and keep it there until the linked PR is opened.
+- **Review** - set when you open the draft PR that links the issue (first time the work is on the board as a PR).
+- **Done** - set only **after** that PR has merged (and close the issue when the work is finished).
 
 ## Purpose
 

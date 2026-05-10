@@ -320,7 +320,7 @@ static int apply_command(struct GameState *game, struct Command *cmd)
         return 1;
     }
     if (cmd->type == CMD_HELP) {
-        game_print_help();
+        game_print_help(cmd->arg);
         return 1;
     }
     if (cmd->type == CMD_QUIT) {
