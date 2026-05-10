@@ -13,12 +13,13 @@ Guidance for AI/code agents working in this repository.
 - NEVER, ever, use em dash, we only use '-'
 - ALWAYS create a branch before making changes
 - ALWAYS raise draft PRs
+- NEVER include issue link in PR title (e.g. closes #ID)
 - ALWAYS check for needed documentation updates/additions/removals when making changes
 - ALWAYS keep documentation style consistent with surrounding files
-- ALWAYS make commit messages concise; use bullet points rather than sentences if needed; first character is ALWAYS lower-case
+- ALWAYS make commit messages concise; use bullet points rather than sentences if needed; first character is ALWAYS lower-case, NEVER use * for lists, instead ALWAYS use a flat list of '-'
 - When asked to pick up a new issue (possibly under a specific label), ALWAYS ensure you pick the top issue according to the dosmud Github project - ALWAYS ensure you only pull from the tickets that exist in the 'Agent-ready' column
 - If a PR already exists, ALWAYS include pushing follow-up updates to the branch in any implementation plan
-- If you are pushing additional changes to an open PR NOT in draft state, ALWAYS leave a comment 'review this' to trigger a re-review (NEVER ask - ALWAYS do this)
+- (VERY IMPORTANT) ALWAYS if you are pushing additional changes - check if the PR is no longer in draft state FIRST, then ALWAYS leave the comment 'review this' to trigger a re-review if it is NOT in draft state (NEVER ask - ALWAYS do this)
 - ALWAYS switch back to main, pull, and delete other branches locally when done with a task
 - If the task done existed in the DEV_PLAN.md, ALWAYS mark it as done
 - ALWAYS write a test for a new gameplay feature
