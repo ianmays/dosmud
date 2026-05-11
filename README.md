@@ -2,6 +2,22 @@
 
 Minimal DOS-first MUD-like prototype in ANSI C.
 
+
+## Disclaimer
+
+This project is a personal learning and experimentation project provided "as is", without guarantees, warranties, or support of any kind.
+
+While some care is taken to keep the codebase stable and documented, no guarantee is made regarding:
+- correctness
+- compatibility
+- security
+- fitness for any particular purpose
+
+Use, modify, and distribute the project at your own risk.
+
+The project is actively evolving and may change significantly over time.
+
+
 ## Quick start
 
 Native development build:
@@ -39,4 +55,4 @@ The manual is deployed as [Github Pages](https://ianmays.github.io/dosmud/).
 
 - `CONTRIBUTING.md` points to contributor workflow guidance.
 - `AGENTS.md` contains repository guidance for coding agents.
-- `DEV_PLAN.md` keeps track of upcoming development phases. 
+- `DEV_PLAN.md` keeps track of upcoming development phases.
