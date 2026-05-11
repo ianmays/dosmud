@@ -436,6 +436,36 @@ diff test.output test.expect
 
 ---
 
+## Improve deterministic setup control
+
+Current tests can rely too heavily on advancing RNG state through trial-and-error gameplay sequences to reach the desired scenario.
+
+Long-term direction:
+- deterministic fixture setup
+- controlled world bootstrapping
+- injected gameplay state for tests
+- deterministic actor placement
+- scenario-oriented harness helpers
+
+Potential examples:
+
+```text
+spawn specific encounters
+force inventory state
+place actors/items directly
+construct known world layouts
+```
+
+Goal:
+- keep gameplay deterministic
+- reduce fragile setup flows
+- reduce AI/agent thrashing while discovering valid test states
+- improve readability and intent of gameplay tests
+
+This should evolve as structured test harness functionality rather than hidden cheat/debug behaviour.
+
+---
+
 ## Add runtime seed argument
 
 Example:
