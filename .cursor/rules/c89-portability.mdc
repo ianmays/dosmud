@@ -1,0 +1,12 @@
+---
+description: Preserve ANSI C89 and DOS/OpenWatcom compatibility
+alwaysApply: true
+---
+
+# Portability constraints
+
+- Target ANSI C89 / ISO C90 compatibility.
+- Keep DOS/OpenWatcom and GCC compatibility in mind when changing headers, types, or libc usage.
+- Avoid compiler extensions, platform-specific assumptions, and C99/C11 features unless already established in the codebase.
+- Prefer explicit ownership, fixed-size arrays, and static storage over dynamic allocation.
+- Keep platform-specific behaviour isolated to platform/render layers.
