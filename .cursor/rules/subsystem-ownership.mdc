@@ -1,7 +1,6 @@
 ---
 description: Identify owning subsystem; keep gameplay platform agnostic and deterministic
-globs: "**/*.{c,h}"
-alwaysApply: false
+alwaysApply: true
 ---
 
 # Subsystem ownership and implementation boundaries

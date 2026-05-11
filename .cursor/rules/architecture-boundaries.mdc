@@ -1,0 +1,11 @@
+---
+description: Preserve subsystem boundaries and procedural architecture
+alwaysApply: true
+---
+
+# Architecture boundaries
+
+- Keep modules focused on clear responsibilities; avoid re-centralising unrelated systems into `game.c`.
+- Prefer extending existing subsystems over introducing new abstraction layers or cross-module coupling.
+- Keep ownership and state flow explicit.
+- Avoid framework-style architecture, object-emulation patterns, service locators, or ECS-like systems unless explicitly planned.
