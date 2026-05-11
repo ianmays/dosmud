@@ -5,6 +5,7 @@ Guidance for AI/code agents working in this repository.
 ## NON-NEGOTIABLE REQUIREMENTS
 
 - ALWAYS check if a corresponding GitHub Issue exists before starting work (see: dosmud GitHub project)
+- NEVER change tickets that have already been Closed
 - ALWAYS manage issue status in GitHub (NEVER skip straight to **Review** - see 'Github project `status` column (dosmud project)' below) - ALWAYS ensure Issue status and Issue project status are aligned
 - ALWAYS ensure all relevant Issues are linked to PRs
 - If no Issue exists, ALWAYS create one and label it appropriately (`gameplay`, `non-functional`, `tooling`, etc)
