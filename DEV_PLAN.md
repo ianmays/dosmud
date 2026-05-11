@@ -398,7 +398,7 @@ exist.
 
 # Phase 6 — Deterministic Test Harness
 
-Tracking: #40 (general test improvements), #46 (runtime `--seed` argument).
+Tracking: #66 (better test setup), #46 (runtime `--seed` argument), #40 (test coverage).
 
 ## Goal
 
