@@ -383,11 +383,7 @@ dosmud --seed 1234
 
 ## #73 - Rules
 
-Codify:
-- subsystem ownership
-- architecture boundaries
-- portability constraints
-- workflow discipline
+✅ Done - codified: subsystem ownership, architecture boundaries, portability constraints, workflow discipline.
 
 ---
 
