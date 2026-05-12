@@ -69,7 +69,7 @@ Large-scale gameplay/content expansion should remain secondary until the core ar
 
 ---
 
-# Phase 1 — Structural Cleanup + ANSI C89 Enforcement
+# Phase 1 - Structural Cleanup + ANSI C89 Enforcement
 
 ## Primary Goals
 
@@ -79,7 +79,7 @@ Large-scale gameplay/content expansion should remain secondary until the core ar
 
 ---
 
-## #42 — Split `game.c`
+## #42 - Split `game.c`
 
 Highest-priority architecture task.
 
@@ -154,11 +154,11 @@ Goal:
 
 ### Remove all K&R function definitions
 
-✅ Done — no K&R definitions remain in `src/`.
+✅ Done - no K&R definitions remain in `src/`.
 
 ### Enforce strict C89 compilation
 
-✅ Done — flags live in the `Makefile`.
+✅ Done - flags live in the `Makefile`.
 
 GCC:
 
@@ -182,23 +182,23 @@ Compiler discipline and warning cleanliness should remain early priorities throu
 
 ### Ensure OpenWatcom parity
 
-✅ Done — `make prepare-dos` covers the OpenWatcom path; ongoing discipline.
+✅ Done - `make prepare-dos` covers the OpenWatcom path; ongoing discipline.
 
 ### Remove mixed declarations/statements
 
-✅ Done — enforced by `-pedantic`.
+✅ Done - enforced by `-pedantic`.
 
 ### Replace C99 comments
 
-✅ Done — no `//` comments remain in `src/`.
+✅ Done - no `//` comments remain in `src/`.
 
 ### Centralize gameplay tuning values
 
-✅ Done — gameplay tuning values live in `include/config.h` (#33).
+✅ Done - gameplay tuning values live in `include/config.h` (#33).
 
 ---
 
-## #41 — Compatibility typedefs
+## #41 - Compatibility typedefs
 
 Create:
 
@@ -223,9 +223,9 @@ Goal:
 
 ---
 
-# Phase 2 — State Ownership and Boundary Isolation
+# Phase 2 - State Ownership and Boundary Isolation
 
-## #43 — Replace overlapping flags with state structures
+## #43 - Replace overlapping flags with state structures
 
 Introduce:
 
@@ -255,7 +255,7 @@ Goal:
 
 ---
 
-## #44 — Formalize engine boundaries
+## #44 - Formalize engine boundaries
 
 Separate:
 - gameplay simulation
@@ -286,7 +286,7 @@ Gameplay systems must never directly depend on platform or renderer concerns.
 
 ---
 
-## #45 — Platform layer
+## #45 - Platform layer
 
 Create:
 
@@ -304,7 +304,7 @@ Goal:
 
 ---
 
-# Phase 3 — Deterministic Test Harness Evolution
+# Phase 3 - Deterministic Test Harness Evolution
 
 ## Existing snapshot testing
 
@@ -324,7 +324,7 @@ diff test.output test.expect
 
 ---
 
-## #66 — Improve deterministic test setup
+## #66 - Improve deterministic test setup
 
 Current tests can rely too heavily on trial-and-error RNG progression.
 
@@ -353,7 +353,7 @@ This should evolve as structured test harness functionality rather than hidden c
 
 ---
 
-## #40 — Expand deterministic regression coverage
+## #40 - Expand deterministic regression coverage
 
 Add:
 - gameplay edge cases
@@ -369,7 +369,7 @@ Stress-test examples:
 
 ---
 
-## #46 — Runtime `--seed`
+## #46 - Runtime `--seed`
 
 Allow:
 
@@ -379,9 +379,9 @@ dosmud --seed 1234
 
 ---
 
-# Phase 4 — Workflow and Tooling Maturity
+# Phase 4 - Workflow and Tooling Maturity
 
-## #73 — Rules
+## #73 - Rules
 
 Codify:
 - subsystem ownership
@@ -391,7 +391,7 @@ Codify:
 
 ---
 
-## #74 — Skills
+## #74 - Skills
 
 Capture:
 - workflow knowledge
@@ -402,9 +402,9 @@ Capture:
 
 ---
 
-# Phase 5 — Advanced Architecture
+# Phase 5 - Advanced Architecture
 
-## #47 — Event queue architecture
+## #47 - Event queue architecture
 
 Future direction:
 
@@ -440,7 +440,7 @@ This is one of the most important architectural upgrades in the long-term roadma
 
 ---
 
-## #16 — Save/load system
+## #16 - Save/load system
 
 Create:
 
@@ -464,9 +464,9 @@ Initial binary serialization is acceptable.
 
 ---
 
-# Phase 6 — Renderer and Content Expansion
+# Phase 6 - Renderer and Content Expansion
 
-## #48 — SDL renderer
+## #48 - SDL renderer
 
 Target structure:
 
