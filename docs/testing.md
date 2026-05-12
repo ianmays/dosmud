@@ -26,6 +26,12 @@ Use PowerShell-driven DOS prep from Linux host shell:
 make prepare-dos
 ```
 
+Start DOS and launch the existing DOS executable without rebuilding:
+
+```sh
+make run-dos
+```
+
 Deterministic DOS validation:
 
 ```sh

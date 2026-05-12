@@ -1,5 +1,6 @@
 param(
-    [string]$Mode = ""
+    [string]$Mode = "",
+    [switch]$NoBuild
 )
 
 $config = Join-Path $PSScriptRoot "prepare-dos.local.ps1"
@@ -23,9 +24,17 @@ Get-Process $dosexecutable -ErrorAction SilentlyContinue | Stop-Process -Force
 
 $buildArgs = if ($Mode) { " $Mode" } else { "" }
 
-& "$dospath$dosexecutable" `
-  -c "mount c $mountpoint" `
-  -c "c:" `
-  -c "cd $projectdirectory" `
-  -c "call build.bat$buildArgs" `
-  -c "$projectname.exe"
+if (-not $NoBuild) {
+  & "$dospath$dosexecutable" `
+    -c "mount c $mountpoint" `
+    -c "c:" `
+    -c "cd $projectdirectory" `
+    -c "call build.bat$buildArgs" `
+    -c "$projectname.exe"
+} else {
+  & "$dospath$dosexecutable" `
+    -c "mount c $mountpoint" `
+    -c "c:" `
+    -c "cd $projectdirectory" `
+    -c "$projectname.exe"
+}
