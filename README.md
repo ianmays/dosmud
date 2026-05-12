@@ -57,4 +57,5 @@ The manual is deployed as [Github Pages](https://ianmays.github.io/dosmud/).
 - `CONTRIBUTING.md` points to contributor workflow guidance.
 - `AGENTS.md` contains repository guidance for coding agents.
 - `DEV_PLAN.md` outlines the current development roadmap, architectural priorities, and project rationale.
-- The GitHub Project board and Issues track active work, sequencing, and implementation details.
+
+The [dosmud GitHub Project](https://github.com/users/ianmays/projects/1) board and [Issues](https://github.com/ianmays/dosmud/issues) list track active work, sequencing, and implementation details.
