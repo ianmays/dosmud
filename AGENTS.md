@@ -75,6 +75,7 @@ Cross-path validation when touching build/runtime behavior:
 DOS flow entrypoint:
 
 - `make prepare-dos`
+- `make run-dos` - launch the existing prepared DOS tree without rebuilding
 - deterministic DOS mode: `make prepare-dos MODE=TEST_MODE`
 
 ## Environment Model for DOS Flow
