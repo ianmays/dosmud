@@ -1,0 +1,33 @@
+---
+description: Identify owning subsystem; keep gameplay platform agnostic and deterministic
+alwaysApply: true
+---
+
+# Subsystem ownership and implementation boundaries
+
+## Before you change code
+
+- Decide which subsystem owns the behaviour (see `docs/architecture.md`: `game`, `world`, `command`, rendering/platform, etc.).
+- Put the change in the owning module. Do not fix a symptom in the wrong layer.
+
+## Gameplay and simulation stay platform agnostic
+
+- Prefer explicit procedural flow and local state over introducing new abstraction layers, callback systems, or framework-style patterns.
+- Do **not** add rendering, platform I/O, DOS-specific, or UI concerns into gameplay or simulation code.
+- Gameplay/simulation may consume structured input and emit state; presentation and OS/DOS details live at the edges (`main`, render paths, platform glue).
+
+Good at the boundary:
+
+```c
+game_process_input(game, line);
+```
+
+Avoid inside core gameplay/simulation:
+
+```c
+printf("Player moved.\n");  /* UI / platform leakage */
+```
+
+## Determinism
+
+- Keep behaviour deterministic for the same seed and the same input sequence. Avoid hidden nondeterminism (time APIs for gameplay RNG, unordered iteration that affects outcomes, etc.) unless an existing, documented exception applies.

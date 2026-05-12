@@ -15,16 +15,24 @@ make test-run
 Purpose:
 
 - `make build`: native GCC development build
-- `make test`: strict deterministic compile path (`-Werror`, `-DTEST_MODE`)
+- `make test`: strict deterministic compile path (`-Werror`, `-DTEST_MODE`) and debugging (`-g -O0`)
 - `make test-run`: scripted input regression pass (`tests/smoke.*`, `tests/bandit_handover.*`, `tests/area_items.*`, `tests/map.*`, `tests/equipment.*` includes wield, bag wielding line, and first combat attack under `TEST_MODE` RNG)
 
 ## DOS/Open Watcom validation path
 
-Use PowerShell-driven DOS prep from Linux host shell:
+Use PowerShell-driven DOS prep from Linux host shell to build and sync the DOS tree:
 
 ```sh
 make prepare-dos
 ```
+
+Start DOS and launch the existing DOS executable without rebuilding or refreshing the tree:
+
+```sh
+make run-dos
+```
+
+`make run-dos` expects a previously prepared DOS tree. Run `make prepare-dos` first if the mirrored DOS files or executable are missing.
 
 Deterministic DOS validation:
 

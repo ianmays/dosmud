@@ -1,0 +1,16 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug dosmud",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/dosmud",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "externalConsole": false,
+      "MIMode": "gdb"
+    }
+  ]
+}

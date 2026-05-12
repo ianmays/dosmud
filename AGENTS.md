@@ -5,6 +5,7 @@ Guidance for AI/code agents working in this repository.
 ## NON-NEGOTIABLE REQUIREMENTS
 
 - ALWAYS check if a corresponding GitHub Issue exists before starting work (see: dosmud GitHub project)
+- NEVER change tickets that have already been Closed
 - ALWAYS manage issue status in GitHub (NEVER skip straight to **Review** - see 'Github project `status` column (dosmud project)' below) - ALWAYS ensure Issue status and Issue project status are aligned
 - ALWAYS ensure all relevant Issues are linked to PRs
 - If no Issue exists, ALWAYS create one and label it appropriately (`gameplay`, `non-functional`, `tooling`, etc)
@@ -18,6 +19,7 @@ Guidance for AI/code agents working in this repository.
 - ALWAYS keep documentation style consistent with surrounding files
 - ALWAYS make commit messages concise; use bullet points rather than sentences if needed; first character is ALWAYS lower-case
 - When asked to pick up a new issue (possibly under a specific label), ALWAYS ensure you pick the top issue according to the dosmud Github project - ALWAYS ensure you only pull from the tickets that exist in the 'Agent-ready' column
+- NEVER start working on an Issue if you think it's not necessary - challenge the timing of the selection or recommend it is abandoned
 - If a PR already exists, ALWAYS include pushing follow-up updates to the branch in any implementation plan
 - (VERY IMPORTANT) ALWAYS if you are pushing additional changes - check if the PR is no longer in draft state FIRST, then ALWAYS leave the comment 'review this' to trigger a re-review if it is NOT in draft state (NEVER ask - ALWAYS do this)
 - ALWAYS switch back to main, pull, and delete other branches locally when done with a task
@@ -73,6 +75,7 @@ Cross-path validation when touching build/runtime behavior:
 DOS flow entrypoint:
 
 - `make prepare-dos`
+- `make run-dos` - launch the existing prepared DOS tree without rebuilding
 - deterministic DOS mode: `make prepare-dos MODE=TEST_MODE`
 
 ## Environment Model for DOS Flow
