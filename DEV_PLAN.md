@@ -2,7 +2,7 @@
 
 ## Core Project Rules
 
-The agent should treat these as non-negotiable:
+The project should treat these as non-negotiable:
 
 ```text
 Language target:
@@ -11,6 +11,41 @@ Language target:
 - GCC compatible
 - No compiler extensions required
 ```
+
+The project should prioritize:
+
+- deterministic gameplay
+- procedural ANSI C architecture
+- explicit ownership and state flow
+- DOS/OpenWatcom portability
+- maintainability over rapid expansion
+- subsystem isolation
+- deterministic testing
+
+The project should avoid:
+
+- framework-style architecture
+- object-emulation patterns
+- ECS-style abstractions
+- hidden ownership
+- platform/render leakage into gameplay
+- premature complexity
+
+---
+
+# Current Project Priority
+
+The project is currently in an architectural consolidation phase.
+
+Highest-value work:
+
+1. clarify subsystem ownership
+2. reduce architecture drift
+3. improve deterministic testing
+4. preserve ANSI C89 portability
+5. improve workflow/tooling discipline
+
+Large-scale gameplay/content expansion should remain secondary until the core architecture stabilizes.
 
 ---
 
@@ -34,38 +69,50 @@ Language target:
 
 ---
 
-# Phase 1 — ANSI C89 Cleanup + Toolchain Enforcement
+# Phase 1 — Structural Cleanup + ANSI C89 Enforcement
 
-## Goal
+## Primary Goals
 
-Make the project strictly ANSI C89 clean and warning-clean.
+- reduce complexity concentration
+- preserve portability
+- clarify subsystem ownership
 
 ---
 
-## Tasks
+## #42 — Split `game.c`
 
-### 1. Remove all K&R function definitions
+Highest-priority architecture task.
+
+`game.c` should become orchestration-focused only.
+
+Target structure:
+
+```text
+src/
+    game.c
+    combat.c
+    dialogue.c
+    atmosphere.c
+    wanderer.c
+    progression.c
+    encounter.c
+```
+
+Goal:
+- reduce coupling
+- simplify debugging
+- improve maintainability
+- prepare for renderer/platform separation
+
+---
+
+## ANSI C89 cleanup and compiler enforcement
+
+### Remove all K&R function definitions
 
 ✅ Done — no K&R definitions remain in `src/`.
 
-Replace:
-
-```c
-func(a)
-int a;
-```
-
-with:
-
-```c
-int func(int a)
-```
-
-Everywhere.
-
----
-
-### 2. Enforce strict C89 compilation
+### Enforce strict C89 compilation
 
 ✅ Done — flags live in the `Makefile`.
 
@@ -87,61 +134,21 @@ Tests/CI only:
 -Werror
 ```
 
----
-
-### 3. Ensure OpenWatcom parity
+### Ensure OpenWatcom parity
 
 ✅ Done — `make prepare-dos` covers the OpenWatcom path; ongoing discipline.
 
-Goal:
-- no GCC-only behaviour
-- no implicit compiler extensions
-
-Build both targets regularly.
-
----
-
-### 4. Remove mixed declarations/statements
+### Remove mixed declarations/statements
 
 ✅ Done — enforced by `-pedantic`.
 
-Bad:
-
-```c
-foo();
-int x;
-```
-
-Good:
-
-```c
-int x;
-foo();
-```
-
----
-
-### 5. Replace C99 comments
+### Replace C99 comments
 
 ✅ Done — no `//` comments remain in `src/`.
 
-Remove:
-
-```c
-// comment
-```
-
-Use:
-
-```c
-/* comment */
-```
-
 ---
 
-### 6. Introduce compatibility typedefs
-
-Tracking: #41.
+## #41 — Compatibility typedefs
 
 Create:
 
@@ -157,130 +164,17 @@ typedef unsigned short u16;
 typedef unsigned long u32;
 ```
 
-Do NOT assume exact widths blindly.
-Document assumptions.
+Goal:
+- improve portability clarity
+- centralize low-level assumptions
 
 ---
 
-### 7. Centralise constants
+# Phase 2 — State Ownership and Boundary Isolation
 
-✅ Done — see #33; values live in `include/config.h`.
+## #43 — Replace overlapping flags with state structures
 
-Move gameplay tuning values into config headers.
-
-Example:
-
-```c
-#define CFG_BANDIT_SPAWN_CHANCE 14
-#define CFG_ANIMAL_NOISE_CHANCE 75
-```
-
----
-
-# Phase 2 — Split `game.c`
-
-Tracking: #42.
-
-## Goal
-
-Turn `game.c` into orchestration only.
-
-Right now it owns too many systems.
-
----
-
-## Target Structure
-
-```text
-src/
-    game.c
-    combat.c
-    dialogue.c
-    atmosphere.c
-    wanderer.c
-    progression.c
-    encounter.c
-```
-
----
-
-## Responsibilities
-
-### `game.c`
-Only:
-- high-level orchestration
-- tick sequencing
-- command routing
-
----
-
-### `combat.c`
-Own:
-- combat state
-- combat flow
-- enemy turns
-- combat rewards
-
----
-
-### `dialogue.c`
-Own:
-- frog dialogue
-- NPC dialogue
-- reply handling
-
----
-
-### `wanderer.c`
-Own:
-- wanderer movement
-- encounter triggering
-- separation logic
-
----
-
-### `atmosphere.c`
-Own:
-- ambient effects
-- inspect clues
-- environmental state
-
----
-
-### `progression.c`
-Own:
-- XP
-- leveling
-- scaling
-
----
-
-### `encounter.c`
-Own:
-- random encounter spawning
-- bandit logic
-
----
-
-# Phase 3 — Replace Flag Soup with State Machines
-
-Tracking: #43.
-
-## Goal
-
-Prevent invalid state combinations.
-
-Current design uses many overlapping flags:
-- `combat_active`
-- `enemy_dialogue`
-- `pond_dialogue`
-- etc.
-
-This will become unstable as systems grow.
-
----
-
-## Introduce
+Introduce:
 
 ```c
 enum GameMode {
@@ -290,80 +184,32 @@ enum GameMode {
 };
 ```
 
----
-
-## Add subsystem state structs
-
-Example:
-
-```c
-struct CombatState
-{
-    int active;
-    int enemy_hp;
-    int defending;
-};
-```
+Goal:
+- prevent invalid state combinations
+- clarify transitions
+- improve testability
 
 ---
 
-## Goal
-
-Only one major mode active at a time.
-
----
-
-# Phase 4 — Formalise Engine Boundaries
-
-Tracking: #44.
-
-## Goal
+## #44 — Formalize engine boundaries
 
 Separate:
-- simulation
+- gameplay simulation
 - rendering
-- platform
+- platform integration
 
-cleanly.
-
----
-
-## Introduce subsystem boundaries
-
-### Core
-Pure gameplay logic.
-
-NO:
-- printf
+Gameplay systems should not directly depend on:
 - DOS APIs
-- SDL APIs
+- terminal APIs
+- SDL
+- rendering concerns
 - timing APIs
 
 ---
 
-### Render
-Text output only.
+## #45 — Platform layer
 
-Current `grendr.*` separation is already strong.
-
----
-
-### Platform
-Input/timing/system integration only.
-
----
-
-# Phase 5 — Introduce Platform Layer
-
-Tracking: #45.
-
-## Goal
-
-Prevent platform-specific leakage.
-
----
-
-## Create
+Create:
 
 ```text
 platform/
@@ -372,53 +218,16 @@ platform/
     plat_posix.c
 ```
 
----
-
-## Wrap
-
-- timing
-- input polling
-- sleep
-- startup/shutdown
-- randomness seed setup
+Goal:
+- isolate portability concerns
+- reduce platform leakage
+- simplify future renderer work
 
 ---
 
-## Main rule
+# Phase 3 — Deterministic Test Harness Evolution
 
-Core gameplay must never know:
-- DOS
-- Linux
-- SDL
-- terminal APIs
-
-exist.
-
----
-
-# Phase 6 — Deterministic Test Harness
-
-Tracking: #66 (better test setup), #46 (runtime `--seed` argument), #40 (test coverage).
-
-## Goal
-
-Turn deterministic simulation into real regression testing.
-
-You already have the foundations.
-
----
-
-## Add
-
-```text
-tests/
-```
-
----
-
-## Snapshot testing
-
-Tracking: #66 (better test setup), #40 (more test coverage).
+## Existing snapshot testing
 
 Pattern:
 
@@ -436,140 +245,98 @@ diff test.output test.expect
 
 ---
 
-## Improve deterministic setup control
+## #66 — Improve deterministic test setup
 
-Current tests can rely too heavily on advancing RNG state through trial-and-error gameplay sequences to reach the desired scenario.
+Current tests can rely too heavily on trial-and-error RNG progression.
 
 Long-term direction:
 - deterministic fixture setup
 - controlled world bootstrapping
-- injected gameplay state for tests
 - deterministic actor placement
-- scenario-oriented harness helpers
+- explicit scenario construction
+- injected gameplay state where appropriate
 
-Potential examples:
+Potential capabilities:
 
 ```text
-spawn specific encounters
-force inventory state
-place actors/items directly
-construct known world layouts
+spawn encounters directly
+construct inventory state
+place actors/items deterministically
+create known room layouts
 ```
 
 Goal:
-- keep gameplay deterministic
-- reduce fragile setup flows
-- reduce AI/agent thrashing while discovering valid test states
-- improve readability and intent of gameplay tests
-
-This should evolve as structured test harness functionality rather than hidden cheat/debug behaviour.
+- reduce brittle setup flows
+- reduce AI/agent thrashing
+- preserve deterministic behaviour
 
 ---
 
-## Add runtime seed argument
+## #40 — Expand deterministic regression coverage
 
-Example:
+Add:
+- gameplay edge cases
+- combat coverage
+- inventory coverage
+- world simulation coverage
+
+---
+
+## #46 — Runtime `--seed`
+
+Allow:
 
 ```text
 dosmud --seed 1234
 ```
 
-instead of relying entirely on compile-time test mode.
+---
+
+# Phase 4 — Workflow and Tooling Maturity
+
+## #73 — Rules
+
+Codify:
+- subsystem ownership
+- architecture boundaries
+- portability constraints
+- workflow discipline
 
 ---
 
-## Add simulation stress tests
+## #74 — Skills
 
-Examples:
-- 10,000 ticks
-- repeated combat
-- world generation loops
-- inventory edge cases
+Capture:
+- workflow knowledge
+- repo conventions
+- deterministic testing workflows
+- DOS/OpenWatcom constraints
+- architecture expectations
 
 ---
 
-# Phase 7 — Event Queue Architecture
+# Phase 5 — Advanced Architecture
 
-Tracking: #47.
+## #47 — Event queue architecture
 
-## Goal
-
-Decouple simulation from rendering.
-
-Current:
+Future direction:
 
 ```text
-game logic -> render function directly
+gameplay -> event queue -> renderer
 ```
 
-Future:
-
-```text
-game logic -> event queue -> renderer
-```
-
----
-
-## Introduce
-
-```c
-struct GameEvent
-```
-
-Examples:
-
-```text
-EVENT_DAMAGE
-EVENT_MOVE
-EVENT_DIALOGUE
-EVENT_ITEM
-EVENT_NOISE
-```
-
----
-
-## Benefits
-
-Enables:
-- SDL rendering
-- replay system
+Potential benefits:
+- replay systems
 - logging
-- testing
-- save/load consistency
-
-This is the biggest architectural upgrade in the entire roadmap.
-
----
-
-# Phase 8 — Save/Load System
-
-Tracking: #16.
-
-## Goal
-
-Stabilise persistent state ownership.
-
-Because the project already uses:
-- fixed arrays
-- deterministic state
-- explicit structs
-
-serialization will be manageable.
+- renderer flexibility
+- deterministic event capture
+- improved testing
 
 ---
 
-## Add
+## #16 — Save/load system
 
-```text
-save.c
-save.h
-```
-
----
-
-## Initial format
-
-Simple binary serialization is fine initially.
+The current fixed-array architecture is already well suited to serialization.
 
 Avoid:
 - pointers
@@ -578,57 +345,36 @@ Avoid:
 
 ---
 
-# Phase 9 — SDL Renderer
+# Phase 6 — Renderer and Content Expansion
 
-Tracking: #48.
+## #48 — SDL renderer
 
-## Goal
-
-Add graphics without damaging the core architecture.
-
----
-
-## Final structure
-
-```text
-core/
-render_text/
-render_sdl/
-platform/
-```
-
----
-
-## SDL owns ONLY
-
+SDL should own ONLY:
 - rendering
+- audio
 - input
 - timing
-- audio
 
 NOT:
-- combat
-- movement
+- gameplay
 - simulation
-- world logic
+- combat logic
+- world state
 
 ---
 
-# Phase 10 — Content Expansion
+## Content expansion
 
-Only after architecture stabilises.
+Only after core architecture feels stable.
 
-Then safely add:
-- quests (#49)
-- factions (#9)
-- economy (#50)
-- weather (#51)
-- procedural encounters (#54)
-- NPC schedules (#52)
-- larger worlds (#55)
-- persistence systems (#16)
-
-without architectural collapse.
+Includes:
+- factions
+- economy
+- weather
+- schedules
+- quests
+- procedural encounters
+- larger worlds
 
 ---
 
@@ -636,43 +382,47 @@ without architectural collapse.
 
 ## Start now
 
-1. ANSI cleanup
-2. split `game.c`
-3. constants cleanup
-4. warning cleanup
+1. split `game.c`
+2. state ownership cleanup
+3. engine boundary isolation
+4. platform layer
+5. compatibility typedefs
 
 ---
 
 ## Then
 
-5. platform layer
-6. state machine conversion
-7. deterministic test harness
+6. deterministic test setup evolution
+7. regression coverage expansion
+8. runtime `--seed`
+9. workflow/rules/skills maturity
 
 ---
 
 ## Later
 
-8. event queue
-9. save/load
-10. SDL renderer
+10. event queue architecture
+11. save/load
+12. SDL renderer
+13. large-scale gameplay expansion
 
 ---
 
 # Important Final Guidance For The Agent
 
-style C architecture:
+Preferred architecture style:
 - procedural
 - explicit
 - deterministic
 - modular
-- simple data ownership
+- era appropriate
 
 Do NOT turn this into:
 - ECS
 - component-heavy abstractions
 - macro metaprogramming
 - object-emulation frameworks
+- service locator architectures
 - modern enterprise-style architecture
 
 Simple ANSI C scales surprisingly far when module boundaries stay disciplined.
