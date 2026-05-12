@@ -192,6 +192,10 @@ Compiler discipline and warning cleanliness should remain early priorities throu
 
 ✅ Done — no `//` comments remain in `src/`.
 
+### Centralize gameplay tuning values
+
+✅ Done — gameplay tuning values live in `include/config.h` (#33).
+
 ---
 
 ## #41 — Compatibility typedefs
@@ -209,6 +213,9 @@ typedef unsigned char u8;
 typedef unsigned short u16;
 typedef unsigned long u32;
 ```
+
+Do not assume exact widths blindly.
+Document assumptions clearly.
 
 Goal:
 - improve portability clarity
@@ -530,7 +537,7 @@ Includes:
 
 ---
 
-# Important Final Guidance For The Agent
+# Important Final Guidance
 
 Preferred architecture style:
 - procedural
