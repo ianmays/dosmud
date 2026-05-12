@@ -83,7 +83,7 @@ Large-scale gameplay/content expansion should remain secondary until the core ar
 
 Highest-priority architecture task.
 
-`game.c` should become orchestration-focused only.
+`game.c` currently owns too many systems and should become orchestration-focused only.
 
 Target structure:
 
@@ -178,6 +178,8 @@ Tests/CI only:
 -Werror
 ```
 
+Compiler discipline and warning cleanliness should remain early priorities throughout development.
+
 ### Ensure OpenWatcom parity
 
 ✅ Done — `make prepare-dos` covers the OpenWatcom path; ongoing discipline.
@@ -263,13 +265,17 @@ NO:
 - rendering concerns
 - timing APIs
 
+Core gameplay must never know DOS/Linux/SDL/terminal APIs exist.
+
 ### Render
 Presentation only.
+
+Current `grendr.*` separation is already a strong direction and should be preserved.
 
 ### Platform
 Input/timing/system integration only.
 
-Gameplay systems should not directly depend on platform or renderer concerns.
+Gameplay systems must never directly depend on platform or renderer concerns.
 
 ---
 
@@ -335,6 +341,8 @@ Goal:
 - reduce brittle setup flows
 - reduce AI/agent thrashing
 - preserve deterministic behaviour
+
+This should evolve as structured test harness functionality rather than hidden cheat/debug behaviour.
 
 ---
 
@@ -421,6 +429,8 @@ Potential benefits:
 - improved testing
 - save/load consistency
 
+This is one of the most important architectural upgrades in the long-term roadmap.
+
 ---
 
 ## #16 — Save/load system
@@ -432,7 +442,10 @@ save.c
 save.h
 ```
 
-The current fixed-array architecture is already well suited to serialization.
+The current fixed-array architecture is already well suited to serialization because the project favors:
+- fixed arrays
+- deterministic state
+- explicit structs
 
 Avoid:
 - pointers
@@ -495,24 +508,25 @@ Includes:
 3. engine boundary isolation
 4. platform layer
 5. compatibility typedefs
+6. warning cleanup and compiler rigor
 
 ---
 
 ## Then
 
-6. deterministic test setup evolution
-7. regression coverage expansion
-8. runtime `--seed`
-9. workflow/rules/skills maturity
+7. deterministic test setup evolution
+8. regression coverage expansion
+9. runtime `--seed`
+10. workflow/rules/skills maturity
 
 ---
 
 ## Later
 
-10. event queue architecture
-11. save/load
-12. SDL renderer
-13. large-scale gameplay expansion
+11. event queue architecture
+12. save/load
+13. SDL renderer
+14. large-scale gameplay expansion
 
 ---
 
