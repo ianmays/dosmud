@@ -26,6 +26,7 @@ Guidance for AI/code agents working in this repository.
 - If the task done existed in the DEV_PLAN.md, ALWAYS mark it as done
 - ALWAYS write a test for a new gameplay feature
 - ALWAYS ensure PR labels match issue labels
+- NEVER use docs: or anything similar in PR titles or commit messages
 
 ### GitHub project `Status` column (dosmud project)
 
