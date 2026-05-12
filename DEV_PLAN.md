@@ -98,6 +98,50 @@ src/
     encounter.c
 ```
 
+### `game.c`
+Only:
+- high-level orchestration
+- tick sequencing
+- command routing
+- mode transitions
+
+### `combat.c`
+Own:
+- combat state
+- combat flow
+- enemy turns
+- combat rewards
+
+### `dialogue.c`
+Own:
+- NPC dialogue
+- reply handling
+- dialogue state
+
+### `wanderer.c`
+Own:
+- wanderer movement
+- encounter triggering
+- separation logic
+
+### `atmosphere.c`
+Own:
+- ambient effects
+- inspect clues
+- environmental state
+
+### `progression.c`
+Own:
+- XP
+- leveling
+- scaling
+
+### `encounter.c`
+Own:
+- random encounter spawning
+- bandit logic
+- encounter sequencing
+
 Goal:
 - reduce coupling
 - simplify debugging
@@ -184,6 +228,17 @@ enum GameMode {
 };
 ```
 
+Example:
+
+```c
+struct CombatState
+{
+    int active;
+    int enemy_hp;
+    int defending;
+};
+```
+
 Goal:
 - prevent invalid state combinations
 - clarify transitions
@@ -198,12 +253,23 @@ Separate:
 - rendering
 - platform integration
 
-Gameplay systems should not directly depend on:
+### Core
+Pure gameplay logic.
+
+NO:
 - DOS APIs
 - terminal APIs
-- SDL
+- SDL APIs
 - rendering concerns
 - timing APIs
+
+### Render
+Presentation only.
+
+### Platform
+Input/timing/system integration only.
+
+Gameplay systems should not directly depend on platform or renderer concerns.
 
 ---
 
@@ -280,6 +346,12 @@ Add:
 - inventory coverage
 - world simulation coverage
 
+Stress-test examples:
+- 10,000 tick simulations
+- repeated combat loops
+- inventory edge cases
+- world generation loops
+
 ---
 
 ## #46 — Runtime `--seed`
@@ -325,16 +397,40 @@ Future direction:
 gameplay -> event queue -> renderer
 ```
 
+Introduce:
+
+```c
+struct GameEvent
+```
+
+Example event types:
+
+```text
+EVENT_DAMAGE
+EVENT_MOVE
+EVENT_DIALOGUE
+EVENT_ITEM
+EVENT_NOISE
+```
+
 Potential benefits:
 - replay systems
 - logging
 - renderer flexibility
 - deterministic event capture
 - improved testing
+- save/load consistency
 
 ---
 
 ## #16 — Save/load system
+
+Create:
+
+```text
+save.c
+save.h
+```
 
 The current fixed-array architecture is already well suited to serialization.
 
@@ -342,12 +438,24 @@ Avoid:
 - pointers
 - heap ownership
 - variable-sized runtime structures
+- function pointers in persistent state
+
+Initial binary serialization is acceptable.
 
 ---
 
 # Phase 6 — Renderer and Content Expansion
 
 ## #48 — SDL renderer
+
+Target structure:
+
+```text
+core/
+render_text/
+render_sdl/
+platform/
+```
 
 SDL should own ONLY:
 - rendering
