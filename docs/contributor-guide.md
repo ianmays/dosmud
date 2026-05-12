@@ -38,6 +38,7 @@ If your changes affect build flow, DOS runtime behavior, or orchestration script
 
 ```sh
 make prepare-dos
+make run-dos
 make prepare-dos MODE=TEST_MODE
 ```
 

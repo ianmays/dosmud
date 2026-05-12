@@ -20,11 +20,19 @@ Purpose:
 
 ## DOS/Open Watcom validation path
 
-Use PowerShell-driven DOS prep from Linux host shell:
+Use PowerShell-driven DOS prep from Linux host shell to build and sync the DOS tree:
 
 ```sh
 make prepare-dos
 ```
+
+Start DOS and launch the existing DOS executable without rebuilding or refreshing the tree:
+
+```sh
+make run-dos
+```
+
+`make run-dos` expects a previously prepared DOS tree. Run `make prepare-dos` first if the mirrored DOS files or executable are missing.
 
 Deterministic DOS validation:
 

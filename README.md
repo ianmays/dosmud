@@ -38,6 +38,7 @@ DOS/Open Watcom path:
 
 ```sh
 make prepare-dos
+make run-dos
 ```
 
 ## Manual

@@ -50,4 +50,7 @@ clean:
 prepare-dos:
 	powershell.exe -ExecutionPolicy Bypass -File prepare-dos.ps1 $(if $(MODE),-Mode $(MODE))
 
-.PHONY: all build all-test test test-run clean prepare-dos
+run-dos:
+	powershell.exe -ExecutionPolicy Bypass -File prepare-dos.ps1 -NoBuild
+
+.PHONY: all build all-test test test-run clean prepare-dos run-dos
