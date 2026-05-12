@@ -12,19 +12,18 @@ if (!(Test-Path $config)) {
 
 . $config
 
-# Remove old copy
-if (Test-Path $destination) {
-    Remove-Item -Recurse -Force $destination
-}
-
-# Copy fresh
-robocopy $source $destination    /MIR
-
 Get-Process $dosexecutable -ErrorAction SilentlyContinue | Stop-Process -Force
 
 $buildArgs = if ($Mode) { " $Mode" } else { "" }
 
 if (-not $NoBuild) {
+  # Refresh the DOS tree before building.
+  if (Test-Path $destination) {
+    Remove-Item -Recurse -Force $destination
+  }
+
+  robocopy $source $destination    /MIR
+
   & "$dospath$dosexecutable" `
     -c "mount c $mountpoint" `
     -c "c:" `
@@ -32,6 +31,16 @@ if (-not $NoBuild) {
     -c "call build.bat$buildArgs" `
     -c "$projectname.exe"
 } else {
+  if (!(Test-Path $destination)) {
+    Write-Error "Missing prepared DOS tree at $destination. Run make prepare-dos first."
+    exit 1
+  }
+
+  if (!(Test-Path (Join-Path $destination "$projectname.exe"))) {
+    Write-Error "Missing DOS executable at $destination\$projectname.exe. Run make prepare-dos first."
+    exit 1
+  }
+
   & "$dospath$dosexecutable" `
     -c "mount c $mountpoint" `
     -c "c:" `
