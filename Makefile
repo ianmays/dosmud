@@ -1,18 +1,17 @@
 CC ?= gcc
 
 BASE_CFLAGS = -Wall -Wextra -Wshadow -Wstrict-prototypes -Wmissing-prototypes -std=c89 -pedantic -Iinclude -Isrc
-DEV_CFLAGS = $(BASE_CFLAGS)
 TEST_MODE_FLAG = TEST_MODE
-TEST_CFLAGS = $(BASE_CFLAGS) -Werror -D$(TEST_MODE_FLAG)
+TEST_CFLAGS = $(BASE_CFLAGS) -Werror -D$(TEST_MODE_FLAG) -g -O0
 SRC = src/main.c src/game.c src/grendr.c src/invent.c src/command.c src/world.c src/items.c src/txtres.c
 BIN = dosmud
 
 all-build: $(BIN)
 $(BIN): $(SRC)
-	$(MAKE) clean && $(MAKE) prepare-dos && $(CC) $(DEV_CFLAGS) -o $(BIN) $(SRC)
+	$(MAKE) clean && $(MAKE) prepare-dos && $(CC) $(BASE_CFLAGS) -o $(BIN) $(SRC)
 
 build:
-	$(MAKE) clean && $(CC) $(DEV_CFLAGS) -o $(BIN) $(SRC)
+	$(MAKE) clean && $(CC) $(BASE_CFLAGS) -o $(BIN) $(SRC)
 
 # deterministic
 all-test:
