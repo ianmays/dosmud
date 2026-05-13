@@ -169,7 +169,7 @@ const char *const TXT_BANDIT_OPEN_INTRO = "\nA road bandit steps from cover with
 const char *const TXT_BANDIT_OPEN_QUOTE = "\"Easy now. We can do this three ways.\"\n";
 const char *const TXT_BANDIT_OPEN_OPT1 = "  [1] Refuse and fight.\n";
 const char *const TXT_BANDIT_OPEN_OPT2 =
-    "  [2] Hand over one item from your bag (choose reply 2, then give <item>).\n";
+    "  [2] Hand over one item from your bag or what you are wielding (choose reply 2, then give <item>).\n";
 const char *const TXT_BANDIT_OPEN_OPT3 = "  [3] Talk it down and part ways.\n";
 const char *const TXT_REPLY_PROMPT = "(Answer with 1, 2, 3, or reply <n>.)\n";
 
@@ -235,10 +235,11 @@ const char *const TXT_ARCHIVIST_ART_CAPTION = "(ink under every nail)";
 
 const char *const TXT_MSG_BANDIT_WAITING = "The bandit is waiting on your move (reply 1/2/3).\n";
 const char *const TXT_MSG_BANDIT_WAITING_HANDOVER =
-    "The bandit waits for you to name what you hand over: give <item> (try bag).\n";
+    "The bandit waits for you to name what you hand over: give <item> (bag lists loose gear; wielded counts).\n";
 const char *const TXT_BANDIT_HANDOVER_PICK_PROMPT =
     "The bandit watches your hands. Name what you surrender with give <item>.\n";
-const char *const TXT_MSG_BANDIT_GIVE_NOT_CARRYING = "You are not carrying that. Pick something from your bag.\n";
+const char *const TXT_MSG_BANDIT_GIVE_NOT_CARRYING =
+    "You are not carrying that. Pick something from your bag or name your wielded weapon.\n";
 const char *const TXT_MSG_GIVE_WRONG_CONTEXT = "Nobody here is asking you for a hand-out.\n";
 const char *const TXT_MSG_UNKNOWN_COMMAND = "Unknown command. Type 'help'.\n";
 const char *const TXT_MSG_WAIT = "You wait.\n";
@@ -331,3 +332,10 @@ const char *const TXT_INV_WIELD_NOT_WEAPON = "That is not something you can wiel
 const char *const TXT_INV_WIELD_FMT = "You ready the %s.\n";
 const char *const TXT_INV_UNWIELD = "You sling your weapon aside.\n";
 const char *const TXT_INV_UNWIELD_EMPTY = "You have nothing wielded.\n";
+const char *const TXT_INV_UNWIELD_GROUND_FMT =
+    "Your bag is full; you set the %s on the ground.\n";
+const char *const TXT_INV_UNWIELD_CANNOT =
+    "You cannot unwield right now. Your bag is full and there is no room on the ground here.\n";
+const char *const TXT_INV_ALREADY_WIELDING_FMT = "You are already wielding the %s.\n";
+const char *const TXT_INV_WIELD_STOW_FAIL =
+    "You cannot switch weapons; there is no room to stow what you were holding.\n";

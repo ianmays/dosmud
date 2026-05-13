@@ -78,7 +78,7 @@ Loose grit skips over stone under an uncertain breeze.
 A road bandit steps from cover with a hand on a rusted blade.
 "Easy now. We can do this three ways."
   [1] Refuse and fight.
-  [2] Hand over one item from your bag (choose reply 2, then give <item>).
+  [2] Hand over one item from your bag or what you are wielding (choose reply 2, then give <item>).
   [3] Talk it down and part ways.
 (Answer with 1, 2, 3, or reply <n>.)
 

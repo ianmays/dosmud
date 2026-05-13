@@ -12,6 +12,8 @@ int game_room_ground_try_add(struct GameState *game, int room_id, int item_id);
 int game_room_ground_has_space(struct GameState *game, int room_id);
 
 int game_inv_bag_find_index(struct GameState *game, int item_id);
+/* True when the item is in the bag or is the wielded weapon. */
+int game_inv_player_has_item(struct GameState *game, int item_id);
 int game_inv_bag_add(struct GameState *game, int item_id);
 int game_inv_bag_remove_index(struct GameState *game, int index);
 int game_inv_bag_remove_item(struct GameState *game, int item_id);

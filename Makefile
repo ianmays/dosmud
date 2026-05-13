@@ -43,6 +43,10 @@ test-run:
 	diff -u \
 		tests/equipment.expect \
 		tests/equipment.output
+	./$(BIN) < tests/bandit_wielded_give.input > tests/bandit_wielded_give.output
+	diff -u \
+		tests/bandit_wielded_give.expect \
+		tests/bandit_wielded_give.output
 
 clean:
 	rm -f $(BIN)

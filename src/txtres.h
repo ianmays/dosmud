@@ -189,5 +189,9 @@ extern const char *const TXT_INV_WIELD_NOT_WEAPON;
 extern const char *const TXT_INV_WIELD_FMT;
 extern const char *const TXT_INV_UNWIELD;
 extern const char *const TXT_INV_UNWIELD_EMPTY;
+extern const char *const TXT_INV_UNWIELD_GROUND_FMT;
+extern const char *const TXT_INV_UNWIELD_CANNOT;
+extern const char *const TXT_INV_ALREADY_WIELDING_FMT;
+extern const char *const TXT_INV_WIELD_STOW_FAIL;
 
 #endif

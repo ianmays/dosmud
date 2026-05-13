@@ -83,6 +83,32 @@ int game_inv_bag_find_index(struct GameState *game, int item_id)
     return -1;
 }
 
+int game_inv_player_has_item(struct GameState *game, int item_id)
+{
+    if (game_inv_bag_find_index(game, item_id) >= 0) {
+        return 1;
+    }
+    if (game->weapon_equipped == item_id) {
+        return 1;
+    }
+    return 0;
+}
+
+/* Remove bag slot without clearing weapon_equipped (used when moving item to hand). */
+static int game_inv_bag_remove_index_transfer(struct GameState *game, int index)
+{
+    int i;
+    if (index < 0 || index >= game->bag_count) {
+        return 0;
+    }
+    for (i = index; i < game->bag_count - 1; ++i) {
+        game->bag[i] = game->bag[i + 1];
+    }
+    game->bag_count -= 1;
+    game->bag[game->bag_count] = ITEM_NONE;
+    return 1;
+}
+
 int game_inv_bag_add(struct GameState *game, int item_id)
 {
     if (game->bag_count >= game->bag_capacity) {
@@ -187,7 +213,7 @@ int game_inv_cmd_drop(struct GameState *game, int item_arg)
         return 1;
     }
     room_id = game->player.room_id;
-    if (game_inv_bag_find_index(game, item_arg) < 0) {
+    if (!game_inv_player_has_item(game, item_arg)) {
         printf(TXT_INV_NOT_CARRYING_FMT, item_name(item_arg));
         return 1;
     }
@@ -196,7 +222,20 @@ int game_inv_cmd_drop(struct GameState *game, int item_arg)
         printf(TXT_INV_GROUND_FULL_FMT, CFG_AREA_ITEM_SLOTS);
         return 1;
     }
-    game_inv_bag_remove_item(game, item_arg);
+    {
+        int idx;
+        idx = game_inv_bag_find_index(game, item_arg);
+        if (idx >= 0) {
+            if (!game_inv_bag_remove_index_transfer(game, idx)) {
+                return 1;
+            }
+        } else if (game->weapon_equipped == item_arg) {
+            game->weapon_equipped = ITEM_NONE;
+        } else {
+            printf(TXT_INV_NOT_CARRYING_FMT, item_name(item_arg));
+            return 1;
+        }
+    }
     game->room_item[room_id][slot] = item_arg;
     printf(TXT_INV_DROP_FMT, item_name(item_arg));
     return 1;
@@ -209,15 +248,15 @@ int game_inv_cmd_bag(struct GameState *game)
     printf(TXT_INV_BAG_HEADER_FMT, game->bag_count, game->bag_capacity);
     if (game->bag_count <= 0) {
         printf("%s", TXT_INV_BAG_EMPTY);
-        return 1;
-    }
-    for (i = 0; i < game->bag_count; ++i) {
-        printf(" %s", item_name(game->bag[i]));
-        if (i < game->bag_count - 1) {
-            printf(",");
+    } else {
+        for (i = 0; i < game->bag_count; ++i) {
+            printf(" %s", item_name(game->bag[i]));
+            if (i < game->bag_count - 1) {
+                printf(",");
+            }
         }
+        printf("\n");
     }
-    printf("\n");
     if (game->weapon_equipped != ITEM_NONE) {
         printf(TXT_INV_BAG_WIELDING_FMT, item_name(game->weapon_equipped));
     }
@@ -326,13 +365,36 @@ int game_inv_cmd_craft(struct GameState *game, int item_arg)
 
 int game_inv_cmd_wield(struct GameState *game, int item_arg)
 {
-    if (game_inv_bag_find_index(game, item_arg) < 0) {
+    int idx;
+    int old_weapon;
+
+    if (item_arg == game->weapon_equipped) {
+        printf(TXT_INV_ALREADY_WIELDING_FMT, item_name(item_arg));
+        return 1;
+    }
+    idx = game_inv_bag_find_index(game, item_arg);
+    if (idx < 0) {
         printf(TXT_INV_NOT_CARRYING_FMT, item_name(item_arg));
         return 1;
     }
     if (!item_is_weapon(item_arg)) {
         printf("%s", TXT_INV_WIELD_NOT_WEAPON);
         return 1;
+    }
+    old_weapon = game->weapon_equipped;
+    if (!game_inv_bag_remove_index_transfer(game, idx)) {
+        return 1;
+    }
+    if (old_weapon != ITEM_NONE) {
+        if (!game_inv_bag_add(game, old_weapon)) {
+            if (!game_inv_bag_add(game, item_arg)) {
+                game->weapon_equipped = old_weapon;
+                return 1;
+            }
+            game->weapon_equipped = old_weapon;
+            printf("%s", TXT_INV_WIELD_STOW_FAIL);
+            return 1;
+        }
     }
     game->weapon_equipped = item_arg;
     printf(TXT_INV_WIELD_FMT, item_name(item_arg));
@@ -341,11 +403,32 @@ int game_inv_cmd_wield(struct GameState *game, int item_arg)
 
 int game_inv_cmd_unwield(struct GameState *game)
 {
+    int room_id;
+    int slot;
+    int w;
+
     if (game->weapon_equipped == ITEM_NONE) {
         printf("%s", TXT_INV_UNWIELD_EMPTY);
         return 1;
     }
+    w = game->weapon_equipped;
+    if (game_inv_bag_add(game, w)) {
+        game->weapon_equipped = ITEM_NONE;
+        printf("%s", TXT_INV_UNWIELD);
+        return 1;
+    }
+    if (game->combat_active) {
+        printf("%s", TXT_INV_UNWIELD_CANNOT);
+        return 1;
+    }
+    room_id = game->player.room_id;
+    slot = room_first_free_slot(game, room_id);
+    if (slot < 0) {
+        printf("%s", TXT_INV_UNWIELD_CANNOT);
+        return 1;
+    }
     game->weapon_equipped = ITEM_NONE;
-    printf("%s", TXT_INV_UNWIELD);
+    game->room_item[room_id][slot] = w;
+    printf(TXT_INV_UNWIELD_GROUND_FMT, item_name(w));
     return 1;
 }

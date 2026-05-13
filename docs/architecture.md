@@ -108,7 +108,8 @@ Conventions:
 
 - bag/inventory state mutation
 - item use and crafting behavior
-- wield/unwield commands track `weapon_equipped` on `GameState`; combat adds `item_weapon_damage_bonus` when attacking with a carried weapon still in the bag
+- wield/unwield commands track `weapon_equipped` on `GameState`; a wielded weapon is not stored in `bag[]` (it occupies the hand slot only until unwield, drop, or bandit handover moves it)
+- combat adds `item_weapon_damage_bonus` from `weapon_equipped` when the player attacks; it does not require the weapon id to appear in the bag
 
 ## `items`
 

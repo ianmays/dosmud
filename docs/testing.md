@@ -16,7 +16,7 @@ Purpose:
 
 - `make build`: native GCC development build
 - `make test`: strict deterministic compile path (`-Werror`, `-DTEST_MODE`) and debugging (`-g -O0`)
-- `make test-run`: scripted input regression pass (`tests/smoke.*`, `tests/bandit_handover.*`, `tests/area_items.*`, `tests/map.*`, `tests/equipment.*` includes wield, bag wielding line, and first combat attack under `TEST_MODE` RNG)
+- `make test-run`: scripted input regression pass (`tests/smoke.*`, `tests/bandit_handover.*`, `tests/bandit_wielded_give.*`, `tests/area_items.*`, `tests/map.*`, `tests/equipment.*` covers wield, bag plus wielding line, unwield back to bag, and first combat attack under `TEST_MODE` RNG)
 
 ## DOS/Open Watcom validation path
 
@@ -77,4 +77,4 @@ In `prepare-dos.local.ps1`:
 5. Enter `wait`; tick increments by exactly 1.
 6. Enter `look`, then `move <listed-direction>`; room changes and tick increments by 1.
 7. Enter `quit`; process exits cleanly.
-8. Bandit hand-over (optional): from a room where a bandit encounter triggers with at least one bag item, enter `2`, then `give <item>` matching something you carry; the bandit should leave and the item should be removed.
+8. Bandit hand-over (optional): from a room where a bandit encounter triggers, enter `2`, then `give <item>` for something you carry in the bag **or** your wielded weapon (you can `wield` before replying `2` if the bag is empty); the bandit should leave and that item or wield slot should clear.
