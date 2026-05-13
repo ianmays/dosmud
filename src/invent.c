@@ -1,4 +1,4 @@
-/* Inventory implementation (DOS-friendly 8.3 name invent.c). */
+/* Inventory implementation (FAT 8+3 basename invent.c for MS-DOS era trees). */
 
 #include <stdio.h>
 #include "config.h"

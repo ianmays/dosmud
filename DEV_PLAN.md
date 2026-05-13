@@ -81,9 +81,11 @@ Large-scale gameplay/content expansion should remain secondary until the core ar
 
 ## #42 - Split `game.c`
 
+Done ✅.
+
 Highest-priority architecture task.
 
-`game.c` currently owns too many systems and should become orchestration-focused only.
+Orchestration stays in `game.c`; combat, dialogue (pond + NPC hint), atmosphere (`gatmos`), wanderer, progression (`gprog`), and ambient encounter entry (`genc`) live in dedicated translation units (see `docs/architecture.md`).
 
 Target structure:
 
@@ -92,10 +94,10 @@ src/
     game.c
     combat.c
     dialogue.c
-    atmosphere.c
+    gatmos.c
     wanderer.c
-    progression.c
-    encounter.c
+    gprog.c
+    genc.c
 ```
 
 ### `game.c`
@@ -124,19 +126,19 @@ Own:
 - encounter triggering
 - separation logic
 
-### `atmosphere.c`
+### `gatmos.c` (atmosphere)
 Own:
 - ambient effects
 - inspect clues
 - environmental state
 
-### `progression.c`
+### `gprog.c` (progression)
 Own:
 - XP
 - leveling
 - scaling
 
-### `encounter.c`
+### `genc.c` (encounter)
 Own:
 - random encounter spawning
 - bandit logic
@@ -499,37 +501,6 @@ Includes:
 - quests
 - procedural encounters
 - larger worlds
-
----
-
-# Immediate Recommended Order
-
-## Start now
-
-1. split `game.c`
-2. state ownership cleanup
-3. engine boundary isolation
-4. platform layer
-5. compatibility typedefs
-6. warning cleanup and compiler rigor
-
----
-
-## Then
-
-7. deterministic test setup evolution
-8. regression coverage expansion
-9. runtime `--seed`
-10. workflow/rules/skills maturity
-
----
-
-## Later
-
-11. event queue architecture
-12. save/load
-13. SDL renderer
-14. large-scale gameplay expansion
 
 ---
 

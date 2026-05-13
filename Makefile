@@ -3,7 +3,7 @@ CC ?= gcc
 BASE_CFLAGS = -Wall -Wextra -Wshadow -Wstrict-prototypes -Wmissing-prototypes -std=c89 -pedantic -Iinclude -Isrc
 TEST_MODE_FLAG = TEST_MODE
 TEST_CFLAGS = $(BASE_CFLAGS) -Werror -D$(TEST_MODE_FLAG) -g -O0
-SRC = src/main.c src/game.c src/grendr.c src/invent.c src/command.c src/world.c src/items.c src/txtres.c
+SRC = src/main.c src/game.c src/gprog.c src/combat.c src/genc.c src/wanderer.c src/dialogue.c src/gatmos.c src/grendr.c src/invent.c src/command.c src/world.c src/items.c src/txtres.c
 BIN = dosmud
 
 all-build: $(BIN)

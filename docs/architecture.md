@@ -60,8 +60,20 @@ Commands mutate game state, world ticks mutate simulation state, and rendering o
 - top-level gameplay orchestration
 - command routing
 - world update sequencing
+- `game_is_busy_dialogue` gating for ambient encounters (shared with encounter and wanderer entry)
 
-`game` should not grow into a monolith; specialized systems should move into dedicated modules over time.
+Gameplay slices live beside `game.c` as plain C translation units (no extra framework):
+
+- [`gprog.c`](../src/gprog.c) - XP and level-up rewards (`game_xp_to_next_level`, `progression_gain_xp`; FAT 8.3-safe basename)
+- [`combat.c`](../src/combat.c) - combat start, player reply resolution, enemy turn
+- [`genc.c`](../src/genc.c) - ambient bandit encounter open state (FAT 8.3-safe basename)
+- [`wanderer.c`](../src/wanderer.c) - traveler movement and encounter flow
+- [`dialogue.c`](../src/dialogue.c) - pond frog lines and NPC id hint for room look
+- [`gatmos.c`](../src/gatmos.c) - initial room items, ambient rolls, animal noise, inspect focus hooks (FAT 8.3-safe basename)
+
+New `src/*.c` and `src/*.h` basenames must stay within **classic FAT 8+3** (at most eight characters before `.c` or `.h`) so MS-DOS 5.x-6.x style volumes and the Open Watcom DOS build can open them reliably. Existing examples: `grendr.*`, `invent.*`, `gprog.*`, `gatmos.*`, `genc.*`.
+
+`game` stays orchestration; new behaviour should land in the owning slice above rather than re-centralising into `game.c`.
 
 ## `command`
 

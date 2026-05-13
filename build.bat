@@ -12,17 +12,24 @@ echo WFL: %WFL% >> %LOG%
 echo. >> %LOG%
 
 REM COMMAND.COM limits one command line to about 127 characters. We compile each
-REM .c to a .obj with a short line, then link in a second short wcl line.
-REM (A single long wcl with all sources truncates; @rsp failed on some setups.)
+REM .c to a .obj with a short line, pack gameplay objects into gameplay.lib (wlib),
+REM then link with one short wcl line (same shape as before the game.c split).
 
 if exist main.obj del main.obj
 if exist game.obj del game.obj
+if exist gprog.obj del gprog.obj
+if exist combat.obj del combat.obj
+if exist genc.obj del genc.obj
+if exist wanderer.obj del wanderer.obj
+if exist dialogue.obj del dialogue.obj
+if exist gatmos.obj del gatmos.obj
 if exist grendr.obj del grendr.obj
 if exist invent.obj del invent.obj
 if exist command.obj del command.obj
 if exist world.obj del world.obj
 if exist items.obj del items.obj
 if exist txtres.obj del txtres.obj
+if exist gameplay.lib del gameplay.lib
 if exist dosmud.exe del dosmud.exe
 
 echo Compiling main.c ... >> %LOG%
@@ -33,6 +40,36 @@ if errorlevel 1 goto wcl_bad
 echo Compiling game.c ... >> %LOG%
 echo Compiling game.c ...
 wcl %WFL% -c -fo=game.obj src\game.c >> %LOG%
+if errorlevel 1 goto wcl_bad
+
+echo Compiling gprog.c ... >> %LOG%
+echo Compiling gprog.c ...
+wcl %WFL% -c -fo=gprog.obj src\gprog.c >> %LOG%
+if errorlevel 1 goto wcl_bad
+
+echo Compiling combat.c ... >> %LOG%
+echo Compiling combat.c ...
+wcl %WFL% -c -fo=combat.obj src\combat.c >> %LOG%
+if errorlevel 1 goto wcl_bad
+
+echo Compiling genc.c ... >> %LOG%
+echo Compiling genc.c ...
+wcl %WFL% -c -fo=genc.obj src\genc.c >> %LOG%
+if errorlevel 1 goto wcl_bad
+
+echo Compiling wanderer.c ... >> %LOG%
+echo Compiling wanderer.c ...
+wcl %WFL% -c -fo=wanderer.obj src\wanderer.c >> %LOG%
+if errorlevel 1 goto wcl_bad
+
+echo Compiling dialogue.c ... >> %LOG%
+echo Compiling dialogue.c ...
+wcl %WFL% -c -fo=dialogue.obj src\dialogue.c >> %LOG%
+if errorlevel 1 goto wcl_bad
+
+echo Compiling gatmos.c ... >> %LOG%
+echo Compiling gatmos.c ...
+wcl %WFL% -c -fo=gatmos.obj src\gatmos.c >> %LOG%
 if errorlevel 1 goto wcl_bad
 
 echo Compiling grendr.c ... >> %LOG%
@@ -65,11 +102,16 @@ echo Compiling txtres.c ...
 wcl %WFL% -c -fo=txtres.obj src\txtres.c >> %LOG%
 if errorlevel 1 goto wcl_bad
 
+echo Archiving gameplay.lib ... >> %LOG%
+echo Archiving gameplay.lib ...
+wlib -n gameplay.lib +game.obj +gprog.obj +combat.obj +genc.obj +wanderer.obj +dialogue.obj +gatmos.obj >> %LOG%
+if errorlevel 1 goto wcl_bad
+
 echo Linking dosmud.exe ... >> %LOG%
 echo Linking dosmud.exe ...
-REM No -I here: link only; line stays under 127 chars.
-wcl -bt=dos -fe=dosmud.exe main.obj game.obj grendr.obj invent.obj command.obj world.obj items.obj txtres.obj >> %LOG%
+wcl -bt=dos -fe=dosmud.exe main.obj gameplay.lib grendr.obj invent.obj command.obj world.obj items.obj txtres.obj >> %LOG%
 if errorlevel 1 goto wcl_bad
+if not exist dosmud.exe goto wcl_bad
 
 echo. >> %LOG%
 echo wcl result: success ERRORLEVEL 0 >> %LOG%
@@ -78,7 +120,7 @@ goto wcl_done
 
 :wcl_bad
 echo. >> %LOG%
-echo wcl result: failure non-zero ERRORLEVEL >> %LOG%
+echo wcl/wlib result: failure (non-zero ERRORLEVEL or missing dosmud.exe) >> %LOG%
 echo Build FAILED. See %LOG%
 
 :wcl_done
