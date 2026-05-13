@@ -6,7 +6,9 @@ Guidance for AI/code agents working in this repository.
 
 - ALWAYS check if a corresponding GitHub Issue exists before starting work (see: dosmud GitHub project)
 - NEVER change tickets that have already been Closed
-- ALWAYS manage issue status in GitHub (NEVER skip straight to **Review** - see 'Github project `status` column (dosmud project)' below) - ALWAYS ensure Issue status and Issue project status are aligned
+- ALWAYS manage issue status in GitHub (NEVER skip straight to **Review** - see 'Github project `status` column (dosmud project)' below)
+- ALWAYS move the corresponding Issue to **In progress** BEFORE starting ANY work after the planning phase 
+- ALWAYS ensure Issue status and Issue project status are aligned
 - ALWAYS ensure all relevant Issues are linked to PRs
 - If no Issue exists, ALWAYS create one and label it appropriately (`gameplay`, `non-functional`, `tooling`, etc)
 - ALWAYS add the `agent` label to any issue you create
@@ -22,7 +24,7 @@ Guidance for AI/code agents working in this repository.
 - NEVER start working on an Issue if you think it's not necessary - challenge the timing of the selection or recommend it is abandoned
 - If a PR already exists, ALWAYS include pushing follow-up updates to the branch in any implementation plan
 - (VERY IMPORTANT) ALWAYS if you are pushing additional changes - check if the PR is no longer in draft state FIRST, then ALWAYS leave the comment 'review this' to trigger a re-review if it is NOT in draft state (NEVER ask - ALWAYS do this)
-- ALWAYS switch back to main, pull, and delete other branches locally when done with a task
+- ALWAYS switch back to main, pull, and delete other branches locally when a task is fully done (PR merged, Issue closed on GitHub)
 - If the task done existed in the DEV_PLAN.md, ALWAYS mark it as done
 - ALWAYS write a test for a new gameplay feature
 - ALWAYS ensure PR labels match issue labels
