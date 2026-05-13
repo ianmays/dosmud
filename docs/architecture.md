@@ -60,8 +60,18 @@ Commands mutate game state, world ticks mutate simulation state, and rendering o
 - top-level gameplay orchestration
 - command routing
 - world update sequencing
+- `game_is_busy_dialogue` gating for ambient encounters (shared with encounter and wanderer entry)
 
-`game` should not grow into a monolith; specialized systems should move into dedicated modules over time.
+Gameplay slices live beside `game.c` as plain C translation units (no extra framework):
+
+- [`progression.c`](../src/progression.c) - XP and level-up rewards (`game_xp_to_next_level`, `progression_gain_xp`)
+- [`combat.c`](../src/combat.c) - combat start, player reply resolution, enemy turn
+- [`encounter.c`](../src/encounter.c) - ambient bandit encounter open state
+- [`wanderer.c`](../src/wanderer.c) - traveler movement and encounter flow
+- [`dialogue.c`](../src/dialogue.c) - pond frog lines and NPC id hint for room look
+- [`atmosphere.c`](../src/atmosphere.c) - initial room items, ambient rolls, animal noise, inspect focus hooks
+
+`game` stays orchestration; new behaviour should land in the owning slice above rather than re-centralising into `game.c`.
 
 ## `command`
 

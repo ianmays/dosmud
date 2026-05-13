@@ -83,7 +83,7 @@ Large-scale gameplay/content expansion should remain secondary until the core ar
 
 Highest-priority architecture task.
 
-`game.c` currently owns too many systems and should become orchestration-focused only.
+Orchestration stays in `game.c`; combat, dialogue (pond + NPC hint), atmosphere, wanderer, progression, and ambient encounter entry live in dedicated translation units (see `docs/architecture.md`).
 
 Target structure:
 
@@ -506,7 +506,7 @@ Includes:
 
 ## Start now
 
-1. split `game.c`
+1. ~~split `game.c`~~ (done: progression, combat, encounter, wanderer, dialogue, atmosphere modules)
 2. state ownership cleanup
 3. engine boundary isolation
 4. platform layer
