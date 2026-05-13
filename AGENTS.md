@@ -117,6 +117,7 @@ DOS flow entrypoint:
 - `make test-run` pipes scripted input and diffs against snapshot output.
 - `make prepare-dos` and DOS-path validation targets are unavailable in cloud VMs.
 - No lint tooling exists beyond GCC warning enforcement.
+- Do not include co-author statements in commits
 
 ## When in Doubt
 
