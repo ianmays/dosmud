@@ -222,19 +222,19 @@ int game_inv_cmd_drop(struct GameState *game, int item_arg)
         printf(TXT_INV_GROUND_FULL_FMT, CFG_AREA_ITEM_SLOTS);
         return 1;
     }
-    if (game_inv_bag_find_index(game, item_arg) >= 0) {
-        {
-            int idx;
-            idx = game_inv_bag_find_index(game, item_arg);
+    {
+        int idx;
+        idx = game_inv_bag_find_index(game, item_arg);
+        if (idx >= 0) {
             if (!game_inv_bag_remove_index_transfer(game, idx)) {
                 return 1;
             }
+        } else if (game->weapon_equipped == item_arg) {
+            game->weapon_equipped = ITEM_NONE;
+        } else {
+            printf(TXT_INV_NOT_CARRYING_FMT, item_name(item_arg));
+            return 1;
         }
-    } else if (game->weapon_equipped == item_arg) {
-        game->weapon_equipped = ITEM_NONE;
-    } else {
-        printf(TXT_INV_NOT_CARRYING_FMT, item_name(item_arg));
-        return 1;
     }
     game->room_item[room_id][slot] = item_arg;
     printf(TXT_INV_DROP_FMT, item_name(item_arg));
