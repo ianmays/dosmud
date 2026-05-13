@@ -10,7 +10,8 @@
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
       "externalConsole": false,
-      "MIMode": "gdb"
+      "MIMode": "gdb",
+      "miDebuggerPath": "/home/linuxbrew/.linuxbrew/bin/gdb"
     }
   ]
 }
