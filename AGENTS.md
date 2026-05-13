@@ -8,9 +8,8 @@ Guidance for AI/code agents working in this repository.
 - NEVER change tickets that have already been Closed
 - ALWAYS manage issue status in GitHub (NEVER skip straight to **Review** - see 'Github project `status` column (dosmud project)' below)
 - ALWAYS move the corresponding Issue to **In progress** BEFORE starting ANY work after the planning phase 
-- ALWAYS ensure Issue status and Issue project status are aligned
-- ALWAYS ensure all relevant Issues are linked to PRs
-- If no Issue exists, ALWAYS create one and label it appropriately (`gameplay`, `non-functional`, `tooling`, etc)
+- ALWAYS ensure all relevant Issues are linked to PRs (Link Issue to PR in Development area OR add 'Closes: #ID' to PR description)
+- If no Issue exists, ALWAYS create one and label it appropriately (`gameplay`, `non-functional`, `tooling`, `documentation` etc)
 - ALWAYS add the `agent` label to any issue you create
 - ALWAYS add Issues to the dosmud Github project
 - NEVER, ever, use em dash, we only use '-'
