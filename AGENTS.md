@@ -7,7 +7,7 @@ Guidance for AI/code agents working in this repository.
 - ALWAYS check if a corresponding GitHub Issue exists before starting work (see: dosmud GitHub project)
 - NEVER change tickets that have already been Closed
 - ALWAYS manage issue status in GitHub (NEVER skip straight to **Review** - see 'Github project `status` column (dosmud project)' below)
-- ALWAYS move the corresponding Issue to **In progress** BEFORE starting ANY work after the planning phase 
+- ALWAYS move the corresponding Issue to **In progress** in the GitHub project BEFORE starting ANY work after the planning phase 
 - ALWAYS ensure all relevant Issues are linked to PRs (Link Issue to PR in Development area OR add 'Closes: #ID' to PR description)
 - If no Issue exists, ALWAYS create one and label it appropriately (`gameplay`, `non-functional`, `tooling`, `documentation` etc)
 - ALWAYS add the `agent` label to any issue you create
