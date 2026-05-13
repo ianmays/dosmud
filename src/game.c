@@ -96,11 +96,8 @@ static void combat_resolve_reply(struct GameState *game, int choice)
     if (choice == 1) {
         dmg = CFG_COMBAT_PLAYER_HIT_BASE + (rand() % CFG_COMBAT_PLAYER_HIT_SPREAD) +
             game->damage_bonus;
-        if (game->weapon_equipped != ITEM_NONE &&
-                game_inv_bag_find_index(game, game->weapon_equipped) >= 0) {
+        if (game->weapon_equipped != ITEM_NONE) {
             dmg += item_weapon_damage_bonus(game->weapon_equipped);
-        } else if (game->weapon_equipped != ITEM_NONE) {
-            game->weapon_equipped = ITEM_NONE;
         }
         game->enemy_hp -= dmg;
         render_combat_player_hit(dmg);
@@ -406,12 +403,16 @@ static int apply_command(struct GameState *game, struct Command *cmd)
     }
     if (cmd->type == CMD_GIVE) {
         if (game->enemy_dialogue == 1 && game->enemy_handover_pick == 1) {
-            if (game_inv_bag_find_index(game, cmd->arg) < 0) {
+            if (!game_inv_player_has_item(game, cmd->arg)) {
                 render_msg_bandit_give_not_carrying();
                 return 1;
             }
             render_msg_hand_over_item(item_name(cmd->arg));
-            game_inv_bag_remove_item(game, cmd->arg);
+            if (game->weapon_equipped == cmd->arg) {
+                game->weapon_equipped = ITEM_NONE;
+            } else {
+                game_inv_bag_remove_item(game, cmd->arg);
+            }
             game->enemy_dialogue = 0;
             game->enemy_handover_pick = 0;
             return 1;
@@ -525,7 +526,7 @@ static int apply_command(struct GameState *game, struct Command *cmd)
                 return 1;
             }
             if (cmd->arg == 2) {
-                if (game->bag_count <= 0) {
+                if (game->bag_count <= 0 && game->weapon_equipped == ITEM_NONE) {
                     render_msg_bag_empty_bandit();
                     combat_start(game);
                     return 1;

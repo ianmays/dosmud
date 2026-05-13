@@ -16,7 +16,7 @@ Purpose:
 
 - `make build`: native GCC development build
 - `make test`: strict deterministic compile path (`-Werror`, `-DTEST_MODE`) and debugging (`-g -O0`)
-- `make test-run`: scripted input regression pass (`tests/smoke.*`, `tests/bandit_handover.*`, `tests/area_items.*`, `tests/map.*`, `tests/equipment.*` includes wield, bag wielding line, and first combat attack under `TEST_MODE` RNG)
+- `make test-run`: scripted input regression pass (`tests/smoke.*`, `tests/bandit_handover.*`, `tests/bandit_wielded_give.*`, `tests/area_items.*`, `tests/map.*`, `tests/equipment.*` covers wield, bag plus wielding line, unwield back to bag, and first combat attack under `TEST_MODE` RNG)
 
 ## DOS/Open Watcom validation path
 

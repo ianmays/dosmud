@@ -331,3 +331,10 @@ const char *const TXT_INV_WIELD_NOT_WEAPON = "That is not something you can wiel
 const char *const TXT_INV_WIELD_FMT = "You ready the %s.\n";
 const char *const TXT_INV_UNWIELD = "You sling your weapon aside.\n";
 const char *const TXT_INV_UNWIELD_EMPTY = "You have nothing wielded.\n";
+const char *const TXT_INV_UNWIELD_GROUND_FMT =
+    "Your bag is full; you set the %s on the ground.\n";
+const char *const TXT_INV_UNWIELD_CANNOT =
+    "You cannot unwield right now. Your bag is full and there is no room on the ground here.\n";
+const char *const TXT_INV_ALREADY_WIELDING_FMT = "You are already wielding the %s.\n";
+const char *const TXT_INV_WIELD_STOW_FAIL =
+    "You cannot switch weapons; there is no room to stow what you were holding.\n";
