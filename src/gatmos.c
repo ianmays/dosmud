@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include "atmosphere.h"
+#include "gatmos.h"
 #include "game.h"
 #include "grendr.h"
 #include "invent.h"

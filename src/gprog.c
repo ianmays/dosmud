@@ -1,4 +1,4 @@
-#include "progression.h"
+#include "gprog.h"
 #include "game.h"
 #include "grendr.h"
 

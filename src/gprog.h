@@ -1,5 +1,7 @@
-#ifndef PROGRESSION_H
-#define PROGRESSION_H
+/* XP and level-up (FAT 8+3: progression basename would exceed eight characters). */
+
+#ifndef GPROG_H
+#define GPROG_H
 
 struct GameState;
 

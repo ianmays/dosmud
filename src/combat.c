@@ -4,7 +4,7 @@
 #include "grendr.h"
 #include "invent.h"
 #include "items.h"
-#include "progression.h"
+#include "gprog.h"
 
 static void combat_enemy_turn(struct GameState *game)
 {

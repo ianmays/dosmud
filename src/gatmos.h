@@ -1,5 +1,7 @@
-#ifndef ATMOSPHERE_H
-#define ATMOSPHERE_H
+/* Ambient world feel and room item seeding (FAT 8+3: atmosphere basename too long). */
+
+#ifndef GATMOS_H
+#define GATMOS_H
 
 struct GameState;
 

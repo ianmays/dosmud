@@ -3,10 +3,10 @@
 #include "grendr.h"
 #include "invent.h"
 #include "items.h"
-#include "atmosphere.h"
+#include "gatmos.h"
 #include "combat.h"
 #include "dialogue.h"
-#include "encounter.h"
+#include "genc.h"
 #include "wanderer.h"
 
 int game_is_busy_dialogue(struct GameState *game)

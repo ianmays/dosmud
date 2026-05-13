@@ -34,6 +34,8 @@ make run-dos
 
 `make run-dos` expects a previously prepared DOS tree. Run `make prepare-dos` first if the mirrored DOS files or executable are missing.
 
+When you add or remove `src\*.c` files, update `Makefile` (`SRC`) and `build.bat`. For the Open Watcom path, keep the final `wcl` link line under the COMMAND.COM length limit (about 127 characters): gameplay sources are packed into `gameplay.lib` via `wlib` so the link line matches the pre-split shape (`main.obj` plus `gameplay.lib` plus the other `.obj` files). Add new gameplay `.obj` names to the `wlib` line in `build.bat`.
+
 Deterministic DOS validation:
 
 ```sh

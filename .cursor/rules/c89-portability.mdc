@@ -7,6 +7,7 @@ alwaysApply: true
 
 - Target ANSI C89 / ISO C90 compatibility.
 - Keep DOS/OpenWatcom and GCC compatibility in mind when changing headers, types, or libc usage.
+- **`src/` translation units and headers use FAT 8.3 (8+3) basenames** for MS-DOS 5.x-6.x era FAT volumes and the Open Watcom DOS tree (at most eight characters before `.c` or `.h`). Longer basenames break on those layouts; see `invent.h` and `docs/contributor-guide.md`.
 - Avoid compiler extensions, platform-specific assumptions, and C99/C11 features unless already established in the codebase.
 - Prefer explicit ownership, fixed-size arrays, and static storage over dynamic allocation.
 - Keep platform-specific behaviour isolated to platform/render layers.

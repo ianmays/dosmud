@@ -3,7 +3,7 @@
 
 #include "command.h"
 #include "world.h"
-#include "progression.h"
+#include "gprog.h"
 
 struct Player {
     int room_id;

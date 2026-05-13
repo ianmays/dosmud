@@ -1,4 +1,4 @@
-#include "encounter.h"
+#include "genc.h"
 #include "game.h"
 #include "grendr.h"
 

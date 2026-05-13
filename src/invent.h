@@ -1,5 +1,5 @@
 /* Inventory module API. Header is invent.h (not game_inventory.h) so the filename
- * stays within DOS 8.3 (8+3); "game_inventory.h" is too long for classic FAT. */
+ * stays within classic FAT 8+3; "game_inventory.h" is too long for MS-DOS 5.x-6.x style trees. */
 
 #ifndef INVENT_H
 #define INVENT_H
