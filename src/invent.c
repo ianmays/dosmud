@@ -317,6 +317,19 @@ int game_inv_cmd_use(struct GameState *game, int item_arg)
     return 1;
 }
 
+/* Remove one ingredient from bag if present, else from the wielded slot. */
+static int craft_consume_one(struct GameState *game, int item_id)
+{
+    if (game_inv_bag_find_index(game, item_id) >= 0) {
+        return game_inv_bag_remove_item(game, item_id);
+    }
+    if (game->weapon_equipped == item_id) {
+        game->weapon_equipped = ITEM_NONE;
+        return 1;
+    }
+    return 0;
+}
+
 int game_inv_cmd_craft(struct GameState *game, int item_arg)
 {
     if (game->combat_active) {
@@ -324,37 +337,37 @@ int game_inv_cmd_craft(struct GameState *game, int item_arg)
         return 1;
     }
     if (item_arg == ITEM_TORCH) {
-        if (game_inv_bag_find_index(game, ITEM_STICK) < 0 ||
-                game_inv_bag_find_index(game, ITEM_REED) < 0) {
+        if (!game_inv_player_has_item(game, ITEM_STICK) ||
+                !game_inv_player_has_item(game, ITEM_REED)) {
             printf("%s", TXT_INV_NEED_TORCH);
             return 1;
         }
-        game_inv_bag_remove_item(game, ITEM_STICK);
-        game_inv_bag_remove_item(game, ITEM_REED);
+        craft_consume_one(game, ITEM_STICK);
+        craft_consume_one(game, ITEM_REED);
         game_inv_bag_add(game, ITEM_TORCH);
         printf("%s", TXT_INV_CRAFT_TORCH);
         return 1;
     }
     if (item_arg == ITEM_SALVE) {
-        if (game_inv_bag_find_index(game, ITEM_HERB) < 0 ||
-                game_inv_bag_find_index(game, ITEM_BERRY) < 0) {
+        if (!game_inv_player_has_item(game, ITEM_HERB) ||
+                !game_inv_player_has_item(game, ITEM_BERRY)) {
             printf("%s", TXT_INV_NEED_SALVE);
             return 1;
         }
-        game_inv_bag_remove_item(game, ITEM_HERB);
-        game_inv_bag_remove_item(game, ITEM_BERRY);
+        craft_consume_one(game, ITEM_HERB);
+        craft_consume_one(game, ITEM_BERRY);
         game_inv_bag_add(game, ITEM_SALVE);
         printf("%s", TXT_INV_CRAFT_SALVE);
         return 1;
     }
     if (item_arg == ITEM_SPEAR) {
-        if (game_inv_bag_find_index(game, ITEM_STICK) < 0 ||
-                game_inv_bag_find_index(game, ITEM_STONE) < 0) {
+        if (!game_inv_player_has_item(game, ITEM_STICK) ||
+                !game_inv_player_has_item(game, ITEM_STONE)) {
             printf("%s", TXT_INV_NEED_SPEAR);
             return 1;
         }
-        game_inv_bag_remove_item(game, ITEM_STICK);
-        game_inv_bag_remove_item(game, ITEM_STONE);
+        craft_consume_one(game, ITEM_STICK);
+        craft_consume_one(game, ITEM_STONE);
         game_inv_bag_add(game, ITEM_SPEAR);
         printf("%s", TXT_INV_CRAFT_SPEAR);
         return 1;

@@ -121,7 +121,7 @@ const char *const TXT_HELP_USE =
     "use <item> - use a tool or consumable from your bag (torch, salve, spear).";
 
 const char *const TXT_HELP_CRAFT =
-    "craft <item> or build <item> - torch needs stick+reed, salve needs herb+berry, spear needs stick+stone (all in bag). Not while fighting.";
+    "craft <item> or build <item> - torch needs stick+reed, salve needs herb+berry, spear needs stick+stone (ingredients in bag or wielded where applicable). Not while fighting.";
 
 const char *const TXT_HELP_LOOT =
     "loot - take gear from a bandit corpse.";
