@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "grendr.h"
 #include "game.h"
+#include "combat.h"
 #include "items.h"
 #include "command.h"
 #include "world.h"
@@ -504,6 +505,7 @@ void game_render(const struct GameState *game)
     needed = game_xp_to_next_level(game->level);
     printf(TXT_HUD_FMT,
         game->tick, room->name, game->player_hp, game->max_hp,
+        combat_player_attack_bonus(game),
         game->level, game->xp, needed);
 }
 

@@ -188,7 +188,8 @@ const char *const TXT_COMBAT_BANDIT_DEFEATED = "The bandit falls. The body slump
 const char *const TXT_XP_GAIN_FMT = "You gain %d XP.\n";
 const char *const TXT_LEVEL_UP_FMT = "Level up! You are now level %d.\n";
 const char *const TXT_LEVEL_STATS_FMT = "Max HP %d, Damage bonus +%d, Bag capacity %d.\n";
-const char *const TXT_HUD_FMT = "\n[T:%lu] %s [HP:%d/%d] [Lv:%d XP:%d/%d]\n";
+const char *const TXT_HUD_FMT =
+    "\n[T:%lu] %s [HP:%d/%d] [Atk:%d] [Lv:%d XP:%d/%d]\n";
 const char *const TXT_NEARBY_ITEM_FMT = "A %s catches your eye nearby.\n";
 const char *const TXT_ATMO_GUST = "\nA cool gust threads through the area and fades.\n";
 const char *const TXT_ATMO_RUSTLE = "\nSomething small rustles just out of sight.\n";

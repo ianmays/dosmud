@@ -6,6 +6,17 @@
 #include "items.h"
 #include "gprog.h"
 
+int combat_player_attack_bonus(const struct GameState *game)
+{
+    int bonus;
+
+    bonus = game->damage_bonus;
+    if (game->weapon_equipped != ITEM_NONE) {
+        bonus += item_weapon_damage_bonus(game->weapon_equipped);
+    }
+    return bonus;
+}
+
 static void combat_enemy_turn(struct GameState *game)
 {
     int dmg;
@@ -42,10 +53,7 @@ void combat_resolve_reply(struct GameState *game, int choice)
     int dmg;
     if (choice == 1) {
         dmg = CFG_COMBAT_PLAYER_HIT_BASE + (rand() % CFG_COMBAT_PLAYER_HIT_SPREAD) +
-            game->damage_bonus;
-        if (game->weapon_equipped != ITEM_NONE) {
-            dmg += item_weapon_damage_bonus(game->weapon_equipped);
-        }
+            combat_player_attack_bonus(game);
         game->enemy_hp -= dmg;
         render_combat_player_hit(dmg);
     } else if (choice == 2) {
