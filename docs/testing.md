@@ -72,6 +72,8 @@ In `prepare-dos.local.ps1`:
 
 ## Manual gameplay verification checklist
 
+The tick HUD line includes `[Atk:n]`; `n` is the flat melee bonus used on combat attacks (level damage bonus plus wielded weapon). Expect the same value when editing snapshot `.expect` files after wield, unwield, or level-up.
+
 1. Start program, confirm initial tick `[T:0]`.
 2. Enter `help`; tick remains unchanged. Enter `help craft` (or another topic); tick remains unchanged and a single-topic line prints.
 3. Enter invalid command (for example `xyz`); tick remains unchanged.
