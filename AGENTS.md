@@ -18,7 +18,7 @@ Guidance for AI/code agents working in this repository.
 - NEVER include issue link in PR title (e.g. closes #ID)
 - ALWAYS check for needed documentation updates/additions/removals when making changes
 - ALWAYS keep documentation style consistent with surrounding files
-- ALWAYS make commit messages concise; use bullet points rather than sentences if needed; first character is ALWAYS lower-case
+- ALWAYS make commit messages concise; use bullet points rather than sentences if needed; first character is ALWAYS lower-case in PR titles and commit messages
 - When asked to pick up a new issue (possibly under a specific label), ALWAYS ensure you pick the top issue according to the dosmud Github project - ALWAYS ensure you only pull from the tickets that exist in the 'Agent-ready' column
 - NEVER start working on an Issue if you think it's not necessary - challenge the timing of the selection or recommend it is abandoned
 - If a PR already exists, ALWAYS include pushing follow-up updates to the branch in any implementation plan
