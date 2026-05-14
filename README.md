@@ -2,7 +2,6 @@
 
 Minimal DOS-first MUD-like prototype in ANSI C.
 
-
 ## Disclaimer
 
 This project is a personal learning and experimentation project provided "as is", without guarantees, warranties, or support of any kind.
@@ -17,6 +16,10 @@ Use, modify, and distribute the project at your own risk.
 
 The project is actively evolving and may change significantly over time.
 
+## At a glance
+\* this is a (modified) AI-generated image - purely intended to give a sense of what this project is all about before you move on, do **not** consider this a source of truth
+
+<img src="dosmud.png" width="100%">
 
 ## Quick start
 
