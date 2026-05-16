@@ -2,14 +2,14 @@ TEST MODE
 dosmud prototype
 Type 'help' for commands.
 
-              *     .     *
-                 .-~~~-.
-                /  ~ ~  \
-               | []   [] |
-                \  ___  /
-                 `-----'
-                    /|\
-                    (campfire at first watch)
+       *      *        $   * 
+   *               *   $     
+      _________        $     
+     /       /|\       $    
+    /       / | \     \|/  
+___/_______/__|__\ ___XXX___
+                             
+ (campfire at first watch)                             
 
 Camp
 A small campfire burns quietly.
@@ -26,12 +26,14 @@ On the ground: stick. (take stick)
 
 > You move north.
 
-        /\              /\
-       /__\____________/__\
-       |  |============|  |
-       |__|____________|__|
-     .   .   .   .   .   .
-                  (wagon ruts hold rain)
+  ##     #####      #####    
+        ##########          #
+   ####         ###          
+_____________________________
+            /    \          
+           /      \         
+                             
+   (wagon ruts hold rain)                             
 
 Road
 A dusty road stretches toward pale hills.
@@ -39,13 +41,16 @@ Exits: south west
 On the ground: stone. (take stone)
 
 Loose grit skips over stone under an uncertain breeze.
-
-          .-____________-.
-         /  (o) (o) (o)  \
-        |    rusty blade   |
-         \________________/
+  /\                        
+  ||     .-'''''''-.         
+  ||    / (.)..(.)  |        
+  ||    |  (::::)   |        
+  ||    \__________/        
+ :::: .-----\  \-----.     
+                             
 
 A road bandit steps from cover with a hand on a rusted blade.
+                             
 "Easy now. We can do this three ways."
   [1] Refuse and fight.
   [2] Hand over one item from your bag or what you are wielding (choose reply 2, then give <item>).
