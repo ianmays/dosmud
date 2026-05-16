@@ -66,7 +66,7 @@ In `prepare-dos.local.ps1`:
 - `$source` should be Windows-reachable for Linux-hosted project files.
 - `$mountpoint`, `$destination`, `$dospath` should be Windows-visible emulator paths.
 
-`prepare-dos.ps1` mirrors `src/`, `include/`, and `build.bat` into the DOS tree. It excludes `.git`, tests, docs, CI/editor folders, native build artifacts (`dosmud`, `*.output`, `*.o`, `*.obj`), and the Linux `Makefile`.
+The Open Watcom build (`build.bat`) only needs `src/`, `include/`, and `build.bat`. `prepare-dos.ps1` uses `robocopy /MIR` from `$source` with exclusions (not a whitelist): it skips `.git`, `tests/`, `docs/`, `.github/`, `.cursor/`, `.vscode/`, native build artifacts (`dosmud`, `*.output`, `*.o`, `*.obj`), and the Linux `Makefile`. Other top-level files (for example `README.md`) may still be copied.
 
 ## Build artifacts
 
