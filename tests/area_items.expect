@@ -2,27 +2,14 @@ TEST MODE
 dosmud prototype
 Type 'help' for commands.
 
-                *          .            *
-         .            .           .           .
-                        /\
-                       /  \        /\
-                      /____\      /  \
-                 /\   |    |     /____\
-                /  \  |[]  |  /\ | [] |
-               /____\ |    | /  \|    |
-               |    |/______\____/______\
-               | [] /  /\      /\      / \
-               |   /  /  \____/  \____/   \
-              /___/_________________________\
-                    (  )   (  )   (  )
-                     )(___)(___(__(
-                    (____(____)____)
-                     \   \|/   / 
-                      \   |   /
-                       '. | .'
-                         \|/
-                         / \
-                    (campfire at first watch)
+       *      *        $   * 
+   *               *   $     
+      _________        $     
+     /       /|\       $    
+    /       / | \     \|/  
+___/_______/__|__\ ___XXX___
+                             
+ (campfire at first watch)                             
 
 Camp
 A small campfire burns quietly.
@@ -34,20 +21,16 @@ On the ground: stick. (take stick)
 > You pick up the stick.
 
 Loose grit skips over stone under an uncertain breeze.
-
-                  .--.__________________.--.
-                .'   /  _   _   _   _  \   '.
-               /    |  (o) (o) (o) (o) |    \
-              |     |        /\         |     |
-              |     |   .-==========-.  |     |
-              |     |  /  /  /  /  / |  |     |
-              |     | /__/__/__/__/  |  |     |
-              |     | \  rusty blade  /  |     |
-               \    |  '------------'   |    /
-                '.  \__________________/  .'
-                  '--._______________ .--'
+  /\                        
+  ||     .-'''''''-.         
+  ||    / (.)..(.)  |        
+  ||    |  (::::)   |        
+  ||    \__________/        
+ :::: .-----\  \-----.     
+                             
 
 A road bandit steps from cover with a hand on a rusted blade.
+                             
 "Easy now. We can do this three ways."
   [1] Refuse and fight.
   [2] Hand over one item from your bag or what you are wielding (choose reply 2, then give <item>).
@@ -62,15 +45,14 @@ A road bandit steps from cover with a hand on a rusted blade.
 
 > You move south.
 
-       ||      ||      ||      ||
-       ||      ||      ||      ||
-   _.-~||~--._ ||  _.-~||~--._ ||
-.-~  ~ || ~  ~'||-~  ~ || ~  ~'||-.
-|  ~   ||   ~  ||  ~   ||   ~  || |
-|  _..-||-.._  ||  _..-||-.._  || |
-|.'    ||    '.||.'    ||    '.|| |
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-           (mud pulls at your boots)
+                             
+                             
+  ||    |    ||    |    ||   
+  ||  .-|-.  ||  .-|-.  ||   
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                             
+  (mud pulls at your boots)                             
 
 Marsh
 Reeds lean over black water.
@@ -91,27 +73,14 @@ Something small rustles just out of sight.
 
 > You move north.
 
-                *          .            *
-         .            .           .           .
-                        /\
-                       /  \        /\
-                      /____\      /  \
-                 /\   |    |     /____\
-                /  \  |[]  |  /\ | [] |
-               /____\ |    | /  \|    |
-               |    |/______\____/______\
-               | [] /  /\      /\      / \
-               |   /  /  \____/  \____/   \
-              /___/_________________________\
-                    (  )   (  )   (  )
-                     )(___)(___(__(
-                    (____(____)____)
-                     \   \|/   / 
-                      \   |   /
-                       '. | .'
-                         \|/
-                         / \
-                    (campfire at first watch)
+       *      *        $   * 
+   *               *   $     
+      _________        $     
+     /       /|\       $    
+    /       / | \     \|/  
+___/_______/__|__\ ___XXX___
+                             
+ (campfire at first watch)                             
 
 Camp
 A small campfire burns quietly.
@@ -136,27 +105,14 @@ A distant creak rolls across the landscape.
 [T:6] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
 > 
-                *          .            *
-         .            .           .           .
-                        /\
-                       /  \        /\
-                      /____\      /  \
-                 /\   |    |     /____\
-                /  \  |[]  |  /\ | [] |
-               /____\ |    | /  \|    |
-               |    |/______\____/______\
-               | [] /  /\      /\      / \
-               |   /  /  \____/  \____/   \
-              /___/_________________________\
-                    (  )   (  )   (  )
-                     )(___)(___(__(
-                    (____(____)____)
-                     \   \|/   / 
-                      \   |   /
-                       '. | .'
-                         \|/
-                         / \
-                    (campfire at first watch)
+       *      *        $   * 
+   *               *   $     
+      _________        $     
+     /       /|\       $    
+    /       / | \     \|/  
+___/_______/__|__\ ___XXX___
+                             
+ (campfire at first watch)                             
 
 Camp
 A small campfire burns quietly.

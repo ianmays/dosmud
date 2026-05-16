@@ -9,351 +9,278 @@
 
 static void art_room_camp(void)
 {
-    printf("                *          .            *\n");
-    printf("         .            .           .           .\n");
-    printf("                        /\\\n");
-    printf("                       /  \\        /\\\n");
-    printf("                      /____\\      /  \\\n");
-    printf("                 /\\   |    |     /____\\\n");
-    printf("                /  \\  |[]  |  /\\ | [] |\n");
-    printf("               /____\\ |    | /  \\|    |\n");
-    printf("               |    |/______\\____/______\\\n");
-    printf("               | [] /  /\\      /\\      / \\\n");
-    printf("               |   /  /  \\____/  \\____/   \\\n");
-    printf("              /___/_________________________\\\n");
-    printf("                    (  )   (  )   (  )\n");
-    printf("                     )(___)(___(__(\n");
-    printf("                    (____(____)____)\n");
-    printf("                     \\   \\|/   / \n");
-    printf("                      \\   |   /\n");
-    printf("                       '. | .'\n");
-    printf("                         \\|/\n");
-    printf("                         / \\\n");
-    printf("                    %s\n", g_room_art_captions[WORLD_ROOM_CAMP]);
+    printf("       *      *        $   * \n");
+    printf("   *               *   $     \n");
+    printf("      _________        $     \n");
+    printf("     /       /|\\       $    \n");
+    printf("    /       / | \\     \\|/  \n");
+    printf("___/_______/__|__\\ ___XXX___\n");
+    printf("                             \n");
+    printf(" %s", g_room_art_captions[WORLD_ROOM_CAMP]);
+    printf("                             \n");
 }
 
 static void art_room_road(void)
 {
-    printf("           /\\                        /\\\n");
-    printf("          /  \\        _.._          /  \\\n");
-    printf("         /    \\    .-'    '-.      /    \\\n");
-    printf("        /      \\__/  _  _    \\____/      \\\n");
-    printf("       /  /\\                        /\\    \\\n");
-    printf("      /  /  \\                      /  \\    \\\n");
-    printf("     /__/____\\____________________/____\\____\\\n");
-    printf("                  ||        ||\n");
-    printf("                  ||        ||\n");
-    printf("                  ||        ||\n");
-    printf("__________________||________||________________________\n");
-    printf("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\n");
-    printf("  .     .      .     .      .     .      .     .\n");
-    printf("    .      .      .      .      .      .      .\n");
-    printf("      .      .      .      .      .      .\n");
-    printf("                  %s\n", g_room_art_captions[WORLD_ROOM_ROAD]);
+    printf("  ##     #####      #####    \n");
+    printf("        ##########          #\n");
+    printf("   ####         ###          \n");
+    printf("_____________________________\n");
+    printf("            /    \\          \n");
+    printf("           /      \\         \n");
+    printf("                             \n");
+    printf("   %s", g_room_art_captions[WORLD_ROOM_ROAD]);
+    printf("                             \n");
 }
 
 static void art_room_pond(void)
 {
-    printf("                    _..-~~~~-.._\n");
-    printf("               _.-~`  ~  ~   ~  `~-._\n");
-    printf("            .-`  ~   _..----.._   ~  `-.\n");
-    printf("          .'  ~   .-'  .--.   '-.   ~   '.\n");
-    printf("         / ~   .-'   .(____).    '-.  ~   \\\n");
-    printf("        /_____/________________________\\____\\\n");
-    printf("        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-    printf("      ~~~   ~~~~~   ~~~~~   ~~~~~   ~~~~~   ~~~\n");
-    printf("    ~~~   ~~~   ~~~   ~~~   ~~~   ~~~   ~~~   ~~~\n");
-    printf("         .-._                               _.-.\n");
-    printf("       .'    '.         .-''''-.          .'    '.\n");
-    printf("      /  o  o  \\       /  .--.  \\        /  o  o  \\\n");
-    printf("      |   --   |      |  (____)  |       |   --   |\n");
-    printf("      \\  '__' /        \\  '--'  /        \\  '__' /\n");
-    printf("       '.___.'          '.___.'           '.___.'\n");
-    printf("                %s\n", g_room_art_captions[WORLD_ROOM_POND]);
+    printf("                             \n");
+    printf("|_||||||_|||||__|||||||_||_||\n");
+    printf("   ^   __|_____||___|_       \n");
+    printf("     |/    o       O  \\  ^  \n");
+    printf("     (        O   |    )|    \n");
+    printf(" ^    \\__||______o_|__/     \n");
+    printf("                             \n");
+    printf("  %s", g_room_art_captions[WORLD_ROOM_POND]);
+    printf("                             \n");
 }
 
 static void art_room_forest(void)
 {
-    printf("               &&& &&  & &&\n");
-    printf("          && &\\/&\\|& ()|/ @, &&\n");
-    printf("          &\\/(/&/&||/& /_/)_&/_&\n");
-    printf("       &() &\\/&|()|/&\\/ '%%\" & ()\n");
-    printf("      &_\\_&&_\\ |& |&&/&__%%_/_& &&\n");
-    printf("    &&   && & &| &| /& & %% ()& /&&\n");
-    printf("      ()&_---()&\\&\\|&&-&&--%%---()~\n");
-    printf("          &&     \\||| \n");
-    printf("                  |||\n");
-    printf("                  |||\n");
-    printf("                  |||\n");
-    printf("            ______|||______\n");
-    printf("           /_____/////_____\\\n");
-    printf("              %s\n", g_room_art_captions[WORLD_ROOM_FOREST]);
+    printf("                             \n");
+    printf("       &&     &&     &&      \n");
+    printf("      &/\\&   &/\\&   &/\\&  \n");
+    printf("     &|()|& &|()|& &|()|&    \n");
+    printf("      \\||/   \\||/   \\||/  \n");
+    printf("_______||_____||_____||______\n");
+    printf("                             \n");
+    printf("%s", g_room_art_captions[WORLD_ROOM_FOREST]);
+    printf("                             \n");
 }
 
 static void art_room_stream(void)
 {
-    printf("                .      .      .      .\n");
-    printf("            .      .      .      .      .\n");
-    printf("      _..-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-.._\n");
-    printf("   .-~   ~~~~    ~~~~    ~~~~    ~~~~    ~   ~-.\n");
-    printf("  /   ~~~   ~~~~   ~~~~   ~~~~   ~~~~   ~~~    \\\n");
-    printf(" | ~~~~   ~~~~   ~~~~   ~~~~   ~~~~   ~~~~  ~  |\n");
-    printf(" |_______________________________________________|\n");
-    printf("      o   o     o    o     o    o     o    o\n");
-    printf("    _/|\\_/|\\___/|\\__/|\\___/|\\__/|\\___/|\\__/|\\_\n");
-    printf("   /____________________________________________\\\n");
-    printf("              %s\n", g_room_art_captions[WORLD_ROOM_STREAM]);
+    printf("____&________________________\n");
+    printf("   ooo      &           _/   \n");
+    printf("    |   &  ooo         /__   \n");
+    printf("       ooo  |         ____\\ \n");
+    printf("        |        ___/        \n");
+    printf("________________/            \n");
+    printf("                             \n");
+    printf("%s", g_room_art_captions[WORLD_ROOM_STREAM]);
+    printf("                             \n");
 }
 
 static void art_room_ruins(void)
 {
-    printf("                 |\\                       /|\n");
-    printf("                 | \\        ____         / |\n");
-    printf("                 |  \\    .-' __ '-.     /  |\n");
-    printf("                 |   |  /   /  \\   \\   |   |\n");
-    printf("             ____|___|_|___|____|___|__|___|____\n");
-    printf("            /   _    _    _    _    _    _    \\\n");
-    printf("           /___|_|__|_|__|_|__|_|__|_|__|_|____\\\n");
-    printf("           |  _   _   _   _   _   _   _   _   |\n");
-    printf("           | |_| |_| |_| |_| |_| |_| |_| |_|  |\n");
-    printf("           |  _   _   _   _   _   _   _   _   |\n");
-    printf("           |___________________________________|\n");
-    printf("          / / / / / / / / / / / / / / / / / / /\n");
-    printf("         /_/ /_/ /_/ /_/ /_/ /_/ /_/ /_/ /_/ /_\n");
-    printf("                %s\n", g_room_art_captions[WORLD_ROOM_RUINS]);
+    printf("                     ####    \n");
+    printf("  ###                        \n");
+    printf("     |\\              /|     \n");
+    printf("     | \\__.--''--.__/ |     \n");
+    printf(" ____|_|_|________|_|_|____  \n");
+    printf("/__________________________\\\n");
+    printf("                             \n");
+    printf(" %s", g_room_art_captions[WORLD_ROOM_RUINS]);
+    printf("                             \n");
 }
 
 static void art_room_cliff(void)
 {
-    printf("                           /\\\n");
-    printf("                          /  \\\n");
-    printf("                 /\\      / /\\ \\      /\\\n");
-    printf("                /  \\    / /  \\ \\    /  \\\n");
-    printf("               / /\\ \\__/ /____\\ \\__/ /\\ \\\n");
-    printf("              / /  \\____/      \\____/  \\ \\\n");
-    printf("             /_/                        \\_\\\n");
-    printf("             ||   ____            ____   ||\n");
-    printf("             ||  / __ \\__________/ __ \\  ||\n");
-    printf("             ||_/ /  \\____________/  \\_\\_||\n");
-    printf("~~~~~~~~~~~~~~~~~~ %s ~~~~~~~~~~~~~~~~~~\n", g_room_art_captions[WORLD_ROOM_CLIFF]);
+    printf("                    ##       \n");
+    printf("   ###        /\\            \n");
+    printf("        /\\   /  \\   /\\    \n");
+    printf("       /__\\_/____\\_/__\\   \n");
+    printf("      /________________\\    \n");
+    printf("     /__________________\\   \n");
+    printf("                             \n");
+    printf("      %s", g_room_art_captions[WORLD_ROOM_CLIFF]);
+    printf("                             \n");
 }
 
 static void art_room_marsh(void)
 {
-    printf("       ||      ||      ||      ||\n");
-    printf("       ||      ||      ||      ||\n");
-    printf("   _.-~||~--._ ||  _.-~||~--._ ||\n");
-    printf(".-~  ~ || ~  ~'||-~  ~ || ~  ~'||-.\n");
-    printf("|  ~   ||   ~  ||  ~   ||   ~  || |\n");
-    printf("|  _..-||-.._  ||  _..-||-.._  || |\n");
-    printf("|.'    ||    '.||.'    ||    '.|| |\n");
-    printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-    printf("           %s\n", g_room_art_captions[WORLD_ROOM_MARSH]);
+    printf("                             \n");
+    printf("                             \n");
+    printf("  ||    |    ||    |    ||   \n");
+    printf("  ||  .-|-.  ||  .-|-.  ||   \n");
+    printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    printf("                             \n");
+    printf("  %s", g_room_art_captions[WORLD_ROOM_MARSH]);
+    printf("                             \n");
 }
 
 static void art_room_grove(void)
 {
-    printf("                .-~~~~~~~~~~~~-.\n");
-    printf("            .-~   .-~~~~~~-.    ~-.\n");
-    printf("         .-~    .'  .--.    '.     ~-.\n");
-    printf("        /     .'   /    \\     '.      \\\n");
-    printf("       /     /    / /\\   \\      \\      \\\n");
-    printf("      |     |    | |  |   |      |      |\n");
-    printf("      |     |    | |  |   |      |      |\n");
-    printf("      |      \\    \\ \\/   /      /       |\n");
-    printf("       \\      '.   '--' .'      /       /\n");
-    printf("        '.      '-.__.-'      .'      .'\n");
-    printf("          '-._              _.-'  _.-'\n");
-    printf("               '----------'   .-'\n");
-    printf("                 %s\n", g_room_art_captions[WORLD_ROOM_GROVE]);
+    printf("         &       &           \n");
+    printf("     &  ooo  &  ooo  &       \n");
+    printf("    ooo  |  ooo  |  ooo  ^   \n");
+    printf("     |   &   |   &   |       \n");
+    printf("  ^     ooo     ooo          \n");
+    printf("         |       |     ^^    \n");
+    printf("                             \n");
+    printf("   %s", g_room_art_captions[WORLD_ROOM_GROVE]);
+    printf("                             \n");
 }
 
 static void art_room_bridge(void)
 {
-    printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  ~~~~~~~~~~~~~~~~\n");
-    printf("      ||\\                                   /||\n");
-    printf("      || \\_________________________________/ ||\n");
-    printf("      ||  |  |  |  |  |  |  |  |  |  |  |   ||\n");
-    printf("======||==|==|==|==|==|==|==|==|==|==|==|===||======\n");
-    printf("      ||  |  |  |  |  |  |  |  |  |  |  |   ||\n");
-    printf("      ||_/_________________________________\\_||\n");
-    printf("      ||/                                   \\||\n");
-    printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  ~~~~~~~~~~~~~~~~\n");
-    printf("             %s\n", g_room_art_captions[WORLD_ROOM_BRIDGE]);
+    printf("                             \n");
+    printf("       ||\\          /||     \n");
+    printf("~~~~~~~~~~|        |~~~~~~~~~\n");
+    printf("~~~~~~~~~~|        |~~~~~~~~~\n");
+    printf("~~~~~~~~~~|        |~~~~~~~~~\n");
+    printf("       ||/          \\||     \n");
+    printf("                             \n");
+    printf("    %s", g_room_art_captions[WORLD_ROOM_BRIDGE]);
+    printf("                             \n");
 }
 
 static void art_room_catacombs(void)
 {
-    printf("              __________________________\n");
-    printf("           .-'__________________________'-.\n");
-    printf("         .'  ___   ___   ___   ___   ___  '.\n");
-    printf("        /   /___\\ /___\\ /___\\ /___\\ /___\\  \\\n");
-    printf("       |    |   | |   | |   | |   | |   |   |\n");
-    printf("       |    |___| |___| |___| |___| |___|   |\n");
-    printf("       |                                     |\n");
-    printf("       |    |___| |___| |___| |___| |___|   |\n");
-    printf("       |    |   | |   | |   | |   | |   |   |\n");
-    printf("        \\___________________________________/\n");
-    printf("                 %s\n", g_room_art_captions[WORLD_ROOM_CATACOMBS]);
+    printf("                             \n");
+    printf("oooo ooooOOOOOooooooooOOOOooo\n");
+    printf("ooooooooooooooooOOOo   oooooo\n");
+    printf("oo  ooooOOooooooooooooOOOOooo\n");
+    printf("oooOOOoooooooOOO OOoooooooooo\n");
+    printf("ooooooooooOO oo  ooooOOOooooo\n");
+    printf("                             \n");
+    printf("   %s", g_room_art_captions[WORLD_ROOM_CATACOMBS]);
+    printf("                             \n");
 }
 
 static void art_room_meadow(void)
 {
-    printf("             \\  |  /            \\  |  /\n");
-    printf("          '.   \\|/    .'      '.   \\|/    .'\n");
-    printf("        --  *   *   *  --   --  *   *   *  --\n");
-    printf("          .'   /|\\    '.      .'   /|\\    .'\n");
-    printf("             /  |  \\            /  |  \\\n");
-    printf("     .             .      .              .\n");
-    printf("  .     .      .      .      .      .      .\n");
-    printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-    printf("            %s\n", g_room_art_captions[WORLD_ROOM_MEADOW]);
+    printf("    ######     #####  ###    \n");
+    printf("           ##     ###        \n");
+    printf("-*-*--*------*-----*-*----*--\n");
+    printf("- * -- * * -- -- * * -- * ---\n");
+    printf("---  @  ---  @  -------  @  -\n");
+    printf("------   @   ---   @   @   --\n");
+    printf("                             \n");
+    printf("%s", g_room_art_captions[WORLD_ROOM_MEADOW]);
+    printf("                             \n");
 }
 
 static void art_room_canyon(void)
 {
-    printf("            /\\                         /\\\n");
-    printf("           /  \\      __      __       /  \\\n");
-    printf("          / /\\ \\____/  \\____/  \\_____/ /\\ \\\n");
-    printf("         / /  \\________________________/  \\ \\\n");
-    printf("        /_/    /  /  /  /  /  /  /  /    \\_\\\n");
-    printf("        ||    /__/__/__/__/__/__/__/      ||\n");
-    printf("        ||                                   ||\n");
-    printf("~~~~~~~~||~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~||~~~~~~~~\n");
-    printf("            %s\n", g_room_art_captions[WORLD_ROOM_CANYON]);
+    printf("__________      ### _________\n");
+    printf("          \\ ##    |         \n");
+    printf("          /________\\        \n");
+    printf("           \\   \\ __/       \n");
+    printf("           /  _/ \\          \n");
+    printf("          /  /   /           \n");
+    printf("                             \n");
+    printf("  %s", g_room_art_captions[WORLD_ROOM_CANYON]);
+    printf("                             \n");
 }
 
 static void art_room_tower(void)
 {
-    printf("                       /\\\n");
-    printf("                      /  \\\n");
-    printf("                     /____\\\n");
-    printf("                   __| [] |__\n");
-    printf("                  /  |    |  \\\n");
-    printf("                 /___|____|___\\\n");
-    printf("                    / || \\\n");
-    printf("                   /  ||  \\\n");
-    printf("                  /___||___\\\n");
-    printf("                 /____||____\\\n");
-    printf("              %s\n", g_room_art_captions[WORLD_ROOM_TOWER]);
+    printf("             /''\\   ####    \n");
+    printf("            /____\\   ##     \n");
+    printf("           | [__] |          \n");
+    printf("___________|      |__________\n");
+    printf("   \\|/     |  __  |         \n");
+    printf("          /__|__|__\\   \\|/ \n");
+    printf("                             \n");
+    printf(" %s", g_room_art_captions[WORLD_ROOM_TOWER]);
+    printf("                             \n");
 }
 
 static void art_room_orchard(void)
 {
-    printf("          &&&        &&&        &&&\n");
-    printf("       &&&&&&&    &&&&&&&    &&&&&&&\n");
-    printf("      &&&&&&&&&  &&&&&&&&&  &&&&&&&&&\n");
-    printf("         ||||        ||||        ||||\n");
-    printf("         ||||        ||||        ||||\n");
-    printf("      .-.||||.-.  .-.||||.-.  .-.||||.-.\n");
-    printf("     (o o)  (o o)(o o)  (o o)(o o)  (o o)\n");
-    printf("      '-'    '-'  '-'    '-'  '-'    '-'\n");
-    printf("             %s\n", g_room_art_captions[WORLD_ROOM_ORCHARD]);
+    printf("                             \n");
+    printf("    &   &       @.@@.@    &  \n");
+    printf("    '  ooo     @@@'@@'@   '  \n");
+    printf("        |     @'@.@@'@'@     \n");
+    printf("   ^^           ' | o|''   ^ \n");
+    printf("        ^^^     ..|  |.      \n");
+    printf("                             \n");
+    printf("%s", g_room_art_captions[WORLD_ROOM_ORCHARD]);
+    printf("                             \n");
 }
 
 static void art_room_cave(void)
 {
-    printf("                 ______________________\n");
-    printf("            _.-'                      '-._\n");
-    printf("         .-'    .--.            .--.      '-.\n");
-    printf("        /      /    \\          /    \\        \\\n");
-    printf("       /______/______\\________/______\\________\\\n");
-    printf("       |   .-.    .-.    .-.    .-.    .-.   |\n");
-    printf("       |  (   )  (   )  (   )  (   )  (   )  |\n");
-    printf("       |   '-'    '-'    '-'    '-'    '-'   |\n");
-    printf("       |______________________________________|\n");
-    printf("              %s\n", g_room_art_captions[WORLD_ROOM_CAVE]);
+    printf("                             \n");
+    printf("'''.._----_______---__-_     \n");
+    printf(" ^    ^   .-----.    ^^  '-- \n");
+    printf("  {{     |       |      }    \n");
+    printf("_________|_______|___________\n");
+    printf("  ''' ''          '' ''''    \n");
+    printf("                             \n");
+    printf(" %s", g_room_art_captions[WORLD_ROOM_CAVE]);
+    printf("                             \n");
 }
 
 static void art_wanderer(void)
 {
-    printf("                        .-''''-.\n");
-    printf("                      .'  _  _  '.\n");
-    printf("                     /   (o)(o)   \\\n");
-    printf("                    |      /\\      |\n");
-    printf("                    |     /  \\     |\n");
-    printf("                    |   .-====-.   |\n");
-    printf("                    |  /  ____  \\  |\n");
-    printf("                    | /  / __ \\  \\ |\n");
-    printf("                    | | | /  \\ | | |\n");
-    printf("                    | | | \\__/ | | |\n");
-    printf("                    |  \\ \\____/ /  |\n");
-    printf("                    |   '------'   |\n");
-    printf("                    |   /|    |\\   |\n");
-    printf("                    |  /_|____|_\\  |\n");
-    printf("                    | /__|____|__\\ |\n");
-    printf("                    |/___/    \\___\\|\n");
-    printf("                   /____/      \\____\\\n");
-    printf("              %s\n", TXT_WANDERER_ART_CAPTION);
+    printf("        .-''''-.             \n");
+    printf("       / o)o)   |            \n");
+    printf("      |   /_    B =-----     \n");
+    printf("      |   ---  / //     \\   \n");
+    printf("       \\______/_//       \\ \n");
+    printf("      /        //\\_______/  \n");
+    printf("                             \n");
+    printf(" %s", TXT_WANDERER_ART_CAPTION);
+    printf("                             \n");
 }
 
 static void art_watchman_portrait(void)
 {
-    printf("                           ____\n");
-    printf("                        .-'    '-.\n");
-    printf("                       /   (o)  .---.   \\\n");
-    printf("                      |    |   |//|    |\n");
-    printf("                      |    \\~~~+~~/    |\n");
-    printf("                      |     \\____/     |\n");
-    printf("                      |      |  |      |\n");
-    printf("                      |______|__|______|\n");
-    printf("                     /______||||______\\\n");
-    printf("                    /_______|__|_______\\\n");
-    printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-    printf("              %s\n", TXT_WATCHMAN_ART_CAPTION);
+    printf("        .#######.            \n");
+    printf("       /#########\\          \n");
+    printf("       |  -- (o) |           \n");
+    printf("       |    ^    |           \n");
+    printf("       \\___---___/          \n");
+    printf("      ----/'''\\---          \n");
+    printf("                             \n");
+    printf("%s", TXT_WATCHMAN_ART_CAPTION);
+    printf("                             \n");
 }
 
 static void art_herbalist_portrait(void)
 {
-    printf("                         __________\n");
-    printf("                      .-'          '-.\n");
-    printf("                     /    ()    ()    \\\n");
-    printf("                    |      \\__/       |\n");
-    printf("                    |    .--||--.     |\n");
-    printf("                    |   /   ||   \\    |\n");
-    printf("                    |  | [][][][] |   |\n");
-    printf("                    |   \\________/    |\n");
-    printf("                    |______||||________|\n");
-    printf("                   /_______||||________\\\n");
-    printf("                  /________|  |________\\\n");
-    printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-    printf("              %s\n", TXT_HERBALIST_ART_CAPTION);
+    printf("                             \n");
+    printf("        _......_             \n");
+    printf("       / _    _ \\           \n");
+    printf("      (-( )--( )-)           \n");
+    printf("       |    ^   |            \n");
+    printf("        \\__ - _/            \n");
+    printf("       ___|''' |___          \n");
+    printf("                             \n");
+    printf("  %s", TXT_HERBALIST_ART_CAPTION);
+    printf("                             \n");
 }
 
 static void art_archivist_portrait(void)
 {
-    printf("                         _______\n");
-    printf("                      .-'       '-.\n");
-    printf("                     /   ___   ___  \\\n");
-    printf("                    |   |__| |__|   |\n");
-    printf("                    |    ________    |\n");
-    printf("                    |   |~~~~~~~~|   |\n");
-    printf("                    |   | candle |   |\n");
-    printf("                    |   |________|   |\n");
-    printf("                    |______||||______|\n");
-    printf("                   /______||||______\\\n");
-    printf("                  /_______|  |_______\\\n");
-    printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-    printf("              %s\n", TXT_ARCHIVIST_ART_CAPTION);
+    printf("        _________            \n");
+    printf("       /|||||||||\\          \n");
+    printf("      ||/ _   _ \\||         \n");
+    printf("      ||  0   0  ||          \n");
+    printf("      ||    _    ||          \n");
+    printf("      ||\\_/___\\_/||        \n");
+    printf("     _|||_\\|||/_|||_        \n");
+    printf("                             \n");
+    printf("  %s", TXT_ARCHIVIST_ART_CAPTION);
+    printf("                             \n");
 }
 
 static void art_frog_portrait(void)
 {
-    printf("                            _..---.._\n");
-    printf("                        .-''  .-.  ''-.\n");
-    printf("                      .'     (   )     '.\n");
-    printf("                     /   .-.  '-'  .-.   \\\n");
-    printf("                    /   /   \\     /   \\   \\\n");
-    printf("                    |  | (o) |   | (o) |  |\n");
-    printf("                    |  |     /___\\     |  |\n");
-    printf("                    |  |   .-`___`-.   |  |\n");
-    printf("                    |   \\  \\_____/  /  /   |\n");
-    printf("                    |    '._\\___/_.-'   |\n");
-    printf("                    |       /   \\       |\n");
-    printf("                  __|__   _/_____|\\_   __|__\n");
-    printf("               .-'____ '-/  /\\ /\\  \\-' ____'-.\n");
-    printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-    printf("                %s\n", TXT_FROG_ART_CAPTION);
+    printf("        _________            \n");
+    printf("      (|)  . .  (|)          \n");
+    printf("       \\_________/          \n");
+    printf("      //          \\\\       \n");
+    printf("     ||            ||        \n");
+    printf("     ||            ||        \n");
+    printf("    /||\\__________/||\\     \n");
+    printf("                             \n");
+    printf("%s", TXT_FROG_ART_CAPTION);
+    printf("                             \n");
 }
 
 static void art_for_room(int room_id)
@@ -516,19 +443,15 @@ void game_print_help(int topic)
 
 void render_bandit_encounter_open(void)
 {
-    printf("\n");
-    printf("                  .--.__________________.--.\n");
-    printf("                .'   /  _   _   _   _  \\   '.\n");
-    printf("               /    |  (o) (o) (o) (o) |    \\\n");
-    printf("              |     |        /\\         |     |\n");
-    printf("              |     |   .-==========-.  |     |\n");
-    printf("              |     |  /  /  /  /  / |  |     |\n");
-    printf("              |     | /__/__/__/__/  |  |     |\n");
-    printf("              |     | \\  rusty blade  /  |     |\n");
-    printf("               \\    |  '------------'   |    /\n");
-    printf("                '.  \\__________________/  .'\n");
-    printf("                  '--._______________ .--'\n");
+    printf("  /\\                        \n");
+    printf("  ||     .-'''''''-.         \n");
+    printf("  ||    / (.)..(.)  |        \n");
+    printf("  ||    |  (::::)   |        \n");
+    printf("  ||    \\__________/        \n");
+    printf(" :::: .-----\\  \\-----.     \n");
+    printf("                             \n");
     printf("%s", TXT_BANDIT_OPEN_INTRO);
+    printf("                             \n");
     printf("%s", TXT_BANDIT_OPEN_QUOTE);
     printf("%s", TXT_BANDIT_OPEN_OPT1);
     printf("%s", TXT_BANDIT_OPEN_OPT2);
