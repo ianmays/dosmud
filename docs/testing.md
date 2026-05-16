@@ -16,9 +16,9 @@ make test-run
 Purpose:
 
 - `make build`: native GCC development build
-- `make check-layers`: core/render boundary guard (no `printf` in `src/*.c` except `main.c` and `grendr.c`)
+- `make check-layers`: core/render boundary guard (no `printf` in `src/*.c` except `main.c`, `grendr.c`, and the platform file `platpos.c` or `platdos.c`)
 - `make test`: strict deterministic compile (`-Werror`, `-DTEST_MODE`, `-g -O0`); does not run `check-layers`
-- `make test-run`: scripted input regression pass (`tests/smoke.*`, `tests/bandit_handover.*`, `tests/bandit_wielded_give.*`, `tests/area_items.*`, `tests/map.*`, `tests/equipment.*`, `tests/craft_wielded.*`
+- `make test-run`: scripted input regression pass (`tests/smoke.*`, `tests/seed_cli.*`, `tests/bandit_handover.*`, `tests/bandit_wielded_give.*`, `tests/area_items.*`, `tests/map.*`, `tests/equipment.*`, `tests/craft_wielded.*`)
 
 ## Test fixtures (`TEST_MODE` only)
 
@@ -28,15 +28,17 @@ Snapshot tests can set up known game state without walking RNG-dependent command
 @fixture <name>
 ```
 
-are handled by `testharn` before normal command parsing. Fixture lines are not echoed as player commands. Unknown fixture names print `unknown test fixture` to stderr and exit with status 1. When a known fixture cannot finish setup (for example the bag is full), the binary prints `test fixture failed` to stderr and also exits with status 1.
+are handled by `testharn` before normal command parsing. Fixture lines are not echoed as player commands. Unknown fixture names print `unknown test fixture` to stderr and exit with status 1. When a known fixture cannot finish setup, the binary prints `test fixture failed` to stderr and also exits with status 1.
 
 Prefer fixtures over long setup scripts when a test needs a specific mode, inventory, or encounter. After changing fixture output, regenerate the matching `.expect` with `make test-run` and review the diff.
 
+Bandit fixtures share a base reset first: explore mode, camp, tick 1, starting player stats (HP, level, XP, combat), empty bag, and no camp ground sticks, so later fixtures in the same run do not inherit prior damage or inventory.
+
 | Fixture | State |
 |---------|--------|
-| `bandit_dialogue` | Camp, tick 1, stick in bag, bandit dialogue open |
-| `bandit_handover_pick` | Same, plus handover pick prompt (reply 2 already chosen) |
-| `bandit_wielded_pick` | Same, stick wielded (`Atk:1`), handover pick prompt |
+| `bandit_dialogue` | Base reset, stick in bag, bandit dialogue open |
+| `bandit_handover_pick` | Base reset, stick in bag, bandit dialogue open, handover pick prompt (reply 2 already chosen) |
+| `bandit_wielded_pick` | Base reset, stick wielded (`Atk:1`), bandit dialogue open, handover pick prompt |
 
 Add new fixtures in [`src/testharn.c`](../src/testharn.c) and document them here. `testharn` is linked only for `make test` / `prepare-dos MODE=TEST_MODE`, not for `make build`.
 
@@ -64,7 +66,7 @@ Deterministic DOS validation:
 make prepare-dos MODE=TEST_MODE
 ```
 
-Runtime seed override (native or DOS build):
+Runtime seed (native or DOS build): the startup banner always prints the active seed, for example `dosmud (seed 1234)`. In `TEST_MODE` the default is `CFG_TEST_RAND_SEED` unless overridden on the command line:
 
 ```sh
 ./dosmud --seed 1234

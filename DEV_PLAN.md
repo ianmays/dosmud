@@ -222,7 +222,7 @@ Done ✅.
 
 - Documented core / render / platform layers in `docs/architecture.md`
 - Moved all `invent.c` player output to `render_inv_*` in `grendr`
-- Added `make check-layers` to reject `printf` outside `main.c` and `grendr.c` (run explicitly or via `make all-test`; not part of `make test`)
+- Added `make check-layers` to reject `printf` outside `main.c`, `grendr.c`, and the platform file (`platpos.c` / `platdos.c`) (run explicitly or via `make all-test`; not part of `make test`)
 
 ---
 
@@ -260,7 +260,7 @@ diff test.output test.expect
 
 Done ✅.
 
-`TEST_MODE` builds link [`src/testharn.c`](src/testharn.c). Snapshot `.input` files can use `@fixture <name>` to reach known state without RNG-walking setup commands. Initial fixtures: `bandit_dialogue`, `bandit_handover_pick`, `bandit_wielded_pick` (see [`docs/testing.md`](docs/testing.md)). Bandit handover snapshot tests use fixtures instead of `take stick` + encounter rolls.
+`TEST_MODE` builds link [`src/testharn.c`](src/testharn.c). Snapshot `.input` files can use `@fixture <name>` to reach known state without RNG-walking setup commands. Bandit fixtures reset mode, player stats, bag, and camp ground items before encounter setup. Initial fixtures: `bandit_dialogue`, `bandit_handover_pick`, `bandit_wielded_pick` (see [`docs/testing.md`](docs/testing.md)). Bandit handover snapshot tests use fixtures instead of `take stick` + encounter rolls.
 
 Follow-up (not required for #66): more fixtures (combat turns, wanderer co-location, custom world boot), and broader migration of remaining brittle tests.
 

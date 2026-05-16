@@ -114,7 +114,7 @@ DOS flow entrypoint:
   - `make check-layers`
   - `make test`
   - `make test-run`
-- `make check-layers` rejects `printf` in core `src/*.c` (allowed only in `main.c` and `grendr.c`).
+- `make check-layers` rejects `printf` in core `src/*.c` (allowed only in `main.c`, `grendr.c`, and `platpos.c` or `platdos.c`).
 - `make test` builds with `-Werror -DTEST_MODE` (does not run `check-layers`; CI runs both).
 - `make test-run` pipes scripted input and diffs against snapshot output.
 - `make prepare-dos` and DOS-path validation targets are unavailable in cloud VMs.
