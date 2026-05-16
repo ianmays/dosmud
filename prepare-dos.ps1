@@ -22,7 +22,10 @@ if (-not $NoBuild) {
     Remove-Item -Recurse -Force $destination
   }
 
-  robocopy $source $destination    /MIR
+  # Mirror only what the DOS/Open Watcom build needs (see build.bat).
+  robocopy $source $destination /MIR `
+    /XD .git tests docs .github .cursor .vscode `
+    /XF dosmud dosmud.exe Makefile *.output *.o *.obj
 
   & "$dospath$dosexecutable" `
     -c "mount c $mountpoint" `
