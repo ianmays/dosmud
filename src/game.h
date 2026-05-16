@@ -1,6 +1,7 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include "base.h"
 #include "command.h"
 #include "world.h"
 #include "gprog.h"
@@ -12,8 +13,8 @@ struct Player {
 struct GameState {
     struct World world;
     struct Player player;
-    unsigned long tick;
-    unsigned long seed;
+    u32 tick;
+    u32 seed;
     int running;
     int pond_dialogue;
     int wanderer_room;
@@ -22,7 +23,7 @@ struct GameState {
     int env_focus_active;
     int env_focus_room;
     int env_focus_kind;
-    unsigned long env_focus_expires_tick;
+    u32 env_focus_expires_tick;
     int room_item[CFG_ROOM_MAX][CFG_AREA_ITEM_SLOTS];
     int bag[CFG_BAG_MAX];
     int bag_count;
@@ -42,8 +43,8 @@ struct GameState {
     int corpse_loot[CFG_ROOM_MAX];
     int npc_dialogue;
     int wanderer_active;
-    unsigned long wanderer_return_tick;
-    unsigned char room_explored[CFG_ROOM_MAX];
+    u32 wanderer_return_tick;
+    u8 room_explored[CFG_ROOM_MAX];
 };
 
 void game_init(struct GameState *game);

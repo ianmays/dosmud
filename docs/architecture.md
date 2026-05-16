@@ -104,6 +104,20 @@ Conventions:
 - distinguish tuning for NPC corpse loot (`CFG_COMBAT_CORPSE_LOOT_*`, portable items) from ambient room finds (`CFG_ROOM_SPAWN_*`, terrain-driven junk like stone)
 - `TEST_MODE` seeds libc RNG with `CFG_TEST_RAND_SEED` for deterministic snapshot output
 
+## Base types (`base.h`)
+
+[`include/base.h`](../include/base.h) defines portable unsigned aliases used in simulation state:
+
+- `u8` - byte storage (explored-map flags, `map_ready`, safe `char` casts for `ctype` calls)
+- `u16` - 16-bit values when needed (defined for future use; compile-time `sizeof` guard)
+- `u32` - tick counters, seeds, and other monotonic world-time fields (`GameState.tick`, `world_step` argument); maps to `unsigned long` (32-bit on DOS/Open Watcom, may be wider on LP64 Linux hosts)
+
+Conventions:
+
+- use `int` for gameplay quantities, room ids, and boolean-style flags unless a fixed width is required
+- keep `config.h` for limits and tuning; do not fold typedefs into `config.h`
+- see [contributor guide](contributor-guide.md) for ANSI C89 / Open Watcom portability rules
+
 ## `grendr`
 
 - text rendering only

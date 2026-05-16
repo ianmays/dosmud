@@ -239,7 +239,7 @@ void world_init(struct World *world)
     }
 }
 
-void world_step(struct World *world, unsigned long tick)
+void world_step(struct World *world, u32 tick)
 {
     (void)world;
     (void)tick;

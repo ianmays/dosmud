@@ -1,6 +1,7 @@
 #ifndef WORLD_H
 #define WORLD_H
 
+#include "base.h"
 #include "config.h"
 
 enum Direction {
@@ -28,11 +29,11 @@ struct World {
      */
     int map_x[CFG_ROOM_MAX];
     int map_y[CFG_ROOM_MAX];
-    unsigned char map_ready[CFG_ROOM_MAX];
+    u8 map_ready[CFG_ROOM_MAX];
 };
 
 void world_init(struct World *world);
-void world_step(struct World *world, unsigned long tick);
+void world_step(struct World *world, u32 tick);
 int world_can_move(struct World *world, int room_id, int dir);
 int world_move(struct World *world, int room_id, int dir);
 const char *world_dir_name(int dir);

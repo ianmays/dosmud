@@ -202,26 +202,7 @@ Compiler discipline and warning cleanliness should remain early priorities throu
 
 ## #41 - Compatibility typedefs
 
-Create:
-
-```text
-base.h
-```
-
-Example:
-
-```c
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef unsigned long u32;
-```
-
-Do not assume exact widths blindly.
-Document assumptions clearly.
-
-Goal:
-- improve portability clarity
-- centralize low-level assumptions
+✅ Done - [`include/base.h`](include/base.h) defines `u8`/`u16`/`u32` with documented width assumptions and compile-time `sizeof` guards; tick and byte-flag fields in `game.h` / `world.h` use these types.
 
 ---
 
