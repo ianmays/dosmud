@@ -18,35 +18,6 @@ static void art_room_camp(void)
     printf("                             \n");
     printf(" %s", g_room_art_captions[WORLD_ROOM_CAMP]);
     printf("                             \n");
-
-    printf("\n");
-    printf("\n");
-
-    printf("        .-''''-.             \n");
-    printf("       / o)o)   |            \n");
-    printf("      |   /_    B =-----     \n");
-    printf("      |   ---  / //     \\   \n");
-    printf("       \\______/_//       \\ \n");
-    printf("      /        //\\_______/  \n");
-    printf("                             \n");
-    printf(" %s", TXT_WANDERER_ART_CAPTION);
-    printf("                             \n");
-
-    printf("\n");
-    printf("\n");
-
-    printf("        .#######.            \n");
-    printf("       /#########\\          \n");
-    printf("       |  -- (o) |           \n");
-    printf("       |    ^    |           \n");
-    printf("       \\___---___/          \n");
-    printf("      ----/'''\\---          \n");
-    printf("                             \n");
-    printf("%s", TXT_WANDERER_ART_CAPTION);
-    printf("                             \n");
-
-    printf("\n");
-    printf("\n");
 }
 
 static void art_room_road(void)
@@ -266,41 +237,50 @@ static void art_watchman_portrait(void)
     printf("       \\___---___/          \n");
     printf("      ----/'''\\---          \n");
     printf("                             \n");
-    printf("%s", TXT_WANDERER_ART_CAPTION);
+    printf("%s", TXT_WATCHMAN_ART_CAPTION);
     printf("                             \n");
 }
 
 static void art_herbalist_portrait(void)
 {
-    printf("            __________\n");
-    printf("         .-( )--( )--.\n");
-    printf("        |  [][][][]  |\n");
-    printf("        |____||||____|\n");
-    printf("       /_____||||_____\\\n");
-    printf("~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-    printf("              %s\n", TXT_HERBALIST_ART_CAPTION);
+    printf("                             \n");
+    printf("        _......_             \n");
+    printf("       / _    _ \\           \n");
+    printf("      (-( )--( )-)           \n");
+    printf("       |    ^   |            \n");
+    printf("        \\__ - _/            \n");
+    printf("       ___|''' |___          \n");
+    printf("                             \n");
+    printf("  %s", TXT_HERBALIST_ART_CAPTION);
+    printf("                             \n");
 }
 
 static void art_archivist_portrait(void)
 {
-    printf("            _______\n");
-    printf("         .-|___|___|-.\n");
-    printf("        | |~~~~~~~| |\n");
-    printf("        |_|_______|_|\n");
-    printf("       /____||||_____\\\n");
-    printf("~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-    printf("              %s\n", TXT_ARCHIVIST_ART_CAPTION);
+    printf("        _________            \n");
+    printf("       /|||||||||\\          \n");
+    printf("      ||/ _   _ \\||         \n");
+    printf("      ||  0   0  ||          \n");
+    printf("      ||    _    ||          \n");
+    printf("      ||\\_/___\\_/||        \n");
+    printf("     _|||_\\|||/_|||_        \n");
+    printf("                             \n");
+    printf("  %s", TXT_ARCHIVIST_ART_CAPTION);
+    printf("                             \n");
 }
 
 static void art_frog_portrait(void)
 {
-    printf("            .-~~~~-.\n");
-    printf("           / (o) (o) \\\n");
-    printf("          |  \\___/   |\n");
-    printf("          |  .---.  |\n");
-    printf("           \\_______/\n");
-    printf("~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-    printf("                %s\n", TXT_FROG_ART_CAPTION);
+    printf("        _________            \n");
+    printf("      (|)  . .  (|)          \n");
+    printf("       \\_________/          \n");
+    printf("      //          \\\\       \n");
+    printf("     ||            ||        \n");
+    printf("     ||            ||        \n");
+    printf("    /||\\__________/||\\     \n");
+    printf("                             \n");
+    printf("%s", TXT_FROG_ART_CAPTION);
+    printf("                             \n");
 }
 
 static void art_for_room(int room_id)
@@ -463,12 +443,16 @@ void game_print_help(int topic)
 
 void render_bandit_encounter_open(void)
 {
-    printf("\n");
-    printf("          .-____________-.\n");
-    printf("         /  (o) (o) (o)  \\\n");
-    printf("        |    rusty blade   |\n");
-    printf("         \\________________/\n");
+    
+    printf("  /\\                        \n");
+    printf("  ||     .-'''''''-.         \n");
+    printf("  ||    / (.)..(.)  |        \n");
+    printf("  ||    |  (::::)   |        \n");
+    printf("  ||    \\__________/        \n");
+    printf(" :::: .-----\\  \\-----.     \n");
+    printf("                             \n");
     printf("%s", TXT_BANDIT_OPEN_INTRO);
+    printf("                             \n");
     printf("%s", TXT_BANDIT_OPEN_QUOTE);
     printf("%s", TXT_BANDIT_OPEN_OPT1);
     printf("%s", TXT_BANDIT_OPEN_OPT2);
