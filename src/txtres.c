@@ -82,7 +82,9 @@ const char *txtres_dir_name(int dir)
 }
 
 const char *const TXT_MAIN_TEST_MODE = "TEST MODE";
-const char *const TXT_MAIN_TITLE = "dosmud prototype";
+const char *const TXT_MAIN_USAGE = "usage: dosmud [--seed <unsigned>]";
+const char *const TXT_MAIN_TITLE = "dosmud";
+const char *const TXT_MAIN_TITLE_SEED_FMT = "%s (seed %lu)\n";
 const char *const TXT_MAIN_HELP_HINT = "Type 'help' for commands.";
 const char *const TXT_MAIN_PROMPT = "\n> ";
 const char *const TXT_MAIN_BYE = "bye";

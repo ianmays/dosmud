@@ -28,6 +28,7 @@ Native development build:
 ```sh
 make build
 ./dosmud
+./dosmud --seed 1234
 ```
 
 Native layers/strict/test checks:
