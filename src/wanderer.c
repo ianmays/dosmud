@@ -47,9 +47,8 @@ void wanderer_begin_encounter(struct GameState *game)
     if (game->wanderer_need_separation) {
         return;
     }
-    game->pond_dialogue = 0;
     render_wanderer_scene();
-    game->wanderer_dialogue = 1;
+    game_set_mode_dialogue(game, DIALOGUE_WANDERER);
     game->wanderer_need_separation = 1;
 }
 

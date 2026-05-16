@@ -210,31 +210,9 @@ Compiler discipline and warning cleanliness should remain early priorities throu
 
 ## #43 - Replace overlapping flags with state structures
 
-Introduce:
+Done ✅.
 
-```c
-enum GameMode {
-    MODE_EXPLORE,
-    MODE_DIALOGUE,
-    MODE_COMBAT
-};
-```
-
-Example:
-
-```c
-struct CombatState
-{
-    int active;
-    int enemy_hp;
-    int defending;
-};
-```
-
-Goal:
-- prevent invalid state combinations
-- clarify transitions
-- improve testability
+[`src/game.h`](src/game.h) defines `GameMode` (`GAME_MODE_EXPLORE`, `GAME_MODE_DIALOGUE`, `GAME_MODE_COMBAT`), `DialogueKind` (room NPCs including frog, wanderer, enemy), and `CombatState` (`enemy_hp`, `defending`). `GameState` holds `mode`, `dialogue`, and `combat` instead of overlapping `pond_dialogue`, `wanderer_dialogue`, `enemy_dialogue`, `npc_dialogue`, and `combat_active` flags. Transitions go through `game_set_mode_explore`, `game_set_mode_dialogue`, and `game_set_mode_combat` in [`src/game.c`](src/game.c).
 
 ---
 

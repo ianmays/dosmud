@@ -91,7 +91,9 @@ Conventions:
 - top-level gameplay orchestration
 - command routing
 - world update sequencing
-- `game_is_busy_dialogue` gating for ambient encounters (shared with encounter and wanderer entry)
+- explicit game modes in [`game.h`](../src/game.h): `GameMode` (explore, dialogue, combat), `DialogueKind` for the active dialogue when in dialogue mode (room NPCs including the pond frog, wanderer, enemy), and `CombatState` for combat-only fields
+- mode transitions via `game_set_mode_explore`, `game_set_mode_dialogue`, and `game_set_mode_combat` (only one major mode at a time)
+- `game_is_busy_dialogue` returns true whenever `mode != GAME_MODE_EXPLORE` (ambient encounters, idle background ticks)
 
 Gameplay slices live beside `game.c` as plain C translation units (no extra framework):
 

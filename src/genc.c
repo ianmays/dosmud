@@ -8,6 +8,5 @@ void enemy_begin_encounter(struct GameState *game)
         return;
     }
     render_bandit_encounter_open();
-    game->enemy_dialogue = 1;
-    game->enemy_handover_pick = 0;
+    game_set_mode_dialogue(game, DIALOGUE_ENEMY);
 }

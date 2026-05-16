@@ -179,7 +179,7 @@ int game_inv_cmd_take(struct GameState *game, int item_arg)
     int ground_item;
     int slot;
 
-    if (game->combat_active) {
+    if (game->mode == GAME_MODE_COMBAT) {
         printf("%s", TXT_INV_NO_RUMMAGE_COMBAT);
         return 1;
     }
@@ -208,7 +208,7 @@ int game_inv_cmd_drop(struct GameState *game, int item_arg)
     int room_id;
     int slot;
 
-    if (game->combat_active) {
+    if (game->mode == GAME_MODE_COMBAT) {
         printf("%s", TXT_INV_NO_DROP_COMBAT);
         return 1;
     }
@@ -265,7 +265,7 @@ int game_inv_cmd_bag(struct GameState *game)
 
 int game_inv_cmd_eat(struct GameState *game, int item_arg)
 {
-    if (game->combat_active) {
+    if (game->mode == GAME_MODE_COMBAT) {
         printf("%s", TXT_INV_NO_EAT_COMBAT);
         return 1;
     }
@@ -288,7 +288,7 @@ int game_inv_cmd_eat(struct GameState *game, int item_arg)
 
 int game_inv_cmd_use(struct GameState *game, int item_arg)
 {
-    if (game->combat_active) {
+    if (game->mode == GAME_MODE_COMBAT) {
         printf("%s", TXT_INV_USE_REPLY_COMBAT);
         return 1;
     }
@@ -332,7 +332,7 @@ static int craft_consume_one(struct GameState *game, int item_id)
 
 int game_inv_cmd_craft(struct GameState *game, int item_arg)
 {
-    if (game->combat_active) {
+    if (game->mode == GAME_MODE_COMBAT) {
         printf("%s", TXT_INV_NO_CRAFT_COMBAT);
         return 1;
     }
@@ -430,7 +430,7 @@ int game_inv_cmd_unwield(struct GameState *game)
         printf("%s", TXT_INV_UNWIELD);
         return 1;
     }
-    if (game->combat_active) {
+    if (game->mode == GAME_MODE_COMBAT) {
         printf("%s", TXT_INV_UNWIELD_CANNOT);
         return 1;
     }
