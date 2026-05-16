@@ -105,7 +105,7 @@ Conventions:
 
 ### Test harness (`testharn`, `TEST_MODE` only)
 
-[`src/testharn.c`](../src/testharn.c) lives at the `main` edge (not core simulation). It applies `@fixture` lines from snapshot `.input` files by calling existing game, inventory, encounter, and `render_*` APIs (same paths as normal play). Bandit fixtures reset mode, player progression/HP/combat, bag, and camp ground items before encounter setup so snapshots stay independent of earlier commands. Release builds (`make build`) do not link it. See [testing](testing.md#test-fixtures-test_mode-only).
+[`src/testharn.c`](../src/testharn.c) lives at the `main` edge (not core simulation). It applies `@fixture` lines from snapshot `.input` files by calling existing game, inventory, encounter, and `render_*` APIs (same paths as normal play). Bandit fixtures reset mode, player progression/HP/combat, bag, camp ground items, and explored-map flags before encounter setup so snapshots stay independent of earlier commands. Release builds (`make build`) do not link it. See [testing](testing.md#test-fixtures-test_mode-only).
 
 ## Base types (`base.h`)
 

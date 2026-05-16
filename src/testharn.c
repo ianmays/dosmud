@@ -40,11 +40,17 @@ static void fixture_reset_player_state(struct GameState *game)
 
 static void fixture_bandit_base(struct GameState *game)
 {
+    int i;
+
     game_set_mode_explore(game);
     game->player.room_id = WORLD_ROOM_CAMP;
     game->tick = 1;
     fixture_reset_player_state(game);
     camp_clear_ground_sticks(game);
+    for (i = 0; i < CFG_ROOM_MAX; ++i) {
+        game->room_explored[i] = 0;
+    }
+    game->room_explored[WORLD_ROOM_CAMP] = 1;
 }
 
 static int fixture_bandit_dialogue(struct GameState *game)
