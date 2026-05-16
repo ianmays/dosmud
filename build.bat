@@ -130,7 +130,7 @@ if errorlevel 1 goto wcl_bad
 
 echo Linking dosmud.exe ... >> %LOG%
 echo Linking dosmud.exe ...
-REM Link line below is ~125 chars (under COMMAND.COM ~127); testharn.obj lives in gameplay.lib.
+REM Link line below is ~125 chars (under COMMAND.COM ~127); tharn.obj lives in gameplay.lib.
 wcl -bt=dos -fe=dosmud.exe main.obj platdos.obj gameplay.lib grendr.obj invent.obj command.obj world.obj items.obj txtres.obj >> %LOG%
 if errorlevel 1 goto wcl_bad
 if not exist dosmud.exe goto wcl_bad

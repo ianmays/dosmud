@@ -9,18 +9,28 @@
 #include "items.h"
 #include "testharn.h"
 
-static void camp_clear_ground_stick(struct GameState *game)
+static void camp_clear_ground_sticks(struct GameState *game)
 {
-    if (game->room_item[WORLD_ROOM_CAMP][0] == ITEM_STICK) {
-        game->room_item[WORLD_ROOM_CAMP][0] = ITEM_NONE;
+    int s;
+
+    for (s = 0; s < CFG_AREA_ITEM_SLOTS; ++s) {
+        if (game->room_item[WORLD_ROOM_CAMP][s] == ITEM_STICK) {
+            game->room_item[WORLD_ROOM_CAMP][s] = ITEM_NONE;
+        }
     }
+}
+
+static void fixture_bandit_base(struct GameState *game)
+{
+    game_set_mode_explore(game);
+    game->player.room_id = WORLD_ROOM_CAMP;
+    game->tick = 1;
+    camp_clear_ground_sticks(game);
 }
 
 static void fixture_bandit_dialogue(struct GameState *game)
 {
-    game->player.room_id = WORLD_ROOM_CAMP;
-    game->tick = 1;
-    camp_clear_ground_stick(game);
+    fixture_bandit_base(game);
     (void)game_inv_bag_add(game, ITEM_STICK);
     enemy_begin_encounter(game);
 }
@@ -34,9 +44,7 @@ static void fixture_bandit_handover_pick(struct GameState *game)
 
 static void fixture_bandit_wielded_pick(struct GameState *game)
 {
-    game->player.room_id = WORLD_ROOM_CAMP;
-    game->tick = 1;
-    camp_clear_ground_stick(game);
+    fixture_bandit_base(game);
     game->weapon_equipped = ITEM_STICK;
     enemy_begin_encounter(game);
     game->enemy_handover_pick = 1;

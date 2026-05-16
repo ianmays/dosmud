@@ -82,6 +82,9 @@ int main(int argc, char **argv)
     int poll_rc;
     int ran_tick;
     u32 rng_seed;
+#ifdef TEST_MODE
+    int th_rc;
+#endif
     const time_t idle_tick_seconds = (time_t)CFG_MAIN_IDLE_TICK_SECONDS;
 
     rng_seed = default_rng_seed();
@@ -113,29 +116,28 @@ int main(int argc, char **argv)
             line[strcspn(line, "\r\n")] = '\0';
             if (line[0] != '\0') {
 #ifdef TEST_MODE
-                {
-                    int th_rc;
-
-                    th_rc = testharn_apply(&game, line);
-                    if (th_rc < 0) {
-                        fprintf(stderr, "unknown test fixture\n");
-                        return 1;
+                th_rc = testharn_apply(&game, line);
+                if (th_rc < 0) {
+                    fprintf(stderr, "unknown test fixture\n");
+                    return 1;
+                }
+                if (th_rc > 0) {
+                    last_tick_time = plat_time_now();
+                    if (game.running) {
+                        game_render(&game);
                     }
-                    if (th_rc > 0) {
-                        last_tick_time = plat_time_now();
-                        if (game.running) {
-                            game_render(&game);
-                        }
-                    } else
-#endif
-                    {
-                        game_process_input(&game, line);
-                        last_tick_time = plat_time_now();
-                        if (game.running) {
-                            game_render(&game);
-                        }
+                } else {
+                    game_process_input(&game, line);
+                    last_tick_time = plat_time_now();
+                    if (game.running) {
+                        game_render(&game);
                     }
-#ifdef TEST_MODE
+                }
+#else
+                game_process_input(&game, line);
+                last_tick_time = plat_time_now();
+                if (game.running) {
+                    game_render(&game);
                 }
 #endif
             }
