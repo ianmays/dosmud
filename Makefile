@@ -52,6 +52,15 @@ test-run:
 		tests/craft_wielded.expect \
 		tests/craft_wielded.output
 
+# gameplay .c files must not call printf (use grendr render_* instead)
+check-layers:
+	@violators=$$(grep -l 'printf' src/*.c 2>/dev/null | grep -v -E 'main\.c|grendr\.c' || true); \
+	if [ -n "$$violators" ]; then \
+		echo "layer violation: printf only allowed in main.c and grendr.c"; \
+		echo "$$violators"; \
+		exit 1; \
+	fi
+
 clean:
 	rm -f $(BIN)
 
@@ -61,4 +70,4 @@ prepare-dos:
 run-dos:
 	powershell.exe -ExecutionPolicy Bypass -File prepare-dos.ps1 -NoBuild
 
-.PHONY: all build all-test test test-run clean prepare-dos run-dos
+.PHONY: all build all-test test test-run check-layers clean prepare-dos run-dos
