@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <limits.h>
 #include "config.h"
 #include "game.h"
 #include "grendr.h"
@@ -52,9 +53,14 @@ static int parse_cli_seed(int argc, char **argv, u32 *out_seed, int *out_cli_see
             }
             errno = 0;
             val = strtoul(arg, &end, 10);
-            if (end == arg || *end != '\0' || errno == ERANGE || val > CFG_SEED_CLI_MAX) {
+            if (end == arg || *end != '\0' || errno == ERANGE) {
                 return -1;
             }
+#if ULONG_MAX > CFG_SEED_CLI_MAX
+            if (val > (unsigned long)CFG_SEED_CLI_MAX) {
+                return -1;
+            }
+#endif
             *out_seed = (u32)val;
             *out_cli_seed = 1;
             have_seed = 1;
