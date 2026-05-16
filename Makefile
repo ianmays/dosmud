@@ -34,7 +34,7 @@ test-run:
 		tests/smoke.output
 	./$(BIN) --seed 1234 < tests/smoke.input > tests/seed_cli.output
 	diff -u \
-		tests/smoke.expect \
+		tests/seed_cli.expect \
 		tests/seed_cli.output
 	./$(BIN) < tests/bandit_handover.input > tests/bandit_handover.output
 	diff -u \

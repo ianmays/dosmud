@@ -13,6 +13,7 @@ const char *txtres_dir_name(int dir);
 extern const char *const TXT_MAIN_TEST_MODE;
 extern const char *const TXT_MAIN_USAGE;
 extern const char *const TXT_MAIN_TITLE;
+extern const char *const TXT_MAIN_TITLE_SEED_FMT;
 extern const char *const TXT_MAIN_HELP_HINT;
 extern const char *const TXT_MAIN_PROMPT;
 extern const char *const TXT_MAIN_BYE;
