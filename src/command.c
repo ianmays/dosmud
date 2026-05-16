@@ -1,6 +1,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <string.h>
+#include "base.h"
 #include "command.h"
 #include "items.h"
 #include "txtres.h"
@@ -8,7 +9,7 @@
 static void lower_inplace(char *s)
 {
     while (*s) {
-        *s = (char)tolower((unsigned char)*s);
+        *s = (char)tolower((u8)*s);
         ++s;
     }
 }

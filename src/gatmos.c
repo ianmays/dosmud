@@ -59,7 +59,7 @@ static void maybe_spawn_room_item(struct GameState *game)
 
 void maybe_emit_animal_noise(struct GameState *game)
 {
-    if ((game->tick % (unsigned long)CFG_ANIMAL_NOISE_TICK_PERIOD) != 0UL) {
+    if ((game->tick % (u32)CFG_ANIMAL_NOISE_TICK_PERIOD) != 0UL) {
         return;
     }
     if ((rand() % CFG_ROLL_PERCENT_RANGE) >= CFG_ANIMAL_NOISE_SKIP_ROLL_GE) {
