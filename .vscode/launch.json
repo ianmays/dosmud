@@ -6,7 +6,7 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/dosmud",
-      "args": ["--seed", "5678"],
+      "args": [], // set a seed: ["--seed", "5678"] 
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
       "externalConsole": false,
