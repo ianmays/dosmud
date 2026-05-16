@@ -33,7 +33,7 @@ time_t plat_time_now(void)
     return time(NULL);
 }
 
-void plat_seed_rng(unsigned int seed)
+void plat_seed_rng(u32 seed)
 {
-    srand(seed);
+    srand((unsigned int)seed);
 }

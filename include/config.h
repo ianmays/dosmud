@@ -99,7 +99,9 @@
  * Default libc RNG seed when building with -DTEST_MODE (see Makefile).
  * Override at runtime with: dosmud --seed <unsigned>
  */
-#define CFG_TEST_RAND_SEED 1234
+#define CFG_TEST_RAND_SEED 1234UL
+/* Maximum --seed value (fits in u32 on all supported targets). */
+#define CFG_SEED_CLI_MAX 4294967295UL
 
 /* --- World generation --- */
 

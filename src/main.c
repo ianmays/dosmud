@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include "config.h"
 #include "game.h"
 #include "grendr.h"
@@ -13,12 +14,12 @@ static void print_prompt(void)
     fflush(stdout);
 }
 
-static unsigned int default_rng_seed(void)
+static u32 default_rng_seed(void)
 {
 #ifdef TEST_MODE
-    return (unsigned int)CFG_TEST_RAND_SEED;
+    return (u32)CFG_TEST_RAND_SEED;
 #else
-    return (unsigned int)plat_time_now();
+    return (u32)plat_time_now();
 #endif
 }
 
@@ -26,7 +27,7 @@ static unsigned int default_rng_seed(void)
  * Parse optional --seed <value>. Updates *out_seed when --seed is present.
  * Returns 0 on success, -1 on invalid or unknown arguments.
  */
-static int parse_cli_seed(int argc, char **argv, unsigned int *out_seed)
+static int parse_cli_seed(int argc, char **argv, u32 *out_seed)
 {
     int i;
     int have_seed;
@@ -34,6 +35,7 @@ static int parse_cli_seed(int argc, char **argv, unsigned int *out_seed)
     have_seed = 0;
     for (i = 1; i < argc; ++i) {
         if (strcmp(argv[i], "--seed") == 0) {
+            const char *arg;
             char *end;
             unsigned long val;
 
@@ -43,11 +45,16 @@ static int parse_cli_seed(int argc, char **argv, unsigned int *out_seed)
             if (i + 1 >= argc) {
                 return -1;
             }
-            val = strtoul(argv[i + 1], &end, 10);
-            if (end == argv[i + 1] || *end != '\0') {
+            arg = argv[i + 1];
+            if (arg[0] == '-' || arg[0] == '+') {
                 return -1;
             }
-            *out_seed = (unsigned int)val;
+            errno = 0;
+            val = strtoul(arg, &end, 10);
+            if (end == arg || *end != '\0' || errno == ERANGE || val > CFG_SEED_CLI_MAX) {
+                return -1;
+            }
+            *out_seed = (u32)val;
             have_seed = 1;
             ++i;
         } else {
@@ -65,7 +72,7 @@ int main(int argc, char **argv)
     time_t now_time;
     int poll_rc;
     int ran_tick;
-    unsigned int rng_seed;
+    u32 rng_seed;
     const time_t idle_tick_seconds = (time_t)CFG_MAIN_IDLE_TICK_SECONDS;
 
     rng_seed = default_rng_seed();
@@ -79,7 +86,7 @@ int main(int argc, char **argv)
     printf("%s\n", TXT_MAIN_TEST_MODE);
 #endif
 
-    game_init(&game, (u32)rng_seed);
+    game_init(&game, rng_seed);
     last_tick_time = plat_time_now();
 
     printf("%s\n", TXT_MAIN_TITLE);

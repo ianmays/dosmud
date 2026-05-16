@@ -59,7 +59,7 @@ Core calls `render_*` after mutating `GameState`; render never changes simulatio
 
 - `plat_poll_line` - non-blocking stdin poll (DOS `kbhit`/`getch` or POSIX `select`)
 - `plat_time_now` - wall-clock seconds for idle ticks
-- `plat_seed_rng` - applies `srand(seed)`; `main.c` chooses the seed (`CFG_TEST_RAND_SEED`, wall clock, or `--seed`)
+- `plat_seed_rng` - applies `srand((unsigned int)seed)`; `main.c` chooses a `u32` seed (`CFG_TEST_RAND_SEED`, wall clock, or `--seed`). `GameState.seed` stores the full `u32`; libc may use fewer bits (for example 16-bit `unsigned int` on DOS)
 
 Implementations are split by toolchain (FAT 8.3 basenames):
 
