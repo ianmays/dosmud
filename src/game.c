@@ -53,13 +53,13 @@ void game_describe_current_room(struct GameState *game)
     do_look(game);
 }
 
-void game_init(struct GameState *game)
+void game_init(struct GameState *game, u32 seed)
 {
     int i;
     world_init(&game->world);
     game->player.room_id = 0;
     game->tick = 0;
-    game->seed = CFG_GAME_INIT_SEED;
+    game->seed = seed;
     game->running = 1;
     game_set_mode_explore(game);
     game->wanderer_room = WORLD_ROOM_RUINS;

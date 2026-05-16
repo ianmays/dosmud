@@ -53,11 +53,7 @@ time_t plat_time_now(void)
     return time(NULL);
 }
 
-void plat_seed_rng(void)
+void plat_seed_rng(unsigned int seed)
 {
-#ifdef TEST_MODE
-    srand(CFG_TEST_RAND_SEED);
-#else
-    srand((unsigned int)time(NULL));
-#endif
+    srand(seed);
 }

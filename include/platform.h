@@ -8,6 +8,6 @@ int plat_poll_line(char *out_line, int out_size);
 
 time_t plat_time_now(void);
 
-void plat_seed_rng(void);
+void plat_seed_rng(unsigned int seed);
 
 #endif /* PLATFORM_H */

@@ -59,7 +59,7 @@ Core calls `render_*` after mutating `GameState`; render never changes simulatio
 
 - `plat_poll_line` - non-blocking stdin poll (DOS `kbhit`/`getch` or POSIX `select`)
 - `plat_time_now` - wall-clock seconds for idle ticks
-- `plat_seed_rng` - `srand` for `TEST_MODE` vs runtime
+- `plat_seed_rng` - applies `srand(seed)`; `main.c` chooses the seed (`CFG_TEST_RAND_SEED`, wall clock, or `--seed`)
 
 Implementations are split by toolchain (FAT 8.3 basenames):
 
@@ -101,7 +101,7 @@ Conventions:
 - keep related values grouped and commented
 - separate gameplay tuning from main-loop/test-harness settings
 - distinguish tuning for NPC corpse loot (`CFG_COMBAT_CORPSE_LOOT_*`, portable items) from ambient room finds (`CFG_ROOM_SPAWN_*`, terrain-driven junk like stone)
-- `TEST_MODE` seeds libc RNG with `CFG_TEST_RAND_SEED` for deterministic snapshot output
+- `TEST_MODE` defaults libc RNG to `CFG_TEST_RAND_SEED` for deterministic snapshot output; override with `dosmud --seed <unsigned>`
 
 ## Base types (`base.h`)
 

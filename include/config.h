@@ -32,8 +32,6 @@
 #define CFG_START_LEVEL 1
 #define CFG_START_DAMAGE_BONUS 0
 #define CFG_START_XP 0
-/* Stored on GameState; not the libc RNG seed (see main.c / TEST_MODE). */
-#define CFG_GAME_INIT_SEED 1UL
 
 /* Combat */
 #define CFG_COMBAT_ENEMY_HP_BASE 8
@@ -98,8 +96,8 @@
 #define CFG_MAIN_IDLE_TICK_SECONDS 20
 
 /*
- * libc RNG seed when building with -DTEST_MODE (see Makefile).
- * May become a command-line argument later; do not assume header-only forever.
+ * Default libc RNG seed when building with -DTEST_MODE (see Makefile).
+ * Override at runtime with: dosmud --seed <unsigned>
  */
 #define CFG_TEST_RAND_SEED 1234
 

@@ -303,7 +303,7 @@ Stress-test examples:
 
 ## #46 - Runtime `--seed`
 
-Allow:
+Done ✅.
 
 ```text
 dosmud --seed 1234

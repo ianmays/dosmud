@@ -64,7 +64,7 @@ struct GameState {
     u8 room_explored[CFG_ROOM_MAX];
 };
 
-void game_init(struct GameState *game);
+void game_init(struct GameState *game, u32 seed);
 void game_describe_current_room(struct GameState *game);
 int game_process_input(struct GameState *game, char *line);
 void game_background_step(struct GameState *game);

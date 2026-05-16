@@ -44,6 +44,14 @@ Deterministic DOS validation:
 make prepare-dos MODE=TEST_MODE
 ```
 
+Runtime seed override (native or DOS build):
+
+```sh
+./dosmud --seed 1234
+```
+
+Invalid flags print `usage: dosmud [--seed <unsigned>]` to stderr and exit with status 1.
+
 ## Combined cross-path checks
 
 When changing build flow/tooling or other high-risk runtime behavior:
