@@ -53,13 +53,22 @@ Presentation only: room art, HUD, combat text, inventory messages, and explorati
 
 Core calls `render_*` after mutating `GameState`; render never changes simulation state.
 
-### Platform (`main` today; `platform/` in [#45](https://github.com/ianmays/dosmud/issues/45))
+### Platform (`main`, `platform.h`, `platdos.c` / `platpos.c`)
 
-Startup, main loop, line input, prompts, and `#ifdef` portability for DOS vs POSIX.
+[`include/platform.h`](../include/platform.h) defines the portable boundary:
 
-`main.c` may use `printf` for shell-level prompts and banners. Platform code orchestrates core and render; it does not embed gameplay rules.
+- `plat_poll_line` - non-blocking stdin poll (DOS `kbhit`/`getch` or POSIX `select`)
+- `plat_time_now` - wall-clock seconds for idle ticks
+- `plat_seed_rng` - `srand` for `TEST_MODE` vs runtime
 
-Run `make check-layers` before opening a PR (or use `make all-test`, which runs it first). That target fails if `printf` appears in any `src/*.c` other than `main.c` or `grendr.c`. `make test` compiles only and does not run the guard.
+Implementations are split by toolchain (FAT 8.3 basenames):
+
+- [`src/platdos.c`](../src/platdos.c) - Open Watcom / DOS (`build.bat` links `platdos.obj`)
+- [`src/platpos.c`](../src/platpos.c) - GCC / POSIX (`Makefile` links `platpos.c`)
+
+[`src/main.c`](../src/main.c) orchestrates the main loop and may use `printf` for shell-level prompts and banners. It must not include `conio.h`, `dos.h`, or other platform headers directly.
+
+Run `make check-layers` before opening a PR (or use `make all-test`, which runs it first). That target fails if `printf` appears in any `src/*.c` other than `main.c`, `grendr.c`, `platdos.c`, or `platpos.c`. `make test` compiles only and does not run the guard.
 
 ## High-level flow
 

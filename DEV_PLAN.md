@@ -228,19 +228,11 @@ Done ✅.
 
 ## #45 - Platform layer
 
-Create:
+Done ✅.
 
-```text
-platform/
-    platform.h
-    plat_dos.c
-    plat_posix.c
-```
-
-Goal:
-- isolate portability concerns
-- reduce platform leakage
-- simplify future renderer work
+- [`include/platform.h`](include/platform.h) - `plat_poll_line`, `plat_time_now`, `plat_seed_rng`
+- [`src/platdos.c`](src/platdos.c) / [`src/platpos.c`](src/platpos.c) - DOS vs POSIX implementations (FAT 8.3 names; flat `src/` layout)
+- [`src/main.c`](src/main.c) - no `#ifdef __WATCOMC__`; orchestration only
 
 ---
 

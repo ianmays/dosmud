@@ -29,12 +29,18 @@ if exist command.obj del command.obj
 if exist world.obj del world.obj
 if exist items.obj del items.obj
 if exist txtres.obj del txtres.obj
+if exist platdos.obj del platdos.obj
 if exist gameplay.lib del gameplay.lib
 if exist dosmud.exe del dosmud.exe
 
 echo Compiling main.c ... >> %LOG%
 echo Compiling main.c ...
 wcl %WFL% -c -fo=main.obj src\main.c >> %LOG%
+if errorlevel 1 goto wcl_bad
+
+echo Compiling platdos.c ... >> %LOG%
+echo Compiling platdos.c ...
+wcl %WFL% -c -fo=platdos.obj src\platdos.c >> %LOG%
 if errorlevel 1 goto wcl_bad
 
 echo Compiling game.c ... >> %LOG%
@@ -109,7 +115,8 @@ if errorlevel 1 goto wcl_bad
 
 echo Linking dosmud.exe ... >> %LOG%
 echo Linking dosmud.exe ...
-wcl -bt=dos -fe=dosmud.exe main.obj gameplay.lib grendr.obj invent.obj command.obj world.obj items.obj txtres.obj >> %LOG%
+REM Link line below is ~125 chars (under COMMAND.COM ~127); platdos.obj fits without platform.lib.
+wcl -bt=dos -fe=dosmud.exe main.obj platdos.obj gameplay.lib grendr.obj invent.obj command.obj world.obj items.obj txtres.obj >> %LOG%
 if errorlevel 1 goto wcl_bad
 if not exist dosmud.exe goto wcl_bad
 

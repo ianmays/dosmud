@@ -3,7 +3,7 @@ CC ?= gcc
 BASE_CFLAGS = -Wall -Wextra -Wshadow -Wstrict-prototypes -Wmissing-prototypes -std=c89 -pedantic -Iinclude -Isrc
 TEST_MODE_FLAG = TEST_MODE
 TEST_CFLAGS = $(BASE_CFLAGS) -Werror -D$(TEST_MODE_FLAG) -g -O0
-SRC = src/main.c src/game.c src/gprog.c src/combat.c src/genc.c src/wanderer.c src/dialogue.c src/gatmos.c src/grendr.c src/invent.c src/command.c src/world.c src/items.c src/txtres.c
+SRC = src/main.c src/platpos.c src/game.c src/gprog.c src/combat.c src/genc.c src/wanderer.c src/dialogue.c src/gatmos.c src/grendr.c src/invent.c src/command.c src/world.c src/items.c src/txtres.c
 BIN = dosmud
 
 all-build:
@@ -59,9 +59,9 @@ test-run:
 
 # gameplay .c files must not call printf (use grendr render_* instead)
 check-layers:
-	@violators=$$(grep -l 'printf' src/*.c 2>/dev/null | grep -vE '/(main|grendr)\.c$$' || true); \
+	@violators=$$(grep -l 'printf' src/*.c 2>/dev/null | grep -vE '/(main|grendr|platdos|platpos)\.c$$' || true); \
 	if [ -n "$$violators" ]; then \
-		echo "layer violation: printf only allowed in main.c and grendr.c"; \
+		echo "layer violation: printf only allowed in main.c, grendr.c, platdos.c, platpos.c"; \
 		echo "$$violators"; \
 		exit 1; \
 	fi
