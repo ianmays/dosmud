@@ -47,46 +47,6 @@ Rendering
 
 Commands mutate game state, world ticks mutate simulation state, and rendering only displays state.
 
-## Subsystem responsibilities
-
-## `main`
-
-- startup
-- main loop orchestration
-- input/timing integration
-
-## `game`
-
-- top-level gameplay orchestration
-- command routing
-- world update sequencing
-- `game_is_busy_dialogue` gating for ambient encounters (shared with encounter and wanderer entry)
-
-Gameplay slices live beside `game.c` as plain C translation units (no extra framework):
-
-- [`gprog.c`](../src/gprog.c) - XP and level-up rewards (`game_xp_to_next_level`, `progression_gain_xp`; FAT 8.3-safe basename)
-- [`combat.c`](../src/combat.c) - combat start, player reply resolution, enemy turn
-- [`genc.c`](../src/genc.c) - ambient bandit encounter open state (FAT 8.3-safe basename)
-- [`wanderer.c`](../src/wanderer.c) - traveler movement and encounter flow
-- [`dialogue.c`](../src/dialogue.c) - pond frog lines and NPC id hint for room look
-- [`gatmos.c`](../src/gatmos.c) - initial room items, ambient rolls, animal noise, inspect focus hooks (FAT 8.3-safe basename)
-
-New `src/*.c` and `src/*.h` basenames must stay within **classic FAT 8+3** (at most eight characters before `.c` or `.h`) so MS-DOS 5.x-6.x style volumes and the Open Watcom DOS build can open them reliably. Existing examples: `grendr.*`, `invent.*`, `gprog.*`, `gatmos.*`, `genc.*`.
-
-`game` stays orchestration; new behaviour should land in the owning slice above rather than re-centralising into `game.c`.
-
-## `command`
-
-- parse raw text into structured commands
-- keep parsing separate from execution/mutation
-
-## `world`
-
-- room graph data and connectivity
-- procedural world generation
-- movement validation
-- logical map coordinates assigned when rooms are linked (used only for the exploration map display)
-
 ## Configuration (`config.h`)
 
 [`include/config.h`](../include/config.h) is the compile-time home for:
@@ -118,37 +78,77 @@ Conventions:
 - keep `config.h` for limits and tuning; do not fold typedefs into `config.h`
 - see [contributor guide](contributor-guide.md) for ANSI C89 / Open Watcom portability rules
 
-## `grendr`
+## Subsystem responsibilities
+
+### `main`
+
+- startup
+- main loop orchestration
+- input/timing integration
+
+### `game`
+
+- top-level gameplay orchestration
+- command routing
+- world update sequencing
+- `game_is_busy_dialogue` gating for ambient encounters (shared with encounter and wanderer entry)
+
+Gameplay slices live beside `game.c` as plain C translation units (no extra framework):
+
+- [`gprog.c`](../src/gprog.c) - XP and level-up rewards (`game_xp_to_next_level`, `progression_gain_xp`; FAT 8.3-safe basename)
+- [`combat.c`](../src/combat.c) - combat start, player reply resolution, enemy turn
+- [`genc.c`](../src/genc.c) - ambient bandit encounter open state (FAT 8.3-safe basename)
+- [`wanderer.c`](../src/wanderer.c) - traveler movement and encounter flow
+- [`dialogue.c`](../src/dialogue.c) - pond frog lines and NPC id hint for room look
+- [`gatmos.c`](../src/gatmos.c) - initial room items, ambient rolls, animal noise, inspect focus hooks (FAT 8.3-safe basename)
+
+New `src/*.c` and `src/*.h` basenames must stay within **classic FAT 8+3** (at most eight characters before `.c` or `.h`) so MS-DOS 5.x-6.x style volumes and the Open Watcom DOS build can open them reliably. Existing examples: `grendr.*`, `invent.*`, `gprog.*`, `gatmos.*`, `genc.*`.
+
+`game` stays orchestration; new behaviour should land in the owning slice above rather than re-centralising into `game.c`.
+
+### `command`
+
+- parse raw text into structured commands
+- keep parsing separate from execution/mutation
+
+### `world`
+
+- room graph data and connectivity
+- procedural world generation
+- movement validation
+- logical map coordinates assigned when rooms are linked (used only for the exploration map display)
+
+### `grendr`
 
 - text rendering only
 - art is intentionally compact to work well with 25 line displays (DOS standard)
 - no gameplay mutation
 - player-facing lines and format strings come from [`txtres.c`](../src/txtres.c) (`TXT_*` constants and `g_room_*` arrays), not scattered literals
 
-## `txtres`
+### `txtres`
 
 - single home for static player-facing copy
 - exported globals, not thin getters
 - functions only where selection matters
 
-## `invent`
+### `invent`
 
 - bag/inventory state mutation
 - item use and crafting behavior
 - wield/unwield commands track `weapon_equipped` on `GameState`; a wielded weapon is not stored in `bag[]` (it occupies the hand slot only until unwield, drop, or bandit handover moves it)
 - combat adds `item_weapon_damage_bonus` from `weapon_equipped` when the player attacks; it does not require the weapon id to appear in the bag
 
-## `items`
+### `items`
 
 - item metadata and lookup
 
 ## Core data ownership
 
-## `GameState`
+### `GameState`
 
 `GameState` is the primary simulation container. Gameplay systems should mutate it explicitly and avoid shadow copies.
 
-## `World` and `Room`
+### `World` and `Room`
 
 `World` stores room graph data. `Room` stores room metadata, exits, and ambient state.
 
