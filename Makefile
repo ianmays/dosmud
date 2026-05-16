@@ -70,4 +70,4 @@ prepare-dos:
 run-dos:
 	powershell.exe -ExecutionPolicy Bypass -File prepare-dos.ps1 -NoBuild
 
-.PHONY: all-build all-test test test-run check-layers clean prepare-dos run-dos
+.PHONY: all-build build all-test test test-run check-layers clean prepare-dos run-dos
