@@ -20,13 +20,30 @@ static void camp_clear_ground_sticks(struct GameState *game)
     }
 }
 
+static void fixture_reset_player_state(struct GameState *game)
+{
+    game->bag_count = 0;
+    game->bag_capacity = CFG_START_BAG_CAPACITY;
+    game->level = CFG_START_LEVEL;
+    game->xp = CFG_START_XP;
+    game->max_hp = CFG_START_MAX_HP;
+    game->damage_bonus = CFG_START_DAMAGE_BONUS;
+    game->weapon_equipped = ITEM_NONE;
+    game->player_hp = CFG_START_MAX_HP;
+    game->combat.enemy_hp = 0;
+    game->combat.defending = 0;
+    game->env_focus_active = 0;
+    game->env_focus_room = -1;
+    game->env_focus_kind = GAME_ENV_NONE;
+    game->env_focus_expires_tick = 0;
+}
+
 static void fixture_bandit_base(struct GameState *game)
 {
     game_set_mode_explore(game);
     game->player.room_id = WORLD_ROOM_CAMP;
     game->tick = 1;
-    game->bag_count = 0;
-    game->weapon_equipped = ITEM_NONE;
+    fixture_reset_player_state(game);
     camp_clear_ground_sticks(game);
 }
 
