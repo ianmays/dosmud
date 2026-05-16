@@ -30,6 +30,7 @@ if exist world.obj del world.obj
 if exist items.obj del items.obj
 if exist txtres.obj del txtres.obj
 if exist platdos.obj del platdos.obj
+if exist testharn.obj del testharn.obj
 if exist gameplay.lib del gameplay.lib
 if exist dosmud.exe del dosmud.exe
 
@@ -108,6 +109,13 @@ echo Compiling txtres.c ...
 wcl %WFL% -c -fo=txtres.obj src\txtres.c >> %LOG%
 if errorlevel 1 goto wcl_bad
 
+if "%1"=="TEST_MODE" (
+echo Compiling testharn.c ... >> %LOG%
+echo Compiling testharn.c ...
+wcl %WFL% -c -fo=testharn.obj src\testharn.c >> %LOG%
+if errorlevel 1 goto wcl_bad
+)
+
 echo Archiving gameplay.lib ... >> %LOG%
 echo Archiving gameplay.lib ...
 wlib -n gameplay.lib +game.obj +gprog.obj +combat.obj +genc.obj +wanderer.obj +dialogue.obj +gatmos.obj >> %LOG%
@@ -116,7 +124,11 @@ if errorlevel 1 goto wcl_bad
 echo Linking dosmud.exe ... >> %LOG%
 echo Linking dosmud.exe ...
 REM Link line below is ~125 chars (under COMMAND.COM ~127); platdos.obj fits without platform.lib.
+if "%1"=="TEST_MODE" (
+wcl -bt=dos -fe=dosmud.exe main.obj platdos.obj testharn.obj gameplay.lib grendr.obj invent.obj command.obj world.obj items.obj txtres.obj >> %LOG%
+) else (
 wcl -bt=dos -fe=dosmud.exe main.obj platdos.obj gameplay.lib grendr.obj invent.obj command.obj world.obj items.obj txtres.obj >> %LOG%
+)
 if errorlevel 1 goto wcl_bad
 if not exist dosmud.exe goto wcl_bad
 

@@ -20,6 +20,26 @@ Purpose:
 - `make test`: strict deterministic compile (`-Werror`, `-DTEST_MODE`, `-g -O0`); does not run `check-layers`
 - `make test-run`: scripted input regression pass (`tests/smoke.*`, `tests/bandit_handover.*`, `tests/bandit_wielded_give.*`, `tests/area_items.*`, `tests/map.*`, `tests/equipment.*`, `tests/craft_wielded.*`
 
+## Test fixtures (`TEST_MODE` only)
+
+Snapshot tests can set up known game state without walking RNG-dependent commands. In a `make test` binary, lines in `.input` files of the form:
+
+```text
+@fixture <name>
+```
+
+are handled by `testharn` before normal command parsing. Fixture lines are not echoed as player commands. Unknown fixture names print `unknown test fixture` to stderr and exit with status 1.
+
+Prefer fixtures over long setup scripts when a test needs a specific mode, inventory, or encounter. After changing fixture output, regenerate the matching `.expect` with `make test-run` and review the diff.
+
+| Fixture | State |
+|---------|--------|
+| `bandit_dialogue` | Camp, tick 1, stick in bag, bandit dialogue open |
+| `bandit_handover_pick` | Same, plus handover pick prompt (reply 2 already chosen) |
+| `bandit_wielded_pick` | Same, stick wielded (`Atk:1`), handover pick prompt |
+
+Add new fixtures in [`src/testharn.c`](../src/testharn.c) and document them here. `testharn` is linked only for `make test` / `prepare-dos MODE=TEST_MODE`, not for `make build`.
+
 ## DOS/Open Watcom validation path
 
 Use PowerShell-driven DOS prep from Linux host shell to build and sync the DOS tree:
@@ -36,7 +56,7 @@ make run-dos
 
 `make run-dos` expects a previously prepared DOS tree. Run `make prepare-dos` first if the mirrored DOS files or executable are missing.
 
-When you add or remove `src\*.c` files, update `Makefile` (`SRC`) and `build.bat`. For the Open Watcom path, keep the final `wcl` link line under the COMMAND.COM length limit (about 127 characters): gameplay sources are packed into `gameplay.lib` via `wlib` so the link line stays short (`main.obj`, `platdos.obj`, `gameplay.lib`, plus the other `.obj` files; currently ~125 characters and verified on DOS). Add new gameplay `.obj` names to the `wlib` line in `build.bat`; platform objects stay outside `gameplay.lib` until the link line would exceed the limit (then archive a `platform.lib` via `wlib`).
+When you add or remove `src\*.c` files, update `Makefile` (`SRC` or `TEST_SRC`) and `build.bat`. For the Open Watcom path, keep the final `wcl` link line under the COMMAND.COM length limit (about 127 characters): gameplay sources are packed into `gameplay.lib` via `wlib` so the link line stays short (`main.obj`, `platdos.obj`, `gameplay.lib`, plus the other `.obj` files; `testharn.obj` when `MODE=TEST_MODE`). Add new gameplay `.obj` names to the `wlib` line in `build.bat`; platform and harness objects stay outside `gameplay.lib` until the link line would exceed the limit (then archive a `platform.lib` via `wlib`).
 
 Deterministic DOS validation:
 

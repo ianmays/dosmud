@@ -4,6 +4,7 @@ BASE_CFLAGS = -Wall -Wextra -Wshadow -Wstrict-prototypes -Wmissing-prototypes -s
 TEST_MODE_FLAG = TEST_MODE
 TEST_CFLAGS = $(BASE_CFLAGS) -Werror -D$(TEST_MODE_FLAG) -g -O0
 SRC = src/main.c src/platpos.c src/game.c src/gprog.c src/combat.c src/genc.c src/wanderer.c src/dialogue.c src/gatmos.c src/grendr.c src/invent.c src/command.c src/world.c src/items.c src/txtres.c
+TEST_SRC = $(SRC) src/testharn.c
 BIN = dosmud
 
 all-build:
@@ -24,7 +25,7 @@ all-test:
 
 # deterministic
 test:
-	$(CC) $(TEST_CFLAGS) -o $(BIN) $(SRC)
+	$(CC) $(TEST_CFLAGS) -o $(BIN) $(TEST_SRC)
 
 # deterministic tests
 test-run:

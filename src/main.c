@@ -8,6 +8,9 @@
 #include "grendr.h"
 #include "platform.h"
 #include "txtres.h"
+#ifdef TEST_MODE
+#include "testharn.h"
+#endif
 
 static void print_prompt(void)
 {
@@ -109,11 +112,32 @@ int main(int argc, char **argv)
         if (poll_rc > 0) {
             line[strcspn(line, "\r\n")] = '\0';
             if (line[0] != '\0') {
-                game_process_input(&game, line);
-                last_tick_time = plat_time_now();
-                if (game.running) {
-                    game_render(&game);
+#ifdef TEST_MODE
+                {
+                    int th_rc;
+
+                    th_rc = testharn_apply(&game, line);
+                    if (th_rc < 0) {
+                        fprintf(stderr, "unknown test fixture\n");
+                        return 1;
+                    }
+                    if (th_rc > 0) {
+                        last_tick_time = plat_time_now();
+                        if (game.running) {
+                            game_render(&game);
+                        }
+                    } else
+#endif
+                    {
+                        game_process_input(&game, line);
+                        last_tick_time = plat_time_now();
+                        if (game.running) {
+                            game_render(&game);
+                        }
+                    }
+#ifdef TEST_MODE
                 }
+#endif
             }
             if (game.running) {
                 print_prompt();

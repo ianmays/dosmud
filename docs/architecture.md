@@ -103,6 +103,10 @@ Conventions:
 - distinguish tuning for NPC corpse loot (`CFG_COMBAT_CORPSE_LOOT_*`, portable items) from ambient room finds (`CFG_ROOM_SPAWN_*`, terrain-driven junk like stone)
 - `TEST_MODE` defaults libc RNG to `CFG_TEST_RAND_SEED` for deterministic snapshot output; override with `dosmud --seed <unsigned>`
 
+### Test harness (`testharn`, `TEST_MODE` only)
+
+[`src/testharn.c`](../src/testharn.c) lives at the `main` edge (not core simulation). It applies `@fixture` lines from snapshot `.input` files by calling existing game/inventory/encounter APIs. Release builds (`make build`) do not link it. See [testing](testing.md#test-fixtures-test_mode-only).
+
 ## Base types (`base.h`)
 
 [`include/base.h`](../include/base.h) defines portable unsigned aliases used in simulation state:
@@ -124,6 +128,7 @@ Conventions:
 - startup
 - main loop orchestration
 - input/timing integration
+- `TEST_MODE`: delegates `@fixture` lines to `testharn`
 
 ### `game`
 

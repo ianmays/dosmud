@@ -1,5 +1,3 @@
-look
-take stick
-2
+@fixture bandit_handover_pick
 give stick
 quit
