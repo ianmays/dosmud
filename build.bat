@@ -30,7 +30,7 @@ if exist world.obj del world.obj
 if exist items.obj del items.obj
 if exist txtres.obj del txtres.obj
 if exist platdos.obj del platdos.obj
-if exist testharn.obj del testharn.obj
+if exist tharn.obj del tharn.obj
 if exist gameplay.lib del gameplay.lib
 if exist dosmud.exe del dosmud.exe
 
@@ -112,17 +112,19 @@ if errorlevel 1 goto wcl_bad
 if not "%1"=="TEST_MODE" goto skip_testharn
 echo Compiling testharn.c ... >> %LOG%
 echo Compiling testharn.c ...
-wcl %WFL% -c -fo=testharn.obj src\testharn.c >> %LOG%
+wcl %WFL% -c -fo=tharn.obj src\testharn.c >> %LOG%
 if errorlevel 1 goto wcl_bad
 :skip_testharn
 
 echo Archiving gameplay.lib ... >> %LOG%
 echo Archiving gameplay.lib ...
-if not "%1"=="TEST_MODE" goto wlib_release
-wlib -n gameplay.lib +game.obj +gprog.obj +combat.obj +genc.obj +wanderer.obj +dialogue.obj +gatmos.obj +testharn.obj >> %LOG%
-goto wlib_done
-:wlib_release
-wlib -n gameplay.lib +game.obj +gprog.obj +combat.obj +genc.obj +wanderer.obj +dialogue.obj +gatmos.obj >> %LOG%
+REM Keep each wlib line under COMMAND.COM ~127 chars (TEST_MODE adds +tharn.obj).
+wlib -n gameplay.lib +game.obj +gprog.obj +combat.obj +genc.obj >> %LOG%
+if errorlevel 1 goto wcl_bad
+wlib gameplay.lib +wanderer.obj +dialogue.obj +gatmos.obj >> %LOG%
+if errorlevel 1 goto wcl_bad
+if not "%1"=="TEST_MODE" goto wlib_done
+wlib gameplay.lib +tharn.obj >> %LOG%
 :wlib_done
 if errorlevel 1 goto wcl_bad
 

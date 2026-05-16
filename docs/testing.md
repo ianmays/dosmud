@@ -56,7 +56,7 @@ make run-dos
 
 `make run-dos` expects a previously prepared DOS tree. Run `make prepare-dos` first if the mirrored DOS files or executable are missing.
 
-When you add or remove `src\*.c` files, update `Makefile` (`SRC` or `TEST_SRC`) and `build.bat`. For the Open Watcom path, keep the final `wcl` link line under the COMMAND.COM length limit (about 127 characters): gameplay sources are packed into `gameplay.lib` via `wlib` so the link line stays short (`main.obj`, `platdos.obj`, `gameplay.lib`, plus the other `.obj` files). `testharn.obj` is archived into `gameplay.lib` when `MODE=TEST_MODE`. Use `goto` labels in `build.bat` for conditionals; parenthesized `if (...)` blocks break under COMMAND.COM. Add new gameplay `.obj` names to the `wlib` line in `build.bat`; platform objects stay outside `gameplay.lib` until the link line would exceed the limit (then archive a `platform.lib` via `wlib`).
+When you add or remove `src\*.c` files, update `Makefile` (`SRC` or `TEST_SRC`) and `build.bat`. For the Open Watcom path, keep every `wcl` and `wlib` line under the COMMAND.COM length limit (about 127 characters): gameplay sources are packed into `gameplay.lib` via several short `wlib` calls; the final `wcl` link lists `main.obj`, `platdos.obj`, `gameplay.lib`, plus the other `.obj` files. `TEST_MODE` compiles `testharn.c` to `tharn.obj` and appends it with a separate `wlib gameplay.lib +tharn.obj` line. Use `goto` labels in `build.bat` for conditionals; parenthesized `if (...)` blocks break under COMMAND.COM.
 
 Deterministic DOS validation:
 
