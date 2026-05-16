@@ -6,19 +6,24 @@ TEST_CFLAGS = $(BASE_CFLAGS) -Werror -D$(TEST_MODE_FLAG) -g -O0
 SRC = src/main.c src/game.c src/gprog.c src/combat.c src/genc.c src/wanderer.c src/dialogue.c src/gatmos.c src/grendr.c src/invent.c src/command.c src/world.c src/items.c src/txtres.c
 BIN = dosmud
 
-all-build: clean prepare-dos $(BIN)
+all-build:
+	$(MAKE) clean
+	$(MAKE) prepare-dos
+	$(MAKE) build
 
-build: clean $(BIN)
-$(BIN): $(SRC)
+build:
 	$(CC) $(BASE_CFLAGS) -o $(BIN) $(SRC)
 
 # deterministic
-all-test: MODE=$(TEST_MODE_FLAG)
-all-test: check-layers clean prepare-dos
-	$(CC) $(TEST_CFLAGS) -o $(BIN) $(SRC)
+all-test: 
+	$(MAKE) check-layers
+	$(MAKE) clean
+	$(MAKE) prepare-dos MODE=$(TEST_MODE_FLAG) 
+	$(MAKE) test
+	$(MAKE) test-run
 
 # deterministic
-test: check-layers clean
+test: 
 	$(CC) $(TEST_CFLAGS) -o $(BIN) $(SRC)
 
 # deterministic tests
@@ -70,4 +75,4 @@ prepare-dos:
 run-dos:
 	powershell.exe -ExecutionPolicy Bypass -File prepare-dos.ps1 -NoBuild
 
-.PHONY: all-build build all-test test test-run check-layers clean prepare-dos run-dos
+.PHONY: all build all-test test test-run check-layers clean prepare-dos run-dos
