@@ -219,7 +219,7 @@ static void art_wanderer(void)
 {
     printf("        .-''''-.             \n");
     printf("       / o)o)   |            \n");
-    printf("      |   /_    B =-----     \n");
+    printf("      |   /_    B ------     \n");
     printf("      |   ---  / //     \\   \n");
     printf("       \\______/_//       \\ \n");
     printf("      /        //\\_______/  \n");
