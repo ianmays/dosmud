@@ -15,15 +15,15 @@ build:
 	$(CC) $(BASE_CFLAGS) -o $(BIN) $(SRC)
 
 # deterministic
-all-test: 
+all-test:
 	$(MAKE) check-layers
 	$(MAKE) clean
-	$(MAKE) prepare-dos MODE=$(TEST_MODE_FLAG) 
+	$(MAKE) prepare-dos MODE=$(TEST_MODE_FLAG)
 	$(MAKE) test
 	$(MAKE) test-run
 
 # deterministic
-test: 
+test:
 	$(CC) $(TEST_CFLAGS) -o $(BIN) $(SRC)
 
 # deterministic tests

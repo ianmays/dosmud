@@ -8,6 +8,7 @@ Run from project root:
 
 ```sh
 make build
+make check-layers
 make test
 make test-run
 ```
@@ -15,7 +16,8 @@ make test-run
 Purpose:
 
 - `make build`: native GCC development build
-- `make test`: `check-layers` (core/render `printf` guard), then strict deterministic compile (`-Werror`, `-DTEST_MODE`, `-g -O0`)
+- `make check-layers`: core/render boundary guard (no `printf` in `src/*.c` except `main.c` and `grendr.c`)
+- `make test`: strict deterministic compile (`-Werror`, `-DTEST_MODE`, `-g -O0`); does not run `check-layers`
 - `make test-run`: scripted input regression pass (`tests/smoke.*`, `tests/bandit_handover.*`, `tests/bandit_wielded_give.*`, `tests/area_items.*`, `tests/map.*`, `tests/equipment.*`, `tests/craft_wielded.*`
 
 ## DOS/Open Watcom validation path

@@ -222,7 +222,7 @@ Done ✅.
 
 - Documented core / render / platform layers in `docs/architecture.md`
 - Moved all `invent.c` player output to `render_inv_*` in `grendr`
-- Added `make check-layers` to reject `printf` outside `main.c` and `grendr.c`
+- Added `make check-layers` to reject `printf` outside `main.c` and `grendr.c` (run explicitly or via `make all-test`; not part of `make test`)
 
 ---
 

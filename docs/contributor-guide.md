@@ -10,7 +10,7 @@ Thanks for contributing to dosmud.
 - Keep gameplay deterministic for identical seed + inputs.
 - Prefer simple, explicit, procedural code over heavy abstractions.
 - Avoid unrelated refactors in the same PR.
-- Keep core gameplay free of `printf` and other terminal I/O; use `render_*` in `grendr` instead (`make test` runs `check-layers` to enforce this).
+- Keep core gameplay free of `printf` and other terminal I/O; use `render_*` in `grendr` instead (`make check-layers` enforces this; `make all-test` runs it before the test build).
 
 ## Pull Requests Required
 
@@ -32,6 +32,7 @@ Run:
 
 ```sh
 make build
+make check-layers
 make test
 make test-run
 ```

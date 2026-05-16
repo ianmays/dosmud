@@ -59,7 +59,7 @@ Startup, main loop, line input, prompts, and `#ifdef` portability for DOS vs POS
 
 `main.c` may use `printf` for shell-level prompts and banners. Platform code orchestrates core and render; it does not embed gameplay rules.
 
-`make test` and `make all-test` run `check-layers` first; that target fails if `printf` appears in any `src/*.c` other than `main.c` or `grendr.c`.
+Run `make check-layers` before opening a PR (or use `make all-test`, which runs it first). That target fails if `printf` appears in any `src/*.c` other than `main.c` or `grendr.c`. `make test` compiles only and does not run the guard.
 
 ## High-level flow
 
