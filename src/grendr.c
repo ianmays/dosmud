@@ -36,11 +36,11 @@ static void art_room_road(void)
 static void art_room_pond(void)
 {
     printf("                             \n");
-    printf("|||||||||||||||||||||||||||||\n");
-    printf("-----------------------------\n");
-    printf("     |/    o       O  \\     \n");
+    printf("|_||||||_|||||__|||||||_||_||\n");
+    printf("   ^   __|_____||___|_       \n");
+    printf("     |/    o       O  \\  ^  \n");
     printf("     (        O   |    )|    \n");
-    printf("      \\__||______o_|__/     \n");
+    printf(" ^    \\__||______o_|__/     \n");
     printf("                             \n");
     printf("  %s", g_room_art_captions[WORLD_ROOM_POND]);
     printf("                             \n");
