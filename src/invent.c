@@ -1,11 +1,10 @@
 /* Inventory implementation (FAT 8+3 basename invent.c for MS-DOS era trees). */
 
-#include <stdio.h>
 #include "config.h"
 #include "invent.h"
 #include "game.h"
+#include "grendr.h"
 #include "items.h"
-#include "txtres.h"
 
 int game_room_ground_try_add(struct GameState *game, int room_id, int item_id)
 {
@@ -155,19 +154,19 @@ int game_inv_cmd_loot(struct GameState *game)
 
     room_id = game->player.room_id;
     if (!game->corpse_present[room_id]) {
-        printf("%s", TXT_INV_NO_BODY_LOOT);
+        render_inv_no_body_loot();
         return 1;
     }
     ground_item = game->corpse_loot[room_id];
     if (ground_item == ITEM_NONE) {
-        printf("%s", TXT_INV_BODY_STRIPPED);
+        render_inv_body_stripped();
         return 1;
     }
     if (!game_inv_bag_add(game, ground_item)) {
-        printf("%s", TXT_INV_BAG_FULL_DROP);
+        render_inv_bag_full_drop();
         return 1;
     }
-    printf(TXT_INV_LOOT_FMT, item_name(ground_item));
+    render_inv_loot(item_name(ground_item));
     game->corpse_loot[room_id] = ITEM_NONE;
     game->corpse_present[room_id] = 0;
     return 1;
@@ -180,26 +179,26 @@ int game_inv_cmd_take(struct GameState *game, int item_arg)
     int slot;
 
     if (game->mode == GAME_MODE_COMBAT) {
-        printf("%s", TXT_INV_NO_RUMMAGE_COMBAT);
+        render_inv_no_rummage_combat();
         return 1;
     }
     room_id = game->player.room_id;
     if (room_ground_is_empty(game, room_id)) {
-        printf("%s", TXT_INV_TAKE_NOTHING);
+        render_inv_take_nothing();
         return 1;
     }
     slot = room_find_item_slot(game, room_id, item_arg);
     if (slot < 0) {
-        printf("%s", TXT_INV_CANNOT_TAKE_HERE);
+        render_inv_cannot_take_here();
         return 1;
     }
     ground_item = game->room_item[room_id][slot];
     if (!game_inv_bag_add(game, ground_item)) {
-        printf(TXT_INV_BAG_FULL_FMT, game->bag_capacity);
+        render_inv_bag_full(game->bag_capacity);
         return 1;
     }
     room_remove_slot_compact(game, room_id, slot);
-    printf(TXT_INV_PICKUP_FMT, item_name(ground_item));
+    render_inv_pickup(item_name(ground_item));
     return 1;
 }
 
@@ -209,17 +208,17 @@ int game_inv_cmd_drop(struct GameState *game, int item_arg)
     int slot;
 
     if (game->mode == GAME_MODE_COMBAT) {
-        printf("%s", TXT_INV_NO_DROP_COMBAT);
+        render_inv_no_drop_combat();
         return 1;
     }
     room_id = game->player.room_id;
     if (!game_inv_player_has_item(game, item_arg)) {
-        printf(TXT_INV_NOT_CARRYING_FMT, item_name(item_arg));
+        render_inv_not_carrying(item_name(item_arg));
         return 1;
     }
     slot = room_first_free_slot(game, room_id);
     if (slot < 0) {
-        printf(TXT_INV_GROUND_FULL_FMT, CFG_AREA_ITEM_SLOTS);
+        render_inv_ground_full(CFG_AREA_ITEM_SLOTS);
         return 1;
     }
     {
@@ -232,56 +231,40 @@ int game_inv_cmd_drop(struct GameState *game, int item_arg)
         } else if (game->weapon_equipped == item_arg) {
             game->weapon_equipped = ITEM_NONE;
         } else {
-            printf(TXT_INV_NOT_CARRYING_FMT, item_name(item_arg));
+            render_inv_not_carrying(item_name(item_arg));
             return 1;
         }
     }
     game->room_item[room_id][slot] = item_arg;
-    printf(TXT_INV_DROP_FMT, item_name(item_arg));
+    render_inv_drop(item_name(item_arg));
     return 1;
 }
 
 int game_inv_cmd_bag(struct GameState *game)
 {
-    int i;
-
-    printf(TXT_INV_BAG_HEADER_FMT, game->bag_count, game->bag_capacity);
-    if (game->bag_count <= 0) {
-        printf("%s", TXT_INV_BAG_EMPTY);
-    } else {
-        for (i = 0; i < game->bag_count; ++i) {
-            printf(" %s", item_name(game->bag[i]));
-            if (i < game->bag_count - 1) {
-                printf(",");
-            }
-        }
-        printf("\n");
-    }
-    if (game->weapon_equipped != ITEM_NONE) {
-        printf(TXT_INV_BAG_WIELDING_FMT, item_name(game->weapon_equipped));
-    }
+    render_inv_bag(game);
     return 1;
 }
 
 int game_inv_cmd_eat(struct GameState *game, int item_arg)
 {
     if (game->mode == GAME_MODE_COMBAT) {
-        printf("%s", TXT_INV_NO_EAT_COMBAT);
+        render_inv_no_eat_combat();
         return 1;
     }
     if (game_inv_bag_find_index(game, item_arg) < 0) {
-        printf(TXT_INV_NOT_CARRYING_FMT, item_name(item_arg));
+        render_inv_not_carrying(item_name(item_arg));
         return 1;
     }
     if (!item_is_edible(item_arg)) {
-        printf(TXT_INV_CANNOT_EAT_FMT, item_name(item_arg));
+        render_inv_cannot_eat(item_name(item_arg));
         return 1;
     }
     game_inv_bag_remove_item(game, item_arg);
     if (item_arg == ITEM_BERRY) {
-        printf("%s", TXT_INV_EAT_BERRY);
+        render_inv_eat_berry();
     } else {
-        printf("%s", TXT_INV_EAT_FISH);
+        render_inv_eat_fish();
     }
     return 1;
 }
@@ -289,31 +272,29 @@ int game_inv_cmd_eat(struct GameState *game, int item_arg)
 int game_inv_cmd_use(struct GameState *game, int item_arg)
 {
     if (game->mode == GAME_MODE_COMBAT) {
-        printf("%s", TXT_INV_USE_REPLY_COMBAT);
+        render_inv_use_reply_combat();
         return 1;
     }
     if (game_inv_bag_find_index(game, item_arg) < 0) {
-        printf(TXT_INV_NOT_CARRYING_FMT, item_name(item_arg));
+        render_inv_not_carrying(item_name(item_arg));
         return 1;
     }
     if (item_arg == ITEM_TORCH) {
-        printf("%s", TXT_INV_USE_TORCH);
+        render_inv_use_torch();
         return 1;
     }
     if (item_arg == ITEM_SALVE) {
         game->player_hp += CFG_SALVE_HEAL_AMOUNT;
         if (game->player_hp > game->max_hp) game->player_hp = game->max_hp;
-        printf(TXT_INV_USE_SALVE_FMT,
-            game->player_hp);
+        render_inv_use_salve(game->player_hp);
         game_inv_bag_remove_item(game, item_arg);
         return 1;
     }
     if (item_arg == ITEM_SPEAR) {
-        printf("%s", TXT_INV_USE_SPEAR);
+        render_inv_use_spear();
         return 1;
     }
-    printf(TXT_INV_NO_USE_FMT,
-        item_name(item_arg));
+    render_inv_no_use(item_name(item_arg));
     return 1;
 }
 
@@ -333,46 +314,46 @@ static int craft_consume_one(struct GameState *game, int item_id)
 int game_inv_cmd_craft(struct GameState *game, int item_arg)
 {
     if (game->mode == GAME_MODE_COMBAT) {
-        printf("%s", TXT_INV_NO_CRAFT_COMBAT);
+        render_inv_no_craft_combat();
         return 1;
     }
     if (item_arg == ITEM_TORCH) {
         if (!game_inv_player_has_item(game, ITEM_STICK) ||
                 !game_inv_player_has_item(game, ITEM_REED)) {
-            printf("%s", TXT_INV_NEED_TORCH);
+            render_inv_need_torch();
             return 1;
         }
         craft_consume_one(game, ITEM_STICK);
         craft_consume_one(game, ITEM_REED);
         game_inv_bag_add(game, ITEM_TORCH);
-        printf("%s", TXT_INV_CRAFT_TORCH);
+        render_inv_craft_torch();
         return 1;
     }
     if (item_arg == ITEM_SALVE) {
         if (!game_inv_player_has_item(game, ITEM_HERB) ||
                 !game_inv_player_has_item(game, ITEM_BERRY)) {
-            printf("%s", TXT_INV_NEED_SALVE);
+            render_inv_need_salve();
             return 1;
         }
         craft_consume_one(game, ITEM_HERB);
         craft_consume_one(game, ITEM_BERRY);
         game_inv_bag_add(game, ITEM_SALVE);
-        printf("%s", TXT_INV_CRAFT_SALVE);
+        render_inv_craft_salve();
         return 1;
     }
     if (item_arg == ITEM_SPEAR) {
         if (!game_inv_player_has_item(game, ITEM_STICK) ||
                 !game_inv_player_has_item(game, ITEM_STONE)) {
-            printf("%s", TXT_INV_NEED_SPEAR);
+            render_inv_need_spear();
             return 1;
         }
         craft_consume_one(game, ITEM_STICK);
         craft_consume_one(game, ITEM_STONE);
         game_inv_bag_add(game, ITEM_SPEAR);
-        printf("%s", TXT_INV_CRAFT_SPEAR);
+        render_inv_craft_spear();
         return 1;
     }
-    printf("%s", TXT_INV_CRAFT_UNKNOWN);
+    render_inv_craft_unknown();
     return 1;
 }
 
@@ -382,16 +363,16 @@ int game_inv_cmd_wield(struct GameState *game, int item_arg)
     int old_weapon;
 
     if (item_arg == game->weapon_equipped) {
-        printf(TXT_INV_ALREADY_WIELDING_FMT, item_name(item_arg));
+        render_inv_already_wielding(item_name(item_arg));
         return 1;
     }
     idx = game_inv_bag_find_index(game, item_arg);
     if (idx < 0) {
-        printf(TXT_INV_NOT_CARRYING_FMT, item_name(item_arg));
+        render_inv_not_carrying(item_name(item_arg));
         return 1;
     }
     if (!item_is_weapon(item_arg)) {
-        printf("%s", TXT_INV_WIELD_NOT_WEAPON);
+        render_inv_wield_not_weapon();
         return 1;
     }
     old_weapon = game->weapon_equipped;
@@ -405,12 +386,12 @@ int game_inv_cmd_wield(struct GameState *game, int item_arg)
                 return 1;
             }
             game->weapon_equipped = old_weapon;
-            printf("%s", TXT_INV_WIELD_STOW_FAIL);
+            render_inv_wield_stow_fail();
             return 1;
         }
     }
     game->weapon_equipped = item_arg;
-    printf(TXT_INV_WIELD_FMT, item_name(item_arg));
+    render_inv_wield(item_name(item_arg));
     return 1;
 }
 
@@ -421,27 +402,27 @@ int game_inv_cmd_unwield(struct GameState *game)
     int w;
 
     if (game->weapon_equipped == ITEM_NONE) {
-        printf("%s", TXT_INV_UNWIELD_EMPTY);
+        render_inv_unwield_empty();
         return 1;
     }
     w = game->weapon_equipped;
     if (game_inv_bag_add(game, w)) {
         game->weapon_equipped = ITEM_NONE;
-        printf("%s", TXT_INV_UNWIELD);
+        render_inv_unwield();
         return 1;
     }
     if (game->mode == GAME_MODE_COMBAT) {
-        printf("%s", TXT_INV_UNWIELD_CANNOT);
+        render_inv_unwield_cannot();
         return 1;
     }
     room_id = game->player.room_id;
     slot = room_first_free_slot(game, room_id);
     if (slot < 0) {
-        printf("%s", TXT_INV_UNWIELD_CANNOT);
+        render_inv_unwield_cannot();
         return 1;
     }
     game->weapon_equipped = ITEM_NONE;
     game->room_item[room_id][slot] = w;
-    printf(TXT_INV_UNWIELD_GROUND_FMT, item_name(w));
+    render_inv_unwield_ground(item_name(w));
     return 1;
 }

@@ -15,6 +15,9 @@ jobs:
       - name: Install build tools
         run: sudo apt-get update && sudo apt-get install -y gcc make
 
+      - name: Core/render layer guard
+        run: make check-layers
+
       - name: Strict build (TEST_MODE, -Werror)
         run: make test
 

@@ -792,6 +792,217 @@ void render_msg_nobody_waiting_reply(void)
     printf("%s", TXT_MSG_NOBODY_WAITING);
 }
 
+void render_inv_no_body_loot(void)
+{
+    printf("%s", TXT_INV_NO_BODY_LOOT);
+}
+
+void render_inv_body_stripped(void)
+{
+    printf("%s", TXT_INV_BODY_STRIPPED);
+}
+
+void render_inv_bag_full_drop(void)
+{
+    printf("%s", TXT_INV_BAG_FULL_DROP);
+}
+
+void render_inv_loot(const char *item_name)
+{
+    printf(TXT_INV_LOOT_FMT, item_name);
+}
+
+void render_inv_no_rummage_combat(void)
+{
+    printf("%s", TXT_INV_NO_RUMMAGE_COMBAT);
+}
+
+void render_inv_take_nothing(void)
+{
+    printf("%s", TXT_INV_TAKE_NOTHING);
+}
+
+void render_inv_cannot_take_here(void)
+{
+    printf("%s", TXT_INV_CANNOT_TAKE_HERE);
+}
+
+void render_inv_bag_full(int capacity)
+{
+    printf(TXT_INV_BAG_FULL_FMT, capacity);
+}
+
+void render_inv_pickup(const char *item_name)
+{
+    printf(TXT_INV_PICKUP_FMT, item_name);
+}
+
+void render_inv_no_drop_combat(void)
+{
+    printf("%s", TXT_INV_NO_DROP_COMBAT);
+}
+
+void render_inv_not_carrying(const char *item_name)
+{
+    printf(TXT_INV_NOT_CARRYING_FMT, item_name);
+}
+
+void render_inv_ground_full(int slots)
+{
+    printf(TXT_INV_GROUND_FULL_FMT, slots);
+}
+
+void render_inv_drop(const char *item_name)
+{
+    printf(TXT_INV_DROP_FMT, item_name);
+}
+
+void render_inv_bag(const struct GameState *game)
+{
+    int i;
+
+    printf(TXT_INV_BAG_HEADER_FMT, game->bag_count, game->bag_capacity);
+    if (game->bag_count <= 0) {
+        printf("%s", TXT_INV_BAG_EMPTY);
+    } else {
+        for (i = 0; i < game->bag_count; ++i) {
+            printf(" %s", item_name(game->bag[i]));
+            if (i < game->bag_count - 1) {
+                printf(",");
+            }
+        }
+        printf("\n");
+    }
+    if (game->weapon_equipped != ITEM_NONE) {
+        printf(TXT_INV_BAG_WIELDING_FMT, item_name(game->weapon_equipped));
+    }
+}
+
+void render_inv_no_eat_combat(void)
+{
+    printf("%s", TXT_INV_NO_EAT_COMBAT);
+}
+
+void render_inv_cannot_eat(const char *item_name)
+{
+    printf(TXT_INV_CANNOT_EAT_FMT, item_name);
+}
+
+void render_inv_eat_berry(void)
+{
+    printf("%s", TXT_INV_EAT_BERRY);
+}
+
+void render_inv_eat_fish(void)
+{
+    printf("%s", TXT_INV_EAT_FISH);
+}
+
+void render_inv_use_reply_combat(void)
+{
+    printf("%s", TXT_INV_USE_REPLY_COMBAT);
+}
+
+void render_inv_use_torch(void)
+{
+    printf("%s", TXT_INV_USE_TORCH);
+}
+
+void render_inv_use_salve(int hp)
+{
+    printf(TXT_INV_USE_SALVE_FMT, hp);
+}
+
+void render_inv_use_spear(void)
+{
+    printf("%s", TXT_INV_USE_SPEAR);
+}
+
+void render_inv_no_use(const char *item_name)
+{
+    printf(TXT_INV_NO_USE_FMT, item_name);
+}
+
+void render_inv_no_craft_combat(void)
+{
+    printf("%s", TXT_INV_NO_CRAFT_COMBAT);
+}
+
+void render_inv_need_torch(void)
+{
+    printf("%s", TXT_INV_NEED_TORCH);
+}
+
+void render_inv_craft_torch(void)
+{
+    printf("%s", TXT_INV_CRAFT_TORCH);
+}
+
+void render_inv_need_salve(void)
+{
+    printf("%s", TXT_INV_NEED_SALVE);
+}
+
+void render_inv_craft_salve(void)
+{
+    printf("%s", TXT_INV_CRAFT_SALVE);
+}
+
+void render_inv_need_spear(void)
+{
+    printf("%s", TXT_INV_NEED_SPEAR);
+}
+
+void render_inv_craft_spear(void)
+{
+    printf("%s", TXT_INV_CRAFT_SPEAR);
+}
+
+void render_inv_craft_unknown(void)
+{
+    printf("%s", TXT_INV_CRAFT_UNKNOWN);
+}
+
+void render_inv_already_wielding(const char *item_name)
+{
+    printf(TXT_INV_ALREADY_WIELDING_FMT, item_name);
+}
+
+void render_inv_wield_not_weapon(void)
+{
+    printf("%s", TXT_INV_WIELD_NOT_WEAPON);
+}
+
+void render_inv_wield_stow_fail(void)
+{
+    printf("%s", TXT_INV_WIELD_STOW_FAIL);
+}
+
+void render_inv_wield(const char *item_name)
+{
+    printf(TXT_INV_WIELD_FMT, item_name);
+}
+
+void render_inv_unwield_empty(void)
+{
+    printf("%s", TXT_INV_UNWIELD_EMPTY);
+}
+
+void render_inv_unwield(void)
+{
+    printf("%s", TXT_INV_UNWIELD);
+}
+
+void render_inv_unwield_cannot(void)
+{
+    printf("%s", TXT_INV_UNWIELD_CANNOT);
+}
+
+void render_inv_unwield_ground(const char *item_name)
+{
+    printf(TXT_INV_UNWIELD_GROUND_FMT, item_name);
+}
+
 void render_exploration_map(struct GameState *game)
 {
     int min_x;

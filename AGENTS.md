@@ -66,6 +66,7 @@ Keep each issue’s card aligned with real progress. Do not skip **In progress**
 Primary local validation loop:
 
 - `make build`
+- `make check-layers`
 - `make test`
 - `make test-run`
 
@@ -110,9 +111,11 @@ DOS flow entrypoint:
 - Required dependencies: `gcc` and `make`.
 - Full supported loop:
   - `make build`
+  - `make check-layers`
   - `make test`
   - `make test-run`
-- `make test` builds with `-Werror -DTEST_MODE`.
+- `make check-layers` rejects `printf` in core `src/*.c` (allowed only in `main.c` and `grendr.c`).
+- `make test` builds with `-Werror -DTEST_MODE` (does not run `check-layers`; CI runs both).
 - `make test-run` pipes scripted input and diffs against snapshot output.
 - `make prepare-dos` and DOS-path validation targets are unavailable in cloud VMs.
 - No lint tooling exists beyond GCC warning enforcement.

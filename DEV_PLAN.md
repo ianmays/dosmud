@@ -218,32 +218,11 @@ Done ✅.
 
 ## #44 - Formalize engine boundaries
 
-Separate:
-- gameplay simulation
-- rendering
-- platform integration
+Done ✅.
 
-### Core
-Pure gameplay logic.
-
-NO:
-- DOS APIs
-- terminal APIs
-- SDL APIs
-- rendering concerns
-- timing APIs
-
-Core gameplay must never know DOS/Linux/SDL/terminal APIs exist.
-
-### Render
-Presentation only.
-
-Current `grendr.*` separation is already a strong direction and should be preserved.
-
-### Platform
-Input/timing/system integration only.
-
-Gameplay systems must never directly depend on platform or renderer concerns.
+- Documented core / render / platform layers in `docs/architecture.md`
+- Moved all `invent.c` player output to `render_inv_*` in `grendr`
+- Added `make check-layers` to reject `printf` outside `main.c` and `grendr.c` (run explicitly or via `make all-test`; not part of `make test`)
 
 ---
 

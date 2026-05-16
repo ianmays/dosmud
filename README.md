@@ -30,9 +30,10 @@ make build
 ./dosmud
 ```
 
-Local strict/test checks:
+Native layers/strict/test checks:
 
 ```sh
+make check-layers
 make test
 make test-run
 ```
@@ -43,6 +44,8 @@ DOS/Open Watcom path:
 make prepare-dos
 make run-dos
 ```
+
+See the [Makefile](Makefile) for all commands.
 
 ## Manual
 

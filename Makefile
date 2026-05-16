@@ -6,20 +6,25 @@ TEST_CFLAGS = $(BASE_CFLAGS) -Werror -D$(TEST_MODE_FLAG) -g -O0
 SRC = src/main.c src/game.c src/gprog.c src/combat.c src/genc.c src/wanderer.c src/dialogue.c src/gatmos.c src/grendr.c src/invent.c src/command.c src/world.c src/items.c src/txtres.c
 BIN = dosmud
 
-all-build: $(BIN)
-$(BIN): $(SRC)
-	$(MAKE) clean && $(MAKE) prepare-dos && $(CC) $(BASE_CFLAGS) -o $(BIN) $(SRC)
+all-build:
+	$(MAKE) clean
+	$(MAKE) prepare-dos
+	$(MAKE) build
 
 build:
-	$(MAKE) clean && $(CC) $(BASE_CFLAGS) -o $(BIN) $(SRC)
+	$(CC) $(BASE_CFLAGS) -o $(BIN) $(SRC)
 
 # deterministic
 all-test:
-	$(MAKE) clean && $(MAKE) prepare-dos MODE=$(TEST_MODE_FLAG) && $(CC) $(TEST_CFLAGS) -o $(BIN) $(SRC)
+	$(MAKE) check-layers
+	$(MAKE) clean
+	$(MAKE) prepare-dos MODE=$(TEST_MODE_FLAG)
+	$(MAKE) test
+	$(MAKE) test-run
 
 # deterministic
 test:
-	$(MAKE) clean && $(CC) $(TEST_CFLAGS) -o $(BIN) $(SRC)
+	$(CC) $(TEST_CFLAGS) -o $(BIN) $(SRC)
 
 # deterministic tests
 test-run:
@@ -52,6 +57,15 @@ test-run:
 		tests/craft_wielded.expect \
 		tests/craft_wielded.output
 
+# gameplay .c files must not call printf (use grendr render_* instead)
+check-layers:
+	@violators=$$(grep -l 'printf' src/*.c 2>/dev/null | grep -vE '/(main|grendr)\.c$$' || true); \
+	if [ -n "$$violators" ]; then \
+		echo "layer violation: printf only allowed in main.c and grendr.c"; \
+		echo "$$violators"; \
+		exit 1; \
+	fi
+
 clean:
 	rm -f $(BIN)
 
@@ -61,4 +75,4 @@ prepare-dos:
 run-dos:
 	powershell.exe -ExecutionPolicy Bypass -File prepare-dos.ps1 -NoBuild
 
-.PHONY: all build all-test test test-run clean prepare-dos run-dos
+.PHONY: all build all-test test test-run check-layers clean prepare-dos run-dos

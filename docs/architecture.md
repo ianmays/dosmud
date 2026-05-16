@@ -15,21 +15,51 @@ The codebase intentionally avoids:
 - hidden globals
 - object-emulation frameworks and ECS-style designs
 
-## Platform boundary rule
+## Engine layers (core / render / platform)
 
-Core gameplay must not depend on platform APIs or rendering details.
+The codebase splits into three layers. Gameplay and simulation modules must stay in **core**; only **render** and **platform** may touch terminal I/O or OS APIs.
+
+### Core (gameplay simulation)
+
+Owns state mutation, command handling, world ticks, combat, inventory logic, and procedural systems.
+
+Modules include `game`, `command`, `world`, `invent`, `combat`, `gatmos`, `gprog`, `genc`, `wanderer`, `dialogue`, and `items`.
+
+Core must **not** use:
+
+- `printf` or other terminal output (call `render_*` in `grendr` instead)
+- DOS, SDL, or platform timing/input APIs
+- `#ifdef __WATCOMC__` or similar platform switches
 
 Good:
 
 ```c
 game_process_input(game, line);
+render_msg_moved(world_dir_name(cmd->dir));
 ```
 
-Bad in gameplay systems:
+Bad in core:
 
 ```c
 printf("Player moved.\n");
 ```
+
+### Render (`grendr`, `txtres`)
+
+Presentation only: room art, HUD, combat text, inventory messages, and exploration map output.
+
+- `grendr` is the only gameplay-adjacent module that may call `printf`
+- `txtres` holds static copy; it does not print
+
+Core calls `render_*` after mutating `GameState`; render never changes simulation state.
+
+### Platform (`main` today; `platform/` in [#45](https://github.com/ianmays/dosmud/issues/45))
+
+Startup, main loop, line input, prompts, and `#ifdef` portability for DOS vs POSIX.
+
+`main.c` may use `printf` for shell-level prompts and banners. Platform code orchestrates core and render; it does not embed gameplay rules.
+
+Run `make check-layers` before opening a PR (or use `make all-test`, which runs it first). That target fails if `printf` appears in any `src/*.c` other than `main.c` or `grendr.c`. `make test` compiles only and does not run the guard.
 
 ## High-level flow
 
