@@ -25,15 +25,14 @@ static u32 default_rng_seed(void)
 }
 
 /*
- * Parse optional --seed <value>. Updates *out_seed when --seed is present.
+ * Parse optional --seed <value>. Updates *out_seed when --seed is present and valid.
  * Returns 0 on success, -1 on invalid or unknown arguments.
  */
-static int parse_cli_seed(int argc, char **argv, u32 *out_seed, int *out_cli_seed)
+static int parse_cli_seed(int argc, char **argv, u32 *out_seed)
 {
     int i;
     int have_seed;
 
-    *out_cli_seed = 0;
     have_seed = 0;
     for (i = 1; i < argc; ++i) {
         if (strcmp(argv[i], "--seed") == 0) {
@@ -62,7 +61,6 @@ static int parse_cli_seed(int argc, char **argv, u32 *out_seed, int *out_cli_see
             }
 #endif
             *out_seed = (u32)val;
-            *out_cli_seed = 1;
             have_seed = 1;
             ++i;
         } else {
@@ -81,11 +79,10 @@ int main(int argc, char **argv)
     int poll_rc;
     int ran_tick;
     u32 rng_seed;
-    int cli_seed_set;
     const time_t idle_tick_seconds = (time_t)CFG_MAIN_IDLE_TICK_SECONDS;
 
     rng_seed = default_rng_seed();
-    if (parse_cli_seed(argc, argv, &rng_seed, &cli_seed_set) != 0) {
+    if (parse_cli_seed(argc, argv, &rng_seed) != 0) {
         fprintf(stderr, "%s\n", TXT_MAIN_USAGE);
         return 1;
     }
@@ -98,11 +95,7 @@ int main(int argc, char **argv)
     game_init(&game, rng_seed);
     last_tick_time = plat_time_now();
 
-    if (cli_seed_set) {
-        printf(TXT_MAIN_TITLE_SEED_FMT, TXT_MAIN_TITLE, (unsigned long)rng_seed);
-    } else {
-        printf("%s\n", TXT_MAIN_TITLE);
-    }
+    printf(TXT_MAIN_TITLE_SEED_FMT, TXT_MAIN_TITLE, (unsigned long)rng_seed);
     printf("%s\n", TXT_MAIN_HELP_HINT);
     game_describe_current_room(&game);
     game_render(&game);
