@@ -28,7 +28,7 @@ Snapshot tests can set up known game state without walking RNG-dependent command
 @fixture <name>
 ```
 
-are handled by `testharn` before normal command parsing. Fixture lines are not echoed as player commands. Unknown fixture names print `unknown test fixture` to stderr and exit with status 1.
+are handled by `testharn` before normal command parsing. Fixture lines are not echoed as player commands. Unknown fixture names print `unknown test fixture` to stderr and exit with status 1. When a known fixture cannot finish setup (for example the bag is full), the binary prints `test fixture failed` to stderr and also exits with status 1.
 
 Prefer fixtures over long setup scripts when a test needs a specific mode, inventory, or encounter. After changing fixture output, regenerate the matching `.expect` with `make test-run` and review the diff.
 
