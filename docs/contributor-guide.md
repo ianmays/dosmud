@@ -10,6 +10,7 @@ Thanks for contributing to dosmud.
 - Keep gameplay deterministic for identical seed + inputs.
 - Prefer simple, explicit, procedural code over heavy abstractions.
 - Avoid unrelated refactors in the same PR.
+- Keep core gameplay free of `printf` and other terminal I/O; use `render_*` in `grendr` instead (`make test` runs `check-layers` to enforce this).
 
 ## Pull Requests Required
 

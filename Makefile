@@ -14,11 +14,11 @@ build:
 	$(MAKE) clean && $(CC) $(BASE_CFLAGS) -o $(BIN) $(SRC)
 
 # deterministic
-all-test:
+all-test: check-layers
 	$(MAKE) clean && $(MAKE) prepare-dos MODE=$(TEST_MODE_FLAG) && $(CC) $(TEST_CFLAGS) -o $(BIN) $(SRC)
 
 # deterministic
-test:
+test: check-layers
 	$(MAKE) clean && $(CC) $(TEST_CFLAGS) -o $(BIN) $(SRC)
 
 # deterministic tests
@@ -54,7 +54,7 @@ test-run:
 
 # gameplay .c files must not call printf (use grendr render_* instead)
 check-layers:
-	@violators=$$(grep -l 'printf' src/*.c 2>/dev/null | grep -v -E 'main\.c|grendr\.c' || true); \
+	@violators=$$(grep -l 'printf' src/*.c 2>/dev/null | grep -vE '/(main|grendr)\.c$$' || true); \
 	if [ -n "$$violators" ]; then \
 		echo "layer violation: printf only allowed in main.c and grendr.c"; \
 		echo "$$violators"; \

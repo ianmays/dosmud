@@ -112,7 +112,7 @@ DOS flow entrypoint:
   - `make build`
   - `make test`
   - `make test-run`
-- `make test` builds with `-Werror -DTEST_MODE`.
+- `make test` runs `check-layers` (no `printf` in core `src/*.c` except via `grendr`), then builds with `-Werror -DTEST_MODE`.
 - `make test-run` pipes scripted input and diffs against snapshot output.
 - `make prepare-dos` and DOS-path validation targets are unavailable in cloud VMs.
 - No lint tooling exists beyond GCC warning enforcement.
