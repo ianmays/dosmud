@@ -443,7 +443,6 @@ void game_print_help(int topic)
 
 void render_bandit_encounter_open(void)
 {
-    
     printf("  /\\                        \n");
     printf("  ||     .-'''''''-.         \n");
     printf("  ||    / (.)..(.)  |        \n");
