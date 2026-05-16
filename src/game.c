@@ -9,13 +9,32 @@
 #include "genc.h"
 #include "wanderer.h"
 
+void game_set_mode_explore(struct GameState *game)
+{
+    game->mode = GAME_MODE_EXPLORE;
+    game->dialogue = DIALOGUE_NONE;
+    game->enemy_handover_pick = 0;
+}
+
+void game_set_mode_dialogue(struct GameState *game, int kind)
+{
+    game->mode = GAME_MODE_DIALOGUE;
+    game->dialogue = kind;
+    game->enemy_handover_pick = 0;
+}
+
+void game_set_mode_combat(struct GameState *game)
+{
+    game->mode = GAME_MODE_COMBAT;
+    game->dialogue = DIALOGUE_NONE;
+    game->enemy_handover_pick = 0;
+}
+
 int game_is_busy_dialogue(struct GameState *game)
 {
-    if (game->wanderer_dialogue == 1) return 1;
-    if (game->pond_dialogue == 1) return 1;
-    if (game->npc_dialogue != 0) return 1;
-    if (game->enemy_dialogue == 1) return 1;
-    if (game->combat_active == 1) return 1;
+    if (game->mode != GAME_MODE_EXPLORE) {
+        return 1;
+    }
     return 0;
 }
 
@@ -42,9 +61,8 @@ void game_init(struct GameState *game)
     game->tick = 0;
     game->seed = CFG_GAME_INIT_SEED;
     game->running = 1;
-    game->pond_dialogue = 0;
+    game_set_mode_explore(game);
     game->wanderer_room = WORLD_ROOM_RUINS;
-    game->wanderer_dialogue = 0;
     game->wanderer_need_separation = 0;
     game->env_focus_active = 0;
     game->env_focus_room = -1;
@@ -58,12 +76,8 @@ void game_init(struct GameState *game)
     game->damage_bonus = CFG_START_DAMAGE_BONUS;
     game->weapon_equipped = ITEM_NONE;
     game->player_hp = CFG_START_MAX_HP;
-    game->enemy_dialogue = 0;
-    game->enemy_handover_pick = 0;
-    game->combat_active = 0;
-    game->enemy_hp = 0;
-    game->combat_defending = 0;
-    game->npc_dialogue = 0;
+    game->combat.enemy_hp = 0;
+    game->combat.defending = 0;
     game->wanderer_active = 1;
     game->wanderer_return_tick = 0;
     for (i = 0; i < CFG_ROOM_MAX; ++i) {
@@ -75,9 +89,41 @@ void game_init(struct GameState *game)
     seed_world_items(game);
 }
 
+static int apply_room_npc_reply(struct GameState *game, struct Command *cmd)
+{
+    if (game->mode != GAME_MODE_DIALOGUE) {
+        return 0;
+    }
+    if (game->dialogue == DIALOGUE_NPC_FROG) {
+        if (cmd->arg < 1 || cmd->arg > 3) {
+            render_msg_pick_123();
+            return 1;
+        }
+        frog_dialogue_branch(cmd->arg);
+        game_set_mode_explore(game);
+        return 1;
+    }
+    if (game->dialogue == DIALOGUE_NPC_WATCHMAN) {
+        render_msg_watchman_reply(cmd->arg);
+        game_set_mode_explore(game);
+        return 1;
+    }
+    if (game->dialogue == DIALOGUE_NPC_HERBALIST) {
+        render_msg_herbalist_reply(cmd->arg);
+        game_set_mode_explore(game);
+        return 1;
+    }
+    if (game->dialogue == DIALOGUE_NPC_ARCHIVIST) {
+        render_msg_archivist_reply(cmd->arg);
+        game_set_mode_explore(game);
+        return 1;
+    }
+    return 0;
+}
+
 static int apply_command(struct GameState *game, struct Command *cmd)
 {
-    if (game->combat_active == 1 &&
+    if (game->mode == GAME_MODE_COMBAT &&
             cmd->type != CMD_REPLY &&
             cmd->type != CMD_LOOK &&
             cmd->type != CMD_MAP &&
@@ -90,7 +136,8 @@ static int apply_command(struct GameState *game, struct Command *cmd)
         return 0;
     }
 
-    if (game->enemy_dialogue == 1 &&
+    if (game->mode == GAME_MODE_DIALOGUE &&
+            game->dialogue == DIALOGUE_ENEMY &&
             cmd->type != CMD_REPLY &&
             cmd->type != CMD_LOOK &&
             cmd->type != CMD_MAP &&
@@ -135,9 +182,9 @@ static int apply_command(struct GameState *game, struct Command *cmd)
         }
         game->player.room_id = world_move(&game->world, game->player.room_id, cmd->dir);
         game->room_explored[game->player.room_id] = 1;
-        game->pond_dialogue = 0;
-        game->wanderer_dialogue = 0;
-        game->npc_dialogue = 0;
+        if (game->mode == GAME_MODE_DIALOGUE) {
+            game_set_mode_explore(game);
+        }
         render_msg_moved(world_dir_name(cmd->dir));
         do_look(game);
         return 1;
@@ -152,7 +199,9 @@ static int apply_command(struct GameState *game, struct Command *cmd)
         return game_inv_cmd_drop(game, cmd->arg);
     }
     if (cmd->type == CMD_GIVE) {
-        if (game->enemy_dialogue == 1 && game->enemy_handover_pick == 1) {
+        if (game->mode == GAME_MODE_DIALOGUE &&
+                game->dialogue == DIALOGUE_ENEMY &&
+                game->enemy_handover_pick == 1) {
             if (!game_inv_player_has_item(game, cmd->arg)) {
                 render_msg_bandit_give_not_carrying();
                 return 1;
@@ -163,8 +212,7 @@ static int apply_command(struct GameState *game, struct Command *cmd)
             } else {
                 game_inv_bag_remove_item(game, cmd->arg);
             }
-            game->enemy_dialogue = 0;
-            game->enemy_handover_pick = 0;
+            game_set_mode_explore(game);
             return 1;
         }
         render_msg_give_wrong_context();
@@ -219,27 +267,31 @@ static int apply_command(struct GameState *game, struct Command *cmd)
         return 1;
     }
     if (cmd->type == CMD_TALK) {
-        if (game->enemy_dialogue == 1 || game->combat_active == 1) {
+        if (game->mode == GAME_MODE_DIALOGUE && game->dialogue == DIALOGUE_ENEMY) {
             render_msg_bandit_blocks_talk();
             return 1;
         }
-        if (game->wanderer_dialogue == 1) {
+        if (game->mode == GAME_MODE_COMBAT) {
+            render_msg_bandit_blocks_talk();
+            return 1;
+        }
+        if (game->mode == GAME_MODE_DIALOGUE && game->dialogue == DIALOGUE_WANDERER) {
             render_msg_traveler_waiting();
             return 1;
         }
         if (game->player.room_id == WORLD_ROOM_TOWER) {
             render_msg_watchman_talk();
-            game->npc_dialogue = 2;
+            game_set_mode_dialogue(game, DIALOGUE_NPC_WATCHMAN);
             return 1;
         }
         if (game->player.room_id == WORLD_ROOM_ORCHARD) {
             render_msg_herbalist_talk();
-            game->npc_dialogue = 3;
+            game_set_mode_dialogue(game, DIALOGUE_NPC_HERBALIST);
             return 1;
         }
         if (game->player.room_id == WORLD_ROOM_CATACOMBS) {
             render_msg_archivist_talk();
-            game->npc_dialogue = 4;
+            game_set_mode_dialogue(game, DIALOGUE_NPC_ARCHIVIST);
             return 1;
         }
         if (game->player.room_id != WORLD_ROOM_POND) {
@@ -247,30 +299,18 @@ static int apply_command(struct GameState *game, struct Command *cmd)
             return 1;
         }
         frog_dialogue_intro();
-        game->pond_dialogue = 1;
+        game_set_mode_dialogue(game, DIALOGUE_NPC_FROG);
         return 1;
     }
     if (cmd->type == CMD_REPLY) {
-        if (game->combat_active == 1) {
+        if (game->mode == GAME_MODE_COMBAT) {
             combat_resolve_reply(game, cmd->arg);
             return 1;
         }
-        if (game->npc_dialogue == 2) {
-            render_msg_watchman_reply(cmd->arg);
-            game->npc_dialogue = 0;
+        if (apply_room_npc_reply(game, cmd)) {
             return 1;
         }
-        if (game->npc_dialogue == 3) {
-            render_msg_herbalist_reply(cmd->arg);
-            game->npc_dialogue = 0;
-            return 1;
-        }
-        if (game->npc_dialogue == 4) {
-            render_msg_archivist_reply(cmd->arg);
-            game->npc_dialogue = 0;
-            return 1;
-        }
-        if (game->enemy_dialogue == 1) {
+        if (game->mode == GAME_MODE_DIALOGUE && game->dialogue == DIALOGUE_ENEMY) {
             if (cmd->arg == 1) {
                 combat_start(game);
                 return 1;
@@ -289,7 +329,7 @@ static int apply_command(struct GameState *game, struct Command *cmd)
                 game->enemy_handover_pick = 0;
                 if ((rand() % CFG_ROLL_PERCENT_RANGE) < CFG_BANDIT_INTIMIDATE_SUCCESS_BELOW) {
                     render_msg_intimidate_success();
-                    game->enemy_dialogue = 0;
+                    game_set_mode_explore(game);
                 } else {
                     render_msg_intimidate_fail();
                     combat_start(game);
@@ -299,29 +339,20 @@ static int apply_command(struct GameState *game, struct Command *cmd)
             render_msg_pick_123();
             return 1;
         }
-        if (game->wanderer_dialogue == 1) {
+        if (game->mode == GAME_MODE_DIALOGUE && game->dialogue == DIALOGUE_WANDERER) {
             if (cmd->arg < 1 || cmd->arg > 3) {
                 render_msg_pick_123();
                 return 1;
             }
             wanderer_apply_reply(cmd->arg);
-            game->wanderer_dialogue = 0;
+            game_set_mode_explore(game);
             game->wanderer_active = 0;
             game->wanderer_room = -1;
             game->wanderer_return_tick = game->tick + CFG_WANDERER_RETURN_DELAY_BASE +
                 (rand() % CFG_WANDERER_RETURN_DELAY_SPREAD);
             return 1;
         }
-        if (game->pond_dialogue != 1) {
-            render_msg_nobody_waiting_reply();
-            return 1;
-        }
-        if (cmd->arg < 1 || cmd->arg > 3) {
-            render_msg_pick_123();
-            return 1;
-        }
-        frog_dialogue_branch(cmd->arg);
-        game->pond_dialogue = 0;
+        render_msg_nobody_waiting_reply();
         return 1;
     }
 

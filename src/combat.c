@@ -21,7 +21,7 @@ static void combat_enemy_turn(struct GameState *game)
 {
     int dmg;
     dmg = CFG_COMBAT_ENEMY_DMG_BASE + (rand() % CFG_COMBAT_ENEMY_DMG_SPREAD);
-    if (game->combat_defending) {
+    if (game->combat.defending) {
         dmg -= CFG_COMBAT_DEFEND_DAMAGE_REDUCTION;
         if (dmg < 0) dmg = 0;
     }
@@ -35,17 +35,15 @@ static void combat_enemy_turn(struct GameState *game)
         game->running = 0;
         return;
     }
-    render_combat_status_line(game->player_hp, game->enemy_hp);
+    render_combat_status_line(game->player_hp, game->combat.enemy_hp);
 }
 
 void combat_start(struct GameState *game)
 {
-    game->enemy_dialogue = 0;
-    game->enemy_handover_pick = 0;
-    game->combat_active = 1;
-    game->enemy_hp = CFG_COMBAT_ENEMY_HP_BASE + (rand() % CFG_COMBAT_ENEMY_HP_SPREAD);
-    game->combat_defending = 0;
-    render_combat_start(game->player_hp, game->enemy_hp);
+    game_set_mode_combat(game);
+    game->combat.enemy_hp = CFG_COMBAT_ENEMY_HP_BASE + (rand() % CFG_COMBAT_ENEMY_HP_SPREAD);
+    game->combat.defending = 0;
+    render_combat_start(game->player_hp, game->combat.enemy_hp);
 }
 
 void combat_resolve_reply(struct GameState *game, int choice)
@@ -54,10 +52,10 @@ void combat_resolve_reply(struct GameState *game, int choice)
     if (choice == 1) {
         dmg = CFG_COMBAT_PLAYER_HIT_BASE + (rand() % CFG_COMBAT_PLAYER_HIT_SPREAD) +
             combat_player_attack_bonus(game);
-        game->enemy_hp -= dmg;
+        game->combat.enemy_hp -= dmg;
         render_combat_player_hit(dmg);
     } else if (choice == 2) {
-        game->combat_defending = 1;
+        game->combat.defending = 1;
         render_combat_braced();
     } else if (choice == 3) {
         if (game_inv_bag_find_index(game, ITEM_SALVE) < 0) {
@@ -73,10 +71,9 @@ void combat_resolve_reply(struct GameState *game, int choice)
         return;
     }
 
-    if (game->enemy_hp <= 0) {
-        game->enemy_hp = 0;
-        game->combat_active = 0;
-        game->combat_defending = 0;
+    if (game->combat.enemy_hp <= 0) {
+        game->combat.enemy_hp = 0;
+        game_set_mode_explore(game);
         render_combat_bandit_defeated();
         game->corpse_present[game->player.room_id] = 1;
         {
@@ -102,8 +99,8 @@ void combat_resolve_reply(struct GameState *game, int choice)
     }
 
     combat_enemy_turn(game);
-    game->combat_defending = 0;
-    if (game->running && game->combat_active) {
+    game->combat.defending = 0;
+    if (game->running && game->mode == GAME_MODE_COMBAT) {
         render_combat_menu();
     }
 }
