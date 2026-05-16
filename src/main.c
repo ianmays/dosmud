@@ -118,7 +118,11 @@ int main(int argc, char **argv)
 #ifdef TEST_MODE
                 th_rc = testharn_apply(&game, line);
                 if (th_rc < 0) {
-                    fprintf(stderr, "unknown test fixture\n");
+                    if (th_rc == -2) {
+                        fprintf(stderr, "test fixture failed\n");
+                    } else {
+                        fprintf(stderr, "unknown test fixture\n");
+                    }
                     return 1;
                 }
                 if (th_rc > 0) {

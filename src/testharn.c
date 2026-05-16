@@ -25,21 +25,29 @@ static void fixture_bandit_base(struct GameState *game)
     game_set_mode_explore(game);
     game->player.room_id = WORLD_ROOM_CAMP;
     game->tick = 1;
+    game->bag_count = 0;
+    game->weapon_equipped = ITEM_NONE;
     camp_clear_ground_sticks(game);
 }
 
-static void fixture_bandit_dialogue(struct GameState *game)
+static int fixture_bandit_dialogue(struct GameState *game)
 {
     fixture_bandit_base(game);
-    (void)game_inv_bag_add(game, ITEM_STICK);
+    if (!game_inv_bag_add(game, ITEM_STICK)) {
+        return 0;
+    }
     enemy_begin_encounter(game);
+    return 1;
 }
 
-static void fixture_bandit_handover_pick(struct GameState *game)
+static int fixture_bandit_handover_pick(struct GameState *game)
 {
-    fixture_bandit_dialogue(game);
+    if (!fixture_bandit_dialogue(game)) {
+        return 0;
+    }
     game->enemy_handover_pick = 1;
     render_bandit_handover_pick_prompt();
+    return 1;
 }
 
 static void fixture_bandit_wielded_pick(struct GameState *game)
@@ -87,11 +95,15 @@ int testharn_apply(struct GameState *game, const char *line)
     name = p;
 
     if (fixture_name_is("bandit_dialogue", name)) {
-        fixture_bandit_dialogue(game);
+        if (!fixture_bandit_dialogue(game)) {
+            return -2;
+        }
         return 1;
     }
     if (fixture_name_is("bandit_handover_pick", name)) {
-        fixture_bandit_handover_pick(game);
+        if (!fixture_bandit_handover_pick(game)) {
+            return -2;
+        }
         return 1;
     }
     if (fixture_name_is("bandit_wielded_pick", name)) {
