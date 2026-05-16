@@ -16,7 +16,7 @@ void game_set_mode_explore(struct GameState *game)
     game->enemy_handover_pick = 0;
 }
 
-void game_set_mode_dialogue(struct GameState *game, int kind)
+void game_set_mode_dialogue(struct GameState *game, enum DialogueKind kind)
 {
     game->mode = GAME_MODE_DIALOGUE;
     game->dialogue = kind;

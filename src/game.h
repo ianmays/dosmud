@@ -70,7 +70,7 @@ int game_process_input(struct GameState *game, char *line);
 void game_background_step(struct GameState *game);
 
 void game_set_mode_explore(struct GameState *game);
-void game_set_mode_dialogue(struct GameState *game, int kind);
+void game_set_mode_dialogue(struct GameState *game, enum DialogueKind kind);
 void game_set_mode_combat(struct GameState *game);
 
 /* True while dialogue or combat blocks ambient encounters. */
