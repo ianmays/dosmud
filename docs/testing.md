@@ -66,6 +66,8 @@ In `prepare-dos.local.ps1`:
 - `$source` should be Windows-reachable for Linux-hosted project files.
 - `$mountpoint`, `$destination`, `$dospath` should be Windows-visible emulator paths.
 
+`prepare-dos.ps1` mirrors `src/`, `include/`, and `build.bat` into the DOS tree. It excludes `.git`, tests, docs, CI/editor folders, native build artifacts (`dosmud`, `*.output`, `*.o`, `*.obj`), and the Linux `Makefile`.
+
 ## Build artifacts
 
 - native path produces `./dosmud`
