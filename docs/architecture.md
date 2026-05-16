@@ -106,7 +106,7 @@ Conventions:
 
 ## `grendr`
 
-- text rendering only 
+- text rendering only
 - art is intentionally compact to work well with 25 line displays (DOS standard)
 - no gameplay mutation
 - player-facing lines and format strings come from [`txtres.c`](../src/txtres.c) (`TXT_*` constants and `g_room_*` arrays), not scattered literals
