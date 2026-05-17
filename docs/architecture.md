@@ -53,6 +53,18 @@ Presentation only: room art, HUD, combat text, inventory messages, and explorati
 
 Core calls `render_*` after mutating `GameState`; render never changes simulation state.
 
+### Newline and spacing
+
+Player-facing copy lives in `txtres`; `grendr` owns when a blank line appears before output.
+
+- **`txtres`:** each string ends with exactly one `\n`. Do not embed a leading `\n` in copy (the main prompt in `main` is the exception).
+- **`grendr`:** use the tier helpers in [`grendr.c`](../src/grendr.c):
+  - **Line** - inline messages (combat, errors): print copy only.
+  - **Paragraph** - atmosphere primaries, animal noise: `render_paragraph()` (one gap, then copy).
+  - **Scene** - room look art, encounters, NPC portraits: `render_gap()` once before the art block.
+  - **Continuation** - atmosphere follow-ups (berry/reed), dialogue after art: no extra gap.
+- **ASCII art:** the first row must be drawing, not a blank spacer row. Section breaks come from `render_gap()`, not padding lines at the top of art.
+
 ### Platform (`main`, `platform.h`, `platdos.c` / `platpos.c`)
 
 [`include/platform.h`](../include/platform.h) defines the portable boundary:
@@ -170,10 +182,12 @@ New `src/*.c` and `src/*.h` basenames must stay within **classic FAT 8+3** (at m
 - art is intentionally compact to work well with 25 line displays (DOS standard)
 - no gameplay mutation
 - player-facing lines and format strings come from [`txtres.c`](../src/txtres.c) (`TXT_*` constants and `g_room_*` arrays), not scattered literals
+- newline tiers (`render_gap`, `render_paragraph`, and related rules): [Newline and spacing](#newline-and-spacing)
 
 ### `txtres`
 
 - single home for static player-facing copy
+- trailing `\n` only on copy strings; see [Newline and spacing](#newline-and-spacing)
 - exported globals, not thin getters
 - functions only where selection matters
 

@@ -10,19 +10,7 @@ Thanks for contributing to dosmud.
 - Keep gameplay deterministic for identical seed + inputs.
 - Prefer simple, explicit, procedural code over heavy abstractions.
 - Avoid unrelated refactors in the same PR.
-- Keep core gameplay free of `printf` and other terminal I/O; use `render_*` in `grendr` instead (`make check-layers` allows `printf` only in `main.c`, `grendr.c`, and the platform file `platpos.c` or `platdos.c`; `make all-test` runs the guard before the test build).
-
-## Newline and spacing
-
-Player-facing copy lives in `txtres`; `grendr` owns when a blank line appears before output.
-
-- **`txtres`:** each string ends with exactly one `\n`. Do not embed a leading `\n` in copy (the main prompt in `main` is the exception).
-- **`grendr`:** use the tier helpers in `grendr.c`:
-  - **Line** - inline messages (combat, errors): print copy only.
-  - **Paragraph** - atmosphere primaries, animal noise: `render_paragraph()` (one gap, then copy).
-  - **Scene** - room look art, encounters, NPC portraits: `render_gap()` once before the art block.
-  - **Continuation** - atmosphere follow-ups (berry/reed), dialogue after art: no extra gap.
-- **ASCII art:** the first row must be drawing, not a blank spacer row. Section breaks come from `render_gap()`, not padding lines at the top of art.
+- Keep core gameplay free of `printf` and other terminal I/O; use `render_*` in `grendr` instead (`make check-layers` allows `printf` only in `main.c`, `grendr.c`, and the platform file `platpos.c` or `platdos.c`; `make all-test` runs the guard before the test build). Newline and spacing rules for `txtres` and `grendr` are in [architecture.md](architecture.md#newline-and-spacing).
 
 ## Pull Requests Required
 
