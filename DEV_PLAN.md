@@ -256,7 +256,7 @@ diff test.output test.expect
 
 ---
 
-## #66 - Improve deterministic test setup
+## #66 / #112 - Improve deterministic test setup
 
 Current tests can rely too heavily on trial-and-error RNG progression.
 
