@@ -76,4 +76,12 @@ void game_set_mode_combat(struct GameState *game);
 /* True while dialogue or combat blocks ambient encounters. */
 int game_is_busy_dialogue(struct GameState *game);
 
+#ifdef TEST_MODE
+/*
+ * Reset all mutable simulation fields to the same values game_init applies
+ * (world graph and seed are unchanged). Used by test fixtures for a clean slate.
+ */
+void game_reset_fixture_baseline(struct GameState *game, int room_id, u32 tick);
+#endif
+
 #endif

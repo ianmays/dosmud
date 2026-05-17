@@ -16,9 +16,31 @@ make test-run
 Purpose:
 
 - `make build`: native GCC development build
-- `make check-layers`: core/render boundary guard (no `printf` in `src/*.c` except `main.c` and `grendr.c`)
+- `make check-layers`: core/render boundary guard (no `printf` in `src/*.c` except `main.c`, `grendr.c`, and the platform file `platpos.c` or `platdos.c`)
 - `make test`: strict deterministic compile (`-Werror`, `-DTEST_MODE`, `-g -O0`); does not run `check-layers`
-- `make test-run`: scripted input regression pass (`tests/smoke.*`, `tests/bandit_handover.*`, `tests/bandit_wielded_give.*`, `tests/area_items.*`, `tests/map.*`, `tests/equipment.*`, `tests/craft_wielded.*`
+- `make test-run`: scripted input regression pass (`tests/smoke.*`, `tests/seed_cli.*`, `tests/bandit_handover.*`, `tests/bandit_wielded_give.*`, `tests/area_items.*`, `tests/map.*`, `tests/equipment.*`, `tests/craft_wielded.*`)
+
+## Test fixtures (`TEST_MODE` only)
+
+Snapshot tests can set up known game state without walking RNG-dependent commands. In a `make test` binary, lines in `.input` files of the form:
+
+```text
+@fixture <name>
+```
+
+are handled by `testharn` before normal command parsing. Fixture lines are not echoed as player commands. Unknown fixture names print `unknown test fixture` to stderr and exit with status 1. When a known fixture cannot finish setup, the binary prints `test fixture failed` to stderr and also exits with status 1.
+
+Prefer fixtures over long setup scripts when a test needs a specific mode, inventory, or encounter. After changing fixture output, regenerate the matching `.expect` with `make test-run` and review the diff.
+
+Bandit fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_init`: mode, room, tick, player stats, bag, combat, wanderer, corpses, ground items, env focus, and map exploration). That leaves the world graph and `GameState.seed` unchanged. `main.c` then calls `plat_seed_rng(game.seed)` so libc `rand()` matches that seed and follow-up rolls do not depend on earlier commands in the same run. Bandit setup then clears camp ground items so the stick lives only in the bag or wield slot, not on the floor.
+
+| Fixture | State |
+|---------|--------|
+| `bandit_dialogue` | Base reset, stick in bag, bandit dialogue open |
+| `bandit_handover_pick` | Base reset, stick in bag, bandit dialogue open, handover pick prompt (reply 2 already chosen) |
+| `bandit_wielded_pick` | Base reset, stick wielded (`Atk:1`), bandit dialogue open, handover pick prompt |
+
+Add new fixtures in [`src/testharn.c`](../src/testharn.c) and document them here. `testharn` is linked only for `make test` / `prepare-dos MODE=TEST_MODE`, not for `make build`.
 
 ## DOS/Open Watcom validation path
 
@@ -36,7 +58,7 @@ make run-dos
 
 `make run-dos` expects a previously prepared DOS tree. Run `make prepare-dos` first if the mirrored DOS files or executable are missing.
 
-When you add or remove `src\*.c` files, update `Makefile` (`SRC`) and `build.bat`. For the Open Watcom path, keep the final `wcl` link line under the COMMAND.COM length limit (about 127 characters): gameplay sources are packed into `gameplay.lib` via `wlib` so the link line stays short (`main.obj`, `platdos.obj`, `gameplay.lib`, plus the other `.obj` files; currently ~125 characters and verified on DOS). Add new gameplay `.obj` names to the `wlib` line in `build.bat`; platform objects stay outside `gameplay.lib` until the link line would exceed the limit (then archive a `platform.lib` via `wlib`).
+When you add or remove `src\*.c` files, update `Makefile` (`SRC` or `TEST_SRC`) and `build.bat`. For the Open Watcom path, keep every `wcl` and `wlib` line under the COMMAND.COM length limit (about 127 characters): gameplay sources are packed into `gameplay.lib` via several short `wlib` calls; the final `wcl` link lists `main.obj`, `platdos.obj`, `gameplay.lib`, plus the other `.obj` files. `TEST_MODE` compiles `testharn.c` to `tharn.obj` and appends it with a separate `wlib gameplay.lib +tharn.obj` line. Use `goto` labels in `build.bat` for conditionals; parenthesized `if (...)` blocks break under COMMAND.COM.
 
 Deterministic DOS validation:
 
@@ -44,7 +66,7 @@ Deterministic DOS validation:
 make prepare-dos MODE=TEST_MODE
 ```
 
-Runtime seed override (native or DOS build):
+Runtime seed (native or DOS build): the startup banner always prints the active seed, for example `dosmud (seed 1234)`. In `TEST_MODE` the default is `CFG_TEST_RAND_SEED` unless overridden on the command line:
 
 ```sh
 ./dosmud --seed 1234

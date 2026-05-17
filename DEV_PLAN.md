@@ -222,7 +222,7 @@ Done ✅.
 
 - Documented core / render / platform layers in `docs/architecture.md`
 - Moved all `invent.c` player output to `render_inv_*` in `grendr`
-- Added `make check-layers` to reject `printf` outside `main.c` and `grendr.c` (run explicitly or via `make all-test`; not part of `make test`)
+- Added `make check-layers` to reject `printf` outside `main.c`, `grendr.c`, and the platform file (`platpos.c` / `platdos.c`) (run explicitly or via `make all-test`; not part of `make test`)
 
 ---
 
@@ -258,30 +258,11 @@ diff test.output test.expect
 
 ## #66 / #112 - Improve deterministic test setup
 
-Current tests can rely too heavily on trial-and-error RNG progression.
+Done ✅.
 
-Long-term direction:
-- deterministic fixture setup
-- controlled world bootstrapping
-- deterministic actor placement
-- explicit scenario construction
-- injected gameplay state where appropriate
+`TEST_MODE` builds link [`src/testharn.c`](src/testharn.c). Snapshot `.input` files can use `@fixture <name>` to reach known state without RNG-walking setup commands. Bandit fixtures call `game_reset_fixture_baseline` (shared with `game_init` mutable setup) before encounter-specific steps. Initial fixtures: `bandit_dialogue`, `bandit_handover_pick`, `bandit_wielded_pick` (see [`docs/testing.md`](docs/testing.md)). Bandit handover snapshot tests use fixtures instead of `take stick` + encounter rolls.
 
-Potential capabilities:
-
-```text
-spawn encounters directly
-construct inventory state
-place actors/items deterministically
-create known room layouts
-```
-
-Goal:
-- reduce brittle setup flows
-- reduce AI/agent thrashing
-- preserve deterministic behaviour
-
-This should evolve as structured test harness functionality rather than hidden cheat/debug behaviour.
+Follow-up (not required for #66): more fixtures (combat turns, wanderer co-location, custom world boot), and broader migration of remaining brittle tests.
 
 ---
 

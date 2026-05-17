@@ -8,6 +8,9 @@
 #include "grendr.h"
 #include "platform.h"
 #include "txtres.h"
+#ifdef TEST_MODE
+#include "testharn.h"
+#endif
 
 static void print_prompt(void)
 {
@@ -79,6 +82,9 @@ int main(int argc, char **argv)
     int poll_rc;
     int ran_tick;
     u32 rng_seed;
+#ifdef TEST_MODE
+    int th_rc;
+#endif
     const time_t idle_tick_seconds = (time_t)CFG_MAIN_IDLE_TICK_SECONDS;
 
     rng_seed = default_rng_seed();
@@ -109,7 +115,24 @@ int main(int argc, char **argv)
         if (poll_rc > 0) {
             line[strcspn(line, "\r\n")] = '\0';
             if (line[0] != '\0') {
+#ifdef TEST_MODE
+                th_rc = testharn_apply(&game, line);
+                if (th_rc < 0) {
+                    if (th_rc == -2) {
+                        fprintf(stderr, "test fixture failed\n");
+                    } else {
+                        fprintf(stderr, "unknown test fixture\n");
+                    }
+                    return 1;
+                }
+                if (th_rc == 0) {
+                    game_process_input(&game, line);
+                } else {
+                    plat_seed_rng(game.seed);
+                }
+#else
                 game_process_input(&game, line);
+#endif
                 last_tick_time = plat_time_now();
                 if (game.running) {
                     game_render(&game);
