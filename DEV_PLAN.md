@@ -184,7 +184,7 @@ Compiler discipline and warning cleanliness should remain early priorities throu
 
 ### Ensure OpenWatcom parity
 
-✅ Done - `make prepare-dos` covers the OpenWatcom path; ongoing discipline.
+✅ Done - `make dos-prepare` covers the OpenWatcom path; ongoing discipline.
 
 ### Remove mixed declarations/statements
 
@@ -222,7 +222,7 @@ Done ✅.
 
 - Documented core / render / platform layers in `docs/architecture.md`
 - Moved all `invent.c` player output to `render_inv_*` in `grendr`
-- Added `make check-layers` to reject `printf` outside `main.c`, `grendr.c`, and the platform file (`platpos.c` / `platdos.c`) (run explicitly or via `make all-test`; not part of `make test`)
+- Added `make check-layers` to reject `printf` outside `main.c`, `grendr.c`, and the platform file (`platpos.c` / `platdos.c`) (run explicitly or via `make test-all`; not part of `make test`)
 
 ---
 

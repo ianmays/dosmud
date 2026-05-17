@@ -42,8 +42,8 @@ make test-run
 DOS/Open Watcom path:
 
 ```sh
-make prepare-dos
-make run-dos
+make dos-prepare
+make dos-run
 ```
 
 See the [Makefile](Makefile) for all commands.

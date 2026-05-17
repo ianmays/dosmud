@@ -72,21 +72,21 @@ Primary local validation loop:
 
 Cross-path validation when touching build/runtime behavior:
 
-- `make all-build`
-- `make all-test`
+- `make build-all`
+- `make test-all`
 
 DOS flow entrypoint:
 
-- `make prepare-dos`
-- `make run-dos` - launch the existing prepared DOS tree without rebuilding
-- deterministic DOS mode: `make prepare-dos MODE=TEST_MODE`
+- `make dos-prepare`
+- `make dos-run` - launch the existing prepared DOS tree without rebuilding
+- deterministic DOS mode: `make dos-prepare MODE=TEST_MODE`
 
 ## Environment Model for DOS Flow
 
 - `make` executes from Linux/WSL.
-- `prepare-dos.ps1` executes through Windows PowerShell.
+- `dos-prepare.ps1` executes through Windows PowerShell.
 - DOSBox-X launches on the Windows side.
-- `prepare-dos.local.ps1` stores machine-specific Windows/WSL path configuration.
+- `dos-prepare.local.ps1` stores machine-specific Windows/WSL path configuration.
 - Do not assume the repository lives under `/mnt/c`.
 
 ## Documentation Ownership
@@ -117,7 +117,7 @@ DOS flow entrypoint:
 - `make check-layers` rejects `printf` in core `src/*.c` (allowed only in `main.c`, `grendr.c`, and `platpos.c` or `platdos.c`).
 - `make test` builds with `-Werror -DTEST_MODE` (does not run `check-layers`; CI runs both).
 - `make test-run` pipes scripted input and diffs against snapshot output.
-- `make prepare-dos` and DOS-path validation targets are unavailable in cloud VMs.
+- `make dos-prepare` and DOS-path validation targets are unavailable in cloud VMs.
 - No lint tooling exists beyond GCC warning enforcement.
 - Do not include co-author statements in commits
 

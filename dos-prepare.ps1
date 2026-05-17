@@ -3,10 +3,10 @@ param(
     [switch]$NoBuild
 )
 
-$config = Join-Path $PSScriptRoot "prepare-dos.local.ps1"
+$config = Join-Path $PSScriptRoot "dos-prepare.local.ps1"
 
 if (!(Test-Path $config)) {
-    Write-Error "Missing prepare-dos.local.ps1"
+    Write-Error "Missing dos-prepare.local.ps1"
     exit 1
 }
 
@@ -35,12 +35,12 @@ if (-not $NoBuild) {
     -c "$projectname.exe"
 } else {
   if (!(Test-Path $destination)) {
-    Write-Error "Missing prepared DOS tree at $destination. Run make prepare-dos first."
+    Write-Error "Missing prepared DOS tree at $destination. Run make dos-prepare first."
     exit 1
   }
 
   if (!(Test-Path (Join-Path $destination "$projectname.exe"))) {
-    Write-Error "Missing DOS executable at $destination\$projectname.exe. Run make prepare-dos first."
+    Write-Error "Missing DOS executable at $destination\$projectname.exe. Run make dos-prepare first."
     exit 1
   }
 

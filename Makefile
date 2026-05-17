@@ -75,9 +75,9 @@ clean:
 	rm -f $(BIN)
 
 dos-prepare:
-	powershell.exe -ExecutionPolicy Bypass -File prepare-dos.ps1 $(if $(MODE),-Mode $(MODE))
+	powershell.exe -ExecutionPolicy Bypass -File dos-prepare.ps1 $(if $(MODE),-Mode $(MODE))
 
 dos-run:
-	powershell.exe -ExecutionPolicy Bypass -File prepare-dos.ps1 -NoBuild
+	powershell.exe -ExecutionPolicy Bypass -File dos-prepare.ps1 -NoBuild
 
 .PHONY: build-all build test-all test test-run check-layers clean dos-prepare dos-run

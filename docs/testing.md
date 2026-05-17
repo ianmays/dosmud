@@ -40,30 +40,30 @@ Bandit fixtures call `game_reset_fixture_baseline` first (same mutable fields as
 | `bandit_handover_pick` | Base reset, stick in bag, bandit dialogue open, handover pick prompt (reply 2 already chosen) |
 | `bandit_wielded_pick` | Base reset, stick wielded (`Atk:1`), bandit dialogue open, handover pick prompt |
 
-Add new fixtures in [`src/testharn.c`](../src/testharn.c) and document them here. `testharn` is linked only for `make test` / `prepare-dos MODE=TEST_MODE`, not for `make build`.
+Add new fixtures in [`src/testharn.c`](../src/testharn.c) and document them here. `testharn` is linked only for `make test` / `dos-prepare MODE=TEST_MODE`, not for `make build`.
 
 ## DOS/Open Watcom validation path
 
 Use PowerShell-driven DOS prep from Linux host shell to build and sync the DOS tree:
 
 ```sh
-make prepare-dos
+make dos-prepare
 ```
 
 Start DOS and launch the existing DOS executable without rebuilding or refreshing the tree:
 
 ```sh
-make run-dos
+make dos-run
 ```
 
-`make run-dos` expects a previously prepared DOS tree. Run `make prepare-dos` first if the mirrored DOS files or executable are missing.
+`make dos-run` expects a previously prepared DOS tree. Run `make dos-prepare` first if the mirrored DOS files or executable are missing.
 
 When you add or remove `src\*.c` files, update `Makefile` (`SRC` or `TEST_SRC`) and `build.bat`. For the Open Watcom path, keep every `wcl` and `wlib` line under the COMMAND.COM length limit (about 127 characters): gameplay sources are packed into `gameplay.lib` via several short `wlib` calls; the final `wcl` link lists `main.obj`, `platdos.obj`, `gameplay.lib`, plus the other `.obj` files. `TEST_MODE` compiles `testharn.c` to `tharn.obj` and appends it with a separate `wlib gameplay.lib +tharn.obj` line. Use `goto` labels in `build.bat` for conditionals; parenthesized `if (...)` blocks break under COMMAND.COM.
 
 Deterministic DOS validation:
 
 ```sh
-make prepare-dos MODE=TEST_MODE
+make dos-prepare MODE=TEST_MODE
 ```
 
 Runtime seed (native or DOS build): the startup banner always prints the active seed, for example `dosmud (seed 1234)`. In `TEST_MODE` the default is `CFG_TEST_RAND_SEED` unless overridden on the command line:
@@ -79,8 +79,8 @@ Invalid flags print `usage: dosmud [--seed <unsigned>]` to stderr and exit with 
 When changing build flow/tooling or other high-risk runtime behavior:
 
 ```sh
-make all-build
-make all-test
+make build-all
+make test-all
 ```
 
 These targets intentionally exercise DOS prep/invocation and native GCC flow together.
@@ -88,15 +88,15 @@ These targets intentionally exercise DOS prep/invocation and native GCC flow tog
 ## Environment and path model
 
 - `make` runs from Linux shell.
-- `prepare-dos.ps1` runs via Windows PowerShell.
+- `dos-prepare.ps1` runs via Windows PowerShell.
 - DOS emulator runs on Windows side.
 
-In `prepare-dos.local.ps1`:
+In `dos-prepare.local.ps1`:
 
 - `$source` should be Windows-reachable for Linux-hosted project files.
 - `$mountpoint`, `$destination`, `$dospath` should be Windows-visible emulator paths.
 
-The Open Watcom build (`build.bat`) only needs `src/`, `include/`, and `build.bat`. `prepare-dos.ps1` uses `robocopy /MIR` from `$source` with exclusions (not a whitelist): it skips `.git`, `tests/`, `docs/`, `.github/`, `.cursor/`, `.vscode/`, native build artifacts (`dosmud`, `*.output`, `*.o`, `*.obj`), and the Linux `Makefile`. Other top-level files (for example `README.md`) may still be copied.
+The Open Watcom build (`build.bat`) only needs `src/`, `include/`, and `build.bat`. `dos-prepare.ps1` uses `robocopy /MIR` from `$source` with exclusions (not a whitelist): it skips `.git`, `tests/`, `docs/`, `.github/`, `.cursor/`, `.vscode/`, native build artifacts (`dosmud`, `*.output`, `*.o`, `*.obj`), and the Linux `Makefile`. Other top-level files (for example `README.md`) may still be copied.
 
 ## Build artifacts
 

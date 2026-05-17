@@ -10,7 +10,7 @@ Thanks for contributing to dosmud.
 - Keep gameplay deterministic for identical seed + inputs.
 - Prefer simple, explicit, procedural code over heavy abstractions.
 - Avoid unrelated refactors in the same PR.
-- Keep core gameplay free of `printf` and other terminal I/O; use `render_*` in `grendr` instead (`make check-layers` allows `printf` only in `main.c`, `grendr.c`, and the platform file `platpos.c` or `platdos.c`; `make all-test` runs the guard before the test build). Newline and spacing rules for `txtres` and `grendr` are in [architecture.md](architecture.md#newline-and-spacing).
+- Keep core gameplay free of `printf` and other terminal I/O; use `render_*` in `grendr` instead (`make check-layers` allows `printf` only in `main.c`, `grendr.c`, and the platform file `platpos.c` or `platdos.c`; `make test-all` runs the guard before the test build). Newline and spacing rules for `txtres` and `grendr` are in [architecture.md](architecture.md#newline-and-spacing).
 
 ## Pull Requests Required
 
@@ -40,16 +40,16 @@ make test-run
 If your changes affect build flow, DOS runtime behavior, or orchestration scripts:
 
 ```sh
-make prepare-dos
-make run-dos
-make prepare-dos MODE=TEST_MODE
+make dos-prepare
+make dos-run
+make dos-prepare MODE=TEST_MODE
 ```
 
 Recommended for broader tooling/build validation:
 
 ```sh
-make all-build
-make all-test
+make build-all
+make test-all
 ```
 
 For detailed environment and workflow information, see `testing.md`.
