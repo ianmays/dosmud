@@ -468,7 +468,7 @@ void render_bandit_encounter_open(void)
     printf("  ||    |  (::::)   |        \n");
     printf("  ||    \\__________/        \n");
     printf(" :::: .-----\\  \\-----.     \n");
-    printf("  || /                  |    \n");
+    printf("  || /                |      \n");
     printf("                             \n");
     printf("%s", TXT_BANDIT_OPEN_INTRO);
     printf("                             \n");
