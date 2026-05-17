@@ -262,7 +262,12 @@ Done ✅.
 
 `TEST_MODE` builds link [`src/testharn.c`](src/testharn.c). Snapshot `.input` files can use `@fixture <name>` to reach known state without RNG-walking setup commands. Bandit fixtures call `game_reset_fixture_baseline` (shared with `game_init` mutable setup) before encounter-specific steps. Initial fixtures: `bandit_dialogue`, `bandit_handover_pick`, `bandit_wielded_pick` (see [`docs/testing.md`](docs/testing.md)). Bandit handover snapshot tests use fixtures instead of `take stick` + encounter rolls.
 
-Follow-up (not required for #66): more fixtures (combat turns, wanderer co-location, custom world boot), and broader migration of remaining brittle tests.
+Follow-up:
+
+- **#112** (open) - migrate remaining snapshot tests to fixtures (`equipment`, `area_items`, `craft_wielded`, `map`, `smoke` / `seed_cli`)
+- **#95** (open) - unit tests via [greatest](https://github.com/silentbicycle/greatest); harness/encounter invariants
+- **#113** (open) - wanderer snapshot fixtures
+- **#114** (open) - custom world boot fixture for deterministic snapshots
 
 ---
 
