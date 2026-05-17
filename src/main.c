@@ -125,25 +125,18 @@ int main(int argc, char **argv)
                     }
                     return 1;
                 }
-                if (th_rc > 0) {
-                    last_tick_time = plat_time_now();
-                    if (game.running) {
-                        game_render(&game);
-                    }
-                } else {
+                if (th_rc == 0) {
                     game_process_input(&game, line);
-                    last_tick_time = plat_time_now();
-                    if (game.running) {
-                        game_render(&game);
-                    }
+                } else {
+                    plat_seed_rng(game.seed);
                 }
 #else
                 game_process_input(&game, line);
+#endif
                 last_tick_time = plat_time_now();
                 if (game.running) {
                     game_render(&game);
                 }
-#endif
             }
             if (game.running) {
                 print_prompt();

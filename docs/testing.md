@@ -32,7 +32,7 @@ are handled by `testharn` before normal command parsing. Fixture lines are not e
 
 Prefer fixtures over long setup scripts when a test needs a specific mode, inventory, or encounter. After changing fixture output, regenerate the matching `.expect` with `make test-run` and review the diff.
 
-Bandit fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_init`: mode, room, tick, player stats, bag, combat, wanderer, corpses, ground items, env focus, and map exploration). That leaves the world graph and seed unchanged. Bandit setup then clears camp ground items so the stick lives only in the bag or wield slot, not on the floor.
+Bandit fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_init`: mode, room, tick, player stats, bag, combat, wanderer, corpses, ground items, env focus, and map exploration). That leaves the world graph and `GameState.seed` unchanged. `main.c` then calls `plat_seed_rng(game.seed)` so libc `rand()` matches that seed and follow-up rolls do not depend on earlier commands in the same run. Bandit setup then clears camp ground items so the stick lives only in the bag or wield slot, not on the floor.
 
 | Fixture | State |
 |---------|--------|
