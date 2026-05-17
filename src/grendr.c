@@ -7,6 +7,26 @@
 #include "world.h"
 #include "txtres.h"
 
+/*
+ * Newline tiers: txtres strings end with \n only; grendr owns gaps.
+ * render_gap = scene/paragraph break; render_paragraph = gap + copy.
+ */
+static void render_gap(void)
+{
+    printf("\n");
+}
+
+static void render_copy(const char *text)
+{
+    printf("%s", text);
+}
+
+static void render_paragraph(const char *text)
+{
+    render_gap();
+    render_copy(text);
+}
+
 static void art_room_camp(void)
 {
     printf("       *      *        $   * \n");
@@ -35,7 +55,7 @@ static void art_room_road(void)
 
 static void art_room_pond(void)
 {
-    printf("                             \n");
+    printf(" |  | || |  ||  ||| |    | | \n");
     printf("|_||||||_|||||__|||||||_||_||\n");
     printf("   ^   __|_____||___|_       \n");
     printf("     |/    o       O  \\  ^  \n");
@@ -48,12 +68,12 @@ static void art_room_pond(void)
 
 static void art_room_forest(void)
 {
-    printf("                             \n");
     printf("       &&     &&     &&      \n");
     printf("      &/\\&   &/\\&   &/\\&  \n");
     printf("     &|()|& &|()|& &|()|&    \n");
     printf("      \\||/   \\||/   \\||/  \n");
     printf("_______||_____||_____||______\n");
+    printf("    ^^       ^^^^     ^^^    \n");
     printf("                             \n");
     printf("%s", g_room_art_captions[WORLD_ROOM_FOREST]);
     printf("                             \n");
@@ -74,8 +94,8 @@ static void art_room_stream(void)
 
 static void art_room_ruins(void)
 {
-    printf("                     ####    \n");
-    printf("  ###                        \n");
+    printf(" #####        ########       \n");
+    printf("               #####         \n");
     printf("     |\\              /|     \n");
     printf("     | \\__.--''--.__/ |     \n");
     printf(" ____|_|_|________|_|_|____  \n");
@@ -87,7 +107,7 @@ static void art_room_ruins(void)
 
 static void art_room_cliff(void)
 {
-    printf("                    ##       \n");
+    printf("    #####            ####    \n");
     printf("   ###        /\\            \n");
     printf("        /\\   /  \\   /\\    \n");
     printf("       /__\\_/____\\_/__\\   \n");
@@ -100,7 +120,7 @@ static void art_room_cliff(void)
 
 static void art_room_marsh(void)
 {
-    printf("                             \n");
+    printf("   ########        ######    \n");
     printf("                             \n");
     printf("  ||    |    ||    |    ||   \n");
     printf("  ||  .-|-.  ||  .-|-.  ||   \n");
@@ -126,8 +146,8 @@ static void art_room_grove(void)
 
 static void art_room_bridge(void)
 {
-    printf("                             \n");
     printf("       ||\\          /||     \n");
+    printf("~~~~~~~~~~|        |~~~~~~~~~\n");
     printf("~~~~~~~~~~|        |~~~~~~~~~\n");
     printf("~~~~~~~~~~|        |~~~~~~~~~\n");
     printf("~~~~~~~~~~|        |~~~~~~~~~\n");
@@ -139,7 +159,7 @@ static void art_room_bridge(void)
 
 static void art_room_catacombs(void)
 {
-    printf("                             \n");
+    printf("=============================\n");
     printf("oooo ooooOOOOOooooooooOOOOooo\n");
     printf("ooooooooooooooooOOOo   oooooo\n");
     printf("oo  ooooOOooooooooooooOOOOooo\n");
@@ -191,7 +211,7 @@ static void art_room_tower(void)
 
 static void art_room_orchard(void)
 {
-    printf("                             \n");
+    printf("                  @@         \n");
     printf("    &   &       @.@@.@    &  \n");
     printf("    '  ooo     @@@'@@'@   '  \n");
     printf("        |     @'@.@@'@'@     \n");
@@ -204,8 +224,8 @@ static void art_room_orchard(void)
 
 static void art_room_cave(void)
 {
-    printf("                             \n");
     printf("'''.._----_______---__-_     \n");
+    printf("                        |    \n");
     printf(" ^    ^   .-----.    ^^  '-- \n");
     printf("  {{     |       |      }    \n");
     printf("_________|_______|___________\n");
@@ -243,8 +263,7 @@ static void art_watchman_portrait(void)
 
 static void art_herbalist_portrait(void)
 {
-    printf("                             \n");
-    printf("        _......_             \n");
+    printf("        _;;;;;;_             \n");
     printf("       / _    _ \\           \n");
     printf("      (-( )--( )-)           \n");
     printf("       |    ^   |            \n");
@@ -257,7 +276,6 @@ static void art_herbalist_portrait(void)
 
 static void art_archivist_portrait(void)
 {
-    printf("        _________            \n");
     printf("       /|||||||||\\          \n");
     printf("      ||/ _   _ \\||         \n");
     printf("      ||  0   0  ||          \n");
@@ -271,11 +289,10 @@ static void art_archivist_portrait(void)
 
 static void art_frog_portrait(void)
 {
-    printf("        _________            \n");
+    printf("        ___---___            \n");
     printf("      (|)  . .  (|)          \n");
     printf("       \\_________/          \n");
     printf("      //          \\\\       \n");
-    printf("     ||            ||        \n");
     printf("     ||            ||        \n");
     printf("    /||\\__________/||\\     \n");
     printf("                             \n");
@@ -353,7 +370,7 @@ static void art_for_room(int room_id)
 
 void game_print_location_art(int room_id)
 {
-    printf("\n");
+    render_gap();
     art_for_room(room_id);
 }
 
@@ -369,7 +386,8 @@ void render_room_look(struct GameState *game, int npc_in_room_hint)
     room = &game->world.rooms[game->player.room_id];
     rid = game->player.room_id;
     game_print_location_art(game->player.room_id);
-    printf("\n%s\n", room->name);
+    render_gap();
+    printf("%s\n", room->name);
     printf("%s\n", room->desc);
     printf("%s", TXT_UI_EXITS_LABEL);
     for (dir = 0; dir < DIR_NONE; ++dir) {
@@ -430,6 +448,7 @@ void game_render(const struct GameState *game)
 
     room = &game->world.rooms[game->player.room_id];
     needed = game_xp_to_next_level(game->level);
+    render_gap();
     printf(TXT_HUD_FMT,
         game->tick, room->name, game->player_hp, game->max_hp,
         combat_player_attack_bonus(game),
@@ -443,12 +462,13 @@ void game_print_help(int topic)
 
 void render_bandit_encounter_open(void)
 {
-    printf("                             \n");
+    render_gap();
     printf("  /\\     .-'''''''-.        \n");
     printf("  ||    / (.)..(.)  |        \n");
     printf("  ||    |  (::::)   |        \n");
     printf("  ||    \\__________/        \n");
     printf(" :::: .-----\\  \\-----.     \n");
+    printf("  || /                  |    \n");
     printf("                             \n");
     printf("%s", TXT_BANDIT_OPEN_INTRO);
     printf("                             \n");
@@ -534,49 +554,50 @@ void render_nearby_item_notice(const char *item_name)
 
 void render_animal_noise_line(const char *line)
 {
-    printf("\n%s\n", line);
+    render_gap();
+    printf("%s\n", line);
 }
 
 void render_atmosphere_gust(void)
 {
-    printf("%s", TXT_ATMO_GUST);
+    render_paragraph(TXT_ATMO_GUST);
 }
 
 void render_atmosphere_rustle(void)
 {
-    printf("%s", TXT_ATMO_RUSTLE);
+    render_paragraph(TXT_ATMO_RUSTLE);
 }
 
 void render_atmosphere_berry_drop(void)
 {
-    printf("%s", TXT_ATMO_BERRY_DROP);
+    render_copy(TXT_ATMO_BERRY_DROP);
 }
 
 void render_atmosphere_creak(void)
 {
-    printf("%s", TXT_ATMO_CREAK);
+    render_paragraph(TXT_ATMO_CREAK);
 }
 
 void render_atmosphere_water(void)
 {
-    printf("%s", TXT_ATMO_WATER);
+    render_paragraph(TXT_ATMO_WATER);
 }
 
 void render_atmosphere_reed_drop(void)
 {
-    printf("%s", TXT_ATMO_REED_DROP);
+    render_copy(TXT_ATMO_REED_DROP);
 }
 
 void render_atmosphere_grit(void)
 {
-    printf("%s", TXT_ATMO_GRIT);
+    render_paragraph(TXT_ATMO_GRIT);
 }
 
 void render_wanderer_scene(void)
 {
-    printf("\n");
+    render_gap();
     art_wanderer();
-    printf("%s", TXT_WANDERER_INTRO);
+    render_copy(TXT_WANDERER_INTRO);
     printf("%s", TXT_WANDERER_QUOTE_A);
     printf("%s", TXT_WANDERER_QUOTE_B);
     printf("%s", TXT_WANDERER_OPT1);
@@ -587,14 +608,14 @@ void render_wanderer_scene(void)
 
 void render_wanderer_reply(int choice)
 {
-    printf("%s", txtres_wanderer_reply(choice));
+    render_paragraph(txtres_wanderer_reply(choice));
 }
 
 void render_frog_dialogue_intro(void)
 {
-    printf("\n");
+    render_gap();
     art_frog_portrait();
-    printf("%s", TXT_FROG_INTRO);
+    render_copy(TXT_FROG_INTRO);
     printf("%s", TXT_FROG_QUOTE);
     printf("%s", TXT_FROG_OPT1);
     printf("%s", TXT_FROG_OPT2);
@@ -605,20 +626,20 @@ void render_frog_dialogue_intro(void)
 void render_frog_dialogue_branch(int choice)
 {
     if (choice == 1) {
-        printf("%s", TXT_FROG_REPLY_A1);
-        printf("%s", TXT_FROG_REPLY_A2);
-        printf("%s", TXT_FROG_REPLY_A3);
+        render_paragraph(TXT_FROG_REPLY_A1);
+        render_copy(TXT_FROG_REPLY_A2);
+        render_copy(TXT_FROG_REPLY_A3);
         return;
     }
     if (choice == 2) {
-        printf("%s", TXT_FROG_REPLY_B1);
-        printf("%s", TXT_FROG_REPLY_B2);
-        printf("%s", TXT_FROG_REPLY_B3);
+        render_paragraph(TXT_FROG_REPLY_B1);
+        render_copy(TXT_FROG_REPLY_B2);
+        render_copy(TXT_FROG_REPLY_B3);
         return;
     }
-    printf("%s", TXT_FROG_REPLY_C1);
-    printf("%s", TXT_FROG_REPLY_C2);
-    printf("%s", TXT_FROG_REPLY_C3);
+    render_paragraph(TXT_FROG_REPLY_C1);
+    render_copy(TXT_FROG_REPLY_C2);
+    render_copy(TXT_FROG_REPLY_C3);
 }
 
 void render_msg_bandit_waiting_reply(void)
@@ -708,38 +729,38 @@ void render_msg_traveler_waiting(void)
 
 void render_msg_watchman_talk(void)
 {
-    printf("\n");
+    render_gap();
     art_watchman_portrait();
-    printf("\n");
-    printf("%s", TXT_MSG_WATCHMAN_TALK_LINE1);
-    printf("%s", TXT_MSG_WATCHMAN_TALK_LINE2);
-    printf("%s", TXT_MSG_WATCHMAN_TALK_LINE3);
-    printf("%s", TXT_MSG_WATCHMAN_TALK_LINE4);
-    printf("%s", TXT_REPLY_PROMPT);
+    render_gap();
+    render_copy(TXT_MSG_WATCHMAN_TALK_LINE1);
+    render_copy(TXT_MSG_WATCHMAN_TALK_LINE2);
+    render_copy(TXT_MSG_WATCHMAN_TALK_LINE3);
+    render_copy(TXT_MSG_WATCHMAN_TALK_LINE4);
+    render_copy(TXT_REPLY_PROMPT);
 }
 
 void render_msg_herbalist_talk(void)
 {
-    printf("\n");
+    render_gap();
     art_herbalist_portrait();
-    printf("\n");
-    printf("%s", TXT_MSG_HERBALIST_TALK_LINE1);
-    printf("%s", TXT_MSG_HERBALIST_TALK_LINE2);
-    printf("%s", TXT_MSG_HERBALIST_TALK_LINE3);
-    printf("%s", TXT_MSG_HERBALIST_TALK_LINE4);
-    printf("%s", TXT_REPLY_PROMPT);
+    render_gap();
+    render_copy(TXT_MSG_HERBALIST_TALK_LINE1);
+    render_copy(TXT_MSG_HERBALIST_TALK_LINE2);
+    render_copy(TXT_MSG_HERBALIST_TALK_LINE3);
+    render_copy(TXT_MSG_HERBALIST_TALK_LINE4);
+    render_copy(TXT_REPLY_PROMPT);
 }
 
 void render_msg_archivist_talk(void)
 {
-    printf("\n");
+    render_gap();
     art_archivist_portrait();
-    printf("\n");
-    printf("%s", TXT_MSG_ARCHIVIST_TALK_LINE1);
-    printf("%s", TXT_MSG_ARCHIVIST_TALK_LINE2);
-    printf("%s", TXT_MSG_ARCHIVIST_TALK_LINE3);
-    printf("%s", TXT_MSG_ARCHIVIST_TALK_LINE4);
-    printf("%s", TXT_REPLY_PROMPT);
+    render_gap();
+    render_copy(TXT_MSG_ARCHIVIST_TALK_LINE1);
+    render_copy(TXT_MSG_ARCHIVIST_TALK_LINE2);
+    render_copy(TXT_MSG_ARCHIVIST_TALK_LINE3);
+    render_copy(TXT_MSG_ARCHIVIST_TALK_LINE4);
+    render_copy(TXT_REPLY_PROMPT);
 }
 
 void render_msg_nobody_talk(void)
