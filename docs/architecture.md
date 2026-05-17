@@ -80,7 +80,7 @@ Implementations are split by toolchain (FAT 8.3 basenames):
 
 [`src/main.c`](../src/main.c) orchestrates the main loop and may use `printf` for shell-level prompts and banners. It must not include `conio.h`, `dos.h`, or other platform headers directly.
 
-Run `make check-layers` before opening a PR (or use `make all-test`, which runs it first). That target fails if `printf` appears in any `src/*.c` other than `main.c`, `grendr.c`, `platdos.c`, or `platpos.c`. `make test` compiles only and does not run the guard.
+Run `make check-layers` before opening a PR (or use `make test-all`, which runs it first). That target fails if `printf` appears in any `src/*.c` other than `main.c`, `grendr.c`, `platdos.c`, or `platpos.c`. `make test` compiles only and does not run the guard.
 
 ## High-level flow
 

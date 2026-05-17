@@ -7,19 +7,19 @@ SRC = src/main.c src/platpos.c src/game.c src/gprog.c src/combat.c src/genc.c sr
 TEST_SRC = $(SRC) src/testharn.c
 BIN = dosmud
 
-all-build:
+build-all:
 	$(MAKE) clean
-	$(MAKE) prepare-dos
+	$(MAKE) dos-prepare
 	$(MAKE) build
 
 build:
 	$(CC) $(BASE_CFLAGS) -o $(BIN) $(SRC)
 
 # deterministic
-all-test:
+test-all:
 	$(MAKE) check-layers
 	$(MAKE) clean
-	$(MAKE) prepare-dos MODE=$(TEST_MODE_FLAG)
+	$(MAKE) dos-prepare MODE=$(TEST_MODE_FLAG)
 	$(MAKE) test
 	$(MAKE) test-run
 
@@ -74,10 +74,10 @@ check-layers:
 clean:
 	rm -f $(BIN)
 
-prepare-dos:
-	powershell.exe -ExecutionPolicy Bypass -File prepare-dos.ps1 $(if $(MODE),-Mode $(MODE))
+dos-prepare:
+	powershell.exe -ExecutionPolicy Bypass -File dos-prepare.ps1 $(if $(MODE),-Mode $(MODE))
 
-run-dos:
-	powershell.exe -ExecutionPolicy Bypass -File prepare-dos.ps1 -NoBuild
+dos-run:
+	powershell.exe -ExecutionPolicy Bypass -File dos-prepare.ps1 -NoBuild
 
-.PHONY: all build all-test test test-run check-layers clean prepare-dos run-dos
+.PHONY: build-all build test-all test test-run check-layers clean dos-prepare dos-run

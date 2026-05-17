@@ -1,6 +1,6 @@
 /dosmud
 /dosmud.exe
-prepare-dos.local.ps1
+dos-prepare.local.ps1
 *.output
 *.o
 *.obj
