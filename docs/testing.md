@@ -32,7 +32,7 @@ are handled by `testharn` before normal command parsing. Fixture lines are not e
 
 Prefer fixtures over long setup scripts when a test needs a specific mode, inventory, or encounter. After changing fixture output, regenerate the matching `.expect` with `make test-run` and review the diff.
 
-Bandit fixtures share a base reset first: explore mode, camp, tick 1, starting player stats (HP, level, XP, combat), empty bag, no camp ground sticks, and only camp marked explored on the map, so later fixtures in the same run do not inherit prior damage, inventory, or exploration history.
+Bandit fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_init`: mode, room, tick, player stats, bag, combat, wanderer, corpses, ground items, env focus, and map exploration). That leaves the world graph and seed unchanged. Bandit setup then clears camp ground items so the stick lives only in the bag or wield slot, not on the floor.
 
 | Fixture | State |
 |---------|--------|

@@ -260,7 +260,7 @@ diff test.output test.expect
 
 Done ✅.
 
-`TEST_MODE` builds link [`src/testharn.c`](src/testharn.c). Snapshot `.input` files can use `@fixture <name>` to reach known state without RNG-walking setup commands. Bandit fixtures reset mode, player stats, bag, camp ground items, and explored-map flags before encounter setup. Initial fixtures: `bandit_dialogue`, `bandit_handover_pick`, `bandit_wielded_pick` (see [`docs/testing.md`](docs/testing.md)). Bandit handover snapshot tests use fixtures instead of `take stick` + encounter rolls.
+`TEST_MODE` builds link [`src/testharn.c`](src/testharn.c). Snapshot `.input` files can use `@fixture <name>` to reach known state without RNG-walking setup commands. Bandit fixtures call `game_reset_fixture_baseline` (shared with `game_init` mutable setup) before encounter-specific steps. Initial fixtures: `bandit_dialogue`, `bandit_handover_pick`, `bandit_wielded_pick` (see [`docs/testing.md`](docs/testing.md)). Bandit handover snapshot tests use fixtures instead of `take stick` + encounter rolls.
 
 Follow-up (not required for #66): more fixtures (combat turns, wanderer co-location, custom world boot), and broader migration of remaining brittle tests.
 

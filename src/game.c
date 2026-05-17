@@ -53,15 +53,13 @@ void game_describe_current_room(struct GameState *game)
     do_look(game);
 }
 
-void game_init(struct GameState *game, u32 seed)
+static void reset_mutable_state(struct GameState *game, int room_id, u32 tick)
 {
     int i;
-    world_init(&game->world);
-    game->player.room_id = 0;
-    game->tick = 0;
-    game->seed = seed;
-    game->running = 1;
+
     game_set_mode_explore(game);
+    game->player.room_id = room_id;
+    game->tick = tick;
     game->wanderer_room = WORLD_ROOM_RUINS;
     game->wanderer_need_separation = 0;
     game->env_focus_active = 0;
@@ -85,9 +83,24 @@ void game_init(struct GameState *game, u32 seed)
         game->corpse_loot[i] = ITEM_NONE;
         game->room_explored[i] = 0;
     }
-    game->room_explored[game->player.room_id] = 1;
     seed_world_items(game);
+    game->room_explored[room_id] = 1;
 }
+
+void game_init(struct GameState *game, u32 seed)
+{
+    world_init(&game->world);
+    game->seed = seed;
+    game->running = 1;
+    reset_mutable_state(game, WORLD_ROOM_CAMP, 0);
+}
+
+#ifdef TEST_MODE
+void game_reset_fixture_baseline(struct GameState *game, int room_id, u32 tick)
+{
+    reset_mutable_state(game, room_id, tick);
+}
+#endif
 
 static int apply_room_npc_reply(struct GameState *game, struct Command *cmd)
 {
