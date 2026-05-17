@@ -55,7 +55,7 @@ static void art_room_road(void)
 
 static void art_room_pond(void)
 {
-    printf("                             \n");
+    printf(" |  | || |  ||  ||| |    | | \n");
     printf("|_||||||_|||||__|||||||_||_||\n");
     printf("   ^   __|_____||___|_       \n");
     printf("     |/    o       O  \\  ^  \n");
@@ -68,12 +68,12 @@ static void art_room_pond(void)
 
 static void art_room_forest(void)
 {
-    printf("                             \n");
     printf("       &&     &&     &&      \n");
     printf("      &/\\&   &/\\&   &/\\&  \n");
     printf("     &|()|& &|()|& &|()|&    \n");
     printf("      \\||/   \\||/   \\||/  \n");
     printf("_______||_____||_____||______\n");
+    printf("    ^^       ^^^^     ^^^    \n");
     printf("                             \n");
     printf("%s", g_room_art_captions[WORLD_ROOM_FOREST]);
     printf("                             \n");
@@ -94,8 +94,8 @@ static void art_room_stream(void)
 
 static void art_room_ruins(void)
 {
-    printf("                     ####    \n");
-    printf("  ###                        \n");
+    printf(" #####        ########       \n");
+    printf("               #####         \n");
     printf("     |\\              /|     \n");
     printf("     | \\__.--''--.__/ |     \n");
     printf(" ____|_|_|________|_|_|____  \n");
@@ -107,7 +107,7 @@ static void art_room_ruins(void)
 
 static void art_room_cliff(void)
 {
-    printf("                    ##       \n");
+    printf("    #####            ####    \n");
     printf("   ###        /\\            \n");
     printf("        /\\   /  \\   /\\    \n");
     printf("       /__\\_/____\\_/__\\   \n");
@@ -120,7 +120,7 @@ static void art_room_cliff(void)
 
 static void art_room_marsh(void)
 {
-    printf("                             \n");
+    printf("   ########        ######    \n");
     printf("                             \n");
     printf("  ||    |    ||    |    ||   \n");
     printf("  ||  .-|-.  ||  .-|-.  ||   \n");
@@ -146,8 +146,8 @@ static void art_room_grove(void)
 
 static void art_room_bridge(void)
 {
-    printf("                             \n");
     printf("       ||\\          /||     \n");
+    printf("~~~~~~~~~~|        |~~~~~~~~~\n");
     printf("~~~~~~~~~~|        |~~~~~~~~~\n");
     printf("~~~~~~~~~~|        |~~~~~~~~~\n");
     printf("~~~~~~~~~~|        |~~~~~~~~~\n");
@@ -159,7 +159,7 @@ static void art_room_bridge(void)
 
 static void art_room_catacombs(void)
 {
-    printf("                             \n");
+    printf("=============================\n");
     printf("oooo ooooOOOOOooooooooOOOOooo\n");
     printf("ooooooooooooooooOOOo   oooooo\n");
     printf("oo  ooooOOooooooooooooOOOOooo\n");
@@ -211,7 +211,7 @@ static void art_room_tower(void)
 
 static void art_room_orchard(void)
 {
-    printf("                             \n");
+    printf("                  @@         \n");
     printf("    &   &       @.@@.@    &  \n");
     printf("    '  ooo     @@@'@@'@   '  \n");
     printf("        |     @'@.@@'@'@     \n");
@@ -224,8 +224,8 @@ static void art_room_orchard(void)
 
 static void art_room_cave(void)
 {
-    printf("                             \n");
     printf("'''.._----_______---__-_     \n");
+    printf("                        |    \n");
     printf(" ^    ^   .-----.    ^^  '-- \n");
     printf("  {{     |       |      }    \n");
     printf("_________|_______|___________\n");
@@ -263,8 +263,7 @@ static void art_watchman_portrait(void)
 
 static void art_herbalist_portrait(void)
 {
-    printf("                             \n");
-    printf("        _......_             \n");
+    printf("        _;;;;;;_             \n");
     printf("       / _    _ \\           \n");
     printf("      (-( )--( )-)           \n");
     printf("       |    ^   |            \n");
@@ -277,7 +276,6 @@ static void art_herbalist_portrait(void)
 
 static void art_archivist_portrait(void)
 {
-    printf("        _________            \n");
     printf("       /|||||||||\\          \n");
     printf("      ||/ _   _ \\||         \n");
     printf("      ||  0   0  ||          \n");
@@ -291,11 +289,10 @@ static void art_archivist_portrait(void)
 
 static void art_frog_portrait(void)
 {
-    printf("        _________            \n");
+    printf("        ___---___            \n");
     printf("      (|)  . .  (|)          \n");
     printf("       \\_________/          \n");
     printf("      //          \\\\       \n");
-    printf("     ||            ||        \n");
     printf("     ||            ||        \n");
     printf("    /||\\__________/||\\     \n");
     printf("                             \n");
