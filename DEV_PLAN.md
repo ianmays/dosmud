@@ -262,28 +262,35 @@ Done ✅.
 
 `TEST_MODE` builds link [`src/testharn.c`](src/testharn.c). Snapshot `.input` files can use `@fixture <name>` to reach known state without RNG-walking setup commands. Bandit fixtures call `game_reset_fixture_baseline` (shared with `game_init` mutable setup) before encounter-specific steps. Initial fixtures: `bandit_dialogue`, `bandit_handover_pick`, `bandit_wielded_pick` (see [`docs/testing.md`](docs/testing.md)). Bandit handover snapshot tests use fixtures instead of `take stick` + encounter rolls.
 
-Follow-up:
+Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 
 - **#112** (open) - migrate remaining snapshot tests to fixtures (`equipment`, `area_items`, `craft_wielded`, `map`, `smoke` / `seed_cli`)
-- **#95** (open) - unit tests via [greatest](https://github.com/silentbicycle/greatest); harness/encounter invariants
+- **#115** (open) - Phase A: new snapshot tests for gameplay gaps (after #112)
+- **#95** (open) - Phase B: unit tests via [greatest](https://github.com/silentbicycle/greatest); high branch coverage on core modules (~90%+)
+- **#116** (open) - Phase C: stress/soak (optional)
 - **#113** (open) - wanderer snapshot fixtures
 - **#114** (open) - custom world boot fixture for deterministic snapshots
 
 ---
 
-## #40 - Expand deterministic regression coverage
+## #40 - Gameplay test coverage (umbrella epic)
 
-Add:
-- gameplay edge cases
-- combat coverage
-- inventory coverage
-- world simulation coverage
+**[#40](https://github.com/ianmays/dosmud/issues/40)** tracks overall coverage; implementation is split across child issues (no single mega-PR).
 
-Stress-test examples:
-- 10,000 tick simulations
-- repeated combat loops
-- inventory edge cases
-- world generation loops
+| Issue | Role |
+|-------|------|
+| [#112](https://github.com/ianmays/dosmud/issues/112) | Prerequisite: migrate 5 brittle snapshots to fixtures |
+| [#115](https://github.com/ianmays/dosmud/issues/115) | Phase A: new snapshot tests (combat, NPC, loot, eat, inspect, wait, etc.) |
+| [#95](https://github.com/ianmays/dosmud/issues/95) | Phase B: greatest unit tests; **~90%+ branch coverage** on core modules |
+| [#116](https://github.com/ianmays/dosmud/issues/116) | Phase C: stress/soak (10k ticks, combat loops; optional) |
+| [#113](https://github.com/ianmays/dosmud/issues/113) | Wanderer snapshot fixtures |
+| [#114](https://github.com/ianmays/dosmud/issues/114) | Custom world boot fixture |
+
+**Sequencing:** #112 -> #115 (and #113/#114 as needed); #95 in parallel after #112; #116 when prioritized.
+
+**Snapshot gaps (Phase A):** combat defend/salve/victory/loot, room NPC `talk`/`reply`, eat/use, inspect, wait.
+
+**Unit scope (Phase B):** `command`, `invent`, `combat`, `game`, `genc`, `wanderer`, `dialogue`, `gatmos`, `world` (fixed graph), `gprog`, `items`, `testharn`. Out of scope: `grendr`, `txtres`, `main`, platform glue.
 
 ---
 
