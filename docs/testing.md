@@ -32,15 +32,21 @@ are handled by `testharn` before normal command parsing. Fixture lines are not e
 
 Prefer fixtures over long setup scripts when a test needs a specific mode, inventory, or encounter. After changing fixture output, regenerate the matching `.expect` with `make test-run` and review the diff.
 
-Bandit fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_init`: mode, room, tick, player stats, bag, combat, wanderer, corpses, ground items, env focus, and map exploration). That leaves the world graph and `GameState.seed` unchanged. `main.c` then calls `plat_seed_rng(game.seed)` so libc `rand()` matches that seed and follow-up rolls do not depend on earlier commands in the same run. Bandit setup then clears camp ground items so the stick lives only in the bag or wield slot, not on the floor.
+Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_init`: mode, room, tick, player stats, bag, combat, wanderer, corpses, ground items, env focus, and map exploration). That leaves the world graph and `GameState.seed` unchanged. `main.c` then calls `plat_seed_rng(game.seed)` so libc `rand()` matches that seed and follow-up rolls do not depend on earlier commands in the same run.
+
+**Bandit / combat** (camp baseline; bandit setups clear camp ground items so the stick is only in bag or wield slot):
 
 | Fixture | State |
 |---------|--------|
 | `bandit_dialogue` | Base reset, stick in bag, bandit dialogue open |
 | `bandit_handover_pick` | Base reset, stick in bag, bandit dialogue open, handover pick prompt (reply 2 already chosen) |
 | `bandit_wielded_pick` | Base reset, stick wielded (`Atk:1`), bandit dialogue open, handover pick prompt |
-| `bandit_combat_turn1` | Base reset, stick wielded, combat mode, player HP 20, bandit HP 8, combat start line shown |
-| `bandit_combat_turn1_done` | Mid-combat after one attack round (16/3 HP); fixed hit lines, no `combat_resolve_reply` RNG. Chain after `bandit_combat_turn1` |
+| `bandit_combat_turn1` | Base reset, stick wielded, combat mode, player HP 20, bandit HP at `CFG_COMBAT_ENEMY_HP_BASE`; use reply `1` next to run `combat_resolve_reply` |
+
+**Exploration / world** (room and map state without bandit dialogue):
+
+| Fixture | State |
+|---------|--------|
 | `at_camp` | Camp, tick 0, explore, camp explored on map |
 | `at_road` | Road, tick 1, explore, camp and road explored on map |
 | `at_marsh_reed` | Marsh, tick 2, stick in bag, reed on ground, camp and marsh explored |

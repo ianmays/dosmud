@@ -53,27 +53,19 @@ static void fixture_bandit_wielded_pick(struct GameState *game)
     render_bandit_handover_pick_prompt();
 }
 
+/*
+ * Combat start without combat_start() RNG. enemy_hp is CFG_COMBAT_ENEMY_HP_BASE;
+ * follow with reply 1 so equipment exercises combat_resolve_reply under seed 1234.
+ */
 static void fixture_bandit_combat_turn1(struct GameState *game)
 {
     fixture_bandit_base(game);
     game->weapon_equipped = ITEM_STICK;
     game_set_mode_combat(game);
     game->player_hp = CFG_START_MAX_HP;
-    game->combat.enemy_hp = 8;
+    game->combat.enemy_hp = CFG_COMBAT_ENEMY_HP_BASE;
     game->combat.defending = 0;
     render_combat_start(game->player_hp, game->combat.enemy_hp);
-}
-
-/* After one attack round; use immediately after bandit_combat_turn1 (no combat reply). */
-static void fixture_bandit_combat_turn1_done(struct GameState *game)
-{
-    game->player_hp = 16;
-    game->combat.enemy_hp = 3;
-    game->combat.defending = 0;
-    render_combat_player_hit(5);
-    render_combat_enemy_strike(4);
-    render_combat_status_line(game->player_hp, game->combat.enemy_hp);
-    render_combat_menu();
 }
 
 static void fixture_at_camp(struct GameState *game)
@@ -157,10 +149,6 @@ int testharn_apply(struct GameState *game, const char *line)
     }
     if (fixture_name_is("bandit_combat_turn1", name)) {
         fixture_bandit_combat_turn1(game);
-        return 1;
-    }
-    if (fixture_name_is("bandit_combat_turn1_done", name)) {
-        fixture_bandit_combat_turn1_done(game);
         return 1;
     }
     if (fixture_name_is("at_camp", name)) {

@@ -5,5 +5,5 @@ unwield
 bag
 wield stick
 @fixture bandit_combat_turn1
-@fixture bandit_combat_turn1_done
+1
 quit
