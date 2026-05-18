@@ -60,7 +60,7 @@ Snapshots use three determinism levels:
 
 1. **Teleport state** - fixtures set `GameState` directly (`at_marsh_reed`, `at_camp`, `at_road`). The test does not walk RNG-heavy setup (`take stick`, intimidate, bandit spawn on `north`). `tests/map.*` checks map **render** with explored flags set by the fixture, not movement marking `room_explored`. Movement-driven map coverage is tracked on [#115](https://github.com/ianmays/dosmud/issues/115).
 
-2. **Inject rolls** - `game_roll_inject_begin` supplies a fixed sequence for `game_roll_spread` / `game_roll_percent` in [`combat.c`](../src/combat.c). `bandit_combat_turn1_resolve` runs real `combat_resolve_reply` without a player `1`. Values for `equipment` are `CFG_TEST_EQUIPMENT_ROLL_*` in [`config.h`](../include/config.h). Do not bypass combat with render-only hit lines. If combat tuning changes, update those constants and `.expect`.
+2. **Inject rolls** (`TEST_MODE` only) - `game_roll_inject_begin` and queue state compile only in test builds; release [`game.c`](../src/game.c) keeps `game_roll_spread` / `game_roll_percent` as thin `rand()` wrappers for combat. The fixture supplies a fixed sequence so `bandit_combat_turn1_resolve` can run real `combat_resolve_reply` without a player `1`. Values for `equipment` are `CFG_TEST_EQUIPMENT_ROLL_*` in [`config.h`](../include/config.h). Do not bypass combat with render-only hit lines. If combat tuning changes, update those constants and `.expect`.
 
 3. **Libc RNG** - default `rand()` after `plat_seed_rng(game.seed)` for everything else.
 
