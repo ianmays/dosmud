@@ -80,7 +80,7 @@ Implementations are split by toolchain (FAT 8.3 basenames):
 
 [`src/main.c`](../src/main.c) orchestrates the main loop and may use `printf` for shell-level prompts and banners. It must not include `conio.h`, `dos.h`, or other platform headers directly.
 
-Run `make check-layers` before opening a PR (or use `make test-all`, which runs it first). That target fails if `printf` appears in any `src/*.c` other than `main.c`, `grendr.c`, `platdos.c`, or `platpos.c`. `make test` compiles only and does not run the guard.
+Run `make check-layers` before opening a PR (or use `make all-test`, which runs it first). That target fails if `printf` appears in any `src/*.c` other than `main.c`, `grendr.c`, `platdos.c`, or `platpos.c`. `make test` compiles only and does not run the guard.
 
 ## High-level flow
 
@@ -117,7 +117,7 @@ Conventions:
 
 ### Test harness (`testharn`, `TEST_MODE` only)
 
-[`src/testharn.c`](../src/testharn.c) lives at the `main` edge (not core simulation). It applies `@fixture` lines from snapshot `.input` files by calling `game_reset_fixture_baseline` plus existing inventory, encounter, and `render_*` APIs (same paths as normal play). After a successful fixture, `main.c` calls `plat_seed_rng(game.seed)` so libc RNG matches the stored seed. Bandit fixtures call `game_reset_fixture_baseline` (all mutable `GameState` fields that `game_init` sets, via shared `reset_mutable_state` in `game.c`) before encounter-specific inventory and prompts, so snapshots stay independent of earlier commands. Release builds (`make build`) do not link it. See [testing](testing.md#test-fixtures-test_mode-only).
+[`src/testharn.c`](../src/testharn.c) lives at the `main` edge (not core simulation). It applies `@fixture` lines from snapshot `.input` files by calling `game_reset_fixture_baseline` plus existing inventory, encounter, and `render_*` APIs (same paths as normal play). After a successful fixture, `main.c` calls `plat_seed_rng(game.seed)` so libc RNG matches the stored seed. Fixtures reset mutable `GameState` (all fields `game_init` sets, via shared `reset_mutable_state` in `game.c`) before room- or encounter-specific setup: bandit dialogue/combat entry, or exploration placement (`at_camp`, `at_road`, `at_marsh_reed`), so snapshots stay independent of earlier commands. Release builds (`make build`) do not link it. See [testing](testing.md#test-fixtures-test_mode-only).
 
 ## Base types (`base.h`)
 
