@@ -260,7 +260,7 @@ diff test.output test.expect
 
 Done ✅.
 
-`TEST_MODE` builds link [`src/testharn.c`](src/testharn.c). Snapshot `.input` files can use `@fixture <name>` to reach known state without RNG-walking setup commands. Bandit fixtures call `game_reset_fixture_baseline` (shared with `game_init` mutable setup) before encounter-specific steps. Initial fixtures: `bandit_dialogue`, `bandit_handover_pick`, `bandit_wielded_pick` (see [`docs/testing.md`](docs/testing.md)). Bandit handover snapshot tests use fixtures instead of `take stick` + encounter rolls.
+`TEST_MODE` builds link [`src/testharn.c`](src/testharn.c). Snapshot `.input` files can use `@fixture <name>` to reach known state without RNG-walking setup commands. Fixtures call `game_reset_fixture_baseline` (shared with `game_init` mutable setup) before encounter- or room-specific steps. Current set: `bandit_dialogue`, `bandit_handover_pick`, `bandit_wielded_pick`, `bandit_combat_turn1`, `at_camp`, `at_road`, `at_marsh_reed` (see [`docs/testing.md`](docs/testing.md)). #66 added the harness and bandit handover fixtures; #112 migrated the remaining brittle snapshots off libc RNG walks.
 
 Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 
