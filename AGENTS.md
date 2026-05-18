@@ -6,12 +6,14 @@ Guidance for AI/code agents working in this repository.
 
 - ALWAYS check if a corresponding GitHub Issue exists before starting work (see: dosmud GitHub project)
 - NEVER change tickets that have already been Closed
-- ALWAYS manage issue status in GitHub (NEVER skip straight to **Review** - see 'Github project `status` column (dosmud project)' below)
-- ALWAYS move the corresponding Issue to **In progress** in the GitHub project BEFORE starting ANY work after the planning phase 
-- ALWAYS ensure all relevant Issues are linked to PRs (Link Issue to PR in Development area OR add 'Closes: #ID' to PR description)
 - If no Issue exists, ALWAYS create one and label it appropriately (`gameplay`, `non-functional`, `tooling`, `documentation` etc)
 - ALWAYS add the `agent` label to any issue you create
 - ALWAYS add Issues to the dosmud Github project
+- ALWAYS manage issue status in GitHub (NEVER skip straight to **Review** - see 'Github project `status` column (dosmud project)' below)
+- ALWAYS move the corresponding Isuee to **Planning** in the Github project BEFORE starting any planning activities
+- ALWAYS add any agreed implementation plan as a comment on the Issue BEFORE moving to **In progress** 
+- ALWAYS move the corresponding Issue to **In progress** in the GitHub project BEFORE starting ANY work after the planning phase 
+- ALWAYS ensure all relevant Issues are linked to PRs (Link Issue to PR in Development area OR add 'Closes: #ID' to PR description)
 - NEVER, ever, use em dash, we only use '-'
 - ALWAYS create a branch before making changes
 - ALWAYS raise draft PRs
@@ -31,8 +33,9 @@ Guidance for AI/code agents working in this repository.
 
 ### GitHub project `Status` column (dosmud project)
 
-Keep each issue’s card aligned with real progress. Do not skip **In progress** on the way to **Review**:
+Keep each issue’s card aligned with real progress. Do not skip**Planning** or **In progress** on the way to **Review**:
 
+- **Planning** - set as soon as you start making a plan for the Issue
 - **In progress** - set as soon as work on the issue begins (e.g. branch created or first commit), and keep it there until the linked PR is opened.
 - **Review** - set when you open the draft PR that links the issue (first time the work is on the board as a PR).
 - **Done** - set only **after** that PR has merged (and close the issue when the work is finished).

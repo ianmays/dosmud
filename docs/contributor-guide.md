@@ -24,7 +24,7 @@ Recommended workflow:
 - keep commits small and reviewable
 - update documentation when behavior or workflows change
 
-The repo’s GitHub project uses a **Status** field on issues: **In progress** while you implement (before the PR exists), **Review** once the draft PR is up, **Done** after merge. Details for agents: [AGENTS.md](../AGENTS.md).
+The repo’s GitHub project uses a **Status** field on issues: **Planning** when forming an implementation plan (add decided plan as a comment), **In progress** while you implement (before the PR exists), **Review** once the draft PR is up, **Done** after merge. Details for agents: [AGENTS.md](../AGENTS.md).
 
 ## Local Validation Before Opening a PR
 
