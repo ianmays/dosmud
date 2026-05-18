@@ -17,6 +17,12 @@
 /* Uniform roll range for d100-style probability checks (0 .. RANGE-1). */
 #define CFG_ROLL_PERCENT_RANGE 100
 
+/* Injected roll queue for deterministic combat snapshots (see game_roll_inject_*). */
+#define CFG_ROLL_INJECT_MAX 8
+/* equipment bandit_combat_turn1_resolve: player hit spread, enemy damage spread */
+#define CFG_TEST_EQUIPMENT_ROLL_PLAYER_HIT 2
+#define CFG_TEST_EQUIPMENT_ROLL_ENEMY_DMG 3
+
 /* --- Gameplay tuning --- */
 
 /* Progression */

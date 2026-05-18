@@ -62,6 +62,10 @@ struct GameState {
     int wanderer_active;
     u32 wanderer_return_tick;
     u8 room_explored[CFG_ROOM_MAX];
+    int roll_inject_active;
+    int roll_queue[CFG_ROLL_INJECT_MAX];
+    int roll_queue_len;
+    int roll_queue_i;
 };
 
 void game_init(struct GameState *game, u32 seed);
@@ -75,6 +79,12 @@ void game_set_mode_combat(struct GameState *game);
 
 /* True while dialogue or combat blocks ambient encounters. */
 int game_is_busy_dialogue(struct GameState *game);
+
+void game_roll_inject_begin(struct GameState *game, const int *values, int count);
+void game_roll_inject_clear(struct GameState *game);
+int game_roll_spread(struct GameState *game, int spread);
+int game_roll_percent(struct GameState *game);
+int game_roll_inject_fully_consumed(const struct GameState *game);
 
 #ifdef TEST_MODE
 /*

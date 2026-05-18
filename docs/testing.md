@@ -41,7 +41,8 @@ Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_
 | `bandit_dialogue` | Base reset, stick in bag, bandit dialogue open |
 | `bandit_handover_pick` | Base reset, stick in bag, bandit dialogue open, handover pick prompt (reply 2 already chosen) |
 | `bandit_wielded_pick` | Base reset, stick wielded (`Atk:1`), bandit dialogue open, handover pick prompt |
-| `bandit_combat_turn1` | Base reset, stick wielded, combat mode, player HP 20, bandit HP at `CFG_COMBAT_ENEMY_HP_BASE`; use reply `1` next to run `combat_resolve_reply` |
+| `bandit_combat_turn1` | Base reset, stick wielded, combat mode, player HP 20, bandit HP at `CFG_COMBAT_ENEMY_HP_BASE` (combat start only) |
+| `bandit_combat_turn1_resolve` | Same as `bandit_combat_turn1`, then injected roll queue + `combat_resolve_reply(1)` for `equipment` (see trade-offs below) |
 
 **Exploration / world** (room and map state without bandit dialogue):
 
@@ -52,6 +53,16 @@ Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_
 | `at_marsh_reed` | Marsh, tick 2, stick in bag, reed on ground, camp and marsh explored |
 
 For marsh item/craft snapshots, prefer `at_marsh_reed` over walking camp intimidate plus `south` (avoids tick RNG on travel).
+
+### Fixture design trade-offs
+
+Snapshots use three determinism levels:
+
+1. **Teleport state** - fixtures set `GameState` directly (`at_marsh_reed`, `at_camp`, `at_road`). The test does not walk RNG-heavy setup (`take stick`, intimidate, bandit spawn on `north`). `tests/map.*` checks map **render** with explored flags set by the fixture, not movement marking `room_explored`. Movement-driven map coverage is tracked on [#115](https://github.com/ianmays/dosmud/issues/115).
+
+2. **Inject rolls** - `game_roll_inject_begin` supplies a fixed sequence for `game_roll_spread` / `game_roll_percent` in [`combat.c`](../src/combat.c). `bandit_combat_turn1_resolve` runs real `combat_resolve_reply` without a player `1`. Values for `equipment` are `CFG_TEST_EQUIPMENT_ROLL_*` in [`config.h`](../include/config.h). Do not bypass combat with render-only hit lines. If combat tuning changes, update those constants and `.expect`.
+
+3. **Libc RNG** - default `rand()` after `plat_seed_rng(game.seed)` for everything else.
 
 Add new fixtures in [`src/testharn.c`](../src/testharn.c) and document them here. `testharn` is linked only for `make test` / `dos-prepare MODE=TEST_MODE`, not for `make build`.
 
