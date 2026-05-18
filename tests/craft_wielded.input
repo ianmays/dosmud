@@ -1,7 +1,5 @@
-take stick
-3
+@fixture at_marsh_reed
 wield stick
-south
 take reed
 craft torch
 bag

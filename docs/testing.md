@@ -32,13 +32,37 @@ are handled by `testharn` before normal command parsing. Fixture lines are not e
 
 Prefer fixtures over long setup scripts when a test needs a specific mode, inventory, or encounter. After changing fixture output, regenerate the matching `.expect` with `make test-run` and review the diff.
 
-Bandit fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_init`: mode, room, tick, player stats, bag, combat, wanderer, corpses, ground items, env focus, and map exploration). That leaves the world graph and `GameState.seed` unchanged. `main.c` then calls `plat_seed_rng(game.seed)` so libc `rand()` matches that seed and follow-up rolls do not depend on earlier commands in the same run. Bandit setup then clears camp ground items so the stick lives only in the bag or wield slot, not on the floor.
+Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_init`: mode, room, tick, player stats, bag, combat, wanderer, corpses, ground items, env focus, and map exploration). That leaves the world graph and `GameState.seed` unchanged. `main.c` then calls `plat_seed_rng(game.seed)` so libc `rand()` matches that seed and follow-up rolls do not depend on earlier commands in the same run.
+
+**Bandit / combat** (camp baseline; bandit setups clear camp ground items so the stick is only in bag or wield slot):
 
 | Fixture | State |
 |---------|--------|
 | `bandit_dialogue` | Base reset, stick in bag, bandit dialogue open |
 | `bandit_handover_pick` | Base reset, stick in bag, bandit dialogue open, handover pick prompt (reply 2 already chosen) |
 | `bandit_wielded_pick` | Base reset, stick wielded (`Atk:1`), bandit dialogue open, handover pick prompt |
+| `bandit_combat_turn1` | Base reset, stick wielded, combat mode, player HP 20, bandit HP at `CFG_COMBAT_ENEMY_HP_BASE` (combat start only) |
+| `bandit_combat_turn1_resolve` | Same as `bandit_combat_turn1`, then injected roll queue + `combat_resolve_reply(1)` for `equipment` (see trade-offs below) |
+
+**Exploration / world** (room and map state without bandit dialogue):
+
+| Fixture | State |
+|---------|--------|
+| `at_camp` | Camp, tick 0, explore, camp explored on map |
+| `at_road` | Road, tick 1, explore, camp and road explored on map |
+| `at_marsh_reed` | Marsh, tick 2, stick in bag, reed on ground, camp and marsh explored |
+
+For marsh item/craft snapshots, prefer `at_marsh_reed` over walking camp intimidate plus `south` (avoids tick RNG on travel).
+
+### Fixture design trade-offs
+
+Snapshots use three determinism levels:
+
+1. **Teleport state** - fixtures set `GameState` directly (`at_marsh_reed`, `at_camp`, `at_road`). The test does not walk RNG-heavy setup (`take stick`, intimidate, bandit spawn on `north`). `tests/map.*` checks map **render** with explored flags set by the fixture, not movement marking `room_explored`. Movement-driven map coverage is tracked on [#115](https://github.com/ianmays/dosmud/issues/115).
+
+2. **Inject rolls** (`TEST_MODE` only) - `game_roll_inject_begin` and queue state compile only in test builds; release [`game.c`](../src/game.c) keeps `game_roll_spread` / `game_roll_percent` as thin `rand()` wrappers for combat. The fixture supplies a fixed sequence so `bandit_combat_turn1_resolve` can run real `combat_resolve_reply` without a player `1`. Values for `equipment` are `CFG_TEST_EQUIPMENT_ROLL_*` in [`config.h`](../include/config.h). Do not bypass combat with render-only hit lines. If combat tuning changes, update those constants and `.expect`.
+
+3. **Libc RNG** - default `rand()` after `plat_seed_rng(game.seed)` for everything else.
 
 Add new fixtures in [`src/testharn.c`](../src/testharn.c) and document them here. `testharn` is linked only for `make test` / `dos-prepare MODE=TEST_MODE`, not for `make build`.
 

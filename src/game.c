@@ -78,6 +78,9 @@ static void reset_mutable_state(struct GameState *game, int room_id, u32 tick)
     game->combat.defending = 0;
     game->wanderer_active = 1;
     game->wanderer_return_tick = 0;
+#ifdef TEST_MODE
+    game_roll_inject_clear(game);
+#endif
     for (i = 0; i < CFG_ROOM_MAX; ++i) {
         game->corpse_present[i] = 0;
         game->corpse_loot[i] = ITEM_NONE;
@@ -101,6 +104,78 @@ void game_reset_fixture_baseline(struct GameState *game, int room_id, u32 tick)
     reset_mutable_state(game, room_id, tick);
 }
 #endif
+
+#ifdef TEST_MODE
+static int game_roll_draw(struct GameState *game)
+{
+    if (game->roll_inject_active) {
+        if (game->roll_queue_i >= game->roll_queue_len) {
+            /* Past end: count the draw so fully_consumed fails (over-consumption). */
+            game->roll_queue_i++;
+            return 0;
+        }
+        return game->roll_queue[game->roll_queue_i++];
+    }
+    return rand();
+}
+
+void game_roll_inject_begin(struct GameState *game, const int *values, int count)
+{
+    int i;
+
+    game_roll_inject_clear(game);
+    if (values == 0 || count <= 0) {
+        return;
+    }
+    if (count > CFG_ROLL_INJECT_MAX) {
+        count = CFG_ROLL_INJECT_MAX;
+    }
+    for (i = 0; i < count; ++i) {
+        game->roll_queue[i] = values[i];
+    }
+    game->roll_queue_len = count;
+    game->roll_inject_active = 1;
+}
+
+void game_roll_inject_clear(struct GameState *game)
+{
+    game->roll_inject_active = 0;
+    game->roll_queue_len = 0;
+    game->roll_queue_i = 0;
+}
+
+int game_roll_inject_fully_consumed(const struct GameState *game)
+{
+    if (!game->roll_inject_active) {
+        return 1;
+    }
+    return game->roll_queue_i == game->roll_queue_len;
+}
+#endif /* TEST_MODE */
+
+int game_roll_spread(struct GameState *game, int spread)
+{
+    int roll;
+
+    if (spread <= 0) {
+        return 0;
+    }
+#ifdef TEST_MODE
+    roll = game_roll_draw(game);
+#else
+    (void)game;
+    roll = rand();
+#endif
+    if (roll < 0) {
+        roll = -roll;
+    }
+    return roll % spread;
+}
+
+int game_roll_percent(struct GameState *game)
+{
+    return game_roll_spread(game, CFG_ROLL_PERCENT_RANGE);
+}
 
 static int apply_room_npc_reply(struct GameState *game, struct Command *cmd)
 {

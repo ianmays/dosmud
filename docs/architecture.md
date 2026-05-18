@@ -114,10 +114,11 @@ Conventions:
 - separate gameplay tuning from main-loop/test-harness settings
 - distinguish tuning for NPC corpse loot (`CFG_COMBAT_CORPSE_LOOT_*`, portable items) from ambient room finds (`CFG_ROOM_SPAWN_*`, terrain-driven junk like stone)
 - `TEST_MODE` defaults libc RNG to `CFG_TEST_RAND_SEED` for deterministic snapshot output; override with `dosmud --seed <unsigned>`
+- roll-inject limits and equipment snapshot roll constants (`CFG_ROLL_INJECT_*`, `CFG_TEST_EQUIPMENT_ROLL_*`) are defined only under `#ifdef TEST_MODE` in `config.h`
 
 ### Test harness (`testharn`, `TEST_MODE` only)
 
-[`src/testharn.c`](../src/testharn.c) lives at the `main` edge (not core simulation). It applies `@fixture` lines from snapshot `.input` files by calling `game_reset_fixture_baseline` plus existing inventory, encounter, and `render_*` APIs (same paths as normal play). After a successful fixture, `main.c` calls `plat_seed_rng(game.seed)` so libc RNG matches the stored seed. Bandit fixtures call `game_reset_fixture_baseline` (all mutable `GameState` fields that `game_init` sets, via shared `reset_mutable_state` in `game.c`) before encounter-specific inventory and prompts, so snapshots stay independent of earlier commands. Release builds (`make build`) do not link it. See [testing](testing.md#test-fixtures-test_mode-only).
+[`src/testharn.c`](../src/testharn.c) lives at the `main` edge (not core simulation). It applies `@fixture` lines from snapshot `.input` files by calling `game_reset_fixture_baseline` plus existing inventory, encounter, and `render_*` APIs (same paths as normal play). After a successful fixture, `main.c` calls `plat_seed_rng(game.seed)` so libc RNG matches the stored seed. Fixtures reset mutable `GameState` (all fields `game_init` sets, via shared `reset_mutable_state` in `game.c`) before room- or encounter-specific setup: bandit dialogue/combat entry, or exploration placement (`at_camp`, `at_road`, `at_marsh_reed`), so snapshots stay independent of earlier commands. The `bandit_combat_turn1_resolve` fixture also calls `game_roll_inject_begin` and `combat_resolve_reply` so the `equipment` snapshot exercises real combat without a scripted `1`; inject queue state and APIs compile only in `TEST_MODE` (see below). Release builds (`make build`) do not link `testharn`. See [testing](testing.md#test-fixtures-test_mode-only) and [fixture design trade-offs](testing.md#fixture-design-trade-offs).
 
 ## Base types (`base.h`)
 
@@ -150,11 +151,13 @@ Conventions:
 - explicit game modes in [`game.h`](../src/game.h): `GameMode` (explore, dialogue, combat), `DialogueKind` for the active dialogue when in dialogue mode (room NPCs including the pond frog, wanderer, enemy), and `CombatState` for combat-only fields
 - mode transitions via `game_set_mode_explore`, `game_set_mode_dialogue`, and `game_set_mode_combat` (only one major mode at a time)
 - `game_is_busy_dialogue` returns true whenever `mode != GAME_MODE_EXPLORE` (ambient encounters, idle background ticks)
+- `game_roll_spread` and `game_roll_percent` centralize combat random draws (`rand()` modulo spread); release builds have no inject path
+- `TEST_MODE` only: `game_roll_inject_begin` / `clear` / `fully_consumed` and queue fields on `GameState` supply a fixed roll sequence for snapshot fixtures; other subsystems still call `rand()` directly
 
 Gameplay slices live beside `game.c` as plain C translation units (no extra framework):
 
 - [`gprog.c`](../src/gprog.c) - XP and level-up rewards (`game_xp_to_next_level`, `progression_gain_xp`; FAT 8.3-safe basename)
-- [`combat.c`](../src/combat.c) - combat start, player reply resolution, enemy turn
+- [`combat.c`](../src/combat.c) - combat start, player reply resolution, enemy turn (randomness via `game_roll_spread` / `game_roll_percent`, not `rand()`)
 - [`genc.c`](../src/genc.c) - ambient bandit encounter open state (FAT 8.3-safe basename)
 - [`wanderer.c`](../src/wanderer.c) - traveler movement and encounter flow
 - [`dialogue.c`](../src/dialogue.c) - pond frog lines and NPC id hint for room look
@@ -206,7 +209,7 @@ New `src/*.c` and `src/*.h` basenames must stay within **classic FAT 8+3** (at m
 
 ### `GameState`
 
-`GameState` is the primary simulation container. Gameplay systems should mutate it explicitly and avoid shadow copies.
+`GameState` is the primary simulation container. Gameplay systems should mutate it explicitly and avoid shadow copies. In `TEST_MODE` builds only, it may include fixture-only fields (for example the combat roll-inject queue); release `GameState` has no test inject members.
 
 ### `World` and `Room`
 
@@ -214,9 +217,10 @@ New `src/*.c` and `src/*.h` basenames must stay within **classic FAT 8+3** (at m
 
 ## Determinism rules
 
-- seed randomness once at startup
+- seed randomness once at startup (`plat_seed_rng` from `main`; combat uses `game_roll_*`, which calls `rand()` when inject is inactive)
 - evolve simulation via commands and background ticks
 - never tie simulation correctness to render cadence
+- snapshot tests combine fixtures (direct state), optional roll inject (`TEST_MODE` only), and a fixed default seed for remaining libc `rand()` paths; see [fixture design trade-offs](testing.md#fixture-design-trade-offs)
 
 ## ANSI C89/C90 compatibility rules
 
