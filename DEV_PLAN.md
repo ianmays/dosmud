@@ -184,7 +184,7 @@ Compiler discipline and warning cleanliness should remain early priorities throu
 
 ### Ensure OpenWatcom parity
 
-✅ Done - `make dos-prepare` covers the OpenWatcom path; ongoing discipline.
+✅ Done - `make prepare-dos` covers the OpenWatcom path; ongoing discipline.
 
 ### Remove mixed declarations/statements
 
@@ -222,7 +222,7 @@ Done ✅.
 
 - Documented core / render / platform layers in `docs/architecture.md`
 - Moved all `invent.c` player output to `render_inv_*` in `grendr`
-- Added `make check-layers` to reject `printf` outside `main.c`, `grendr.c`, and the platform file (`platpos.c` / `platdos.c`) (run explicitly or via `make test-all`; not part of `make test`)
+- Added `make check-layers` to reject `printf` outside `main.c`, `grendr.c`, and the platform file (`platpos.c` / `platdos.c`) (run explicitly or via `make all-test`; not part of `make test`)
 
 ---
 
@@ -264,9 +264,9 @@ Done ✅.
 
 Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 
-- **#112** (open) - migrate remaining snapshot tests to fixtures (`equipment`, `area_items`, `craft_wielded`, `map`, `smoke` / `seed_cli`)
+- **#112** Done ✅ - migrated `equipment`, `area_items`, `craft_wielded`, `map`, `smoke` / `seed_cli` to fixtures. Added `bandit_intimidate_ok`, `bandit_combat_turn1`, `at_camp`, `at_road`, `at_marsh_reed` in [`src/testharn.c`](src/testharn.c) (see [`docs/testing.md`](docs/testing.md)).
 - **#115** (open) - Phase A: new snapshot tests for gameplay gaps (after #112)
-- **#95** (open) - Phase B: unit tests via [greatest](https://github.com/silentbicycle/greatest); high branch coverage on core modules (~90%+)
+- **#95** (open) - Phase B: unit tests via [greatest](https://github.com/silentbicycle/greatest); high branch coverage on core modules
 - **#116** (open) - Phase C: stress/soak (optional)
 - **#113** (open) - wanderer snapshot fixtures
 - **#114** (open) - custom world boot fixture for deterministic snapshots
@@ -279,14 +279,14 @@ Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 
 | Issue | Role |
 |-------|------|
-| [#112](https://github.com/ianmays/dosmud/issues/112) | Prerequisite: migrate 5 brittle snapshots to fixtures |
+| [#112](https://github.com/ianmays/dosmud/issues/112) | Done ✅: migrate 5 brittle snapshots to fixtures |
 | [#115](https://github.com/ianmays/dosmud/issues/115) | Phase A: new snapshot tests (combat, NPC, loot, eat, inspect, wait, etc.) |
 | [#95](https://github.com/ianmays/dosmud/issues/95) | Phase B: greatest unit tests; **~90%+ branch coverage** on core modules |
 | [#116](https://github.com/ianmays/dosmud/issues/116) | Phase C: stress/soak (10k ticks, combat loops; optional) |
 | [#113](https://github.com/ianmays/dosmud/issues/113) | Wanderer snapshot fixtures |
 | [#114](https://github.com/ianmays/dosmud/issues/114) | Custom world boot fixture |
 
-**Sequencing:** #112 -> #115 (and #113/#114 as needed); #95 in parallel after #112; #116 when prioritized.
+**Sequencing:** #115 next (and #113/#114 as needed); #95 in parallel; #116 when prioritized. #112 prerequisite complete.
 
 **Snapshot gaps (Phase A):** combat defend/salve/victory/loot, room NPC `talk`/`reply`, eat/use, inspect, wait.
 
