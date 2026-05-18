@@ -18,10 +18,7 @@ On the ground: stick. (take stick)
 
 [T:0] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
-> You pick up the stick.
-
-Loose grit skips over stone under an uncertain breeze.
-
+> 
   /\     .-'''''''-.        
   ||    / (.)..(.)  |        
   ||    |  (::::)   |        
@@ -62,14 +59,11 @@ Wielding: stick
 
 > Combat starts. You HP: 20, Bandit HP: 8.
 Choose: [1] Attack  [2] Defend  [3] Use salve
-
-[T:1] Camp [HP:20/20] [Atk:1] [Lv:1 XP:0/20]
-
-> You hit the bandit for 4 damage.
-The bandit strikes for 3 damage.
-You HP: 17, Bandit HP: 4.
+You hit the bandit for 5 damage.
+The bandit strikes for 4 damage.
+You HP: 16, Bandit HP: 3.
 Choose: [1] Attack  [2] Defend  [3] Use salve
 
-[T:1] Camp [HP:17/20] [Atk:1] [Lv:1 XP:0/20]
+[T:1] Camp [HP:16/20] [Atk:1] [Lv:1 XP:0/20]
 
 > bye

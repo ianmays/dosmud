@@ -7,6 +7,7 @@
 #include "grendr.h"
 #include "invent.h"
 #include "items.h"
+#include "combat.h"
 #include "testharn.h"
 
 static void camp_clear_ground(struct GameState *game)
@@ -51,6 +52,67 @@ static void fixture_bandit_wielded_pick(struct GameState *game)
     enemy_begin_encounter(game);
     game->enemy_handover_pick = 1;
     render_bandit_handover_pick_prompt();
+}
+
+/*
+ * Combat start without combat_start() RNG. enemy_hp is CFG_COMBAT_ENEMY_HP_BASE;
+ * follow with reply 1 so equipment exercises combat_resolve_reply under seed 1234.
+ */
+static void fixture_bandit_combat_turn1(struct GameState *game)
+{
+    fixture_bandit_base(game);
+    game->weapon_equipped = ITEM_STICK;
+    game_set_mode_combat(game);
+    game->player_hp = CFG_START_MAX_HP;
+    game->combat.enemy_hp = CFG_COMBAT_ENEMY_HP_BASE;
+    game->combat.defending = 0;
+    render_combat_start(game->player_hp, game->combat.enemy_hp);
+}
+
+static int fixture_bandit_combat_turn1_resolve(struct GameState *game)
+{
+    static const int equipment_rolls[2] = {
+        CFG_TEST_EQUIPMENT_ROLL_PLAYER_HIT,
+        CFG_TEST_EQUIPMENT_ROLL_ENEMY_DMG
+    };
+
+    fixture_bandit_combat_turn1(game);
+    game_roll_inject_begin(game, equipment_rolls, 2);
+    combat_resolve_reply(game, 1);
+    if (!game_roll_inject_fully_consumed(game)) {
+        game_roll_inject_clear(game);
+        return 0;
+    }
+    game_roll_inject_clear(game);
+    return 1;
+}
+
+static void fixture_at_camp(struct GameState *game)
+{
+    game_reset_fixture_baseline(game, WORLD_ROOM_CAMP, 0);
+    camp_clear_ground(game);
+    game->room_explored[WORLD_ROOM_CAMP] = 1;
+}
+
+static void fixture_at_road(struct GameState *game)
+{
+    game_reset_fixture_baseline(game, WORLD_ROOM_ROAD, 1);
+    game->room_explored[WORLD_ROOM_CAMP] = 1;
+    game->room_explored[WORLD_ROOM_ROAD] = 1;
+}
+
+static int fixture_at_marsh_reed(struct GameState *game)
+{
+    game_reset_fixture_baseline(game, WORLD_ROOM_MARSH, 2);
+    camp_clear_ground(game);
+    if (!game_inv_bag_add(game, ITEM_STICK)) {
+        return 0;
+    }
+    game->room_item[WORLD_ROOM_MARSH][0] = ITEM_REED;
+    game->room_explored[WORLD_ROOM_CAMP] = 1;
+    game->room_explored[WORLD_ROOM_MARSH] = 1;
+    game_set_mode_explore(game);
+    return 1;
 }
 
 static int fixture_name_is(const char *name, const char *line)
@@ -102,6 +164,30 @@ int testharn_apply(struct GameState *game, const char *line)
     }
     if (fixture_name_is("bandit_wielded_pick", name)) {
         fixture_bandit_wielded_pick(game);
+        return 1;
+    }
+    if (fixture_name_is("bandit_combat_turn1", name)) {
+        fixture_bandit_combat_turn1(game);
+        return 1;
+    }
+    if (fixture_name_is("bandit_combat_turn1_resolve", name)) {
+        if (!fixture_bandit_combat_turn1_resolve(game)) {
+            return -2;
+        }
+        return 1;
+    }
+    if (fixture_name_is("at_camp", name)) {
+        fixture_at_camp(game);
+        return 1;
+    }
+    if (fixture_name_is("at_road", name)) {
+        fixture_at_road(game);
+        return 1;
+    }
+    if (fixture_name_is("at_marsh_reed", name)) {
+        if (!fixture_at_marsh_reed(game)) {
+            return -2;
+        }
         return 1;
     }
     return -1;

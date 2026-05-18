@@ -1,9 +1,8 @@
-take stick
+@fixture bandit_dialogue
 wield stick
 bag
 unwield
 bag
 wield stick
-1
-1
+@fixture bandit_combat_turn1_resolve
 quit

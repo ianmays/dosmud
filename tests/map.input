@@ -1,4 +1,5 @@
+@fixture at_camp
 map
-north
+@fixture at_road
 map
 quit

@@ -20,7 +20,7 @@ int combat_player_attack_bonus(const struct GameState *game)
 static void combat_enemy_turn(struct GameState *game)
 {
     int dmg;
-    dmg = CFG_COMBAT_ENEMY_DMG_BASE + (rand() % CFG_COMBAT_ENEMY_DMG_SPREAD);
+    dmg = CFG_COMBAT_ENEMY_DMG_BASE + game_roll_spread(game, CFG_COMBAT_ENEMY_DMG_SPREAD);
     if (game->combat.defending) {
         dmg -= CFG_COMBAT_DEFEND_DAMAGE_REDUCTION;
         if (dmg < 0) dmg = 0;
@@ -41,7 +41,8 @@ static void combat_enemy_turn(struct GameState *game)
 void combat_start(struct GameState *game)
 {
     game_set_mode_combat(game);
-    game->combat.enemy_hp = CFG_COMBAT_ENEMY_HP_BASE + (rand() % CFG_COMBAT_ENEMY_HP_SPREAD);
+    game->combat.enemy_hp = CFG_COMBAT_ENEMY_HP_BASE +
+        game_roll_spread(game, CFG_COMBAT_ENEMY_HP_SPREAD);
     game->combat.defending = 0;
     render_combat_start(game->player_hp, game->combat.enemy_hp);
 }
@@ -50,7 +51,8 @@ void combat_resolve_reply(struct GameState *game, int choice)
 {
     int dmg;
     if (choice == 1) {
-        dmg = CFG_COMBAT_PLAYER_HIT_BASE + (rand() % CFG_COMBAT_PLAYER_HIT_SPREAD) +
+        dmg = CFG_COMBAT_PLAYER_HIT_BASE +
+            game_roll_spread(game, CFG_COMBAT_PLAYER_HIT_SPREAD) +
             combat_player_attack_bonus(game);
         game->combat.enemy_hp -= dmg;
         render_combat_player_hit(dmg);
@@ -80,7 +82,7 @@ void combat_resolve_reply(struct GameState *game, int choice)
             int roll;
             int loot_item;
 
-            roll = rand() % CFG_ROLL_PERCENT_RANGE;
+            roll = game_roll_percent(game);
             if (roll < CFG_COMBAT_CORPSE_LOOT_SPEAR_BELOW) {
                 loot_item = ITEM_SPEAR;
             } else if (roll < CFG_COMBAT_CORPSE_LOOT_STICK_BELOW) {
@@ -94,7 +96,8 @@ void combat_resolve_reply(struct GameState *game, int choice)
             }
             game->corpse_loot[game->player.room_id] = loot_item;
         }
-        progression_gain_xp(game, CFG_COMBAT_KILL_XP_BASE + (rand() % CFG_COMBAT_KILL_XP_SPREAD));
+        progression_gain_xp(game, CFG_COMBAT_KILL_XP_BASE +
+            game_roll_spread(game, CFG_COMBAT_KILL_XP_SPREAD));
         return;
     }
 

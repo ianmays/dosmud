@@ -1,6 +1,4 @@
-take stick
-3
-south
+@fixture at_marsh_reed
 take reed
 north
 drop stick
