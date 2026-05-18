@@ -53,6 +53,56 @@ static void fixture_bandit_wielded_pick(struct GameState *game)
     render_bandit_handover_pick_prompt();
 }
 
+static int fixture_bandit_intimidate_ok(struct GameState *game)
+{
+    fixture_bandit_base(game);
+    if (!game_inv_bag_add(game, ITEM_STICK)) {
+        return 0;
+    }
+    game_set_mode_explore(game);
+    return 1;
+}
+
+static int fixture_bandit_combat_turn1(struct GameState *game)
+{
+    fixture_bandit_base(game);
+    game->weapon_equipped = ITEM_STICK;
+    game_set_mode_combat(game);
+    game->player_hp = CFG_START_MAX_HP;
+    game->combat.enemy_hp = 8;
+    game->combat.defending = 0;
+    render_combat_start(game->player_hp, game->combat.enemy_hp);
+    return 1;
+}
+
+static void fixture_at_camp(struct GameState *game)
+{
+    game_reset_fixture_baseline(game, WORLD_ROOM_CAMP, 0);
+    camp_clear_ground(game);
+    game->room_explored[WORLD_ROOM_CAMP] = 1;
+}
+
+static void fixture_at_road(struct GameState *game)
+{
+    game_reset_fixture_baseline(game, WORLD_ROOM_ROAD, 1);
+    game->room_explored[WORLD_ROOM_CAMP] = 1;
+    game->room_explored[WORLD_ROOM_ROAD] = 1;
+}
+
+static int fixture_at_marsh_reed(struct GameState *game)
+{
+    game_reset_fixture_baseline(game, WORLD_ROOM_MARSH, 2);
+    camp_clear_ground(game);
+    if (!game_inv_bag_add(game, ITEM_STICK)) {
+        return 0;
+    }
+    game->room_item[WORLD_ROOM_MARSH][0] = ITEM_REED;
+    game->room_explored[WORLD_ROOM_CAMP] = 1;
+    game->room_explored[WORLD_ROOM_MARSH] = 1;
+    game_set_mode_explore(game);
+    return 1;
+}
+
 static int fixture_name_is(const char *name, const char *line)
 {
     size_t nlen;
@@ -102,6 +152,32 @@ int testharn_apply(struct GameState *game, const char *line)
     }
     if (fixture_name_is("bandit_wielded_pick", name)) {
         fixture_bandit_wielded_pick(game);
+        return 1;
+    }
+    if (fixture_name_is("bandit_intimidate_ok", name)) {
+        if (!fixture_bandit_intimidate_ok(game)) {
+            return -2;
+        }
+        return 1;
+    }
+    if (fixture_name_is("bandit_combat_turn1", name)) {
+        if (!fixture_bandit_combat_turn1(game)) {
+            return -2;
+        }
+        return 1;
+    }
+    if (fixture_name_is("at_camp", name)) {
+        fixture_at_camp(game);
+        return 1;
+    }
+    if (fixture_name_is("at_road", name)) {
+        fixture_at_road(game);
+        return 1;
+    }
+    if (fixture_name_is("at_marsh_reed", name)) {
+        if (!fixture_at_marsh_reed(game)) {
+            return -2;
+        }
         return 1;
     }
     return -1;
