@@ -266,7 +266,7 @@ Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 
 - **#112** Done ✅ - migrated `equipment`, `area_items`, `craft_wielded`, `map`, `smoke` / `seed_cli` to fixtures. Added `bandit_combat_turn1`, `at_camp`, `at_road`, `at_marsh_reed` in [`src/testharn.c`](src/testharn.c) (see [`docs/testing.md`](docs/testing.md)).
 - **#115** (open) - Phase A: new snapshot tests for gameplay gaps (after #112)
-- **#95** (open) - Phase B: unit tests via [greatest](https://github.com/silentbicycle/greatest); high branch coverage on core modules
+- **#95** (open) - Phase B: unit tests via [greatest](https://github.com/silentbicycle/greatest); **~90%+ branch coverage** on core modules
 - **#116** (open) - Phase C: stress/soak (optional)
 - **#113** (open) - wanderer snapshot fixtures
 - **#114** (open) - custom world boot fixture for deterministic snapshots
@@ -281,7 +281,7 @@ Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 |-------|------|
 | [#112](https://github.com/ianmays/dosmud/issues/112) | Done ✅: migrate 5 brittle snapshots to fixtures |
 | [#115](https://github.com/ianmays/dosmud/issues/115) | Phase A: new snapshot tests (combat, NPC, loot, eat, inspect, wait, etc.) |
-| [#95](https://github.com/ianmays/dosmud/issues/95) | Phase B: greatest unit tests; high branch coverage on core modules |
+| [#95](https://github.com/ianmays/dosmud/issues/95) | Phase B: greatest unit tests; **~90%+ branch coverage** on core modules |
 | [#116](https://github.com/ianmays/dosmud/issues/116) | Phase C: stress/soak (10k ticks, combat loops; optional) |
 | [#113](https://github.com/ianmays/dosmud/issues/113) | Wanderer snapshot fixtures |
 | [#114](https://github.com/ianmays/dosmud/issues/114) | Custom world boot fixture |

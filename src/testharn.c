@@ -53,7 +53,7 @@ static void fixture_bandit_wielded_pick(struct GameState *game)
     render_bandit_handover_pick_prompt();
 }
 
-static int fixture_bandit_combat_turn1(struct GameState *game)
+static void fixture_bandit_combat_turn1(struct GameState *game)
 {
     fixture_bandit_base(game);
     game->weapon_equipped = ITEM_STICK;
@@ -62,7 +62,18 @@ static int fixture_bandit_combat_turn1(struct GameState *game)
     game->combat.enemy_hp = 8;
     game->combat.defending = 0;
     render_combat_start(game->player_hp, game->combat.enemy_hp);
-    return 1;
+}
+
+/* After one attack round; use immediately after bandit_combat_turn1 (no combat reply). */
+static void fixture_bandit_combat_turn1_done(struct GameState *game)
+{
+    game->player_hp = 16;
+    game->combat.enemy_hp = 3;
+    game->combat.defending = 0;
+    render_combat_player_hit(5);
+    render_combat_enemy_strike(4);
+    render_combat_status_line(game->player_hp, game->combat.enemy_hp);
+    render_combat_menu();
 }
 
 static void fixture_at_camp(struct GameState *game)
@@ -145,9 +156,11 @@ int testharn_apply(struct GameState *game, const char *line)
         return 1;
     }
     if (fixture_name_is("bandit_combat_turn1", name)) {
-        if (!fixture_bandit_combat_turn1(game)) {
-            return -2;
-        }
+        fixture_bandit_combat_turn1(game);
+        return 1;
+    }
+    if (fixture_name_is("bandit_combat_turn1_done", name)) {
+        fixture_bandit_combat_turn1_done(game);
         return 1;
     }
     if (fixture_name_is("at_camp", name)) {
