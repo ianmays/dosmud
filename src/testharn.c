@@ -53,16 +53,6 @@ static void fixture_bandit_wielded_pick(struct GameState *game)
     render_bandit_handover_pick_prompt();
 }
 
-static int fixture_bandit_intimidate_ok(struct GameState *game)
-{
-    fixture_bandit_base(game);
-    if (!game_inv_bag_add(game, ITEM_STICK)) {
-        return 0;
-    }
-    game_set_mode_explore(game);
-    return 1;
-}
-
 static int fixture_bandit_combat_turn1(struct GameState *game)
 {
     fixture_bandit_base(game);
@@ -152,12 +142,6 @@ int testharn_apply(struct GameState *game, const char *line)
     }
     if (fixture_name_is("bandit_wielded_pick", name)) {
         fixture_bandit_wielded_pick(game);
-        return 1;
-    }
-    if (fixture_name_is("bandit_intimidate_ok", name)) {
-        if (!fixture_bandit_intimidate_ok(game)) {
-            return -2;
-        }
         return 1;
     }
     if (fixture_name_is("bandit_combat_turn1", name)) {

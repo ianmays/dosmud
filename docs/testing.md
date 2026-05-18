@@ -39,11 +39,12 @@ Bandit fixtures call `game_reset_fixture_baseline` first (same mutable fields as
 | `bandit_dialogue` | Base reset, stick in bag, bandit dialogue open |
 | `bandit_handover_pick` | Base reset, stick in bag, bandit dialogue open, handover pick prompt (reply 2 already chosen) |
 | `bandit_wielded_pick` | Base reset, stick wielded (`Atk:1`), bandit dialogue open, handover pick prompt |
-| `bandit_intimidate_ok` | Base reset, stick in bag, explore mode (post-intimidate, no enemy) |
 | `bandit_combat_turn1` | Base reset, stick wielded, combat mode, player HP 20, bandit HP 8, combat menu shown |
 | `at_camp` | Camp, tick 0, explore, camp explored on map |
 | `at_road` | Road, tick 1, explore, camp and road explored on map |
 | `at_marsh_reed` | Marsh, tick 2, stick in bag, reed on ground, camp and marsh explored |
+
+For marsh item/craft snapshots, prefer `at_marsh_reed` over walking camp intimidate plus `south` (avoids tick RNG on travel).
 
 Add new fixtures in [`src/testharn.c`](../src/testharn.c) and document them here. `testharn` is linked only for `make test` / `dos-prepare MODE=TEST_MODE`, not for `make build`.
 
