@@ -107,6 +107,8 @@ static int game_roll_draw(struct GameState *game)
 {
     if (game->roll_inject_active) {
         if (game->roll_queue_i >= game->roll_queue_len) {
+            /* Past end: count the draw so fully_consumed fails (over-consumption). */
+            game->roll_queue_i++;
             return 0;
         }
         return game->roll_queue[game->roll_queue_i++];
@@ -163,7 +165,7 @@ int game_roll_inject_fully_consumed(const struct GameState *game)
     if (!game->roll_inject_active) {
         return 1;
     }
-    return game->roll_queue_i >= game->roll_queue_len;
+    return game->roll_queue_i == game->roll_queue_len;
 }
 
 static int apply_room_npc_reply(struct GameState *game, struct Command *cmd)
