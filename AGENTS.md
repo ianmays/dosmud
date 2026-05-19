@@ -39,7 +39,7 @@ Guidance for AI/code agents working in this repository.
 
 Do not skip workflow stages.
 
-- **Planning** - set as soon as planning/discussion begins.
+- **Planning** - set as soon as planning/discussion begins (even if in plan mode!)
 - **In progress** - set before implementation work starts.
 - **Review** - set when the draft PR is opened.
 - **Done** - set only after merge and Issue closure.
