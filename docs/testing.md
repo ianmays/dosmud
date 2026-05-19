@@ -57,6 +57,8 @@ Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_
 
 | Fixture | State |
 |---------|--------|
+| `world_boot` | Replace `World` graph with fixed seed-1234 layout (`world_init_fixture`); does not reset player state |
+| `world_linear` | Same graph as `world_boot` (alias until a slimmer preset exists) |
 | `at_camp` | Camp, tick 0, explore, camp explored on map |
 | `at_road` | Road, tick 1, explore, camp and road explored on map |
 | `at_marsh_reed` | Marsh, tick 2, stick in bag, reed on ground, camp and marsh explored |
@@ -89,7 +91,12 @@ Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_
 | `corpse_stripped` | Corpse present, no loot item |
 | `corpse_loot_full_bag` | Full bag + corpse with stick loot |
 
-For marsh item/craft snapshots, prefer `at_marsh_reed` over walking camp intimidate plus `south` (avoids tick RNG on travel).
+For marsh item/craft snapshots, prefer `at_marsh_reed` over walking camp intimidate plus `south` (avoids tick RNG on travel). For movement that depends on exit layout (`north` from marsh, `move north` from camp), chain `@fixture world_boot` before room fixtures so the graph stays stable if `world_init` changes.
+
+```text
+@fixture world_boot
+@fixture at_marsh_reed
+```
 
 ### Quiet ticks (`test_quiet_ticks`, `TEST_MODE` only)
 

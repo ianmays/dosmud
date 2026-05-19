@@ -239,6 +239,79 @@ void world_init(struct World *world)
     }
 }
 
+#ifdef TEST_MODE
+/*
+ * Fixed room graph for snapshot tests (seed 1234 layout from world_init).
+ * Exits: index 0..3 = north, south, east, west.
+ */
+static const int snapshot_exits[CFG_ROOM_MAX][CFG_DIR_MAX] = {
+    {  1,  7, -1,  8 },
+    { -1,  0, -1, 13 },
+    { -1,  8, 14, -1 },
+    { -1, -1,  8, -1 },
+    { 12, 15, 11, -1 },
+    { 15, -1, -1, -1 },
+    { -1, -1, -1, 15 },
+    {  0, -1, -1, -1 },
+    {  2, -1,  0,  3 },
+    { -1, 10, 13, -1 },
+    {  9, 14, 15, -1 },
+    { -1, -1, -1,  4 },
+    { -1,  4, -1, -1 },
+    { -1, -1,  1,  9 },
+    { 10, -1, -1,  2 },
+    {  4,  5,  6, 10 }
+};
+
+static const int snapshot_map_x[CFG_ROOM_MAX] = {
+    2, 2, 2, 0, 0, -1, 1, 2, 1, 0, -1, 1, 0, 1, -1, 0
+};
+
+static const int snapshot_map_y[CFG_ROOM_MAX] = {
+    0, -1, -3, 0, -3, -3, -2, 1, 0, -1, -2, -3, -4, -1, -1, -2
+};
+
+static void world_reset_graph(struct World *world)
+{
+    int i;
+    int d;
+
+    world->room_count = CFG_ROOM_MAX;
+    for (i = 0; i < CFG_ROOM_MAX; ++i) {
+        room_set_meta(&world->rooms[i],
+            g_room_names[i],
+            g_room_descs[i],
+            g_room_animals[i],
+            g_room_noises[i]);
+        world->map_x[i] = 0;
+        world->map_y[i] = 0;
+        world->map_ready[i] = 0;
+        for (d = 0; d < DIR_NONE; ++d) {
+            world->rooms[i].exits[d] = -1;
+        }
+    }
+}
+
+void world_init_fixture(struct World *world, int preset)
+{
+    int i;
+    int d;
+
+    if (preset != WORLD_FIXTURE_SNAPSHOT) {
+        return;
+    }
+    world_reset_graph(world);
+    for (i = 0; i < CFG_ROOM_MAX; ++i) {
+        for (d = 0; d < DIR_NONE; ++d) {
+            world->rooms[i].exits[d] = snapshot_exits[i][d];
+        }
+        world->map_x[i] = snapshot_map_x[i];
+        world->map_y[i] = snapshot_map_y[i];
+        world->map_ready[i] = 1;
+    }
+}
+#endif /* TEST_MODE */
+
 void world_step(struct World *world, u32 tick)
 {
     (void)world;

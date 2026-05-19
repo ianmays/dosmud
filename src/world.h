@@ -33,6 +33,10 @@ struct World {
 };
 
 void world_init(struct World *world);
+#ifdef TEST_MODE
+#define WORLD_FIXTURE_SNAPSHOT 0
+void world_init_fixture(struct World *world, int preset);
+#endif
 void world_step(struct World *world, u32 tick);
 int world_can_move(struct World *world, int room_id, int dir);
 int world_move(struct World *world, int room_id, int dir);

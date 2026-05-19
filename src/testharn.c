@@ -12,6 +12,7 @@
 #include "items.h"
 #include "combat.h"
 #include "wanderer.h"
+#include "world.h"
 #include "testharn.h"
 
 static void camp_clear_ground(struct GameState *game)
@@ -169,6 +170,11 @@ static int fixture_bandit_fight_ready(struct GameState *game)
     }
     game_roll_inject_begin(game, rolls, 1);
     return 1;
+}
+
+static void fixture_world_boot(struct GameState *game)
+{
+    world_init_fixture(&game->world, WORLD_FIXTURE_SNAPSHOT);
 }
 
 static void fixture_at_camp(struct GameState *game)
@@ -452,6 +458,14 @@ int testharn_apply(struct GameState *game, const char *line)
     }
     if (fixture_name_is("bandit_victory_fish", name)) {
         fixture_bandit_victory_inject(game, CFG_TEST_VICTORY_LOOT_FISH);
+        return 1;
+    }
+    if (fixture_name_is("world_boot", name)) {
+        fixture_world_boot(game);
+        return 1;
+    }
+    if (fixture_name_is("world_linear", name)) {
+        fixture_world_boot(game);
         return 1;
     }
     if (fixture_name_is("at_camp", name)) {

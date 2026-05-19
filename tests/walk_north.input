@@ -1,3 +1,4 @@
+@fixture world_boot
 @fixture quiet_explore
 move north
 look
