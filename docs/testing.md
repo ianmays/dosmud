@@ -63,6 +63,12 @@ Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_
 | `at_pond` / `at_tower` / `at_orchard` / `at_catacombs` | Named room, explore, room explored |
 | `quiet_explore` | `at_camp` + `test_quiet_ticks` + wanderer off (for `wait` / `move` snapshots) |
 
+**Wanderer** (co-located dialogue without tick movement):
+
+| Fixture | State |
+|---------|--------|
+| `wanderer_dialogue` | Road, tick 0, player and wanderer co-located, wanderer dialogue open (intro + options rendered) |
+
 **Bags / items** (explore, named room):
 
 | Fixture | State |
@@ -128,7 +134,7 @@ Each process run uses one `.input` file until `quit`. `make test-run` runs `SNAP
 
 **Movement / time:** `walk_north`, `walk_map`, `wait_tick`.
 
-**NPC talk:** `frog_replies`, `watchman_talk`, `herbalist_talk`, `archivist_talk`, `talk_nobody`.
+**NPC talk:** `frog_replies`, `watchman_talk`, `wanderer_replies`, `wanderer_talk_blocked`, `herbalist_talk`, `archivist_talk`, `talk_nobody`.
 
 **Eat / use:** `use_salve`, `use_torch`, `use_spear`, `use_stone`, `eat_berry`, `eat_fish`, `eat_not_edible`, `eat_missing`.
 

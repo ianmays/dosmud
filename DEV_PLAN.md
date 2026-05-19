@@ -269,7 +269,7 @@ Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 - **#122** Done ✅ - optional `@seed <unsigned>` line in snapshot `.input` files (PR [#124](https://github.com/ianmays/dosmud/pull/124)).
 - **#95** (open) - Phase B: unit tests via [greatest](https://github.com/silentbicycle/greatest); **~90%+ branch coverage** on core modules
 - **#116** (open) - Phase C: stress/soak (optional)
-- **#113** (open) - wanderer snapshot fixtures
+- **#113** Done ✅ - wanderer snapshot fixtures (`wanderer_dialogue` fixture; `wanderer_replies`, `wanderer_talk_blocked` snapshots)
 - **#114** (open) - custom world boot fixture for deterministic snapshots
 
 ---
@@ -285,14 +285,14 @@ Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 | [#122](https://github.com/ianmays/dosmud/issues/122) | Done ✅: optional `@seed` harness directive for `.input` files |
 | [#95](https://github.com/ianmays/dosmud/issues/95) | Phase B: greatest unit tests; **~90%+ branch coverage** on core modules |
 | [#116](https://github.com/ianmays/dosmud/issues/116) | Phase C: stress/soak (10k ticks, combat loops; optional) |
-| [#113](https://github.com/ianmays/dosmud/issues/113) | Wanderer snapshot fixtures |
+| [#113](https://github.com/ianmays/dosmud/issues/113) | Done ✅: wanderer snapshot fixtures |
 | [#114](https://github.com/ianmays/dosmud/issues/114) | Custom world boot fixture |
 
-**Sequencing:** #115 and #112 complete. Next: #113 / #114 as needed; #95 in parallel; #116 when prioritized.
+**Sequencing:** #112, #115, #113 complete. Next: #114 as needed; #95 in parallel; #116 when prioritized.
 
-**Phase A (#115) delivered:** 57 snapshots in `SNAPSHOT_TESTS` plus `seed_cli` (58 total in `make test-run`). Combat defend/salve/victory/loot/level-up, all room NPC talk branches, eat/use/inspect variants, `quiet_explore` for wait/move/map, bandit fight/intimidate/bag-empty, loot tiers, meta commands. RNG: `game_roll_percent` for intimidate; `test_quiet_ticks`; `CFG_TEST_*` inject constants.
+**Phase A (#115) delivered:** 59 snapshots in `SNAPSHOT_TESTS` plus `seed_cli` (60 total in `make test-run`). Combat defend/salve/victory/loot/level-up, all room NPC talk branches, eat/use/inspect variants, `quiet_explore` for wait/move/map, bandit fight/intimidate/bag-empty, loot tiers, meta commands. RNG: `game_roll_percent` for intimidate; `test_quiet_ticks`; `CFG_TEST_*` inject constants.
 
-**Still open under #40:** wanderer snapshots (#113), custom world boot (#114), greatest unit tests (#95), stress/soak (#116).
+**Still open under #40:** custom world boot (#114), greatest unit tests (#95), stress/soak (#116).
 
 ---
 
@@ -316,7 +316,7 @@ Delivered in PR [#123](https://github.com/ianmays/dosmud/pull/123).
 - [`docs/testing.md`](docs/testing.md) - fixture tables, determinism model, snapshot file list, adding-a-snapshot checklist.
 - [`docs/architecture.md`](docs/architecture.md) - harness and RNG split updated.
 
-**Deferred (not #115):** wanderer (#113), world boot (#114), eat-heals-HP ([#105](https://github.com/ianmays/dosmud/issues/105)).
+**Deferred (not #115):** world boot (#114), eat-heals-HP ([#105](https://github.com/ianmays/dosmud/issues/105)).
 
 **Unit scope (Phase B):** `command`, `invent`, `combat`, `game`, `genc`, `wanderer`, `dialogue`, `gatmos`, `world` (fixed graph), `gprog`, `items`, `testharn`. Out of scope: `grendr`, `txtres`, `main`, platform glue.
 
