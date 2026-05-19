@@ -120,6 +120,8 @@ int main(int argc, char **argv)
                 if (th_rc < 0) {
                     if (th_rc == -2) {
                         fprintf(stderr, "test fixture failed\n");
+                    } else if (th_rc == -3) {
+                        fprintf(stderr, "invalid @seed\n");
                     } else {
                         fprintf(stderr, "unknown test fixture\n");
                     }
