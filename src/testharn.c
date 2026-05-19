@@ -144,25 +144,27 @@ static void fixture_bandit_combat_level_ready(struct GameState *game)
     game->xp = 19;
 }
 
-static void fixture_bandit_intimidate_inject(struct GameState *game, int roll)
+static int fixture_bandit_intimidate_inject(struct GameState *game, int roll)
 {
     int rolls[1];
 
     if (!fixture_bandit_dialogue(game)) {
-        return;
+        return 0;
     }
     rolls[0] = roll;
     game_roll_inject_begin(game, rolls, 1);
+    return 1;
 }
 
-static void fixture_bandit_fight_ready(struct GameState *game)
+static int fixture_bandit_fight_ready(struct GameState *game)
 {
     static const int rolls[1] = { CFG_TEST_FIGHT_ENEMY_HP_SPREAD };
 
     if (!fixture_bandit_dialogue(game)) {
-        return;
+        return 0;
     }
     game_roll_inject_begin(game, rolls, 1);
+    return 1;
 }
 
 static void fixture_at_camp(struct GameState *game)
@@ -356,15 +358,21 @@ int testharn_apply(struct GameState *game, const char *line)
         return 1;
     }
     if (fixture_name_is("bandit_fight_ready", name)) {
-        fixture_bandit_fight_ready(game);
+        if (!fixture_bandit_fight_ready(game)) {
+            return -2;
+        }
         return 1;
     }
     if (fixture_name_is("bandit_intimidate_ok", name)) {
-        fixture_bandit_intimidate_inject(game, CFG_TEST_INTIMIDATE_OK);
+        if (!fixture_bandit_intimidate_inject(game, CFG_TEST_INTIMIDATE_OK)) {
+            return -2;
+        }
         return 1;
     }
     if (fixture_name_is("bandit_intimidate_fail", name)) {
-        fixture_bandit_intimidate_inject(game, CFG_TEST_INTIMIDATE_FAIL);
+        if (!fixture_bandit_intimidate_inject(game, CFG_TEST_INTIMIDATE_FAIL)) {
+            return -2;
+        }
         return 1;
     }
     if (fixture_name_is("bandit_victory_spear", name)) {
