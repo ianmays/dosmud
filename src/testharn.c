@@ -11,6 +11,7 @@
 #include "invent.h"
 #include "items.h"
 #include "combat.h"
+#include "wanderer.h"
 #include "testharn.h"
 
 static void camp_clear_ground(struct GameState *game)
@@ -226,6 +227,16 @@ static void fixture_quiet_explore(struct GameState *game)
 {
     fixture_at_camp(game);
     fixture_quiet_ticks_on(game);
+}
+
+static void fixture_wanderer_dialogue(struct GameState *game)
+{
+    game_reset_fixture_baseline(game, WORLD_ROOM_ROAD, 0);
+    game->room_explored[WORLD_ROOM_ROAD] = 1;
+    game->wanderer_active = 1;
+    game->wanderer_room = WORLD_ROOM_ROAD;
+    game->wanderer_need_separation = 0;
+    wanderer_begin_encounter(game);
 }
 
 static int fixture_bag_item(struct GameState *game, int room_id, int item_id)
@@ -475,6 +486,10 @@ int testharn_apply(struct GameState *game, const char *line)
     }
     if (fixture_name_is("quiet_explore", name)) {
         fixture_quiet_explore(game);
+        return 1;
+    }
+    if (fixture_name_is("wanderer_dialogue", name)) {
+        fixture_wanderer_dialogue(game);
         return 1;
     }
     if (fixture_name_is("bag_berry", name)) {

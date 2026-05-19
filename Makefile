@@ -31,7 +31,7 @@ SNAPSHOT_TESTS = \
 	smoke \
 	bandit_handover bandit_wielded_give area_items map equipment craft_wielded \
 	walk_north walk_map wait_tick \
-	frog_replies watchman_talk herbalist_talk archivist_talk talk_nobody \
+	frog_replies watchman_talk wanderer_replies wanderer_talk_blocked herbalist_talk archivist_talk talk_nobody \
 	use_salve use_torch use_spear use_stone eat_berry eat_fish eat_not_edible eat_missing \
 	inspect_rustle inspect_creak inspect_water inspect_grit inspect_none inspect_wrong \
 	combat_defend combat_salve combat_no_salve combat_invalid combat_take_blocked \
