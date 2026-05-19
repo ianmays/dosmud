@@ -27,40 +27,35 @@ test-all:
 test:
 	$(CC) $(TEST_CFLAGS) -o $(BIN) $(TEST_SRC)
 
-# deterministic tests
-test-run:
-	./$(BIN) < tests/smoke.input > tests/smoke.output
-	diff -u \
-		tests/smoke.expect \
-		tests/smoke.output
-	./$(BIN) --seed 1234 < tests/smoke.input > tests/seed_cli.output
-	diff -u \
-		tests/seed_cli.expect \
-		tests/seed_cli.output
-	./$(BIN) < tests/bandit_handover.input > tests/bandit_handover.output
-	diff -u \
-		tests/bandit_handover.expect \
-		tests/bandit_handover.output
-	./$(BIN) < tests/area_items.input > tests/area_items.output
-	diff -u \
-		tests/area_items.expect \
-		tests/area_items.output
-	./$(BIN) < tests/map.input > tests/map.output
-	diff -u \
-		tests/map.expect \
-		tests/map.output
-	./$(BIN) < tests/equipment.input > tests/equipment.output
-	diff -u \
-		tests/equipment.expect \
-		tests/equipment.output
-	./$(BIN) < tests/bandit_wielded_give.input > tests/bandit_wielded_give.output
-	diff -u \
-		tests/bandit_wielded_give.expect \
-		tests/bandit_wielded_give.output
-	./$(BIN) < tests/craft_wielded.input > tests/craft_wielded.output
-	diff -u \
-		tests/craft_wielded.expect \
-		tests/craft_wielded.output
+# deterministic tests (see docs/testing.md for snapshot list)
+SNAPSHOT_TESTS = \
+	smoke \
+	bandit_handover bandit_wielded_give area_items map equipment craft_wielded \
+	walk_north walk_map wait_tick \
+	frog_replies watchman_talk herbalist_talk archivist_talk talk_nobody \
+	use_salve use_torch use_spear use_stone eat_berry eat_fish eat_not_edible eat_missing \
+	inspect_rustle inspect_creak inspect_water inspect_grit inspect_none inspect_wrong \
+	combat_defend combat_salve combat_no_salve combat_invalid combat_take_blocked \
+	combat_victory_xp level_up \
+	loot_spear loot_stick loot_berry loot_herb loot_fish loot_empty loot_stripped loot_bag_full \
+	bandit_fight bandit_intimidate_ok bandit_intimidate_fail bandit_bag_empty \
+	unknown_cmd cannot_move give_wrong_context reply_nobody reply_invalid \
+	craft_salve craft_unknown take_nothing take_wrong_item
+
+test-run: test
+	@set -e; \
+	n=0; \
+	for t in $(SNAPSHOT_TESTS); do \
+		echo "snapshot: $$t"; \
+		./$(BIN) < tests/$$t.input > tests/$$t.output; \
+		diff -u tests/$$t.expect tests/$$t.output; \
+		n=$$((n + 1)); \
+	done; \
+	echo "snapshot: seed_cli"; \
+	./$(BIN) --seed 1234 < tests/smoke.input > tests/seed_cli.output; \
+	diff -u tests/seed_cli.expect tests/seed_cli.output; \
+	n=$$((n + 1)); \
+	echo "snapshot tests passed: $$n"
 
 # gameplay .c files must not call printf (use grendr render_* instead)
 check-layers:

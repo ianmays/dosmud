@@ -1,0 +1,4 @@
+@fixture quiet_explore
+move north
+map
+quit

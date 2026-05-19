@@ -67,6 +67,7 @@ struct GameState {
     int roll_queue[CFG_ROLL_INJECT_MAX];
     int roll_queue_len;
     int roll_queue_i;
+    int test_quiet_ticks;
 #endif
 };
 
