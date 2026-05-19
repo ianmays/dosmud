@@ -18,7 +18,7 @@ Purpose:
 - `make build`: native GCC development build
 - `make check-layers`: core/render boundary guard (no `printf` in `src/*.c` except `main.c`, `grendr.c`, and the platform file `platpos.c` or `platdos.c`)
 - `make test`: strict deterministic compile (`-Werror`, `-DTEST_MODE`, `-g -O0`); does not run `check-layers`
-- `make test-run`: builds the test binary (`make test`), then runs `tests/smoke.*`, `tests/seed_cli.*`, and every name in `SNAPSHOT_TESTS` in the [Makefile](../Makefile). Each snapshot prints `snapshot: <name>` as it runs (see [Snapshot test files](#snapshot-test-files))
+- `make test-run`: builds the test binary (`make test`), then runs every name in `SNAPSHOT_TESTS` plus `seed_cli` (CLI `--seed` on `smoke.input`; see [Snapshot test files](#snapshot-test-files)). Each step prints `snapshot: <name>`.
 
 ## Test fixtures (`TEST_MODE` only)
 
@@ -114,14 +114,14 @@ Add new fixtures in [`src/testharn.c`](../src/testharn.c) and document them here
 2. Use `@fixture` for setup; add inject in the fixture or via a `*_ready` fixture when outcomes must be fixed.
 3. Use `quiet_explore` when the test calls `wait` or `move`.
 4. Run `make test && make test-run` (or `./dosmud < tests/<name>.input > tests/<name>.output`) and copy or diff against `tests/<name>.expect`.
-5. Add `<name>` to `SNAPSHOT_TESTS` in the [Makefile](../Makefile) (plus `smoke` / `seed_cli` handled separately).
+5. Add `<name>` to `SNAPSHOT_TESTS` in the [Makefile](../Makefile) (`seed_cli` stays separate: it uses `--seed` with `smoke.input`).
 6. Document new fixtures in this file.
 
 ### Snapshot test files
 
-Each process run uses one `.input` file until `quit`. `make test-run` runs `smoke`, `seed_cli`, then every name in `SNAPSHOT_TESTS`.
+Each process run uses one `.input` file until `quit`. `make test-run` runs `SNAPSHOT_TESTS` (includes `smoke`), then `seed_cli`.
 
-**Legacy / inventory:** `smoke`, `seed_cli`, `bandit_handover`, `bandit_wielded_give`, `area_items`, `map`, `equipment`, `craft_wielded`.
+**Core / inventory (also in `SNAPSHOT_TESTS`):** `smoke`, `bandit_handover`, `bandit_wielded_give`, `area_items`, `map`, `equipment`, `craft_wielded`.
 
 **Movement / time:** `walk_north`, `walk_map`, `wait_tick`.
 

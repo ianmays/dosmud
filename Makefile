@@ -29,6 +29,7 @@ test:
 
 # deterministic tests (see docs/testing.md for snapshot list)
 SNAPSHOT_TESTS = \
+	smoke \
 	bandit_handover bandit_wielded_give area_items map equipment craft_wielded \
 	walk_north walk_map wait_tick \
 	frog_replies watchman_talk herbalist_talk archivist_talk talk_nobody \
@@ -42,12 +43,6 @@ SNAPSHOT_TESTS = \
 	craft_salve craft_unknown take_nothing take_wrong_item
 
 test-run: test
-	@echo "snapshot: smoke"
-	./$(BIN) < tests/smoke.input > tests/smoke.output
-	diff -u tests/smoke.expect tests/smoke.output
-	@echo "snapshot: seed_cli"
-	./$(BIN) --seed 1234 < tests/smoke.input > tests/seed_cli.output
-	diff -u tests/seed_cli.expect tests/seed_cli.output
 	@set -e; \
 	n=0; \
 	for t in $(SNAPSHOT_TESTS); do \
@@ -56,7 +51,11 @@ test-run: test
 		diff -u tests/$$t.expect tests/$$t.output; \
 		n=$$((n + 1)); \
 	done; \
-	echo "snapshot tests passed: $$n (+ smoke, seed_cli)"
+	echo "snapshot: seed_cli"; \
+	./$(BIN) --seed 1234 < tests/smoke.input > tests/seed_cli.output; \
+	diff -u tests/seed_cli.expect tests/seed_cli.output; \
+	n=$$((n + 1)); \
+	echo "snapshot tests passed: $$n"
 
 # gameplay .c files must not call printf (use grendr render_* instead)
 check-layers:
