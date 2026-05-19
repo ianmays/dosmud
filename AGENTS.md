@@ -150,7 +150,7 @@ Prefer linking between documents over duplicating large instruction blocks.
 - Preserve surrounding naming/style/layout conventions unless explicitly asked.
 - Verify build and tooling documentation against real scripts and targets.
 - Prefer small, reviewable commits with clear intent.
-- ALWAYS add tests for new gameplay features.
+- ALWAYS add tests for new gameplay features - aim for maximum coverage
 
 ## Cursor Cloud Instructions
 
