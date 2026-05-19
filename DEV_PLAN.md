@@ -266,7 +266,7 @@ Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 
 - **#112** Done ✅ - migrated `equipment`, `area_items`, `craft_wielded`, `map`, `smoke` to fixtures; `seed_cli` still uses CLI `--seed` on `smoke.input`.
 - **#115** Done ✅ - Phase A maximum snapshot coverage (PR [#123](https://github.com/ianmays/dosmud/pull/123)); details in the section below.
-- **#122** (open) - optional `@seed <unsigned>` line in snapshot `.input` files ([#122](https://github.com/ianmays/dosmud/issues/122)); not required for #115.
+- **#122** Done ✅ - optional `@seed <unsigned>` line in snapshot `.input` files (PR [#124](https://github.com/ianmays/dosmud/pull/124)).
 - **#95** (open) - Phase B: unit tests via [greatest](https://github.com/silentbicycle/greatest); **~90%+ branch coverage** on core modules
 - **#116** (open) - Phase C: stress/soak (optional)
 - **#113** (open) - wanderer snapshot fixtures
@@ -282,7 +282,7 @@ Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 |-------|------|
 | [#112](https://github.com/ianmays/dosmud/issues/112) | Done ✅: migrate 5 brittle snapshots to fixtures |
 | [#115](https://github.com/ianmays/dosmud/issues/115) | Done ✅: Phase A maximum snapshot coverage + RNG hardening ([`docs/testing.md`](docs/testing.md)) |
-| [#122](https://github.com/ianmays/dosmud/issues/122) | Optional `@seed` harness directive for `.input` files |
+| [#122](https://github.com/ianmays/dosmud/issues/122) | Done ✅: optional `@seed` harness directive for `.input` files |
 | [#95](https://github.com/ianmays/dosmud/issues/95) | Phase B: greatest unit tests; **~90%+ branch coverage** on core modules |
 | [#116](https://github.com/ianmays/dosmud/issues/116) | Phase C: stress/soak (10k ticks, combat loops; optional) |
 | [#113](https://github.com/ianmays/dosmud/issues/113) | Wanderer snapshot fixtures |
@@ -292,7 +292,7 @@ Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 
 **Phase A (#115) delivered:** 57 snapshots in `SNAPSHOT_TESTS` plus `seed_cli` (58 total in `make test-run`). Combat defend/salve/victory/loot/level-up, all room NPC talk branches, eat/use/inspect variants, `quiet_explore` for wait/move/map, bandit fight/intimidate/bag-empty, loot tiers, meta commands. RNG: `game_roll_percent` for intimidate; `test_quiet_ticks`; `CFG_TEST_*` inject constants.
 
-**Still open under #40:** wanderer snapshots (#113), custom world boot (#114), greatest unit tests (#95), stress/soak (#116), `@seed` harness (#122).
+**Still open under #40:** wanderer snapshots (#113), custom world boot (#114), greatest unit tests (#95), stress/soak (#116).
 
 ---
 
@@ -316,7 +316,7 @@ Delivered in PR [#123](https://github.com/ianmays/dosmud/pull/123).
 - [`docs/testing.md`](docs/testing.md) - fixture tables, determinism model, snapshot file list, adding-a-snapshot checklist.
 - [`docs/architecture.md`](docs/architecture.md) - harness and RNG split updated.
 
-**Deferred (not #115):** wanderer (#113), world boot (#114), eat-heals-HP ([#105](https://github.com/ianmays/dosmud/issues/105)), `@seed` directive ([#122](https://github.com/ianmays/dosmud/issues/122)).
+**Deferred (not #115):** wanderer (#113), world boot (#114), eat-heals-HP ([#105](https://github.com/ianmays/dosmud/issues/105)).
 
 **Unit scope (Phase B):** `command`, `invent`, `combat`, `game`, `genc`, `wanderer`, `dialogue`, `gatmos`, `world` (fixed graph), `gprog`, `items`, `testharn`. Out of scope: `grendr`, `txtres`, `main`, platform glue.
 
