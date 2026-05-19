@@ -10,9 +10,11 @@ Guidance for AI/code agents working in this repository.
 
 ## Core Agent Rules (Non-Negotiable)
 
+- ALWAYS start in plan mode
 - ALWAYS check for an existing GitHub Issue before starting work.
 - NEVER modify or reopen Closed Issues.
 - ALWAYS create a branch before making changes.
+- ALWAYS include mark work as done in  `DEV_PLAN.md` when raising a PR.
 - ALWAYS open draft PRs first.
 - ALWAYS link PRs to their corresponding Issues.
 - ALWAYS check whether documentation updates are required.
@@ -70,8 +72,6 @@ After merge:
 - switch back to `main`
 - pull latest changes
 - delete completed local branches
-
-If work existed in `DEV_PLAN.md`, ALWAYS mark it complete.
 
 ## Technical Constraints
 
