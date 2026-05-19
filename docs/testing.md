@@ -91,9 +91,9 @@ For marsh item/craft snapshots, prefer `at_marsh_reed` over walking camp intimid
 
 ### `@seed` in `.input` files
 
-`@seed <unsigned>` sets `GameState.seed` mid-file and reseeds libc RNG (same rules as CLI `--seed`: decimal, non-negative, at most `CFG_SEED_CLI_MAX`; no leading `+`/`-`). After each successful `@seed` or `@fixture`, `main.c` calls `plat_seed_rng(game.seed)` so later rolls do not depend on earlier commands in the same run. CLI `--seed` still applies only at process start (`tests/seed_cli.*`). Example: `tests/map.input` uses `@seed 5678` between fixture blocks for stream isolation.
+`@seed <unsigned>` sets `GameState.seed` mid-file and reseeds libc RNG (same rules as CLI `--seed`: decimal, non-negative, at most `CFG_SEED_CLI_MAX`; no leading `+`/`-`). After each successful `@seed` or `@fixture`, `main.c` calls `plat_seed_rng(game.seed)` so later rolls do not depend on earlier commands in the same run. CLI `--seed` still applies only at process start (`tests/seed_cli.*`).
 
-Use `@seed` when a snapshot block needs a different libc RNG stream without starting a new process. Do not rely on seed alone for asserted mechanics; use inject or teleport.
+Use `@seed` when a snapshot block needs a different libc RNG stream without starting a new process. Add it to a snapshot only when that isolation is required; do not rely on seed alone for asserted mechanics; use inject or teleport.
 
 ### Fixture design trade-offs
 
