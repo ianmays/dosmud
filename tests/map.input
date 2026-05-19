@@ -1,5 +1,6 @@
 @fixture at_camp
 map
+@seed 5678
 @fixture at_road
 map
 quit

@@ -1,5 +1,8 @@
 #ifdef TEST_MODE
 
+#include <errno.h>
+#include <limits.h>
+#include <stdlib.h>
 #include <string.h>
 #include "config.h"
 #include "game.h"
@@ -289,6 +292,43 @@ static int fixture_name_is(const char *name, const char *line)
     return line[nlen] == '\0' || line[nlen] == ' ' || line[nlen] == '\t';
 }
 
+static int parse_seed_value(const char *p, u32 *out_seed)
+{
+    char *end;
+    unsigned long val;
+
+    while (*p == ' ' || *p == '\t') {
+        ++p;
+    }
+    if (*p == '\0') {
+        return -1;
+    }
+    if (*p == '-' || *p == '+') {
+        return -1;
+    }
+    errno = 0;
+    val = strtoul(p, &end, 10);
+    if (end == p) {
+        return -1;
+    }
+    while (*end == ' ' || *end == '\t') {
+        ++end;
+    }
+    if (*end != '\0') {
+        return -1;
+    }
+    if (errno == ERANGE) {
+        return -1;
+    }
+#if ULONG_MAX > CFG_SEED_CLI_MAX
+    if (val > (unsigned long)CFG_SEED_CLI_MAX) {
+        return -1;
+    }
+#endif
+    *out_seed = (u32)val;
+    return 0;
+}
+
 int testharn_apply(struct GameState *game, const char *line)
 {
     const char *p;
@@ -300,6 +340,14 @@ int testharn_apply(struct GameState *game, const char *line)
     p = line + 1;
     while (*p == ' ' || *p == '\t') {
         ++p;
+    }
+    if (strncmp(p, "seed", 4) == 0 &&
+        (p[4] == '\0' || p[4] == ' ' || p[4] == '\t')) {
+        p += 4;
+        if (parse_seed_value(p, &game->seed) != 0) {
+            return -3;
+        }
+        return 1;
     }
     if (strncmp(p, "fixture", 7) != 0) {
         return 0;

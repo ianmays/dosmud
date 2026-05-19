@@ -118,7 +118,7 @@ Conventions:
 
 ### Test harness (`testharn`, `TEST_MODE` only)
 
-[`src/testharn.c`](../src/testharn.c) lives at the `main` edge (not core simulation). It applies `@fixture` lines from snapshot `.input` files by calling `game_reset_fixture_baseline` plus existing inventory, encounter, and `render_*` APIs (same paths as normal play). After a successful fixture, `main.c` calls `plat_seed_rng(game.seed)` so libc RNG matches the stored seed. Fixtures cover bandit dialogue/combat, room placement, bag contents, inspect focus, corpse loot, combat-ready inject queues, and `quiet_explore` (`test_quiet_ticks` + wanderer off). The `bandit_combat_turn1_resolve` fixture also calls `game_roll_inject_begin` and `combat_resolve_reply` so the `equipment` snapshot exercises real combat without a scripted `1`. Release builds (`make build`) do not link `testharn`. Optional mid-file `@seed` is tracked in [#122](https://github.com/ianmays/dosmud/issues/122). See [testing](testing.md#test-fixtures-test_mode-only).
+[`src/testharn.c`](../src/testharn.c) lives at the `main` edge (not core simulation). It applies `@fixture` and `@seed` lines from snapshot `.input` files by calling `game_reset_fixture_baseline` plus existing inventory, encounter, and `render_*` APIs (same paths as normal play). After a successful harness directive, `main.c` calls `plat_seed_rng(game.seed)` so libc RNG matches the stored seed. Fixtures cover bandit dialogue/combat, room placement, bag contents, inspect focus, corpse loot, combat-ready inject queues, and `quiet_explore` (`test_quiet_ticks` + wanderer off). The `bandit_combat_turn1_resolve` fixture also calls `game_roll_inject_begin` and `combat_resolve_reply` so the `equipment` snapshot exercises real combat without a scripted `1`. `@seed` sets `GameState.seed` mid-file for libc RNG stream isolation. Release builds (`make build`) do not link `testharn`. See [testing](testing.md#test-fixtures-test_mode-only).
 
 ## Base types (`base.h`)
 
@@ -141,7 +141,7 @@ Conventions:
 - startup
 - main loop orchestration
 - input/timing integration
-- `TEST_MODE`: delegates `@fixture` lines to `testharn`
+- `TEST_MODE`: delegates `@fixture` and `@seed` lines to `testharn`
 
 ### `game`
 

@@ -22,13 +22,14 @@ Purpose:
 
 ## Test fixtures (`TEST_MODE` only)
 
-Snapshot tests can set up known game state without walking RNG-dependent commands. In a `make test` binary, lines in `.input` files of the form:
+Snapshot tests can set up known game state without walking RNG-dependent commands. In a `make test` binary, harness lines in `.input` files of the form:
 
 ```text
 @fixture <name>
+@seed <unsigned>
 ```
 
-are handled by `testharn` before normal command parsing. Fixture lines are not echoed as player commands. Unknown fixture names print `unknown test fixture` to stderr and exit with status 1. When a known fixture cannot finish setup, the binary prints `test fixture failed` to stderr and also exits with status 1.
+are handled by `testharn` before normal command parsing. Harness lines are not echoed as player commands. Unknown fixture names print `unknown test fixture` to stderr and exit with status 1. When a known fixture cannot finish setup, the binary prints `test fixture failed` to stderr and also exits with status 1. Invalid `@seed` syntax prints `invalid @seed` to stderr and exits with status 1.
 
 Prefer fixtures over long setup scripts when a test needs a specific mode, inventory, or encounter. After changing fixture output, regenerate the matching `.expect` with `make test-run` and review the diff.
 
@@ -88,9 +89,11 @@ For marsh item/craft snapshots, prefer `at_marsh_reed` over walking camp intimid
 
 `quiet_explore` sets `GameState.test_quiet_ticks` and disables the wanderer. While set, `advance_world_tick` only increments the tick and runs `world_step`; it skips animal noise, atmosphere, bandit ambush rolls, and wanderer movement/spawn. Use this for snapshots that call `wait` or `move` so output does not depend on ambient libc `rand()`.
 
-### Future: `@seed` in `.input` files
+### `@seed` in `.input` files
 
-[#122](https://github.com/ianmays/dosmud/issues/122) tracks an optional `@seed <unsigned>` harness line to change `game.seed` mid-file. Until then, each `@fixture` resets libc RNG via `plat_seed_rng(game.seed)` (default `CFG_TEST_RAND_SEED`), and CLI `--seed` applies only at process start (`tests/seed_cli.*`).
+`@seed <unsigned>` sets `GameState.seed` mid-file and reseeds libc RNG (same rules as CLI `--seed`: decimal, non-negative, at most `CFG_SEED_CLI_MAX`; no leading `+`/`-`). After each successful `@seed` or `@fixture`, `main.c` calls `plat_seed_rng(game.seed)` so later rolls do not depend on earlier commands in the same run. CLI `--seed` still applies only at process start (`tests/seed_cli.*`). Example: `tests/map.input` uses `@seed 5678` between fixture blocks for stream isolation.
+
+Use `@seed` when a snapshot block needs a different libc RNG stream without starting a new process. Do not rely on seed alone for asserted mechanics; use inject or teleport.
 
 ### Fixture design trade-offs
 
@@ -100,7 +103,7 @@ Snapshots use three determinism levels:
 
 2. **Inject rolls** (`TEST_MODE` only) - use `game_roll_inject_begin` for any asserted outcome that goes through `game_roll_spread` / `game_roll_percent`: combat damage, corpse loot tier, kill XP, bandit intimidate (reply `3`), and `combat_start` enemy HP. Constants live under `#ifdef TEST_MODE` in [`config.h`](../include/config.h) (`CFG_TEST_EQUIPMENT_*`, `CFG_TEST_COMBAT_*`, `CFG_TEST_INTIMIDATE_*`, `CFG_TEST_VICTORY_*`). Do not bypass combat with render-only hit lines. If combat tuning changes, update those constants and `.expect`.
 
-3. **Seed reset** - after each `@fixture`, `main.c` calls `plat_seed_rng(game.seed)` for stream isolation between fixture blocks. Do not rely on seed alone for asserted mechanics; use inject or teleport.
+3. **Seed reset** - after each `@fixture` or `@seed`, `main.c` calls `plat_seed_rng(game.seed)` for stream isolation between harness blocks. Do not rely on seed alone for asserted mechanics; use inject or teleport.
 
 4. **Quiet ticks** - for tick-advancing commands in explore mode, use `quiet_explore` (see above).
 
