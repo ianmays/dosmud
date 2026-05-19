@@ -41,15 +41,22 @@ SNAPSHOT_TESTS = \
 	unknown_cmd cannot_move give_wrong_context reply_nobody reply_invalid \
 	craft_salve craft_unknown take_nothing take_wrong_item
 
-test-run:
+test-run: test
+	@echo "snapshot: smoke"
 	./$(BIN) < tests/smoke.input > tests/smoke.output
 	diff -u tests/smoke.expect tests/smoke.output
+	@echo "snapshot: seed_cli"
 	./$(BIN) --seed 1234 < tests/smoke.input > tests/seed_cli.output
 	diff -u tests/seed_cli.expect tests/seed_cli.output
-	@for t in $(SNAPSHOT_TESTS); do \
-		./$(BIN) < tests/$$t.input > tests/$$t.output || exit 1; \
-		diff -u tests/$$t.expect tests/$$t.output || exit 1; \
-	done
+	@set -e; \
+	n=0; \
+	for t in $(SNAPSHOT_TESTS); do \
+		echo "snapshot: $$t"; \
+		./$(BIN) < tests/$$t.input > tests/$$t.output; \
+		diff -u tests/$$t.expect tests/$$t.output; \
+		n=$$((n + 1)); \
+	done; \
+	echo "snapshot tests passed: $$n (+ smoke, seed_cli)"
 
 # gameplay .c files must not call printf (use grendr render_* instead)
 check-layers:

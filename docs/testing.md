@@ -18,7 +18,7 @@ Purpose:
 - `make build`: native GCC development build
 - `make check-layers`: core/render boundary guard (no `printf` in `src/*.c` except `main.c`, `grendr.c`, and the platform file `platpos.c` or `platdos.c`)
 - `make test`: strict deterministic compile (`-Werror`, `-DTEST_MODE`, `-g -O0`); does not run `check-layers`
-- `make test-run`: scripted input regression pass for `tests/smoke.*`, `tests/seed_cli.*`, and every name in `SNAPSHOT_TESTS` in the [Makefile](../Makefile) (see [Snapshot test files](#snapshot-test-files))
+- `make test-run`: builds the test binary (`make test`), then runs `tests/smoke.*`, `tests/seed_cli.*`, and every name in `SNAPSHOT_TESTS` in the [Makefile](../Makefile). Each snapshot prints `snapshot: <name>` as it runs (see [Snapshot test files](#snapshot-test-files))
 
 ## Test fixtures (`TEST_MODE` only)
 
