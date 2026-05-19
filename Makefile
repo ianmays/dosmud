@@ -20,7 +20,6 @@ test-all:
 	$(MAKE) check-layers
 	$(MAKE) clean
 	$(MAKE) dos-prepare MODE=$(TEST_MODE_FLAG)
-	$(MAKE) test
 	$(MAKE) test-run
 
 # deterministic
