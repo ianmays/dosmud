@@ -10,7 +10,7 @@ Guidance for AI/code agents working in this repository.
 
 ## Core Agent Rules (Non-Negotiable)
 
-- ALWAYS start in plan mode
+- ALWAYS start in plan mode - then ALWAYS move the Issue to the Planning status immediately
 - ALWAYS check for an existing GitHub Issue before starting work.
 - NEVER modify or reopen Closed Issues.
 - ALWAYS create a branch before making changes.
@@ -41,7 +41,7 @@ Guidance for AI/code agents working in this repository.
 
 Do not skip workflow stages.
 
-- **Planning** - set as soon as planning/discussion begins (even if in plan mode!)
+- **Planning** - set as soon as planning/discussion begins
 - **In progress** - set before implementation work starts.
 - **Review** - set when the draft PR is opened.
 - **Done** - set only after merge and Issue closure.
