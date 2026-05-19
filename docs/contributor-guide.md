@@ -37,6 +37,8 @@ make test
 make test-run
 ```
 
+For snapshot fixtures, roll inject, and `quiet_explore` tick tests, see [testing.md](testing.md#test-fixtures-test_mode-only).
+
 If your changes affect build flow, DOS runtime behavior, or orchestration scripts:
 
 ```sh

@@ -19,6 +19,18 @@ static void camp_clear_ground(struct GameState *game)
     }
 }
 
+static void fixture_wanderer_off(struct GameState *game)
+{
+    game->wanderer_active = 0;
+    game->wanderer_return_tick = 999999UL;
+}
+
+static void fixture_quiet_ticks_on(struct GameState *game)
+{
+    game->test_quiet_ticks = 1;
+    fixture_wanderer_off(game);
+}
+
 static void fixture_bandit_base(struct GameState *game)
 {
     game_reset_fixture_baseline(game, WORLD_ROOM_CAMP, 1);
@@ -33,6 +45,12 @@ static int fixture_bandit_dialogue(struct GameState *game)
     }
     enemy_begin_encounter(game);
     return 1;
+}
+
+static void fixture_bandit_dialogue_empty(struct GameState *game)
+{
+    fixture_bandit_base(game);
+    enemy_begin_encounter(game);
 }
 
 static int fixture_bandit_handover_pick(struct GameState *game)
@@ -54,10 +72,6 @@ static void fixture_bandit_wielded_pick(struct GameState *game)
     render_bandit_handover_pick_prompt();
 }
 
-/*
- * Combat start without combat_start() RNG. enemy_hp is CFG_COMBAT_ENEMY_HP_BASE;
- * follow with reply 1 so equipment exercises combat_resolve_reply under seed 1234.
- */
 static void fixture_bandit_combat_turn1(struct GameState *game)
 {
     fixture_bandit_base(game);
@@ -87,6 +101,70 @@ static int fixture_bandit_combat_turn1_resolve(struct GameState *game)
     return 1;
 }
 
+static void fixture_bandit_combat_near_kill(struct GameState *game)
+{
+    fixture_bandit_combat_turn1(game);
+    game->combat.enemy_hp = 1;
+}
+
+static void fixture_bandit_combat_defend_ready(struct GameState *game)
+{
+    static const int rolls[1] = { CFG_TEST_COMBAT_DEFEND_ENEMY_DMG };
+
+    fixture_bandit_combat_turn1(game);
+    game_roll_inject_begin(game, rolls, 1);
+}
+
+static int fixture_bandit_combat_salve_ready(struct GameState *game)
+{
+    static const int rolls[1] = { CFG_TEST_COMBAT_SALVE_ENEMY_DMG };
+
+    fixture_bandit_combat_turn1(game);
+    if (!game_inv_bag_add(game, ITEM_SALVE)) {
+        return 0;
+    }
+    game_roll_inject_begin(game, rolls, 1);
+    return 1;
+}
+
+static void fixture_bandit_victory_inject(struct GameState *game, int loot_percent)
+{
+    int rolls[3];
+
+    rolls[0] = CFG_TEST_VICTORY_HIT_SPREAD;
+    rolls[1] = loot_percent;
+    rolls[2] = CFG_TEST_VICTORY_XP_SPREAD;
+    fixture_bandit_combat_near_kill(game);
+    game_roll_inject_begin(game, rolls, 3);
+}
+
+static void fixture_bandit_combat_level_ready(struct GameState *game)
+{
+    fixture_bandit_victory_inject(game, CFG_TEST_VICTORY_LOOT_STICK);
+    game->xp = 19;
+}
+
+static void fixture_bandit_intimidate_inject(struct GameState *game, int roll)
+{
+    int rolls[1];
+
+    if (!fixture_bandit_dialogue(game)) {
+        return;
+    }
+    rolls[0] = roll;
+    game_roll_inject_begin(game, rolls, 1);
+}
+
+static void fixture_bandit_fight_ready(struct GameState *game)
+{
+    static const int rolls[1] = { CFG_TEST_FIGHT_ENEMY_HP_SPREAD };
+
+    if (!fixture_bandit_dialogue(game)) {
+        return;
+    }
+    game_roll_inject_begin(game, rolls, 1);
+}
+
 static void fixture_at_camp(struct GameState *game)
 {
     game_reset_fixture_baseline(game, WORLD_ROOM_CAMP, 0);
@@ -112,6 +190,89 @@ static int fixture_at_marsh_reed(struct GameState *game)
     game->room_explored[WORLD_ROOM_CAMP] = 1;
     game->room_explored[WORLD_ROOM_MARSH] = 1;
     game_set_mode_explore(game);
+    return 1;
+}
+
+static void fixture_at_pond(struct GameState *game)
+{
+    game_reset_fixture_baseline(game, WORLD_ROOM_POND, 0);
+    game->room_explored[WORLD_ROOM_POND] = 1;
+}
+
+static void fixture_at_tower(struct GameState *game)
+{
+    game_reset_fixture_baseline(game, WORLD_ROOM_TOWER, 0);
+    game->room_explored[WORLD_ROOM_TOWER] = 1;
+}
+
+static void fixture_at_orchard(struct GameState *game)
+{
+    game_reset_fixture_baseline(game, WORLD_ROOM_ORCHARD, 0);
+    game->room_explored[WORLD_ROOM_ORCHARD] = 1;
+}
+
+static void fixture_at_catacombs(struct GameState *game)
+{
+    game_reset_fixture_baseline(game, WORLD_ROOM_CATACOMBS, 0);
+    game->room_explored[WORLD_ROOM_CATACOMBS] = 1;
+}
+
+static void fixture_quiet_explore(struct GameState *game)
+{
+    fixture_at_camp(game);
+    fixture_quiet_ticks_on(game);
+}
+
+static int fixture_bag_item(struct GameState *game, int room_id, int item_id)
+{
+    game_reset_fixture_baseline(game, room_id, 0);
+    game->room_explored[room_id] = 1;
+    if (!game_inv_bag_add(game, item_id)) {
+        return 0;
+    }
+    return 1;
+}
+
+static void fixture_env_focus(struct GameState *game, int kind)
+{
+    fixture_at_camp(game);
+    game->env_focus_active = 1;
+    game->env_focus_room = game->player.room_id;
+    game->env_focus_kind = kind;
+    game->env_focus_expires_tick = game->tick + CFG_ENV_FOCUS_DURATION_TICKS;
+}
+
+static void fixture_corpse_stripped(struct GameState *game)
+{
+    fixture_at_camp(game);
+    game->corpse_present[WORLD_ROOM_CAMP] = 1;
+    game->corpse_loot[WORLD_ROOM_CAMP] = ITEM_NONE;
+}
+
+static int fixture_corpse_loot_full_bag(struct GameState *game, int loot_item)
+{
+    int i;
+
+    fixture_at_camp(game);
+    for (i = 0; i < game->bag_capacity; ++i) {
+        if (!game_inv_bag_add(game, ITEM_BERRY)) {
+            return 0;
+        }
+    }
+    game->corpse_present[WORLD_ROOM_CAMP] = 1;
+    game->corpse_loot[WORLD_ROOM_CAMP] = loot_item;
+    return 1;
+}
+
+static int fixture_bag_craft_salve(struct GameState *game)
+{
+    fixture_at_camp(game);
+    if (!game_inv_bag_add(game, ITEM_HERB)) {
+        return 0;
+    }
+    if (!game_inv_bag_add(game, ITEM_BERRY)) {
+        return 0;
+    }
     return 1;
 }
 
@@ -156,6 +317,10 @@ int testharn_apply(struct GameState *game, const char *line)
         }
         return 1;
     }
+    if (fixture_name_is("bandit_dialogue_empty", name)) {
+        fixture_bandit_dialogue_empty(game);
+        return 1;
+    }
     if (fixture_name_is("bandit_handover_pick", name)) {
         if (!fixture_bandit_handover_pick(game)) {
             return -2;
@@ -176,6 +341,52 @@ int testharn_apply(struct GameState *game, const char *line)
         }
         return 1;
     }
+    if (fixture_name_is("bandit_combat_defend_ready", name)) {
+        fixture_bandit_combat_defend_ready(game);
+        return 1;
+    }
+    if (fixture_name_is("bandit_combat_salve_ready", name)) {
+        if (!fixture_bandit_combat_salve_ready(game)) {
+            return -2;
+        }
+        return 1;
+    }
+    if (fixture_name_is("bandit_combat_level_ready", name)) {
+        fixture_bandit_combat_level_ready(game);
+        return 1;
+    }
+    if (fixture_name_is("bandit_fight_ready", name)) {
+        fixture_bandit_fight_ready(game);
+        return 1;
+    }
+    if (fixture_name_is("bandit_intimidate_ok", name)) {
+        fixture_bandit_intimidate_inject(game, CFG_TEST_INTIMIDATE_OK);
+        return 1;
+    }
+    if (fixture_name_is("bandit_intimidate_fail", name)) {
+        fixture_bandit_intimidate_inject(game, CFG_TEST_INTIMIDATE_FAIL);
+        return 1;
+    }
+    if (fixture_name_is("bandit_victory_spear", name)) {
+        fixture_bandit_victory_inject(game, CFG_TEST_VICTORY_LOOT_SPEAR);
+        return 1;
+    }
+    if (fixture_name_is("bandit_victory_stick", name)) {
+        fixture_bandit_victory_inject(game, CFG_TEST_VICTORY_LOOT_STICK);
+        return 1;
+    }
+    if (fixture_name_is("bandit_victory_berry", name)) {
+        fixture_bandit_victory_inject(game, CFG_TEST_VICTORY_LOOT_BERRY);
+        return 1;
+    }
+    if (fixture_name_is("bandit_victory_herb", name)) {
+        fixture_bandit_victory_inject(game, CFG_TEST_VICTORY_LOOT_HERB);
+        return 1;
+    }
+    if (fixture_name_is("bandit_victory_fish", name)) {
+        fixture_bandit_victory_inject(game, CFG_TEST_VICTORY_LOOT_FISH);
+        return 1;
+    }
     if (fixture_name_is("at_camp", name)) {
         fixture_at_camp(game);
         return 1;
@@ -188,6 +399,100 @@ int testharn_apply(struct GameState *game, const char *line)
         if (!fixture_at_marsh_reed(game)) {
             return -2;
         }
+        return 1;
+    }
+    if (fixture_name_is("at_pond", name)) {
+        fixture_at_pond(game);
+        return 1;
+    }
+    if (fixture_name_is("at_tower", name)) {
+        fixture_at_tower(game);
+        return 1;
+    }
+    if (fixture_name_is("at_orchard", name)) {
+        fixture_at_orchard(game);
+        return 1;
+    }
+    if (fixture_name_is("at_catacombs", name)) {
+        fixture_at_catacombs(game);
+        return 1;
+    }
+    if (fixture_name_is("quiet_explore", name)) {
+        fixture_quiet_explore(game);
+        return 1;
+    }
+    if (fixture_name_is("bag_berry", name)) {
+        if (!fixture_bag_item(game, WORLD_ROOM_CAMP, ITEM_BERRY)) {
+            return -2;
+        }
+        return 1;
+    }
+    if (fixture_name_is("bag_fish", name)) {
+        if (!fixture_bag_item(game, WORLD_ROOM_POND, ITEM_FISH)) {
+            return -2;
+        }
+        return 1;
+    }
+    if (fixture_name_is("bag_salve", name)) {
+        if (!fixture_bag_item(game, WORLD_ROOM_CAMP, ITEM_SALVE)) {
+            return -2;
+        }
+        return 1;
+    }
+    if (fixture_name_is("bag_torch", name)) {
+        if (!fixture_bag_item(game, WORLD_ROOM_CAMP, ITEM_TORCH)) {
+            return -2;
+        }
+        return 1;
+    }
+    if (fixture_name_is("bag_spear", name)) {
+        if (!fixture_bag_item(game, WORLD_ROOM_CAMP, ITEM_SPEAR)) {
+            return -2;
+        }
+        return 1;
+    }
+    if (fixture_name_is("bag_stone", name)) {
+        if (!fixture_bag_item(game, WORLD_ROOM_CAMP, ITEM_STONE)) {
+            return -2;
+        }
+        return 1;
+    }
+    if (fixture_name_is("bag_stick", name)) {
+        if (!fixture_bag_item(game, WORLD_ROOM_CAMP, ITEM_STICK)) {
+            return -2;
+        }
+        return 1;
+    }
+    if (fixture_name_is("bag_craft_salve", name)) {
+        if (!fixture_bag_craft_salve(game)) {
+            return -2;
+        }
+        return 1;
+    }
+    if (fixture_name_is("corpse_stripped", name)) {
+        fixture_corpse_stripped(game);
+        return 1;
+    }
+    if (fixture_name_is("corpse_loot_full_bag", name)) {
+        if (!fixture_corpse_loot_full_bag(game, ITEM_STICK)) {
+            return -2;
+        }
+        return 1;
+    }
+    if (fixture_name_is("env_focus_rustle", name)) {
+        fixture_env_focus(game, GAME_ENV_RUSTLE);
+        return 1;
+    }
+    if (fixture_name_is("env_focus_creak", name)) {
+        fixture_env_focus(game, GAME_ENV_CREAK);
+        return 1;
+    }
+    if (fixture_name_is("env_focus_water", name)) {
+        fixture_env_focus(game, GAME_ENV_WATER);
+        return 1;
+    }
+    if (fixture_name_is("env_focus_grit", name)) {
+        fixture_env_focus(game, GAME_ENV_GRIT);
         return 1;
     }
     return -1;

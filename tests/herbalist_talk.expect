@@ -1,0 +1,93 @@
+TEST MODE
+dosmud (seed 1234)
+Type 'help' for commands.
+
+       *      *        $   * 
+   *               *   $     
+      _________        $     
+     /       /|\       $    
+    /       / | \     \|/  
+___/_______/__|__\ ___XXX___
+                             
+ (campfire at first watch)                             
+
+Camp
+A small campfire burns quietly.
+Exits: north south west
+On the ground: stick. (take stick)
+
+[T:0] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
+
+> 
+[T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
+
+> 
+        _;;;;;;_             
+       / _    _ \           
+      (-( )--( )-)           
+       |    ^   |            
+        \__ - _/            
+       ___|''' |___          
+                             
+  (hands stained green)                             
+
+An herbalist kneels among fallen fruit.
+"Need a field remedy or just company?"
+  [1] Ask for medicine advice.
+  [2] Trade gossip from the road.
+  [3] Leave politely.
+(Answer with 1, 2, 3, or reply <n>.)
+
+[T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
+
+> She mutters ratios: "Two berries, one herb, crush fine."
+
+[T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
+
+> 
+        _;;;;;;_             
+       / _    _ \           
+      (-( )--( )-)           
+       |    ^   |            
+        \__ - _/            
+       ___|''' |___          
+                             
+  (hands stained green)                             
+
+An herbalist kneels among fallen fruit.
+"Need a field remedy or just company?"
+  [1] Ask for medicine advice.
+  [2] Trade gossip from the road.
+  [3] Leave politely.
+(Answer with 1, 2, 3, or reply <n>.)
+
+[T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
+
+> She laughs. "Road stories always cost extra."
+
+[T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
+
+> 
+        _;;;;;;_             
+       / _    _ \           
+      (-( )--( )-)           
+       |    ^   |            
+        \__ - _/            
+       ___|''' |___          
+                             
+  (hands stained green)                             
+
+An herbalist kneels among fallen fruit.
+"Need a field remedy or just company?"
+  [1] Ask for medicine advice.
+  [2] Trade gossip from the road.
+  [3] Leave politely.
+(Answer with 1, 2, 3, or reply <n>.)
+
+[T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
+
+> She waves without looking up.
+
+[T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
+
+> bye

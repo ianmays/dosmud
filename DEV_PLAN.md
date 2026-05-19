@@ -265,7 +265,8 @@ Done ✅.
 Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 
 - **#112** Done ✅ - migrated `equipment`, `area_items`, `craft_wielded`, `map`, `smoke` / `seed_cli` to fixtures. Added `bandit_combat_turn1`, `at_camp`, `at_road`, `at_marsh_reed` in [`src/testharn.c`](src/testharn.c) (see [`docs/testing.md`](docs/testing.md)).
-- **#115** (open) - Phase A: new snapshot tests for gameplay gaps (after #112)
+- **#115** (in progress) - Phase A: maximum snapshot coverage (~50 regression pairs), RNG hardening (`game_roll_percent` for intimidate, `test_quiet_ticks` / `quiet_explore`, inject for combat/loot/XP), full fixture set in `testharn.c`, docs in `testing.md` / `architecture.md`
+- **#122** (open) - optional `@seed <unsigned>` line in snapshot `.input` files (not required to close #115)
 - **#95** (open) - Phase B: unit tests via [greatest](https://github.com/silentbicycle/greatest); **~90%+ branch coverage** on core modules
 - **#116** (open) - Phase C: stress/soak (optional)
 - **#113** (open) - wanderer snapshot fixtures
@@ -280,7 +281,8 @@ Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 | Issue | Role |
 |-------|------|
 | [#112](https://github.com/ianmays/dosmud/issues/112) | Done ✅: migrate 5 brittle snapshots to fixtures |
-| [#115](https://github.com/ianmays/dosmud/issues/115) | Phase A: new snapshot tests (combat, NPC, loot, eat, inspect, wait, etc.) |
+| [#115](https://github.com/ianmays/dosmud/issues/115) | Phase A: maximum snapshot coverage + RNG hardening (see `docs/testing.md`) |
+| [#122](https://github.com/ianmays/dosmud/issues/122) | Optional `@seed` harness directive for `.input` files |
 | [#95](https://github.com/ianmays/dosmud/issues/95) | Phase B: greatest unit tests; **~90%+ branch coverage** on core modules |
 | [#116](https://github.com/ianmays/dosmud/issues/116) | Phase C: stress/soak (10k ticks, combat loops; optional) |
 | [#113](https://github.com/ianmays/dosmud/issues/113) | Wanderer snapshot fixtures |
@@ -288,7 +290,7 @@ Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 
 **Sequencing:** #115 next (and #113/#114 as needed); #95 in parallel; #116 when prioritized. #112 prerequisite complete.
 
-**Snapshot gaps (Phase A):** combat defend/salve/victory/loot, room NPC `talk`/`reply`, eat/use, inspect, wait.
+**Snapshot gaps (Phase A, #115):** addressed in branch `115-snapshot-gameplay-gaps` - combat branches, all room NPC replies, eat/use variants, inspect focus kinds, wait/move/map, bandit fight/intimidate, loot tiers, meta commands. Remaining: wanderer (#113), custom world boot (#114), unit tests (#95).
 
 **Unit scope (Phase B):** `command`, `invent`, `combat`, `game`, `genc`, `wanderer`, `dialogue`, `gatmos`, `world` (fixed graph), `gprog`, `items`, `testharn`. Out of scope: `grendr`, `txtres`, `main`, platform glue.
 
