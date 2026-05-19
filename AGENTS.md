@@ -2,130 +2,184 @@
 
 Guidance for AI/code agents working in this repository.
 
-## NON-NEGOTIABLE REQUIREMENTS
-
-- ALWAYS check if a corresponding GitHub Issue exists before starting work (see: dosmud GitHub project)
-- NEVER change tickets that have already been Closed
-- If no Issue exists, ALWAYS create one and label it appropriately (`gameplay`, `non-functional`, `tooling`, `documentation` etc)
-- ALWAYS add the `agent` label to any issue you create
-- ALWAYS add Issues to the dosmud Github project
-- ALWAYS manage issue status in GitHub (NEVER skip straight to **Review** - see 'Github project `status` column (dosmud project)' below)
-- ALWAYS move the corresponding Isuee to **Planning** in the Github project BEFORE starting any planning activities
-- ALWAYS add any agreed implementation plan as a comment on the Issue BEFORE moving to **In progress** 
-- ALWAYS move the corresponding Issue to **In progress** in the GitHub project BEFORE starting ANY work after the planning phase 
-- ALWAYS ensure all relevant Issues are linked to PRs (Link Issue to PR in Development area OR add 'Closes: #ID' to PR description)
-- NEVER, ever, use em dash, we only use '-'
-- ALWAYS create a branch before making changes
-- ALWAYS raise draft PRs
-- NEVER include issue link in PR title (e.g. closes #ID)
-- ALWAYS check for needed documentation updates/additions/removals when making changes
-- ALWAYS keep documentation style consistent with surrounding files
-- ALWAYS make commit messages concise; use bullet points rather than sentences if needed; first character is ALWAYS lower-case in PR titles and commit messages
-- When asked to pick up a new issue (possibly under a specific label), ALWAYS ensure you pick the top issue according to the dosmud Github project - ALWAYS ensure you only pull from the tickets that exist in the 'Agent-ready' column
-- NEVER start working on an Issue if you think it's not necessary - challenge the timing of the selection or recommend it is abandoned
-- If a PR already exists, ALWAYS include pushing follow-up updates to the branch in any implementation plan
-- (VERY IMPORTANT) ALWAYS if you are pushing additional changes - check if the PR is no longer in draft state FIRST, then ALWAYS leave the comment 'review this' to trigger a re-review if it is NOT in draft state (NEVER ask - ALWAYS do this)
-- ALWAYS switch back to main, pull, and delete other branches locally when a task is fully done (PR merged, Issue closed on GitHub)
-- If the task done existed in the DEV_PLAN.md, ALWAYS mark it as done
-- ALWAYS write a test for a new gameplay feature
-- ALWAYS ensure PR labels match issue labels
-- NEVER use docs: or anything similar in PR titles or commit messages
-
-### GitHub project `Status` column (dosmud project)
-
-Keep each issue’s card aligned with real progress. Do not skip**Planning** or **In progress** on the way to **Review**:
-
-- **Planning** - set as soon as you start making a plan for the Issue
-- **In progress** - set as soon as work on the issue begins (e.g. branch created or first commit), and keep it there until the linked PR is opened.
-- **Review** - set when you open the draft PR that links the issue (first time the work is on the board as a PR).
-- **Done** - set only **after** that PR has merged (and close the issue when the work is finished).
-
 ## Purpose
 
 - Keep changes aligned with DOS-first goals and deterministic ANSI C design.
 - Preserve fast local iteration on Linux while validating DOS/OpenWatcom compatibility.
 - Avoid architectural drift and documentation duplication.
 
-## Non-Negotiable Technical Constraints
+## Core Agent Rules (Non-Negotiable)
+
+- ALWAYS check for an existing GitHub Issue before starting work.
+- NEVER modify or reopen Closed Issues.
+- ALWAYS create a branch before making changes.
+- ALWAYS open draft PRs first.
+- ALWAYS link PRs to their corresponding Issues.
+- ALWAYS check whether documentation updates are required.
+- ALWAYS preserve deterministic gameplay behavior.
+- NEVER introduce gameplay/render/platform coupling.
+- NEVER use em dash - use standard hyphen only.
+- NEVER introduce C99/C11 features or compiler-specific extensions.
+
+## GitHub Workflow (dosmud project)
+
+### Issue selection
+
+- When asked to pick up a new issue, ALWAYS select the top issue from the `Agent-ready` column in the dosmud GitHub project.
+- NEVER begin work on an issue you believe should be abandoned, deferred, or reconsidered - challenge the work instead.
+
+### Issue creation
+
+- If no Issue exists, ALWAYS create one.
+- ALWAYS apply appropriate labels (`gameplay`, `non-functional`, `tooling`, `documentation`, etc).
+- ALWAYS add the `agent` label to agent-created Issues.
+- ALWAYS add new Issues to the dosmud GitHub project.
+
+### Status transitions
+
+Do not skip workflow stages.
+
+- **Planning** - set as soon as planning/discussion begins.
+- **In progress** - set before implementation work starts.
+- **Review** - set when the draft PR is opened.
+- **Done** - set only after merge and Issue closure.
+
+### Planning expectations
+
+- ALWAYS add agreed implementation details as an Issue comment before moving to `In progress`.
+- If a PR already exists, ALWAYS include updating the PR in the implementation plan.
+
+### PR expectations
+
+- ALWAYS raise draft PRs initially.
+- NEVER include issue references in PR titles.
+- ALWAYS ensure PR labels match Issue labels.
+- ALWAYS keep PR titles and commit messages concise.
+- ALWAYS use lower-case first character in PR titles and commit messages.
+- NEVER use prefixes like `docs:` in PR titles or commit messages.
+
+### Re-review workflow
+
+- If pushing follow-up commits to a non-draft PR:
+  - ALWAYS leave the comment `review this`
+  - NEVER ask whether a re-review is needed
+
+### Completion workflow
+
+After merge:
+- switch back to `main`
+- pull latest changes
+- delete completed local branches
+
+If work existed in `DEV_PLAN.md`, ALWAYS mark it complete.
+
+## Technical Constraints
 
 - Target language: ANSI C89 / ISO C90.
 - Must remain compatible with both GCC and OpenWatcom.
 - Prefer fixed-size arrays and static storage.
 - Avoid dynamic allocation unless explicitly justified.
 - Avoid recursion.
-- Avoid compiler-specific extensions and C99/C11 features.
-- Keep state explicit; avoid hidden globals and cross-module state mutation.
+- Keep state explicit and localized.
+- Avoid hidden globals and cross-module state mutation.
 
-## Architecture Guardrails
+## Architecture Principles
 
 - Keep gameplay deterministic for identical seed + inputs.
 - Keep simulation, rendering, and platform concerns separated.
-- Keep `game.c` orchestration-focused; avoid re-centralizing unrelated systems.
-- Prefer simple, procedural, explicit control flow over heavy abstraction patterns.
+- Keep `game.c` orchestration-focused.
+- Avoid re-centralizing unrelated systems into `game.c`.
+- Prefer simple, procedural, explicit control flow.
+- Avoid heavy abstraction patterns.
 - Do not introduce ECS-like frameworks or object-emulation architectures.
+- Favor explicit ownership boundaries over shared mutable systems.
 
-## Build and Validation Workflow
+## Validation Workflow
 
 Primary local validation loop:
 
-- `make build`
-- `make check-layers`
-- `make test`
-- `make test-run`
+```sh
+make build
+make check-layers
+make test
+make test-run
+```
 
 Cross-path validation when touching build/runtime behavior:
 
-- `make build-all`
-- `make test-all`
+```sh
+make build-all
+make test-all
+```
 
-DOS flow entrypoint:
+DOS workflow:
 
-- `make dos-prepare`
-- `make dos-run` - launch the existing prepared DOS tree without rebuilding
-- deterministic DOS mode: `make dos-prepare MODE=TEST_MODE`
+```sh
+make dos-prepare
+make dos-run
+```
+
+Deterministic DOS mode:
+
+```sh
+make dos-prepare MODE=TEST_MODE
+```
 
 ## Environment Model for DOS Flow
 
 - `make` executes from Linux/WSL.
 - `dos-prepare.ps1` executes through Windows PowerShell.
 - DOSBox-X launches on the Windows side.
-- `dos-prepare.local.ps1` stores machine-specific Windows/WSL path configuration.
-- Do not assume the repository lives under `/mnt/c`.
+- `dos-prepare.local.ps1` stores machine-specific path configuration.
+- Do not assume the repository exists under `/mnt/c`.
 
 ## Documentation Ownership
 
-- `README.md` = quick-start/operator usage.
-- `/docs/index.md` = documentation entrypoint.
-- `/docs/architecture.md` = subsystem boundaries and architecture rationale.
-- `/docs/testing.md` = build/test workflow and deterministic testing model.
-- `/docs/contributor-guide.md` = contributor workflow and PR expectations.
-- Prefer links between documents instead of duplicating long instructions.
+- `README.md` = quick-start/operator usage
+- `docs/index.md` = documentation entrypoint
+- `docs/architecture.md` = subsystem boundaries and rationale
+- `docs/testing.md` = deterministic testing workflow
+- `docs/contributor-guide.md` = contributor and PR workflow
+
+Prefer linking between documents over duplicating large instruction blocks.
 
 ## Editing and Change Hygiene
 
-- Make focused changes; avoid unrelated opportunistic refactors.
-- Preserve existing naming, file layout, and style unless explicitly asked otherwise.
-- Verify build/tooling documentation against actual scripts and Make targets.
+- Make focused changes.
+- Avoid unrelated opportunistic refactors.
+- Preserve surrounding naming/style/layout conventions unless explicitly asked.
+- Verify build and tooling documentation against real scripts and targets.
 - Prefer small, reviewable commits with clear intent.
+- ALWAYS add tests for new gameplay features.
 
 ## Cursor Cloud Instructions
 
-- Expected environment: Ubuntu-based Linux VM.
-- Required dependencies: `gcc` and `make`.
-- Full supported loop:
-  - `make build`
-  - `make check-layers`
-  - `make test`
-  - `make test-run`
-- `make check-layers` rejects `printf` in core `src/*.c` (allowed only in `main.c`, `grendr.c`, and `platpos.c` or `platdos.c`).
-- `make test` builds with `-Werror -DTEST_MODE` (does not run `check-layers`; CI runs both).
-- `make test-run` pipes scripted input and diffs against snapshot output.
-- `make dos-prepare` and DOS-path validation targets are unavailable in cloud VMs.
+Expected environment:
+- Ubuntu-based Linux VM
+- `gcc`
+- `make`
+
+Supported validation loop:
+
+```sh
+make build
+make check-layers
+make test
+make test-run
+```
+
+Additional notes:
+- `make check-layers` rejects `printf` in core gameplay files.
+- `make test` builds with `-Werror -DTEST_MODE`.
+- `make test-run` executes deterministic snapshot tests.
+- DOS validation targets are unavailable in cloud VMs.
 - No lint tooling exists beyond GCC warning enforcement.
-- Do not include co-author statements in commits
+- NEVER include co-author statements in commits.
 
 ## When in Doubt
 
 - Choose the simpler implementation.
-- Favor deterministic behavior and explicit ownership boundaries.
+- Favor deterministic behavior.
+- Favor explicit ownership boundaries.
 - Prioritize DOS/OpenWatcom compatibility over convenience features.
+- Prefer consistency with surrounding code over abstract "best practice".
