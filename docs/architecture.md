@@ -114,11 +114,11 @@ Conventions:
 - separate gameplay tuning from main-loop/test-harness settings
 - distinguish tuning for NPC corpse loot (`CFG_COMBAT_CORPSE_LOOT_*`, portable items) from ambient room finds (`CFG_ROOM_SPAWN_*`, terrain-driven junk like stone)
 - `TEST_MODE` defaults libc RNG to `CFG_TEST_RAND_SEED` for deterministic snapshot output; override with `dosmud --seed <unsigned>`
-- roll-inject limits and equipment snapshot roll constants (`CFG_ROLL_INJECT_*`, `CFG_TEST_EQUIPMENT_ROLL_*`) are defined only under `#ifdef TEST_MODE` in `config.h`
+- roll-inject limits and snapshot roll constants (`CFG_ROLL_INJECT_*`, `CFG_TEST_*`) are defined only under `#ifdef TEST_MODE` in `config.h`
 
 ### Test harness (`testharn`, `TEST_MODE` only)
 
-[`src/testharn.c`](../src/testharn.c) lives at the `main` edge (not core simulation). It applies `@fixture` lines from snapshot `.input` files by calling `game_reset_fixture_baseline` plus existing inventory, encounter, and `render_*` APIs (same paths as normal play). After a successful fixture, `main.c` calls `plat_seed_rng(game.seed)` so libc RNG matches the stored seed. Fixtures reset mutable `GameState` (all fields `game_init` sets, via shared `reset_mutable_state` in `game.c`) before room- or encounter-specific setup: bandit dialogue/combat entry, or exploration placement (`at_camp`, `at_road`, `at_marsh_reed`), so snapshots stay independent of earlier commands. The `bandit_combat_turn1_resolve` fixture also calls `game_roll_inject_begin` and `combat_resolve_reply` so the `equipment` snapshot exercises real combat without a scripted `1`; inject queue state and APIs compile only in `TEST_MODE` (see below). Release builds (`make build`) do not link `testharn`. See [testing](testing.md#test-fixtures-test_mode-only) and [fixture design trade-offs](testing.md#fixture-design-trade-offs).
+[`src/testharn.c`](../src/testharn.c) lives at the `main` edge (not core simulation). It applies `@fixture` lines from snapshot `.input` files by calling `game_reset_fixture_baseline` plus existing inventory, encounter, and `render_*` APIs (same paths as normal play). After a successful fixture, `main.c` calls `plat_seed_rng(game.seed)` so libc RNG matches the stored seed. Fixtures cover bandit dialogue/combat, room placement, bag contents, inspect focus, corpse loot, combat-ready inject queues, and `quiet_explore` (`test_quiet_ticks` + wanderer off). The `bandit_combat_turn1_resolve` fixture also calls `game_roll_inject_begin` and `combat_resolve_reply` so the `equipment` snapshot exercises real combat without a scripted `1`. Release builds (`make build`) do not link `testharn`. Optional mid-file `@seed` is tracked in [#122](https://github.com/ianmays/dosmud/issues/122). See [testing](testing.md#test-fixtures-test_mode-only).
 
 ## Base types (`base.h`)
 
@@ -151,8 +151,9 @@ Conventions:
 - explicit game modes in [`game.h`](../src/game.h): `GameMode` (explore, dialogue, combat), `DialogueKind` for the active dialogue when in dialogue mode (room NPCs including the pond frog, wanderer, enemy), and `CombatState` for combat-only fields
 - mode transitions via `game_set_mode_explore`, `game_set_mode_dialogue`, and `game_set_mode_combat` (only one major mode at a time)
 - `game_is_busy_dialogue` returns true whenever `mode != GAME_MODE_EXPLORE` (ambient encounters, idle background ticks)
-- `game_roll_spread` and `game_roll_percent` centralize combat random draws (`rand()` modulo spread); release builds have no inject path
-- `TEST_MODE` only: `game_roll_inject_begin` / `clear` / `fully_consumed` and queue fields on `GameState` supply a fixed roll sequence for snapshot fixtures; other subsystems still call `rand()` directly
+- `game_roll_spread` and `game_roll_percent` centralize gameplay draws used for combat, corpse loot, kill XP, and bandit intimidate (`rand()` when inject is inactive)
+- `TEST_MODE` only: `game_roll_inject_*` and `test_quiet_ticks` on `GameState`; when `test_quiet_ticks` is set, `advance_world_tick` skips ambient atmosphere, animal noise, bandit ambush, and wanderer movement (see [quiet ticks](testing.md#quiet-ticks-test_quiet_ticks-test_mode-only))
+- [`gatmos.c`](../src/gatmos.c) and wanderer return timing still use raw `rand()` in normal play; world generation uses `rand()` at init
 
 Gameplay slices live beside `game.c` as plain C translation units (no extra framework):
 
@@ -209,7 +210,7 @@ New `src/*.c` and `src/*.h` basenames must stay within **classic FAT 8+3** (at m
 
 ### `GameState`
 
-`GameState` is the primary simulation container. Gameplay systems should mutate it explicitly and avoid shadow copies. In `TEST_MODE` builds only, it may include fixture-only fields (for example the combat roll-inject queue); release `GameState` has no test inject members.
+`GameState` is the primary simulation container. Gameplay systems should mutate it explicitly and avoid shadow copies. In `TEST_MODE` builds only, it may include the roll-inject queue and `test_quiet_ticks`; release `GameState` has neither.
 
 ### `World` and `Room`
 

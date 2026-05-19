@@ -1,0 +1,3 @@
+@fixture quiet_explore
+wait
+quit

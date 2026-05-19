@@ -80,6 +80,7 @@ static void reset_mutable_state(struct GameState *game, int room_id, u32 tick)
     game->wanderer_return_tick = 0;
 #ifdef TEST_MODE
     game_roll_inject_clear(game);
+    game->test_quiet_ticks = 0;
 #endif
     for (i = 0; i < CFG_ROOM_MAX; ++i) {
         game->corpse_present[i] = 0;
@@ -415,7 +416,7 @@ static int apply_command(struct GameState *game, struct Command *cmd)
             }
             if (cmd->arg == 3) {
                 game->enemy_handover_pick = 0;
-                if ((rand() % CFG_ROLL_PERCENT_RANGE) < CFG_BANDIT_INTIMIDATE_SUCCESS_BELOW) {
+                if (game_roll_percent(game) < CFG_BANDIT_INTIMIDATE_SUCCESS_BELOW) {
                     render_msg_intimidate_success();
                     game_set_mode_explore(game);
                 } else {
@@ -453,6 +454,12 @@ static void advance_world_tick(struct GameState *game, int wanderer_moves_first)
 
     game->tick += 1;
     wanderer_update_separation(game);
+#ifdef TEST_MODE
+    if (game->test_quiet_ticks) {
+        world_step(&game->world, game->tick);
+        return;
+    }
+#endif
     if (!game->wanderer_active && game->tick >= game->wanderer_return_tick) {
         game->wanderer_active = 1;
         game->wanderer_room = rand() % game->world.room_count;

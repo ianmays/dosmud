@@ -23,6 +23,21 @@
 /* equipment bandit_combat_turn1_resolve: player hit spread, enemy damage spread */
 #define CFG_TEST_EQUIPMENT_ROLL_PLAYER_HIT 2
 #define CFG_TEST_EQUIPMENT_ROLL_ENEMY_DMG 3
+/* bandit intimidate: percent roll must be < CFG_BANDIT_INTIMIDATE_SUCCESS_BELOW to pass */
+#define CFG_TEST_INTIMIDATE_OK 10
+#define CFG_TEST_INTIMIDATE_FAIL 70
+/* combat_start enemy HP spread; defend/salve enemy damage spread */
+#define CFG_TEST_FIGHT_ENEMY_HP_SPREAD 0
+#define CFG_TEST_COMBAT_DEFEND_ENEMY_DMG 0
+#define CFG_TEST_COMBAT_SALVE_ENEMY_DMG 0
+/* victory: player hit spread, corpse loot percent, kill XP spread */
+#define CFG_TEST_VICTORY_HIT_SPREAD 0
+#define CFG_TEST_VICTORY_LOOT_SPEAR 10
+#define CFG_TEST_VICTORY_LOOT_STICK 30
+#define CFG_TEST_VICTORY_LOOT_BERRY 50
+#define CFG_TEST_VICTORY_LOOT_HERB 70
+#define CFG_TEST_VICTORY_LOOT_FISH 90
+#define CFG_TEST_VICTORY_XP_SPREAD 0
 #endif
 
 /* --- Gameplay tuning --- */
