@@ -11,10 +11,21 @@ Full workflow: [`AGENTS.md`](../../AGENTS.md). This rule covers mandatory **task
 
 When the user asks for the next task, to pick up work, or to start a new issue:
 
-1. **First action:** call `SwitchMode` with `target_mode_id: plan`. Do not research, edit files, branch, or run implementation commands before plan mode is active.
-2. If a GitHub issue applies: move it to **Planning** on the dosmud project board immediately after switching.
+1. **First action:** call `SwitchMode` with `target_mode_id: plan`.
+2. **Second action (same turn, before research):** if a GitHub issue applies, move it to **Planning** on the dosmud project board. Required even in plan mode - this is workflow metadata, not implementation. Never defer until plan approval.
 3. Stay in plan mode until the user confirms the plan or explicitly asks to execute (e.g. "go ahead", "implement", "execute the plan").
-4. In plan mode: gather context and produce a plan only - no file edits or non-readonly commands.
+4. In plan mode: gather context and produce a plan only. No repo file edits, branches, builds, or code changes.
+
+### Allowed in plan mode (workflow only)
+
+- GitHub project status transitions (Planning, In progress, Review)
+- Posting implementation plan comments on the linked issue
+- Read-only exploration (`gh issue view`, reading files, `git log`)
+
+### Not allowed in plan mode
+
+- Branch creation, code edits, commits, PRs
+- `make build`, `make test`, or other commands that change repo artifacts
 
 ## Before implementation
 

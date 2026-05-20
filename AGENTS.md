@@ -10,7 +10,7 @@ Guidance for AI/code agents working in this repository.
 
 ## Core Agent Rules (Non-Negotiable)
 
-- ALWAYS start in plan mode - then ALWAYS move the Issue to the Planning status immediately
+- ALWAYS start in plan mode - then IMMEDIATELY move the linked Issue to **Planning** (same response, before issue research or plan drafting)
 - ALWAYS check for an existing GitHub Issue before starting work.
 - NEVER modify or reopen Closed Issues.
 - ALWAYS create a branch before making changes.
@@ -24,6 +24,18 @@ Guidance for AI/code agents working in this repository.
 - NEVER introduce C99/C11 features or compiler-specific extensions.
 
 ## GitHub Workflow (dosmud project)
+
+### Task start checklist
+
+1. SwitchMode -> plan
+2. Select top Agent-ready issue (or confirm user-specified issue)
+3. Move issue to **Planning** on project board (same turn as step 1)
+4. Research and draft plan
+5. Post plan comment on issue
+6. Wait for user approval
+7. Move to **In progress** and create branch
+
+Plan mode forbids code and repo changes, but GitHub project status updates and issue comments are always allowed.
 
 ### Issue selection
 
@@ -41,7 +53,7 @@ Guidance for AI/code agents working in this repository.
 
 Do not skip workflow stages.
 
-- **Planning** - set as soon as planning/discussion begins
+- **Planning** - set in the same turn as `SwitchMode`, before issue research or plan drafting. Never defer until plan approval.
 - **In progress** - set before implementation work starts.
 - **Review** - set when the draft PR is opened.
 - **Done** - set only after merge and Issue closure.
