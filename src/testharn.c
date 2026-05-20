@@ -614,6 +614,12 @@ int testharn_apply(struct GameState *game, const char *line)
         fixture_env_focus(game, GAME_ENV_GRIT);
         return 1;
     }
+    if (fixture_name_is("bag_full_gate", name)) {
+        if (!game_inv_bag_add(game, ITEM_STICK)) {
+            return -2;
+        }
+        return 1;
+    }
     return -1;
 }
 

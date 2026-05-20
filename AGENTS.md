@@ -115,6 +115,7 @@ make build
 make check-layers
 make test
 make test-run
+make test-unit
 ```
 
 Cross-path validation when touching build/runtime behavior:
@@ -143,6 +144,7 @@ make dos-prepare MODE=TEST_MODE
 - `dos-prepare.ps1` executes through Windows PowerShell.
 - DOSBox-X launches on the Windows side.
 - `dos-prepare.local.ps1` stores machine-specific path configuration.
+- `dos-prepare.ps1` copies only `src/`, `include/`, and `build.bat` into the DOS tree (per-directory `robocopy`, not a repo-root mirror); `.git` and tests never belong in the Windows tree.
 - Do not assume the repository exists under `/mnt/c`.
 
 ## Documentation Ownership
@@ -178,12 +180,14 @@ make build
 make check-layers
 make test
 make test-run
+make test-unit
 ```
 
 Additional notes:
 - `make check-layers` rejects `printf` in core gameplay files.
 - `make test` builds with `-Werror -DTEST_MODE`.
-- `make test-run` executes deterministic snapshot tests.
+- `make test-run` executes deterministic snapshot tests under `tests/regression/`.
+- `make test-unit` builds `tests/unit/build/dosmud_unit` (greatest harness; see `docs/testing.md`).
 - DOS validation targets are unavailable in cloud VMs.
 - No lint tooling exists beyond GCC warning enforcement.
 - NEVER include co-author statements in commits.

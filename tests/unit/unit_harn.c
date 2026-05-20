@@ -1,0 +1,85 @@
+#include "greatest.h"
+#include "config.h"
+#include "game.h"
+#include "genc.h"
+#include "testharn.h"
+#include "unit_util.h"
+
+TEST harness_baseline_matches_start_fields(void)
+{
+    struct GameState game;
+
+    unit_game_fresh(&game, 999u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ROAD, 5);
+
+    ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
+    ASSERT_EQ(WORLD_ROOM_ROAD, game.player.room_id);
+    ASSERT_EQ(5u, game.tick);
+    ASSERT_EQ(CFG_START_LEVEL, game.level);
+    ASSERT_EQ(CFG_START_XP, game.xp);
+    ASSERT_EQ(CFG_START_MAX_HP, game.max_hp);
+    ASSERT_EQ(CFG_START_MAX_HP, game.player_hp);
+    ASSERT_EQ(0, game.bag_count);
+    ASSERT_EQ(1, game_roll_inject_fully_consumed(&game));
+    PASS();
+}
+
+TEST harness_enemy_begin_after_baseline(void)
+{
+    struct GameState game;
+
+    unit_game_fresh(&game, 1234u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    enemy_begin_encounter(&game);
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(DIALOGUE_ENEMY, game.dialogue);
+    PASS();
+}
+
+TEST harness_apply_unknown_fixture(void)
+{
+    struct GameState game;
+    int rc;
+
+    unit_game_fresh(&game, 1u);
+    rc = testharn_apply(&game, "@fixture no_such_thing");
+    ASSERT_EQ(-1, rc);
+    PASS();
+}
+
+TEST harness_apply_bag_full_returns_minus2(void)
+{
+    struct GameState game;
+    int rc;
+
+    unit_game_fresh(&game, 1u);
+    testharn_apply(&game, "@fixture at_camp");
+    game.bag_count = game.bag_capacity;
+    rc = testharn_apply(&game, "@fixture bag_full_gate");
+    ASSERT_EQ(-2, rc);
+    PASS();
+}
+
+TEST harness_seed_repeatable_rolls(void)
+{
+    struct GameState game;
+    int a;
+    int b;
+
+    unit_game_fresh(&game, 77u);
+    testharn_apply(&game, "@fixture at_camp");
+    plat_seed_rng(game.seed);
+    a = game_roll_percent(&game);
+    plat_seed_rng(game.seed);
+    b = game_roll_percent(&game);
+    ASSERT_EQ(a, b);
+    PASS();
+}
+
+SUITE(harness) {
+    RUN_TEST(harness_baseline_matches_start_fields);
+    RUN_TEST(harness_enemy_begin_after_baseline);
+    RUN_TEST(harness_apply_unknown_fixture);
+    RUN_TEST(harness_apply_bag_full_returns_minus2);
+    RUN_TEST(harness_seed_repeatable_rolls);
+}

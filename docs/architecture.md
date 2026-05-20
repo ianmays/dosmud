@@ -221,7 +221,8 @@ New `src/*.c` and `src/*.h` basenames must stay within **classic FAT 8+3** (at m
 - seed randomness once at startup (`plat_seed_rng` from `main`; combat uses `game_roll_*`, which calls `rand()` when inject is inactive)
 - evolve simulation via commands and background ticks
 - never tie simulation correctness to render cadence
-- snapshot tests combine fixtures (direct state), optional roll inject (`TEST_MODE` only), and a fixed default seed for remaining libc `rand()` paths; see [fixture design trade-offs](testing.md#fixture-design-trade-offs)
+- snapshot tests under `tests/regression/` combine fixtures (direct state), optional roll inject (`TEST_MODE` only), and a fixed default seed for remaining libc `rand()` paths; see [fixture design trade-offs](testing.md#fixture-design-trade-offs)
+- greatest unit tests under `tests/unit/` assert `GameState` and parse results (`make test-unit`); see [unit tests](testing.md#unit-tests-greatest)
 
 ## ANSI C89/C90 compatibility rules
 

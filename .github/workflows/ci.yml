@@ -23,3 +23,6 @@ jobs:
 
       - name: Deterministic test run
         run: make test-run
+
+      - name: Unit tests (greatest)
+        run: make test-unit
