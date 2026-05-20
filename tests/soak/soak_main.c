@@ -12,7 +12,7 @@ int main(int argc, char **argv)
     greatest_set_quiet(0);
     RUN_SUITE(soak);
     GREATEST_PRINT_REPORT();
-    return greatest_all_passed() ? 0 : 1;
     (void)argc;
     (void)argv;
+    return greatest_all_passed() ? 0 : 1;
 }
