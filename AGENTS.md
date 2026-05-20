@@ -72,12 +72,24 @@ Do not skip workflow stages.
 - ALWAYS use lower-case first character in PR titles and commit messages.
 - NEVER use prefixes like `docs:` in PR titles or commit messages.
 
-### Re-review workflow
+### After `git push` to a PR branch (mandatory)
 
-- If pushing follow-up commits to a non-draft PR:
- - ALWAYS leave the comment `review this` in the **same turn** as `git push` (see `.cursor/rules/agent-workflow.mdc`)
- - NEVER ask whether a re-review is needed
- - Draft PRs: skip until ready for review; every push after that requires the comment
+Whenever you `git push` and the branch has an open pull request:
+
+1. Run `gh pr view --json isDraft` (or check the PR on GitHub).
+2. If the PR is **not a draft**: in the **same turn** as the push, **before** you finish your message to the user, run:
+   `gh pr comment <number> --body "review this"`
+3. Use that exact body text only. NEVER ask whether re-review is needed.
+
+| PR state | `review this` required? |
+|----------|-------------------------|
+| Draft | No — skip until **Ready for review** |
+| Ready for review (non-draft) | Yes — **every** push, including review fixes and docs-only commits |
+| Project board **Review** + non-draft | Yes — same as ready for review |
+
+The first push after marking the PR ready for review starts this rule; it applies to all later pushes until merge.
+
+A missed `review this` comment is a **workflow failure** (same severity as skipping project status updates). Details: [`.cursor/rules/agent-workflow.mdc`](.cursor/rules/agent-workflow.mdc).
 
 ### Completion workflow
 
