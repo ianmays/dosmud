@@ -54,9 +54,12 @@ make check-layers
 make test
 make test-run
 make test-unit
+make test-soak
 ```
 
-Details: [Testing](docs/testing.md) (snapshots in `tests/regression/`, unit harness in `tests/unit/`).
+Full validation (snapshots, unit coverage, soak): `make test-all`.
+
+Details: [Testing](docs/testing.md) — snapshots in `tests/regression/`, fixture harness in `tests/harness/`, unit tests in `tests/unit/`, soak/stress in `tests/soak/`.
 
 DOS/Open Watcom path:
 
