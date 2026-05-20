@@ -37,6 +37,7 @@ static void unit_test_apply_verbosity(int level)
 {
     render_set_suppress(1);
     if (level >= UNIT_VERBOSE_GREATEST) {
+        greatest_set_quiet(0);
         greatest_set_verbosity(1);
     }
     if (level >= UNIT_VERBOSE_GAMEPLAY) {
