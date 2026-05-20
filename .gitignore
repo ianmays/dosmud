@@ -13,6 +13,10 @@ dos-prepare.local.ps1
 *.o
 *.obj
 
+# CI report script output (scripts/ci-test-report.sh)
+ci-test-report.md
+ci-test.log
+
 # Unit tests and coverage (make test-unit, make test-unit-coverage)
 tests/unit/build/
 *.gcov

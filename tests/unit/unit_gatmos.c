@@ -1,4 +1,5 @@
 #include "greatest.h"
+#include <stdlib.h>
 #include "config.h"
 #include "game.h"
 #include "gatmos.h"
@@ -52,18 +53,39 @@ TEST gatmos_animal_noise_tick_gate(void)
 {
     struct GameState game;
     u32 seed;
-    int emitted;
+    int r_skip;
+    int r_first;
+    int r_after;
+    int r_second;
 
-    emitted = 0;
+    reset_camp(&game);
+    game.tick = 1;
+    maybe_emit_animal_noise(&game);
+    r_skip = rand();
+
+    reset_camp(&game);
+    r_first = rand();
+    ASSERT_EQ(r_skip, r_first);
+
+    reset_camp(&game);
+    game.tick = 2;
+    maybe_emit_animal_noise(&game);
+    r_after = rand();
+
+    reset_camp(&game);
+    r_first = rand();
+    r_second = rand();
+    ASSERT_EQ(r_after, r_second);
+    if (r_skip == r_after) {
+        FAILm("tick period gate should call rand() only when tick matches");
+    }
+
     for (seed = 0; seed < 500u; ++seed) {
         reset_camp(&game);
         game.tick = 2;
         plat_seed_rng(seed);
         maybe_emit_animal_noise(&game);
-        emitted = 1;
-        break;
     }
-    ASSERT_EQ(1, emitted);
     PASS();
 }
 

@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
@@ -15,14 +19,19 @@ jobs:
       - name: Install build tools
         run: sudo apt-get update && sudo apt-get install -y gcc make
 
-      - name: Core/render layer guard
-        run: make check-layers
+      - name: Run tests and write report
+        id: ci_report
+        run: sh scripts/ci-test-report.sh
+        continue-on-error: true
 
-      - name: Strict build (TEST_MODE, -Werror)
-        run: make test
+      - name: Post test results on pull request
+        if: github.event_name == 'pull_request'
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body-path: ci-test-report.md
+          comment-tag: ci-test-results
 
-      - name: Deterministic test run
-        run: make test-run
-
-      - name: Unit tests (greatest)
-        run: make test-unit
+      - name: Fail if tests failed
+        if: steps.ci_report.outcome == 'failure'
+        run: exit 1

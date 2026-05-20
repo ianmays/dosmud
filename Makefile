@@ -118,8 +118,8 @@ test-unit-verbose-gameplay: $(UNIT_BIN)
 test-unit-coverage: test-unit
 	@mkdir -p $(UNIT_COVERAGE_DIR)
 	@echo "unit coverage (branch % / line %):"
-	@below=""; \
-	rows=""; \
+	@rm -f $(UNIT_COVERAGE_DIR)/.cov_rows; \
+	below=""; \
 	for f in $(COVERAGE_MODULES); do \
 		stats=$$(cd $(UNIT_COVERAGE_DIR) && gcov -b -o $(CURDIR)/$(UNIT_BUILD_DIR) $(CURDIR)/src/$$f.c 2>/dev/null | awk ' \
 			/^Lines executed:/ && !seen_l { seen_l=1; split($$2,a,":"); lnp=a[2]; gsub(/%/,"",lnp); lt=$$4+0; le=lt*lnp/100 } \
@@ -128,12 +128,14 @@ test-unit-coverage: test-unit
 		br=$$(echo $$stats | awk '{print $$1}'); \
 		ln=$$(echo $$stats | awk '{print $$2}'); \
 		printf "  %-10s %6s / %6s\n" "$$f" "$$br" "$$ln"; \
-		rows="$$rows$$stats\n"; \
+		printf '%s\n' "$$stats" >> $(UNIT_COVERAGE_DIR)/.cov_rows; \
 		if echo "$$br" | awk '{ exit !($$1+0 < 90) }'; then below="$$below $$f"; fi; \
 	done; \
-	echo ""; \
-	printf "%s" "$$rows" | awk '{ le+=$$3; lt+=$$4; be+=$$5; bt+=$$6 } END { \
-		if (lt > 0 && bt > 0) printf "  %-10s %6.2f / %6.2f\n", "overall", 100*be/bt, 100*le/lt }'; \
+	echo "  -------"; \
+	awk '{ le+=$$3; lt+=$$4; be+=$$5; bt+=$$6 } END { \
+		if (lt > 0 && bt > 0) printf "  %-10s %6.2f / %6.2f\n", "overall", 100*be/bt, 100*le/lt }' \
+		$(UNIT_COVERAGE_DIR)/.cov_rows; \
+	rm -f $(UNIT_COVERAGE_DIR)/.cov_rows; \
 	if [ -n "$$below" ]; then echo "below 90% branch:$$below"; fi
 
 test-unit-coverage-verbose:
