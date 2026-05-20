@@ -3,7 +3,7 @@ call \watcom\owsetenv
 
 set LOG=build.log
 set WFL=-bt=dos -I. -Iinclude -Isrc
-if "%1"=="TEST_MODE" set WFL=%WFL% -DTEST_MODE
+if "%1"=="TEST_MODE" set WFL=%WFL% -DTEST_MODE -Iharness
 
 echo dosmud Open Watcom build log > %LOG%
 echo. >> %LOG%
@@ -31,6 +31,7 @@ if exist items.obj del items.obj
 if exist txtres.obj del txtres.obj
 if exist platdos.obj del platdos.obj
 if exist tharn.obj del tharn.obj
+if exist thwld.obj del thwld.obj
 if exist gameplay.lib del gameplay.lib
 if exist dosmud.exe del dosmud.exe
 
@@ -110,9 +111,13 @@ wcl %WFL% -c -fo=txtres.obj src\txtres.c >> %LOG%
 if errorlevel 1 goto wcl_bad
 
 if not "%1"=="TEST_MODE" goto skip_testharn
+echo Compiling th_world.c ... >> %LOG%
+echo Compiling th_world.c ...
+wcl %WFL% -c -fo=thwld.obj harness\th_world.c >> %LOG%
+if errorlevel 1 goto wcl_bad
 echo Compiling testharn.c ... >> %LOG%
 echo Compiling testharn.c ...
-wcl %WFL% -c -fo=tharn.obj src\testharn.c >> %LOG%
+wcl %WFL% -c -fo=tharn.obj harness\testharn.c >> %LOG%
 if errorlevel 1 goto wcl_bad
 :skip_testharn
 
@@ -124,7 +129,7 @@ if errorlevel 1 goto wcl_bad
 wlib gameplay.lib +wanderer.obj +dialogue.obj +gatmos.obj >> %LOG%
 if errorlevel 1 goto wcl_bad
 if not "%1"=="TEST_MODE" goto wlib_done
-wlib gameplay.lib +tharn.obj >> %LOG%
+wlib gameplay.lib +thwld.obj +tharn.obj >> %LOG%
 :wlib_done
 if errorlevel 1 goto wcl_bad
 

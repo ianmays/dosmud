@@ -2,9 +2,11 @@ CC ?= gcc
 
 BASE_CFLAGS = -Wall -Wextra -Wshadow -Wstrict-prototypes -Wmissing-prototypes -std=c89 -pedantic -Iinclude -Isrc
 TEST_MODE_FLAG = TEST_MODE
-TEST_CFLAGS = $(BASE_CFLAGS) -Werror -D$(TEST_MODE_FLAG) -g -O0
+HARNESS_DIR = tests/harness
+TEST_CFLAGS = $(BASE_CFLAGS) -Werror -D$(TEST_MODE_FLAG) -g -O0 -I$(HARNESS_DIR)
 SRC = src/main.c src/platpos.c src/game.c src/gprog.c src/combat.c src/genc.c src/wanderer.c src/dialogue.c src/gatmos.c src/grendr.c src/invent.c src/command.c src/world.c src/items.c src/txtres.c
-TEST_SRC = $(SRC) src/testharn.c
+HARNESS_SRC = $(HARNESS_DIR)/testharn.c $(HARNESS_DIR)/th_world.c
+TEST_SRC = $(SRC) $(HARNESS_SRC)
 BIN = dosmud
 REGRESSION_DIR = tests/regression
 UNIT_DIR = tests/unit
@@ -75,9 +77,10 @@ UNIT_BUILD_DIR = tests/unit/build
 UNIT_COVERAGE_DIR = $(UNIT_BUILD_DIR)/coverage
 UNIT_BIN = $(UNIT_BUILD_DIR)/dosmud_unit
 UNIT_CFLAGS = $(TEST_CFLAGS) -I$(UNIT_DIR) -fprofile-arcs -ftest-coverage
-UNIT_CORE_SRC = src/platpos.c src/game.c src/gprog.c src/combat.c src/genc.c \
+UNIT_GAMEPLAY_SRC = src/platpos.c src/game.c src/gprog.c src/combat.c src/genc.c \
 	src/wanderer.c src/dialogue.c src/gatmos.c src/grendr.c src/invent.c \
-	src/command.c src/world.c src/items.c src/txtres.c src/testharn.c
+	src/command.c src/world.c src/items.c src/txtres.c
+UNIT_CORE_SRC = $(UNIT_GAMEPLAY_SRC) $(HARNESS_SRC)
 UNIT_TEST_SRC = $(UNIT_DIR)/unit_main.c $(UNIT_DIR)/unit_util.c $(UNIT_DIR)/unit_item.c \
 	$(UNIT_DIR)/unit_cmd.c $(UNIT_DIR)/unit_harn.c $(UNIT_DIR)/unit_inv.c $(UNIT_DIR)/unit_cbt.c \
 	$(UNIT_DIR)/unit_gprog.c $(UNIT_DIR)/unit_genc.c $(UNIT_DIR)/unit_dial.c $(UNIT_DIR)/unit_wandr.c \
@@ -102,6 +105,10 @@ $(UNIT_BUILD_DIR)/%.o: $(UNIT_DIR)/%.c
 	@mkdir -p $(UNIT_BUILD_DIR)
 	$(UNIT_CC_QUIET)$(CC) $(UNIT_CFLAGS) -c $< -o $@
 
+$(UNIT_BUILD_DIR)/%.o: $(HARNESS_DIR)/%.c
+	@mkdir -p $(UNIT_BUILD_DIR)
+	$(UNIT_CC_QUIET)$(CC) $(UNIT_CFLAGS) -c $< -o $@
+
 $(UNIT_BIN): $(UNIT_CORE_OBJS) $(UNIT_TEST_OBJS)
 	@mkdir -p $(UNIT_BUILD_DIR)
 	$(UNIT_LINK_ANNOUNCE)
@@ -122,7 +129,12 @@ test-unit-coverage: test-unit
 	@rm -f $(UNIT_COVERAGE_DIR)/.cov_rows; \
 	below=""; \
 	for f in $(COVERAGE_MODULES); do \
-		stats=$$(cd $(UNIT_COVERAGE_DIR) && gcov -b -o $(CURDIR)/$(UNIT_BUILD_DIR) $(CURDIR)/src/$$f.c 2>/dev/null | awk ' \
+		if [ "$$f" = "testharn" ]; then \
+			covsrc=$(CURDIR)/$(HARNESS_DIR)/testharn.c; \
+		else \
+			covsrc=$(CURDIR)/src/$$f.c; \
+		fi; \
+		stats=$$(cd $(UNIT_COVERAGE_DIR) && gcov -b -o $(CURDIR)/$(UNIT_BUILD_DIR) $$covsrc 2>/dev/null | awk ' \
 			/^Lines executed:/ && !seen_l { seen_l=1; split($$2,a,":"); lnp=a[2]; gsub(/%/,"",lnp); lt=$$4+0; le=lt*lnp/100 } \
 			/^Branches executed:/ && !seen_b { seen_b=1; split($$2,a,":"); brp=a[2]; gsub(/%/,"",brp); bt=$$4+0; be=bt*brp/100 } \
 			END { if (seen_l && seen_b) printf "%s %s %.6f %.0f %.6f %.0f\n", brp, lnp, le, lt, be, bt }'); \
@@ -144,15 +156,20 @@ test-unit-coverage-verbose:
 	@mkdir -p $(UNIT_COVERAGE_DIR)
 	@for f in $(COVERAGE_MODULES); do \
 		echo "=== $$f ==="; \
-		(cd $(UNIT_COVERAGE_DIR) && gcov -b -o $(CURDIR)/$(UNIT_BUILD_DIR) $(CURDIR)/src/$$f.c 2>/dev/null | grep -E '^File|^Lines|^Branches') || true; \
+		if [ "$$f" = "testharn" ]; then \
+			covsrc=$(CURDIR)/$(HARNESS_DIR)/testharn.c; \
+		else \
+			covsrc=$(CURDIR)/src/$$f.c; \
+		fi; \
+		(cd $(UNIT_COVERAGE_DIR) && gcov -b -o $(CURDIR)/$(UNIT_BUILD_DIR) $$covsrc 2>/dev/null | grep -E '^File|^Lines|^Branches') || true; \
 	done
 
-# Soak / stress tests (separate binary from unit tests; keep SOAK_CORE_SRC in sync with UNIT_CORE_SRC)
+# Soak / stress tests (separate binary; keep UNIT_GAMEPLAY_SRC in sync with gameplay objects above)
 SOAK_DIR = tests/soak
 SOAK_BUILD_DIR = $(SOAK_DIR)/build
 SOAK_BIN = $(SOAK_BUILD_DIR)/dosmud_soak
 SOAK_CFLAGS = $(TEST_CFLAGS) -I$(SOAK_DIR) -I$(UNIT_DIR)
-SOAK_CORE_SRC = $(UNIT_CORE_SRC)
+SOAK_CORE_SRC = $(UNIT_GAMEPLAY_SRC) $(HARNESS_DIR)/th_world.c
 SOAK_TEST_SRC = $(SOAK_DIR)/soak_main.c $(SOAK_DIR)/soak_sim.c $(SOAK_DIR)/soak_util.c \
 	$(UNIT_DIR)/unit_util.c
 SOAK_CORE_OBJS = $(addprefix $(SOAK_BUILD_DIR)/,$(notdir $(SOAK_CORE_SRC:.c=.o)))
@@ -163,6 +180,10 @@ $(SOAK_BUILD_DIR)/%.o: src/%.c
 	@$(CC) $(SOAK_CFLAGS) -c $< -o $@
 
 $(SOAK_BUILD_DIR)/%.o: $(SOAK_DIR)/%.c
+	@mkdir -p $(SOAK_BUILD_DIR)
+	@$(CC) $(SOAK_CFLAGS) -c $< -o $@
+
+$(SOAK_BUILD_DIR)/%.o: $(HARNESS_DIR)/%.c
 	@mkdir -p $(SOAK_BUILD_DIR)
 	@$(CC) $(SOAK_CFLAGS) -c $< -o $@
 

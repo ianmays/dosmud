@@ -20,7 +20,7 @@
 #ifdef TEST_MODE
 /* Injected roll queue for deterministic combat snapshots (see game_roll_inject_*). */
 #define CFG_ROLL_INJECT_MAX 8
-/* Fixed world graphs: testharn passes tables to world_apply_graph (see @fixture world_boot). */
+/* Fixed world graphs: tests/harness/th_world.c (see @fixture world_boot). */
 /* equipment bandit_combat_turn1_resolve: player hit spread, enemy damage spread */
 #define CFG_TEST_EQUIPMENT_ROLL_PLAYER_HIT 2
 #define CFG_TEST_EQUIPMENT_ROLL_ENEMY_DMG 3
@@ -43,6 +43,9 @@
 #define CFG_TEST_SOAK_TICKS 10000
 #define CFG_TEST_SOAK_COMBAT_ROUNDS 200
 #define CFG_TEST_SOAK_CHECK_INTERVAL 1000
+#define CFG_TEST_SOAK_LIMIT_BACKGROUND_TICKS 50000
+#define CFG_TEST_SOAK_LIMIT_COMMAND_TICKS 50000
+#define CFG_TEST_SOAK_LIMIT_COMBAT_ROUNDS 200000
 #endif
 
 /* --- Gameplay tuning --- */

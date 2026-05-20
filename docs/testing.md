@@ -38,17 +38,18 @@ Purpose:
 
 ```text
 tests/
-  regression/     # snapshot pairs: <name>.input, <name>.expect (generated <name>.output)
+  harness/        # testharn.c (@fixture DSL), th_world.c (seed-1234 graph); not in src/
+  regression/     # snapshot golden files only: <name>.input, <name>.expect
   unit/           # greatest harness: greatest.h, unit_*.c, unit_util.*
     build/        # generated: dosmud_unit, *.o, *.gcno, *.gcda (gitignored)
       coverage/   # *.gcov reports from make test-unit-coverage (gitignored)
-  soak/           # stress harness: soak_*.c (links unit_util.c for world boot only)
+  soak/           # stress harness: soak_*.c (links unit_util + th_world)
     build/        # generated: dosmud_soak (gitignored)
-  benchmarks/
-    soak_limits.txt   # max us_per_tick per soak scenario (CI regression guard)
 ```
 
-Snapshot regression lives under [`tests/regression/`](../tests/regression/). Unit sources live under [`tests/unit/`](../tests/unit/). Soak sources live under [`tests/soak/`](../tests/soak/). The unit binary and coverage profiles are written to [`tests/unit/build/`](../tests/unit/build/) (ignored by git). Release `dosmud` and snapshot `*.output` are also ignored via [`.gitignore`](../.gitignore).
+Snapshot regression lives under [`tests/regression/`](../tests/regression/) (data only). Fixture code lives under [`tests/harness/`](../tests/harness/). Unit sources live under [`tests/unit/`](../tests/unit/). Soak sources live under [`tests/soak/`](../tests/soak/). The unit binary and coverage profiles are written to [`tests/unit/build/`](../tests/unit/build/) (ignored by git). Release `dosmud` and snapshot `*.output` are also ignored via [`.gitignore`](../.gitignore).
+
+[`tests/harness/testharn.c`](../tests/harness/testharn.c) implements the `@fixture` / `@seed` DSL used by snapshot `.input` files and by unit tests in [`tests/unit/unit_tharn.c`](../tests/unit/unit_tharn.c). It is not snapshot-only.
 
 ## Unit tests (greatest)
 
@@ -105,17 +106,17 @@ Scenarios (see [`tests/soak/soak_sim.c`](../tests/soak/soak_sim.c)):
 | `soak_command_wait_move` | 10000 × alternate `wait` / `move north` with `test_quiet_ticks` |
 | `soak_combat_loop` | `CFG_TEST_SOAK_COMBAT_ROUNDS` (200) × one-hit combat victory with roll inject |
 
-Each scenario prints a machine-readable benchmark line:
+Each scenario prints a machine-readable benchmark line (limits come from `CFG_TEST_SOAK_LIMIT_*` in [`include/config.h`](../include/config.h)):
 
 ```text
-SOAK_BENCH <name> ticks=<n> us_per_tick=<u>
+SOAK_BENCH <name> ticks=<n> us_per_tick=<u> limit=<L>
 ```
 
-[`tests/benchmarks/soak_limits.txt`](../tests/benchmarks/soak_limits.txt) lists the maximum allowed `us_per_tick` (tab-separated). The test fails if measured time exceeds the limit. CI ([`scripts/ci-test-report.sh`](../scripts/ci-test-report.sh)) runs `make test-soak` as its own step and adds a **Soak benchmarks** table to the PR comment.
+The test fails if `us_per_tick` exceeds `limit`. CI ([`scripts/ci-test-report.sh`](../scripts/ci-test-report.sh)) runs `make test-soak` as its own step and parses `limit=` from the log for the PR **Soak benchmarks** table (no separate limits file).
 
-After intentional performance changes, run `make test-soak` locally and raise limits in `soak_limits.txt` only when the new baseline is expected (~2× measured on the CI runner is a reasonable starting margin).
+After intentional performance changes, run `make test-soak` locally and raise the matching `CFG_TEST_SOAK_LIMIT_*` macros only when the new baseline is expected (~2× measured on the CI runner is a reasonable starting margin). Coarse `clock()` resolution may report `us_per_tick=0` on fast runs; limits are regression guards, not micro-benchmarks.
 
-World boot for soak reuses [`tests/unit/unit_util.c`](../tests/unit/unit_util.c) (`unit_game_fresh`); keep that graph in sync with `testharn` `world_boot` when the default layout changes.
+World boot uses [`tests/harness/th_world.c`](../tests/harness/th_world.c) via [`tests/unit/unit_util.c`](../tests/unit/unit_util.c) (`unit_game_fresh` / `harness_world_boot_graph`). When `world_init` changes, update **one** graph in `th_world.c`.
 
 ## Test fixtures (`TEST_MODE` only)
 
@@ -217,11 +218,11 @@ Snapshots use three determinism levels:
 
 4. **Quiet ticks** - for tick-advancing commands in explore mode, use `quiet_explore` (see above).
 
-5. **World graph** (`TEST_MODE` only) - `@fixture world_boot` passes `th_world_snapshot_*` tables from [`src/testharn.c`](../src/testharn.c) into `world_apply_graph` (same pass-in style as roll data into `game_roll_inject_begin`). Unlike rolls, the graph is **not** cleared by `game_reset_fixture_baseline`; it persists until the next `world_boot` or a new process. When `world_init` changes and you want `world_boot` to match the default test seed layout, refresh those tables in testharn (they do not track generator changes automatically). Unit tests use a **duplicate** copy of the same seed-1234 graph in [`tests/unit/unit_util.c`](../tests/unit/unit_util.c) (`unit_world_*` via `unit_world_boot_graph`); update **both** when the default layout changes.
+5. **World graph** (`TEST_MODE` only) - `@fixture world_boot` calls `harness_world_boot_graph` in [`tests/harness/th_world.c`](../tests/harness/th_world.c) (seed-1234 layout). Unlike rolls, the graph is **not** cleared by `game_reset_fixture_baseline`; it persists until the next `world_boot` or a new process. Unit and soak tests use the same graph through `unit_world_boot_graph` in [`tests/unit/unit_util.c`](../tests/unit/unit_util.c). When `world_init` changes, refresh **only** `th_world.c`.
 
 Bandit intimidate in gameplay uses `game_roll_percent` (not raw `rand()`), so intimidate snapshots stay on the inject path.
 
-Add new fixtures in [`src/testharn.c`](../src/testharn.c) and document them here. `testharn` is linked only for `make test` / `dos-prepare MODE=TEST_MODE` and `make test-unit`, not for `make build`.
+Add new fixtures in [`tests/harness/testharn.c`](../tests/harness/testharn.c) and document them here. `testharn` + `th_world` are linked for `make test` / `dos-prepare MODE=TEST_MODE` and `make test-unit`, not for `make build` or `make test-soak` (soak links `th_world` only).
 
 | Fixture | Notes |
 |---------|--------|
@@ -274,7 +275,7 @@ make dos-run
 
 `make dos-run` expects a previously prepared DOS tree. Run `make dos-prepare` first if the mirrored DOS files or executable are missing.
 
-When you add or remove `src\*.c` files, update `Makefile` (`SRC` or `TEST_SRC`) and `build.bat`. For the Open Watcom path, keep every `wcl` and `wlib` line under the COMMAND.COM length limit (about 127 characters): gameplay sources are packed into `gameplay.lib` via several short `wlib` calls; the final `wcl` link lists `main.obj`, `platdos.obj`, `gameplay.lib`, plus the other `.obj` files. `TEST_MODE` compiles `testharn.c` to `tharn.obj` and appends it with a separate `wlib gameplay.lib +tharn.obj` line. Use `goto` labels in `build.bat` for conditionals; parenthesized `if (...)` blocks break under COMMAND.COM.
+When you add or remove `src\*.c` files, update `Makefile` (`SRC` or `TEST_SRC`) and `build.bat`. For the Open Watcom path, keep every `wcl` and `wlib` line under the COMMAND.COM length limit (about 127 characters): gameplay sources are packed into `gameplay.lib` via several short `wlib` calls; the final `wcl` link lists `main.obj`, `platdos.obj`, `gameplay.lib`, plus the other `.obj` files. `TEST_MODE` copies [`tests/harness/`](../tests/harness/) to `harness\` via `dos-prepare.ps1`, compiles `th_world.c` / `testharn.c` to `thwld.obj` / `tharn.obj`, and archives both into `gameplay.lib`. Use `goto` labels in `build.bat` for conditionals; parenthesized `if (...)` blocks break under COMMAND.COM.
 
 Deterministic DOS validation:
 

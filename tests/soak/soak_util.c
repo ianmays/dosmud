@@ -4,8 +4,19 @@
 #include "config.h"
 #include "game.h"
 
-#define SOAK_LIMITS_PATH "tests/benchmarks/soak_limits.txt"
-#define SOAK_LIMITS_LINE_MAX 128
+static unsigned long soak_limit_for_name(const char *name)
+{
+    if (strcmp(name, "background_ticks") == 0) {
+        return CFG_TEST_SOAK_LIMIT_BACKGROUND_TICKS;
+    }
+    if (strcmp(name, "command_ticks") == 0) {
+        return CFG_TEST_SOAK_LIMIT_COMMAND_TICKS;
+    }
+    if (strcmp(name, "combat_rounds") == 0) {
+        return CFG_TEST_SOAK_LIMIT_COMBAT_ROUNDS;
+    }
+    return 0;
+}
 
 int soak_assert_game_state_ok(const struct GameState *game)
 {
@@ -46,46 +57,29 @@ unsigned long soak_print_bench(const char *name, unsigned long ticks, clock_t el
 {
     unsigned long us;
     unsigned long us_per_tick;
+    unsigned long limit;
 
     if (ticks == 0) {
         ticks = 1;
     }
     us = (unsigned long)((elapsed * 1000000UL) / (clock_t)CLOCKS_PER_SEC);
     us_per_tick = us / ticks;
-    printf("SOAK_BENCH %s ticks=%lu us_per_tick=%lu\n",
-        name, ticks, us_per_tick);
+    limit = soak_limit_for_name(name);
+    printf("SOAK_BENCH %s ticks=%lu us_per_tick=%lu limit=%lu\n",
+        name, ticks, us_per_tick, limit);
     return us_per_tick;
 }
 
 int soak_check_limit(const char *name, unsigned long us_per_tick)
 {
-    FILE *fp;
-    char line[SOAK_LIMITS_LINE_MAX];
-    char scenario[64];
     unsigned long limit;
-    int found;
 
-    fp = fopen(SOAK_LIMITS_PATH, "r");
-    if (fp == NULL) {
+    limit = soak_limit_for_name(name);
+    if (limit == 0) {
         return 0;
     }
-    found = 0;
-    while (fgets(line, SOAK_LIMITS_LINE_MAX, fp) != NULL) {
-        if (line[0] == '#' || line[0] == '\n') {
-            continue;
-        }
-        if (sscanf(line, "%63s %lu", scenario, &limit) != 2) {
-            continue;
-        }
-        if (strcmp(scenario, name) == 0) {
-            found = 1;
-            if (us_per_tick > limit) {
-                fclose(fp);
-                return 0;
-            }
-            break;
-        }
+    if (us_per_tick > limit) {
+        return 0;
     }
-    fclose(fp);
-    return found;
+    return 1;
 }

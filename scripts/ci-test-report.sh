@@ -60,7 +60,7 @@ append_unit_row() {
 }
 
 append_soak_benchmark_section() {
-    if ! grep -q '^SOAK_BENCH' "$LOG"; then
+    if ! grep -q 'SOAK_BENCH ' "$LOG"; then
         failed=1
         return 1
     fi
@@ -71,10 +71,11 @@ append_soak_benchmark_section() {
         echo "| Scenario | measured | limit |"
         echo "|----------|----------|-------|"
     } >> "$REPORT"
-    grep '^SOAK_BENCH' "$LOG" | while read -r line; do
-        name=$(echo "$line" | sed -n 's/^SOAK_BENCH \([^ ]*\).*/\1/p')
-        us=$(echo "$line" | sed -n 's/.*us_per_tick=\([0-9]*\).*/\1/p')
-        limit=$(awk -v n="$name" '$1 == n { print $2; exit }' tests/benchmarks/soak_limits.txt)
+    grep 'SOAK_BENCH ' "$LOG" | while read -r line; do
+        bench=$(echo "$line" | sed 's/^[^S]*//')
+        name=$(echo "$bench" | sed -n 's/^SOAK_BENCH \([^ ]*\).*/\1/p')
+        us=$(echo "$bench" | sed -n 's/.*us_per_tick=\([0-9]*\).*/\1/p')
+        limit=$(echo "$bench" | sed -n 's/.*limit=\([0-9]*\).*/\1/p')
         if [ -z "$limit" ]; then
             limit="?"
         fi

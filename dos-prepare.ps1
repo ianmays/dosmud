@@ -70,6 +70,7 @@ if (-not $NoBuild) {
   # Copy only build.bat inputs (never repo-root .git, tests, docs, or Linux artifacts).
   Invoke-RobocopyOk 'src' (Join-Path $source 'src') (Join-Path $destination 'src') '/E'
   Invoke-RobocopyOk 'include' (Join-Path $source 'include') (Join-Path $destination 'include') '/E'
+  Invoke-RobocopyOk 'harness' (Join-Path $source 'tests\harness') (Join-Path $destination 'harness') '/E'
   Invoke-RobocopyOk 'build.bat' $source $destination 'build.bat'
   Remove-StaleDosMirrorExtras $destination
 

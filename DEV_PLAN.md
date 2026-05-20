@@ -261,7 +261,7 @@ Or manually: `./dosmud < tests/regression/<name>.input > tests/regression/<name>
 
 Done ✅.
 
-`TEST_MODE` builds link [`src/testharn.c`](src/testharn.c). Snapshot `.input` files use `@fixture <name>` for known state without RNG-walking setup. Canonical fixture and test lists: [`docs/testing.md`](docs/testing.md). #66 added the harness; #112 migrated brittle snapshots to fixtures and roll inject for `equipment`.
+`TEST_MODE` builds link [`tests/harness/testharn.c`](tests/harness/testharn.c) and [`tests/harness/th_world.c`](tests/harness/th_world.c). Snapshot `.input` files use `@fixture <name>` for known state without RNG-walking setup. Canonical fixture and test lists: [`docs/testing.md`](docs/testing.md). #66 added the harness; #112 migrated brittle snapshots to fixtures and roll inject for `equipment`.
 
 Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 
@@ -285,7 +285,7 @@ Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 | [#115](https://github.com/ianmays/dosmud/issues/115) | Done ✅: Phase A maximum snapshot coverage + RNG hardening ([`docs/testing.md`](docs/testing.md)) |
 | [#122](https://github.com/ianmays/dosmud/issues/122) | Done ✅: optional `@seed` harness directive for `.input` files |
 | [#95](https://github.com/ianmays/dosmud/issues/95) | Done ✅: greatest unit tests (PR [#127](https://github.com/ianmays/dosmud/pull/127)); **96%+** branch coverage on core modules |
-| [#116](https://github.com/ianmays/dosmud/issues/116) | Done ✅: soak harness (`tests/soak/`, `make test-soak`, `soak_limits.txt`, CI benchmark table) |
+| [#116](https://github.com/ianmays/dosmud/issues/116) | Done ✅: soak harness (`tests/soak/`, `make test-soak`, `CFG_TEST_SOAK_LIMIT_*`, CI benchmark table) |
 | [#113](https://github.com/ianmays/dosmud/issues/113) | Done ✅: wanderer snapshot fixtures |
 | [#114](https://github.com/ianmays/dosmud/issues/114) | Done ✅: custom world boot fixture |
 
@@ -305,7 +305,7 @@ Delivered in PR [#123](https://github.com/ianmays/dosmud/pull/123).
 
 - Bandit intimidate uses `game_roll_percent` (injectable in `TEST_MODE`).
 - `GameState.test_quiet_ticks` + `quiet_explore` fixture: tick-advancing tests skip atmosphere, animal noise, bandit ambush, and wanderer movement.
-- Extended [`src/testharn.c`](src/testharn.c): room fixtures, bag helpers, env focus, combat-ready/victory inject, intimidate/fight ready fixtures.
+- Extended [`tests/harness/testharn.c`](tests/harness/testharn.c): room fixtures, bag helpers, env focus, combat-ready/victory inject, intimidate/fight ready fixtures.
 
 **Tests**
 
@@ -345,7 +345,7 @@ Delivered in PR [#127](https://github.com/ianmays/dosmud/pull/127).
 
 **Docs**
 
-- [`docs/testing.md`](docs/testing.md) - unit layout, coverage levels, CI PR comment, duplicate `unit_world_*` graph note.
+- [`docs/testing.md`](docs/testing.md) - unit layout, coverage levels, CI PR comment, shared `th_world.c` graph.
 
 ---
 
