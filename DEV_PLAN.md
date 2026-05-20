@@ -269,7 +269,7 @@ Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 - **#115** Done ✅ - Phase A maximum snapshot coverage (PR [#123](https://github.com/ianmays/dosmud/pull/123)); details in the section below.
 - **#122** Done ✅ - optional `@seed <unsigned>` line in snapshot `.input` files (PR [#124](https://github.com/ianmays/dosmud/pull/124)).
 - **#95** Done ✅ - Phase B: greatest unit tests (PR [#127](https://github.com/ianmays/dosmud/pull/127)); **~96%** weighted branch coverage on core modules
-- **#116** (open) - Phase C: stress/soak (optional)
+- **#116** Done ✅ - Phase C: stress/soak harness (`make test-soak`, CI benchmarks)
 - **#113** Done ✅ - wanderer snapshot fixtures (`wanderer_dialogue` fixture; `wanderer_replies`, `wanderer_talk_blocked` snapshots)
 - **#114** Done ✅ - custom world boot fixture (`world_boot` / `world_linear`; `world_apply_graph` + harness tables in TEST_MODE)
 
@@ -285,15 +285,15 @@ Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 | [#115](https://github.com/ianmays/dosmud/issues/115) | Done ✅: Phase A maximum snapshot coverage + RNG hardening ([`docs/testing.md`](docs/testing.md)) |
 | [#122](https://github.com/ianmays/dosmud/issues/122) | Done ✅: optional `@seed` harness directive for `.input` files |
 | [#95](https://github.com/ianmays/dosmud/issues/95) | Done ✅: greatest unit tests (PR [#127](https://github.com/ianmays/dosmud/pull/127)); **96%+** branch coverage on core modules |
-| [#116](https://github.com/ianmays/dosmud/issues/116) | Phase C: stress/soak (10k ticks, combat loops; optional) |
+| [#116](https://github.com/ianmays/dosmud/issues/116) | Done ✅: soak harness (`tests/soak/`, `make test-soak`, `soak_limits.txt`, CI benchmark table) |
 | [#113](https://github.com/ianmays/dosmud/issues/113) | Done ✅: wanderer snapshot fixtures |
 | [#114](https://github.com/ianmays/dosmud/issues/114) | Done ✅: custom world boot fixture |
 
-**Sequencing:** #112, #115, #113, #114, #95 complete (PR [#127](https://github.com/ianmays/dosmud/pull/127)). Next: #116 when prioritized.
+**Sequencing:** #112, #115, #113, #114, #95, #116 complete (unit [#127](https://github.com/ianmays/dosmud/pull/127); soak on branch `issue-116-soak-benchmarks`).
 
 **Phase A (#115) delivered:** 59 snapshots in `SNAPSHOT_TESTS` plus `seed_cli` (60 total in `make test-run`). Combat defend/salve/victory/loot/level-up, all room NPC talk branches, eat/use/inspect variants, `quiet_explore` for wait/move/map, bandit fight/intimidate/bag-empty, loot tiers, meta commands. RNG: `game_roll_percent` for intimidate; `test_quiet_ticks`; `CFG_TEST_*` inject constants.
 
-**Still open under #40:** stress/soak (#116).
+**Still open under #40:** none (Phase C soak delivered with #116).
 
 ---
 

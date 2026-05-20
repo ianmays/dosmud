@@ -19,6 +19,7 @@ ci-test.log
 
 # Unit tests and coverage (make test-unit, make test-unit-coverage)
 tests/unit/build/
+tests/soak/build/
 *.gcov
 *.gcno
 *.gcda

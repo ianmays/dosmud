@@ -39,6 +39,10 @@
 #define CFG_TEST_VICTORY_LOOT_HERB 70
 #define CFG_TEST_VICTORY_LOOT_FISH 90
 #define CFG_TEST_VICTORY_XP_SPREAD 0
+/* soak / stress (tests/soak): long-run tick and combat loop counts */
+#define CFG_TEST_SOAK_TICKS 10000
+#define CFG_TEST_SOAK_COMBAT_ROUNDS 200
+#define CFG_TEST_SOAK_CHECK_INTERVAL 1000
 #endif
 
 /* --- Gameplay tuning --- */

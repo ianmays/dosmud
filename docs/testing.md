@@ -12,6 +12,7 @@ make check-layers
 make test
 make test-run
 make test-unit
+make test-soak
 ```
 
 Purpose:
@@ -21,6 +22,17 @@ Purpose:
 - `make test`: strict deterministic compile (`-Werror`, `-DTEST_MODE`, `-g -O0`); does not run `check-layers`
 - `make test-run`: builds the test binary (`make test`), then runs every name in `SNAPSHOT_TESTS` plus `seed_cli` (CLI `--seed` on `smoke.input`; see [Snapshot test files](#snapshot-test-files)). Each step prints `snapshot: <name>`. Finishes with `snapshot tests passed: N/M` (for example `60/60`).
 - `make test-unit`: builds and runs the greatest unit suite (`tests/unit/build/dosmud_unit`, `TEST_MODE` only; not linked into release `dosmud`)
+- `make test-soak`: builds and runs long-run soak/stress checks (`tests/soak/build/dosmud_soak`; separate from unit tests)
+
+## Test layers
+
+| Layer | Command | What it proves |
+|-------|---------|----------------|
+| Snapshots | `make test-run` | Player-visible output matches golden `.expect` files |
+| Unit tests | `make test-unit` | Small, targeted `GameState` / API behavior |
+| Soak tests | `make test-soak` | Fixed-seed long runs: state stays legal, perf within ceilings |
+
+`make test-all` runs check-layers, snapshots, unit coverage, then soak.
 
 ## Test layout
 
@@ -30,9 +42,13 @@ tests/
   unit/           # greatest harness: greatest.h, unit_*.c, unit_util.*
     build/        # generated: dosmud_unit, *.o, *.gcno, *.gcda (gitignored)
       coverage/   # *.gcov reports from make test-unit-coverage (gitignored)
+  soak/           # stress harness: soak_*.c (links unit_util.c for world boot only)
+    build/        # generated: dosmud_soak (gitignored)
+  benchmarks/
+    soak_limits.txt   # max us_per_tick per soak scenario (CI regression guard)
 ```
 
-Snapshot regression lives under [`tests/regression/`](../tests/regression/). Unit sources live under [`tests/unit/`](../tests/unit/). The unit binary and coverage profiles are written to [`tests/unit/build/`](../tests/unit/build/) (ignored by git). Release `dosmud` and snapshot `*.output` are also ignored via [`.gitignore`](../.gitignore).
+Snapshot regression lives under [`tests/regression/`](../tests/regression/). Unit sources live under [`tests/unit/`](../tests/unit/). Soak sources live under [`tests/soak/`](../tests/soak/). The unit binary and coverage profiles are written to [`tests/unit/build/`](../tests/unit/build/) (ignored by git). Release `dosmud` and snapshot `*.output` are also ignored via [`.gitignore`](../.gitignore).
 
 ## Unit tests (greatest)
 
@@ -72,6 +88,34 @@ make test-unit-coverage-verbose     # same tests, full gcov block per module
 **Out of scope for the unit coverage bar:** `grendr`, `txtres`, `main`, `platpos` / `platdos` (presentation and platform glue; snapshots cover render text)
 
 **Harness-only fixture:** `bag_full_gate` - applies `game_inv_bag_add` without resetting baseline; returns fixture failure (`-2`) when the bag is already full (used by unit tests for `testharn_apply` error paths)
+
+## Soak / stress tests (Phase C, [#116](https://github.com/ianmays/dosmud/issues/116))
+
+Separate binary from unit tests: `tests/soak/build/dosmud_soak` via `make test-soak`. Uses the same greatest runner and linked game modules as unit tests, but runs long fixed-seed loops and checks that `GameState` stays legal (HP, mode, room, bag, dialogue/combat fields).
+
+```sh
+make test-soak
+```
+
+Scenarios (see [`tests/soak/soak_sim.c`](../tests/soak/soak_sim.c)):
+
+| Test | Loop |
+|------|------|
+| `soak_background_ticks` | `CFG_TEST_SOAK_TICKS` (10000) × `game_background_step` with full wanderer/bandit/atmosphere |
+| `soak_command_wait_move` | 10000 × alternate `wait` / `move north` with `test_quiet_ticks` |
+| `soak_combat_loop` | `CFG_TEST_SOAK_COMBAT_ROUNDS` (200) × one-hit combat victory with roll inject |
+
+Each scenario prints a machine-readable benchmark line:
+
+```text
+SOAK_BENCH <name> ticks=<n> us_per_tick=<u>
+```
+
+[`tests/benchmarks/soak_limits.txt`](../tests/benchmarks/soak_limits.txt) lists the maximum allowed `us_per_tick` (tab-separated). The test fails if measured time exceeds the limit. CI ([`scripts/ci-test-report.sh`](../scripts/ci-test-report.sh)) runs `make test-soak` as its own step and adds a **Soak benchmarks** table to the PR comment.
+
+After intentional performance changes, run `make test-soak` locally and raise limits in `soak_limits.txt` only when the new baseline is expected (~2× measured on the CI runner is a reasonable starting margin).
+
+World boot for soak reuses [`tests/unit/unit_util.c`](../tests/unit/unit_util.c) (`unit_game_fresh`); keep that graph in sync with `testharn` `world_boot` when the default layout changes.
 
 ## Test fixtures (`TEST_MODE` only)
 

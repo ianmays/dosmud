@@ -59,6 +59,30 @@ append_unit_row() {
     fi
 }
 
+append_soak_benchmark_section() {
+    if ! grep -q '^SOAK_BENCH' "$LOG"; then
+        failed=1
+        return 1
+    fi
+    {
+        echo ""
+        echo "### Soak benchmarks (us per tick or round)"
+        echo ""
+        echo "| Scenario | measured | limit |"
+        echo "|----------|----------|-------|"
+    } >> "$REPORT"
+    grep '^SOAK_BENCH' "$LOG" | while read -r line; do
+        name=$(echo "$line" | sed -n 's/^SOAK_BENCH \([^ ]*\).*/\1/p')
+        us=$(echo "$line" | sed -n 's/.*us_per_tick=\([0-9]*\).*/\1/p')
+        limit=$(awk -v n="$name" '$1 == n { print $2; exit }' tests/benchmarks/soak_limits.txt)
+        if [ -z "$limit" ]; then
+            limit="?"
+        fi
+        echo "| $name | ${us} us | <= $limit |" >> "$REPORT"
+    done
+    return 0
+}
+
 append_coverage_section() {
     if ! grep -q '^unit coverage' "$LOG"; then
         echo "| unit coverage | **fail** |" >> "$REPORT"
@@ -106,6 +130,9 @@ else
     echo "| unit coverage | **fail** |" >> "$REPORT"
     failed=1
 fi
+
+run_step "soak tests" make test-soak || true
+append_soak_benchmark_section || true
 
 if [ "$failed" -ne 0 ]; then
     {

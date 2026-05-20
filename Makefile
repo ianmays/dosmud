@@ -24,6 +24,7 @@ test-all:
 	$(MAKE) dos-prepare MODE=$(TEST_MODE_FLAG)
 	$(MAKE) test-run
 	$(MAKE) test-unit-coverage
+	$(MAKE) test-soak
 
 # deterministic
 test:
@@ -146,9 +147,41 @@ test-unit-coverage-verbose:
 		(cd $(UNIT_COVERAGE_DIR) && gcov -b -o $(CURDIR)/$(UNIT_BUILD_DIR) $(CURDIR)/src/$$f.c 2>/dev/null | grep -E '^File|^Lines|^Branches') || true; \
 	done
 
+# Soak / stress tests (separate binary from unit tests; keep SOAK_CORE_SRC in sync with UNIT_CORE_SRC)
+SOAK_DIR = tests/soak
+SOAK_BUILD_DIR = $(SOAK_DIR)/build
+SOAK_BIN = $(SOAK_BUILD_DIR)/dosmud_soak
+SOAK_CFLAGS = $(TEST_CFLAGS) -I$(SOAK_DIR) -I$(UNIT_DIR)
+SOAK_CORE_SRC = $(UNIT_CORE_SRC)
+SOAK_TEST_SRC = $(SOAK_DIR)/soak_main.c $(SOAK_DIR)/soak_sim.c $(SOAK_DIR)/soak_util.c \
+	$(UNIT_DIR)/unit_util.c
+SOAK_CORE_OBJS = $(addprefix $(SOAK_BUILD_DIR)/,$(notdir $(SOAK_CORE_SRC:.c=.o)))
+SOAK_TEST_OBJS = $(addprefix $(SOAK_BUILD_DIR)/,$(notdir $(SOAK_TEST_SRC:.c=.o)))
+
+$(SOAK_BUILD_DIR)/%.o: src/%.c
+	@mkdir -p $(SOAK_BUILD_DIR)
+	@$(CC) $(SOAK_CFLAGS) -c $< -o $@
+
+$(SOAK_BUILD_DIR)/%.o: $(SOAK_DIR)/%.c
+	@mkdir -p $(SOAK_BUILD_DIR)
+	@$(CC) $(SOAK_CFLAGS) -c $< -o $@
+
+$(SOAK_BUILD_DIR)/unit_util.o: $(UNIT_DIR)/unit_util.c
+	@mkdir -p $(SOAK_BUILD_DIR)
+	@$(CC) $(SOAK_CFLAGS) -c $< -o $@
+
+$(SOAK_BIN): $(SOAK_CORE_OBJS) $(SOAK_TEST_OBJS)
+	@mkdir -p $(SOAK_BUILD_DIR)
+	@echo "building $(SOAK_BIN)..."
+	@$(CC) $(SOAK_CFLAGS) -o $@ $(SOAK_CORE_OBJS) $(SOAK_TEST_OBJS)
+
+test-soak: $(SOAK_BIN)
+	./$(SOAK_BIN)
+
 clean:
 	rm -f $(BIN)
 	rm -rf $(UNIT_BUILD_DIR)
+	rm -rf $(SOAK_BUILD_DIR)
 	rm -f $(REGRESSION_DIR)/*.output tests/*.output
 	rm -f dosmud_unit dosmud_unit-*.gcno dosmud_unit-*.gcda *.gcov src/*.gcno src/*.gcda
 
@@ -158,4 +191,4 @@ dos-prepare:
 dos-run:
 	powershell.exe -ExecutionPolicy Bypass -File dos-prepare.ps1 -NoBuild
 
-.PHONY: build-all build test-all test test-run test-unit test-unit-verbose test-unit-verbose-gameplay test-unit-coverage test-unit-coverage-verbose check-layers clean dos-prepare dos-run
+.PHONY: build-all build test-all test test-run test-unit test-unit-verbose test-unit-verbose-gameplay test-unit-coverage test-unit-coverage-verbose test-soak check-layers clean dos-prepare dos-run

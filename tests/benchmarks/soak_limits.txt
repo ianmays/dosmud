@@ -1,0 +1,4 @@
+# max us_per_tick (or us_per_round for combat_rounds); tab-separated name and limit
+background_ticks	50000
+command_ticks	50000
+combat_rounds	200000
