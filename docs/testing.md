@@ -36,7 +36,7 @@ Snapshot regression lives under [`tests/regression/`](../tests/regression/). Uni
 
 ## Unit tests (greatest)
 
-Phase B coverage ([#95](https://github.com/ianmays/dosmud/issues/95)) uses [greatest](https://github.com/silentbicycle/greatest) vendored as [`tests/unit/greatest.h`](../tests/unit/greatest.h).
+Phase B coverage ([#95](https://github.com/ianmays/dosmud/issues/95)) uses [greatest](https://github.com/silentbicycle/greatest) **1.5.0** vendored as [`tests/unit/greatest.h`](../tests/unit/greatest.h). Upstream MIT license stays in the header; a small dosmud patch adds quiet-by-default output (`greatest_set_quiet`, `GREATEST_FLAG_QUIET`) in a separate git commit from the unmodified vendor import.
 
 ```sh
 make test-unit
@@ -59,7 +59,7 @@ make test-unit-coverage-verbose     # same tests, full gcov block per module
 
 | Target | Output |
 |--------|--------|
-| `make test-unit-coverage` | Quiet `test-unit`, then one line per module (`branch % / line %`), weighted `overall` row, and `below 90% branch: ...` if any module misses the bar |
+| `make test-unit-coverage` | Quiet `test-unit`, then one line per module (`branch % / line %`), a `-------` separator, weighted `overall` row, and `below 90% branch: ...` if any module misses the bar |
 | `make test-unit-coverage-verbose` | `test-unit` with compile lines echoed, then `=== module ===` blocks with full `gcov` lines (for debugging gaps) |
 
 `make test-all` uses quiet `test-unit-coverage`. Run `make clean` before coverage if stale `.gcda` files produce libgcov checksum warnings.
@@ -173,7 +173,7 @@ Snapshots use three determinism levels:
 
 4. **Quiet ticks** - for tick-advancing commands in explore mode, use `quiet_explore` (see above).
 
-5. **World graph** (`TEST_MODE` only) - `@fixture world_boot` passes `th_world_snapshot_*` tables from [`src/testharn.c`](../src/testharn.c) into `world_apply_graph` (same pass-in style as roll data into `game_roll_inject_begin`). Unlike rolls, the graph is **not** cleared by `game_reset_fixture_baseline`; it persists until the next `world_boot` or a new process. When `world_init` changes and you want `world_boot` to match the default test seed layout, refresh those tables in testharn (they do not track generator changes automatically).
+5. **World graph** (`TEST_MODE` only) - `@fixture world_boot` passes `th_world_snapshot_*` tables from [`src/testharn.c`](../src/testharn.c) into `world_apply_graph` (same pass-in style as roll data into `game_roll_inject_begin`). Unlike rolls, the graph is **not** cleared by `game_reset_fixture_baseline`; it persists until the next `world_boot` or a new process. When `world_init` changes and you want `world_boot` to match the default test seed layout, refresh those tables in testharn (they do not track generator changes automatically). Unit tests use a **duplicate** copy of the same seed-1234 graph in [`tests/unit/unit_util.c`](../tests/unit/unit_util.c) (`unit_world_*` via `unit_world_boot_graph`); update **both** when the default layout changes.
 
 Bandit intimidate in gameplay uses `game_roll_percent` (not raw `rand()`), so intimidate snapshots stay on the inject path.
 
@@ -272,7 +272,7 @@ The Open Watcom build (`build.bat`) only needs `src/`, `include/`, and `build.ba
 
 ## CI (GitHub Actions)
 
-On `main` and pull requests, CI runs `make check-layers`, `make test`, `make test-run`, and `make test-unit` (see [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)). DOS prep is not run in CI.
+On `main` and pull requests, CI runs `scripts/ci-test-report.sh` (layer check, `make test`, `make test-run`, `make test-unit`, `make test-unit-coverage`; see [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)). On pull requests, results are posted or updated in a single PR comment (`comment-tag: ci-test-results`). DOS prep is not run in CI.
 
 ## Build artifacts
 

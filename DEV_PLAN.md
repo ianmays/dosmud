@@ -268,7 +268,7 @@ Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 - **#112** Done ✅ - migrated `equipment`, `area_items`, `craft_wielded`, `map`, `smoke` to fixtures; `seed_cli` still uses CLI `--seed` on `smoke.input`.
 - **#115** Done ✅ - Phase A maximum snapshot coverage (PR [#123](https://github.com/ianmays/dosmud/pull/123)); details in the section below.
 - **#122** Done ✅ - optional `@seed <unsigned>` line in snapshot `.input` files (PR [#124](https://github.com/ianmays/dosmud/pull/124)).
-- **#95** (open) - Phase B: unit tests via [greatest](https://github.com/silentbicycle/greatest); **~90%+ branch coverage** on core modules
+- **#95** Done ✅ - Phase B: greatest unit tests (PR [#127](https://github.com/ianmays/dosmud/pull/127)); **~96%** weighted branch coverage on core modules
 - **#116** (open) - Phase C: stress/soak (optional)
 - **#113** Done ✅ - wanderer snapshot fixtures (`wanderer_dialogue` fixture; `wanderer_replies`, `wanderer_talk_blocked` snapshots)
 - **#114** Done ✅ - custom world boot fixture (`world_boot` / `world_linear`; `world_apply_graph` + harness tables in TEST_MODE)
@@ -284,16 +284,16 @@ Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 | [#112](https://github.com/ianmays/dosmud/issues/112) | Done ✅: migrate 5 brittle snapshots to fixtures |
 | [#115](https://github.com/ianmays/dosmud/issues/115) | Done ✅: Phase A maximum snapshot coverage + RNG hardening ([`docs/testing.md`](docs/testing.md)) |
 | [#122](https://github.com/ianmays/dosmud/issues/122) | Done ✅: optional `@seed` harness directive for `.input` files |
-| [#95](https://github.com/ianmays/dosmud/issues/95) | Phase B: greatest unit tests; **~90%+ branch coverage** on core modules |
+| [#95](https://github.com/ianmays/dosmud/issues/95) | Done ✅: greatest unit tests (PR [#127](https://github.com/ianmays/dosmud/pull/127)); **96%+** branch coverage on core modules |
 | [#116](https://github.com/ianmays/dosmud/issues/116) | Phase C: stress/soak (10k ticks, combat loops; optional) |
 | [#113](https://github.com/ianmays/dosmud/issues/113) | Done ✅: wanderer snapshot fixtures |
 | [#114](https://github.com/ianmays/dosmud/issues/114) | Done ✅: custom world boot fixture |
 
-**Sequencing:** #112, #115, #113, #114 complete. Next: #95 in parallel; #116 when prioritized.
+**Sequencing:** #112, #115, #113, #114, #95 complete (PR [#127](https://github.com/ianmays/dosmud/pull/127)). Next: #116 when prioritized.
 
 **Phase A (#115) delivered:** 59 snapshots in `SNAPSHOT_TESTS` plus `seed_cli` (60 total in `make test-run`). Combat defend/salve/victory/loot/level-up, all room NPC talk branches, eat/use/inspect variants, `quiet_explore` for wait/move/map, bandit fight/intimidate/bag-empty, loot tiers, meta commands. RNG: `game_roll_percent` for intimidate; `test_quiet_ticks`; `CFG_TEST_*` inject constants.
 
-**Still open under #40:** greatest unit tests (#95), stress/soak (#116).
+**Still open under #40:** stress/soak (#116).
 
 ---
 
@@ -320,6 +320,32 @@ Delivered in PR [#123](https://github.com/ianmays/dosmud/pull/123).
 **Deferred (not #115):** world boot (#114), eat-heals-HP ([#105](https://github.com/ianmays/dosmud/issues/105)).
 
 **Unit scope (Phase B):** `command`, `invent`, `combat`, `game`, `genc`, `wanderer`, `dialogue`, `gatmos`, `world` (fixed graph), `gprog`, `items`, `testharn`. Out of scope: `grendr`, `txtres`, `main`, platform glue.
+
+---
+
+## #95 - Phase B unit tests (Done ✅)
+
+Delivered in PR [#127](https://github.com/ianmays/dosmud/pull/127).
+
+**Framework**
+
+- [greatest 1.5.0](https://github.com/silentbicycle/greatest/releases/tag/v1.5.0) vendored as [`tests/unit/greatest.h`](tests/unit/greatest.h) (upstream commit + dosmud quiet-output patch in a follow-up commit).
+- `make test-unit`, verbose/coverage targets; 88 unit tests; CI via [`scripts/ci-test-report.sh`](scripts/ci-test-report.sh) with PR result comment.
+
+**Coverage**
+
+- Weighted **95.7%** branch / **82.7%** line on in-scope modules (`make test-unit-coverage`).
+- `render_set_suppress` in `TEST_MODE` keeps default runs quiet; `--verbose-gameplay` restores render text.
+
+**Layout / tooling**
+
+- Snapshots under [`tests/regression/`](tests/regression/).
+- `dos-prepare.ps1` copies only `src/`, `include/`, `build.bat`.
+- Harness `bag_full_gate` fixture for `testharn_apply` `-2` paths.
+
+**Docs**
+
+- [`docs/testing.md`](docs/testing.md) - unit layout, coverage levels, CI PR comment, duplicate `unit_world_*` graph note.
 
 ---
 

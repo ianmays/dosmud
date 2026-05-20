@@ -43,23 +43,3 @@ void unit_game_fresh(struct GameState *game, u32 seed)
     unit_world_boot_graph(game);
     plat_seed_rng(seed);
 }
-
-void unit_game_baseline(struct GameState *game, int room_id, u32 tick)
-{
-    game_reset_fixture_baseline(game, room_id, tick);
-    plat_seed_rng(game->seed);
-}
-
-void unit_bag_fill(struct GameState *game)
-{
-    int i;
-
-    game->bag_count = 0;
-    for (i = 0; i < game->bag_capacity; ++i) {
-        game->bag[i] = ITEM_BERRY + (i % 9);
-        if (game->bag[i] == ITEM_NONE) {
-            game->bag[i] = ITEM_BERRY;
-        }
-        game->bag_count += 1;
-    }
-}
