@@ -1,0 +1,30 @@
+---
+description: Agent task start, plan mode, and GitHub project workflow for dosmud
+alwaysApply: true
+---
+
+# Agent workflow
+
+Full workflow: [`AGENTS.md`](../../AGENTS.md). This rule covers mandatory **task start** behaviour.
+
+## New task (mandatory first steps)
+
+When the user asks for the next task, to pick up work, or to start a new issue:
+
+1. **First action:** call `SwitchMode` with `target_mode_id: plan`. Do not research, edit files, branch, or run implementation commands before plan mode is active.
+2. If a GitHub issue applies: move it to **Planning** on the dosmud project board immediately after switching.
+3. Stay in plan mode until the user confirms the plan or explicitly asks to execute (e.g. "go ahead", "implement", "execute the plan").
+4. In plan mode: gather context and produce a plan only - no file edits or non-readonly commands.
+
+## Before implementation
+
+- Confirm an open issue exists; never modify closed issues.
+- Post agreed implementation details as an issue comment, then move **Planning** to **In progress**.
+- Create a branch before any code changes.
+- Prefer the top **Agent-ready** issue when the user asks for the next task.
+
+## Before opening a PR
+
+- Mark related work in `DEV_PLAN.md`.
+- Open a **draft** PR linked to the issue; move project status to **Review**.
+- Match PR labels to the issue; follow PR title/commit rules in `AGENTS.md`.

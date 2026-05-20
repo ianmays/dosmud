@@ -1,0 +1,10 @@
+---
+description: Keep documentation aligned when the codebase or developer expectations change
+alwaysApply: true
+---
+
+# Documentation discipline
+
+- Update related documentation when architecture, tooling, workflows, or developer expectations change.
+- Check whether docs need updates before finishing a task; prefer linking over duplicating large blocks (see `AGENTS.md` documentation ownership).
+- Avoid introducing temporary behaviour, TODOs, or partial systems without documenting intent and follow-up work.
