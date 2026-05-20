@@ -240,36 +240,7 @@ void world_init(struct World *world)
 }
 
 #ifdef TEST_MODE
-/*
- * Fixed room graph for snapshot tests (seed 1234 layout from world_init).
- * Exits: index 0..3 = north, south, east, west.
- */
-static const int snapshot_exits[CFG_ROOM_MAX][CFG_DIR_MAX] = {
-    {  1,  7, -1,  8 },
-    { -1,  0, -1, 13 },
-    { -1,  8, 14, -1 },
-    { -1, -1,  8, -1 },
-    { 12, 15, 11, -1 },
-    { 15, -1, -1, -1 },
-    { -1, -1, -1, 15 },
-    {  0, -1, -1, -1 },
-    {  2, -1,  0,  3 },
-    { -1, 10, 13, -1 },
-    {  9, 14, 15, -1 },
-    { -1, -1, -1,  4 },
-    { -1,  4, -1, -1 },
-    { -1, -1,  1,  9 },
-    { 10, -1, -1,  2 },
-    {  4,  5,  6, 10 }
-};
-
-static const int snapshot_map_x[CFG_ROOM_MAX] = {
-    2, 2, 2, 0, 0, -1, 1, 2, 1, 0, -1, 1, 0, 1, -1, 0
-};
-
-static const int snapshot_map_y[CFG_ROOM_MAX] = {
-    0, -1, -3, 0, -3, -3, -2, 1, 0, -1, -2, -3, -4, -1, -1, -2
-};
+/* Apply harness-supplied room graph (see world_apply_graph). */
 
 static void world_reset_graph(struct World *world)
 {
@@ -292,21 +263,21 @@ static void world_reset_graph(struct World *world)
     }
 }
 
-void world_init_fixture(struct World *world, int preset)
+void world_apply_graph(struct World *world,
+    const int exits[CFG_ROOM_MAX][CFG_DIR_MAX],
+    const int map_x[CFG_ROOM_MAX],
+    const int map_y[CFG_ROOM_MAX])
 {
     int i;
     int d;
 
-    if (preset != WORLD_FIXTURE_SNAPSHOT) {
-        return;
-    }
     world_reset_graph(world);
     for (i = 0; i < CFG_ROOM_MAX; ++i) {
         for (d = 0; d < DIR_NONE; ++d) {
-            world->rooms[i].exits[d] = snapshot_exits[i][d];
+            world->rooms[i].exits[d] = exits[i][d];
         }
-        world->map_x[i] = snapshot_map_x[i];
-        world->map_y[i] = snapshot_map_y[i];
+        world->map_x[i] = map_x[i];
+        world->map_y[i] = map_y[i];
         world->map_ready[i] = 1;
     }
 }

@@ -270,7 +270,7 @@ Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 - **#95** (open) - Phase B: unit tests via [greatest](https://github.com/silentbicycle/greatest); **~90%+ branch coverage** on core modules
 - **#116** (open) - Phase C: stress/soak (optional)
 - **#113** Done ✅ - wanderer snapshot fixtures (`wanderer_dialogue` fixture; `wanderer_replies`, `wanderer_talk_blocked` snapshots)
-- **#114** Done ✅ - custom world boot fixture (`world_boot` / `world_linear`; `world_init_fixture` in TEST_MODE)
+- **#114** Done ✅ - custom world boot fixture (`world_boot` / `world_linear`; `world_apply_graph` + harness tables in TEST_MODE)
 
 ---
 

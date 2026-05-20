@@ -57,7 +57,7 @@ Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_
 
 | Fixture | State |
 |---------|--------|
-| `world_boot` | Replace `World` graph with fixed seed-1234 layout (`world_init_fixture`); does not reset player state |
+| `world_boot` | Replace `World` graph via `world_apply_graph` with harness-owned seed-1234 tables; does not reset player state |
 | `world_linear` | Same graph as `world_boot` (alias until a slimmer preset exists) |
 | `at_camp` | Camp, tick 0, explore, camp explored on map |
 | `at_road` | Road, tick 1, explore, camp and road explored on map |
@@ -119,6 +119,8 @@ Snapshots use three determinism levels:
 3. **Seed reset** - after each `@fixture` or `@seed`, `main.c` calls `plat_seed_rng(game.seed)` for stream isolation between harness blocks. Do not rely on seed alone for asserted mechanics; use inject or teleport.
 
 4. **Quiet ticks** - for tick-advancing commands in explore mode, use `quiet_explore` (see above).
+
+5. **World graph** (`TEST_MODE` only) - `@fixture world_boot` passes `th_world_snapshot_*` tables from [`src/testharn.c`](../src/testharn.c) into `world_apply_graph` (same pass-in style as roll data into `game_roll_inject_begin`). Unlike rolls, the graph is **not** cleared by `game_reset_fixture_baseline`; it persists until the next `world_boot` or a new process. When `world_init` changes and you want `world_boot` to match the default test seed layout, refresh those tables in testharn (they do not track generator changes automatically).
 
 Bandit intimidate in gameplay uses `game_roll_percent` (not raw `rand()`), so intimidate snapshots stay on the inject path.
 
