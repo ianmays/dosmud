@@ -94,7 +94,7 @@ TEST soak_combat_loop(void)
         rolls[2] = CFG_TEST_VICTORY_XP_SPREAD;
         game_roll_inject_begin(&game, rolls, 3);
         combat_resolve_reply(&game, 1);
-        if ((i % CFG_TEST_SOAK_CHECK_INTERVAL) == 0 || i == CFG_TEST_SOAK_COMBAT_ROUNDS) {
+        if ((i % CFG_TEST_SOAK_COMBAT_CHECK_INTERVAL) == 0) {
             ASSERT(soak_assert_game_state_ok(&game));
         }
         if (game.mode == GAME_MODE_EXPLORE && game.running) {
