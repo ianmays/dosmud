@@ -39,3 +39,15 @@ When the user asks for the next task, to pick up work, or to start a new issue:
 - Mark related work in `DEV_PLAN.md`.
 - Open a **draft** PR linked to the issue; move project status to **Review**.
 - Match PR labels to the issue; follow PR title/commit rules in `AGENTS.md`.
+
+## After pushing to an open PR (mandatory)
+
+Applies whenever you `git push` new commits to a branch that already has an open pull request.
+
+1. Check whether the PR is still a **draft** (`gh pr view --json isDraft`).
+2. If **not** a draft: in the **same turn** as the push (before ending your response), run:
+   `gh pr comment <number> --body "review this"`
+3. Use that exact body text only. Do not ask whether re-review is needed.
+4. **Draft PRs:** skip until the PR is marked ready for review; after the first push to a ready (non-draft) PR, apply step 2 on every later push.
+
+Treat a missed `review this` comment as a workflow failure, same as skipping project status updates.

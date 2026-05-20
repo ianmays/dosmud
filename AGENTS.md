@@ -75,8 +75,9 @@ Do not skip workflow stages.
 ### Re-review workflow
 
 - If pushing follow-up commits to a non-draft PR:
-  - ALWAYS leave the comment `review this`
-  - NEVER ask whether a re-review is needed
+ - ALWAYS leave the comment `review this` in the **same turn** as `git push` (see `.cursor/rules/agent-workflow.mdc`)
+ - NEVER ask whether a re-review is needed
+ - Draft PRs: skip until ready for review; every push after that requires the comment
 
 ### Completion workflow
 
