@@ -275,25 +275,25 @@ Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 
 ---
 
-## #40 - Gameplay test coverage (umbrella epic)
+## #40 - Gameplay test coverage (umbrella epic) — Done ✅
 
-**[#40](https://github.com/ianmays/dosmud/issues/40)** tracks overall coverage; implementation is split across child issues (no single mega-PR).
+**[#40](https://github.com/ianmays/dosmud/issues/40)** tracked overall coverage; work landed via child issues (no mega-PR on #40). **Epic complete** as of merge of [#116](https://github.com/ianmays/dosmud/issues/116) (PR [#133](https://github.com/ianmays/dosmud/pull/133)).
 
 | Issue | Role |
 |-------|------|
 | [#112](https://github.com/ianmays/dosmud/issues/112) | Done ✅: migrate 5 brittle snapshots to fixtures |
-| [#115](https://github.com/ianmays/dosmud/issues/115) | Done ✅: Phase A maximum snapshot coverage + RNG hardening ([`docs/testing.md`](docs/testing.md)) |
-| [#122](https://github.com/ianmays/dosmud/issues/122) | Done ✅: optional `@seed` harness directive for `.input` files |
-| [#95](https://github.com/ianmays/dosmud/issues/95) | Done ✅: greatest unit tests (PR [#127](https://github.com/ianmays/dosmud/pull/127)); **96%+** branch coverage on core modules |
-| [#116](https://github.com/ianmays/dosmud/issues/116) | Done ✅: soak harness (`tests/soak/`, `make test-soak`, `CFG_TEST_SOAK_LIMIT_*`, CI benchmark table) |
 | [#113](https://github.com/ianmays/dosmud/issues/113) | Done ✅: wanderer snapshot fixtures |
 | [#114](https://github.com/ianmays/dosmud/issues/114) | Done ✅: custom world boot fixture |
+| [#115](https://github.com/ianmays/dosmud/issues/115) | Done ✅: Phase A maximum snapshot coverage + RNG hardening ([`docs/testing.md`](docs/testing.md)) |
+| [#122](https://github.com/ianmays/dosmud/issues/122) | Done ✅: optional `@seed` harness directive for `.input` files |
+| [#95](https://github.com/ianmays/dosmud/issues/95) | Done ✅: Phase B greatest unit tests (PR [#127](https://github.com/ianmays/dosmud/pull/127)); **96%+** branch coverage on core modules |
+| [#116](https://github.com/ianmays/dosmud/issues/116) | Done ✅: Phase C soak (`make test-soak`, PR [#133](https://github.com/ianmays/dosmud/pull/133)) |
 
-**Sequencing:** #112, #115, #113, #114, #95, #116 complete (unit [#127](https://github.com/ianmays/dosmud/pull/127); soak on branch `issue-116-soak-benchmarks`).
+**Three layers (see [`docs/testing.md`](docs/testing.md)):** snapshots (`make test-run`), unit tests (`make test-unit`), soak/stress (`make test-soak`). `make test-all` runs check-layers, snapshots, unit coverage, and soak.
 
 **Phase A (#115) delivered:** 59 snapshots in `SNAPSHOT_TESTS` plus `seed_cli` (60 total in `make test-run`). Combat defend/salve/victory/loot/level-up, all room NPC talk branches, eat/use/inspect variants, `quiet_explore` for wait/move/map, bandit fight/intimidate/bag-empty, loot tiers, meta commands. RNG: `game_roll_percent` for intimidate; `test_quiet_ticks`; `CFG_TEST_*` inject constants.
 
-**Still open under #40:** none (Phase C soak delivered with #116).
+**Harness layout (final):** fixture DSL and `@seed` in [`tests/harness/testharn.c`](tests/harness/testharn.c); seed-1234 world graph in [`tests/harness/th_world.c`](tests/harness/th_world.c) (shared by snapshots, unit, soak).
 
 ---
 
@@ -346,6 +346,26 @@ Delivered in PR [#127](https://github.com/ianmays/dosmud/pull/127).
 **Docs**
 
 - [`docs/testing.md`](docs/testing.md) - unit layout, coverage levels, CI PR comment, shared `th_world.c` graph.
+
+---
+
+## #116 - Phase C soak / stress tests (Done ✅)
+
+Delivered in PR [#133](https://github.com/ianmays/dosmud/pull/133).
+
+**Harness**
+
+- Separate binary `tests/soak/build/dosmud_soak` via `make test-soak` (not linked into `make test-unit`).
+- Long fixed-seed loops with `soak_assert_game_state_ok`; combat uses `CFG_TEST_SOAK_COMBAT_CHECK_INTERVAL` (50) over 200 rounds.
+
+**Benchmarks**
+
+- `SOAK_BENCH` lines with `us_per_tick` and `limit=` from `CFG_TEST_SOAK_LIMIT_*` in `config.h`.
+- [`scripts/ci-test-report.sh`](scripts/ci-test-report.sh) soak step + PR benchmark table (parsed from log).
+
+**Related cleanup in #133**
+
+- `testharn` moved from `src/` to `tests/harness/`; `dos-prepare.ps1` copies `tests/harness` for DOS `TEST_MODE`.
 
 ---
 
