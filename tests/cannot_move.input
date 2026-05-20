@@ -1,3 +1,4 @@
+@fixture world_boot
 @fixture at_camp
 move east
 quit

@@ -12,6 +12,7 @@
 #include "items.h"
 #include "combat.h"
 #include "wanderer.h"
+#include "world.h"
 #include "testharn.h"
 
 static void camp_clear_ground(struct GameState *game)
@@ -169,6 +170,45 @@ static int fixture_bandit_fight_ready(struct GameState *game)
     }
     game_roll_inject_begin(game, rolls, 1);
     return 1;
+}
+
+/*
+ * Seed-1234 room graph for @fixture world_boot (captured from world_init).
+ * Exits: index 0..3 = north, south, east, west.
+ */
+static const int th_world_snapshot_exits[CFG_ROOM_MAX][CFG_DIR_MAX] = {
+    {  1,  7, -1,  8 },
+    { -1,  0, -1, 13 },
+    { -1,  8, 14, -1 },
+    { -1, -1,  8, -1 },
+    { 12, 15, 11, -1 },
+    { 15, -1, -1, -1 },
+    { -1, -1, -1, 15 },
+    {  0, -1, -1, -1 },
+    {  2, -1,  0,  3 },
+    { -1, 10, 13, -1 },
+    {  9, 14, 15, -1 },
+    { -1, -1, -1,  4 },
+    { -1,  4, -1, -1 },
+    { -1, -1,  1,  9 },
+    { 10, -1, -1,  2 },
+    {  4,  5,  6, 10 }
+};
+
+static const int th_world_snapshot_map_x[CFG_ROOM_MAX] = {
+    2, 2, 2, 0, 0, -1, 1, 2, 1, 0, -1, 1, 0, 1, -1, 0
+};
+
+static const int th_world_snapshot_map_y[CFG_ROOM_MAX] = {
+    0, -1, -3, 0, -3, -3, -2, 1, 0, -1, -2, -3, -4, -1, -1, -2
+};
+
+static void fixture_world_boot(struct GameState *game)
+{
+    world_apply_graph(&game->world,
+        th_world_snapshot_exits,
+        th_world_snapshot_map_x,
+        th_world_snapshot_map_y);
 }
 
 static void fixture_at_camp(struct GameState *game)
@@ -452,6 +492,14 @@ int testharn_apply(struct GameState *game, const char *line)
     }
     if (fixture_name_is("bandit_victory_fish", name)) {
         fixture_bandit_victory_inject(game, CFG_TEST_VICTORY_LOOT_FISH);
+        return 1;
+    }
+    if (fixture_name_is("world_boot", name)) {
+        fixture_world_boot(game);
+        return 1;
+    }
+    if (fixture_name_is("world_linear", name)) {
+        fixture_world_boot(game);
         return 1;
     }
     if (fixture_name_is("at_camp", name)) {

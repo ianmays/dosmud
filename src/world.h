@@ -33,6 +33,12 @@ struct World {
 };
 
 void world_init(struct World *world);
+#ifdef TEST_MODE
+void world_apply_graph(struct World *world,
+    const int exits[CFG_ROOM_MAX][CFG_DIR_MAX],
+    const int map_x[CFG_ROOM_MAX],
+    const int map_y[CFG_ROOM_MAX]);
+#endif
 void world_step(struct World *world, u32 tick);
 int world_can_move(struct World *world, int room_id, int dir);
 int world_move(struct World *world, int room_id, int dir);

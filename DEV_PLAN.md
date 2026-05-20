@@ -270,7 +270,7 @@ Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 - **#95** (open) - Phase B: unit tests via [greatest](https://github.com/silentbicycle/greatest); **~90%+ branch coverage** on core modules
 - **#116** (open) - Phase C: stress/soak (optional)
 - **#113** Done ✅ - wanderer snapshot fixtures (`wanderer_dialogue` fixture; `wanderer_replies`, `wanderer_talk_blocked` snapshots)
-- **#114** (open) - custom world boot fixture for deterministic snapshots
+- **#114** Done ✅ - custom world boot fixture (`world_boot` / `world_linear`; `world_apply_graph` + harness tables in TEST_MODE)
 
 ---
 
@@ -286,13 +286,13 @@ Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 | [#95](https://github.com/ianmays/dosmud/issues/95) | Phase B: greatest unit tests; **~90%+ branch coverage** on core modules |
 | [#116](https://github.com/ianmays/dosmud/issues/116) | Phase C: stress/soak (10k ticks, combat loops; optional) |
 | [#113](https://github.com/ianmays/dosmud/issues/113) | Done ✅: wanderer snapshot fixtures |
-| [#114](https://github.com/ianmays/dosmud/issues/114) | Custom world boot fixture |
+| [#114](https://github.com/ianmays/dosmud/issues/114) | Done ✅: custom world boot fixture |
 
-**Sequencing:** #112, #115, #113 complete. Next: #114 as needed; #95 in parallel; #116 when prioritized.
+**Sequencing:** #112, #115, #113, #114 complete. Next: #95 in parallel; #116 when prioritized.
 
 **Phase A (#115) delivered:** 59 snapshots in `SNAPSHOT_TESTS` plus `seed_cli` (60 total in `make test-run`). Combat defend/salve/victory/loot/level-up, all room NPC talk branches, eat/use/inspect variants, `quiet_explore` for wait/move/map, bandit fight/intimidate/bag-empty, loot tiers, meta commands. RNG: `game_roll_percent` for intimidate; `test_quiet_ticks`; `CFG_TEST_*` inject constants.
 
-**Still open under #40:** custom world boot (#114), greatest unit tests (#95), stress/soak (#116).
+**Still open under #40:** greatest unit tests (#95), stress/soak (#116).
 
 ---
 

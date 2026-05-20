@@ -239,6 +239,50 @@ void world_init(struct World *world)
     }
 }
 
+#ifdef TEST_MODE
+/* Apply harness-supplied room graph (see world_apply_graph). */
+
+static void world_reset_graph(struct World *world)
+{
+    int i;
+    int d;
+
+    world->room_count = CFG_ROOM_MAX;
+    for (i = 0; i < CFG_ROOM_MAX; ++i) {
+        room_set_meta(&world->rooms[i],
+            g_room_names[i],
+            g_room_descs[i],
+            g_room_animals[i],
+            g_room_noises[i]);
+        world->map_x[i] = 0;
+        world->map_y[i] = 0;
+        world->map_ready[i] = 0;
+        for (d = 0; d < DIR_NONE; ++d) {
+            world->rooms[i].exits[d] = -1;
+        }
+    }
+}
+
+void world_apply_graph(struct World *world,
+    const int exits[CFG_ROOM_MAX][CFG_DIR_MAX],
+    const int map_x[CFG_ROOM_MAX],
+    const int map_y[CFG_ROOM_MAX])
+{
+    int i;
+    int d;
+
+    world_reset_graph(world);
+    for (i = 0; i < CFG_ROOM_MAX; ++i) {
+        for (d = 0; d < DIR_NONE; ++d) {
+            world->rooms[i].exits[d] = exits[i][d];
+        }
+        world->map_x[i] = map_x[i];
+        world->map_y[i] = map_y[i];
+        world->map_ready[i] = 1;
+    }
+}
+#endif /* TEST_MODE */
+
 void world_step(struct World *world, u32 tick)
 {
     (void)world;
