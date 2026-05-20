@@ -11,6 +11,11 @@
 
 struct GameState;
 
+#ifdef TEST_MODE
+/* Suppress render printf during unit tests (snapshots leave this off). */
+void render_set_suppress(int on);
+#endif
+
 void game_print_location_art(int room_id);
 void render_room_look(struct GameState *game, int npc_in_room_hint);
 void render_exploration_map(struct GameState *game);

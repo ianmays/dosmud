@@ -11,6 +11,7 @@ make build
 make check-layers
 make test
 make test-run
+make test-unit
 ```
 
 Purpose:
@@ -18,7 +19,59 @@ Purpose:
 - `make build`: native GCC development build
 - `make check-layers`: core/render boundary guard (no `printf` in `src/*.c` except `main.c`, `grendr.c`, and the platform file `platpos.c` or `platdos.c`)
 - `make test`: strict deterministic compile (`-Werror`, `-DTEST_MODE`, `-g -O0`); does not run `check-layers`
-- `make test-run`: builds the test binary (`make test`), then runs every name in `SNAPSHOT_TESTS` plus `seed_cli` (CLI `--seed` on `smoke.input`; see [Snapshot test files](#snapshot-test-files)). Each step prints `snapshot: <name>`.
+- `make test-run`: builds the test binary (`make test`), then runs every name in `SNAPSHOT_TESTS` plus `seed_cli` (CLI `--seed` on `smoke.input`; see [Snapshot test files](#snapshot-test-files)). Each step prints `snapshot: <name>`. Finishes with `snapshot tests passed: N/M` (for example `60/60`).
+- `make test-unit`: builds and runs the greatest unit suite (`tests/unit/build/dosmud_unit`, `TEST_MODE` only; not linked into release `dosmud`)
+
+## Test layout
+
+```text
+tests/
+  regression/     # snapshot pairs: <name>.input, <name>.expect (generated <name>.output)
+  unit/           # greatest harness: greatest.h, unit_*.c, unit_util.*
+    build/        # generated: dosmud_unit, *.o, *.gcno, *.gcda (gitignored)
+      coverage/   # *.gcov reports from make test-unit-coverage (gitignored)
+```
+
+Snapshot regression lives under [`tests/regression/`](../tests/regression/). Unit sources live under [`tests/unit/`](../tests/unit/). The unit binary and coverage profiles are written to [`tests/unit/build/`](../tests/unit/build/) (ignored by git). Release `dosmud` and snapshot `*.output` are also ignored via [`.gitignore`](../.gitignore).
+
+## Unit tests (greatest)
+
+Phase B coverage ([#95](https://github.com/ianmays/dosmud/issues/95)) uses [greatest](https://github.com/silentbicycle/greatest) vendored as [`tests/unit/greatest.h`](../tests/unit/greatest.h).
+
+```sh
+make test-unit
+make test-unit-verbose              # greatest suite/test progress only
+make test-unit-verbose-gameplay     # greatest progress + gameplay render text
+make test-unit-coverage             # runs test-unit, then compact branch/line % table
+make test-unit-coverage-verbose     # same tests, full gcov block per module
+```
+
+- Binary: `tests/unit/build/dosmud_unit` (all gameplay modules except `main.c`, plus `tests/unit/unit_*.c`)
+- Output levels:
+
+| Target / flag | Greatest | Gameplay `render_*` |
+|---------------|----------|---------------------|
+| `make test-unit` (default) | final summary only (`FAIL` lines on error) | suppressed |
+| `make test-unit-verbose` (`--verbose`, `-v`) | suite headers, per-test `PASS`/`FAIL`, per-suite summary | suppressed |
+| `make test-unit-verbose-gameplay` (`--verbose-gameplay`) | same as verbose | enabled |
+
+**Coverage report levels:**
+
+| Target | Output |
+|--------|--------|
+| `make test-unit-coverage` | Quiet `test-unit`, then one line per module (`branch % / line %`), weighted `overall` row, and `below 90% branch: ...` if any module misses the bar |
+| `make test-unit-coverage-verbose` | `test-unit` with compile lines echoed, then `=== module ===` blocks with full `gcov` lines (for debugging gaps) |
+
+`make test-all` uses quiet `test-unit-coverage`. Run `make clean` before coverage if stale `.gcda` files produce libgcov checksum warnings.
+
+- Determinism: call `plat_seed_rng(fixed_seed)` in setup; use `game_roll_inject_*` and `CFG_TEST_*` for asserted combat/intimidate outcomes
+- Snapshots assert player-visible output; unit tests assert `GameState` and parse results
+
+**In-scope modules (branch coverage target ~90%+):** `command`, `invent`, `combat`, `game`, `genc`, `wanderer`, `dialogue`, `gatmos`, `world`, `gprog`, `items`, `testharn`
+
+**Out of scope for the unit coverage bar:** `grendr`, `txtres`, `main`, `platpos` / `platdos` (presentation and platform glue; snapshots cover render text)
+
+**Harness-only fixture:** `bag_full_gate` - applies `game_inv_bag_add` without resetting baseline; returns fixture failure (`-2`) when the bag is already full (used by unit tests for `testharn_apply` error paths)
 
 ## Test fixtures (`TEST_MODE` only)
 
@@ -104,7 +157,7 @@ For marsh item/craft snapshots, prefer `at_marsh_reed` over walking camp intimid
 
 ### `@seed` in `.input` files
 
-`@seed <unsigned>` sets `GameState.seed` mid-file and reseeds libc RNG (same rules as CLI `--seed`: decimal, non-negative, at most `CFG_SEED_CLI_MAX`; no leading `+`/`-`). After each successful `@seed` or `@fixture`, `main.c` calls `plat_seed_rng(game.seed)` so later rolls do not depend on earlier commands in the same run. CLI `--seed` still applies only at process start (`tests/seed_cli.*`).
+`@seed <unsigned>` sets `GameState.seed` mid-file and reseeds libc RNG (same rules as CLI `--seed`: decimal, non-negative, at most `CFG_SEED_CLI_MAX`; no leading `+`/`-`). After each successful `@seed` or `@fixture`, `main.c` calls `plat_seed_rng(game.seed)` so later rolls do not depend on earlier commands in the same run. CLI `--seed` still applies only at process start (`tests/regression/seed_cli.*`).
 
 Use `@seed` when a snapshot block needs a different libc RNG stream without starting a new process. Add it to a snapshot only when that isolation is required; do not rely on seed alone for asserted mechanics; use inject or teleport.
 
@@ -112,7 +165,7 @@ Use `@seed` when a snapshot block needs a different libc RNG stream without star
 
 Snapshots use three determinism levels:
 
-1. **Teleport state** - fixtures set `GameState` directly. Do not walk RNG-heavy setup (`take stick`, intimidate, random bandit spawn). `tests/map.*` checks map **render** with explored flags set by the fixture; `tests/walk_map.*` checks `room_explored` updated by a real `move` (with `quiet_explore`).
+1. **Teleport state** - fixtures set `GameState` directly. Do not walk RNG-heavy setup (`take stick`, intimidate, random bandit spawn). `tests/regression/map.*` checks map **render** with explored flags set by the fixture; `tests/regression/walk_map.*` checks `room_explored` updated by a real `move` (with `quiet_explore`).
 
 2. **Inject rolls** (`TEST_MODE` only) - use `game_roll_inject_begin` for any asserted outcome that goes through `game_roll_spread` / `game_roll_percent`: combat damage, corpse loot tier, kill XP, bandit intimidate (reply `3`), and `combat_start` enemy HP. Constants live under `#ifdef TEST_MODE` in [`config.h`](../include/config.h) (`CFG_TEST_EQUIPMENT_*`, `CFG_TEST_COMBAT_*`, `CFG_TEST_INTIMIDATE_*`, `CFG_TEST_VICTORY_*`). Do not bypass combat with render-only hit lines. If combat tuning changes, update those constants and `.expect`.
 
@@ -124,14 +177,18 @@ Snapshots use three determinism levels:
 
 Bandit intimidate in gameplay uses `game_roll_percent` (not raw `rand()`), so intimidate snapshots stay on the inject path.
 
-Add new fixtures in [`src/testharn.c`](../src/testharn.c) and document them here. `testharn` is linked only for `make test` / `dos-prepare MODE=TEST_MODE`, not for `make build`.
+Add new fixtures in [`src/testharn.c`](../src/testharn.c) and document them here. `testharn` is linked only for `make test` / `dos-prepare MODE=TEST_MODE` and `make test-unit`, not for `make build`.
+
+| Fixture | Notes |
+|---------|--------|
+| `bag_full_gate` | No baseline reset; fails setup when `game_inv_bag_add` cannot store `ITEM_STICK` (bag already full) |
 
 ### Adding a snapshot test
 
-1. Add `tests/<name>.input` (and prefer one scenario per file).
+1. Add `tests/regression/<name>.input` (and prefer one scenario per file).
 2. Use `@fixture` for setup; add inject in the fixture or via a `*_ready` fixture when outcomes must be fixed.
 3. Use `quiet_explore` when the test calls `wait` or `move`.
-4. Run `make test && make test-run` (or `./dosmud < tests/<name>.input > tests/<name>.output`) and copy or diff against `tests/<name>.expect`.
+4. Run `make test && make test-run` (or `./dosmud < tests/regression/<name>.input > tests/regression/<name>.output`) and copy or diff against `tests/regression/<name>.expect`.
 5. Add `<name>` to `SNAPSHOT_TESTS` in the [Makefile](../Makefile) (`seed_cli` stays separate: it uses `--seed` with `smoke.input`).
 6. Document new fixtures in this file.
 
@@ -211,13 +268,23 @@ In `dos-prepare.local.ps1`:
 - `$source` should be Windows-reachable for Linux-hosted project files.
 - `$mountpoint`, `$destination`, `$dospath` should be Windows-visible emulator paths.
 
-The Open Watcom build (`build.bat`) only needs `src/`, `include/`, and `build.bat`. `dos-prepare.ps1` uses `robocopy /MIR` from `$source` with exclusions (not a whitelist): it skips `.git`, `tests/`, `docs/`, `.github/`, `.cursor/`, `.vscode/`, native build artifacts (`dosmud`, `*.output`, `*.o`, `*.obj`), and the Linux `Makefile`. Other top-level files (for example `README.md`) may still be copied.
+The Open Watcom build (`build.bat`) only needs `src/`, `include/`, and `build.bat`. `dos-prepare.ps1` deletes the Windows DOS tree, copies only those paths (separate `robocopy` per directory plus `build.bat`), then strips any stray `.git`, `tests/`, docs, or Linux build junk if an old full mirror left them behind. Add new DOS inputs under `src/` or `include/` (or extend `dos-prepare.ps1` if a new top-level tree is required).
+
+## CI (GitHub Actions)
+
+On `main` and pull requests, CI runs `make check-layers`, `make test`, `make test-run`, and `make test-unit` (see [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)). DOS prep is not run in CI.
 
 ## Build artifacts
 
-- native path produces `./dosmud`
-- DOS path produces `./dosmud.exe`
-- DOS build transcript is `./build.log`
+| Target | Output |
+|--------|--------|
+| `make build` | `./dosmud` (repo root) |
+| `make test` | `./dosmud` with `TEST_MODE` (same path; overwrites release binary) |
+| `make test-unit` / `make test-unit-coverage` / `make test-unit-coverage-verbose` | `tests/unit/build/dosmud_unit`, `*.o`, `*.gcno`, `*.gcda`; `.gcov` under `tests/unit/build/coverage/` (gitignored) |
+| `make test-run` | `tests/regression/<name>.output` (gitignored) |
+| `make dos-prepare` | `dosmud.exe` and `build.log` in the prepared DOS tree (`$destination` in `dos-prepare.local.ps1`; not mirrored from Linux) |
+
+`make clean` removes `./dosmud`, `tests/unit/build/`, snapshot `*.output`, and legacy root-level unit/coverage junk.
 
 ## Manual gameplay verification checklist
 

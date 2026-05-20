@@ -1,6 +1,20 @@
+# Native binaries (repo root)
 /dosmud
 /dosmud.exe
+/dosmud_unit
+
+# Local DOS prep paths (per-machine)
 dos-prepare.local.ps1
+
+# Snapshot regression (make test-run)
 *.output
+
+# Compile artifacts
 *.o
 *.obj
+
+# Unit tests and coverage (make test-unit, make test-unit-coverage)
+tests/unit/build/
+*.gcov
+*.gcno
+*.gcda

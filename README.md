@@ -53,7 +53,10 @@ Native layers/strict/test checks:
 make check-layers
 make test
 make test-run
+make test-unit
 ```
+
+Details: [Testing](docs/testing.md) (snapshots in `tests/regression/`, unit harness in `tests/unit/`).
 
 DOS/Open Watcom path:
 

@@ -35,9 +35,10 @@ make build
 make check-layers
 make test
 make test-run
+make test-unit
 ```
 
-For snapshot fixtures, roll inject, and `quiet_explore` tick tests, see [testing.md](testing.md#test-fixtures-test_mode-only).
+Snapshot pairs live under `tests/regression/`; unit sources under `tests/unit/` (binary and coverage output in `tests/unit/build/`, gitignored). For snapshot fixtures, roll inject, unit tests, and `quiet_explore` tick tests, see [testing.md](testing.md).
 
 If your changes affect build flow, DOS runtime behavior, or orchestration scripts:
 

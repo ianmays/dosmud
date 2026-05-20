@@ -240,19 +240,20 @@ Done ✅.
 
 ## Existing snapshot testing
 
-Pattern:
+Pattern (under `tests/regression/`):
 
 ```text
-test.input
-test.expect
+<name>.input
+<name>.expect
 ```
 
 Run:
 
 ```text
-dosmud < test.input > test.output
-diff test.output test.expect
+make test && make test-run
 ```
+
+Or manually: `./dosmud < tests/regression/<name>.input > tests/regression/<name>.output` then `diff` against `.expect`.
 
 ---
 
@@ -309,7 +310,7 @@ Delivered in PR [#123](https://github.com/ianmays/dosmud/pull/123).
 **Tests**
 
 - `Makefile` `SNAPSHOT_TESTS` (includes `smoke`); `seed_cli` alone uses `--seed 1234` on `smoke.input`.
-- New regression pairs under `tests/` for movement, NPCs, combat, loot, eat/use, inspect, bandit dialogue paths, and edge cases.
+- New regression pairs under `tests/regression/` for movement, NPCs, combat, loot, eat/use, inspect, bandit dialogue paths, and edge cases.
 
 **Docs**
 
