@@ -34,6 +34,39 @@ Purpose:
 
 `make test-all` runs check-layers, snapshots, unit coverage, then soak.
 
+## When to add or update tests
+
+Use this section when deciding what to write, not only what to run. Agents and contributors should follow it before opening a PR.
+
+| Change | Snapshots | Unit (`tests/unit/unit_*.c`) |
+|--------|-----------|------------------------------|
+| New verb or changed player-visible output | Yes | Yes |
+| New `*_cmd_*` or other exported handler in a slice | If output changes | **Yes - call the API directly** |
+| Behavior-preserving refactor into another `.c` | Only if `.expect` files drift | Update the slice suite when APIs are new |
+| `game.c` static router only | No | Optional via `game_process_input` if semantics change |
+| `world_init` or fixed graph layout | If travel or map output changes | Update [`tests/harness/th_world.c`](../tests/harness/th_world.c) (and fixtures if needed) |
+
+**Module to unit file map** (FAT 8.3 basenames; `dialogue` maps to `unit_dial.c`):
+
+| `src` module | Unit file |
+|--------------|-----------|
+| `command.c` | `unit_cmd.c` |
+| `invent.c` | `unit_inv.c` |
+| `combat.c` | `unit_cbt.c` |
+| `game.c` | `unit_game.c` |
+| `genc.c` | `unit_genc.c` |
+| `wanderer.c` | `unit_wandr.c` |
+| `dialogue.c` | `unit_dial.c` |
+| `gatmos.c` | `unit_gatmos.c` |
+| `world.c` | `unit_wrld.c` |
+| `gprog.c` | `unit_gprog.c` |
+| `items.c` | `unit_item.c` |
+| `testharn.c` | `unit_tharn.c` |
+
+**Lesson from [#90](https://github.com/ianmays/dosmud/issues/90):** extracting command handlers from `game.c` into slice modules (for example `gatmos_cmd_inspect`, `dialogue_cmd_talk`) requires tests in the matching `unit_*.c` file. Green `unit_game.c` tests that only call `game_process_input` do not document slice ownership or catch regressions in the new entry points.
+
+Greatest `TEST` names must not match functions under test (for example use `wanderer_reply_cmd_explore`, not `TEST wanderer_cmd_reply`, when testing `wanderer_cmd_reply`).
+
 ## Test layout
 
 ```text

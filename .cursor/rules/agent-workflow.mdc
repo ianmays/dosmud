@@ -31,12 +31,16 @@ When the user asks for the next task, to pick up work, or to start a new issue:
 
 - Confirm an open issue exists; never modify closed issues.
 - Post agreed implementation details as an issue comment, then move **Planning** to **In progress**.
+- Implementation plan or issue comment must include a **Testing** subsection (`Unit:` / `Snapshots:` lines or "none - reason"). See [`AGENTS.md`](../../AGENTS.md) Planning expectations and [`docs/testing.md`](../../docs/testing.md#when-to-add-or-update-tests).
 - Create a branch before any code changes.
 - Prefer the top **Agent-ready** issue when the user asks for the next task.
 
 ## Before opening a PR
 
 - Mark the linked issue **Done ✅** in [`DEV_PLAN.md`](../../DEV_PLAN.md) when opening the draft PR (roadmap log only; see [`AGENTS.md`](../../AGENTS.md)).
+- Run `make test`, `make test-run`, and `make test-unit` (or `make test-all`).
+- Follow [When to add or update tests](../../docs/testing.md#when-to-add-or-update-tests); if in-scope `src/*.c` gained or changed **exported** gameplay APIs (module `.h`), update matching `tests/unit/unit_*.c` or explain why not in the PR **Test plan**.
+- PR body **Test plan** lists new or updated tests (not only "all green").
 - Open a **draft** PR linked to the issue; move project status to **Review**.
 - Match PR labels to the issue; follow PR title/commit rules in `AGENTS.md`.
 

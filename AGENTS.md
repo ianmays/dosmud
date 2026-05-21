@@ -63,6 +63,15 @@ Do not skip workflow stages.
 
 - ALWAYS add agreed implementation details as an Issue comment before moving to `In progress`.
 - If a PR already exists, ALWAYS include updating the PR in the implementation plan.
+- ALWAYS include a **Testing** subsection in the plan (issue comment or plan doc):
+
+```markdown
+### Testing
+- Unit: <files / test names or "none - reason">
+- Snapshots: <files or "none - reason">
+```
+
+See [Testing expectations](#testing-expectations) and [`docs/testing.md`](docs/testing.md#when-to-add-or-update-tests).
 
 ### PR expectations
 
@@ -159,6 +168,18 @@ Deterministic DOS mode:
 make dos-prepare MODE=TEST_MODE
 ```
 
+## Testing expectations
+
+Canonical detail: [`docs/testing.md`](docs/testing.md) (especially [When to add or update tests](docs/testing.md#when-to-add-or-update-tests)).
+
+- **New gameplay behavior:** add or update snapshot tests when player-visible output changes; add unit tests in the owning `tests/unit/unit_<module>.c`; keep tests deterministic per `docs/testing.md`.
+- **New or moved public APIs** in coverage-scope modules (`command`, `invent`, `combat`, `game`, `genc`, `wanderer`, `dialogue`, `gatmos`, `world`, `gprog`, `items`, `testharn`): at least one **direct** unit test per new function or distinct branch. Passing only through `game_process_input` is not enough when logic lives in a named slice API (see #90: `dialogue_cmd_talk`, `genc_cmd_reply`, etc.).
+- **Static-only or router-only changes in `game.c`:** existing tests must pass; add router-level unit tests only when behavior or tick semantics change.
+- **Render-only (`grendr`, `txtres`):** update snapshots when copy or layout changes; unit tests optional unless parsing or state changes.
+- **PR Test plan:** list tests added or updated, or one sentence why none (for example "docs-only PR").
+
+Running `make test`, `make test-run`, and `make test-unit` before a PR does not replace writing tests when the above applies.
+
 ## Environment Model for DOS Flow
 
 - `make` executes from Linux/WSL.
@@ -185,7 +206,7 @@ Prefer linking between documents over duplicating large instruction blocks.
 - Preserve surrounding naming/style/layout conventions unless explicitly asked.
 - Verify build and tooling documentation against real scripts and targets.
 - Prefer small, reviewable commits with clear intent.
-- ALWAYS add tests for new gameplay features - aim for maximum coverage
+- Follow [Testing expectations](#testing-expectations) for new gameplay, new public APIs, and refactors that move logic into slice modules.
 
 ## Cursor Cloud Instructions
 
