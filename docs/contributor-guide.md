@@ -28,13 +28,15 @@ The repo’s GitHub project uses a **Status** field on issues: **Planning** when
 
 [`DEV_PLAN.md`](../DEV_PLAN.md) is a roadmap log: mark the issue **Done ✅** when you open a draft PR. It is not a living status tracker (no updates on push or merge).
 
+[`DEV_PLAN.md`](../DEV_PLAN.md) uses separate status lines: `In review (PR #N)` when a PR is open, **Done ✅** only after merge. Pushing commits does not update DEV_PLAN.
+
 ### After you push
 
 - While the PR is a **draft** on GitHub: do not post `review this`.
 - After you mark the PR **Ready for review** (non-draft): comment `review this` on the PR after **each** push that should re-trigger review. Use that exact body text only.
 - Project board **Review** can be set when the draft PR is opened; GitHub **Ready for review** (`isDraft` false) is what triggers the `review this` convention, not board status alone.
 
-Agents automate this with `gh pr view --json isDraft` after every push; see [AGENTS.md](../AGENTS.md) and [`.cursor/skills/pr-after-push/SKILL.md`](../.cursor/skills/pr-after-push/SKILL.md).
+Agents automate this with `gh pr view --json number,isDraft` after every push; see [AGENTS.md](../AGENTS.md) and [`.cursor/skills/pr-after-push/SKILL.md`](../.cursor/skills/pr-after-push/SKILL.md).
 
 ## Local Validation Before Opening a PR
 
@@ -48,7 +50,7 @@ make test-run
 make test-unit
 ```
 
-Snapshot pairs live under `tests/regression/`; unit sources under `tests/unit/` (binary and coverage output in `tests/unit/build/`, gitignored). For snapshot fixtures, roll inject, unit tests, and `quiet_explore` tick tests, see [testing.md](testing.md).
+Snapshot pairs live under `tests/regression/`; unit sources under `tests/unit/` (binary and coverage output in `tests/unit/build/`, gitignored). For snapshot fixtures, roll inject, unit tests, and `quiet_explore` tick tests, see [testing.md](testing.md). When changing gameplay code, follow [When to add or update tests](testing.md#when-to-add-or-update-tests) and list test additions or updates in the PR **Test plan**.
 
 If your changes affect build flow, DOS runtime behavior, or orchestration scripts:
 

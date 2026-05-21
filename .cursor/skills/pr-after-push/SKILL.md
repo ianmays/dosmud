@@ -45,7 +45,7 @@ Project board **Review** does not replace checking `isDraft`. A PR can be on the
 | Mistake | Fix |
 |---------|-----|
 | End the turn with a summary right after `git push` | Run this checklist first |
-| Assume the PR is still draft because it was opened as draft | Re-run `gh pr view --json isDraft` after every push |
+| Assume the PR is still draft because it was opened as draft | Re-run `gh pr view --json number,isDraft` after every push |
 | Skip because the user marked the issue Review on the project board | Use GitHub `isDraft`, not board status alone |
 
 Example: [#136](https://github.com/ianmays/dosmud/pull/136) - review fixes were pushed after **ready for review**; `review this` was required that turn.
