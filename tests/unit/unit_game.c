@@ -256,6 +256,48 @@ TEST game_wait_and_help(void)
     PASS();
 }
 
+TEST game_session_help_no_tick(void)
+{
+    struct GameState game;
+
+    unit_game_fresh(&game, 23u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game.test_quiet_ticks = 1;
+    game.wanderer_active = 0;
+    ASSERT_EQ(0, game.tick);
+    ASSERT_EQ(1, run_cmd(&game, "help move"));
+    ASSERT_EQ(0, game.tick);
+    PASS();
+}
+
+TEST game_observe_look_no_tick(void)
+{
+    struct GameState game;
+
+    unit_game_fresh(&game, 24u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game.test_quiet_ticks = 1;
+    game.wanderer_active = 0;
+    ASSERT_EQ(0, game.tick);
+    ASSERT_EQ(1, run_cmd(&game, "look"));
+    ASSERT_EQ(0, game.tick);
+    PASS();
+}
+
+TEST game_pass_time_wait_ticks(void)
+{
+    struct GameState game;
+
+    unit_game_fresh(&game, 25u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game.test_quiet_ticks = 1;
+    game.wanderer_active = 0;
+    ASSERT_EQ(0, game.tick);
+    ASSERT_EQ(1, run_cmd(&game, "wait"));
+    ASSERT_EQ(1, game.tick);
+    PASS();
+}
+
 TEST game_roll_spread_zero(void)
 {
     struct GameState game;
@@ -294,6 +336,9 @@ SUITE(game) {
     RUN_TEST(game_give_after_handover_fixture);
     RUN_TEST(game_wanderer_reply_fixture);
     RUN_TEST(game_wait_and_help);
+    RUN_TEST(game_session_help_no_tick);
+    RUN_TEST(game_observe_look_no_tick);
+    RUN_TEST(game_pass_time_wait_ticks);
     RUN_TEST(game_roll_spread_zero);
     RUN_TEST(game_quit_ends_run);
 }
