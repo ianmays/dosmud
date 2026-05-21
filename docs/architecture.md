@@ -168,7 +168,7 @@ When a slice exposes new command or state entry points, add tests in the matchin
 
 New `src/*.c` and `src/*.h` basenames must stay within **classic FAT 8+3** (at most eight characters before `.c` or `.h`) so MS-DOS 5.x-6.x style volumes and the Open Watcom DOS build can open them reliably. Existing examples: `grendr.*`, `invent.*`, `gprog.*`, `gatmos.*`, `genc.*`.
 
-`game` stays orchestration: `apply_command` in [`game.c`](../src/game.c) routes by mode and command type to the slices above via static helpers (`game_cmd_meta`, `game_cmd_move`, `game_cmd_inventory`, `game_cmd_reply`). New behaviour should land in the owning slice rather than re-centralising into `game.c`.
+`game` stays orchestration: `apply_command` in [`game.c`](../src/game.c) routes by mode and command type to the slices above via static helpers (`game_cmd_session`, `game_cmd_observe`, `game_cmd_pass_time`, `game_cmd_move`, `game_cmd_inventory`, `game_cmd_reply`). New behaviour should land in the owning slice rather than re-centralising into `game.c`.
 
 ### `command`
 

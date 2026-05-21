@@ -215,7 +215,20 @@ static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd)
     return 1;
 }
 
-static int game_cmd_meta(struct GameState *game, struct Command *cmd)
+static int game_cmd_session(struct GameState *game, struct Command *cmd)
+{
+    if (cmd->type == CMD_HELP) {
+        game_print_help(cmd->arg);
+        return 1;
+    }
+    if (cmd->type == CMD_QUIT) {
+        game->running = 0;
+        return 1;
+    }
+    return 0;
+}
+
+static int game_cmd_observe(struct GameState *game, struct Command *cmd)
 {
     if (cmd->type == CMD_LOOK) {
         do_look(game);
@@ -225,19 +238,17 @@ static int game_cmd_meta(struct GameState *game, struct Command *cmd)
         do_map(game);
         return 1;
     }
-    if (cmd->type == CMD_HELP) {
-        game_print_help(cmd->arg);
-        return 1;
-    }
-    if (cmd->type == CMD_QUIT) {
-        game->running = 0;
-        return 1;
-    }
-    if (cmd->type == CMD_WAIT) {
-        render_msg_wait();
-        return 1;
-    }
     return 0;
+}
+
+static int game_cmd_pass_time(struct GameState *game, struct Command *cmd)
+{
+    (void)game;
+    if (cmd->type != CMD_WAIT) {
+        return 0;
+    }
+    render_msg_wait();
+    return 1;
 }
 
 static int game_cmd_move(struct GameState *game, struct Command *cmd)
@@ -318,7 +329,13 @@ static int apply_command(struct GameState *game, struct Command *cmd)
     if (!game_cmd_allowed_in_mode(game, cmd)) {
         return 0;
     }
-    if (game_cmd_meta(game, cmd)) {
+    if (game_cmd_session(game, cmd)) {
+        return 1;
+    }
+    if (game_cmd_observe(game, cmd)) {
+        return 1;
+    }
+    if (game_cmd_pass_time(game, cmd)) {
         return 1;
     }
     if (game_cmd_move(game, cmd)) {
