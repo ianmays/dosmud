@@ -22,6 +22,7 @@ Guidance for AI/code agents working in this repository.
 - NEVER introduce gameplay/render/platform coupling.
 - NEVER use em dash - use standard hyphen only.
 - NEVER introduce C99/C11 features or compiler-specific extensions.
+- After `git push` to an open PR: complete the [post-push checklist](.cursor/rules/pr-after-push.mdc) in the **same turn** before replying (see [pr-after-push skill](.cursor/skills/pr-after-push/SKILL.md)).
 
 ## GitHub Workflow (dosmud project)
 
@@ -89,7 +90,9 @@ Whenever you `git push` and the branch has an open pull request:
 
 The first push after marking the PR ready for review starts this rule; it applies to all later pushes until merge.
 
-A missed `review this` comment is a **workflow failure** (same severity as skipping project status updates). Details: [`.cursor/rules/agent-workflow.mdc`](.cursor/rules/agent-workflow.mdc).
+Do **not** skip because the PR was draft when opened. Re-check `isDraft` after **every** push. If the user marked the PR **Ready for review** since the last push, the next push requires `review this` even when earlier pushes in the session did not.
+
+A missed `review this` comment is a **workflow failure** (same severity as skipping project status updates). Procedure: [`.cursor/rules/pr-after-push.mdc`](.cursor/rules/pr-after-push.mdc), [`.cursor/skills/pr-after-push/SKILL.md`](.cursor/skills/pr-after-push/SKILL.md), [`.cursor/rules/agent-workflow.mdc`](.cursor/rules/agent-workflow.mdc).
 
 ### Completion workflow
 

@@ -42,18 +42,11 @@ When the user asks for the next task, to pick up work, or to start a new issue:
 
 ## After pushing to an open PR (mandatory)
 
-**Trigger:** you ran `git push` and the branch has an open PR (`gh pr view` succeeds) → complete this section **before** ending your turn. Do not summarize for the user until the checklist below is done.
-
-1. `gh pr view --json number,isDraft`
-2. If `isDraft` is **false**: `gh pr comment <number> --body "review this"` (exact body only)
-3. If `isDraft` is **true**: skip — until the PR is marked **Ready for review**
-4. After the PR becomes non-draft, **every** later `git push` requires step 2 (review fixes, README, CI fixes, etc.)
-
-NEVER ask whether re-review is needed. A missed `review this` on a non-draft PR is a workflow failure (same as skipping project status updates).
+See [`.cursor/rules/pr-after-push.mdc`](pr-after-push.mdc) and [`.cursor/skills/pr-after-push/SKILL.md`](../skills/pr-after-push/SKILL.md). Complete that gate in the **same turn** as `git push` before the user-facing summary.
 
 ### PR push checklist (complete before replying)
 
 - [ ] `git push` succeeded
 - [ ] Open PR exists for this branch
-- [ ] If PR is not a draft: `gh pr comment <N> --body "review this"` ran in this turn
+- [ ] Post-push gate completed ([`pr-after-push.mdc`](pr-after-push.mdc))
 - [ ] Only then: user-facing summary
