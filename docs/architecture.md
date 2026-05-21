@@ -164,6 +164,8 @@ Gameplay slices live beside `game.c` as plain C translation units (no extra fram
 - [`dialogue.c`](../src/dialogue.c) - pond frog lines and NPC id hint for room look
 - [`gatmos.c`](../src/gatmos.c) - initial room items, ambient rolls, animal noise, inspect focus hooks (FAT 8.3-safe basename)
 
+When a slice exposes new command or state entry points, add tests in the matching `tests/unit/unit_*.c` file (see [When to add or update tests](testing.md#when-to-add-or-update-tests)).
+
 New `src/*.c` and `src/*.h` basenames must stay within **classic FAT 8+3** (at most eight characters before `.c` or `.h`) so MS-DOS 5.x-6.x style volumes and the Open Watcom DOS build can open them reliably. Existing examples: `grendr.*`, `invent.*`, `gprog.*`, `gatmos.*`, `genc.*`.
 
 `game` stays orchestration; new behaviour should land in the owning slice above rather than re-centralising into `game.c`.

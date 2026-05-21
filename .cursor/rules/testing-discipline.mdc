@@ -1,0 +1,20 @@
+---
+description: When to write or update unit and snapshot tests for gameplay changes
+alwaysApply: true
+---
+
+# Testing discipline
+
+Follow [`AGENTS.md`](../../AGENTS.md) [Testing expectations](../../AGENTS.md#testing-expectations) and [`docs/testing.md`](../../docs/testing.md#when-to-add-or-update-tests).
+
+## Authoring tests (not only running them)
+
+- Before a PR: run `make test`, `make test-run`, and `make test-unit` (or `make test-all`).
+- When you add or change **exported** gameplay APIs (module `.h`) in coverage-scope `src/*.c`, add or update tests in the matching `tests/unit/unit_*.c` (same basename convention as `Makefile` `UNIT_TEST_SRC`; see [When to add or update tests](../../docs/testing.md#when-to-add-or-update-tests)).
+- PR **Test plan** must list tests added or updated, or one sentence why none.
+
+## Determinism
+
+- Use `unit_game_fresh` / `game_reset_fixture_baseline` and `plat_seed_rng` in unit setup.
+- Use `game_roll_inject_*` and `CFG_TEST_*` for asserted combat, intimidate, and loot outcomes.
+- Prefer `@fixture` in snapshots instead of RNG-walking setup (see `docs/testing.md`).

@@ -154,6 +154,14 @@ Goal:
 
 ---
 
+## #135 - Document when to add and update tests
+
+Done ✅.
+
+Agent and contributor docs now state when to **write** unit and snapshot tests (not only run them): [`AGENTS.md`](AGENTS.md#testing-expectations), [`.cursor/rules/testing-discipline.mdc`](.cursor/rules/testing-discipline.mdc), [`docs/testing.md`](docs/testing.md#when-to-add-or-update-tests), planning **Testing** subsection, and PR checklist updates in [`agent-workflow.mdc`](.cursor/rules/agent-workflow.mdc). PR [#136](https://github.com/ianmays/dosmud/pull/136). Motivated by [#90](https://github.com/ianmays/dosmud/issues/90).
+
+---
+
 ## #137 - Harden post-push `review this` workflow
 
 Done ✅.

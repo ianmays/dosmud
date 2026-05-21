@@ -48,7 +48,7 @@ make test-run
 make test-unit
 ```
 
-Snapshot pairs live under `tests/regression/`; unit sources under `tests/unit/` (binary and coverage output in `tests/unit/build/`, gitignored). For snapshot fixtures, roll inject, unit tests, and `quiet_explore` tick tests, see [testing.md](testing.md).
+Snapshot pairs live under `tests/regression/`; unit sources under `tests/unit/` (binary and coverage output in `tests/unit/build/`, gitignored). For snapshot fixtures, roll inject, unit tests, and `quiet_explore` tick tests, see [testing.md](testing.md). When changing gameplay code, follow [When to add or update tests](testing.md#when-to-add-or-update-tests) and list test additions or updates in the PR **Test plan**.
 
 If your changes affect build flow, DOS runtime behavior, or orchestration scripts:
 

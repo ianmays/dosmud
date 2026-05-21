@@ -34,6 +34,22 @@ Purpose:
 
 `make test-all` runs check-layers, snapshots, unit coverage, then soak.
 
+## When to add or update tests
+
+Use this section when deciding what to write, not only what to run. Agents and contributors should follow it before opening a PR.
+
+| Change | Snapshots | Unit (`tests/unit/unit_*.c`) |
+|--------|-----------|------------------------------|
+| New verb or changed player-visible output | Yes | Yes |
+| New `*_cmd_*` or other exported handler in a slice | If output changes | **Yes - call the API directly** |
+| Behavior-preserving refactor into another `.c` | Only if `.expect` files drift | Update the slice suite when APIs are new |
+| `game.c` static router only | No | Add or extend `unit_game.c` / `game_process_input` tests **when** router or tick semantics change; otherwise no new unit file |
+| `world_init` or fixed graph layout | If travel or map output changes | Update [`tests/harness/th_world.c`](../tests/harness/th_world.c) (and fixtures if needed) |
+
+**Unit file convention:** add or extend `tests/unit/unit_<basename>.c` for the gameplay module you changed (see `UNIT_TEST_SRC` in the `Makefile`). Suites use abbreviated basenames, not full module names - for example `command.c` → `unit_cmd.c`, `invent.c` → `unit_inv.c`, `combat.c` → `unit_cbt.c`. FAT 8.3 truncations also apply (`dialogue.c` → `unit_dial.c`, `world.c` → `unit_wrld.c`). Which modules need coverage is listed under [In-scope modules](#unit-tests-greatest) below - do not maintain a second module table here.
+
+**Lesson from [#90](https://github.com/ianmays/dosmud/issues/90):** when command handling moves from `game.c` into a slice module, add tests in that slice's `unit_*.c` file. Green `unit_game.c` tests that only call `game_process_input` do not document slice ownership or catch regressions in new entry points.
+
 ## Test layout
 
 ```text
