@@ -31,6 +31,8 @@ The project should avoid:
 - platform/render leakage into gameplay
 - premature complexity
 
+When a draft PR is opened, mark the issue section **Done ✅** under its heading (optional PR link in the body). That line is not updated on later pushes or after merge - use the GitHub project board and PR for workflow status.
+
 ---
 
 # Current Project Priority

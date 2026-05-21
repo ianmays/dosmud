@@ -14,7 +14,7 @@ Guidance for AI/code agents working in this repository.
 - ALWAYS check for an existing GitHub Issue before starting work.
 - NEVER modify or reopen Closed Issues.
 - ALWAYS create a branch before making changes.
-- ALWAYS include mark work as done in  `DEV_PLAN.md` when raising a PR.
+- ALWAYS add or update the linked issue section in [`DEV_PLAN.md`](DEV_PLAN.md) with **Done ✅** when opening a draft PR. That is a roadmap log line, not a living status tracker - do not change it on pushes or after merge.
 - ALWAYS open draft PRs first.
 - ALWAYS link PRs to their corresponding Issues.
 - ALWAYS check whether documentation updates are required.

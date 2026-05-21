@@ -36,7 +36,7 @@ When the user asks for the next task, to pick up work, or to start a new issue:
 
 ## Before opening a PR
 
-- Mark related work in `DEV_PLAN.md`.
+- Mark the linked issue **Done ✅** in [`DEV_PLAN.md`](../../DEV_PLAN.md) when opening the draft PR (roadmap log only; see [`AGENTS.md`](../../AGENTS.md)).
 - Open a **draft** PR linked to the issue; move project status to **Review**.
 - Match PR labels to the issue; follow PR title/commit rules in `AGENTS.md`.
 
