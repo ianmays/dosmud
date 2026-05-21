@@ -98,6 +98,11 @@ After merge:
 - pull latest changes
 - delete completed local branches
 
+### After merge or issue closure
+
+- Offer to document **Human Interventions** using [`.cursor/skills/human-interventions/SKILL.md`](.cursor/skills/human-interventions/SKILL.md).
+- Draft first; post to the issue only after user approval or an explicit "post it" instruction.
+
 ## Technical Constraints
 
 - Target language: ANSI C89 / ISO C90.
