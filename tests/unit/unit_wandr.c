@@ -63,9 +63,22 @@ TEST wanderer_reply_cmd_explore(void)
     PASS();
 }
 
+TEST wanderer_reply_cmd_invalid_choice(void)
+{
+    struct GameState game;
+
+    unit_game_fresh(&game, 5u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game_set_mode_dialogue(&game, DIALOGUE_WANDERER);
+    ASSERT_EQ(1, wanderer_cmd_reply(&game, 0));
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    PASS();
+}
+
 SUITE(wanderer) {
     RUN_TEST(wanderer_separation_clears);
     RUN_TEST(wanderer_step_moves);
     RUN_TEST(wanderer_encounter_guards);
     RUN_TEST(wanderer_reply_cmd_explore);
+    RUN_TEST(wanderer_reply_cmd_invalid_choice);
 }

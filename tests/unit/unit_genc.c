@@ -82,6 +82,47 @@ TEST genc_cmd_give_handover(void)
     PASS();
 }
 
+TEST genc_cmd_reply_handover_pick(void)
+{
+    struct GameState game;
+
+    unit_game_fresh(&game, 7u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    enemy_begin_encounter(&game);
+    game_inv_bag_add(&game, ITEM_STICK);
+    ASSERT_EQ(1, genc_cmd_reply(&game, 2));
+    ASSERT_EQ(1, game.enemy_handover_pick);
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    PASS();
+}
+
+TEST genc_cmd_reply_intimidate_fail(void)
+{
+    struct GameState game;
+    int rolls[1];
+
+    unit_game_fresh(&game, 8u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    enemy_begin_encounter(&game);
+    rolls[0] = CFG_TEST_INTIMIDATE_FAIL;
+    game_roll_inject_begin(&game, rolls, 1);
+    ASSERT_EQ(1, genc_cmd_reply(&game, 3));
+    ASSERT_EQ(GAME_MODE_COMBAT, game.mode);
+    PASS();
+}
+
+TEST genc_cmd_reply_invalid_choice(void)
+{
+    struct GameState game;
+
+    unit_game_fresh(&game, 9u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    enemy_begin_encounter(&game);
+    ASSERT_EQ(1, genc_cmd_reply(&game, 0));
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    PASS();
+}
+
 SUITE(genc) {
     RUN_TEST(genc_skips_when_busy);
     RUN_TEST(genc_opens_dialogue);
@@ -89,4 +130,7 @@ SUITE(genc) {
     RUN_TEST(genc_cmd_reply_intimidate_ok);
     RUN_TEST(genc_cmd_give_wrong_context);
     RUN_TEST(genc_cmd_give_handover);
+    RUN_TEST(genc_cmd_reply_handover_pick);
+    RUN_TEST(genc_cmd_reply_intimidate_fail);
+    RUN_TEST(genc_cmd_reply_invalid_choice);
 }
