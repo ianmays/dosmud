@@ -10,7 +10,7 @@ Follow [`AGENTS.md`](../../AGENTS.md) [Testing expectations](../../AGENTS.md#tes
 ## Authoring tests (not only running them)
 
 - Before a PR: run `make test`, `make test-run`, and `make test-unit` (or `make test-all`).
-- When you add or change **public** gameplay APIs in coverage-scope `src/*.c`, add or update tests in the matching `tests/unit/unit_*.c` (same basename convention as `Makefile` `UNIT_TEST_SRC`; see [When to add or update tests](../../docs/testing.md#when-to-add-or-update-tests)).
+- When you add or change **exported** gameplay APIs (module `.h`) in coverage-scope `src/*.c`, add or update tests in the matching `tests/unit/unit_*.c` (same basename convention as `Makefile` `UNIT_TEST_SRC`; see [When to add or update tests](../../docs/testing.md#when-to-add-or-update-tests)).
 - PR **Test plan** must list tests added or updated, or one sentence why none.
 
 ## Determinism
