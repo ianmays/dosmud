@@ -50,8 +50,6 @@ Use this section when deciding what to write, not only what to run. Agents and c
 
 **Lesson from [#90](https://github.com/ianmays/dosmud/issues/90):** when command handling moves from `game.c` into a slice module, add tests in that slice's `unit_*.c` file. Green `unit_game.c` tests that only call `game_process_input` do not document slice ownership or catch regressions in new entry points.
 
-Greatest `TEST` names must not match functions under test (for example use `wanderer_reply_cmd_explore`, not `TEST wanderer_cmd_reply`, when testing `wanderer_cmd_reply`).
-
 ## Test layout
 
 ```text

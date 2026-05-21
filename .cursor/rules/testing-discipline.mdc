@@ -18,7 +18,3 @@ Follow [`AGENTS.md`](../../AGENTS.md) [Testing expectations](../../AGENTS.md#tes
 - Use `unit_game_fresh` / `game_reset_fixture_baseline` and `plat_seed_rng` in unit setup.
 - Use `game_roll_inject_*` and `CFG_TEST_*` for asserted combat, intimidate, and loot outcomes.
 - Prefer `@fixture` in snapshots instead of RNG-walking setup (see `docs/testing.md`).
-
-## Greatest naming
-
-Do not name a `TEST` after a function you are testing if that collides with the C symbol (example: `TEST wanderer_cmd_reply` vs `wanderer_cmd_reply()` - use `wanderer_reply_cmd_explore` instead).
