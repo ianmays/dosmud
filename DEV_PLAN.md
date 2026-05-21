@@ -158,7 +158,7 @@ Goal:
 
 Done ✅.
 
-[`.cursor/rules/pr-after-push.mdc`](.cursor/rules/pr-after-push.mdc), [`.cursor/skills/pr-after-push/SKILL.md`](.cursor/skills/pr-after-push/SKILL.md), [`AGENTS.md`](AGENTS.md), [`agent-workflow.mdc`](.cursor/rules/agent-workflow.mdc), and [`docs/contributor-guide.md`](docs/contributor-guide.md) **After you push**. Draft PR [#138](https://github.com/ianmays/dosmud/pull/138). Motivated by [#136](https://github.com/ianmays/dosmud/pull/136).
+[`.cursor/rules/pr-after-push.mdc`](.cursor/rules/pr-after-push.mdc), [`.cursor/skills/pr-after-push/SKILL.md`](.cursor/skills/pr-after-push/SKILL.md), [`AGENTS.md`](AGENTS.md), [`agent-workflow.mdc`](.cursor/rules/agent-workflow.mdc), and [`docs/contributor-guide.md`](docs/contributor-guide.md) **After you push**. PR [#138](https://github.com/ianmays/dosmud/pull/138). Motivated by [#136](https://github.com/ianmays/dosmud/pull/136).
 
 ---
 
