@@ -131,3 +131,35 @@ void maybe_emit_atmosphere(struct GameState *game)
     }
     maybe_spawn_room_item(game);
 }
+
+int gatmos_cmd_inspect(struct GameState *game, int item_arg)
+{
+    if (!game->env_focus_active ||
+            game->env_focus_room != game->player.room_id ||
+            game->tick >= game->env_focus_expires_tick) {
+        render_msg_inspect_nothing();
+        game->env_focus_active = 0;
+        game->env_focus_room = -1;
+        game->env_focus_kind = GAME_ENV_NONE;
+        game->env_focus_expires_tick = 0;
+        return 1;
+    }
+    if (item_arg != 0 && item_arg != game->env_focus_kind) {
+        render_msg_inspect_wrong_focus();
+        return 1;
+    }
+    if (game->env_focus_kind == GAME_ENV_RUSTLE) {
+        render_msg_inspect_rustle();
+    } else if (game->env_focus_kind == GAME_ENV_CREAK) {
+        render_msg_inspect_creak();
+    } else if (game->env_focus_kind == GAME_ENV_WATER) {
+        render_msg_inspect_water();
+    } else if (game->env_focus_kind == GAME_ENV_GRIT) {
+        render_msg_inspect_grit();
+    }
+    game->env_focus_active = 0;
+    game->env_focus_room = -1;
+    game->env_focus_kind = GAME_ENV_NONE;
+    game->env_focus_expires_tick = 0;
+    return 1;
+}

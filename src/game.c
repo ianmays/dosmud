@@ -178,39 +178,7 @@ int game_roll_percent(struct GameState *game)
     return game_roll_spread(game, CFG_ROLL_PERCENT_RANGE);
 }
 
-static int apply_room_npc_reply(struct GameState *game, struct Command *cmd)
-{
-    if (game->mode != GAME_MODE_DIALOGUE) {
-        return 0;
-    }
-    if (game->dialogue == DIALOGUE_NPC_FROG) {
-        if (cmd->arg < 1 || cmd->arg > 3) {
-            render_msg_pick_123();
-            return 1;
-        }
-        frog_dialogue_branch(cmd->arg);
-        game_set_mode_explore(game);
-        return 1;
-    }
-    if (game->dialogue == DIALOGUE_NPC_WATCHMAN) {
-        render_msg_watchman_reply(cmd->arg);
-        game_set_mode_explore(game);
-        return 1;
-    }
-    if (game->dialogue == DIALOGUE_NPC_HERBALIST) {
-        render_msg_herbalist_reply(cmd->arg);
-        game_set_mode_explore(game);
-        return 1;
-    }
-    if (game->dialogue == DIALOGUE_NPC_ARCHIVIST) {
-        render_msg_archivist_reply(cmd->arg);
-        game_set_mode_explore(game);
-        return 1;
-    }
-    return 0;
-}
-
-static int apply_command(struct GameState *game, struct Command *cmd)
+static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd)
 {
     if (game->mode == GAME_MODE_COMBAT &&
             cmd->type != CMD_REPLY &&
@@ -244,6 +212,11 @@ static int apply_command(struct GameState *game, struct Command *cmd)
         return 0;
     }
 
+    return 1;
+}
+
+static int game_cmd_meta(struct GameState *game, struct Command *cmd)
+{
     if (cmd->type == CMD_LOOK) {
         do_look(game);
         return 1;
@@ -264,20 +237,30 @@ static int apply_command(struct GameState *game, struct Command *cmd)
         render_msg_wait();
         return 1;
     }
-    if (cmd->type == CMD_MOVE) {
-        if (!world_can_move(&game->world, game->player.room_id, cmd->dir)) {
-            render_msg_cannot_move(world_dir_name(cmd->dir));
-            return 0;
-        }
-        game->player.room_id = world_move(&game->world, game->player.room_id, cmd->dir);
-        game->room_explored[game->player.room_id] = 1;
-        if (game->mode == GAME_MODE_DIALOGUE) {
-            game_set_mode_explore(game);
-        }
-        render_msg_moved(world_dir_name(cmd->dir));
-        do_look(game);
-        return 1;
+    return 0;
+}
+
+static int game_cmd_move(struct GameState *game, struct Command *cmd)
+{
+    if (cmd->type != CMD_MOVE) {
+        return 0;
     }
+    if (!world_can_move(&game->world, game->player.room_id, cmd->dir)) {
+        render_msg_cannot_move(world_dir_name(cmd->dir));
+        return 0;
+    }
+    game->player.room_id = world_move(&game->world, game->player.room_id, cmd->dir);
+    game->room_explored[game->player.room_id] = 1;
+    if (game->mode == GAME_MODE_DIALOGUE) {
+        game_set_mode_explore(game);
+    }
+    render_msg_moved(world_dir_name(cmd->dir));
+    do_look(game);
+    return 1;
+}
+
+static int game_cmd_inventory(struct GameState *game, struct Command *cmd)
+{
     if (cmd->type == CMD_LOOT) {
         return game_inv_cmd_loot(game);
     }
@@ -286,26 +269,6 @@ static int apply_command(struct GameState *game, struct Command *cmd)
     }
     if (cmd->type == CMD_DROP) {
         return game_inv_cmd_drop(game, cmd->arg);
-    }
-    if (cmd->type == CMD_GIVE) {
-        if (game->mode == GAME_MODE_DIALOGUE &&
-                game->dialogue == DIALOGUE_ENEMY &&
-                game->enemy_handover_pick == 1) {
-            if (!game_inv_player_has_item(game, cmd->arg)) {
-                render_msg_bandit_give_not_carrying();
-                return 1;
-            }
-            render_msg_hand_over_item(item_name(cmd->arg));
-            if (game->weapon_equipped == cmd->arg) {
-                game->weapon_equipped = ITEM_NONE;
-            } else {
-                game_inv_bag_remove_item(game, cmd->arg);
-            }
-            game_set_mode_explore(game);
-            return 1;
-        }
-        render_msg_give_wrong_context();
-        return 1;
     }
     if (cmd->type == CMD_BAG) {
         return game_inv_cmd_bag(game);
@@ -325,126 +288,57 @@ static int apply_command(struct GameState *game, struct Command *cmd)
     if (cmd->type == CMD_CRAFT) {
         return game_inv_cmd_craft(game, cmd->arg);
     }
-    if (cmd->type == CMD_INSPECT) {
-        if (!game->env_focus_active ||
-                game->env_focus_room != game->player.room_id ||
-                game->tick >= game->env_focus_expires_tick) {
-            render_msg_inspect_nothing();
-            game->env_focus_active = 0;
-            game->env_focus_room = -1;
-            game->env_focus_kind = GAME_ENV_NONE;
-            game->env_focus_expires_tick = 0;
-            return 1;
-        }
-        if (cmd->arg != 0 && cmd->arg != game->env_focus_kind) {
-            render_msg_inspect_wrong_focus();
-            return 1;
-        }
-        if (game->env_focus_kind == GAME_ENV_RUSTLE) {
-            render_msg_inspect_rustle();
-        } else if (game->env_focus_kind == GAME_ENV_CREAK) {
-            render_msg_inspect_creak();
-        } else if (game->env_focus_kind == GAME_ENV_WATER) {
-            render_msg_inspect_water();
-        } else if (game->env_focus_kind == GAME_ENV_GRIT) {
-            render_msg_inspect_grit();
-        }
-        game->env_focus_active = 0;
-        game->env_focus_room = -1;
-        game->env_focus_kind = GAME_ENV_NONE;
-        game->env_focus_expires_tick = 0;
+    return 0;
+}
+
+static int game_cmd_reply(struct GameState *game, struct Command *cmd)
+{
+    if (cmd->type != CMD_REPLY) {
+        return 0;
+    }
+    if (game->mode == GAME_MODE_COMBAT) {
+        combat_resolve_reply(game, cmd->arg);
         return 1;
+    }
+    if (dialogue_cmd_reply(game, cmd->arg)) {
+        return 1;
+    }
+    if (game->mode == GAME_MODE_DIALOGUE && game->dialogue == DIALOGUE_ENEMY) {
+        return genc_cmd_reply(game, cmd->arg);
+    }
+    if (game->mode == GAME_MODE_DIALOGUE && game->dialogue == DIALOGUE_WANDERER) {
+        return wanderer_cmd_reply(game, cmd->arg);
+    }
+    render_msg_nobody_waiting_reply();
+    return 1;
+}
+
+static int apply_command(struct GameState *game, struct Command *cmd)
+{
+    if (!game_cmd_allowed_in_mode(game, cmd)) {
+        return 0;
+    }
+    if (game_cmd_meta(game, cmd)) {
+        return 1;
+    }
+    if (game_cmd_move(game, cmd)) {
+        return 1;
+    }
+    if (game_cmd_inventory(game, cmd)) {
+        return 1;
+    }
+    if (cmd->type == CMD_INSPECT) {
+        return gatmos_cmd_inspect(game, cmd->arg);
     }
     if (cmd->type == CMD_TALK) {
-        if (game->mode == GAME_MODE_DIALOGUE && game->dialogue == DIALOGUE_ENEMY) {
-            render_msg_bandit_blocks_talk();
-            return 1;
-        }
-        if (game->mode == GAME_MODE_COMBAT) {
-            render_msg_bandit_blocks_talk();
-            return 1;
-        }
-        if (game->mode == GAME_MODE_DIALOGUE && game->dialogue == DIALOGUE_WANDERER) {
-            render_msg_traveler_waiting();
-            return 1;
-        }
-        if (game->player.room_id == WORLD_ROOM_TOWER) {
-            render_msg_watchman_talk();
-            game_set_mode_dialogue(game, DIALOGUE_NPC_WATCHMAN);
-            return 1;
-        }
-        if (game->player.room_id == WORLD_ROOM_ORCHARD) {
-            render_msg_herbalist_talk();
-            game_set_mode_dialogue(game, DIALOGUE_NPC_HERBALIST);
-            return 1;
-        }
-        if (game->player.room_id == WORLD_ROOM_CATACOMBS) {
-            render_msg_archivist_talk();
-            game_set_mode_dialogue(game, DIALOGUE_NPC_ARCHIVIST);
-            return 1;
-        }
-        if (game->player.room_id != WORLD_ROOM_POND) {
-            render_msg_nobody_talk();
-            return 1;
-        }
-        frog_dialogue_intro();
-        game_set_mode_dialogue(game, DIALOGUE_NPC_FROG);
+        return dialogue_cmd_talk(game);
+    }
+    if (game_cmd_reply(game, cmd)) {
         return 1;
     }
-    if (cmd->type == CMD_REPLY) {
-        if (game->mode == GAME_MODE_COMBAT) {
-            combat_resolve_reply(game, cmd->arg);
-            return 1;
-        }
-        if (apply_room_npc_reply(game, cmd)) {
-            return 1;
-        }
-        if (game->mode == GAME_MODE_DIALOGUE && game->dialogue == DIALOGUE_ENEMY) {
-            if (cmd->arg == 1) {
-                combat_start(game);
-                return 1;
-            }
-            if (cmd->arg == 2) {
-                if (game->bag_count <= 0 && game->weapon_equipped == ITEM_NONE) {
-                    render_msg_bag_empty_bandit();
-                    combat_start(game);
-                    return 1;
-                }
-                game->enemy_handover_pick = 1;
-                render_bandit_handover_pick_prompt();
-                return 1;
-            }
-            if (cmd->arg == 3) {
-                game->enemy_handover_pick = 0;
-                if (game_roll_percent(game) < CFG_BANDIT_INTIMIDATE_SUCCESS_BELOW) {
-                    render_msg_intimidate_success();
-                    game_set_mode_explore(game);
-                } else {
-                    render_msg_intimidate_fail();
-                    combat_start(game);
-                }
-                return 1;
-            }
-            render_msg_pick_123();
-            return 1;
-        }
-        if (game->mode == GAME_MODE_DIALOGUE && game->dialogue == DIALOGUE_WANDERER) {
-            if (cmd->arg < 1 || cmd->arg > 3) {
-                render_msg_pick_123();
-                return 1;
-            }
-            wanderer_apply_reply(cmd->arg);
-            game_set_mode_explore(game);
-            game->wanderer_active = 0;
-            game->wanderer_room = -1;
-            game->wanderer_return_tick = game->tick + CFG_WANDERER_RETURN_DELAY_BASE +
-                (rand() % CFG_WANDERER_RETURN_DELAY_SPREAD);
-            return 1;
-        }
-        render_msg_nobody_waiting_reply();
-        return 1;
+    if (cmd->type == CMD_GIVE) {
+        return genc_cmd_give(game, cmd->arg);
     }
-
     return 0;
 }
 

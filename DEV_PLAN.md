@@ -154,6 +154,14 @@ Goal:
 
 ---
 
+## #90 - Refactor `apply_command` in `game.c`
+
+Done ✅.
+
+`apply_command` is a thin router; subsystem command handlers live in `dialogue`, `genc`, `gatmos`, and `wanderer` (see [`docs/architecture.md`](docs/architecture.md)). PR [#134](https://github.com/ianmays/dosmud/pull/134).
+
+---
+
 ## #135 - Document when to add and update tests
 
 Done ✅.
