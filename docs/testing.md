@@ -46,24 +46,9 @@ Use this section when deciding what to write, not only what to run. Agents and c
 | `game.c` static router only | No | Optional via `game_process_input` if semantics change |
 | `world_init` or fixed graph layout | If travel or map output changes | Update [`tests/harness/th_world.c`](../tests/harness/th_world.c) (and fixtures if needed) |
 
-**Module to unit file map** (FAT 8.3 basenames; `dialogue` maps to `unit_dial.c`):
+**Unit file convention:** add or extend `tests/unit/unit_<basename>.c` for the gameplay module you changed (see `UNIT_TEST_SRC` in the `Makefile`). Names follow the `src` basename where possible; FAT 8.3 truncations apply (for example `dialogue.c` pairs with `unit_dial.c`, `world.c` with `unit_wrld.c`). Which modules need coverage is listed under [In-scope modules](#unit-tests-greatest) below - do not maintain a second module table here.
 
-| `src` module | Unit file |
-|--------------|-----------|
-| `command.c` | `unit_cmd.c` |
-| `invent.c` | `unit_inv.c` |
-| `combat.c` | `unit_cbt.c` |
-| `game.c` | `unit_game.c` |
-| `genc.c` | `unit_genc.c` |
-| `wanderer.c` | `unit_wandr.c` |
-| `dialogue.c` | `unit_dial.c` |
-| `gatmos.c` | `unit_gatmos.c` |
-| `world.c` | `unit_wrld.c` |
-| `gprog.c` | `unit_gprog.c` |
-| `items.c` | `unit_item.c` |
-| `testharn.c` | `unit_tharn.c` |
-
-**Lesson from [#90](https://github.com/ianmays/dosmud/issues/90):** extracting command handlers from `game.c` into slice modules (for example `gatmos_cmd_inspect`, `dialogue_cmd_talk`) requires tests in the matching `unit_*.c` file. Green `unit_game.c` tests that only call `game_process_input` do not document slice ownership or catch regressions in the new entry points.
+**Lesson from [#90](https://github.com/ianmays/dosmud/issues/90):** when command handling moves from `game.c` into a slice module, add tests in that slice's `unit_*.c` file. Green `unit_game.c` tests that only call `game_process_input` do not document slice ownership or catch regressions in new entry points.
 
 Greatest `TEST` names must not match functions under test (for example use `wanderer_reply_cmd_explore`, not `TEST wanderer_cmd_reply`, when testing `wanderer_cmd_reply`).
 

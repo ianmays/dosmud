@@ -10,25 +10,8 @@ Follow [`AGENTS.md`](../../AGENTS.md) [Testing expectations](../../AGENTS.md#tes
 ## Authoring tests (not only running them)
 
 - Before a PR: run `make test`, `make test-run`, and `make test-unit` (or `make test-all`).
-- When you add or change **public** gameplay APIs in coverage-scope `src/*.c`, add or update tests in the matching `tests/unit/unit_*.c` (module map in `docs/testing.md`).
+- When you add or change **public** gameplay APIs in coverage-scope `src/*.c`, add or update tests in the matching `tests/unit/unit_*.c` (same basename convention as `Makefile` `UNIT_TEST_SRC`; see [When to add or update tests](../../docs/testing.md#when-to-add-or-update-tests)).
 - PR **Test plan** must list tests added or updated, or one sentence why none.
-
-## Module map (quick reference)
-
-| `src` | `tests/unit` |
-|-------|----------------|
-| `command` | `unit_cmd.c` |
-| `invent` | `unit_inv.c` |
-| `combat` | `unit_cbt.c` |
-| `game` | `unit_game.c` |
-| `genc` | `unit_genc.c` |
-| `wanderer` | `unit_wandr.c` |
-| `dialogue` | `unit_dial.c` |
-| `gatmos` | `unit_gatmos.c` |
-| `world` | `unit_wrld.c` |
-| `gprog` | `unit_gprog.c` |
-| `items` | `unit_item.c` |
-| `testharn` | `unit_tharn.c` |
 
 ## Determinism
 

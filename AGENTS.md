@@ -173,7 +173,7 @@ make dos-prepare MODE=TEST_MODE
 Canonical detail: [`docs/testing.md`](docs/testing.md) (especially [When to add or update tests](docs/testing.md#when-to-add-or-update-tests)).
 
 - **New gameplay behavior:** add or update snapshot tests when player-visible output changes; add unit tests in the owning `tests/unit/unit_<module>.c`; keep tests deterministic per `docs/testing.md`.
-- **New or moved public APIs** in coverage-scope modules (`command`, `invent`, `combat`, `game`, `genc`, `wanderer`, `dialogue`, `gatmos`, `world`, `gprog`, `items`, `testharn`): at least one **direct** unit test per new function or distinct branch. Passing only through `game_process_input` is not enough when logic lives in a named slice API (see #90: `dialogue_cmd_talk`, `genc_cmd_reply`, etc.).
+- **New or moved public APIs** in coverage-scope modules (`command`, `invent`, `combat`, `game`, `genc`, `wanderer`, `dialogue`, `gatmos`, `world`, `gprog`, `items`, `testharn`): at least one **direct** unit test per new function or distinct branch in the matching `tests/unit/unit_*.c` (see `docs/testing.md`). Passing only through `game_process_input` is not enough when logic lives in a named slice API (see #90).
 - **Static-only or router-only changes in `game.c`:** existing tests must pass; add router-level unit tests only when behavior or tick semantics change.
 - **Render-only (`grendr`, `txtres`):** update snapshots when copy or layout changes; unit tests optional unless parsing or state changes.
 - **PR Test plan:** list tests added or updated, or one sentence why none (for example "docs-only PR").
