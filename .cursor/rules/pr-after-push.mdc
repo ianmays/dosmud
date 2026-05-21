@@ -1,0 +1,30 @@
+---
+description: Mandatory post-push gate - check isDraft and comment review this before ending the turn
+alwaysApply: true
+---
+
+# PR after push (mandatory)
+
+Canonical detail: [`AGENTS.md`](../../AGENTS.md) section **After `git push` to a PR branch**. Procedure: [`.cursor/skills/pr-after-push/SKILL.md`](../../.cursor/skills/pr-after-push/SKILL.md).
+
+## Trigger
+
+Any successful `git push` where `gh pr view` succeeds for the current branch.
+
+## Blocker
+
+Do **not** send the final message to the user until this checklist completes in the **same turn** as the push.
+
+## Checklist
+
+1. `gh pr view --json number,isDraft`
+2. If `isDraft` is **false**: `gh pr comment <number> --body "review this"` (exact body only)
+3. If `isDraft` is **true**: skip until the PR is marked **Ready for review**
+
+## Re-check every push
+
+Never infer draft state from PR creation, an earlier turn, or project board **Review**. Always run step 1 after **each** push.
+
+The first push while the PR is still a draft does not require `review this`. The first push **after** the PR becomes ready for review does, and **every** push after that until merge.
+
+A missed `review this` on a non-draft PR is a workflow failure.
