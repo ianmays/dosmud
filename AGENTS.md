@@ -14,7 +14,7 @@ Guidance for AI/code agents working in this repository.
 - ALWAYS check for an existing GitHub Issue before starting work.
 - NEVER modify or reopen Closed Issues.
 - ALWAYS create a branch before making changes.
-- ALWAYS add or update the linked issue section in [`DEV_PLAN.md`](DEV_PLAN.md) with **Done ✅** when opening a draft PR. That is a roadmap log line, not a living status tracker - do not change it on pushes or after merge.
+- ALWAYS update [`DEV_PLAN.md`](DEV_PLAN.md) when opening a PR (`In review (PR #N)`); set **Done ✅** only after merge (see [DEV_PLAN tracking](#dev_plan-tracking)).
 - ALWAYS open draft PRs first.
 - ALWAYS link PRs to their corresponding Issues.
 - ALWAYS check whether documentation updates are required.
@@ -73,6 +73,19 @@ Do not skip workflow stages.
 
 See [Testing expectations](#testing-expectations) and [`docs/testing.md`](docs/testing.md#when-to-add-or-update-tests).
 
+- If the plan includes `git push` to an open PR, note that the [post-push checklist](.cursor/rules/pr-after-push.mdc) runs in the same turn as the push.
+
+### DEV_PLAN tracking
+
+[`DEV_PLAN.md`](DEV_PLAN.md) is the roadmap log, separate from the GitHub project board **Done** column.
+
+| When | `DEV_PLAN.md` status line | GitHub project board |
+|------|---------------------------|----------------------|
+| Draft PR opened | `In review (PR #N)` | **Review** |
+| Pushes to open PR | No change (use `review this` on the PR, not DEV_PLAN) | Stays **Review** |
+| PR merged + issue closed | `Done ✅` (include PR link in section body) | **Done** |
+
+Never use `Done`, `Done (PR pending)`, or **Done ✅** while the PR is still open. Do not update DEV_PLAN on every push.
 
 ### PR expectations
 
@@ -107,6 +120,7 @@ A missed `review this` comment is a **workflow failure** (same severity as skipp
 ### Completion workflow
 
 After merge:
+- update the matching [`DEV_PLAN.md`](DEV_PLAN.md) section to **Done ✅** and note the merged PR URL
 - switch back to `main`
 - pull latest changes
 - delete completed local branches
@@ -174,7 +188,7 @@ make dos-prepare MODE=TEST_MODE
 Canonical detail: [`docs/testing.md`](docs/testing.md) (especially [When to add or update tests](docs/testing.md#when-to-add-or-update-tests)).
 
 - **New gameplay behavior:** add or update snapshot tests when player-visible output changes; add unit tests in the owning `tests/unit/unit_<module>.c`; keep tests deterministic per `docs/testing.md`.
-- **New or moved exported APIs** in coverage-scope modules (`command`, `invent`, `combat`, `game`, `genc`, `wanderer`, `dialogue`, `gatmos`, `world`, `gprog`, `items`, `testharn`): at least one **direct** unit test per new function or distinct branch in the matching `tests/unit/unit_*.c` (see `docs/testing.md`). Passing only through `game_process_input` is not enough when logic lives in a named slice API (see #90).
+- **New or moved exported APIs** in coverage-scope modules listed in [`docs/testing.md`](docs/testing.md#unit-tests-greatest): at least one **direct** unit test per new function or distinct branch in the matching `tests/unit/unit_*.c` (see [When to add or update tests](docs/testing.md#when-to-add-or-update-tests)). Passing only through `game_process_input` is not enough when logic lives in a named slice API (see #90).
 - **Static-only or router-only changes in `game.c`:** existing tests must pass; add router-level unit tests only when behavior or tick semantics change.
 - **Render-only (`grendr`, `txtres`):** update snapshots when copy or layout changes; unit tests in those modules are **not required** for copy-only changes - add them when parsing or render state logic changes.
 - **PR Test plan:** list tests added or updated, or one sentence why none (for example "docs-only PR").
