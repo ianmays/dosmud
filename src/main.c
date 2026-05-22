@@ -140,6 +140,8 @@ static int main_dispatch_line(struct GameState *game, char *line)
 
 /*
  * Handle a polled line. Returns 0 on success, 1 on fatal harness error.
+ * Render only after a non-empty handled line; always re-prompt when running.
+ * Idle ticks use main_render_and_prompt instead (empty Enter must not repaint).
  */
 static int main_handle_polled_line(struct GameState *game, char *line, time_t *last_tick_time)
 {
