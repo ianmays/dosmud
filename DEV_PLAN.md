@@ -162,6 +162,14 @@ Done ✅.
 
 ---
 
+## #91 - Refactor `main()` in `main.c`
+
+Done ✅.
+
+`main()` is thin orchestration; static helpers cover CLI seed parsing, startup, polled input (including `TEST_MODE` harness dispatch), idle ticks, and render/prompt. See [`src/main.c`](src/main.c).
+
+---
+
 ## #135 - Document when to add and update tests
 
 Done ✅.
