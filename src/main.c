@@ -73,23 +73,126 @@ static int parse_cli_seed(int argc, char **argv, u32 *out_seed)
     return 0;
 }
 
+static int main_parse_args(int argc, char **argv, u32 *out_seed)
+{
+    *out_seed = default_rng_seed();
+    if (parse_cli_seed(argc, argv, out_seed) != 0) {
+        fprintf(stderr, "%s\n", TXT_MAIN_USAGE);
+        return 1;
+    }
+    return 0;
+}
+
+static void main_startup(struct GameState *game, u32 rng_seed)
+{
+    game_init(game, rng_seed);
+    printf(TXT_MAIN_TITLE_SEED_FMT, TXT_MAIN_TITLE, (unsigned long)rng_seed);
+    printf("%s\n", TXT_MAIN_HELP_HINT);
+    game_describe_current_room(game);
+    game_render(game);
+    print_prompt();
+}
+
+static void main_render_and_prompt(struct GameState *game)
+{
+    if (game->running) {
+        game_render(game);
+        print_prompt();
+    }
+}
+
+#ifdef TEST_MODE
+static void main_report_testharn_error(int th_rc)
+{
+    if (th_rc == -2) {
+        fprintf(stderr, "test fixture failed\n");
+    } else if (th_rc == -3) {
+        fprintf(stderr, "invalid @seed\n");
+    } else {
+        fprintf(stderr, "unknown test fixture\n");
+    }
+}
+#endif
+
+/*
+ * Process a non-empty input line. Returns 0 on success, 1 on fatal harness error.
+ */
+static int main_dispatch_line(struct GameState *game, char *line)
+{
+#ifdef TEST_MODE
+    int th_rc;
+
+    th_rc = testharn_apply(game, line);
+    if (th_rc < 0) {
+        main_report_testharn_error(th_rc);
+        return 1;
+    }
+    if (th_rc == 0) {
+        game_process_input(game, line);
+    } else {
+        plat_seed_rng(game->seed);
+    }
+#else
+    game_process_input(game, line);
+#endif
+    return 0;
+}
+
+/*
+ * Handle a polled line. Returns 0 on success, 1 on fatal harness error.
+ * Render only after a non-empty handled line; always re-prompt when running.
+ * Idle ticks use main_render_and_prompt instead (empty Enter must not repaint).
+ */
+static int main_handle_polled_line(struct GameState *game, char *line, time_t *last_tick_time)
+{
+    line[strcspn(line, "\r\n")] = '\0';
+    if (line[0] != '\0') {
+        if (main_dispatch_line(game, line) != 0) {
+            return 1;
+        }
+        *last_tick_time = plat_time_now();
+        if (game->running) {
+            game_render(game);
+        }
+    }
+    if (game->running) {
+        print_prompt();
+    }
+    return 0;
+}
+
+/*
+ * Run idle background ticks while in explore mode. Returns 1 if any tick ran.
+ */
+static int main_run_idle_ticks(struct GameState *game, time_t *last_tick_time,
+                               time_t idle_tick_seconds)
+{
+    time_t now_time;
+    int ran_tick;
+
+    now_time = plat_time_now();
+    ran_tick = 0;
+    while ((now_time - *last_tick_time) >= idle_tick_seconds && game->running) {
+        if (game->mode != GAME_MODE_EXPLORE) {
+            *last_tick_time = now_time;
+            break;
+        }
+        game_background_step(game);
+        *last_tick_time += idle_tick_seconds;
+        ran_tick = 1;
+    }
+    return ran_tick;
+}
+
 int main(int argc, char **argv)
 {
     static struct GameState game;
     char line[CFG_INPUT_MAX];
     time_t last_tick_time;
-    time_t now_time;
-    int poll_rc;
-    int ran_tick;
     u32 rng_seed;
-#ifdef TEST_MODE
-    int th_rc;
-#endif
-    const time_t idle_tick_seconds = (time_t)CFG_MAIN_IDLE_TICK_SECONDS;
+    int poll_rc;
 
-    rng_seed = default_rng_seed();
-    if (parse_cli_seed(argc, argv, &rng_seed) != 0) {
-        fprintf(stderr, "%s\n", TXT_MAIN_USAGE);
+    if (main_parse_args(argc, argv, &rng_seed) != 0) {
         return 1;
     }
     plat_seed_rng(rng_seed);
@@ -98,14 +201,8 @@ int main(int argc, char **argv)
     printf("%s\n", TXT_MAIN_TEST_MODE);
 #endif
 
-    game_init(&game, rng_seed);
+    main_startup(&game, rng_seed);
     last_tick_time = plat_time_now();
-
-    printf(TXT_MAIN_TITLE_SEED_FMT, TXT_MAIN_TITLE, (unsigned long)rng_seed);
-    printf("%s\n", TXT_MAIN_HELP_HINT);
-    game_describe_current_room(&game);
-    game_render(&game);
-    print_prompt();
 
     while (game.running) {
         poll_rc = plat_poll_line(line, sizeof(line));
@@ -113,53 +210,14 @@ int main(int argc, char **argv)
             break;
         }
         if (poll_rc > 0) {
-            line[strcspn(line, "\r\n")] = '\0';
-            if (line[0] != '\0') {
-#ifdef TEST_MODE
-                th_rc = testharn_apply(&game, line);
-                if (th_rc < 0) {
-                    if (th_rc == -2) {
-                        fprintf(stderr, "test fixture failed\n");
-                    } else if (th_rc == -3) {
-                        fprintf(stderr, "invalid @seed\n");
-                    } else {
-                        fprintf(stderr, "unknown test fixture\n");
-                    }
-                    return 1;
-                }
-                if (th_rc == 0) {
-                    game_process_input(&game, line);
-                } else {
-                    plat_seed_rng(game.seed);
-                }
-#else
-                game_process_input(&game, line);
-#endif
-                last_tick_time = plat_time_now();
-                if (game.running) {
-                    game_render(&game);
-                }
-            }
-            if (game.running) {
-                print_prompt();
+            if (main_handle_polled_line(&game, line, &last_tick_time) != 0) {
+                return 1;
             }
             continue;
         }
-
-        now_time = plat_time_now();
-        ran_tick = 0;
-        while ((now_time - last_tick_time) >= idle_tick_seconds && game.running) {
-            if (game.mode != GAME_MODE_EXPLORE) {
-                last_tick_time = now_time;
-                break;
-            }
-            game_background_step(&game);
-            last_tick_time += idle_tick_seconds;
-            ran_tick = 1;
-        }
-        if (ran_tick && game.running) {
-            game_render(&game);
-            print_prompt();
+        if (main_run_idle_ticks(&game, &last_tick_time,
+                                (time_t)CFG_MAIN_IDLE_TICK_SECONDS)) {
+            main_render_and_prompt(&game);
         }
     }
 
