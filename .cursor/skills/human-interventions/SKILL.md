@@ -1,14 +1,14 @@
 ---
 name: human-interventions
 description: >-
-  Draft and post "Human Interventions" summaries on GitHub issues where the
-  user steered design during agent work. Use when the user asks for human
-  interventions, after an issue or PR is merged/closed, or when documenting
-  design decisions on a completed ticket.
+  Draft and post "Key Human Interventions" summaries on GitHub issues where the
+  user steered design during agent work. Use when the user asks for key human
+  interventions, human interventions, after merge or issue closure, or when
+  documenting design decisions on a completed ticket.
 disable-model-invocation: true
 ---
 
-# Human Interventions
+# Key Human Interventions
 
 Record where the **user** steered design during agent-led work. Post as an issue comment when they want it on the ticket.
 
@@ -16,12 +16,12 @@ Not a general session summary. Not workflow hygiene. Not review-bot threads the 
 
 ## When to run
 
-- User says: "human interventions", "document interventions", "post interventions on #N"
+- User says: "key human interventions", "human interventions", "document interventions", "post interventions on #N"
 - After merge or issue closure: briefly **offer** this skill (see `AGENTS.md`); do not post without approval unless they already approved the draft or said "post it"
 
 ## What counts (include)
 
-A topic is a **human intervention** only if the user changed or confirmed a **design, architecture, or test-structure** choice:
+A topic is a **key human intervention** only if the user changed or confirmed a **design, architecture, or test-structure** choice:
 
 - They flagged a concern before or during implementation
 - Agent presented alternatives; they chose or rejected one
@@ -52,13 +52,13 @@ When unsure: **omit** rather than inflate the list.
 2. **Scan** — User messages in the current chat first; search agent transcript if the work spanned multiple turns.
 3. **Filter** — Apply inclusion and exclusion rules above.
 4. **Zero topics?** — Tell the user; do not post an empty comment.
-5. **Draft** — Section heading `## Human Interventions`, then bullets. Show draft in chat.
+5. **Draft** — Section heading `## Key Human Interventions`, then bullets. Show draft in chat.
 6. **Approve** — Wait for approval or explicit "post it"; revise if user drops a topic (e.g. not a real intervention).
 7. **Post** — Only after approval:
 
 ```bash
 gh issue comment <N> --body "$(cat <<'EOF'
-## Human Interventions
+## Key Human Interventions
 
 **Topic** — You ...
 EOF
@@ -71,7 +71,7 @@ EOF
 
 - **Multiple issues:** One comment per issue; ask which issue if unclear.
 - **Stacked PRs:** Document the **feature issue** unless the user wants drive-by fixes called out.
-- **Do not** edit an existing Human Interventions comment unless the user asks.
+- **Do not** edit an existing Key Human Interventions comment unless the user asks.
 
 ## Reference
 

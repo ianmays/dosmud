@@ -61,7 +61,7 @@ Report: current branch, sync with `origin/main`, which locals were deleted.
 
 ## Optional follow-ups (offer, do not run unless asked)
 
-- **Human Interventions:** [human-interventions skill](../human-interventions/SKILL.md) - draft only until user approves or says "post it"
+- **Key Human Interventions:** [human-interventions skill](../human-interventions/SKILL.md) - draft only until user approves or says "post it"
 - **Remote branch:** `git push origin --delete <branch>` then `git fetch --prune`
 
 ## Checklist

@@ -1,11 +1,11 @@
-# Human Interventions examples
+# Key Human Interventions examples
 
 ## Issue #116 (reference)
 
 Posted after soak/harness work merged. Three topics only; combat-interval review fix is intentionally omitted (review-bot finding, not a user design intervention).
 
 ```markdown
-## Human Interventions
+## Key Human Interventions
 
 **Soak vs unit coverage** — You flagged that long-run stress work should not ride on `make test-unit`. After discussion of folding soak into the existing greatest binary versus a separate entry point, a dedicated `make test-soak` harness was chosen, with three fixed-seed scenarios and periodic state-ok checks.
 
@@ -16,4 +16,4 @@ Posted after soak/harness work merged. Three topics only; combat-interval review
 
 ## Anti-pattern (do not include)
 
-**Combat soak validation** — Bugbot noted the combat scenario used the wrong check interval; the user only asked why the thread was marked resolved. That is workflow/review hygiene, not a human intervention bullet.
+**Combat soak validation** — Bugbot noted the combat scenario used the wrong check interval; the user only asked why the thread was marked resolved. That is workflow/review hygiene, not a key human intervention bullet.

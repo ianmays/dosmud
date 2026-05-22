@@ -114,7 +114,7 @@ After merge:
 
 ### After merge or issue closure
 
-- Offer to document **Human Interventions** using [`.cursor/skills/human-interventions/SKILL.md`](.cursor/skills/human-interventions/SKILL.md).
+- Offer to document **Key Human Interventions** using [`.cursor/skills/human-interventions/SKILL.md`](.cursor/skills/human-interventions/SKILL.md).
 - Draft first; post to the issue only after user approval or an explicit "post it" instruction.
 
 ## Technical Constraints
