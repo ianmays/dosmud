@@ -80,8 +80,10 @@ See [Testing expectations](#testing-expectations) and [`docs/testing.md`](docs/t
 - NEVER include issue references in PR titles.
 - ALWAYS ensure PR labels match Issue labels.
 - ALWAYS keep PR titles and commit messages concise.
-- ALWAYS use lower-case first character in PR titles and commit messages.
+- ALWAYS use lower-case first character in PR titles and commit message bodies (first line and every bullet).
+- ALWAYS write commit bodies as lower-case phrase-style bullets when there are two or more logical items; use a single lower-case line (no bullet) only when there is exactly one item. Do not write commit bodies as sentences or prose paragraphs.
 - NEVER use prefixes like `docs:` in PR titles or commit messages.
+- Commit message procedure: [`.cursor/rules/commit-messages.mdc`](.cursor/rules/commit-messages.mdc), [`.cursor/skills/squash-commit-message/SKILL.md`](.cursor/skills/squash-commit-message/SKILL.md).
 
 ### After `git push` to a PR branch (mandatory)
 

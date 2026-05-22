@@ -42,7 +42,7 @@ When the user asks for the next task, to pick up work, or to start a new issue:
 - Follow [When to add or update tests](../../docs/testing.md#when-to-add-or-update-tests); if in-scope `src/*.c` gained or changed **exported** gameplay APIs (module `.h`), update matching `tests/unit/unit_*.c` or explain why not in the PR **Test plan**.
 - PR body **Test plan** lists new or updated tests (not only "all green").
 - Open a **draft** PR linked to the issue; move project status to **Review**.
-- Match PR labels to the issue; follow PR title/commit rules in `AGENTS.md`.
+- Match PR labels to the issue; follow PR title/commit rules in `AGENTS.md` and [commit-messages.mdc](commit-messages.mdc).
 
 ## After pushing to an open PR (mandatory)
 

@@ -69,9 +69,12 @@ For detailed environment and workflow information, see `testing.md`.
 
 ## Commit Style
 
-- Keep commit messages concise.
-- Use bullet points rather than long prose if needed.
-- Start commit messages with a lower-case character.
+- Keep the **title** (subject line) concise; start with a lower-case character.
+- Write the **body** in lower-case phrase-style lines, not sentences or paragraphs.
+- **Two or more** logical changes in the body: use markdown bullets (`- `); every bullet starts lower-case.
+- **Exactly one** logical change: one lower-case body line without a bullet is fine.
+- Never start the body (or any bullet) with an upper-case letter.
+- Squash-merge and agent drafting: [`.cursor/skills/squash-commit-message/SKILL.md`](../.cursor/skills/squash-commit-message/SKILL.md), [`.cursor/rules/commit-messages.mdc`](../.cursor/rules/commit-messages.mdc).
 - Keep commits logically focused and easy to review.
 
 ## Documentation Ownership

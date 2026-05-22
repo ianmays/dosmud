@@ -8,7 +8,7 @@ description: >-
 
 # Squash commit message (dosmud)
 
-Produce one **title** and a **bullet body** for squashing a PR branch. Read [`AGENTS.md`](../../AGENTS.md) PR/commit rules; this skill adds the squash shape the user prefers.
+Produce one **title** and a **body** for squashing a PR branch. Read [`AGENTS.md`](../../AGENTS.md), [commit-messages rule](../../rules/commit-messages.mdc); this skill adds squash title `(#<pr>)` shape.
 
 ## When to run
 
@@ -34,11 +34,12 @@ Use commit subjects and the diff to group work into a few bullets. Drop fixup-on
 - No `docs:` / `feat:` prefixes
 - No issue references in the title (`Fixes #90` etc.)
 
-**Body** (markdown bullets only):
+**Body** (same rules as any commit; see commit-messages rule):
 
-- One `- ` line per logical chunk of work (often maps to former commits, merged when tiny)
-- **First word of each bullet is lower-case**
-- Short clauses; optional semicolon for a second phrase
+- **Two or more** chunks: markdown bullets (`- `), each starting lower-case
+- **One** chunk only: a single lower-case line, no bullet
+- Phrase-style clauses, not sentences or prose paragraphs; avoid trailing-period "essay" habit
+- Optional semicolon to join two short phrases in one bullet
 - **Do not** add `Closes #N`, `Fixes #N`, or issue links unless the user explicitly asks
 
 Deliver exactly:
@@ -92,7 +93,8 @@ Body:
 ## Checklist
 
 - [ ] Title starts lower-case; ends with `(#<pr>)` when PR number is known
-- [ ] Every body bullet starts lower-case
+- [ ] Body is bullets (2+ items) or one lower-case line (1 item); never prose paragraphs
+- [ ] No upper-case at start of body or any bullet
 - [ ] No `Closes` / `Fixes` in body unless user requested
 - [ ] No duplicate module tables or unrelated drive-by notes in bullets
 - [ ] Bullets match the actual branch diff, not generic filler

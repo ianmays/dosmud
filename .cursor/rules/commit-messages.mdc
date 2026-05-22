@@ -1,0 +1,53 @@
+---
+description: Commit title and body style - lower-case, bulleted body, no prose sentences
+alwaysApply: true
+---
+
+# Commit messages
+
+Canonical detail: [`AGENTS.md`](../../AGENTS.md) **PR expectations** and [`docs/contributor-guide.md`](../../docs/contributor-guide.md) **Commit Style**. Squash-merge: [`.cursor/skills/squash-commit-message/SKILL.md`](../../.cursor/skills/squash-commit-message/SKILL.md).
+
+## Title (subject line)
+
+- Lower-case first character
+- One concise line; no `docs:` / `feat:` prefixes
+- No issue references in PR titles
+
+## Body
+
+- **Never** start the body with an upper-case letter (first line and every bullet)
+- **Do not** write the body as sentences or paragraphs
+- Use short phrase-style lines (clauses), not full sentences with a trailing period habit
+- **Two or more** logical items: markdown bullets (`- `), each starting lower-case
+- **Exactly one** logical item: a single lower-case line with no bullet is OK
+- **Do not** use upper-case to start bullets for emphasis (`- Add tests` is wrong; `- add tests` is right)
+
+## Bad vs good
+
+Bad (prose paragraph):
+
+```
+rename foo to bar
+
+Align the skill and AGENTS.md with the new heading used on the issue.
+```
+
+Good (bullets):
+
+```
+rename foo to bar
+
+- align skill and AGENTS.md with issue comment heading
+```
+
+Good (single item, one lower-case line, no bullet):
+
+```
+fix off-by-one in combat tick
+
+correct bandit reply index when handover is active
+```
+
+## Squash-merge
+
+Same body rules; title often ends with `(#<pr>)`. See squash-commit-message skill.
