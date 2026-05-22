@@ -56,3 +56,18 @@ void wanderer_apply_reply(int choice)
 {
     render_wanderer_reply(choice);
 }
+
+int wanderer_cmd_reply(struct GameState *game, int choice)
+{
+    if (choice < 1 || choice > 3) {
+        render_msg_pick_123();
+        return 1;
+    }
+    wanderer_apply_reply(choice);
+    game_set_mode_explore(game);
+    game->wanderer_active = 0;
+    game->wanderer_room = -1;
+    game->wanderer_return_tick = game->tick + CFG_WANDERER_RETURN_DELAY_BASE +
+        (rand() % CFG_WANDERER_RETURN_DELAY_SPREAD);
+    return 1;
+}

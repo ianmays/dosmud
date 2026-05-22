@@ -195,6 +195,44 @@ TEST gatmos_rustle_berry_drop(void)
     PASS();
 }
 
+TEST gatmos_cmd_inspect_focus(void)
+{
+    struct GameState game;
+
+    reset_camp(&game);
+    game.env_focus_active = 1;
+    game.env_focus_room = WORLD_ROOM_CAMP;
+    game.env_focus_kind = GAME_ENV_WATER;
+    game.env_focus_expires_tick = game.tick + 10;
+    ASSERT_EQ(1, gatmos_cmd_inspect(&game, GAME_ENV_WATER));
+    ASSERT_EQ(0, game.env_focus_active);
+    PASS();
+}
+
+TEST gatmos_cmd_inspect_none(void)
+{
+    struct GameState game;
+
+    reset_camp(&game);
+    ASSERT_EQ(1, gatmos_cmd_inspect(&game, 0));
+    ASSERT_EQ(0, game.env_focus_active);
+    PASS();
+}
+
+TEST gatmos_cmd_inspect_wrong_focus(void)
+{
+    struct GameState game;
+
+    reset_camp(&game);
+    game.env_focus_active = 1;
+    game.env_focus_room = WORLD_ROOM_CAMP;
+    game.env_focus_kind = GAME_ENV_RUSTLE;
+    game.env_focus_expires_tick = game.tick + 10;
+    ASSERT_EQ(1, gatmos_cmd_inspect(&game, GAME_ENV_WATER));
+    ASSERT_EQ(1, game.env_focus_active);
+    PASS();
+}
+
 SUITE(gatmos) {
     RUN_TEST(gatmos_seed_world_items);
     RUN_TEST(gatmos_focus_expiry);
@@ -203,4 +241,7 @@ SUITE(gatmos) {
     RUN_TEST(gatmos_water_and_grit_focus);
     RUN_TEST(gatmos_room_item_spawn_gate);
     RUN_TEST(gatmos_rustle_berry_drop);
+    RUN_TEST(gatmos_cmd_inspect_focus);
+    RUN_TEST(gatmos_cmd_inspect_none);
+    RUN_TEST(gatmos_cmd_inspect_wrong_focus);
 }
