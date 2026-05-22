@@ -110,6 +110,7 @@ After merge:
 - switch back to `main`
 - pull latest changes
 - delete completed local branches
+- agents: [post-merge-cleanup skill](.cursor/skills/post-merge-cleanup/SKILL.md)
 
 ### After merge or issue closure
 
