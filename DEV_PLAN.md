@@ -53,7 +53,7 @@ flowchart LR
     M9a["104,100,101"]
   end
   subgraph m8 [Advanced_Mechanics]
-    M8["15,128,129,4,5,50,132,102,107,9,31,49,52"]
+    M8["15,128,129,4,5,50,132,102,107,9,31,52,49"]
   end
   subgraph m6 [Content_Expansion]
     M6["55,7,8,51,54,76,130,131"]
@@ -74,7 +74,7 @@ flowchart LR
 
 Workflow (milestone 4) can run in parallel with architecture once unblocked. Content (6) and renderer (7) are not gated on all of mechanics (8).
 
-**Dependencies:** native GitHub **blocked-by** links on issues (Relationships sidebar). Key chains: [#71](https://github.com/ianmays/dosmud/issues/71) before [#47](https://github.com/ianmays/dosmud/issues/47) / [#104](https://github.com/ianmays/dosmud/issues/104) / [#48](https://github.com/ianmays/dosmud/issues/48); [#104](https://github.com/ianmays/dosmud/issues/104) before [#100](https://github.com/ianmays/dosmud/issues/100) / [#101](https://github.com/ianmays/dosmud/issues/101) / [#8](https://github.com/ianmays/dosmud/issues/8); [#101](https://github.com/ianmays/dosmud/issues/101) before [#102](https://github.com/ianmays/dosmud/issues/102) / [#107](https://github.com/ianmays/dosmud/issues/107); [#50](https://github.com/ianmays/dosmud/issues/50) before [#132](https://github.com/ianmays/dosmud/issues/132); [#92](https://github.com/ianmays/dosmud/issues/92) after [#16](https://github.com/ianmays/dosmud/issues/16), [#71](https://github.com/ianmays/dosmud/issues/71), [#47](https://github.com/ianmays/dosmud/issues/47).
+**Dependencies:** native GitHub **blocked-by** links on issues (Relationships sidebar). Key chains: [#71](https://github.com/ianmays/dosmud/issues/71) before [#47](https://github.com/ianmays/dosmud/issues/47) / [#104](https://github.com/ianmays/dosmud/issues/104) / [#48](https://github.com/ianmays/dosmud/issues/48); [#104](https://github.com/ianmays/dosmud/issues/104) before [#100](https://github.com/ianmays/dosmud/issues/100) / [#101](https://github.com/ianmays/dosmud/issues/101) / [#8](https://github.com/ianmays/dosmud/issues/8); [#101](https://github.com/ianmays/dosmud/issues/101) before [#102](https://github.com/ianmays/dosmud/issues/102) / [#107](https://github.com/ianmays/dosmud/issues/107); [#50](https://github.com/ianmays/dosmud/issues/50) before [#132](https://github.com/ianmays/dosmud/issues/132); [#52](https://github.com/ianmays/dosmud/issues/52) before [#49](https://github.com/ianmays/dosmud/issues/49); [#92](https://github.com/ianmays/dosmud/issues/92) after [#16](https://github.com/ianmays/dosmud/issues/16), [#71](https://github.com/ianmays/dosmud/issues/71), [#47](https://github.com/ianmays/dosmud/issues/47).
 
 ### Current Project Priority
 
@@ -543,9 +543,9 @@ NOT:
 | [#9](https://github.com/ianmays/dosmud/issues/9) | reputation system |
 | [#15](https://github.com/ianmays/dosmud/issues/15) | character stats and rolls |
 | [#31](https://github.com/ianmays/dosmud/issues/31) | easy / hard mode |
+| [#52](https://github.com/ianmays/dosmud/issues/52) | npc schedules |
 | [#49](https://github.com/ianmays/dosmud/issues/49) | quests |
 | [#50](https://github.com/ianmays/dosmud/issues/50) | economy |
-| [#52](https://github.com/ianmays/dosmud/issues/52) | npc schedules |
 | [#132](https://github.com/ianmays/dosmud/issues/132) | NPC trade |
 | [#102](https://github.com/ianmays/dosmud/issues/102) | fixed location enemies (Bandits) |
 | [#107](https://github.com/ianmays/dosmud/issues/107) | enemies (Bandits) spawn and wander, rather than spawn randomly at player site |
@@ -562,13 +562,13 @@ NOT:
 
 ### [#31](https://github.com/ianmays/dosmud/issues/31) - Easy / hard mode
 
+### [#52](https://github.com/ianmays/dosmud/issues/52) - NPC schedules
+
 ### [#49](https://github.com/ianmays/dosmud/issues/49) - Quests
 
 ### [#50](https://github.com/ianmays/dosmud/issues/50) - Economy
 
 ### [#132](https://github.com/ianmays/dosmud/issues/132) - NPC trade
-
-### [#52](https://github.com/ianmays/dosmud/issues/52) - NPC schedules
 
 ### [#102](https://github.com/ianmays/dosmud/issues/102) - Fixed location enemies (Bandits)
 
