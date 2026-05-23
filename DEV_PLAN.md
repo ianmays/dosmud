@@ -31,7 +31,7 @@ The project should avoid:
 - platform/render leakage into gameplay
 - premature complexity
 
-When a draft PR is opened, mark the issue section **Done ✅** under its heading (optional PR link in the body). That line is not updated on later pushes or after merge - use the GitHub project board and PR for workflow status.
+When a draft PR is opened for a **milestone-tracked** issue, mark that issue's section **Done ✅** under its heading (optional PR link in the body). That line is not updated on later pushes or after merge - use the GitHub project board and PR for workflow status. Issues without a GitHub **Milestone** (BAU gameplay/tooling) are not listed in this file.
 
 ---
 
@@ -154,38 +154,6 @@ Goal:
 
 ---
 
-## #90 - Refactor `apply_command` in `game.c`
-
-Done ✅.
-
-`apply_command` is a thin router; subsystem command handlers live in `dialogue`, `genc`, `gatmos`, and `wanderer` (see [`docs/architecture.md`](docs/architecture.md)). PR [#134](https://github.com/ianmays/dosmud/pull/134).
-
----
-
-## #91 - Refactor `main()` in `main.c`
-
-Done ✅.
-
-`main()` is thin orchestration; static helpers cover CLI seed parsing, startup, polled input (including `TEST_MODE` harness dispatch), idle ticks, and render/prompt. See [`src/main.c`](src/main.c).
-
----
-
-## #135 - Document when to add and update tests
-
-Done ✅.
-
-Agent and contributor docs now state when to **write** unit and snapshot tests (not only run them): [`AGENTS.md`](AGENTS.md#testing-expectations), [`.cursor/rules/testing-discipline.mdc`](.cursor/rules/testing-discipline.mdc), [`docs/testing.md`](docs/testing.md#when-to-add-or-update-tests), planning **Testing** subsection, and PR checklist updates in [`agent-workflow.mdc`](.cursor/rules/agent-workflow.mdc). PR [#136](https://github.com/ianmays/dosmud/pull/136). Motivated by [#90](https://github.com/ianmays/dosmud/issues/90).
-
----
-
-## #137 - Harden post-push `review this` workflow
-
-Done ✅.
-
-[`.cursor/rules/pr-after-push.mdc`](.cursor/rules/pr-after-push.mdc), [`.cursor/skills/pr-after-push/SKILL.md`](.cursor/skills/pr-after-push/SKILL.md), [`AGENTS.md`](AGENTS.md), [`agent-workflow.mdc`](.cursor/rules/agent-workflow.mdc), and [`docs/contributor-guide.md`](docs/contributor-guide.md) **After you push**. PR [#138](https://github.com/ianmays/dosmud/pull/138). Motivated by [#136](https://github.com/ianmays/dosmud/pull/136).
-
----
-
 ## ANSI C89 cleanup and compiler enforcement
 
 ### Remove all K&R function definitions
@@ -230,7 +198,7 @@ Compiler discipline and warning cleanliness should remain early priorities throu
 
 ### Centralize gameplay tuning values
 
-✅ Done - gameplay tuning values live in `include/config.h` (#33).
+✅ Done - gameplay tuning values live in `include/config.h`.
 
 ---
 
@@ -355,12 +323,6 @@ Delivered in PR [#123](https://github.com/ianmays/dosmud/pull/123).
 
 ---
 
-## #105 - eating restores HP (Done ✅)
-
-Berry and fish restore HP when eaten; salve (inventory and combat reply 3) uses the same full-HP rule (consumable used, no heal, explicit message). Shared `game_heal_player` in [`game.c`](src/game.c).
-
----
-
 ## #95 - Phase B unit tests (Done ✅)
 
 Delivered in PR [#127](https://github.com/ianmays/dosmud/pull/127).
@@ -418,12 +380,6 @@ dosmud --seed 1234
 ---
 
 # Phase 4 - Workflow and Tooling Maturity
-
-## #73 - Rules
-
-✅ Done - codified: subsystem ownership, architecture boundaries, portability constraints, workflow discipline.
-
----
 
 ## #74 - Skills
 
