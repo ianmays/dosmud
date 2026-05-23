@@ -37,6 +37,13 @@ int item_is_edible(int item_id)
     return 0;
 }
 
+int item_food_heal_amount(int item_id)
+{
+    if (item_id == ITEM_BERRY) return CFG_BERRY_HEAL_AMOUNT;
+    if (item_id == ITEM_FISH) return CFG_FISH_HEAL_AMOUNT;
+    return 0;
+}
+
 int item_is_weapon(int item_id)
 {
     if (item_id == ITEM_STICK) return 1;

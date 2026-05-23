@@ -546,6 +546,17 @@ void render_combat_salve_in_combat(int hp)
     RENDER_PRINTF(TXT_COMBAT_SALVE_FMT, hp);
 }
 
+void render_combat_salve_full(void)
+{
+    RENDER_PRINTF("%s", TXT_COMBAT_SALVE_FULL);
+    RENDER_PRINTF("%s", TXT_ALREADY_FULL_HEALTH);
+}
+
+void render_already_full_health(void)
+{
+    RENDER_PRINTF("%s", TXT_ALREADY_FULL_HEALTH);
+}
+
 void render_combat_invalid_choice(void)
 {
     RENDER_PRINTF("%s", TXT_PICK_123);
@@ -935,14 +946,26 @@ void render_inv_cannot_eat(const char *item_name)
     RENDER_PRINTF(TXT_INV_CANNOT_EAT_FMT, item_name);
 }
 
-void render_inv_eat_berry(void)
+void render_inv_eat_berry_healed(int hp)
 {
-    RENDER_PRINTF("%s", TXT_INV_EAT_BERRY);
+    RENDER_PRINTF(TXT_INV_EAT_BERRY_HEAL_FMT, hp);
 }
 
-void render_inv_eat_fish(void)
+void render_inv_eat_berry_full(void)
+{
+    RENDER_PRINTF("%s", TXT_INV_EAT_BERRY);
+    RENDER_PRINTF("%s", TXT_ALREADY_FULL_HEALTH);
+}
+
+void render_inv_eat_fish_healed(int hp)
+{
+    RENDER_PRINTF(TXT_INV_EAT_FISH_HEAL_FMT, hp);
+}
+
+void render_inv_eat_fish_full(void)
 {
     RENDER_PRINTF("%s", TXT_INV_EAT_FISH);
+    RENDER_PRINTF("%s", TXT_ALREADY_FULL_HEALTH);
 }
 
 void render_inv_use_reply_combat(void)
@@ -958,6 +981,12 @@ void render_inv_use_torch(void)
 void render_inv_use_salve(int hp)
 {
     RENDER_PRINTF(TXT_INV_USE_SALVE_FMT, hp);
+}
+
+void render_inv_use_salve_full(void)
+{
+    RENDER_PRINTF("%s", TXT_INV_USE_SALVE_FULL);
+    RENDER_PRINTF("%s", TXT_ALREADY_FULL_HEALTH);
 }
 
 void render_inv_use_spear(void)

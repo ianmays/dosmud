@@ -20,7 +20,7 @@ Purpose:
 - `make build`: native GCC development build
 - `make check-layers`: core/render boundary guard (no `printf` in `src/*.c` except `main.c`, `grendr.c`, and the platform file `platpos.c` or `platdos.c`)
 - `make test`: strict deterministic compile (`-Werror`, `-DTEST_MODE`, `-g -O0`); does not run `check-layers`
-- `make test-run`: builds the test binary (`make test`), then runs every name in `SNAPSHOT_TESTS` plus `seed_cli` (CLI `--seed` on `smoke.input`; see [Snapshot test files](#snapshot-test-files)). Each step prints `snapshot: <name>`. Finishes with `snapshot tests passed: N/M` (for example `60/60`).
+- `make test-run`: builds the test binary (`make test`), then runs every name in `SNAPSHOT_TESTS` plus `seed_cli` (CLI `--seed` on `smoke.input`; see [Snapshot test files](#snapshot-test-files)). Each step prints `snapshot: <name>`. Finishes with `snapshot tests passed: N/M` (for example `63/63`).
 - `make test-unit`: builds and runs the greatest unit suite (`tests/unit/build/dosmud_unit`, `TEST_MODE` only; not linked into release `dosmud`)
 - `make test-soak`: builds and runs long-run soak/stress checks (`tests/soak/build/dosmud_soak`; separate from unit tests)
 
@@ -161,6 +161,7 @@ Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_
 | `bandit_dialogue_empty` | Bandit dialogue, empty bag, no wielded weapon |
 | `bandit_combat_defend_ready` | Combat turn 1 + inject queue for enemy damage after defend |
 | `bandit_combat_salve_ready` | Combat turn 1, salve in bag + inject for enemy turn after salve |
+| `bandit_combat_salve_full` | Combat turn 1, salve in bag, player at max HP + inject for enemy turn after salve |
 | `bandit_combat_level_ready` | Near-kill combat + inject for victory + `xp = 19` (level-up test) |
 | `bandit_fight_ready` | Bandit dialogue + inject for `combat_start` enemy HP spread |
 | `bandit_intimidate_ok` | Bandit dialogue + inject (`CFG_TEST_INTIMIDATE_OK`) for reply `3` success |
@@ -190,6 +191,7 @@ Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_
 | Fixture | State |
 |---------|--------|
 | `bag_berry` / `bag_fish` / `bag_salve` / `bag_torch` / `bag_spear` / `bag_stone` / `bag_stick` | Camp or pond baseline + one item in bag |
+| `bag_berry_low_hp` / `bag_fish_low_hp` | Same as `bag_berry` / `bag_fish` with `player_hp = CFG_START_MAX_HP - 5` |
 | `bag_craft_salve` | Camp + herb and berry in bag |
 
 **Inspect focus** (camp):
@@ -263,11 +265,11 @@ Each process run uses one `.input` file until `quit`. `make test-run` runs `SNAP
 
 **NPC talk:** `frog_replies`, `watchman_talk`, `wanderer_replies`, `wanderer_talk_blocked`, `herbalist_talk`, `archivist_talk`, `talk_nobody`.
 
-**Eat / use:** `use_salve`, `use_torch`, `use_spear`, `use_stone`, `eat_berry`, `eat_fish`, `eat_not_edible`, `eat_missing`.
+**Eat / use:** `use_salve`, `use_torch`, `use_spear`, `use_stone`, `eat_berry`, `eat_fish`, `eat_berry_heal`, `eat_fish_heal`, `eat_not_edible`, `eat_missing`.
 
 **Inspect:** `inspect_rustle`, `inspect_creak`, `inspect_water`, `inspect_grit`, `inspect_none`, `inspect_wrong`.
 
-**Combat:** `combat_defend`, `combat_salve`, `combat_no_salve`, `combat_invalid`, `combat_take_blocked`, `combat_victory_xp`, `level_up`.
+**Combat:** `combat_defend`, `combat_salve`, `combat_salve_full`, `combat_no_salve`, `combat_invalid`, `combat_take_blocked`, `combat_victory_xp`, `level_up`.
 
 **Loot:** `loot_spear`, `loot_stick`, `loot_berry`, `loot_herb`, `loot_fish`, `loot_empty`, `loot_stripped`, `loot_bag_full`.
 

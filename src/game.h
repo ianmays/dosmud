@@ -86,6 +86,9 @@ int game_is_busy_dialogue(struct GameState *game);
 int game_roll_spread(struct GameState *game, int spread);
 int game_roll_percent(struct GameState *game);
 
+/* returns 1 if heal applied, 0 if player was already at max_hp */
+int game_heal_player(struct GameState *game, int amount);
+
 #ifdef TEST_MODE
 void game_roll_inject_begin(struct GameState *game, const int *values, int count);
 void game_roll_inject_clear(struct GameState *game);

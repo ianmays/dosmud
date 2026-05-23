@@ -133,6 +133,19 @@ static int fixture_bandit_combat_salve_ready(struct GameState *game)
     return 1;
 }
 
+static int fixture_bandit_combat_salve_full(struct GameState *game)
+{
+    static const int rolls[1] = { CFG_TEST_COMBAT_SALVE_ENEMY_DMG };
+
+    fixture_bandit_combat_turn1(game);
+    if (!game_inv_bag_add(game, ITEM_SALVE)) {
+        return 0;
+    }
+    game->player_hp = game->max_hp;
+    game_roll_inject_begin(game, rolls, 1);
+    return 1;
+}
+
 static void fixture_bandit_victory_inject(struct GameState *game, int loot_percent)
 {
     int rolls[3];
@@ -253,6 +266,24 @@ static int fixture_bag_item(struct GameState *game, int room_id, int item_id)
     if (!game_inv_bag_add(game, item_id)) {
         return 0;
     }
+    return 1;
+}
+
+static int fixture_bag_berry_low_hp(struct GameState *game)
+{
+    if (!fixture_bag_item(game, WORLD_ROOM_CAMP, ITEM_BERRY)) {
+        return 0;
+    }
+    game->player_hp = CFG_START_MAX_HP - 5;
+    return 1;
+}
+
+static int fixture_bag_fish_low_hp(struct GameState *game)
+{
+    if (!fixture_bag_item(game, WORLD_ROOM_POND, ITEM_FISH)) {
+        return 0;
+    }
+    game->player_hp = CFG_START_MAX_HP - 5;
     return 1;
 }
 
@@ -419,6 +450,12 @@ int testharn_apply(struct GameState *game, const char *line)
         }
         return 1;
     }
+    if (fixture_name_is("bandit_combat_salve_full", name)) {
+        if (!fixture_bandit_combat_salve_full(game)) {
+            return -2;
+        }
+        return 1;
+    }
     if (fixture_name_is("bandit_combat_level_ready", name)) {
         fixture_bandit_combat_level_ready(game);
         return 1;
@@ -515,6 +552,18 @@ int testharn_apply(struct GameState *game, const char *line)
     }
     if (fixture_name_is("bag_fish", name)) {
         if (!fixture_bag_item(game, WORLD_ROOM_POND, ITEM_FISH)) {
+            return -2;
+        }
+        return 1;
+    }
+    if (fixture_name_is("bag_berry_low_hp", name)) {
+        if (!fixture_bag_berry_low_hp(game)) {
+            return -2;
+        }
+        return 1;
+    }
+    if (fixture_name_is("bag_fish_low_hp", name)) {
+        if (!fixture_bag_fish_low_hp(game)) {
             return -2;
         }
         return 1;

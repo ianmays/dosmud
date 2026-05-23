@@ -351,9 +351,13 @@ Delivered in PR [#123](https://github.com/ianmays/dosmud/pull/123).
 - [`docs/testing.md`](docs/testing.md) - fixture tables, determinism model, snapshot file list, adding-a-snapshot checklist.
 - [`docs/architecture.md`](docs/architecture.md) - harness and RNG split updated.
 
-**Deferred (not #115):** world boot (#114), eat-heals-HP ([#105](https://github.com/ianmays/dosmud/issues/105)).
-
 **Unit scope (Phase B):** `command`, `invent`, `combat`, `game`, `genc`, `wanderer`, `dialogue`, `gatmos`, `world` (fixed graph), `gprog`, `items`, `testharn`. Out of scope: `grendr`, `txtres`, `main`, platform glue.
+
+---
+
+## #105 - eating restores HP (Done ✅)
+
+Berry and fish restore HP when eaten; salve (inventory and combat reply 3) uses the same full-HP rule (consumable used, no heal, explicit message). Shared `game_heal_player` in [`game.c`](src/game.c).
 
 ---
 

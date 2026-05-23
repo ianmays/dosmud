@@ -103,7 +103,7 @@ Commands mutate game state, world ticks mutate simulation state, and rendering o
 [`include/config.h`](../include/config.h) is the compile-time home for:
 
 - structural limits (`CFG_ROOM_MAX`, `CFG_BAG_MAX`, `CFG_AREA_ITEM_SLOTS` ground slots per room, buffers, etc.)
-- gameplay tuning (combat and bandit corpse loot thresholds, progression, ambient systems, wanderer timing)
+- gameplay tuning (combat and bandit corpse loot thresholds, food/salve heal amounts, progression, ambient systems, wanderer timing)
 - world-generation numeric policy (`world_init` counts and loop bounds)
 - `WORLD_ROOM_*` room IDs
 
@@ -159,16 +159,16 @@ Gameplay slices live beside `game.c` as plain C translation units (no extra fram
 
 - [`gprog.c`](../src/gprog.c) - XP and level-up rewards (`game_xp_to_next_level`, `progression_gain_xp`; FAT 8.3-safe basename)
 - [`combat.c`](../src/combat.c) - combat start, player reply resolution, enemy turn (randomness via `game_roll_spread` / `game_roll_percent`, not `rand()`)
-- [`genc.c`](../src/genc.c) - ambient bandit encounter entry, bandit reply and handover commands (`genc_cmd_reply`, `genc_cmd_give`; FAT 8.3-safe basename)
-- [`wanderer.c`](../src/wanderer.c) - traveler movement, encounter flow, wanderer reply command (`wanderer_cmd_reply`)
-- [`dialogue.c`](../src/dialogue.c) - pond frog lines, NPC id hint for room look, talk and room-NPC reply commands (`dialogue_cmd_talk`, `dialogue_cmd_reply`)
-- [`gatmos.c`](../src/gatmos.c) - initial room items, ambient rolls, animal noise, inspect command (`gatmos_cmd_inspect`; FAT 8.3-safe basename)
+- [`genc.c`](../src/genc.c) - ambient bandit encounter open state (FAT 8.3-safe basename)
+- [`wanderer.c`](../src/wanderer.c) - traveler movement and encounter flow
+- [`dialogue.c`](../src/dialogue.c) - pond frog lines and NPC id hint for room look
+- [`gatmos.c`](../src/gatmos.c) - initial room items, ambient rolls, animal noise, inspect focus hooks (FAT 8.3-safe basename)
 
 When a slice exposes new command or state entry points, add tests in the matching `tests/unit/unit_*.c` file (see [When to add or update tests](testing.md#when-to-add-or-update-tests)).
 
 New `src/*.c` and `src/*.h` basenames must stay within **classic FAT 8+3** (at most eight characters before `.c` or `.h`) so MS-DOS 5.x-6.x style volumes and the Open Watcom DOS build can open them reliably. Existing examples: `grendr.*`, `invent.*`, `gprog.*`, `gatmos.*`, `genc.*`.
 
-`game` stays orchestration: `apply_command` in [`game.c`](../src/game.c) routes by mode and command type to the slices above via static helpers (`game_cmd_session`, `game_cmd_observe`, `game_cmd_pass_time`, `game_cmd_move`, `game_cmd_inventory`, `game_cmd_reply`). New behaviour should land in the owning slice rather than re-centralising into `game.c`.
+`game` stays orchestration; new behaviour should land in the owning slice above rather than re-centralising into `game.c`. [`game_heal_player`](../src/game.c) applies capped HP heals and is used by inventory eat/salve and combat salve reply 3.
 
 ### `command`
 
@@ -201,12 +201,14 @@ New `src/*.c` and `src/*.h` basenames must stay within **classic FAT 8+3** (at m
 
 - bag/inventory state mutation
 - item use and crafting behavior
+- `eat` and inventory `use salve` restore HP via `game_heal_player`; at max HP the item is still consumed but no heal is applied (player sees an already-full message)
 - wield/unwield commands track `weapon_equipped` on `GameState`; a wielded weapon is not stored in `bag[]` (it occupies the hand slot only until unwield, drop, or bandit handover moves it)
 - combat adds `item_weapon_damage_bonus` from `weapon_equipped` when the player attacks; it does not require the weapon id to appear in the bag
 
 ### `items`
 
 - item metadata and lookup
+- `item_food_heal_amount` for edible heal values (`CFG_BERRY_HEAL_AMOUNT`, `CFG_FISH_HEAL_AMOUNT`)
 
 ## Core data ownership
 

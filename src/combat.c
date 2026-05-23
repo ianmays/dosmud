@@ -64,9 +64,11 @@ void combat_resolve_reply(struct GameState *game, int choice)
             render_combat_no_salve_bag();
         } else {
             game_inv_bag_remove_item(game, ITEM_SALVE);
-            game->player_hp += CFG_SALVE_HEAL_AMOUNT;
-            if (game->player_hp > game->max_hp) game->player_hp = game->max_hp;
-            render_combat_salve_in_combat(game->player_hp);
+            if (game_heal_player(game, CFG_SALVE_HEAL_AMOUNT)) {
+                render_combat_salve_in_combat(game->player_hp);
+            } else {
+                render_combat_salve_full();
+            }
         }
     } else {
         render_combat_invalid_choice();

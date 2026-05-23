@@ -77,12 +77,43 @@ TEST invent_eat_and_use(void)
     game_inv_bag_add(&game, ITEM_STONE);
     ASSERT_EQ(1, game_inv_cmd_eat(&game, ITEM_BERRY));
     ASSERT_EQ(0, game_inv_player_has_item(&game, ITEM_BERRY));
+    ASSERT_EQ(CFG_START_MAX_HP, game.player_hp);
     ASSERT_EQ(1, game_inv_cmd_eat(&game, ITEM_STONE));
     game_inv_bag_add(&game, ITEM_SALVE);
     game.player_hp = 5;
     ASSERT_EQ(1, game_inv_cmd_use(&game, ITEM_SALVE));
     ASSERT_EQ(10, game.player_hp);
     ASSERT_EQ(1, game_inv_cmd_use(&game, ITEM_SPEAR));
+    PASS();
+}
+
+TEST invent_eat_heals_damaged(void)
+{
+    struct GameState game;
+
+    unit_game_fresh(&game, 16u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game.player_hp = 5;
+    game_inv_bag_add(&game, ITEM_BERRY);
+    ASSERT_EQ(1, game_inv_cmd_eat(&game, ITEM_BERRY));
+    ASSERT_EQ(6, game.player_hp);
+    game_inv_bag_add(&game, ITEM_FISH);
+    game.player_hp = 10;
+    ASSERT_EQ(1, game_inv_cmd_eat(&game, ITEM_FISH));
+    ASSERT_EQ(12, game.player_hp);
+    PASS();
+}
+
+TEST invent_salve_at_max_hp(void)
+{
+    struct GameState game;
+
+    unit_game_fresh(&game, 17u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game_inv_bag_add(&game, ITEM_SALVE);
+    ASSERT_EQ(1, game_inv_cmd_use(&game, ITEM_SALVE));
+    ASSERT_EQ(CFG_START_MAX_HP, game.player_hp);
+    ASSERT_EQ(-1, game_inv_bag_find_index(&game, ITEM_SALVE));
     PASS();
 }
 
@@ -227,6 +258,8 @@ SUITE(invent) {
     RUN_TEST(invent_take_drop_paths);
     RUN_TEST(invent_take_combat_blocked);
     RUN_TEST(invent_eat_and_use);
+    RUN_TEST(invent_eat_heals_damaged);
+    RUN_TEST(invent_salve_at_max_hp);
     RUN_TEST(invent_craft_torch);
     RUN_TEST(invent_craft_missing_ingredients);
     RUN_TEST(invent_wield_and_unwield);

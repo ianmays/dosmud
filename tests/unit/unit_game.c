@@ -17,6 +17,41 @@ static int run_cmd(struct GameState *game, const char *line)
     return game_process_input(game, buf);
 }
 
+TEST game_heal_player_applies(void)
+{
+    struct GameState game;
+
+    unit_game_fresh(&game, 30u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game.player_hp = 5;
+    ASSERT_EQ(1, game_heal_player(&game, CFG_SALVE_HEAL_AMOUNT));
+    ASSERT_EQ(10, game.player_hp);
+    PASS();
+}
+
+TEST game_heal_player_at_max(void)
+{
+    struct GameState game;
+
+    unit_game_fresh(&game, 31u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    ASSERT_EQ(0, game_heal_player(&game, CFG_BERRY_HEAL_AMOUNT));
+    ASSERT_EQ(CFG_START_MAX_HP, game.player_hp);
+    PASS();
+}
+
+TEST game_heal_player_clamps(void)
+{
+    struct GameState game;
+
+    unit_game_fresh(&game, 32u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game.player_hp = CFG_START_MAX_HP - 1;
+    ASSERT_EQ(1, game_heal_player(&game, CFG_FISH_HEAL_AMOUNT));
+    ASSERT_EQ(CFG_START_MAX_HP, game.player_hp);
+    PASS();
+}
+
 TEST game_mode_setters(void)
 {
     struct GameState game;
@@ -318,6 +353,9 @@ TEST game_quit_ends_run(void)
 }
 
 SUITE(game) {
+    RUN_TEST(game_heal_player_applies);
+    RUN_TEST(game_heal_player_at_max);
+    RUN_TEST(game_heal_player_clamps);
     RUN_TEST(game_mode_setters);
     RUN_TEST(game_roll_inject_consume);
     RUN_TEST(game_move_blocked_and_ok);

@@ -184,6 +184,8 @@ const char *const TXT_COMBAT_PLAYER_HIT_FMT = "You hit the bandit for %d damage.
 const char *const TXT_COMBAT_BRACED = "You brace for the incoming strike.\n";
 const char *const TXT_COMBAT_NO_SALVE = "You fumble for a salve, but you have none.\n";
 const char *const TXT_COMBAT_SALVE_FMT = "You apply salve and recover. HP now %d.\n";
+const char *const TXT_COMBAT_SALVE_FULL = "You apply salve.\n";
+const char *const TXT_ALREADY_FULL_HEALTH = "You're already at full health.\n";
 const char *const TXT_PICK_123 = "Pick 1, 2, or 3.\n";
 const char *const TXT_COMBAT_BANDIT_DEFEATED = "The bandit falls. The body slumps into the dust.\n";
 
@@ -324,9 +326,14 @@ const char *const TXT_INV_NO_EAT_COMBAT = "You cannot eat calmly during combat.\
 const char *const TXT_INV_CANNOT_EAT_FMT = "You cannot eat the %s.\n";
 const char *const TXT_INV_EAT_BERRY = "You eat the berry. Tart, but fresh.\n";
 const char *const TXT_INV_EAT_FISH = "You eat the fish. Not ideal raw, but nourishing.\n";
+const char *const TXT_INV_EAT_BERRY_HEAL_FMT =
+    "You eat the berry. Tart, but fresh. You recover 1 HP. HP now %d.\n";
+const char *const TXT_INV_EAT_FISH_HEAL_FMT =
+    "You eat the fish. Not ideal raw, but nourishing. You recover 2 HP. HP now %d.\n";
 const char *const TXT_INV_USE_REPLY_COMBAT = "In combat, use reply 1/2/3 for your turn.\n";
 const char *const TXT_INV_USE_TORCH = "You raise the torch; nearby details sharpen in warm light.\n";
 const char *const TXT_INV_USE_SALVE_FMT = "You apply the salve and recover 5 HP. HP now %d.\n";
+const char *const TXT_INV_USE_SALVE_FULL = "You apply the salve.\n";
 const char *const TXT_INV_USE_SPEAR = "You test the spear's weight. Balanced enough.\n";
 const char *const TXT_INV_NO_USE_FMT = "You cannot find a practical use for the %s right now.\n";
 const char *const TXT_INV_NO_CRAFT_COMBAT = "You cannot craft while fighting.\n";
