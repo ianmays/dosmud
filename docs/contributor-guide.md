@@ -26,7 +26,7 @@ Recommended workflow:
 
 The repo’s GitHub project uses a **Status** field on issues: **Planning** when forming an implementation plan (add decided plan as a comment), **In progress** while you implement (before the PR exists), **Review** once the draft PR is up, **Done** after merge. Details for agents: [AGENTS.md](../AGENTS.md).
 
-[`DEV_PLAN.md`](../DEV_PLAN.md) is a roadmap log: mark the issue **Done ✅** when you open a draft PR. It is not a living status tracker (no updates on push or merge).
+[`DEV_PLAN.md`](../DEV_PLAN.md) is a manually curated roadmap log. When you open a draft PR: mark **Done ✅** if the issue already has a section; if it has a GitHub **Milestone** whose Phase is already in DEV_PLAN, add a section under that Phase first. Otherwise leave DEV_PLAN unchanged. It is not a living status tracker (no updates on push or merge). Agents: see [AGENTS.md](../AGENTS.md) **DEV_PLAN updates**.
 
 ### After you push
 

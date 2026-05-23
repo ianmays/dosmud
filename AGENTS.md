@@ -14,7 +14,7 @@ Guidance for AI/code agents working in this repository.
 - ALWAYS check for an existing GitHub Issue before starting work.
 - NEVER modify or reopen Closed Issues.
 - ALWAYS create a branch before making changes.
-- ALWAYS add or update the linked issue section in [`DEV_PLAN.md`](DEV_PLAN.md) with **Done ✅** when opening a draft PR. That is a roadmap log line, not a living status tracker - do not change it on pushes or after merge.
+- Update [`DEV_PLAN.md`](DEV_PLAN.md) per **DEV_PLAN updates** below when opening a draft PR. That file is a roadmap log, not a living status tracker - do not change it on pushes or after merge.
 - ALWAYS open draft PRs first.
 - ALWAYS link PRs to their corresponding Issues.
 - ALWAYS check whether documentation updates are required.
@@ -75,6 +75,24 @@ See [Testing expectations](#testing-expectations) and [`docs/testing.md`](docs/t
 
 
 ### PR expectations
+
+#### DEV_PLAN updates
+
+[`DEV_PLAN.md`](DEV_PLAN.md) is a manually curated roadmap log aligned with phased milestones, not a catalog of every GitHub issue.
+
+Before editing for a draft PR, search `DEV_PLAN.md` for the issue (e.g. `#90` or its section heading):
+
+| Situation | Action |
+|-----------|--------|
+| Issue **already has a section** | Mark that section **Done ✅** (optional PR link). |
+| Issue has a GitHub **Milestone** and that milestone's **Phase is already represented** in DEV_PLAN (e.g. `Phase 4 - …` heading) | Add an issue section under the matching Phase, then mark **Done ✅**. |
+| Otherwise (no section; no Milestone; or Milestone phase not in DEV_PLAN) | **Do not** edit DEV_PLAN. Track on the project board and issue/PR. |
+
+New BAU issues without a Milestone typically fall in the last row - do not add them.
+
+Check Milestone: `gh issue view <N> --json milestone,title`.
+
+Do not update DEV_PLAN on later pushes or after merge.
 
 - ALWAYS raise draft PRs initially.
 - NEVER include issue references in PR titles.

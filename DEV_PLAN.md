@@ -31,7 +31,11 @@ The project should avoid:
 - platform/render leakage into gameplay
 - premature complexity
 
-When a draft PR is opened for a **milestone-tracked** issue, mark that issue's section **Done ✅** under its heading (optional PR link in the body). That line is not updated on later pushes or after merge - use the GitHub project board and PR for workflow status. Issues without a GitHub **Milestone** (BAU gameplay/tooling) are not listed in this file.
+When a draft PR is opened for an issue that **already has a section** here, mark that section **Done ✅** under its heading (optional PR link in the body). That line is not updated on later pushes or after merge - use the GitHub project board and PR for workflow status.
+
+**Agents:** search for the issue (`#N` or section heading) before editing. If the issue has a GitHub **Milestone** and that milestone's **Phase is already represented** in this file (e.g. `# Phase 4 - …`), add an issue section under the matching Phase and mark **Done ✅**. Do not add sections for BAU issues without a Milestone, or for Milestones not tracked here. See [`AGENTS.md`](AGENTS.md) **DEV_PLAN updates**.
+
+**Milestones:** [Phase 1](https://github.com/ianmays/dosmud/milestone/1) · [Phase 2](https://github.com/ianmays/dosmud/milestone/2) · [Phase 3](https://github.com/ianmays/dosmud/milestone/3) · [Phase 4](https://github.com/ianmays/dosmud/milestone/4) · [Phase 5](https://github.com/ianmays/dosmud/milestone/5) · [Phase 6](https://github.com/ianmays/dosmud/milestone/6)
 
 ---
 
@@ -71,9 +75,9 @@ Large-scale gameplay/content expansion should remain secondary until the core ar
 
 ---
 
-# Phase 1 - Structural Cleanup + ANSI C89 Enforcement
+# [Phase 1 - Structural Cleanup + ANSI C89 Enforcement](https://github.com/ianmays/dosmud/milestone/1)
 
-## Primary Goals
+## Primary Goals ([Phase 1](https://github.com/ianmays/dosmud/milestone/1))
 
 - reduce complexity concentration
 - preserve portability
@@ -81,7 +85,7 @@ Large-scale gameplay/content expansion should remain secondary until the core ar
 
 ---
 
-## #42 - Split `game.c`
+## [#42](https://github.com/ianmays/dosmud/issues/42) - Split `game.c`
 
 Done ✅.
 
@@ -154,7 +158,7 @@ Goal:
 
 ---
 
-## ANSI C89 cleanup and compiler enforcement
+## ANSI C89 cleanup and compiler enforcement ([Phase 1](https://github.com/ianmays/dosmud/milestone/1))
 
 ### Remove all K&R function definitions
 
@@ -202,15 +206,15 @@ Compiler discipline and warning cleanliness should remain early priorities throu
 
 ---
 
-## #41 - Compatibility typedefs
+## [#41](https://github.com/ianmays/dosmud/issues/41) - Compatibility typedefs
 
 ✅ Done - [`include/base.h`](include/base.h) defines `u8`/`u16`/`u32` with documented width assumptions and compile-time `sizeof` guards; tick and byte-flag fields in `game.h` / `world.h` use these types.
 
 ---
 
-# Phase 2 - State Ownership and Boundary Isolation
+# [Phase 2 - State Ownership and Boundary Isolation](https://github.com/ianmays/dosmud/milestone/2)
 
-## #43 - Replace overlapping flags with state structures
+## [#43](https://github.com/ianmays/dosmud/issues/43) - Replace overlapping flags with state structures
 
 Done ✅.
 
@@ -218,7 +222,7 @@ Done ✅.
 
 ---
 
-## #44 - Formalize engine boundaries
+## [#44](https://github.com/ianmays/dosmud/issues/44) - Formalize engine boundaries
 
 Done ✅.
 
@@ -228,7 +232,7 @@ Done ✅.
 
 ---
 
-## #45 - Platform layer
+## [#45](https://github.com/ianmays/dosmud/issues/45) - Platform layer
 
 Done ✅.
 
@@ -238,9 +242,9 @@ Done ✅.
 
 ---
 
-# Phase 3 - Deterministic Test Harness Evolution
+# [Phase 3 - Deterministic Test Harness Evolution](https://github.com/ianmays/dosmud/milestone/3)
 
-## Existing snapshot testing
+## Existing snapshot testing ([Phase 3](https://github.com/ianmays/dosmud/milestone/3))
 
 Pattern (under `tests/regression/`):
 
@@ -259,30 +263,34 @@ Or manually: `./dosmud < tests/regression/<name>.input > tests/regression/<name>
 
 ---
 
-## #66 / #112 - Improve deterministic test setup
+## [#66](https://github.com/ianmays/dosmud/issues/66) / [#112](https://github.com/ianmays/dosmud/issues/112) - Improve deterministic test setup
 
 Done ✅.
 
-`TEST_MODE` builds link [`tests/harness/testharn.c`](tests/harness/testharn.c) and [`tests/harness/th_world.c`](tests/harness/th_world.c). Snapshot `.input` files use `@fixture <name>` for known state without RNG-walking setup. Canonical fixture and test lists: [`docs/testing.md`](docs/testing.md). #66 added the harness; #112 migrated brittle snapshots to fixtures and roll inject for `equipment`.
+`TEST_MODE` builds link [`tests/harness/testharn.c`](tests/harness/testharn.c) and [`tests/harness/th_world.c`](tests/harness/th_world.c). Snapshot `.input` files use `@fixture <name>` for known state without RNG-walking setup. Canonical fixture and test lists: [`docs/testing.md`](docs/testing.md). [#66](https://github.com/ianmays/dosmud/issues/66) added the harness; [#112](https://github.com/ianmays/dosmud/issues/112) migrated brittle snapshots to fixtures and roll inject for `equipment`.
 
 Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 
-- **#112** Done ✅ - migrated `equipment`, `area_items`, `craft_wielded`, `map`, `smoke` to fixtures; `seed_cli` still uses CLI `--seed` on `smoke.input`.
-- **#115** Done ✅ - Phase A maximum snapshot coverage (PR [#123](https://github.com/ianmays/dosmud/pull/123)); details in the section below.
-- **#122** Done ✅ - optional `@seed <unsigned>` line in snapshot `.input` files (PR [#124](https://github.com/ianmays/dosmud/pull/124)).
-- **#95** Done ✅ - Phase B: greatest unit tests (PR [#127](https://github.com/ianmays/dosmud/pull/127)); **~96%** weighted branch coverage on core modules
-- **#116** Done ✅ - Phase C: stress/soak harness (`make test-soak`, CI benchmarks)
-- **#113** Done ✅ - wanderer snapshot fixtures (`wanderer_dialogue` fixture; `wanderer_replies`, `wanderer_talk_blocked` snapshots)
-- **#114** Done ✅ - custom world boot fixture (`world_boot` / `world_linear`; `world_apply_graph` + harness tables in TEST_MODE)
+- **[#66](https://github.com/ianmays/dosmud/issues/66)** Done ✅ - `TEST_MODE` harness and fixture DSL (see combined section with [#112](https://github.com/ianmays/dosmud/issues/112) above)
+- **[#112](https://github.com/ianmays/dosmud/issues/112)** Done ✅ - migrated `equipment`, `area_items`, `craft_wielded`, `map`, `smoke` to fixtures; `seed_cli` still uses CLI `--seed` on `smoke.input`.
+- **[#115](https://github.com/ianmays/dosmud/issues/115)** Done ✅ - Phase A maximum snapshot coverage (PR [#123](https://github.com/ianmays/dosmud/pull/123)); details in the section below.
+- **[#122](https://github.com/ianmays/dosmud/issues/122)** Done ✅ - optional `@seed <unsigned>` line in snapshot `.input` files (PR [#124](https://github.com/ianmays/dosmud/pull/124)).
+- **[#95](https://github.com/ianmays/dosmud/issues/95)** Done ✅ - Phase B: greatest unit tests (PR [#127](https://github.com/ianmays/dosmud/pull/127)); **~96%** weighted branch coverage on core modules
+- **[#116](https://github.com/ianmays/dosmud/issues/116)** Done ✅ - Phase C: stress/soak harness (`make test-soak`, CI benchmarks)
+- **[#113](https://github.com/ianmays/dosmud/issues/113)** Done ✅ - wanderer snapshot fixtures (`wanderer_dialogue` fixture; `wanderer_replies`, `wanderer_talk_blocked` snapshots)
+- **[#114](https://github.com/ianmays/dosmud/issues/114)** Done ✅ - custom world boot fixture (`world_boot` / `world_linear`; `world_apply_graph` + harness tables in TEST_MODE)
 
 ---
 
-## #40 - Gameplay test coverage (umbrella epic) — Done ✅
+## [#40](https://github.com/ianmays/dosmud/issues/40) - Gameplay test coverage (umbrella epic) — Done ✅
 
-**[#40](https://github.com/ianmays/dosmud/issues/40)** tracked overall coverage; work landed via child issues (no mega-PR on #40). **Epic complete** as of merge of [#116](https://github.com/ianmays/dosmud/issues/116) (PR [#133](https://github.com/ianmays/dosmud/pull/133)).
+**[#40](https://github.com/ianmays/dosmud/issues/40)** tracked overall coverage; work landed via child issues (no mega-PR on [#40](https://github.com/ianmays/dosmud/issues/40)). **Epic complete** as of merge of [#116](https://github.com/ianmays/dosmud/issues/116) (PR [#133](https://github.com/ianmays/dosmud/pull/133)).
 
 | Issue | Role |
 |-------|------|
+| [#40](https://github.com/ianmays/dosmud/issues/40) | Done ✅: umbrella epic (child issues below) |
+| [#66](https://github.com/ianmays/dosmud/issues/66) | Done ✅: `TEST_MODE` harness + fixture DSL |
+| [#46](https://github.com/ianmays/dosmud/issues/46) | Done ✅: runtime `--seed` CLI |
 | [#112](https://github.com/ianmays/dosmud/issues/112) | Done ✅: migrate 5 brittle snapshots to fixtures |
 | [#113](https://github.com/ianmays/dosmud/issues/113) | Done ✅: wanderer snapshot fixtures |
 | [#114](https://github.com/ianmays/dosmud/issues/114) | Done ✅: custom world boot fixture |
@@ -293,13 +301,13 @@ Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 
 **Three layers (see [`docs/testing.md`](docs/testing.md)):** snapshots (`make test-run`), unit tests (`make test-unit`), soak/stress (`make test-soak`). `make test-all` runs check-layers, snapshots, unit coverage, and soak.
 
-**Phase A (#115) delivered:** 59 snapshots in `SNAPSHOT_TESTS` plus `seed_cli` (60 total in `make test-run`). Combat defend/salve/victory/loot/level-up, all room NPC talk branches, eat/use/inspect variants, `quiet_explore` for wait/move/map, bandit fight/intimidate/bag-empty, loot tiers, meta commands. RNG: `game_roll_percent` for intimidate; `test_quiet_ticks`; `CFG_TEST_*` inject constants.
+**Phase A ([#115](https://github.com/ianmays/dosmud/issues/115)) delivered:** 59 snapshots in `SNAPSHOT_TESTS` plus `seed_cli` (60 total in `make test-run`). Combat defend/salve/victory/loot/level-up, all room NPC talk branches, eat/use/inspect variants, `quiet_explore` for wait/move/map, bandit fight/intimidate/bag-empty, loot tiers, meta commands. RNG: `game_roll_percent` for intimidate; `test_quiet_ticks`; `CFG_TEST_*` inject constants.
 
 **Harness layout (final):** fixture DSL and `@seed` in [`tests/harness/testharn.c`](tests/harness/testharn.c); seed-1234 world graph in [`tests/harness/th_world.c`](tests/harness/th_world.c) (shared by snapshots, unit, soak).
 
 ---
 
-## #115 - Phase A snapshot coverage (Done ✅)
+## [#115](https://github.com/ianmays/dosmud/issues/115) - Phase A snapshot coverage (Done ✅)
 
 Delivered in PR [#123](https://github.com/ianmays/dosmud/pull/123).
 
@@ -323,7 +331,7 @@ Delivered in PR [#123](https://github.com/ianmays/dosmud/pull/123).
 
 ---
 
-## #95 - Phase B unit tests (Done ✅)
+## [#95](https://github.com/ianmays/dosmud/issues/95) - Phase B unit tests (Done ✅)
 
 Delivered in PR [#127](https://github.com/ianmays/dosmud/pull/127).
 
@@ -349,7 +357,7 @@ Delivered in PR [#127](https://github.com/ianmays/dosmud/pull/127).
 
 ---
 
-## #116 - Phase C soak / stress tests (Done ✅)
+## [#116](https://github.com/ianmays/dosmud/issues/116) - Phase C soak / stress tests (Done ✅)
 
 Delivered in PR [#133](https://github.com/ianmays/dosmud/pull/133).
 
@@ -363,13 +371,13 @@ Delivered in PR [#133](https://github.com/ianmays/dosmud/pull/133).
 - `SOAK_BENCH` lines with `us_per_tick` and `limit=` from `CFG_TEST_SOAK_LIMIT_*` in `config.h`.
 - [`scripts/ci-test-report.sh`](scripts/ci-test-report.sh) soak step + PR benchmark table (parsed from log).
 
-**Related cleanup in #133**
+**Related cleanup in PR [#133](https://github.com/ianmays/dosmud/pull/133)**
 
 - `testharn` moved from `src/` to `tests/harness/`; `dos-prepare.ps1` copies `tests/harness` for DOS `TEST_MODE`.
 
 ---
 
-## #46 - Runtime `--seed`
+## [#46](https://github.com/ianmays/dosmud/issues/46) - Runtime `--seed`
 
 Done ✅.
 
@@ -379,9 +387,9 @@ dosmud --seed 1234
 
 ---
 
-# Phase 4 - Workflow and Tooling Maturity
+# [Phase 4 - Workflow and Tooling Maturity](https://github.com/ianmays/dosmud/milestone/4)
 
-## #74 - Skills
+## [#74](https://github.com/ianmays/dosmud/issues/74) - Skills
 
 Capture:
 - workflow knowledge
@@ -392,9 +400,9 @@ Capture:
 
 ---
 
-# Phase 5 - Advanced Architecture
+# [Phase 5 - Advanced Architecture](https://github.com/ianmays/dosmud/milestone/5)
 
-## #47 - Event queue architecture
+## [#47](https://github.com/ianmays/dosmud/issues/47) - Event queue architecture
 
 Future direction:
 
@@ -430,7 +438,7 @@ This is one of the most important architectural upgrades in the long-term roadma
 
 ---
 
-## #16 - Save/load system
+## [#16](https://github.com/ianmays/dosmud/issues/16) - Save/load system
 
 Create:
 
@@ -454,9 +462,9 @@ Initial binary serialization is acceptable.
 
 ---
 
-# Phase 6 - Renderer and Content Expansion
+# [Phase 6 - Renderer and Content Expansion](https://github.com/ianmays/dosmud/milestone/6)
 
-## #48 - SDL renderer
+## [#48](https://github.com/ianmays/dosmud/issues/48) - SDL renderer
 
 Target structure:
 
@@ -481,9 +489,9 @@ NOT:
 
 ---
 
-## Content expansion
+## Content expansion ([Phase 6](https://github.com/ianmays/dosmud/milestone/6))
 
-Only after core architecture feels stable.
+Only after core architecture feels stable. No tracking issue yet - future work under Phase 6.
 
 Includes:
 - factions
