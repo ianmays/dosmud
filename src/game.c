@@ -38,6 +38,18 @@ int game_is_busy_dialogue(struct GameState *game)
     return 0;
 }
 
+int game_heal_player(struct GameState *game, int amount)
+{
+    if (game->player_hp >= game->max_hp) {
+        return 0;
+    }
+    game->player_hp += amount;
+    if (game->player_hp > game->max_hp) {
+        game->player_hp = game->max_hp;
+    }
+    return 1;
+}
+
 static void do_look(struct GameState *game)
 {
     render_room_look(game, npc_in_room(game->player.room_id));

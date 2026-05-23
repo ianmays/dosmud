@@ -54,6 +54,9 @@ TEST items_name_and_flags(void)
     ASSERT_EQ(CFG_WEAPON_STICK_DAMAGE_BONUS, item_weapon_damage_bonus(ITEM_STICK));
     ASSERT_EQ(CFG_WEAPON_SPEAR_DAMAGE_BONUS, item_weapon_damage_bonus(ITEM_SPEAR));
     ASSERT_EQ(0, item_weapon_damage_bonus(ITEM_BERRY));
+    ASSERT_EQ(CFG_BERRY_HEAL_AMOUNT, item_food_heal_amount(ITEM_BERRY));
+    ASSERT_EQ(CFG_FISH_HEAL_AMOUNT, item_food_heal_amount(ITEM_FISH));
+    ASSERT_EQ(0, item_food_heal_amount(ITEM_STICK));
     PASS();
 }
 

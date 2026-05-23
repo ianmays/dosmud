@@ -23,7 +23,8 @@ Choose: [1] Attack  [2] Defend  [3] Use salve
 
 [T:1] Camp [HP:20/20] [Atk:1] [Lv:1 XP:0/20]
 
-> You apply salve and recover. HP now 20.
+> You apply salve.
+You're already at full health.
 The bandit strikes for 1 damage.
 You HP: 19, Bandit HP: 8.
 Choose: [1] Attack  [2] Defend  [3] Use salve

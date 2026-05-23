@@ -261,10 +261,16 @@ int game_inv_cmd_eat(struct GameState *game, int item_arg)
         return 1;
     }
     game_inv_bag_remove_item(game, item_arg);
-    if (item_arg == ITEM_BERRY) {
-        render_inv_eat_berry();
+    if (!game_heal_player(game, item_food_heal_amount(item_arg))) {
+        if (item_arg == ITEM_BERRY) {
+            render_inv_eat_berry_full();
+        } else {
+            render_inv_eat_fish_full();
+        }
+    } else if (item_arg == ITEM_BERRY) {
+        render_inv_eat_berry_healed(game->player_hp);
     } else {
-        render_inv_eat_fish();
+        render_inv_eat_fish_healed(game->player_hp);
     }
     return 1;
 }
@@ -284,10 +290,12 @@ int game_inv_cmd_use(struct GameState *game, int item_arg)
         return 1;
     }
     if (item_arg == ITEM_SALVE) {
-        game->player_hp += CFG_SALVE_HEAL_AMOUNT;
-        if (game->player_hp > game->max_hp) game->player_hp = game->max_hp;
-        render_inv_use_salve(game->player_hp);
         game_inv_bag_remove_item(game, item_arg);
+        if (game_heal_player(game, CFG_SALVE_HEAL_AMOUNT)) {
+            render_inv_use_salve(game->player_hp);
+        } else {
+            render_inv_use_salve_full();
+        }
         return 1;
     }
     if (item_arg == ITEM_SPEAR) {

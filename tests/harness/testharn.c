@@ -256,6 +256,24 @@ static int fixture_bag_item(struct GameState *game, int room_id, int item_id)
     return 1;
 }
 
+static int fixture_bag_berry_low_hp(struct GameState *game)
+{
+    if (!fixture_bag_item(game, WORLD_ROOM_CAMP, ITEM_BERRY)) {
+        return 0;
+    }
+    game->player_hp = CFG_START_MAX_HP - 5;
+    return 1;
+}
+
+static int fixture_bag_fish_low_hp(struct GameState *game)
+{
+    if (!fixture_bag_item(game, WORLD_ROOM_POND, ITEM_FISH)) {
+        return 0;
+    }
+    game->player_hp = CFG_START_MAX_HP - 5;
+    return 1;
+}
+
 static void fixture_env_focus(struct GameState *game, int kind)
 {
     fixture_at_camp(game);
@@ -515,6 +533,18 @@ int testharn_apply(struct GameState *game, const char *line)
     }
     if (fixture_name_is("bag_fish", name)) {
         if (!fixture_bag_item(game, WORLD_ROOM_POND, ITEM_FISH)) {
+            return -2;
+        }
+        return 1;
+    }
+    if (fixture_name_is("bag_berry_low_hp", name)) {
+        if (!fixture_bag_berry_low_hp(game)) {
+            return -2;
+        }
+        return 1;
+    }
+    if (fixture_name_is("bag_fish_low_hp", name)) {
+        if (!fixture_bag_fish_low_hp(game)) {
             return -2;
         }
         return 1;

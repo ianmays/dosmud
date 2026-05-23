@@ -70,6 +70,25 @@ TEST combat_reply_salve_in_combat(void)
     PASS();
 }
 
+TEST combat_reply_salve_at_full_hp(void)
+{
+    struct GameState game;
+    int rolls[1];
+
+    unit_game_fresh(&game, 11u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game_set_mode_combat(&game);
+    game.combat.enemy_hp = 50;
+    game.player_hp = CFG_START_MAX_HP;
+    ASSERT_EQ(1, game_inv_bag_add(&game, ITEM_SALVE));
+    rolls[0] = CFG_TEST_COMBAT_SALVE_ENEMY_DMG;
+    game_roll_inject_begin(&game, rolls, 1);
+    combat_resolve_reply(&game, 3);
+    ASSERT_EQ(CFG_START_MAX_HP - 1, game.player_hp);
+    ASSERT_EQ(-1, game_inv_bag_find_index(&game, ITEM_SALVE));
+    PASS();
+}
+
 TEST combat_victory_loot_and_xp(void)
 {
     struct GameState game;
@@ -153,6 +172,7 @@ SUITE(combat) {
     RUN_TEST(combat_start_mode);
     RUN_TEST(combat_reply_defend_reduces_damage);
     RUN_TEST(combat_reply_salve_in_combat);
+    RUN_TEST(combat_reply_salve_at_full_hp);
     RUN_TEST(combat_victory_loot_and_xp);
     RUN_TEST(combat_invalid_choice);
     RUN_TEST(combat_player_death);

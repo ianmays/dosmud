@@ -78,6 +78,8 @@
 #define CFG_COMBAT_KILL_XP_SPREAD 5
 
 /* Item effects (used in combat and inventory) */
+#define CFG_BERRY_HEAL_AMOUNT 1
+#define CFG_FISH_HEAL_AMOUNT 2
 #define CFG_SALVE_HEAL_AMOUNT 5
 /* Added to attack damage when wielding a melee weapon (reply 1 in combat). */
 #define CFG_WEAPON_STICK_DAMAGE_BONUS 1

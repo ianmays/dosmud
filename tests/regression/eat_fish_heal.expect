@@ -19,13 +19,12 @@ On the ground: stick. (take stick)
 [T:0] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
 > 
-[T:0] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
+[T:0] Pond [HP:15/20] [Atk:0] [Lv:1 XP:0/20]
 
-> You eat the berry. Tart, but fresh.
-You're already at full health.
+> You eat the fish. Not ideal raw, but nourishing. You recover 2 HP. HP now 17.
 
 Something small rustles just out of sight.
 
-[T:1] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
+[T:1] Pond [HP:17/20] [Atk:0] [Lv:1 XP:0/20]
 
 > bye
