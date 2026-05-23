@@ -918,15 +918,45 @@ void render_inv_drop(const char *item_name)
 void render_inv_bag(const struct GameState *game)
 {
     int i;
+    int j;
+    int seen[CFG_BAG_MAX];
+    int seen_count;
+    int item_id;
+    int count;
+    int first;
 
     RENDER_PRINTF(TXT_INV_BAG_HEADER_FMT, game->bag_count, game->bag_capacity);
     if (game->bag_count <= 0) {
         RENDER_PRINTF("%s", TXT_INV_BAG_EMPTY);
     } else {
+        seen_count = 0;
+        first = 1;
         for (i = 0; i < game->bag_count; ++i) {
-            RENDER_PRINTF(" %s", item_name(game->bag[i]));
-            if (i < game->bag_count - 1) {
+            item_id = game->bag[i];
+            for (j = 0; j < seen_count; ++j) {
+                if (seen[j] == item_id) {
+                    break;
+                }
+            }
+            if (j < seen_count) {
+                continue;
+            }
+            seen[seen_count] = item_id;
+            seen_count += 1;
+            count = 0;
+            for (j = 0; j < game->bag_count; ++j) {
+                if (game->bag[j] == item_id) {
+                    count += 1;
+                }
+            }
+            if (!first) {
                 RENDER_PRINTF(",");
+            }
+            first = 0;
+            if (count > 1) {
+                RENDER_PRINTF(TXT_INV_BAG_ITEM_STACK_FMT, item_name(item_id), count);
+            } else {
+                RENDER_PRINTF(" %s", item_name(item_id));
             }
         }
         RENDER_PRINTF("\n");

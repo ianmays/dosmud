@@ -190,6 +190,7 @@ Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_
 | Fixture | State |
 |---------|--------|
 | `bag_berry` / `bag_fish` / `bag_salve` / `bag_torch` / `bag_spear` / `bag_stone` / `bag_stick` | Camp or pond baseline + one item in bag |
+| `bag_stacked` | Camp + two berries and one stick in bag (stacked bag display) |
 | `bag_berry_low_hp` / `bag_fish_low_hp` | Same as `bag_berry` / `bag_fish` with `player_hp = CFG_START_MAX_HP - 5` |
 | `bag_craft_salve` | Camp + herb and berry in bag |
 

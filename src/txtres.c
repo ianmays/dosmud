@@ -321,6 +321,7 @@ const char *const TXT_INV_GROUND_FULL_FMT =
     "The ground here cannot hold more than %d items.\n";
 const char *const TXT_INV_DROP_FMT = "You drop the %s.\n";
 const char *const TXT_INV_BAG_HEADER_FMT = "Bag (%d/%d):";
+const char *const TXT_INV_BAG_ITEM_STACK_FMT = " %s [%d]";
 const char *const TXT_INV_BAG_EMPTY = " empty\n";
 const char *const TXT_INV_NO_EAT_COMBAT = "You cannot eat calmly during combat.\n";
 const char *const TXT_INV_CANNOT_EAT_FMT = "You cannot eat the %s.\n";
