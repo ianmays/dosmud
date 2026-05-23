@@ -18,7 +18,7 @@ The project is actively evolving and may change significantly over time.
 
 A DOS-first MUD-like prototype in ANSI C.
 
-The [dosmud GitHub Project](https://github.com/users/ianmays/projects/1) tracks sequencing and active work. Project milestones if in use can be seen [here](https://github.com/ianmays/dosmud/milestones). The [DEV_PLAN](DEV_PLAN.md) outlines the current development roadmap and architectural priorities.
+The [dosmud GitHub Project](https://github.com/users/ianmays/projects/1) tracks sequencing and active work (Status and **blocked-by** relationships on issues). [GitHub milestones](https://github.com/ianmays/dosmud/milestones) group roadmap themes; they are not a strict schedule. The [DEV_PLAN](DEV_PLAN.md) outlines the development roadmap, execution order for open work, and architectural priorities.
 
 [CONTRIBUTING.md](CONTRIBUTING.md) points to contributor workflow guidance.  
 [AGENTS.md](AGENTS.md) contains repository guidance for coding agents.

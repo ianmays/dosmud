@@ -78,15 +78,15 @@ See [Testing expectations](#testing-expectations) and [`docs/testing.md`](docs/t
 
 #### DEV_PLAN updates
 
-[`DEV_PLAN.md`](DEV_PLAN.md) is a manually curated roadmap log aligned with phased milestones, not a catalog of every GitHub issue.
+[`DEV_PLAN.md`](DEV_PLAN.md) is a manually curated roadmap log aligned with GitHub milestones, not a catalog of every GitHub issue.
 
 Before editing for a draft PR, search `DEV_PLAN.md` for the issue (e.g. `#90` or its section heading):
 
 | Situation | Action |
 |-----------|--------|
 | Issue **already has a section** | Mark that section **Done ✅** (optional PR link). |
-| Issue has a GitHub **Milestone** and that milestone's **Phase is already represented** in DEV_PLAN (e.g. `Phase 4 - …` heading) | Add an issue section under the matching Phase, then mark **Done ✅**. |
-| Otherwise (no section; no Milestone; or Milestone phase not in DEV_PLAN) | **Do not** edit DEV_PLAN. Track on the project board and issue/PR. |
+| Issue has a GitHub **Milestone** and that milestone is **already represented** in DEV_PLAN (milestone heading and issue table) | Add an issue section under the matching milestone, then mark **Done ✅**. |
+| Otherwise (no section; no Milestone; or milestone not in DEV_PLAN) | **Do not** edit DEV_PLAN. Track on the project board and issue/PR. |
 
 New BAU issues without a Milestone typically fall in the last row - do not add them.
 
