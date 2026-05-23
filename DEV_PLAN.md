@@ -595,7 +595,7 @@ NOT:
 
 ### [#92](https://github.com/ianmays/dosmud/issues/92) - Multiplayer
 
-## Important Final Guidance
+# Important Final Guidance
 
 Preferred architecture style:
 - procedural
