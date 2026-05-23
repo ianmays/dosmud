@@ -549,7 +549,7 @@ void render_combat_salve_in_combat(int hp)
 void render_combat_salve_full(void)
 {
     RENDER_PRINTF("%s", TXT_COMBAT_SALVE_FULL);
-    RENDER_PRINTF("%s", TXT_ALREADY_FULL_HEALTH);
+    render_already_full_health();
 }
 
 void render_already_full_health(void)
@@ -954,7 +954,7 @@ void render_inv_eat_berry_healed(int hp)
 void render_inv_eat_berry_full(void)
 {
     RENDER_PRINTF("%s", TXT_INV_EAT_BERRY);
-    RENDER_PRINTF("%s", TXT_ALREADY_FULL_HEALTH);
+    render_already_full_health();
 }
 
 void render_inv_eat_fish_healed(int hp)
@@ -965,7 +965,7 @@ void render_inv_eat_fish_healed(int hp)
 void render_inv_eat_fish_full(void)
 {
     RENDER_PRINTF("%s", TXT_INV_EAT_FISH);
-    RENDER_PRINTF("%s", TXT_ALREADY_FULL_HEALTH);
+    render_already_full_health();
 }
 
 void render_inv_use_reply_combat(void)
@@ -986,7 +986,7 @@ void render_inv_use_salve(int hp)
 void render_inv_use_salve_full(void)
 {
     RENDER_PRINTF("%s", TXT_INV_USE_SALVE_FULL);
-    RENDER_PRINTF("%s", TXT_ALREADY_FULL_HEALTH);
+    render_already_full_health();
 }
 
 void render_inv_use_spear(void)
