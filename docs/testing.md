@@ -69,7 +69,7 @@ Snapshot regression lives under [`tests/regression/`](../tests/regression/) (dat
 
 ## Unit tests (greatest)
 
-Phase B coverage ([#95](https://github.com/ianmays/dosmud/issues/95)) uses [greatest](https://github.com/silentbicycle/greatest) **1.5.0** vendored as [`tests/unit/greatest.h`](../tests/unit/greatest.h). Upstream MIT license stays in the header; a small dosmud patch adds quiet-by-default output (`greatest_set_quiet`, `GREATEST_FLAG_QUIET`) in a separate git commit from the unmodified vendor import.
+Unit test coverage ([#95](https://github.com/ianmays/dosmud/issues/95)) uses [greatest](https://github.com/silentbicycle/greatest) **1.5.0** vendored as [`tests/unit/greatest.h`](../tests/unit/greatest.h). Upstream MIT license stays in the header; a small dosmud patch adds quiet-by-default output (`greatest_set_quiet`, `GREATEST_FLAG_QUIET`) in a separate git commit from the unmodified vendor import.
 
 ```sh
 make test-unit
@@ -106,7 +106,7 @@ make test-unit-coverage-verbose     # same tests, full gcov block per module
 
 **Harness-only fixture:** `bag_full_gate` - applies `game_inv_bag_add` without resetting baseline; returns fixture failure (`-2`) when the bag is already full (used by unit tests for `testharn_apply` error paths)
 
-## Soak / stress tests (Phase C, [#116](https://github.com/ianmays/dosmud/issues/116))
+## Soak / stress tests ([#116](https://github.com/ianmays/dosmud/issues/116))
 
 Separate binary from unit tests: `tests/soak/build/dosmud_soak` via `make test-soak`. Uses the same greatest runner and linked game modules as unit tests, but runs long fixed-seed loops and checks that `GameState` stays legal (HP, mode, room, bag, dialogue/combat fields).
 
