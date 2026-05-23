@@ -94,6 +94,8 @@ Check Milestone: `gh issue view <N> --json milestone,title`.
 
 Do not update DEV_PLAN on later pushes or after merge.
 
+When auditing milestone alignment, execution order, blocked-by links, or project board Priority vs stack order, use [`.cursor/skills/audit-github-devplan/SKILL.md`](.cursor/skills/audit-github-devplan/SKILL.md).
+
 - ALWAYS raise draft PRs initially.
 - NEVER include issue references in PR titles.
 - ALWAYS ensure PR labels match Issue labels.
