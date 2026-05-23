@@ -1,6 +1,6 @@
 # DOSMUD ANSI C89 Development Plan
 
-## Core Project Rules
+### Core Project Rules
 
 The project should treat these as non-negotiable:
 
@@ -37,7 +37,7 @@ When a draft PR is opened for an issue that **already has a section** here, mark
 
 **Milestones:** [Structural Cleanup + ANSI C89 Enforcement](https://github.com/ianmays/dosmud/milestone/1) · [State Ownership and Boundary Isolation](https://github.com/ianmays/dosmud/milestone/2) · [Deterministic Test Harness Evolution](https://github.com/ianmays/dosmud/milestone/3) · [Workflow and Tooling Maturity](https://github.com/ianmays/dosmud/milestone/4) · [Advanced Architecture](https://github.com/ianmays/dosmud/milestone/5) · [Content Expansion](https://github.com/ianmays/dosmud/milestone/6) · [Renderer](https://github.com/ianmays/dosmud/milestone/7) · [Advanced Mechanics](https://github.com/ianmays/dosmud/milestone/8) · [Engine Enhancements](https://github.com/ianmays/dosmud/milestone/9)
 
-## Execution order (open work)
+### Execution order (open work)
 
 Milestone numbers are **themes**, not strict schedule. Suggested pull order for open issues (see GitHub **blocked-by** relationships on each issue):
 
@@ -76,7 +76,7 @@ Workflow (milestone 4) can run in parallel with architecture once unblocked. Con
 
 **Dependencies:** native GitHub **blocked-by** links on issues (Relationships sidebar). Key chains: [#71](https://github.com/ianmays/dosmud/issues/71) before [#47](https://github.com/ianmays/dosmud/issues/47) / [#104](https://github.com/ianmays/dosmud/issues/104) / [#48](https://github.com/ianmays/dosmud/issues/48); [#104](https://github.com/ianmays/dosmud/issues/104) before [#100](https://github.com/ianmays/dosmud/issues/100) / [#101](https://github.com/ianmays/dosmud/issues/101) / [#8](https://github.com/ianmays/dosmud/issues/8); [#101](https://github.com/ianmays/dosmud/issues/101) before [#102](https://github.com/ianmays/dosmud/issues/102) / [#107](https://github.com/ianmays/dosmud/issues/107); [#50](https://github.com/ianmays/dosmud/issues/50) before [#132](https://github.com/ianmays/dosmud/issues/132); [#92](https://github.com/ianmays/dosmud/issues/92) after [#16](https://github.com/ianmays/dosmud/issues/16), [#71](https://github.com/ianmays/dosmud/issues/71), [#47](https://github.com/ianmays/dosmud/issues/47).
 
-## Current Project Priority
+### Current Project Priority
 
 The project is currently in an architectural consolidation phase.
 
@@ -90,9 +90,9 @@ Highest-value work:
 
 Large-scale gameplay/content expansion should remain secondary until the core architecture stabilizes.
 
-## Hard Constraints
+### Hard Constraints
 
-### Allowed
+#### Allowed
 - fixed arrays
 - static/global storage
 - procedural architecture
@@ -100,7 +100,7 @@ Large-scale gameplay/content expansion should remain secondary until the core ar
 - simple structs
 - deterministic systems
 
-### Avoid
+#### Avoid
 - dynamic allocation
 - recursion
 - compiler-specific features
@@ -108,17 +108,15 @@ Large-scale gameplay/content expansion should remain secondary until the core ar
 - hidden globals
 - giant monolithic modules
 
----
+## [Structural Cleanup + ANSI C89 Enforcement](https://github.com/ianmays/dosmud/milestone/1)
 
-# [Structural Cleanup + ANSI C89 Enforcement](https://github.com/ianmays/dosmud/milestone/1)
-
-### Primary Goals
+#### Primary Goals
 
 - reduce complexity concentration
 - preserve portability
 - clarify subsystem ownership
 
-## [#42](https://github.com/ianmays/dosmud/issues/42) - Split `game.c`
+### [#42](https://github.com/ianmays/dosmud/issues/42) - Split `game.c`
 
 Done ✅.
 
@@ -139,45 +137,45 @@ src/
     genc.c
 ```
 
-### `game.c`
+#### `game.c`
 Only:
 - high-level orchestration
 - tick sequencing
 - command routing
 - mode transitions
 
-### `combat.c`
+#### `combat.c`
 Own:
 - combat state
 - combat flow
 - enemy turns
 - combat rewards
 
-### `dialogue.c`
+#### `dialogue.c`
 Own:
 - NPC dialogue
 - reply handling
 - dialogue state
 
-### `wanderer.c`
+#### `wanderer.c`
 Own:
 - wanderer movement
 - encounter triggering
 - separation logic
 
-### `gatmos.c` (atmosphere)
+#### `gatmos.c` (atmosphere)
 Own:
 - ambient effects
 - inspect clues
 - environmental state
 
-### `gprog.c` (progression)
+#### `gprog.c` (progression)
 Own:
 - XP
 - leveling
 - scaling
 
-### `genc.c` (encounter)
+#### `genc.c` (encounter)
 Own:
 - random encounter spawning
 - bandit logic
@@ -189,13 +187,13 @@ Goal:
 - improve maintainability
 - prepare for renderer/platform separation
 
-## ANSI C89 cleanup and compiler enforcement
+### ANSI C89 cleanup and compiler enforcement
 
-### Remove all K&R function definitions
+#### Remove all K&R function definitions
 
 ✅ Done - no K&R definitions remain in `src/`.
 
-### Enforce strict C89 compilation
+#### Enforce strict C89 compilation
 
 ✅ Done - flags live in the `Makefile`.
 
@@ -219,37 +217,35 @@ Tests/CI only:
 
 Compiler discipline and warning cleanliness should remain early priorities throughout development.
 
-### Ensure OpenWatcom parity
+#### Ensure OpenWatcom parity
 
 ✅ Done - `make dos-prepare` covers the OpenWatcom path; ongoing discipline.
 
-### Remove mixed declarations/statements
+#### Remove mixed declarations/statements
 
 ✅ Done - enforced by `-pedantic`.
 
-### Replace C99 comments
+#### Replace C99 comments
 
 ✅ Done - no `//` comments remain in `src/`.
 
-### Centralize gameplay tuning values
+#### Centralize gameplay tuning values
 
 ✅ Done - gameplay tuning values live in `include/config.h`.
 
-## [#41](https://github.com/ianmays/dosmud/issues/41) - Compatibility typedefs
+### [#41](https://github.com/ianmays/dosmud/issues/41) - Compatibility typedefs
 
 ✅ Done - [`include/base.h`](include/base.h) defines `u8`/`u16`/`u32` with documented width assumptions and compile-time `sizeof` guards; tick and byte-flag fields in `game.h` / `world.h` use these types.
 
----
+## [State Ownership and Boundary Isolation](https://github.com/ianmays/dosmud/milestone/2)
 
-# [State Ownership and Boundary Isolation](https://github.com/ianmays/dosmud/milestone/2)
-
-## [#43](https://github.com/ianmays/dosmud/issues/43) - Replace overlapping flags with state structures
+### [#43](https://github.com/ianmays/dosmud/issues/43) - Replace overlapping flags with state structures
 
 Done ✅.
 
 [`src/game.h`](src/game.h) defines `GameMode` (`GAME_MODE_EXPLORE`, `GAME_MODE_DIALOGUE`, `GAME_MODE_COMBAT`), `DialogueKind` (room NPCs including frog, wanderer, enemy), and `CombatState` (`enemy_hp`, `defending`). `GameState` holds `mode`, `dialogue`, and `combat` instead of overlapping `pond_dialogue`, `wanderer_dialogue`, `enemy_dialogue`, `npc_dialogue`, and `combat_active` flags. Transitions go through `game_set_mode_explore`, `game_set_mode_dialogue`, and `game_set_mode_combat` in [`src/game.c`](src/game.c).
 
-## [#44](https://github.com/ianmays/dosmud/issues/44) - Formalize engine boundaries
+### [#44](https://github.com/ianmays/dosmud/issues/44) - Formalize engine boundaries
 
 Done ✅.
 
@@ -257,7 +253,7 @@ Done ✅.
 - Moved all `invent.c` player output to `render_inv_*` in `grendr`
 - Added `make check-layers` to reject `printf` outside `main.c`, `grendr.c`, and the platform file (`platpos.c` / `platdos.c`) (run explicitly or via `make test-all`; not part of `make test`)
 
-## [#45](https://github.com/ianmays/dosmud/issues/45) - Platform layer
+### [#45](https://github.com/ianmays/dosmud/issues/45) - Platform layer
 
 Done ✅.
 
@@ -265,11 +261,9 @@ Done ✅.
 - [`src/platdos.c`](src/platdos.c) / [`src/platpos.c`](src/platpos.c) - DOS vs POSIX implementations (FAT 8.3 names; flat `src/` layout)
 - [`src/main.c`](src/main.c) - no `#ifdef __WATCOMC__`; orchestration only
 
----
+## [Deterministic Test Harness Evolution](https://github.com/ianmays/dosmud/milestone/3)
 
-# [Deterministic Test Harness Evolution](https://github.com/ianmays/dosmud/milestone/3)
-
-### Existing snapshot testing
+#### Existing snapshot testing
 
 Pattern (under `tests/regression/`):
 
@@ -286,7 +280,7 @@ make test && make test-run
 
 Or manually: `./dosmud < tests/regression/<name>.input > tests/regression/<name>.output` then `diff` against `.expect`.
 
-## [#66](https://github.com/ianmays/dosmud/issues/66) / [#112](https://github.com/ianmays/dosmud/issues/112) - Improve deterministic test setup
+### [#66](https://github.com/ianmays/dosmud/issues/66) / [#112](https://github.com/ianmays/dosmud/issues/112) - Improve deterministic test setup
 
 Done ✅.
 
@@ -303,7 +297,7 @@ Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 - **[#113](https://github.com/ianmays/dosmud/issues/113)** Done ✅ - wanderer snapshot fixtures (`wanderer_dialogue` fixture; `wanderer_replies`, `wanderer_talk_blocked` snapshots)
 - **[#114](https://github.com/ianmays/dosmud/issues/114)** Done ✅ - custom world boot fixture (`world_boot` / `world_linear`; `world_apply_graph` + harness tables in TEST_MODE)
 
-## [#40](https://github.com/ianmays/dosmud/issues/40) - Gameplay test coverage (umbrella epic) — Done ✅
+### [#40](https://github.com/ianmays/dosmud/issues/40) - Gameplay test coverage (umbrella epic) — Done ✅
 
 **[#40](https://github.com/ianmays/dosmud/issues/40)** tracked overall coverage; work landed via child issues (no mega-PR on [#40](https://github.com/ianmays/dosmud/issues/40)). **Epic complete** as of merge of [#116](https://github.com/ianmays/dosmud/issues/116) (PR [#133](https://github.com/ianmays/dosmud/pull/133)).
 
@@ -326,7 +320,7 @@ Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 
 **Harness layout (final):** fixture DSL and `@seed` in [`tests/harness/testharn.c`](tests/harness/testharn.c); seed-1234 world graph in [`tests/harness/th_world.c`](tests/harness/th_world.c) (shared by snapshots, unit, soak).
 
-## [#115](https://github.com/ianmays/dosmud/issues/115) - Snapshot coverage (Done ✅)
+### [#115](https://github.com/ianmays/dosmud/issues/115) - Snapshot coverage (Done ✅)
 
 Delivered in PR [#123](https://github.com/ianmays/dosmud/pull/123).
 
@@ -348,7 +342,7 @@ Delivered in PR [#123](https://github.com/ianmays/dosmud/pull/123).
 
 **Unit scope:** `command`, `invent`, `combat`, `game`, `genc`, `wanderer`, `dialogue`, `gatmos`, `world` (fixed graph), `gprog`, `items`, `fmt`, `testharn`. Out of scope: `grendr`, `txtres`, `main`, platform glue.
 
-## [#95](https://github.com/ianmays/dosmud/issues/95) - Unit tests (Done ✅)
+### [#95](https://github.com/ianmays/dosmud/issues/95) - Unit tests (Done ✅)
 
 Delivered in PR [#127](https://github.com/ianmays/dosmud/pull/127).
 
@@ -372,7 +366,7 @@ Delivered in PR [#127](https://github.com/ianmays/dosmud/pull/127).
 
 - [`docs/testing.md`](docs/testing.md) - unit layout, coverage levels, CI PR comment, shared `th_world.c` graph.
 
-## [#116](https://github.com/ianmays/dosmud/issues/116) - Soak / stress tests (Done ✅)
+### [#116](https://github.com/ianmays/dosmud/issues/116) - Soak / stress tests (Done ✅)
 
 Delivered in PR [#133](https://github.com/ianmays/dosmud/pull/133).
 
@@ -390,7 +384,7 @@ Delivered in PR [#133](https://github.com/ianmays/dosmud/pull/133).
 
 - `testharn` moved from `src/` to `tests/harness/`; `dos-prepare.ps1` copies `tests/harness` for DOS `TEST_MODE`.
 
-## [#46](https://github.com/ianmays/dosmud/issues/46) - Runtime `--seed`
+### [#46](https://github.com/ianmays/dosmud/issues/46) - Runtime `--seed`
 
 Done ✅.
 
@@ -398,9 +392,7 @@ Done ✅.
 dosmud --seed 1234
 ```
 
----
-
-# [Workflow and Tooling Maturity](https://github.com/ianmays/dosmud/milestone/4)
+## [Workflow and Tooling Maturity](https://github.com/ianmays/dosmud/milestone/4)
 
 | Issue | Title |
 |-------|-------|
@@ -409,7 +401,7 @@ dosmud --seed 1234
 | [#74](https://github.com/ianmays/dosmud/issues/74) | agent skills |
 | [#82](https://github.com/ianmays/dosmud/issues/82) | compile performance |
 
-## [#74](https://github.com/ianmays/dosmud/issues/74) - Agent skills
+### [#74](https://github.com/ianmays/dosmud/issues/74) - Agent skills
 
 Capture:
 - workflow knowledge
@@ -418,21 +410,19 @@ Capture:
 - DOS/OpenWatcom constraints
 - architecture expectations
 
-## [#34](https://github.com/ianmays/dosmud/issues/34) - Modern Windows build
+### [#34](https://github.com/ianmays/dosmud/issues/34) - Modern Windows build
 
-## [#72](https://github.com/ianmays/dosmud/issues/72) - Sub-agents
+### [#72](https://github.com/ianmays/dosmud/issues/72) - Sub-agents
 
-## [#82](https://github.com/ianmays/dosmud/issues/82) - Compile performance
+### [#82](https://github.com/ianmays/dosmud/issues/82) - Compile performance
 
----
+## [Advanced Architecture](https://github.com/ianmays/dosmud/milestone/5)
 
-# [Advanced Architecture](https://github.com/ianmays/dosmud/milestone/5)
-
-## [#71](https://github.com/ianmays/dosmud/issues/71) - Separate core game engine from game logic
+### [#71](https://github.com/ianmays/dosmud/issues/71) - Separate core game engine from game logic
 
 Separate deterministic gameplay/simulation from rendering, platform, and front-end so the engine can support alternative interfaces or games. Blocks [#47](https://github.com/ianmays/dosmud/issues/47), [#104](https://github.com/ianmays/dosmud/issues/104), [#48](https://github.com/ianmays/dosmud/issues/48), and [#92](https://github.com/ianmays/dosmud/issues/92).
 
-## [#47](https://github.com/ianmays/dosmud/issues/47) - Event queue architecture
+### [#47](https://github.com/ianmays/dosmud/issues/47) - Event queue architecture
 
 Future direction:
 
@@ -466,7 +456,7 @@ Potential benefits:
 
 This is one of the most important architectural upgrades in the long-term roadmap.
 
-## [#16](https://github.com/ianmays/dosmud/issues/16) - Save/load system
+### [#16](https://github.com/ianmays/dosmud/issues/16) - Save/load system
 
 Create:
 
@@ -488,9 +478,7 @@ Avoid:
 
 Initial binary serialization is acceptable.
 
----
-
-# [Content Expansion](https://github.com/ianmays/dosmud/milestone/6)
+## [Content Expansion](https://github.com/ianmays/dosmud/milestone/6)
 
 Gameplay and world content after core architecture stabilizes. Related mechanics (economy, quests, schedules, reputation) live under [Advanced Mechanics](https://github.com/ianmays/dosmud/milestone/8).
 
@@ -505,27 +493,25 @@ Gameplay and world content after core architecture stabilizes. Related mechanics
 | [#130](https://github.com/ianmays/dosmud/issues/130) | night time |
 | [#131](https://github.com/ianmays/dosmud/issues/131) | cooking skill |
 
-## [#7](https://github.com/ianmays/dosmud/issues/7) - Interactive world events
+### [#7](https://github.com/ianmays/dosmud/issues/7) - Interactive world events
 
-## [#8](https://github.com/ianmays/dosmud/issues/8) - Complex dialogue
+### [#8](https://github.com/ianmays/dosmud/issues/8) - Complex dialogue
 
-## [#51](https://github.com/ianmays/dosmud/issues/51) - Weather
+### [#51](https://github.com/ianmays/dosmud/issues/51) - Weather
 
-## [#54](https://github.com/ianmays/dosmud/issues/54) - Procedural encounters
+### [#54](https://github.com/ianmays/dosmud/issues/54) - Procedural encounters
 
-## [#55](https://github.com/ianmays/dosmud/issues/55) - Larger worlds
+### [#55](https://github.com/ianmays/dosmud/issues/55) - Larger worlds
 
-## [#76](https://github.com/ianmays/dosmud/issues/76) - Concrete narrative
+### [#76](https://github.com/ianmays/dosmud/issues/76) - Concrete narrative
 
-## [#130](https://github.com/ianmays/dosmud/issues/130) - Night time
+### [#130](https://github.com/ianmays/dosmud/issues/130) - Night time
 
-## [#131](https://github.com/ianmays/dosmud/issues/131) - Cooking skill
+### [#131](https://github.com/ianmays/dosmud/issues/131) - Cooking skill
 
----
+## [Renderer](https://github.com/ianmays/dosmud/milestone/7)
 
-# [Renderer](https://github.com/ianmays/dosmud/milestone/7)
-
-## [#48](https://github.com/ianmays/dosmud/issues/48) - SDL renderer
+### [#48](https://github.com/ianmays/dosmud/issues/48) - SDL renderer
 
 Target structure:
 
@@ -548,9 +534,7 @@ NOT:
 - combat logic
 - world state
 
----
-
-# [Advanced Mechanics](https://github.com/ianmays/dosmud/milestone/8)
+## [Advanced Mechanics](https://github.com/ianmays/dosmud/milestone/8)
 
 | Issue | Title |
 |-------|-------|
@@ -568,35 +552,33 @@ NOT:
 | [#128](https://github.com/ianmays/dosmud/issues/128) | pick up all items |
 | [#129](https://github.com/ianmays/dosmud/issues/129) | interactive looting |
 
-## [#4](https://github.com/ianmays/dosmud/issues/4) - Combat initiative
+### [#4](https://github.com/ianmays/dosmud/issues/4) - Combat initiative
 
-## [#5](https://github.com/ianmays/dosmud/issues/5) - Enemy difficulty (level)
+### [#5](https://github.com/ianmays/dosmud/issues/5) - Enemy difficulty (level)
 
-## [#9](https://github.com/ianmays/dosmud/issues/9) - Reputation system
+### [#9](https://github.com/ianmays/dosmud/issues/9) - Reputation system
 
-## [#15](https://github.com/ianmays/dosmud/issues/15) - Character stats and rolls
+### [#15](https://github.com/ianmays/dosmud/issues/15) - Character stats and rolls
 
-## [#31](https://github.com/ianmays/dosmud/issues/31) - Easy / hard mode
+### [#31](https://github.com/ianmays/dosmud/issues/31) - Easy / hard mode
 
-## [#49](https://github.com/ianmays/dosmud/issues/49) - Quests
+### [#49](https://github.com/ianmays/dosmud/issues/49) - Quests
 
-## [#50](https://github.com/ianmays/dosmud/issues/50) - Economy
+### [#50](https://github.com/ianmays/dosmud/issues/50) - Economy
 
-## [#132](https://github.com/ianmays/dosmud/issues/132) - NPC trade
+### [#132](https://github.com/ianmays/dosmud/issues/132) - NPC trade
 
-## [#52](https://github.com/ianmays/dosmud/issues/52) - NPC schedules
+### [#52](https://github.com/ianmays/dosmud/issues/52) - NPC schedules
 
-## [#102](https://github.com/ianmays/dosmud/issues/102) - Fixed location enemies (Bandits)
+### [#102](https://github.com/ianmays/dosmud/issues/102) - Fixed location enemies (Bandits)
 
-## [#107](https://github.com/ianmays/dosmud/issues/107) - Enemies (Bandits) spawn and wander
+### [#107](https://github.com/ianmays/dosmud/issues/107) - Enemies (Bandits) spawn and wander
 
-## [#128](https://github.com/ianmays/dosmud/issues/128) - Pick up all items
+### [#128](https://github.com/ianmays/dosmud/issues/128) - Pick up all items
 
-## [#129](https://github.com/ianmays/dosmud/issues/129) - Interactive looting
+### [#129](https://github.com/ianmays/dosmud/issues/129) - Interactive looting
 
----
-
-# [Engine Enhancements](https://github.com/ianmays/dosmud/milestone/9)
+## [Engine Enhancements](https://github.com/ianmays/dosmud/milestone/9)
 
 | Issue | Title |
 |-------|-------|
@@ -605,17 +587,15 @@ NOT:
 | [#101](https://github.com/ianmays/dosmud/issues/101) | bandit behaviour is re-usable for any NPC (enemy NPC) |
 | [#104](https://github.com/ianmays/dosmud/issues/104) | npc module |
 
-## [#104](https://github.com/ianmays/dosmud/issues/104) - NPC module
+### [#104](https://github.com/ianmays/dosmud/issues/104) - NPC module
 
-## [#100](https://github.com/ianmays/dosmud/issues/100) - Wanderer behaviour reusable for any NPC
+### [#100](https://github.com/ianmays/dosmud/issues/100) - Wanderer behaviour reusable for any NPC
 
-## [#101](https://github.com/ianmays/dosmud/issues/101) - Bandit behaviour reusable for any NPC
+### [#101](https://github.com/ianmays/dosmud/issues/101) - Bandit behaviour reusable for any NPC
 
-## [#92](https://github.com/ianmays/dosmud/issues/92) - Multiplayer
+### [#92](https://github.com/ianmays/dosmud/issues/92) - Multiplayer
 
----
-
-# Important Final Guidance
+## Important Final Guidance
 
 Preferred architecture style:
 - procedural
