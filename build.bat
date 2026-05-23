@@ -132,7 +132,7 @@ echo Archiving gameplay.lib ...
 REM Keep each wlib line under COMMAND.COM ~127 chars (TEST_MODE adds +tharn.obj).
 wlib -n gameplay.lib +game.obj +gprog.obj +combat.obj +genc.obj >> %LOG%
 if errorlevel 1 goto wcl_bad
-wlib gameplay.lib +wanderer.obj +dialogue.obj +gatmos.obj >> %LOG%
+wlib gameplay.lib +wanderer.obj +dialogue.obj +gatmos.obj +fmt.obj >> %LOG%
 if errorlevel 1 goto wcl_bad
 if not "%1"=="TEST_MODE" goto wlib_done
 wlib gameplay.lib +thwld.obj +tharn.obj >> %LOG%
@@ -141,8 +141,8 @@ if errorlevel 1 goto wcl_bad
 
 echo Linking dosmud.exe ... >> %LOG%
 echo Linking dosmud.exe ...
-REM Link line below is ~125 chars (under COMMAND.COM ~127); tharn.obj lives in gameplay.lib.
-wcl -bt=dos -fe=dosmud.exe main.obj platdos.obj gameplay.lib grendr.obj fmt.obj invent.obj command.obj world.obj items.obj txtres.obj >> %LOG%
+REM Link line below is ~125 chars (under COMMAND.COM ~127); fmt.obj lives in gameplay.lib.
+wcl -bt=dos -fe=dosmud.exe main.obj platdos.obj gameplay.lib grendr.obj invent.obj command.obj world.obj items.obj txtres.obj >> %LOG%
 if errorlevel 1 goto wcl_bad
 if not exist dosmud.exe goto wcl_bad
 
