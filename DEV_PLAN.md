@@ -76,9 +76,7 @@ Workflow (milestone 4) can run in parallel with architecture once unblocked. Con
 
 **Dependencies:** native GitHub **blocked-by** links on issues (Relationships sidebar). Key chains: [#71](https://github.com/ianmays/dosmud/issues/71) before [#47](https://github.com/ianmays/dosmud/issues/47) / [#104](https://github.com/ianmays/dosmud/issues/104) / [#48](https://github.com/ianmays/dosmud/issues/48); [#104](https://github.com/ianmays/dosmud/issues/104) before [#100](https://github.com/ianmays/dosmud/issues/100) / [#101](https://github.com/ianmays/dosmud/issues/101) / [#8](https://github.com/ianmays/dosmud/issues/8); [#101](https://github.com/ianmays/dosmud/issues/101) before [#102](https://github.com/ianmays/dosmud/issues/102) / [#107](https://github.com/ianmays/dosmud/issues/107); [#50](https://github.com/ianmays/dosmud/issues/50) before [#132](https://github.com/ianmays/dosmud/issues/132); [#92](https://github.com/ianmays/dosmud/issues/92) after [#16](https://github.com/ianmays/dosmud/issues/16), [#71](https://github.com/ianmays/dosmud/issues/71), [#47](https://github.com/ianmays/dosmud/issues/47).
 
----
-
-# Current Project Priority
+## Current Project Priority
 
 The project is currently in an architectural consolidation phase.
 
@@ -91,8 +89,6 @@ Highest-value work:
 5. improve workflow/tooling discipline
 
 Large-scale gameplay/content expansion should remain secondary until the core architecture stabilizes.
-
----
 
 ## Hard Constraints
 
@@ -116,13 +112,11 @@ Large-scale gameplay/content expansion should remain secondary until the core ar
 
 # [Structural Cleanup + ANSI C89 Enforcement](https://github.com/ianmays/dosmud/milestone/1)
 
-## Primary Goals ([milestone 1](https://github.com/ianmays/dosmud/milestone/1))
+### Primary Goals
 
 - reduce complexity concentration
 - preserve portability
 - clarify subsystem ownership
-
----
 
 ## [#42](https://github.com/ianmays/dosmud/issues/42) - Split `game.c`
 
@@ -195,9 +189,7 @@ Goal:
 - improve maintainability
 - prepare for renderer/platform separation
 
----
-
-## ANSI C89 cleanup and compiler enforcement ([milestone 1](https://github.com/ianmays/dosmud/milestone/1))
+## ANSI C89 cleanup and compiler enforcement
 
 ### Remove all K&R function definitions
 
@@ -243,8 +235,6 @@ Compiler discipline and warning cleanliness should remain early priorities throu
 
 ✅ Done - gameplay tuning values live in `include/config.h`.
 
----
-
 ## [#41](https://github.com/ianmays/dosmud/issues/41) - Compatibility typedefs
 
 ✅ Done - [`include/base.h`](include/base.h) defines `u8`/`u16`/`u32` with documented width assumptions and compile-time `sizeof` guards; tick and byte-flag fields in `game.h` / `world.h` use these types.
@@ -259,8 +249,6 @@ Done ✅.
 
 [`src/game.h`](src/game.h) defines `GameMode` (`GAME_MODE_EXPLORE`, `GAME_MODE_DIALOGUE`, `GAME_MODE_COMBAT`), `DialogueKind` (room NPCs including frog, wanderer, enemy), and `CombatState` (`enemy_hp`, `defending`). `GameState` holds `mode`, `dialogue`, and `combat` instead of overlapping `pond_dialogue`, `wanderer_dialogue`, `enemy_dialogue`, `npc_dialogue`, and `combat_active` flags. Transitions go through `game_set_mode_explore`, `game_set_mode_dialogue`, and `game_set_mode_combat` in [`src/game.c`](src/game.c).
 
----
-
 ## [#44](https://github.com/ianmays/dosmud/issues/44) - Formalize engine boundaries
 
 Done ✅.
@@ -268,8 +256,6 @@ Done ✅.
 - Documented core / render / platform layers in `docs/architecture.md`
 - Moved all `invent.c` player output to `render_inv_*` in `grendr`
 - Added `make check-layers` to reject `printf` outside `main.c`, `grendr.c`, and the platform file (`platpos.c` / `platdos.c`) (run explicitly or via `make test-all`; not part of `make test`)
-
----
 
 ## [#45](https://github.com/ianmays/dosmud/issues/45) - Platform layer
 
@@ -283,7 +269,7 @@ Done ✅.
 
 # [Deterministic Test Harness Evolution](https://github.com/ianmays/dosmud/milestone/3)
 
-## Existing snapshot testing ([milestone 3](https://github.com/ianmays/dosmud/milestone/3))
+### Existing snapshot testing
 
 Pattern (under `tests/regression/`):
 
@@ -299,8 +285,6 @@ make test && make test-run
 ```
 
 Or manually: `./dosmud < tests/regression/<name>.input > tests/regression/<name>.output` then `diff` against `.expect`.
-
----
 
 ## [#66](https://github.com/ianmays/dosmud/issues/66) / [#112](https://github.com/ianmays/dosmud/issues/112) - Improve deterministic test setup
 
@@ -318,8 +302,6 @@ Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 - **[#116](https://github.com/ianmays/dosmud/issues/116)** Done ✅ - soak / stress harness (`make test-soak`, CI benchmarks)
 - **[#113](https://github.com/ianmays/dosmud/issues/113)** Done ✅ - wanderer snapshot fixtures (`wanderer_dialogue` fixture; `wanderer_replies`, `wanderer_talk_blocked` snapshots)
 - **[#114](https://github.com/ianmays/dosmud/issues/114)** Done ✅ - custom world boot fixture (`world_boot` / `world_linear`; `world_apply_graph` + harness tables in TEST_MODE)
-
----
 
 ## [#40](https://github.com/ianmays/dosmud/issues/40) - Gameplay test coverage (umbrella epic) — Done ✅
 
@@ -344,8 +326,6 @@ Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 
 **Harness layout (final):** fixture DSL and `@seed` in [`tests/harness/testharn.c`](tests/harness/testharn.c); seed-1234 world graph in [`tests/harness/th_world.c`](tests/harness/th_world.c) (shared by snapshots, unit, soak).
 
----
-
 ## [#115](https://github.com/ianmays/dosmud/issues/115) - Snapshot coverage (Done ✅)
 
 Delivered in PR [#123](https://github.com/ianmays/dosmud/pull/123).
@@ -367,8 +347,6 @@ Delivered in PR [#123](https://github.com/ianmays/dosmud/pull/123).
 - [`docs/architecture.md`](docs/architecture.md) - harness and RNG split updated.
 
 **Unit scope:** `command`, `invent`, `combat`, `game`, `genc`, `wanderer`, `dialogue`, `gatmos`, `world` (fixed graph), `gprog`, `items`, `fmt`, `testharn`. Out of scope: `grendr`, `txtres`, `main`, platform glue.
-
----
 
 ## [#95](https://github.com/ianmays/dosmud/issues/95) - Unit tests (Done ✅)
 
@@ -394,8 +372,6 @@ Delivered in PR [#127](https://github.com/ianmays/dosmud/pull/127).
 
 - [`docs/testing.md`](docs/testing.md) - unit layout, coverage levels, CI PR comment, shared `th_world.c` graph.
 
----
-
 ## [#116](https://github.com/ianmays/dosmud/issues/116) - Soak / stress tests (Done ✅)
 
 Delivered in PR [#133](https://github.com/ianmays/dosmud/pull/133).
@@ -413,8 +389,6 @@ Delivered in PR [#133](https://github.com/ianmays/dosmud/pull/133).
 **Related cleanup in PR [#133](https://github.com/ianmays/dosmud/pull/133)**
 
 - `testharn` moved from `src/` to `tests/harness/`; `dos-prepare.ps1` copies `tests/harness` for DOS `TEST_MODE`.
-
----
 
 ## [#46](https://github.com/ianmays/dosmud/issues/46) - Runtime `--seed`
 
@@ -458,8 +432,6 @@ Capture:
 
 Separate deterministic gameplay/simulation from rendering, platform, and front-end so the engine can support alternative interfaces or games. Blocks [#47](https://github.com/ianmays/dosmud/issues/47), [#104](https://github.com/ianmays/dosmud/issues/104), [#48](https://github.com/ianmays/dosmud/issues/48), and [#92](https://github.com/ianmays/dosmud/issues/92).
 
----
-
 ## [#47](https://github.com/ianmays/dosmud/issues/47) - Event queue architecture
 
 Future direction:
@@ -493,8 +465,6 @@ Potential benefits:
 - save/load consistency
 
 This is one of the most important architectural upgrades in the long-term roadmap.
-
----
 
 ## [#16](https://github.com/ianmays/dosmud/issues/16) - Save/load system
 
