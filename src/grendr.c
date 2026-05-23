@@ -7,6 +7,7 @@
 #include "command.h"
 #include "world.h"
 #include "txtres.h"
+#include "fmt.h"
 
 #ifdef TEST_MODE
 static int g_render_suppress;
@@ -917,49 +918,17 @@ void render_inv_drop(const char *item_name)
 
 void render_inv_bag(const struct GameState *game)
 {
-    int i;
-    int j;
-    int seen[CFG_BAG_MAX];
-    int seen_count;
-    int item_id;
-    int count;
-    int first;
+    char list[CFG_FMT_BAG_LIST_MAX];
+    int len;
 
     RENDER_PRINTF(TXT_INV_BAG_HEADER_FMT, game->bag_count, game->bag_capacity);
     if (game->bag_count <= 0) {
         RENDER_PRINTF("%s", TXT_INV_BAG_EMPTY);
     } else {
-        seen_count = 0;
-        first = 1;
-        for (i = 0; i < game->bag_count; ++i) {
-            item_id = game->bag[i];
-            for (j = 0; j < seen_count; ++j) {
-                if (seen[j] == item_id) {
-                    break;
-                }
-            }
-            if (j < seen_count) {
-                continue;
-            }
-            seen[seen_count] = item_id;
-            seen_count += 1;
-            count = 0;
-            for (j = 0; j < game->bag_count; ++j) {
-                if (game->bag[j] == item_id) {
-                    count += 1;
-                }
-            }
-            if (!first) {
-                RENDER_PRINTF(",");
-            }
-            first = 0;
-            if (count > 1) {
-                RENDER_PRINTF(TXT_INV_BAG_ITEM_STACK_FMT, item_name(item_id), count);
-            } else {
-                RENDER_PRINTF(" %s", item_name(item_id));
-            }
+        len = fmt_inv_bag_items(game, list, (int)sizeof(list));
+        if (len >= 0) {
+            RENDER_PRINTF("%s\n", list);
         }
-        RENDER_PRINTF("\n");
     }
     if (game->weapon_equipped != ITEM_NONE) {
         RENDER_PRINTF(TXT_INV_BAG_WIELDING_FMT, item_name(game->weapon_equipped));

@@ -100,9 +100,9 @@ make test-unit-coverage-verbose     # same tests, full gcov block per module
 - Determinism: call `plat_seed_rng(fixed_seed)` in setup; use `game_roll_inject_*` and `CFG_TEST_*` for asserted combat/intimidate outcomes
 - Snapshots assert player-visible output; unit tests assert `GameState` and parse results
 
-**In-scope modules (branch coverage target ~90%+):** `command`, `invent`, `combat`, `game`, `genc`, `wanderer`, `dialogue`, `gatmos`, `world`, `gprog`, `items`, `testharn`
+**In-scope modules (branch coverage target ~90%+):** `command`, `invent`, `combat`, `game`, `genc`, `wanderer`, `dialogue`, `gatmos`, `world`, `gprog`, `items`, `fmt`, `testharn`
 
-**Out of scope for the unit coverage bar:** `grendr`, `txtres`, `main`, `platpos` / `platdos` (presentation and platform glue; snapshots cover render text)
+**Out of scope for the unit coverage bar:** `grendr`, `txtres`, `main`, `platpos` / `platdos` (presentation glue; `fmt` holds testable format logic; snapshots cover printed output and ASCII art)
 
 **Harness-only fixture:** `bag_full_gate` - applies `game_inv_bag_add` without resetting baseline; returns fixture failure (`-2`) when the bag is already full (used by unit tests for `testharn_apply` error paths)
 
