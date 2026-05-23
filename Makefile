@@ -41,7 +41,7 @@ SNAPSHOT_TESTS = \
 	use_salve use_torch use_spear use_stone eat_berry eat_fish eat_berry_heal eat_fish_heal \
 	eat_not_edible eat_missing \
 	inspect_rustle inspect_creak inspect_water inspect_grit inspect_none inspect_wrong \
-	combat_defend combat_salve combat_salve_full combat_no_salve combat_invalid combat_take_blocked \
+	combat_defend combat_salve combat_no_salve combat_invalid combat_take_blocked \
 	combat_victory_xp level_up \
 	loot_spear loot_stick loot_berry loot_herb loot_fish loot_empty loot_stripped loot_bag_full \
 	bandit_fight bandit_intimidate_ok bandit_intimidate_fail bandit_bag_empty \
