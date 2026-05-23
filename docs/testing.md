@@ -100,9 +100,9 @@ make test-unit-coverage-verbose     # same tests, full gcov block per module
 - Determinism: call `plat_seed_rng(fixed_seed)` in setup; use `game_roll_inject_*` and `CFG_TEST_*` for asserted combat/intimidate outcomes
 - Snapshots assert player-visible output; unit tests assert `GameState` and parse results
 
-**In-scope modules (branch coverage target ~90%+):** `command`, `invent`, `combat`, `game`, `genc`, `wanderer`, `dialogue`, `gatmos`, `world`, `gprog`, `items`, `testharn`
+**In-scope modules (branch coverage target ~90%+):** `command`, `invent`, `combat`, `game`, `genc`, `wanderer`, `dialogue`, `gatmos`, `world`, `gprog`, `items`, `fmt`, `testharn`
 
-**Out of scope for the unit coverage bar:** `grendr`, `txtres`, `main`, `platpos` / `platdos` (presentation and platform glue; snapshots cover render text)
+**Out of scope for the unit coverage bar:** `grendr`, `txtres`, `main`, `platpos` / `platdos` (presentation glue; `fmt` holds testable format logic; snapshots cover printed output and ASCII art)
 
 **Harness-only fixture:** `bag_full_gate` - applies `game_inv_bag_add` without resetting baseline; returns fixture failure (`-2`) when the bag is already full (used by unit tests for `testharn_apply` error paths)
 
@@ -190,6 +190,7 @@ Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_
 | Fixture | State |
 |---------|--------|
 | `bag_berry` / `bag_fish` / `bag_salve` / `bag_torch` / `bag_spear` / `bag_stone` / `bag_stick` | Camp or pond baseline + one item in bag |
+| `bag_stacked` | Camp + two berries and one stick in bag (stacked bag display) |
 | `bag_berry_low_hp` / `bag_fish_low_hp` | Same as `bag_berry` / `bag_fish` with `player_hp = CFG_START_MAX_HP - 5` |
 | `bag_craft_salve` | Camp + herb and berry in bag |
 

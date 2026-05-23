@@ -44,12 +44,13 @@ Bad in core:
 printf("Player moved.\n");
 ```
 
-### Render (`grendr`, `txtres`)
+### Render (`txtres`, `fmt`, `grendr`)
 
 Presentation only: room art, HUD, combat text, inventory messages, and exploration map output.
 
-- `grendr` is the only gameplay-adjacent module that may call `printf`
-- `txtres` holds static copy; it does not print
+- **`txtres`** holds static copy; it does not print
+- **`fmt`** builds player-visible strings from `GameState` into caller buffers (no terminal I/O); logic-heavy formatting (for example aggregated bag lists) lives here
+- **`grendr`** is the only gameplay-adjacent module that may call `printf`; it prints `fmt` output, applies newline/spacing tiers, and draws ASCII art
 
 Core calls `render_*` after mutating `GameState`; render never changes simulation state.
 
@@ -187,8 +188,14 @@ New `src/*.c` and `src/*.h` basenames must stay within **classic FAT 8+3** (at m
 - text rendering only
 - art is intentionally compact to work well with 25 line displays (DOS standard)
 - no gameplay mutation
-- player-facing lines and format strings come from [`txtres.c`](../src/txtres.c) (`TXT_*` constants and `g_room_*` arrays), not scattered literals
+- calls [`fmt.c`](../src/fmt.c) for logic-heavy strings, then prints; static copy from [`txtres.c`](../src/txtres.c) (`TXT_*` constants and `g_room_*` arrays), not scattered literals
 - newline tiers (`render_gap`, `render_paragraph`, and related rules): [Newline and spacing](#newline-and-spacing)
+
+### `fmt`
+
+- pure string formatting from `GameState`; writes into caller-provided buffers
+- no `printf` or gameplay mutation
+- unit-tested directly in [`tests/unit/unit_fmt.c`](../tests/unit/unit_fmt.c) (see [`docs/testing.md`](testing.md))
 
 ### `txtres`
 

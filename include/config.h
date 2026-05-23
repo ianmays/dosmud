@@ -11,6 +11,8 @@
 #define CFG_DIR_MAX   4
 
 #define CFG_BAG_MAX   12
+/* Max chars for fmt_inv_bag_items output (worst case full bag with stack suffixes). */
+#define CFG_FMT_BAG_LIST_MAX 128
 /* How many objects can sit on the ground in one room (drops, forage, ambient). */
 #define CFG_AREA_ITEM_SLOTS 4
 

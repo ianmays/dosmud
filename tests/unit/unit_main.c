@@ -15,6 +15,7 @@ SUITE_EXTERN(genc);
 SUITE_EXTERN(dialogue);
 SUITE_EXTERN(wanderer);
 SUITE_EXTERN(gatmos);
+SUITE_EXTERN(fmt);
 SUITE_EXTERN(world);
 SUITE_EXTERN(game);
 SUITE_EXTERN(testharn);
@@ -92,6 +93,7 @@ int main(int argc, char **argv)
     RUN_SUITE(dialogue);
     RUN_SUITE(wanderer);
     RUN_SUITE(gatmos);
+    RUN_SUITE(fmt);
     RUN_SUITE(world);
     RUN_SUITE(game);
     RUN_SUITE(testharn);

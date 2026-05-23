@@ -4,7 +4,7 @@ BASE_CFLAGS = -Wall -Wextra -Wshadow -Wstrict-prototypes -Wmissing-prototypes -s
 TEST_MODE_FLAG = TEST_MODE
 HARNESS_DIR = tests/harness
 TEST_CFLAGS = $(BASE_CFLAGS) -Werror -D$(TEST_MODE_FLAG) -g -O0 -I$(HARNESS_DIR)
-SRC = src/main.c src/platpos.c src/game.c src/gprog.c src/combat.c src/genc.c src/wanderer.c src/dialogue.c src/gatmos.c src/grendr.c src/invent.c src/command.c src/world.c src/items.c src/txtres.c
+SRC = src/main.c src/platpos.c src/game.c src/gprog.c src/combat.c src/genc.c src/wanderer.c src/dialogue.c src/gatmos.c src/grendr.c src/fmt.c src/invent.c src/command.c src/world.c src/items.c src/txtres.c
 HARNESS_SRC = $(HARNESS_DIR)/testharn.c $(HARNESS_DIR)/th_world.c
 TEST_SRC = $(SRC) $(HARNESS_SRC)
 BIN = dosmud
@@ -39,7 +39,7 @@ SNAPSHOT_TESTS = \
 	walk_north walk_map wait_tick \
 	frog_replies watchman_talk wanderer_replies wanderer_talk_blocked herbalist_talk archivist_talk talk_nobody \
 	use_salve use_torch use_spear use_stone eat_berry eat_fish eat_berry_heal eat_fish_heal \
-	eat_not_edible eat_missing \
+	eat_not_edible eat_missing bag_stacks \
 	inspect_rustle inspect_creak inspect_water inspect_grit inspect_none inspect_wrong \
 	combat_defend combat_salve combat_no_salve combat_invalid combat_take_blocked \
 	combat_victory_xp level_up \
@@ -79,16 +79,16 @@ UNIT_COVERAGE_DIR = $(UNIT_BUILD_DIR)/coverage
 UNIT_BIN = $(UNIT_BUILD_DIR)/dosmud_unit
 UNIT_CFLAGS = $(TEST_CFLAGS) -I$(UNIT_DIR) -fprofile-arcs -ftest-coverage
 UNIT_GAMEPLAY_SRC = src/platpos.c src/game.c src/gprog.c src/combat.c src/genc.c \
-	src/wanderer.c src/dialogue.c src/gatmos.c src/grendr.c src/invent.c \
+	src/wanderer.c src/dialogue.c src/gatmos.c src/grendr.c src/fmt.c src/invent.c \
 	src/command.c src/world.c src/items.c src/txtres.c
 UNIT_CORE_SRC = $(UNIT_GAMEPLAY_SRC) $(HARNESS_SRC)
 UNIT_TEST_SRC = $(UNIT_DIR)/unit_main.c $(UNIT_DIR)/unit_util.c $(UNIT_DIR)/unit_item.c \
 	$(UNIT_DIR)/unit_cmd.c $(UNIT_DIR)/unit_harn.c $(UNIT_DIR)/unit_inv.c $(UNIT_DIR)/unit_cbt.c \
 	$(UNIT_DIR)/unit_gprog.c $(UNIT_DIR)/unit_genc.c $(UNIT_DIR)/unit_dial.c $(UNIT_DIR)/unit_wandr.c \
-	$(UNIT_DIR)/unit_gatmos.c $(UNIT_DIR)/unit_wrld.c $(UNIT_DIR)/unit_game.c $(UNIT_DIR)/unit_tharn.c
+	$(UNIT_DIR)/unit_gatmos.c $(UNIT_DIR)/unit_fmt.c $(UNIT_DIR)/unit_wrld.c $(UNIT_DIR)/unit_game.c $(UNIT_DIR)/unit_tharn.c
 UNIT_CORE_OBJS = $(addprefix $(UNIT_BUILD_DIR)/,$(notdir $(UNIT_CORE_SRC:.c=.o)))
 UNIT_TEST_OBJS = $(addprefix $(UNIT_BUILD_DIR)/,$(notdir $(UNIT_TEST_SRC:.c=.o)))
-COVERAGE_MODULES = command invent combat game genc wanderer dialogue gatmos world gprog items testharn
+COVERAGE_MODULES = command invent combat game genc wanderer dialogue gatmos world gprog items fmt testharn
 
 ifeq ($(UNIT_BUILD_VERBOSE),1)
 UNIT_CC_QUIET =

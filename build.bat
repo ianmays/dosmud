@@ -23,6 +23,7 @@ if exist genc.obj del genc.obj
 if exist wanderer.obj del wanderer.obj
 if exist dialogue.obj del dialogue.obj
 if exist gatmos.obj del gatmos.obj
+if exist fmt.obj del fmt.obj
 if exist grendr.obj del grendr.obj
 if exist invent.obj del invent.obj
 if exist command.obj del command.obj
@@ -80,6 +81,11 @@ echo Compiling gatmos.c ...
 wcl %WFL% -c -fo=gatmos.obj src\gatmos.c >> %LOG%
 if errorlevel 1 goto wcl_bad
 
+echo Compiling fmt.c ... >> %LOG%
+echo Compiling fmt.c ...
+wcl %WFL% -c -fo=fmt.obj src\fmt.c >> %LOG%
+if errorlevel 1 goto wcl_bad
+
 echo Compiling grendr.c ... >> %LOG%
 echo Compiling grendr.c ...
 wcl %WFL% -c -fo=grendr.obj src\grendr.c >> %LOG%
@@ -126,7 +132,7 @@ echo Archiving gameplay.lib ...
 REM Keep each wlib line under COMMAND.COM ~127 chars (TEST_MODE adds +tharn.obj).
 wlib -n gameplay.lib +game.obj +gprog.obj +combat.obj +genc.obj >> %LOG%
 if errorlevel 1 goto wcl_bad
-wlib gameplay.lib +wanderer.obj +dialogue.obj +gatmos.obj >> %LOG%
+wlib gameplay.lib +wanderer.obj +dialogue.obj +gatmos.obj +fmt.obj >> %LOG%
 if errorlevel 1 goto wcl_bad
 if not "%1"=="TEST_MODE" goto wlib_done
 wlib gameplay.lib +thwld.obj +tharn.obj >> %LOG%
@@ -135,7 +141,7 @@ if errorlevel 1 goto wcl_bad
 
 echo Linking dosmud.exe ... >> %LOG%
 echo Linking dosmud.exe ...
-REM Link line below is ~125 chars (under COMMAND.COM ~127); tharn.obj lives in gameplay.lib.
+REM Link line below is ~125 chars (under COMMAND.COM ~127); fmt.obj lives in gameplay.lib.
 wcl -bt=dos -fe=dosmud.exe main.obj platdos.obj gameplay.lib grendr.obj invent.obj command.obj world.obj items.obj txtres.obj >> %LOG%
 if errorlevel 1 goto wcl_bad
 if not exist dosmud.exe goto wcl_bad
