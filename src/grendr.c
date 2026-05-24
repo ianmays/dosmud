@@ -406,9 +406,8 @@ void render_room_look(struct GameState *game, int npc_in_room_hint)
     struct Room *room;
     int dir;
     int rid;
-    int s;
-    int ground_count;
-    int first_ground;
+    char ground[CFG_FMT_GROUND_MAX];
+    int ground_len;
 
     room = &game->world.rooms[game->player.room_id];
     rid = game->player.room_id;
@@ -423,29 +422,11 @@ void render_room_look(struct GameState *game, int npc_in_room_hint)
         }
     }
     RENDER_PRINTF("\n");
-    ground_count = 0;
-    first_ground = ITEM_NONE;
-    for (s = 0; s < CFG_AREA_ITEM_SLOTS; ++s) {
-        if (game->room_item[rid][s] != ITEM_NONE) {
-            if (ground_count == 0) {
-                first_ground = game->room_item[rid][s];
-            }
-            ground_count += 1;
-        }
-    }
-    if (ground_count == 1) {
-        RENDER_PRINTF(TXT_UI_GROUND_ITEM_FMT,
-            item_name(first_ground),
-            item_name(first_ground));
-    } else if (ground_count > 1) {
-        RENDER_PRINTF("%s", TXT_UI_GROUND_ITEMS_HEADER);
-        for (s = 0; s < CFG_AREA_ITEM_SLOTS; ++s) {
-            if (game->room_item[rid][s] != ITEM_NONE) {
-                RENDER_PRINTF(TXT_UI_GROUND_ITEM_LINE_FMT,
-                    item_name(game->room_item[rid][s]),
-                    item_name(game->room_item[rid][s]));
-            }
-        }
+    ground_len = fmt_room_ground_items(game, rid, ground, (int)sizeof(ground));
+    if (ground_len > 0) {
+        RENDER_PRINTF("%s", ground);
+    } else if (ground_len < 0) {
+        RENDER_PRINTF("%s", TXT_UI_GROUND_ITEMS_TOO_LONG);
     }
     if (game->corpse_present[game->player.room_id]) {
         RENDER_PRINTF("%s", TXT_UI_BANDIT_CORPSE);
@@ -928,6 +909,8 @@ void render_inv_bag(const struct GameState *game)
         len = fmt_inv_bag_items(game, list, (int)sizeof(list));
         if (len >= 0) {
             RENDER_PRINTF("%s\n", list);
+        } else {
+            RENDER_PRINTF("%s", TXT_INV_BAG_LIST_TOO_LONG);
         }
     }
     if (game->weapon_equipped != ITEM_NONE) {
@@ -1080,83 +1063,13 @@ void render_inv_unwield_ground(const char *item_name)
 
 void render_exploration_map(struct GameState *game)
 {
-    int min_x;
-    int max_x;
-    int min_y;
-    int max_y;
-    int i;
-    int any;
-    int px;
-    int py;
+    char mapbuf[CFG_FMT_MAP_MAX];
+    int len;
 
-    any = 0;
-    min_x = 0;
-    max_x = 0;
-    min_y = 0;
-    max_y = 0;
-    for (i = 0; i < game->world.room_count; ++i) {
-        if (!game->room_explored[i]) {
-            continue;
-        }
-        if (!game->world.map_ready[i]) {
-            continue;
-        }
-        if (!any) {
-            min_x = game->world.map_x[i];
-            max_x = game->world.map_x[i];
-            min_y = game->world.map_y[i];
-            max_y = game->world.map_y[i];
-            any = 1;
-        } else {
-            if (game->world.map_x[i] < min_x) min_x = game->world.map_x[i];
-            if (game->world.map_x[i] > max_x) max_x = game->world.map_x[i];
-            if (game->world.map_y[i] < min_y) min_y = game->world.map_y[i];
-            if (game->world.map_y[i] > max_y) max_y = game->world.map_y[i];
-        }
+    len = fmt_exploration_map(game, mapbuf, (int)sizeof(mapbuf));
+    if (len >= 0) {
+        RENDER_PRINTF("%s", mapbuf);
+    } else {
+        RENDER_PRINTF("%s", TXT_MAP_TOO_LARGE);
     }
-    if (!any) {
-        RENDER_PRINTF("%s", TXT_MAP_NONE_EXPLORED);
-        return;
-    }
-    RENDER_PRINTF("%s", TXT_MAP_HEADER);
-    for (py = min_y; py <= max_y; ++py) {
-        int first_cell;
-
-        first_cell = 1;
-        for (px = min_x; px <= max_x; ++px) {
-            int rid;
-            int k;
-            char ch;
-
-            rid = -1;
-            for (k = 0; k < game->world.room_count; ++k) {
-                if (!game->room_explored[k]) {
-                    continue;
-                }
-                if (!game->world.map_ready[k]) {
-                    continue;
-                }
-                if (game->world.map_x[k] != px || game->world.map_y[k] != py) {
-                    continue;
-                }
-                if (rid < 0 || k < rid) {
-                    rid = k;
-                }
-            }
-            if (rid < 0) {
-                ch = ' ';
-            } else if (rid == game->player.room_id) {
-                ch = '@';
-            } else {
-                ch = g_room_names[rid][0];
-            }
-            if (!first_cell) {
-                RENDER_PRINTF(" ");
-            }
-            first_cell = 0;
-            RENDER_PRINTF("%c", ch);
-        }
-        RENDER_PRINTF("\n");
-    }
-    RENDER_PRINTF("%s", TXT_MAP_LEGEND);
 }

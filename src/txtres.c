@@ -155,11 +155,15 @@ const char *const TXT_MAP_LEGEND =
     "(@ = you, letter = first initial of a visited place.)\n";
 
 const char *const TXT_MAP_NONE_EXPLORED = "You have not mapped any ground yet.\n";
+const char *const TXT_MAP_TOO_LARGE =
+    "The explored map is too large to show here.\n";
 
 const char *const TXT_UI_EXITS_LABEL = "Exits:";
 const char *const TXT_UI_GROUND_ITEM_FMT = "On the ground: %s. (take %s)\n";
 const char *const TXT_UI_GROUND_ITEMS_HEADER = "On the ground:\n";
 const char *const TXT_UI_GROUND_ITEM_LINE_FMT = "  %s (take %s)\n";
+const char *const TXT_UI_GROUND_ITEMS_TOO_LONG =
+    "Too many ground items to list here.\n";
 const char *const TXT_UI_BANDIT_CORPSE = "A bandit corpse lies here. (loot)\n";
 const char *const TXT_UI_NPC_HINT = "Someone nearby might talk. (talk)\n";
 const char *const TXT_UI_FOCUS_RUSTLE = "Something is rustling nearby. (inspect rustle)\n";
@@ -322,6 +326,8 @@ const char *const TXT_INV_GROUND_FULL_FMT =
 const char *const TXT_INV_DROP_FMT = "You drop the %s.\n";
 const char *const TXT_INV_BAG_HEADER_FMT = "Bag (%d/%d):";
 const char *const TXT_INV_BAG_EMPTY = " empty\n";
+const char *const TXT_INV_BAG_LIST_TOO_LONG =
+    "Your bag list is too long to show here.\n";
 const char *const TXT_INV_NO_EAT_COMBAT = "You cannot eat calmly during combat.\n";
 const char *const TXT_INV_CANNOT_EAT_FMT = "You cannot eat the %s.\n";
 const char *const TXT_INV_EAT_BERRY = "You eat the berry. Tart, but fresh.\n";
