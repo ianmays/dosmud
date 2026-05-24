@@ -47,6 +47,7 @@ extern const char *const TXT_UI_EXITS_LABEL;
 extern const char *const TXT_UI_GROUND_ITEM_FMT;
 extern const char *const TXT_UI_GROUND_ITEMS_HEADER;
 extern const char *const TXT_UI_GROUND_ITEM_LINE_FMT;
+extern const char *const TXT_UI_GROUND_ITEMS_TOO_LONG;
 extern const char *const TXT_UI_BANDIT_CORPSE;
 extern const char *const TXT_UI_NPC_HINT;
 extern const char *const TXT_UI_FOCUS_RUSTLE;

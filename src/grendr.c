@@ -425,6 +425,8 @@ void render_room_look(struct GameState *game, int npc_in_room_hint)
     ground_len = fmt_room_ground_items(game, rid, ground, (int)sizeof(ground));
     if (ground_len > 0) {
         RENDER_PRINTF("%s", ground);
+    } else if (ground_len < 0) {
+        RENDER_PRINTF("%s", TXT_UI_GROUND_ITEMS_TOO_LONG);
     }
     if (game->corpse_present[game->player.room_id]) {
         RENDER_PRINTF("%s", TXT_UI_BANDIT_CORPSE);

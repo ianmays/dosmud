@@ -162,6 +162,8 @@ const char *const TXT_UI_EXITS_LABEL = "Exits:";
 const char *const TXT_UI_GROUND_ITEM_FMT = "On the ground: %s. (take %s)\n";
 const char *const TXT_UI_GROUND_ITEMS_HEADER = "On the ground:\n";
 const char *const TXT_UI_GROUND_ITEM_LINE_FMT = "  %s (take %s)\n";
+const char *const TXT_UI_GROUND_ITEMS_TOO_LONG =
+    "Too many ground items to list here.\n";
 const char *const TXT_UI_BANDIT_CORPSE = "A bandit corpse lies here. (loot)\n";
 const char *const TXT_UI_NPC_HINT = "Someone nearby might talk. (talk)\n";
 const char *const TXT_UI_FOCUS_RUSTLE = "Something is rustling nearby. (inspect rustle)\n";
