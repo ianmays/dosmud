@@ -8,4 +8,14 @@ struct GameState;
  * Returns bytes written excluding NUL, or -1 if bufsize too small. */
 int fmt_inv_bag_items(const struct GameState *game, char *buf, int bufsize);
 
+/* Room ground items for look output; room_id indexes game->room_item.
+ * No items writes "" and returns 0.
+ * Returns bytes written excluding NUL, or -1 if bufsize too small. */
+int fmt_room_ground_items(const struct GameState *game, int room_id,
+    char *buf, int bufsize);
+
+/* Exploration map text (header, grid or none-explored message, legend).
+ * Returns bytes written excluding NUL, or -1 if bufsize too small. */
+int fmt_exploration_map(const struct GameState *game, char *buf, int bufsize);
+
 #endif
