@@ -33,7 +33,7 @@ Long-form project documentation lives in `/docs`:
 The manual is deployed as [Github Pages](https://ianmays.github.io/dosmud/).
 
 ## At a glance
-\* this is a (modified) AI-generated image - purely intended to give a sense of what this project is all about before you move on, do **not** consider this a source of truth
+\* this is an AI-generated image - purely intended to give a sense of what this project is all about before you move on, do **not** consider this a source of truth as it may contain hallucinations 
 
 <img src="dosmud.png" width="100%">
 
