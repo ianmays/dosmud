@@ -74,7 +74,7 @@ gh project item-edit --id <ITEM_ID> --project-id PVT_kwHOAAzqPM4BW5KP \
   --single-select-option-id <SIZE_OPTION_ID>
 ```
 
-Get `<ITEM_ID>` from `gh project item-list 1 --owner ianmays --format json` (filter by issue number).
+Get `<ITEM_ID>` from `gh project item-list 1 --owner ianmays --format json` (filter by issue number). **Always** resolve by issue number before `item-edit`; a duplicate `item-add` creates a second card and edits may land on the wrong id.
 
 ### 3. Priority (project field)
 
