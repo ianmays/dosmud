@@ -36,7 +36,7 @@ Guidance for AI/code agents working in this repository.
 6. Wait for user approval
 7. Move to **In progress** and create branch
 
-Plan mode forbids code and repo changes, but GitHub project status updates and issue comments are always allowed.
+Plan mode forbids code and repo changes, but GitHub project status updates and issue comments are always allowed. [Milestone issue hygiene](.cursor/skills/milestone-issue-hygiene/SKILL.md) in plan mode is **GitHub-only** (defer `DEV_PLAN.md` to a docs PR after approval).
 
 ### Issue selection
 
