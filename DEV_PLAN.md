@@ -76,6 +76,20 @@ Workflow (milestone 4) can run in parallel with architecture once unblocked. Con
 
 **Dependencies:** native GitHub **blocked-by** links on issues (Relationships sidebar). Key chains: [#71](https://github.com/ianmays/dosmud/issues/71) before [#47](https://github.com/ianmays/dosmud/issues/47) / [#104](https://github.com/ianmays/dosmud/issues/104) / [#48](https://github.com/ianmays/dosmud/issues/48); [#104](https://github.com/ianmays/dosmud/issues/104) before [#100](https://github.com/ianmays/dosmud/issues/100) / [#101](https://github.com/ianmays/dosmud/issues/101) / [#8](https://github.com/ianmays/dosmud/issues/8); [#101](https://github.com/ianmays/dosmud/issues/101) before [#102](https://github.com/ianmays/dosmud/issues/102) / [#107](https://github.com/ianmays/dosmud/issues/107); [#50](https://github.com/ianmays/dosmud/issues/50) before [#132](https://github.com/ianmays/dosmud/issues/132); [#52](https://github.com/ianmays/dosmud/issues/52) before [#49](https://github.com/ianmays/dosmud/issues/49); [#92](https://github.com/ianmays/dosmud/issues/92) after [#16](https://github.com/ianmays/dosmud/issues/16), [#71](https://github.com/ianmays/dosmud/issues/71), [#47](https://github.com/ianmays/dosmud/issues/47).
 
+### Relative size (GitHub project)
+
+**Size** (XS–XL on [project #1](https://github.com/users/ianmays/projects/1)) is relative effort / blast radius, not schedule. It is independent of **Priority** (P0/P1/P2) and column **stack order** (execution order above). Board **Status** may differ from pull order (e.g. [#72](https://github.com/ianmays/dosmud/issues/72) in Parked while still sequenced after #34 in the m4 list).
+
+| Size | Meaning | Examples (open roadmap) |
+|------|---------|-------------------------|
+| XS | single trivial change | *(none currently)* |
+| S | narrow feature or tooling slice | #4, #72, #82, #128 |
+| M | one subsystem feature or refactor | #5, #7, #9, #31, #49, #51, #54, #74, #100, #101, #102, #129, #130, #131, #132 |
+| L | major mechanism or platform path | #8, #15, #16, #34, #47, #50, #52, #104, #107 |
+| XL | foundational or multi-area epic | #48, #55, #71, #76, #92 |
+
+[#71](https://github.com/ianmays/dosmud/issues/71) **XL** is the architectural foundation gate (engine vs game-logic boundary); it blocks #47, #104, #48, and #92. Downstream L/XL items build on it.
+
 ### Current Project Priority
 
 The project is currently in an architectural consolidation phase.
@@ -394,12 +408,12 @@ dosmud --seed 1234
 
 ## [Workflow and Tooling Maturity](https://github.com/ianmays/dosmud/milestone/4)
 
-| Issue | Title |
-|-------|-------|
-| [#34](https://github.com/ianmays/dosmud/issues/34) | modern windows build |
-| [#72](https://github.com/ianmays/dosmud/issues/72) | sub-agents |
-| [#74](https://github.com/ianmays/dosmud/issues/74) | agent skills |
-| [#82](https://github.com/ianmays/dosmud/issues/82) | compile performance |
+| Issue | Title | Size |
+|-------|-------|------|
+| [#74](https://github.com/ianmays/dosmud/issues/74) | agent skills | M |
+| [#82](https://github.com/ianmays/dosmud/issues/82) | compile performance | S |
+| [#34](https://github.com/ianmays/dosmud/issues/34) | modern windows build | L |
+| [#72](https://github.com/ianmays/dosmud/issues/72) | sub-agents | S |
 
 ### [#74](https://github.com/ianmays/dosmud/issues/74) - Agent skills
 
@@ -417,6 +431,12 @@ Capture:
 ### [#82](https://github.com/ianmays/dosmud/issues/82) - Compile performance
 
 ## [Advanced Architecture](https://github.com/ianmays/dosmud/milestone/5)
+
+| Issue | Title | Size |
+|-------|-------|------|
+| [#71](https://github.com/ianmays/dosmud/issues/71) | separate core game engine from game logic | XL |
+| [#47](https://github.com/ianmays/dosmud/issues/47) | event queue architecture | L |
+| [#16](https://github.com/ianmays/dosmud/issues/16) | save / load | L |
 
 ### [#71](https://github.com/ianmays/dosmud/issues/71) - Separate core game engine from game logic
 
@@ -482,16 +502,16 @@ Initial binary serialization is acceptable.
 
 Gameplay and world content after core architecture stabilizes. Related mechanics (economy, quests, schedules, reputation) live under [Advanced Mechanics](https://github.com/ianmays/dosmud/milestone/8).
 
-| Issue | Title |
-|-------|-------|
-| [#7](https://github.com/ianmays/dosmud/issues/7) | interactive world events |
-| [#8](https://github.com/ianmays/dosmud/issues/8) | complex dialogue |
-| [#51](https://github.com/ianmays/dosmud/issues/51) | weather |
-| [#54](https://github.com/ianmays/dosmud/issues/54) | procedural encounters |
-| [#55](https://github.com/ianmays/dosmud/issues/55) | larger worlds |
-| [#76](https://github.com/ianmays/dosmud/issues/76) | concrete narrative |
-| [#130](https://github.com/ianmays/dosmud/issues/130) | night time |
-| [#131](https://github.com/ianmays/dosmud/issues/131) | cooking skill |
+| Issue | Title | Size |
+|-------|-------|------|
+| [#55](https://github.com/ianmays/dosmud/issues/55) | larger worlds | XL |
+| [#7](https://github.com/ianmays/dosmud/issues/7) | interactive world events | M |
+| [#8](https://github.com/ianmays/dosmud/issues/8) | complex dialogue | L |
+| [#51](https://github.com/ianmays/dosmud/issues/51) | weather | M |
+| [#54](https://github.com/ianmays/dosmud/issues/54) | procedural encounters | M |
+| [#76](https://github.com/ianmays/dosmud/issues/76) | concrete narrative | XL |
+| [#130](https://github.com/ianmays/dosmud/issues/130) | night time | M |
+| [#131](https://github.com/ianmays/dosmud/issues/131) | cooking skill | M |
 
 ### [#7](https://github.com/ianmays/dosmud/issues/7) - Interactive world events
 
@@ -510,6 +530,10 @@ Gameplay and world content after core architecture stabilizes. Related mechanics
 ### [#131](https://github.com/ianmays/dosmud/issues/131) - Cooking skill
 
 ## [Renderer](https://github.com/ianmays/dosmud/milestone/7)
+
+| Issue | Title | Size |
+|-------|-------|------|
+| [#48](https://github.com/ianmays/dosmud/issues/48) | SDL renderer | XL |
 
 ### [#48](https://github.com/ianmays/dosmud/issues/48) - SDL renderer
 
@@ -536,21 +560,21 @@ NOT:
 
 ## [Advanced Mechanics](https://github.com/ianmays/dosmud/milestone/8)
 
-| Issue | Title |
-|-------|-------|
-| [#4](https://github.com/ianmays/dosmud/issues/4) | combat initiative |
-| [#5](https://github.com/ianmays/dosmud/issues/5) | enemy difficulty (level) |
-| [#9](https://github.com/ianmays/dosmud/issues/9) | reputation system |
-| [#15](https://github.com/ianmays/dosmud/issues/15) | character stats and rolls |
-| [#31](https://github.com/ianmays/dosmud/issues/31) | easy / hard mode |
-| [#52](https://github.com/ianmays/dosmud/issues/52) | npc schedules |
-| [#49](https://github.com/ianmays/dosmud/issues/49) | quests |
-| [#50](https://github.com/ianmays/dosmud/issues/50) | economy |
-| [#132](https://github.com/ianmays/dosmud/issues/132) | NPC trade |
-| [#102](https://github.com/ianmays/dosmud/issues/102) | fixed location enemies (Bandits) |
-| [#107](https://github.com/ianmays/dosmud/issues/107) | enemies (Bandits) spawn and wander, rather than spawn randomly at player site |
-| [#128](https://github.com/ianmays/dosmud/issues/128) | pick up all items |
-| [#129](https://github.com/ianmays/dosmud/issues/129) | interactive looting |
+| Issue | Title | Size |
+|-------|-------|------|
+| [#15](https://github.com/ianmays/dosmud/issues/15) | character stats and rolls | L |
+| [#128](https://github.com/ianmays/dosmud/issues/128) | pick up all items | S |
+| [#129](https://github.com/ianmays/dosmud/issues/129) | interactive looting | M |
+| [#4](https://github.com/ianmays/dosmud/issues/4) | combat initiative | S |
+| [#5](https://github.com/ianmays/dosmud/issues/5) | enemy difficulty (level) | M |
+| [#50](https://github.com/ianmays/dosmud/issues/50) | economy | L |
+| [#132](https://github.com/ianmays/dosmud/issues/132) | NPC trade | M |
+| [#102](https://github.com/ianmays/dosmud/issues/102) | fixed location enemies (Bandits) | M |
+| [#107](https://github.com/ianmays/dosmud/issues/107) | enemies (Bandits) spawn and wander, rather than spawn randomly at player site | L |
+| [#9](https://github.com/ianmays/dosmud/issues/9) | reputation system | M |
+| [#31](https://github.com/ianmays/dosmud/issues/31) | easy / hard mode | M |
+| [#52](https://github.com/ianmays/dosmud/issues/52) | npc schedules | L |
+| [#49](https://github.com/ianmays/dosmud/issues/49) | quests | M |
 
 ### [#4](https://github.com/ianmays/dosmud/issues/4) - Combat initiative
 
@@ -580,12 +604,12 @@ NOT:
 
 ## [Engine Enhancements](https://github.com/ianmays/dosmud/milestone/9)
 
-| Issue | Title |
-|-------|-------|
-| [#92](https://github.com/ianmays/dosmud/issues/92) | multiplayer |
-| [#100](https://github.com/ianmays/dosmud/issues/100) | wanderer behaviour is re-usable for any NPC (wandering NPC) |
-| [#101](https://github.com/ianmays/dosmud/issues/101) | bandit behaviour is re-usable for any NPC (enemy NPC) |
-| [#104](https://github.com/ianmays/dosmud/issues/104) | npc module |
+| Issue | Title | Size |
+|-------|-------|------|
+| [#104](https://github.com/ianmays/dosmud/issues/104) | npc module | L |
+| [#100](https://github.com/ianmays/dosmud/issues/100) | wanderer behaviour is re-usable for any NPC (wandering NPC) | M |
+| [#101](https://github.com/ianmays/dosmud/issues/101) | bandit behaviour is re-usable for any NPC (enemy NPC) | M |
+| [#92](https://github.com/ianmays/dosmud/issues/92) | multiplayer | XL |
 
 ### [#104](https://github.com/ianmays/dosmud/issues/104) - NPC module
 

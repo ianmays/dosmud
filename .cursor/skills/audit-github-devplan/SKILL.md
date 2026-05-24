@@ -4,7 +4,8 @@ description: >-
   Audits alignment between GitHub issues, milestones, project board, blocked-by
   dependencies, and DEV_PLAN.md. Use when the user asks to audit the roadmap,
   review milestone categorization, check DEV_PLAN vs GitHub, reconcile execution
-  order, or verify project board Priority vs stack order.
+  order, verify project board Priority vs stack order, or compare Size (XS–XL)
+  on the board to DEV_PLAN.
 disable-model-invocation: true
 ---
 
@@ -28,9 +29,12 @@ Canonical policy: [`AGENTS.md`](../../../AGENTS.md) **DEV_PLAN updates** and DEV
 | **DEV_PLAN execution order** | Suggested pull order + mermaid in DEV_PLAN | Dependency / workflow sequence |
 | **blocked-by** | Native issue Relationships | Source of truth for blockers |
 | **Project Priority** | P0 / P1 / P2 custom field | Coarse urgency tier; **does not** auto-sort columns |
+| **Project Size** | XS–XL custom field on project #1 | Relative effort / blast radius; **does not** imply schedule (see DEV_PLAN **Relative size**) |
 | **Project stack order** | Global item position (`updateProjectV2ItemPosition`) | Visual order within a Status column |
 
-Priority P0→P1→P2 and execution-order stack **will diverge** (e.g. #47 P1 before #104 P0). That is expected unless the user asks to sort by Priority instead.
+Priority P0→P1→P2 and execution-order stack **will diverge** (e.g. #47 P1 before #104 P0). That is expected unless the user asks to sort by Priority instead. **Size** is independent of both Priority and stack order.
+
+**Board Status vs execution order:** an issue may sit in a different column than its mermaid block suggests (e.g. [#72](https://github.com/ianmays/dosmud/issues/72) in **Parked** while pull order still lists it after #34). Do **not** recommend moving #72 unless the user asks.
 
 ## DEV_PLAN edit rules (audit against these)
 
@@ -52,10 +56,11 @@ Audit progress:
 - [ ] 1. Inventory DEV_PLAN issue refs
 - [ ] 2. Fetch GitHub milestone + state per ref
 - [ ] 3. Compare DEV_PLAN section vs milestone title
-- [ ] 4. Open roadmap: project board + Priority
-- [ ] 5. blocked-by vs execution order
-- [ ] 6. Terminology / doc drift
-- [ ] 7. Write report (fix only if asked)
+- [ ] 4. Open roadmap: project board + Priority + Size
+- [ ] 5. Compare board Size vs DEV_PLAN Size column (open issues)
+- [ ] 6. blocked-by vs execution order
+- [ ] 7. Terminology / doc drift
+- [ ] 8. Write report (fix only if asked)
 ```
 
 ### 1. Inventory DEV_PLAN
@@ -105,7 +110,7 @@ gh project item-list 1 --owner ianmays --format json --limit 200
 gh project field-list 1 --owner ianmays --format json
 ```
 
-For open roadmap issues, record **Status**, **Priority**, and column stack order (GraphQL item list order filtered by Status).
+For open roadmap issues, record **Status**, **Priority**, **Size**, and column stack order (GraphQL item list order filtered by Status).
 
 GraphQL (status + priority on items):
 
@@ -133,7 +138,25 @@ query {
 }'
 ```
 
-### 5. blocked-by vs execution order
+### 5. Size vs DEV_PLAN
+
+Read DEV_PLAN **Relative size (GitHub project)** legend and milestone **Size** columns. For each open roadmap issue on the board:
+
+```bash
+gh project item-list 1 --owner ianmays --format json --limit 200 \
+  | python3 -c "
+import json, sys
+EXEC = {71, 47, ...}  # open roadmap set from DEV_PLAN
+for it in json.load(sys.stdin)['items']:
+    n = it.get('content', {}).get('number')
+    if n in EXEC:
+        print(n, it.get('size','-'))
+"
+```
+
+Flag when board **Size** differs from DEV_PLAN table for the same issue.
+
+### 6. blocked-by vs execution order
 
 Read DEV_PLAN **Execution order** and dependency prose. For each edge documented there:
 
@@ -147,7 +170,7 @@ gh api repos/ianmays/dosmud/issues/47/dependencies/blocked_by \
 
 Verify: blocked issue should appear **after** blockers in execution order list.
 
-### 6. Terminology drift
+### 7. Terminology drift
 
 ```bash
 grep -n 'Phase [0-9]' DEV_PLAN.md AGENTS.md docs/*.md README.md
@@ -173,9 +196,13 @@ Deliver to the user:
 ### Dependencies
 - (missing / extra blocked-by vs DEV_PLAN)
 
+### Size mismatches
+| Issue | DEV_PLAN Size | Board Size | Action |
+
 ### Project board
-- Backlog / Parked / Agent-ready stack vs execution order
+- Backlog / Parked / Agent-ready / In progress stack vs execution order (per Status column)
 - Note if Priority order differs (expected)
+- Do not flag #72 in Parked as an error (intentional; scope TBD)
 
 ### Recommended actions
 - (numbered; do not execute unless user confirms)
@@ -199,7 +226,8 @@ Within each **Status**, sort open roadmap issues by DEV_PLAN execution rank; non
 
 ## Checklist
 
-- [ ] Report distinguishes Priority vs stack order
+- [ ] Report distinguishes Priority vs stack order vs Size
+- [ ] Size checked against DEV_PLAN tables for open roadmap issues
 - [ ] DEV_PLAN "do not add new issues" respected in recommendations
 - [ ] blocked-by checked against DEV_PLAN dependency prose
 - [ ] No drive-by DEV_PLAN edits outside user scope
