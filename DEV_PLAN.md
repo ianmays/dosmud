@@ -601,6 +601,8 @@ NOT:
 
 ### [#128](https://github.com/ianmays/dosmud/issues/128) - Pick up all items
 
+Done ✅.
+
 ### [#129](https://github.com/ianmays/dosmud/issues/129) - Interactive looting
 
 ### [#145](https://github.com/ianmays/dosmud/issues/145) - Local map viewport (region/world map deferred)

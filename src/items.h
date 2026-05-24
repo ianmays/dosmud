@@ -2,6 +2,7 @@
 #define ITEMS_H
 
 #define ITEM_NONE 0
+#define ITEM_ALL (-1)
 #define ITEM_BERRY 1
 #define ITEM_STICK 2
 #define ITEM_REED 3

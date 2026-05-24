@@ -40,6 +40,20 @@ static int room_ground_is_empty(struct GameState *game, int room_id)
     return 1;
 }
 
+static int room_ground_count(struct GameState *game, int room_id)
+{
+    int s;
+    int count;
+
+    count = 0;
+    for (s = 0; s < CFG_AREA_ITEM_SLOTS; ++s) {
+        if (game->room_item[room_id][s] != ITEM_NONE) {
+            count += 1;
+        }
+    }
+    return count;
+}
+
 static int room_find_item_slot(struct GameState *game, int room_id, int item_id)
 {
     int s;
@@ -177,6 +191,9 @@ int game_inv_cmd_take(struct GameState *game, int item_arg)
     int room_id;
     int ground_item;
     int slot;
+    int ground_count;
+    int ground_items[CFG_AREA_ITEM_SLOTS];
+    int i;
 
     if (game->mode == GAME_MODE_COMBAT) {
         render_inv_no_rummage_combat();
@@ -185,6 +202,34 @@ int game_inv_cmd_take(struct GameState *game, int item_arg)
     room_id = game->player.room_id;
     if (room_ground_is_empty(game, room_id)) {
         render_inv_take_nothing();
+        return 1;
+    }
+    if (item_arg == ITEM_ALL) {
+        ground_count = room_ground_count(game, room_id);
+        if (game->bag_count + ground_count > game->bag_capacity) {
+            render_inv_bag_full(game->bag_capacity);
+            return 1;
+        }
+        ground_count = 0;
+        for (slot = 0; slot < CFG_AREA_ITEM_SLOTS; ++slot) {
+            if (game->room_item[room_id][slot] != ITEM_NONE) {
+                ground_items[ground_count] = game->room_item[room_id][slot];
+                ground_count += 1;
+            }
+        }
+        for (i = 0; i < ground_count; ++i) {
+            if (!game_inv_bag_add(game, ground_items[i])) {
+                return 1;
+            }
+        }
+        for (slot = 0; slot < CFG_AREA_ITEM_SLOTS; ++slot) {
+            game->room_item[room_id][slot] = ITEM_NONE;
+        }
+        for (i = 0; i < ground_count; ++i) {
+            if (ground_items[i] != ITEM_NONE) {
+                render_inv_pickup(item_name(ground_items[i]));
+            }
+        }
         return 1;
     }
     slot = room_find_item_slot(game, room_id, item_arg);

@@ -90,7 +90,7 @@ const char *const TXT_MAIN_PROMPT = "\n> ";
 const char *const TXT_MAIN_BYE = "bye";
 
 const char *const TXT_COMMAND_HELP =
-    "Commands: look, map, inspect [rustle|creak|water|grit], take/drop/give <item>, bag, wield <weapon>, unwield, eat/use <item>, craft <item>, loot, move <dir>, wait, talk, 1/2/3 or reply <1-3>, help [topic], quit";
+    "Commands: look, map, inspect [rustle|creak|water|grit], take/get/pickup <item> or take all, drop/give <item>, bag, wield <weapon>, unwield, eat/use <item>, craft <item>, loot, move <dir>, wait, talk, 1/2/3 or reply <1-3>, help [topic], quit";
 
 const char *const TXT_HELP_TOPIC_UNKNOWN =
     "No help for that topic. Type 'help' for the full command list.";
@@ -108,7 +108,7 @@ const char *const TXT_HELP_INSPECT =
     "inspect <rustle|creak|water|grit> - follow a clue after look. Synonyms: examine, investigate.";
 
 const char *const TXT_HELP_TAKE =
-    "take <item> (get, pickup) - pick up the named item from the ground into your bag.";
+    "take <item> (get, pickup), or take all - pick up items from the ground into your bag.";
 
 const char *const TXT_HELP_DROP =
     "drop <item> - place an item from your bag on the ground here (several items fit until the area is full).";
