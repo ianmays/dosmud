@@ -247,6 +247,35 @@ TEST fmt_map_bad_args(void)
     PASS();
 }
 
+TEST fmt_map_buf_too_small(void)
+{
+    struct GameState game;
+    char out[8];
+
+    unit_game_fresh(&game, 24u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game.room_explored[WORLD_ROOM_CAMP] = 1;
+    ASSERT_EQ(-1, fmt_exploration_map(&game, out, (int)sizeof(out)));
+    PASS();
+}
+
+TEST fmt_map_all_explored_fits(void)
+{
+    struct GameState game;
+    char out[UNIT_FMT_MAP_BUF];
+    int len;
+    int i;
+
+    unit_game_fresh(&game, 25u);
+    for (i = 0; i < game.world.room_count; ++i) {
+        game.room_explored[i] = 1;
+    }
+    len = fmt_exploration_map(&game, out, (int)sizeof(out));
+    ASSERT(len >= 0);
+    ASSERT(len < (int)sizeof(out));
+    PASS();
+}
+
 SUITE(fmt) {
     RUN_TEST(fmt_bag_single);
     RUN_TEST(fmt_bag_stacked);
@@ -263,4 +292,6 @@ SUITE(fmt) {
     RUN_TEST(fmt_map_camp_only);
     RUN_TEST(fmt_map_camp_and_road);
     RUN_TEST(fmt_map_bad_args);
+    RUN_TEST(fmt_map_buf_too_small);
+    RUN_TEST(fmt_map_all_explored_fits);
 }

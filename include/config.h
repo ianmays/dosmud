@@ -15,8 +15,10 @@
 #define CFG_FMT_BAG_LIST_MAX 128
 /* Max chars for fmt_room_ground_items (header + CFG_AREA_ITEM_SLOTS lines). */
 #define CFG_FMT_GROUND_MAX 192
-/* Max chars for fmt_exploration_map (header + grid + legend). */
-#define CFG_FMT_MAP_MAX 256
+/* Max chars for fmt_exploration_map (header + grid + legend).
+ * Grid worst case: (max_x-min_x+1) cells with spaces between, per row, plus newlines;
+ * with all CFG_ROOM_MAX rooms explored and collision bumps, ~12x12 span is plausible. */
+#define CFG_FMT_MAP_MAX 384
 /* How many objects can sit on the ground in one room (drops, forage, ambient). */
 #define CFG_AREA_ITEM_SLOTS 4
 
