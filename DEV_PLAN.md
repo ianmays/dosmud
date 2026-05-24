@@ -253,7 +253,7 @@ Compiler discipline and warning cleanliness should remain early priorities throu
 
 ## [State Ownership and Boundary Isolation](https://github.com/ianmays/dosmud/milestone/2)
 
-### [#43](https://github.com/ianmays/dosmud/issues/43) - Replace overlapping flags with state structures
+### [#43](https://github.com/ianmays/dosmud/issues/43) - State machine for game modes
 
 Done ✅.
 
