@@ -16,8 +16,10 @@
 /* Max chars for fmt_room_ground_items (header + CFG_AREA_ITEM_SLOTS lines). */
 #define CFG_FMT_GROUND_MAX 192
 /* Max chars for fmt_exploration_map (header + grid + legend).
- * Grid worst case: (max_x-min_x+1) cells with spaces between, per row, plus newlines;
- * with all CFG_ROOM_MAX rooms explored and collision bumps, ~12x12 span is plausible. */
+ * Worst span per axis <= 2*CFG_ROOM_MAX (collision bumps in world_assign_cell).
+ * Per row: (2*span_x - 1) cell/space chars + newline; rows <= 2*CFG_ROOM_MAX.
+ * For CFG_ROOM_MAX 16: header+legend ~90 + 32*(2*32-1+1) = 2146 upper bound;
+ * 384 covers observed harness/procedural graphs; raise if span grows. */
 #define CFG_FMT_MAP_MAX 384
 /* How many objects can sit on the ground in one room (drops, forage, ambient). */
 #define CFG_AREA_ITEM_SLOTS 4

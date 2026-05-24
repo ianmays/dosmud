@@ -272,7 +272,7 @@ TEST fmt_map_all_explored_fits(void)
     }
     len = fmt_exploration_map(&game, out, (int)sizeof(out));
     ASSERT(len >= 0);
-    ASSERT(len < (int)sizeof(out));
+    ASSERT(len < CFG_FMT_MAP_MAX);
     PASS();
 }
 

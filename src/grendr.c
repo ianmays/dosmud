@@ -907,6 +907,8 @@ void render_inv_bag(const struct GameState *game)
         len = fmt_inv_bag_items(game, list, (int)sizeof(list));
         if (len >= 0) {
             RENDER_PRINTF("%s\n", list);
+        } else {
+            RENDER_PRINTF("%s", TXT_INV_BAG_LIST_TOO_LONG);
         }
     }
     if (game->weapon_equipped != ITEM_NONE) {
@@ -1065,5 +1067,7 @@ void render_exploration_map(struct GameState *game)
     len = fmt_exploration_map(game, mapbuf, (int)sizeof(mapbuf));
     if (len >= 0) {
         RENDER_PRINTF("%s", mapbuf);
+    } else {
+        RENDER_PRINTF("%s", TXT_MAP_TOO_LARGE);
     }
 }

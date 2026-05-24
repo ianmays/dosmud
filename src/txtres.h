@@ -41,6 +41,7 @@ extern const char *const TXT_HELP_WIELD;
 extern const char *const TXT_MAP_HEADER;
 extern const char *const TXT_MAP_LEGEND;
 extern const char *const TXT_MAP_NONE_EXPLORED;
+extern const char *const TXT_MAP_TOO_LARGE;
 
 extern const char *const TXT_UI_EXITS_LABEL;
 extern const char *const TXT_UI_GROUND_ITEM_FMT;
@@ -171,6 +172,7 @@ extern const char *const TXT_INV_GROUND_FULL_FMT;
 extern const char *const TXT_INV_DROP_FMT;
 extern const char *const TXT_INV_BAG_HEADER_FMT;
 extern const char *const TXT_INV_BAG_EMPTY;
+extern const char *const TXT_INV_BAG_LIST_TOO_LONG;
 extern const char *const TXT_INV_NO_EAT_COMBAT;
 extern const char *const TXT_INV_CANNOT_EAT_FMT;
 extern const char *const TXT_INV_EAT_BERRY;
