@@ -169,7 +169,7 @@ int command_parse(char *line, struct Command *out_cmd)
         out_cmd->type = CMD_TAKE;
         if (count < 2) return 0;
         if (strcmp(word2, "all") == 0) {
-            out_cmd->arg = ITEM_ALL;
+            out_cmd->arg = CMD_TAKE_ALL;
             return 1;
         }
         out_cmd->arg = item_from_word(word2);

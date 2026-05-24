@@ -26,6 +26,9 @@
 #define CMD_HELP_TOPIC_MAP 17
 #define CMD_HELP_TOPIC_WIELD 18
 
+/* Passed in Command.arg when type is CMD_TAKE and the user requested "all". */
+#define CMD_TAKE_ALL (-1)
+
 enum CommandType {
     CMD_INVALID = 0,
     CMD_LOOK,

@@ -1,5 +1,6 @@
 #include "greatest.h"
 #include "config.h"
+#include "command.h"
 #include "game.h"
 #include "invent.h"
 #include "items.h"
@@ -62,7 +63,7 @@ TEST invent_take_all_paths(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game.room_item[WORLD_ROOM_CAMP][0] = ITEM_STICK;
     game.room_item[WORLD_ROOM_CAMP][1] = ITEM_REED;
-    ASSERT_EQ(1, game_inv_cmd_take(&game, ITEM_ALL));
+    ASSERT_EQ(1, game_inv_cmd_take(&game, CMD_TAKE_ALL));
     ASSERT_EQ(2, game.bag_count);
     ASSERT_EQ(ITEM_STICK, game.bag[0]);
     ASSERT_EQ(ITEM_REED, game.bag[1]);
@@ -81,7 +82,7 @@ TEST invent_take_all_bag_full(void)
     game.room_item[WORLD_ROOM_CAMP][1] = ITEM_REED;
     game.bag_count = game.bag_capacity - 1;
     game.bag[0] = ITEM_BERRY;
-    ASSERT_EQ(1, game_inv_cmd_take(&game, ITEM_ALL));
+    ASSERT_EQ(1, game_inv_cmd_take(&game, CMD_TAKE_ALL));
     ASSERT_EQ(game.bag_capacity - 1, game.bag_count);
     ASSERT_EQ(ITEM_STICK, game.room_item[WORLD_ROOM_CAMP][0]);
     ASSERT_EQ(ITEM_REED, game.room_item[WORLD_ROOM_CAMP][1]);
@@ -98,7 +99,7 @@ TEST invent_take_combat_blocked(void)
     game_set_mode_combat(&game);
     ASSERT_EQ(1, game_inv_cmd_take(&game, ITEM_STICK));
     ASSERT_EQ(0, game_inv_player_has_item(&game, ITEM_STICK));
-    ASSERT_EQ(1, game_inv_cmd_take(&game, ITEM_ALL));
+    ASSERT_EQ(1, game_inv_cmd_take(&game, CMD_TAKE_ALL));
     ASSERT_EQ(0, game_inv_player_has_item(&game, ITEM_STICK));
     PASS();
 }

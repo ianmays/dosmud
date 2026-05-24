@@ -67,13 +67,13 @@ TEST command_parse_items_and_reply(void)
     ASSERT_EQ(ITEM_STICK, cmd.arg);
     ASSERT_EQ(1, parse_line("take all", &cmd));
     ASSERT_EQ(CMD_TAKE, cmd.type);
-    ASSERT_EQ(ITEM_ALL, cmd.arg);
+    ASSERT_EQ(CMD_TAKE_ALL, cmd.arg);
     ASSERT_EQ(1, parse_line("get all", &cmd));
     ASSERT_EQ(CMD_TAKE, cmd.type);
-    ASSERT_EQ(ITEM_ALL, cmd.arg);
+    ASSERT_EQ(CMD_TAKE_ALL, cmd.arg);
     ASSERT_EQ(1, parse_line("pickup all", &cmd));
     ASSERT_EQ(CMD_TAKE, cmd.type);
-    ASSERT_EQ(ITEM_ALL, cmd.arg);
+    ASSERT_EQ(CMD_TAKE_ALL, cmd.arg);
     ASSERT_EQ(0, parse_line("take", &cmd));
     ASSERT_EQ(0, parse_line("take diamond", &cmd));
     ASSERT_EQ(1, parse_line("reply 2", &cmd));
