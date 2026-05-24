@@ -1,7 +1,6 @@
 /* Inventory implementation (FAT 8+3 basename invent.c for MS-DOS era trees). */
 
 #include "config.h"
-#include "command.h"
 #include "invent.h"
 #include "game.h"
 #include "grendr.h"
@@ -192,10 +191,7 @@ int game_inv_cmd_take(struct GameState *game, int item_arg)
     int room_id;
     int ground_item;
     int slot;
-    int ground_count;
-    int ground_items[CFG_AREA_ITEM_SLOTS];
-    int i;
-
+    
     if (game->mode == GAME_MODE_COMBAT) {
         render_inv_no_rummage_combat();
         return 1;
@@ -203,30 +199,6 @@ int game_inv_cmd_take(struct GameState *game, int item_arg)
     room_id = game->player.room_id;
     if (room_ground_is_empty(game, room_id)) {
         render_inv_take_nothing();
-        return 1;
-    }
-    if (item_arg == CMD_TAKE_ALL) {
-        ground_count = room_ground_count(game, room_id);
-        if (game->bag_count + ground_count > game->bag_capacity) {
-            render_inv_bag_full(game->bag_capacity);
-            return 1;
-        }
-        ground_count = 0;
-        for (slot = 0; slot < CFG_AREA_ITEM_SLOTS; ++slot) {
-            if (game->room_item[room_id][slot] != ITEM_NONE) {
-                ground_items[ground_count] = game->room_item[room_id][slot];
-                ground_count += 1;
-            }
-        }
-        for (i = 0; i < ground_count; ++i) {
-            game_inv_bag_add(game, ground_items[i]);
-        }
-        for (slot = 0; slot < CFG_AREA_ITEM_SLOTS; ++slot) {
-            game->room_item[room_id][slot] = ITEM_NONE;
-        }
-        for (i = 0; i < ground_count; ++i) {
-            render_inv_pickup(item_name(ground_items[i]));
-        }
         return 1;
     }
     slot = room_find_item_slot(game, room_id, item_arg);
@@ -241,6 +213,47 @@ int game_inv_cmd_take(struct GameState *game, int item_arg)
     }
     room_remove_slot_compact(game, room_id, slot);
     render_inv_pickup(item_name(ground_item));
+    return 1;
+}
+
+int game_inv_cmd_take_all(struct GameState *game)
+{
+    int room_id;
+    int ground_count;
+    int ground_items[CFG_AREA_ITEM_SLOTS];
+    int slot;
+    int i;
+
+    if (game->mode == GAME_MODE_COMBAT) {
+        render_inv_no_rummage_combat();
+        return 1;
+    }
+    room_id = game->player.room_id;
+    if (room_ground_is_empty(game, room_id)) {
+        render_inv_take_nothing();
+        return 1;
+    }
+    ground_count = room_ground_count(game, room_id);
+    if (game->bag_count + ground_count > game->bag_capacity) {
+        render_inv_bag_full(game->bag_capacity);
+        return 1;
+    }
+    ground_count = 0;
+    for (slot = 0; slot < CFG_AREA_ITEM_SLOTS; ++slot) {
+        if (game->room_item[room_id][slot] != ITEM_NONE) {
+            ground_items[ground_count] = game->room_item[room_id][slot];
+            ground_count += 1;
+        }
+    }
+    for (i = 0; i < ground_count; ++i) {
+        game_inv_bag_add(game, ground_items[i]);
+    }
+    for (slot = 0; slot < CFG_AREA_ITEM_SLOTS; ++slot) {
+        game->room_item[room_id][slot] = ITEM_NONE;
+    }
+    for (i = 0; i < ground_count; ++i) {
+        render_inv_pickup(item_name(ground_items[i]));
+    }
     return 1;
 }
 

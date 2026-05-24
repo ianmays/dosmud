@@ -19,6 +19,7 @@ int game_inv_bag_remove_index(struct GameState *game, int index);
 int game_inv_bag_remove_item(struct GameState *game, int item_id);
 
 int game_inv_cmd_loot(struct GameState *game);
+int game_inv_cmd_take_all(struct GameState *game);
 int game_inv_cmd_take(struct GameState *game, int item_arg);
 int game_inv_cmd_drop(struct GameState *game, int item_arg);
 int game_inv_cmd_bag(struct GameState *game);
