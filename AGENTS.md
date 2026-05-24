@@ -49,7 +49,7 @@ Plan mode forbids code and repo changes, but GitHub project status updates and i
 - ALWAYS apply appropriate labels (`gameplay`, `non-functional`, `tooling`, `documentation`, etc).
 - ALWAYS add the `agent` label to agent-created Issues.
 - ALWAYS add new Issues to the dosmud GitHub project.
-- If the issue has a **Milestone** listed in [`DEV_PLAN.md`](DEV_PLAN.md) (milestone index): run [milestone-issue-hygiene](.cursor/skills/milestone-issue-hygiene/SKILL.md) in the **same turn** (Size, Priority, blocked-by, issue body scope/Testing, DEV_PLAN row, project stack order). Do **not** skip DEV_PLAN for milestone-tracked issues.
+- If the issue has a **Milestone** listed in [`DEV_PLAN.md`](DEV_PLAN.md) (milestone index): run [milestone-issue-hygiene](.cursor/skills/milestone-issue-hygiene/SKILL.md) in the **same turn** for GitHub metadata (Size, Priority, blocked-by, issue body scope/Testing, project stack order, hygiene comment). Add DEV_PLAN table row + stub via a **docs PR** when execution is allowed; in **plan mode**, defer `DEV_PLAN.md` commits (GitHub-only hygiene). Do **not** skip DEV_PLAN for milestone-tracked issues once a branch is allowed.
 
 ### Status transitions
 
@@ -85,8 +85,8 @@ Before editing for a draft PR, search `DEV_PLAN.md` for the issue (e.g. `#90` or
 
 | Situation | Action |
 |-----------|--------|
-| Issue **already has a section** | Mark that section **Done ✅** (optional PR link). |
-| Issue has a GitHub **Milestone** and that milestone is **already represented** in DEV_PLAN (milestone heading and issue table) | Add an issue section under the matching milestone, then mark **Done ✅**. |
+| Issue **already has a section** (implementation draft PR) | Mark that section **Done ✅** (optional PR link). |
+| New issue with a **Milestone** already represented in DEV_PLAN (milestone heading and issue table) | Add table row + `### [#N](...)` stub via [milestone-issue-hygiene](.cursor/skills/milestone-issue-hygiene/SKILL.md) **docs PR** at create time; mark **Done ✅** only when a draft **implementation** PR opens. |
 | Otherwise (no section; no Milestone; or milestone not in DEV_PLAN) | **Do not** edit DEV_PLAN. Track on the project board and issue/PR. |
 
 New BAU issues without a Milestone typically fall in the last row - do not add them.

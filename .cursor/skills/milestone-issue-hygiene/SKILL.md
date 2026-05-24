@@ -9,7 +9,7 @@ description: >-
 
 # Milestone issue hygiene
 
-Run **in the same turn** as `gh issue create` when the new issue has a GitHub **Milestone** listed in [`DEV_PLAN.md`](../../../DEV_PLAN.md) milestone index (line 38). Also run retroactively when the user asks for **roadmap hygiene for #N**.
+Run when a new issue has a GitHub **Milestone** listed in [`DEV_PLAN.md`](../../../DEV_PLAN.md) milestone index (line 38): **in the same turn** as `gh issue create` (GitHub steps at minimum), with DEV_PLAN commits in a **docs PR** when not in plan mode. Also run retroactively when the user asks for **roadmap hygiene for #N**.
 
 Reactive audits and bulk fixes: [`.cursor/skills/audit-github-devplan/SKILL.md`](../audit-github-devplan/SKILL.md).
 
@@ -17,20 +17,29 @@ Reactive audits and bulk fixes: [`.cursor/skills/audit-github-devplan/SKILL.md`]
 
 - Agent or human created an issue with a DEV_PLAN-tracked milestone
 - User: "roadmap hygiene for #145", "size and prioritize #N", "add #N to DEV_PLAN"
-- **Not** for BAU issues without a milestone, or milestones not in DEV_PLAN (board + issue only)
+- **Not** for BAU issues without a milestone, or milestones not in DEV_PLAN (GitHub metadata only)
 
-## Checklist
+## Timing: plan mode vs DEV_PLAN commits
 
-Copy and track:
+| Phase | GitHub (labels, project Size/Priority, blocked-by, body, stack order, hygiene comment) | `DEV_PLAN.md` git commits |
+|-------|----------------------------------------------------------------------------------------|---------------------------|
+| **Plan mode** | Yes — allowed per [agent-workflow](../../../.cursor/rules/agent-workflow.mdc) | **No** — plan mode forbids repo file edits |
+| **After plan approval** (or retroactive hygiene) | Yes | Yes — **docs PR** from `main` (e.g. `docs-milestone-hygiene`), or combined with implementation PR if user asks |
+
+In plan mode: complete create-time checklist steps **1–5, 7–9** on GitHub only; defer step **6** (DEV_PLAN) until a docs or implementation branch is allowed.
+
+## Create-time checklist
+
+Copy and track (steps **1–9** match headings below):
 
 ```text
-Milestone hygiene for #N:
+Milestone hygiene for #N (create-time):
 - [ ] 1. Labels + project item
 - [ ] 2. Size (XS–XL) matches issue scope in body/title
 - [ ] 3. Priority (P0–P2)
-- [ ] 4. blocked-by edges (REST) + DEV_PLAN dependency prose
+- [ ] 4. blocked-by edges (REST) + DEV_PLAN dependency prose (GitHub + DEV_PLAN when committing)
 - [ ] 5. Issue body: scope, Out of scope, Testing subsection
-- [ ] 6. DEV_PLAN (if milestone section exists)
+- [ ] 6. DEV_PLAN row + stub + mermaid (docs PR when not in plan mode)
 - [ ] 7. Project stack order within Status column
 - [ ] 8. Status column (Backlog default; blocked → stay Backlog)
 - [ ] 9. Hygiene comment on issue (summary + skill link)
@@ -125,20 +134,21 @@ gh issue edit <N> --body-file /path/to/body.md
 
 ### 6. DEV_PLAN.md
 
-**Only** when the issue's milestone already has a section in DEV_PLAN (see [AGENTS.md DEV_PLAN updates](../../../AGENTS.md)).
+**Only** when the issue's milestone already has a section in DEV_PLAN (see [AGENTS.md DEV_PLAN updates](../../../AGENTS.md)). **Skip git edits in plan mode**; open a docs PR when execution is allowed.
 
-Add:
+Add (initial roadmap entry — not **Done ✅**):
 
 1. Row in milestone **table** (Issue | Title | Size)
 2. `### [#N](...) - Title` stub under that milestone
 3. Append issue number to execution-order **mermaid** list for that milestone subgraph (if listed there)
 4. Add `#N` to **Relative size** examples row when representative
+5. New **blocked-by** chains in DEV_PLAN **Dependencies** prose (~line 77)
 
-**Do not** add Done checkmark until a draft PR exists for implementing the issue.
+**Do not** add Done checkmark here — that happens when a draft **implementation** PR opens (see Follow-up below).
 
 **Do not** add new milestone sections or BAU issues without a DEV_PLAN milestone.
 
-Deliver DEV_PLAN edits via a **docs PR** from `main` unless the user asks to combine with a gameplay PR.
+Deliver DEV_PLAN edits via a **docs PR** from `main` (this PR is the model for #145) unless the user asks to combine with a gameplay PR.
 
 ### 7. Project stack order
 
@@ -171,21 +181,7 @@ Reorder **within one Status column only**, not the whole board.
 | Ready for agent pickup (unblocked, prioritized) | **Agent-ready** (human or explicit user request) |
 | Has open blocker | **Backlog** (not Agent-ready) |
 
-### 9. On blocker close
-
-When a blocker issue **closes**, comment on the blocked issue only:
-
-```text
-#<blocker> closed — #<N> unblocked (blocked-by cleared). Still Backlog until prioritized.
-```
-
-Do **not** auto-move to Agent-ready unless the user asks.
-
-### 10. On implementation (later)
-
-When a draft PR opens for the issue: mark DEV_PLAN section **Done** per AGENTS.md (optional PR link). Out of scope for create-time hygiene.
-
-### 11. Hygiene comment
+### 9. Hygiene comment
 
 Post on the issue:
 
@@ -202,6 +198,24 @@ Process: [milestone-issue-hygiene](.cursor/skills/milestone-issue-hygiene/SKILL.
 ```
 
 Adjust paths if commenting from GitHub (link to `main` tree on GitHub for the skill file).
+
+## Follow-up (not in create-time checklist)
+
+These are **not** numbered steps 1–9. Run when the situation arises.
+
+### When a blocker closes
+
+Comment on the blocked issue only:
+
+```text
+#<blocker> closed — #<N> unblocked (blocked-by cleared). Still Backlog until prioritized.
+```
+
+Do **not** auto-move to Agent-ready unless the user asks.
+
+### When implementation starts
+
+When a draft PR opens for the issue: mark the existing DEV_PLAN section **Done ✅** per [AGENTS.md](../../../AGENTS.md) (optional PR link). That is separate from the initial table row + stub added at issue create time.
 
 ## Humans
 

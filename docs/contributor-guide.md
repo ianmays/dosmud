@@ -28,7 +28,7 @@ The repo’s GitHub project uses a **Status** field on issues: **Planning** when
 
 [`DEV_PLAN.md`](../DEV_PLAN.md) is a manually curated roadmap log tied to [GitHub milestones](https://github.com/ianmays/dosmud/milestones). When you open a draft PR: mark **Done ✅** if the issue already has a section; add a section only when the issue's milestone is already represented in DEV_PLAN. Issue **blocked-by** relationships on GitHub express sequencing. It is not a living status tracker (no updates on push or merge).
 
-**New milestone issues:** set **Size** and **Priority** on [project #1](https://github.com/users/ianmays/projects/1), wire **blocked-by** on GitHub, add the DEV_PLAN table row when the milestone is tracked there, and align Backlog stack order. Agents and contributors: [`.cursor/skills/milestone-issue-hygiene/SKILL.md`](../.cursor/skills/milestone-issue-hygiene/SKILL.md). Drift audits: [`.cursor/skills/audit-github-devplan/SKILL.md`](../.cursor/skills/audit-github-devplan/SKILL.md). See [AGENTS.md](../AGENTS.md) **DEV_PLAN updates**.
+**New milestone issues:** set **Size** and **Priority** on [project #1](https://github.com/users/ianmays/projects/1), wire **blocked-by** on GitHub, add the DEV_PLAN table row + stub in a **docs PR** when the milestone is tracked there (agents in plan mode do GitHub steps only), and align Backlog stack order. Mark **Done ✅** in DEV_PLAN when the implementation draft PR opens, not at issue create. Agents and contributors: [`.cursor/skills/milestone-issue-hygiene/SKILL.md`](../.cursor/skills/milestone-issue-hygiene/SKILL.md). Drift audits: [`.cursor/skills/audit-github-devplan/SKILL.md`](../.cursor/skills/audit-github-devplan/SKILL.md). See [AGENTS.md](../AGENTS.md) **DEV_PLAN updates**.
 
 ### After you push
 
