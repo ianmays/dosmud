@@ -1,6 +1,5 @@
 /* Inventory implementation (FAT 8+3 basename invent.c for MS-DOS era trees). */
 
-#include <assert.h>
 #include "config.h"
 #include "command.h"
 #include "invent.h"
@@ -219,10 +218,8 @@ int game_inv_cmd_take(struct GameState *game, int item_arg)
                 ground_count += 1;
             }
         }
-        assert(game->bag_count + ground_count <= game->bag_capacity);
         for (i = 0; i < ground_count; ++i) {
-            game->bag[game->bag_count] = ground_items[i];
-            game->bag_count += 1;
+            game_inv_bag_add(game, ground_items[i]);
         }
         for (slot = 0; slot < CFG_AREA_ITEM_SLOTS; ++slot) {
             game->room_item[room_id][slot] = ITEM_NONE;
