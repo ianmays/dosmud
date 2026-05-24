@@ -34,7 +34,7 @@ Canonical policy: [`AGENTS.md`](../../../AGENTS.md) **DEV_PLAN updates** and DEV
 
 Priority P0→P1→P2 and execution-order stack **will diverge** (e.g. #47 P1 before #104 P0). That is expected unless the user asks to sort by Priority instead. **Size** is independent of both Priority and stack order.
 
-**Board Status vs execution order:** an issue may sit in a different column than its mermaid block suggests (e.g. [#72](https://github.com/ianmays/dosmud/issues/72) in **Parked** while pull order still lists it after #34). Do **not** recommend moving #72 unless the user asks.
+**Board Status (Planning, Backlog, Parked, etc.):** which column an issue sits in changes often. Document layout exceptions only in [`DEV_PLAN.md`](../../../DEV_PLAN.md). Do **not** duplicate per-issue column placement in skills, rules, or audit reports. When checking stack order, compare **execution order** within each Status group the user cares about; do not recommend Status moves unless the user asks or DEV_PLAN documents a target layout.
 
 ## DEV_PLAN edit rules (audit against these)
 
@@ -110,7 +110,7 @@ gh project item-list 1 --owner ianmays --format json --limit 200
 gh project field-list 1 --owner ianmays --format json
 ```
 
-For open roadmap issues, record **Status**, **Priority**, **Size**, and column stack order (GraphQL item list order filtered by Status).
+For open roadmap issues, record **Priority**, **Size**, and stack order within each Status column (GraphQL item list order filtered by Status). Treat DEV_PLAN as canonical for any Status vs pull-order notes.
 
 GraphQL (status + priority on items):
 
@@ -200,9 +200,9 @@ Deliver to the user:
 | Issue | DEV_PLAN Size | Board Size | Action |
 
 ### Project board
-- Backlog / Parked / Agent-ready / In progress stack vs execution order (per Status column)
-- Note if Priority order differs (expected)
-- Do not flag #72 in Parked as an error (intentional; scope TBD)
+- Stack order vs DEV_PLAN execution order (per Status column, if user asked)
+- Priority vs stack order (expected divergence)
+- Status column placement: see DEV_PLAN only; do not flag unless user asks
 
 ### Recommended actions
 - (numbered; do not execute unless user confirms)

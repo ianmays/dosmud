@@ -2,28 +2,13 @@
 
 ## Priority vs stack order (expected mismatch)
 
-Backlog execution order (subset):
+Execution order (subset) vs Priority labels:
 
 ```text
 #71 P0 → #47 P1 → #104 P0 → #100 P1 → … → #52 P2 → #49 P2 → #55 P1 → #7 P2
 ```
 
-#55 is P1 but sits after P2 issues because Content Expansion (#55) follows Advanced Mechanics in the dependency graph. Explain this in the audit report; do not flag as a bug unless the user wanted Priority-sorted columns.
-
-## Board Status vs execution order (#72)
-
-Pull order (m4): `#74, #82, #34, #72, #71, …`
-
-Typical board layout:
-
-| Column | Roadmap items |
-|--------|----------------|
-| In progress | #74 |
-| Agent-ready | #82, #34 (+ BAU #142, #78) |
-| Parked | #72 only |
-| Backlog | #71 through #92 (execution order) |
-
-**Do not** recommend moving #72 out of Parked unless the user asks; placement is TBD.
+#55 is P1 but follows P2 issues because Content Expansion (#55) comes after Advanced Mechanics in the dependency graph. Explain in the audit report; do not flag unless the user wanted Priority-sorted columns.
 
 ## Size audit
 
@@ -84,9 +69,8 @@ Project id: `PVT_kwHOAAzqPM4BW5KP` (verify with `gh project view 1 --owner ianma
 - (none)
 
 ### Project board
-- Backlog: #71 … #92 matches execution order
-- #72 in Parked: intentional (not flagged)
-- Priority not monotonic in Backlog (expected)
+- Stack order matches DEV_PLAN execution order (column checked per user request)
+- Priority not monotonic vs stack (expected)
 
 ### Recommended actions
 - none
