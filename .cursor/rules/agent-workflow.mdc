@@ -21,6 +21,7 @@ When the user asks for the next task, to pick up work, or to start a new issue:
 - GitHub project status transitions (Planning, In progress, Review)
 - Posting implementation plan comments on the linked issue
 - Read-only exploration (`gh issue view`, reading files, `git log`)
+- Milestone issue hygiene **GitHub-only** (project #1 Size/Priority, blocked-by, issue body, stack order, hygiene comment) per [milestone-issue-hygiene](../skills/milestone-issue-hygiene/SKILL.md) when creating or grooming roadmap issues — **not** `DEV_PLAN.md` file commits (those belong in a docs or implementation PR after plan mode)
 
 ### Not allowed in plan mode
 

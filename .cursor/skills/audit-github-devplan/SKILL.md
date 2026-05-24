@@ -11,6 +11,8 @@ disable-model-invocation: true
 
 # Audit GitHub issues and DEV_PLAN
 
+**See also:** proactive setup when creating milestone issues — [milestone-issue-hygiene](../milestone-issue-hygiene/SKILL.md). This skill is for **reactive** audits and reconciliation.
+
 Cross-check **GitHub** (issues, milestones, project #1, blocked-by) against **[`DEV_PLAN.md`](../../../DEV_PLAN.md)**. Report mismatches; apply fixes only when the user asks.
 
 Canonical policy: [`AGENTS.md`](../../../AGENTS.md) **DEV_PLAN updates** and DEV_PLAN **Execution order** section.
@@ -41,7 +43,8 @@ Priority P0→P1→P2 and execution-order stack **will diverge** (e.g. #47 P1 be
 | Rule | Check |
 |------|-------|
 | Do **not** add new issue sections for newly created BAU issues | Grep new `#N` in DEV_PLAN vs issues created recently |
-| Edit DEV_PLAN on draft PR only per AGENTS table | Issue already has section, or milestone already in DEV_PLAN |
+| Initial DEV_PLAN row + stub for milestone-tracked issues | Present after [milestone-issue-hygiene](../milestone-issue-hygiene/SKILL.md) docs PR (create time); **not** Done ✅ yet |
+| **Done ✅** on DEV_PLAN section | Only on draft **implementation** PR per AGENTS table (not on hygiene/docs-only PR) |
 | Milestones are **themes**, not "Phase N" wording | No `Phase 1`–style milestone labels in docs |
 | Harness layers in docs | `unit` / `soak` / snapshot wording; not Phase B/C unless explicitly historical |
 
