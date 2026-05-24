@@ -49,6 +49,7 @@ Plan mode forbids code and repo changes, but GitHub project status updates and i
 - ALWAYS apply appropriate labels (`gameplay`, `non-functional`, `tooling`, `documentation`, etc).
 - ALWAYS add the `agent` label to agent-created Issues.
 - ALWAYS add new Issues to the dosmud GitHub project.
+- If the issue has a **Milestone** listed in [`DEV_PLAN.md`](DEV_PLAN.md) (milestone index): run [milestone-issue-hygiene](.cursor/skills/milestone-issue-hygiene/SKILL.md) in the **same turn** (Size, Priority, blocked-by, issue body scope/Testing, DEV_PLAN row, project stack order). Do **not** skip DEV_PLAN for milestone-tracked issues.
 
 ### Status transitions
 

@@ -52,7 +52,7 @@ Use only when the user asks to fix stack order within a column:
 ```python
 EXEC_ORDER = [74, 82, 34, 72, 71, 47, 16, 104, ...]  # from DEV_PLAN
 rank = {n: i for i, n in enumerate(EXEC_ORDER)}
-# within each Status: sort roadmap items by rank; updateProjectV2ItemPosition
+# within each Status: sort roadmap items by rank; updateProjectV2ItemPosition (afterId)
 ```
 
 Project id: `PVT_kwHOAAzqPM4BW5KP` (verify with `gh project view 1 --owner ianmays --format json`).

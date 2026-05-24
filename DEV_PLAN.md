@@ -53,7 +53,7 @@ flowchart LR
     M9a["104,100,101"]
   end
   subgraph m8 [Advanced_Mechanics]
-    M8["15,128,129,4,5,50,132,102,107,9,31,52,49"]
+    M8["15,128,129,4,5,50,132,102,107,9,31,52,49,145"]
   end
   subgraph m6 [Content_Expansion]
     M6["55,7,8,51,54,76,130,131"]
@@ -74,7 +74,7 @@ flowchart LR
 
 Workflow (milestone 4) can run in parallel with architecture once unblocked. Content (6) and renderer (7) are not gated on all of mechanics (8).
 
-**Dependencies:** native GitHub **blocked-by** links on issues (Relationships sidebar). Key chains: [#71](https://github.com/ianmays/dosmud/issues/71) before [#47](https://github.com/ianmays/dosmud/issues/47) / [#104](https://github.com/ianmays/dosmud/issues/104) / [#48](https://github.com/ianmays/dosmud/issues/48); [#104](https://github.com/ianmays/dosmud/issues/104) before [#100](https://github.com/ianmays/dosmud/issues/100) / [#101](https://github.com/ianmays/dosmud/issues/101) / [#8](https://github.com/ianmays/dosmud/issues/8); [#101](https://github.com/ianmays/dosmud/issues/101) before [#102](https://github.com/ianmays/dosmud/issues/102) / [#107](https://github.com/ianmays/dosmud/issues/107); [#50](https://github.com/ianmays/dosmud/issues/50) before [#132](https://github.com/ianmays/dosmud/issues/132); [#52](https://github.com/ianmays/dosmud/issues/52) before [#49](https://github.com/ianmays/dosmud/issues/49); [#92](https://github.com/ianmays/dosmud/issues/92) after [#16](https://github.com/ianmays/dosmud/issues/16), [#71](https://github.com/ianmays/dosmud/issues/71), [#47](https://github.com/ianmays/dosmud/issues/47).
+**Dependencies:** native GitHub **blocked-by** links on issues (Relationships sidebar). Key chains: [#71](https://github.com/ianmays/dosmud/issues/71) before [#47](https://github.com/ianmays/dosmud/issues/47) / [#104](https://github.com/ianmays/dosmud/issues/104) / [#48](https://github.com/ianmays/dosmud/issues/48); [#104](https://github.com/ianmays/dosmud/issues/104) before [#100](https://github.com/ianmays/dosmud/issues/100) / [#101](https://github.com/ianmays/dosmud/issues/101) / [#8](https://github.com/ianmays/dosmud/issues/8); [#101](https://github.com/ianmays/dosmud/issues/101) before [#102](https://github.com/ianmays/dosmud/issues/102) / [#107](https://github.com/ianmays/dosmud/issues/107); [#50](https://github.com/ianmays/dosmud/issues/50) before [#132](https://github.com/ianmays/dosmud/issues/132); [#52](https://github.com/ianmays/dosmud/issues/52) before [#49](https://github.com/ianmays/dosmud/issues/49); [#142](https://github.com/ianmays/dosmud/issues/142) (fmt render migration) before [#145](https://github.com/ianmays/dosmud/issues/145) (local map viewport); [#92](https://github.com/ianmays/dosmud/issues/92) after [#16](https://github.com/ianmays/dosmud/issues/16), [#71](https://github.com/ianmays/dosmud/issues/71), [#47](https://github.com/ianmays/dosmud/issues/47).
 
 ### Relative size (GitHub project)
 
@@ -84,7 +84,7 @@ Workflow (milestone 4) can run in parallel with architecture once unblocked. Con
 |------|---------|-------------------------|
 | XS | single trivial change | *(none currently)* |
 | S | narrow feature or tooling slice | #4, #72, #82, #128 |
-| M | one subsystem feature or refactor | #5, #7, #9, #31, #49, #51, #54, #74, #100, #101, #102, #129, #130, #131, #132 |
+| M | one subsystem feature or refactor | #5, #7, #9, #31, #49, #51, #54, #74, #100, #101, #102, #129, #130, #131, #132, #145 |
 | L | major mechanism or platform path | #8, #15, #16, #34, #47, #50, #52, #104, #107 |
 | XL | foundational or multi-area epic | #48, #55, #71, #76, #92 |
 
@@ -575,6 +575,7 @@ NOT:
 | [#31](https://github.com/ianmays/dosmud/issues/31) | easy / hard mode | M |
 | [#52](https://github.com/ianmays/dosmud/issues/52) | npc schedules | L |
 | [#49](https://github.com/ianmays/dosmud/issues/49) | quests | M |
+| [#145](https://github.com/ianmays/dosmud/issues/145) | local map viewport (region/world deferred) | M |
 
 ### [#4](https://github.com/ianmays/dosmud/issues/4) - Combat initiative
 
@@ -601,6 +602,10 @@ NOT:
 ### [#128](https://github.com/ianmays/dosmud/issues/128) - Pick up all items
 
 ### [#129](https://github.com/ianmays/dosmud/issues/129) - Interactive looting
+
+### [#145](https://github.com/ianmays/dosmud/issues/145) - Local map viewport (region/world map deferred)
+
+Follow-up to [#142](https://github.com/ianmays/dosmud/issues/142) / PR #144. Player-centered viewport for `map`. Region/world tiers are future issues, not this issue's M scope.
 
 ## [Engine Enhancements](https://github.com/ianmays/dosmud/milestone/9)
 
