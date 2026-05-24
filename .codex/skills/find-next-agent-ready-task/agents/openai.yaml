@@ -1,0 +1,3 @@
+display_name: Find Next Agent Ready Task
+short_description: Find the top Agent-ready issue in the dosmud board and hand it off
+default_prompt: Use the GitHub project board to find the first Agent-ready issue, move it to Planning, and report the issue number, title, and URL.
