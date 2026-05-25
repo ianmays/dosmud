@@ -3,7 +3,9 @@
 #include "grendr.h"
 #include "world.h"
 
-/* Dialogue dispatch maps room identity to a small set of fixed NPC branches. */
+/*
+ * Dialogue dispatch maps room identity to a small set of fixed NPC branches.
+ */
 
 int npc_in_room(int room_id)
 {

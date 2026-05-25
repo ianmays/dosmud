@@ -218,7 +218,7 @@ void world_init(struct World *world)
         }
     }
 
-    /* Keep the pond/orchard pairing when possible so the nearby-biome fiction stays intact. */
+    /* Ensure pond and orchard remain soft-biome neighbors when possible. */
     if (world->rooms[WORLD_ROOM_POND].exits[DIR_EAST] < 0 &&
             world->rooms[WORLD_ROOM_ORCHARD].exits[DIR_WEST] < 0) {
         world_link2(world, WORLD_ROOM_POND, WORLD_ROOM_ORCHARD, DIR_EAST);

@@ -3,7 +3,10 @@
 #include "game.h"
 #include "grendr.h"
 
-/* The wanderer is a separate roaming actor, so its movement and encounter gates stay explicit. */
+/*
+ * The wanderer is a separate roaming actor, so its movement and encounter
+ * gates stay explicit.
+ */
 
 void wanderer_update_separation(struct GameState *game)
 {

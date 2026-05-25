@@ -6,7 +6,10 @@
 #include "items.h"
 #include "world.h"
 
-/* Ambient systems live here: starter ground items, atmospheric focus, and room-scoped incidental events. */
+/*
+ * Ambient systems live here: starter ground items, atmospheric focus, and
+ * room-scoped incidental events.
+ */
 
 void seed_world_items(struct GameState *game)
 {

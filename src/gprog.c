@@ -2,7 +2,10 @@
 #include "game.h"
 #include "grendr.h"
 
-/* Experience progression is centralized so level thresholds and reward side effects stay in sync. */
+/*
+ * Experience progression is centralized so level thresholds and reward side
+ * effects stay in sync.
+ */
 
 int game_xp_to_next_level(int level)
 {

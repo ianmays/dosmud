@@ -2,7 +2,10 @@
 #include "config.h"
 #include "items.h"
 
-/* Item metadata lives in one place so parsing, rendering, and combat bonuses share the same names and values. */
+/*
+ * Item metadata lives in one place so parsing, rendering, and combat bonuses
+ * share the same names and values.
+ */
 
 int item_from_word(char *word)
 {
