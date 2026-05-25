@@ -1,4 +1,7 @@
-/* DOS / Open Watcom platform implementation. */
+/*
+ * DOS / Open Watcom platform glue: keyboard polling, line editing, wall-clock
+ * time, and libc RNG seeding on the DOS side of the boundary.
+ */
 
 #include <stdio.h>
 #include <stdlib.h>

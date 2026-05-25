@@ -4,6 +4,11 @@
 #include <time.h>
 #include "base.h"
 
+/*
+ * Platform boundary: non-blocking input, wall-clock access, and libc RNG
+ * seeding are isolated here so gameplay stays portable.
+ */
+
 /* Poll stdin without blocking. Returns 1 line ready, 0 none, -1 EOF/error. */
 int plat_poll_line(char *out_line, int out_size);
 

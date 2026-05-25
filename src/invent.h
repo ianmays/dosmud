@@ -1,5 +1,7 @@
-/* Inventory module API. Header is invent.h (not game_inventory.h) so the filename
- * stays within classic FAT 8+3; "game_inventory.h" is too long for MS-DOS 5.x-6.x style trees. */
+/*
+ * Inventory module API. The short basename keeps the header compatible with
+ * FAT 8+3 DOS trees while exposing bag, ground, and craft ownership rules.
+ */
 
 #ifndef INVENT_H
 #define INVENT_H

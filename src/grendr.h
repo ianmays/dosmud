@@ -1,7 +1,11 @@
 #ifndef GRENDR_H
 #define GRENDR_H
 
-/* Game render / UI layer. Source files are grendr.* for FAT 8+3 friendly MS-DOS 5.x-6.x trees. */
+/*
+ * Render/UI declarations. grendr.* stays FAT 8+3 friendly and is the only
+ * gameplay-adjacent code allowed to print to stdout.
+ */
+
 /* Stored in GameState.env_focus_kind; keep in sync with game logic. */
 #define GAME_ENV_NONE 0
 #define GAME_ENV_RUSTLE 1

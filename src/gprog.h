@@ -1,4 +1,7 @@
-/* XP and level-up (FAT 8+3: progression basename would exceed eight characters). */
+/*
+ * XP and level-up helpers. The short basename keeps the DOS tree within FAT
+ * 8+3 limits while centralizing progression math.
+ */
 
 #ifndef GPROG_H
 #define GPROG_H

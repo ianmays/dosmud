@@ -16,6 +16,11 @@
 #include "testharn.h"
 #include "th_world.h"
 
+/*
+ * Harness fixtures compose real gameplay APIs into stable starting states so
+ * regression snapshots exercise actual state transitions instead of mocks.
+ */
+
 static void camp_clear_ground(struct GameState *game)
 {
     int s;
@@ -39,6 +44,7 @@ static void fixture_quiet_ticks_on(struct GameState *game)
 
 static void fixture_bandit_base(struct GameState *game)
 {
+    /* Most bandit fixtures start from the same room and clean ground state. */
     game_reset_fixture_baseline(game, WORLD_ROOM_CAMP, 1);
     camp_clear_ground(game);
 }
@@ -80,6 +86,7 @@ static void fixture_bandit_wielded_pick(struct GameState *game)
 
 static void fixture_bandit_combat_turn1(struct GameState *game)
 {
+    /* The combat fixture pins the opening state so the first player reply is reproducible. */
     fixture_bandit_base(game);
     game->weapon_equipped = ITEM_STICK;
     game_set_mode_combat(game);
@@ -187,6 +194,7 @@ static void fixture_at_camp(struct GameState *game)
 
 static void fixture_at_road(struct GameState *game)
 {
+    /* Road fixtures mark only the rooms needed by the snapshot path. */
     game_reset_fixture_baseline(game, WORLD_ROOM_ROAD, 1);
     game->room_explored[WORLD_ROOM_CAMP] = 1;
     game->room_explored[WORLD_ROOM_ROAD] = 1;

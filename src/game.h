@@ -6,6 +6,12 @@
 #include "world.h"
 #include "gprog.h"
 
+/*
+ * game.h defines the orchestration-layer state: GameState owns the persistent
+ * simulation snapshot that command handling, encounters, rendering, and tests
+ * all read or mutate through explicit subsystem APIs.
+ */
+
 enum GameMode {
     GAME_MODE_EXPLORE = 0,
     GAME_MODE_DIALOGUE,

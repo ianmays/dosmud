@@ -3,8 +3,14 @@
 #include "game.h"
 #include "grendr.h"
 
+/*
+ * The wanderer is a separate roaming actor, so its movement and encounter
+ * gates stay explicit.
+ */
+
 void wanderer_update_separation(struct GameState *game)
 {
+    /* Once the player leaves the wanderer room, the re-encounter lock can clear. */
     if (game->player.room_id != game->wanderer_room) {
         game->wanderer_need_separation = 0;
     }
@@ -18,6 +24,7 @@ void wanderer_step(struct GameState *game)
     int i;
     int pick;
 
+    /* Wanderer movement is bounded by the generated graph; invalid room state is a no-op. */
     if (game->world.room_count <= 0) {
         return;
     }
@@ -41,6 +48,7 @@ void wanderer_step(struct GameState *game)
 
 void wanderer_begin_encounter(struct GameState *game)
 {
+    /* The separation flag prevents the same room from retriggering the encounter immediately. */
     if (game_is_busy_dialogue(game)) {
         return;
     }
@@ -67,6 +75,7 @@ int wanderer_cmd_reply(struct GameState *game, int choice)
     game_set_mode_explore(game);
     game->wanderer_active = 0;
     game->wanderer_room = -1;
+    /* Return timing is randomized only after the player resolves the dialogue branch. */
     game->wanderer_return_tick = game->tick + CFG_WANDERER_RETURN_DELAY_BASE +
         (rand() % CFG_WANDERER_RETURN_DELAY_SPREAD);
     return 1;

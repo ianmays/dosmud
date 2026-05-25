@@ -4,6 +4,11 @@
 #include "base.h"
 #include "config.h"
 
+/*
+ * World topology and map projection live here. The room graph is seeded once
+ * and then queried by movement, rendering, and test fixtures.
+ */
+
 enum Direction {
     DIR_NORTH = 0,
     DIR_SOUTH = 1,

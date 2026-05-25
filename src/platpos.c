@@ -1,4 +1,7 @@
-/* POSIX platform implementation (GCC / Linux / WSL). */
+/*
+ * POSIX platform glue for the GCC/Linux/WSL path. This mirrors the DOS
+ * implementation without leaking platform details into core gameplay.
+ */
 
 #include <stdio.h>
 #include <stdlib.h>

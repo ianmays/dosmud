@@ -1,6 +1,10 @@
 #ifndef TXTRES_H
 #define TXTRES_H
 
+/* Static player-facing copy lives here: room text, help text, and dialog
+ * strings stay centralized rather than scattered through gameplay code.
+ */
+
 extern const char *const g_room_names[];
 extern const char *const g_room_descs[];
 extern const char *const g_room_animals[];

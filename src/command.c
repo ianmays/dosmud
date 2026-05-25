@@ -6,6 +6,11 @@
 #include "items.h"
 #include "txtres.h"
 
+/*
+ * command.c turns raw player input into compact command structs. The parser
+ * intentionally stays shallow so command routing can remain deterministic.
+ */
+
 static void lower_inplace(char *s)
 {
     while (*s) {
@@ -16,6 +21,7 @@ static void lower_inplace(char *s)
 
 static int help_topic_from_word(const char *w)
 {
+    /* Help topics mirror the parser vocabulary so built-in help stays stable. */
     if (strcmp(w, "look") == 0 || strcmp(w, "l") == 0) {
         return CMD_HELP_TOPIC_LOOK;
     }
@@ -96,6 +102,7 @@ int command_parse(char *line, struct Command *out_cmd)
     int count;
     int dir;
 
+    /* Two fixed-size words are enough for the command grammar and keep parsing C89-simple. */
     out_cmd->type = CMD_INVALID;
     out_cmd->dir = DIR_NONE;
     out_cmd->arg = 0;

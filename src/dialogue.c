@@ -3,8 +3,13 @@
 #include "grendr.h"
 #include "world.h"
 
+/*
+ * Dialogue dispatch maps room identity to a small set of fixed NPC branches.
+ */
+
 int npc_in_room(int room_id)
 {
+    /* These room IDs are stable content hooks, not arbitrary checks. */
     if (room_id == WORLD_ROOM_TOWER) return 1;  /* watchman */
     if (room_id == WORLD_ROOM_ORCHARD) return 2;/* herbalist */
     if (room_id == WORLD_ROOM_CATACOMBS) return 3; /* archivist */
@@ -26,6 +31,7 @@ int dialogue_cmd_reply(struct GameState *game, int choice)
     if (game->mode != GAME_MODE_DIALOGUE) {
         return 0;
     }
+    /* Each dialogue kind resolves immediately back to explore after one reply. */
     if (game->dialogue == DIALOGUE_NPC_FROG) {
         if (choice < 1 || choice > 3) {
             render_msg_pick_123();
@@ -55,6 +61,7 @@ int dialogue_cmd_reply(struct GameState *game, int choice)
 
 int dialogue_cmd_talk(struct GameState *game)
 {
+    /* Talk is blocked while the player is already in an enemy or wanderer branch. */
     if (game->mode == GAME_MODE_DIALOGUE && game->dialogue == DIALOGUE_ENEMY) {
         render_msg_bandit_blocks_talk();
         return 1;

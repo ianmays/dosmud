@@ -3,6 +3,11 @@
 #include "world.h"
 #include "txtres.h"
 
+/*
+ * world.c owns the generated room graph and its coordinate projection for the
+ * local map display. It keeps the topology deterministic for a given seed.
+ */
+
 static void room_set_meta(struct Room *room, const char *name, const char *desc,
     const char *animal, const char *animal_noise)
 {
@@ -43,6 +48,7 @@ static void world_assign_cell(struct World *world, int rid, int x, int y)
     int ox;
     int oy;
     int bump;
+    /* The map projection prefers unique cells so the explored view does not overlap. */
     ox = x;
     oy = y;
     bump = 0;
@@ -78,6 +84,7 @@ static void world_assign_cell(struct World *world, int rid, int x, int y)
 static void world_link2(struct World *world, int a, int b, int dir_from_a)
 {
     int reverse;
+    /* Links are symmetric; map coordinates are propagated from whichever side is already placed. */
     if (dir_from_a == DIR_NORTH) reverse = DIR_SOUTH;
     else if (dir_from_a == DIR_SOUTH) reverse = DIR_NORTH;
     else if (dir_from_a == DIR_EAST) reverse = DIR_WEST;
@@ -106,6 +113,7 @@ static int random_slot(struct Room *room)
     int dirs[CFG_DIR_MAX];
     int n;
     int i;
+    /* Choose only from currently open exits so generation preserves sparse branching. */
     n = 0;
     for (i = 0; i < DIR_NONE; ++i) {
         if (room->exits[i] < 0) {
@@ -126,6 +134,7 @@ void world_init(struct World *world)
     int path_len;
     int dir;
 
+    /* Seeded world generation is order-sensitive, so the shuffle and link pass stay explicit. */
     world->room_count = CFG_ROOM_MAX;
 
     for (i = 0; i < CFG_ROOM_MAX; ++i) {
@@ -240,7 +249,7 @@ void world_init(struct World *world)
 }
 
 #ifdef TEST_MODE
-/* Apply harness-supplied room graph (see world_apply_graph). */
+/* Apply a harness-supplied graph without re-running seeded generation. */
 
 static void world_reset_graph(struct World *world)
 {
@@ -285,6 +294,7 @@ void world_apply_graph(struct World *world,
 
 void world_step(struct World *world, u32 tick)
 {
+    /* World stepping is a hook today; keeping it explicit preserves the call boundary. */
     (void)world;
     (void)tick;
 }
