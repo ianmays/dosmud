@@ -79,15 +79,7 @@ function Start-DosSession {
         $dosArgs += @('-c', $cmd)
     }
     if ($Wait) {
-        $quotedArgs = @()
-        foreach ($arg in $dosArgs) {
-            if ($arg -match '[\s"]') {
-                $quotedArgs += '"' + ($arg -replace '"', '\"') + '"'
-            } else {
-                $quotedArgs += $arg
-            }
-        }
-        $proc = Start-Process -FilePath "$dospath$dosexecutable" -ArgumentList ($quotedArgs -join ' ') -Wait -PassThru
+        $proc = Start-Process -FilePath "$dospath$dosexecutable" -ArgumentList $dosArgs -Wait -PassThru
         return $proc.ExitCode
     }
     & "$dospath$dosexecutable" @dosArgs

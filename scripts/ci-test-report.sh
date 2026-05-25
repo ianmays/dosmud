@@ -60,6 +60,14 @@ append_result_row() {
     echo "| $1 | $2 | $3 |" >> "$REPORT"
 }
 
+run_build_step() {
+    duration_var="$1"
+    name="$2"
+    shift 2
+    run_step "$name" "$@" || true
+    eval "$duration_var=\$last_duration"
+}
+
 run_step() {
     name="$1"
     shift
@@ -159,41 +167,10 @@ write_header
 : > "$LOG"
 
 run_step "check-layers" make check-layers || true
-if run_timed "build (release)" make build; then
-    build_release_duration=$last_duration
-    append_result_row "build (release)" "pass" "$(format_duration "$last_duration")"
-else
-    build_release_duration=$last_duration
-    append_result_row "build (release)" "**fail**" "$(format_duration "$last_duration")"
-    failed=1
-fi
-
-if run_timed "build (TEST_MODE)" make test; then
-    build_test_duration=$last_duration
-    append_result_row "build (TEST_MODE)" "pass" "$(format_duration "$last_duration")"
-else
-    build_test_duration=$last_duration
-    append_result_row "build (TEST_MODE)" "**fail**" "$(format_duration "$last_duration")"
-    failed=1
-fi
-
-if run_timed "build unit binary" make build-unit; then
-    build_unit_duration=$last_duration
-    append_result_row "build unit binary" "pass" "$(format_duration "$last_duration")"
-else
-    build_unit_duration=$last_duration
-    append_result_row "build unit binary" "**fail**" "$(format_duration "$last_duration")"
-    failed=1
-fi
-
-if run_timed "build soak binary" make build-soak; then
-    build_soak_duration=$last_duration
-    append_result_row "build soak binary" "pass" "$(format_duration "$last_duration")"
-else
-    build_soak_duration=$last_duration
-    append_result_row "build soak binary" "**fail**" "$(format_duration "$last_duration")"
-    failed=1
-fi
+run_build_step build_release_duration "build (release)" make build
+run_build_step build_test_duration "build (TEST_MODE)" make test
+run_build_step build_unit_duration "build unit binary" make build-unit
+run_build_step build_soak_duration "build soak binary" make build-soak
 
 if run_timed "snapshots" make snapshot-run; then
     append_snapshots_row "$(format_duration "$last_duration")"
