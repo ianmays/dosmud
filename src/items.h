@@ -1,6 +1,10 @@
 #ifndef ITEMS_H
 #define ITEMS_H
 
+/* Item IDs stay centralized so parsing, combat, inventory, and text use the
+ * same compact vocabulary.
+ */
+
 #define ITEM_NONE 0
 #define ITEM_BERRY 1
 #define ITEM_STICK 2

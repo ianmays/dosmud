@@ -12,6 +12,11 @@
 #include "testharn.h"
 #endif
 
+/*
+ * main.c owns shell-level startup, CLI parsing, polling, and the outer loop
+ * that bridges platform I/O to game orchestration.
+ */
+
 static void print_prompt(void)
 {
     printf("%s", TXT_MAIN_PROMPT);

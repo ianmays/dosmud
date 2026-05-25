@@ -1,4 +1,7 @@
-/* Pure presentation formatters (no terminal I/O). */
+/*
+ * Pure presentation formatters: build player-facing strings into caller
+ * buffers, but never print or mutate game state.
+ */
 
 #include "config.h"
 #include "fmt.h"

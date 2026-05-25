@@ -1,4 +1,7 @@
-/* Ambient world feel and room item seeding (FAT 8+3: atmosphere basename too long). */
+/*
+ * Ambient world feel and room item seeding. The shorter basename keeps the
+ * DOS/OpenWatcom tree compatible with FAT 8+3 limits.
+ */
 
 #ifndef GATMOS_H
 #define GATMOS_H

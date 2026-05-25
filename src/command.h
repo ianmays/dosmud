@@ -4,6 +4,11 @@
 #include "config.h"
 #include "world.h"
 
+/*
+ * Command parsing keeps raw input separate from execution. CMD_* values and
+ * help-topic constants are shared with game routing and help text.
+ */
+
 /* Passed in Command.arg when type is CMD_HELP. */
 #define CMD_HELP_TOPIC_GENERAL 0
 #define CMD_HELP_TOPIC_UNKNOWN (-1)

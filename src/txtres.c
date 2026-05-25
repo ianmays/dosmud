@@ -2,6 +2,11 @@
 #include "config.h"
 #include "world.h"
 
+/*
+ * txtres is the single home for static player-facing copy. It keeps prose in
+ * one place so rendering and gameplay code do not scatter literals.
+ */
+
 const char *const g_room_names[CFG_ROOM_MAX] = {
     "Camp", "Road", "Pond", "Forest", "Ruins", "Stream", "Cliff", "Marsh",
     "Grove", "Bridge", "Catacombs", "Meadow", "Canyon", "Tower", "Orchard", "Cave"

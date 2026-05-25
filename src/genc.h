@@ -1,4 +1,7 @@
-/* Ambient bandit encounter entry (FAT 8+3: encounter basename too long). */
+/*
+ * Enemy encounter entry points. The short basename keeps the DOS tree FAT
+ * 8+3 compatible while the logic stays separate from combat.
+ */
 
 #ifndef GENC_H
 #define GENC_H

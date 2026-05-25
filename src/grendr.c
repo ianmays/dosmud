@@ -35,6 +35,11 @@ static void render_emit(const char *fmt, ...)
 #define RENDER_PRINTF render_emit
 
 /*
+ * grendr is the only gameplay-adjacent module that prints: it wraps fmt/text
+ * resources, adds spacing tiers, and keeps ASCII art out of core gameplay.
+ */
+
+/*
  * Newline tiers: txtres strings end with \n only; grendr owns gaps.
  * render_gap = scene/paragraph break; render_paragraph = gap + copy.
  */

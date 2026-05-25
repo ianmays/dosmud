@@ -3,6 +3,11 @@
 
 struct GameState;
 
+/*
+ * fmt functions build UI text into caller-owned buffers so grendr can print
+ * deterministic strings without mixing gameplay logic into terminal I/O.
+ */
+
 /* Write aggregated bag item list to buf (e.g. " berry [2], stick").
  * bag_count==0 writes "" and returns 0.
  * Returns bytes written excluding NUL, or -1 if bufsize too small. */
