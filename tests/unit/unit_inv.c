@@ -88,6 +88,21 @@ TEST invent_take_all_bag_full(void)
     PASS();
 }
 
+TEST invent_take_all_nothing(void)
+{
+    struct GameState game;
+    int slot;
+
+    unit_game_fresh(&game, 20u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    for (slot = 0; slot < CFG_AREA_ITEM_SLOTS; ++slot) {
+        game.room_item[WORLD_ROOM_CAMP][slot] = ITEM_NONE;
+    }
+    ASSERT_EQ(1, game_inv_cmd_take_all(&game));
+    ASSERT_EQ(0, game.bag_count);
+    PASS();
+}
+
 TEST invent_take_combat_blocked(void)
 {
     struct GameState game;
@@ -294,6 +309,7 @@ SUITE(invent) {
     RUN_TEST(invent_take_drop_paths);
     RUN_TEST(invent_take_all_paths);
     RUN_TEST(invent_take_all_bag_full);
+    RUN_TEST(invent_take_all_nothing);
     RUN_TEST(invent_take_combat_blocked);
     RUN_TEST(invent_eat_and_use);
     RUN_TEST(invent_eat_heals_damaged);

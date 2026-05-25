@@ -20,7 +20,7 @@ Purpose:
 - `make build`: native GCC development build
 - `make check-layers`: core/render boundary guard (no `printf` in `src/*.c` except `main.c`, `grendr.c`, and the platform file `platpos.c` or `platdos.c`)
 - `make test`: strict deterministic compile (`-Werror`, `-DTEST_MODE`, `-g -O0`); does not run `check-layers`
-- `make test-run`: builds the test binary (`make test`), then runs every name in `SNAPSHOT_TESTS` plus `seed_cli` (CLI `--seed` on `smoke.input`; see [Snapshot test files](#snapshot-test-files)). Each step prints `snapshot: <name>`. Finishes with `snapshot tests passed: N/M` (for example `63/63` snapshots plus `seed_cli`, 64 steps total).
+- `make test-run`: builds the test binary (`make test`), then runs every name in `SNAPSHOT_TESTS` plus `seed_cli` (CLI `--seed` on `smoke.input`; see [Snapshot test files](#snapshot-test-files)). Each step prints `snapshot: <name>`. Finishes with `snapshot tests passed: N/M` (for example `64/64` snapshots plus `seed_cli`, 65 steps total).
 - `make test-unit`: builds and runs the greatest unit suite (`tests/unit/build/dosmud_unit`, `TEST_MODE` only; not linked into release `dosmud`)
 - `make test-soak`: builds and runs long-run soak/stress checks (`tests/soak/build/dosmud_soak`; separate from unit tests)
 
