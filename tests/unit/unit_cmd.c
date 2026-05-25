@@ -65,6 +65,15 @@ TEST command_parse_items_and_reply(void)
     ASSERT_EQ(1, parse_line("take stick", &cmd));
     ASSERT_EQ(CMD_TAKE, cmd.type);
     ASSERT_EQ(ITEM_STICK, cmd.arg);
+    ASSERT_EQ(1, parse_line("take all", &cmd));
+    ASSERT_EQ(CMD_TAKE, cmd.type);
+    ASSERT_EQ(CMD_TAKE_ALL, cmd.arg);
+    ASSERT_EQ(1, parse_line("get all", &cmd));
+    ASSERT_EQ(CMD_TAKE, cmd.type);
+    ASSERT_EQ(CMD_TAKE_ALL, cmd.arg);
+    ASSERT_EQ(1, parse_line("pickup all", &cmd));
+    ASSERT_EQ(CMD_TAKE, cmd.type);
+    ASSERT_EQ(CMD_TAKE_ALL, cmd.arg);
     ASSERT_EQ(0, parse_line("take", &cmd));
     ASSERT_EQ(0, parse_line("take diamond", &cmd));
     ASSERT_EQ(1, parse_line("reply 2", &cmd));
@@ -122,6 +131,7 @@ TEST command_help_line_topics(void)
     ASSERT_STR_EQ(command_help_text(), command_help_line(CMD_HELP_TOPIC_GENERAL));
     ASSERT(strcmp(command_help_line(CMD_HELP_TOPIC_LOOK),
             command_help_line(CMD_HELP_TOPIC_UNKNOWN)) != 0);
+    ASSERT(strstr(command_help_line(CMD_HELP_TOPIC_TAKE), "take all") != 0);
     PASS();
 }
 

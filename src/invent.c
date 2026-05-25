@@ -202,6 +202,46 @@ int game_inv_cmd_take(struct GameState *game, int item_arg)
     return 1;
 }
 
+int game_inv_cmd_take_all(struct GameState *game)
+{
+    int room_id;
+    int ground_count;
+    int ground_items[CFG_AREA_ITEM_SLOTS];
+    int slot;
+    int i;
+
+    if (game->mode == GAME_MODE_COMBAT) {
+        render_inv_no_rummage_combat();
+        return 1;
+    }
+    room_id = game->player.room_id;
+    ground_count = 0;
+    for (slot = 0; slot < CFG_AREA_ITEM_SLOTS; ++slot) {
+        if (game->room_item[room_id][slot] != ITEM_NONE) {
+            ground_items[ground_count] = game->room_item[room_id][slot];
+            ground_count += 1;
+        }
+    }
+    if (ground_count == 0) {
+        render_inv_take_nothing();
+        return 1;
+    }
+    if (game->bag_count + ground_count > game->bag_capacity) {
+        render_inv_bag_full(game->bag_capacity);
+        return 1;
+    }
+    for (i = 0; i < ground_count; ++i) {
+        game_inv_bag_add(game, ground_items[i]);
+    }
+    for (slot = 0; slot < CFG_AREA_ITEM_SLOTS; ++slot) {
+        game->room_item[room_id][slot] = ITEM_NONE;
+    }
+    for (i = 0; i < ground_count; ++i) {
+        render_inv_pickup(item_name(ground_items[i]));
+    }
+    return 1;
+}
+
 int game_inv_cmd_drop(struct GameState *game, int item_arg)
 {
     int room_id;

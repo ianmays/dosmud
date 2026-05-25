@@ -236,6 +236,29 @@ static void fixture_quiet_explore(struct GameState *game)
     fixture_quiet_ticks_on(game);
 }
 
+static void fixture_quiet_camp_dual_ground(struct GameState *game)
+{
+    game_reset_fixture_baseline(game, WORLD_ROOM_CAMP, 0);
+    camp_clear_ground(game);
+    game->room_item[WORLD_ROOM_CAMP][0] = ITEM_STICK;
+    game->room_item[WORLD_ROOM_CAMP][1] = ITEM_REED;
+    game->room_explored[WORLD_ROOM_CAMP] = 1;
+    fixture_quiet_ticks_on(game);
+}
+
+static int fixture_quiet_camp_dual_ground_full_bag(struct GameState *game)
+{
+    int i;
+
+    fixture_quiet_camp_dual_ground(game);
+    for (i = 0; i < game->bag_capacity; ++i) {
+        if (!game_inv_bag_add(game, ITEM_BERRY)) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
 static void fixture_wanderer_dialogue(struct GameState *game)
 {
     game_reset_fixture_baseline(game, WORLD_ROOM_ROAD, 0);
@@ -535,6 +558,16 @@ int testharn_apply(struct GameState *game, const char *line)
     }
     if (fixture_name_is("quiet_explore", name)) {
         fixture_quiet_explore(game);
+        return 1;
+    }
+    if (fixture_name_is("quiet_camp_dual_ground", name)) {
+        fixture_quiet_camp_dual_ground(game);
+        return 1;
+    }
+    if (fixture_name_is("quiet_camp_dual_ground_full_bag", name)) {
+        if (!fixture_quiet_camp_dual_ground_full_bag(game)) {
+            return -2;
+        }
         return 1;
     }
     if (fixture_name_is("wanderer_dialogue", name)) {

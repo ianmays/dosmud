@@ -288,6 +288,9 @@ static int game_cmd_inventory(struct GameState *game, struct Command *cmd)
         return game_inv_cmd_loot(game);
     }
     if (cmd->type == CMD_TAKE) {
+        if (cmd->arg == CMD_TAKE_ALL) {
+            return game_inv_cmd_take_all(game);
+        }
         return game_inv_cmd_take(game, cmd->arg);
     }
     if (cmd->type == CMD_DROP) {
