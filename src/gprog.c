@@ -2,6 +2,8 @@
 #include "game.h"
 #include "grendr.h"
 
+/* Experience progression is centralized so level thresholds and reward side effects stay in sync. */
+
 int game_xp_to_next_level(int level)
 {
     return CFG_XP_LEVEL_BASE + ((level - 1) * CFG_XP_LEVEL_PER_LEVEL);
@@ -10,6 +12,7 @@ int game_xp_to_next_level(int level)
 void progression_gain_xp(struct GameState *game, int amount)
 {
     int needed;
+    /* Multiple level-ups can happen in one grant, so the threshold is recomputed each loop. */
     game->xp += amount;
     render_xp_gained(amount);
     needed = game_xp_to_next_level(game->level);

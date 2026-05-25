@@ -2,8 +2,11 @@
 #include "config.h"
 #include "items.h"
 
+/* Item metadata lives in one place so parsing, rendering, and combat bonuses share the same names and values. */
+
 int item_from_word(char *word)
 {
+    /* The parser only needs a narrow vocabulary, so item names stay centralized here. */
     if (strcmp(word, "berry") == 0 || strcmp(word, "berries") == 0) return ITEM_BERRY;
     if (strcmp(word, "stick") == 0) return ITEM_STICK;
     if (strcmp(word, "reed") == 0 || strcmp(word, "reeds") == 0) return ITEM_REED;
@@ -53,6 +56,7 @@ int item_is_weapon(int item_id)
 
 int item_weapon_damage_bonus(int item_id)
 {
+    /* Weapon bonuses are kept with item metadata instead of being spread across combat code. */
     if (item_id == ITEM_STICK) return CFG_WEAPON_STICK_DAMAGE_BONUS;
     if (item_id == ITEM_SPEAR) return CFG_WEAPON_SPEAR_DAMAGE_BONUS;
     return 0;

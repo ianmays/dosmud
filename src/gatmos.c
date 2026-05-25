@@ -6,10 +6,13 @@
 #include "items.h"
 #include "world.h"
 
+/* Ambient systems live here: starter ground items, atmospheric focus, and room-scoped incidental events. */
+
 void seed_world_items(struct GameState *game)
 {
     int i;
     int s;
+    /* Start from a clean room-item grid so seeded placement stays deterministic. */
     for (i = 0; i < CFG_ROOM_MAX; ++i) {
         for (s = 0; s < CFG_AREA_ITEM_SLOTS; ++s) {
             game->room_item[i][s] = ITEM_NONE;
@@ -34,6 +37,7 @@ static void maybe_spawn_room_item(struct GameState *game)
     int roll;
     int spawned;
 
+    /* Random ground items only appear when the current room still has a free slot. */
     room_id = game->player.room_id;
     if (room_id < 0 || room_id >= game->world.room_count) {
         return;
@@ -73,6 +77,7 @@ void maybe_emit_atmosphere(struct GameState *game)
 {
     int roll;
 
+    /* Environmental focus is a short-lived state machine keyed by room, kind, and expiry tick. */
     if (game->env_focus_active && game->tick >= game->env_focus_expires_tick) {
         game->env_focus_active = 0;
         game->env_focus_room = -1;
@@ -134,6 +139,7 @@ void maybe_emit_atmosphere(struct GameState *game)
 
 int gatmos_cmd_inspect(struct GameState *game, int item_arg)
 {
+    /* Inspection only succeeds while the current room still has an active ambient focus. */
     if (!game->env_focus_active ||
             game->env_focus_room != game->player.room_id ||
             game->tick >= game->env_focus_expires_tick) {

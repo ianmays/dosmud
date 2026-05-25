@@ -9,6 +9,12 @@
 #include "genc.h"
 #include "wanderer.h"
 
+/*
+ * game.c owns top-level orchestration: it routes commands, advances ticks,
+ * and switches between explore, dialogue, and combat without embedding slice
+ * rules in the wrong layer.
+ */
+
 void game_set_mode_explore(struct GameState *game)
 {
     game->mode = GAME_MODE_EXPLORE;
@@ -32,6 +38,7 @@ void game_set_mode_combat(struct GameState *game)
 
 int game_is_busy_dialogue(struct GameState *game)
 {
+    /* Any non-explore mode suppresses ambient encounters and background prompts. */
     if (game->mode != GAME_MODE_EXPLORE) {
         return 1;
     }
@@ -69,6 +76,7 @@ static void reset_mutable_state(struct GameState *game, int room_id, u32 tick)
 {
     int i;
 
+    /* Reset only per-run state here; world topology is rebuilt separately. */
     game_set_mode_explore(game);
     game->player.room_id = room_id;
     game->tick = tick;
@@ -192,6 +200,11 @@ int game_roll_percent(struct GameState *game)
 
 static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd)
 {
+    /*
+     * Combat and enemy handover are narrow modal states; only the small
+     * command set that preserves the branch is allowed until the player
+     * resolves it.
+     */
     if (game->mode == GAME_MODE_COMBAT &&
             cmd->type != CMD_REPLY &&
             cmd->type != CMD_LOOK &&
@@ -378,10 +391,16 @@ static void advance_world_tick(struct GameState *game, int wanderer_moves_first)
 {
     int old_wanderer_room;
 
+    /*
+     * Tick order is deliberate: advance the wanderer and world clock, then
+     * emit ambient events, then consider random encounters so one input
+     * produces the same visible sequence everywhere.
+     */
     game->tick += 1;
     wanderer_update_separation(game);
 #ifdef TEST_MODE
     if (game->test_quiet_ticks) {
+        /* Quiet fixtures keep time moving but suppress ambient randomness. */
         world_step(&game->world, game->tick);
         return;
     }

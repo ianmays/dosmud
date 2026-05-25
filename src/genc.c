@@ -5,6 +5,8 @@
 #include "invent.h"
 #include "items.h"
 
+/* Enemy encounter handling stays separate from combat so the dialogue branch can gate handover and intimidation. */
+
 void enemy_begin_encounter(struct GameState *game)
 {
     if (game_is_busy_dialogue(game)) {
@@ -38,6 +40,7 @@ int genc_cmd_give(struct GameState *game, int item_arg)
 
 int genc_cmd_reply(struct GameState *game, int choice)
 {
+    /* Reply choice decides whether the enemy opens combat, asks for tribute, or reacts to intimidation. */
     if (choice == 1) {
         combat_start(game);
         return 1;

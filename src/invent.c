@@ -1,4 +1,7 @@
-/* Inventory implementation (FAT 8+3 basename invent.c for MS-DOS era trees). */
+/*
+ * Inventory and ground-slot ownership live here; the module keeps bag, hand,
+ * and room storage explicit so the DOS-sized buffers stay predictable.
+ */
 
 #include "config.h"
 #include "invent.h"
@@ -65,6 +68,7 @@ static int room_first_free_slot(struct GameState *game, int room_id)
 static void room_remove_slot_compact(struct GameState *game, int room_id, int slot)
 {
     int s;
+    /* Compact after removal so ground slots stay dense and deterministic. */
     for (s = slot; s < CFG_AREA_ITEM_SLOTS - 1; ++s) {
         game->room_item[room_id][s] = game->room_item[room_id][s + 1];
     }
@@ -97,6 +101,7 @@ int game_inv_player_has_item(struct GameState *game, int item_id)
 static int game_inv_bag_remove_index_transfer(struct GameState *game, int index)
 {
     int i;
+    /* Dropping or wielding can move an item out of the bag without losing ownership. */
     if (index < 0 || index >= game->bag_count) {
         return 0;
     }
@@ -349,6 +354,7 @@ int game_inv_cmd_use(struct GameState *game, int item_arg)
 /* Remove one ingredient from bag if present, else from the wielded slot. */
 static int craft_consume_one(struct GameState *game, int item_id)
 {
+    /* Crafting can consume a held weapon or a bag item; the source slot matters. */
     if (game_inv_bag_find_index(game, item_id) >= 0) {
         return game_inv_bag_remove_item(game, item_id);
     }

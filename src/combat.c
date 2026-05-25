@@ -6,6 +6,11 @@
 #include "items.h"
 #include "gprog.h"
 
+/*
+ * combat.c resolves the short battle loop only: it applies a reply, advances
+ * the enemy turn, and converts a defeat into corpse state plus XP.
+ */
+
 int combat_player_attack_bonus(const struct GameState *game)
 {
     int bonus;
@@ -20,6 +25,7 @@ int combat_player_attack_bonus(const struct GameState *game)
 static void combat_enemy_turn(struct GameState *game)
 {
     int dmg;
+    /* The enemy turn happens only after a non-terminal player reply. */
     dmg = CFG_COMBAT_ENEMY_DMG_BASE + game_roll_spread(game, CFG_COMBAT_ENEMY_DMG_SPREAD);
     if (game->combat.defending) {
         dmg -= CFG_COMBAT_DEFEND_DAMAGE_REDUCTION;
@@ -76,6 +82,7 @@ void combat_resolve_reply(struct GameState *game, int choice)
     }
 
     if (game->combat.enemy_hp <= 0) {
+        /* Defeat is resolved immediately so corpse state is fixed on the same turn. */
         game->combat.enemy_hp = 0;
         game_set_mode_explore(game);
         render_combat_bandit_defeated();
