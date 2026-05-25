@@ -65,6 +65,44 @@ function Format-ElapsedSeconds {
     "{0}.{1:D3}s" -f [Math]::Floor($Duration.TotalSeconds), $Duration.Milliseconds
 }
 
+function Convert-ToWindowsCommandLineArgument {
+    param([string]$Argument)
+    if ($Argument -notmatch '[\s"]') {
+        return $Argument
+    }
+
+    $builder = New-Object System.Text.StringBuilder
+    $backslashCount = 0
+    [void]$builder.Append('"')
+
+    foreach ($ch in $Argument.ToCharArray()) {
+        if ($ch -eq '\') {
+            $backslashCount++
+            continue
+        }
+        if ($ch -eq '"') {
+            if ($backslashCount -gt 0) {
+                [void]$builder.Append(('\' * ($backslashCount * 2)))
+            }
+            [void]$builder.Append('\')
+            [void]$builder.Append('"')
+            $backslashCount = 0
+            continue
+        }
+        if ($backslashCount -gt 0) {
+            [void]$builder.Append(('\' * $backslashCount))
+            $backslashCount = 0
+        }
+        [void]$builder.Append($ch)
+    }
+
+    if ($backslashCount -gt 0) {
+        [void]$builder.Append(('\' * ($backslashCount * 2)))
+    }
+    [void]$builder.Append('"')
+    $builder.ToString()
+}
+
 function Start-DosSession {
     param(
         [string[]]$Commands,
@@ -79,7 +117,10 @@ function Start-DosSession {
         $dosArgs += @('-c', $cmd)
     }
     if ($Wait) {
-        $proc = Start-Process -FilePath "$dospath$dosexecutable" -ArgumentList $dosArgs -Wait -PassThru
+        # Start-Process on Windows PowerShell flattens arrays into one command line.
+        # Build that command line explicitly so mount/cd/build args survive spaces safely.
+        $commandLine = ($dosArgs | ForEach-Object { Convert-ToWindowsCommandLineArgument $_ }) -join ' '
+        $proc = Start-Process -FilePath "$dospath$dosexecutable" -ArgumentList $commandLine -Wait -PassThru
         return $proc.ExitCode
     }
     & "$dospath$dosexecutable" @dosArgs
