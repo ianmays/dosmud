@@ -5,7 +5,10 @@
 #include "invent.h"
 #include "items.h"
 
-/* Enemy encounter handling stays separate from combat so the dialogue branch can gate handover and intimidation. */
+/*
+ * Enemy encounter handling stays separate from combat so the dialogue
+ * branch can gate handover and intimidation.
+ */
 
 void enemy_begin_encounter(struct GameState *game)
 {

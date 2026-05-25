@@ -354,7 +354,6 @@ int game_inv_cmd_use(struct GameState *game, int item_arg)
 /* Remove one ingredient from bag if present, else from the wielded slot. */
 static int craft_consume_one(struct GameState *game, int item_id)
 {
-    /* Crafting can consume a held weapon or a bag item; the source slot matters. */
     if (game_inv_bag_find_index(game, item_id) >= 0) {
         return game_inv_bag_remove_item(game, item_id);
     }
