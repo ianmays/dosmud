@@ -4,6 +4,7 @@
 REPORT=ci-test-report.md
 LOG=ci-test.log
 failed=0
+build_release_duration=
 build_test_duration=
 build_unit_duration=
 build_soak_duration=
@@ -145,6 +146,7 @@ append_build_timing_section() {
         echo ""
         echo "| Build target | Duration |"
         echo "|--------------|----------|"
+        echo "| make build | $(format_duration "$build_release_duration") |"
         echo "| make test | $(format_duration "$build_test_duration") |"
         echo "| make build-unit | $(format_duration "$build_unit_duration") |"
         echo "| make build-soak | $(format_duration "$build_soak_duration") |"
@@ -157,6 +159,15 @@ write_header
 : > "$LOG"
 
 run_step "check-layers" make check-layers || true
+if run_timed "build (release)" make build; then
+    build_release_duration=$last_duration
+    append_result_row "build (release)" "pass" "$(format_duration "$last_duration")"
+else
+    build_release_duration=$last_duration
+    append_result_row "build (release)" "**fail**" "$(format_duration "$last_duration")"
+    failed=1
+fi
+
 if run_timed "build (TEST_MODE)" make test; then
     build_test_duration=$last_duration
     append_result_row "build (TEST_MODE)" "pass" "$(format_duration "$last_duration")"
