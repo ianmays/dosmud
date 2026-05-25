@@ -8,8 +8,10 @@ Run from project root:
 
 ```sh
 make build
+make run
 make check-layers
 make test
+make test-run-bin
 make test-run
 make test-unit
 make test-soak
@@ -17,9 +19,11 @@ make test-soak
 
 Purpose:
 
-- `make build`: native GCC development build
+- `make build`: native GCC development build; prints `elapsed: <seconds>` after the compile/link step
+- `make run`: builds the native release binary if needed, then launches it; pass `SEED=<unsigned>` to forward `--seed`
 - `make check-layers`: core/render boundary guard (no `printf` in `src/*.c` except `main.c`, `grendr.c`, and the platform file `platpos.c` or `platdos.c`)
-- `make test`: strict deterministic compile (`-Werror`, `-DTEST_MODE`, `-g -O0`); does not run `check-layers`
+- `make test`: strict deterministic compile (`-Werror`, `-DTEST_MODE`, `-g -O0`); does not run `check-layers`; prints `elapsed: <seconds>` after the compile/link step
+- `make test-run-bin`: builds the native `TEST_MODE` binary if needed, then launches it; pass `SEED=<unsigned>` to forward `--seed`
 - `make test-run`: builds the test binary (`make test`), then runs every name in `SNAPSHOT_TESTS` plus `seed_cli` (CLI `--seed` on `smoke.input`; see [Snapshot test files](#snapshot-test-files)). Each step prints `snapshot: <name>`. Finishes with `snapshot tests passed: N/M` (for example `64/64` snapshots plus `seed_cli`, 65 steps total).
 - `make test-unit`: builds and runs the greatest unit suite (`tests/unit/build/dosmud_unit`, `TEST_MODE` only; not linked into release `dosmud`)
 - `make test-soak`: builds and runs long-run soak/stress checks (`tests/soak/build/dosmud_soak`; separate from unit tests)
@@ -81,6 +85,7 @@ make test-unit-coverage-verbose     # same tests, full gcov block per module
 ```
 
 - Binary: `tests/unit/build/dosmud_unit` (all gameplay modules except `main.c`, plus `tests/unit/unit_*.c`)
+- `make build-unit` prints `elapsed: <seconds>` after the unit binary build finishes
 - Output levels:
 
 | Target / flag | Greatest | Gameplay `render_*` |
@@ -115,6 +120,8 @@ Separate binary from unit tests: `tests/soak/build/dosmud_soak` via `make test-s
 make build-soak
 make test-soak
 ```
+
+`make build-soak` prints `elapsed: <seconds>` after the soak binary build finishes.
 
 Scenarios (see [`tests/soak/soak_sim.c`](../tests/soak/soak_sim.c)):
 
@@ -289,13 +296,36 @@ Use PowerShell-driven DOS prep from Linux host shell to build and sync the DOS t
 make dos-prepare
 ```
 
+TEST_MODE DOS prep without spelling the mode flag directly:
+
+```sh
+make test-dos-prepare
+```
+
 Start DOS and launch the existing DOS executable without rebuilding or refreshing the tree:
 
 ```sh
 make dos-run
 ```
 
+TEST_MODE launch of the existing prepared DOS executable:
+
+```sh
+make test-dos-run
+```
+
 `make dos-run` expects a previously prepared DOS tree. Run `make dos-prepare` first if the mirrored DOS files or executable are missing.
+
+`make dos-prepare` now prints `elapsed build.bat time: <seconds>` after the Open Watcom build finishes and before the runtime DOS session starts. That elapsed time measures `build.bat` only, not the PowerShell tree refresh/copy phase. When `build.log` is present in the prepared DOS tree, `dos-prepare.ps1` appends the same elapsed line there too.
+
+To pass a custom seed through the DOS helper targets, use `SEED=<unsigned>`, for example:
+
+```sh
+make dos-prepare SEED=1234
+make test-dos-prepare SEED=1234
+make dos-run SEED=1234
+make test-dos-run SEED=1234
+```
 
 When you add or remove `src\*.c` files, update `Makefile` (`SRC` or `TEST_SRC`) and `build.bat`. For the Open Watcom path, keep every `wcl` and `wlib` line under the COMMAND.COM length limit (about 127 characters): gameplay sources are packed into `gameplay.lib` via several short `wlib` calls; the final `wcl` link lists `main.obj`, `platdos.obj`, `gameplay.lib`, plus the other `.obj` files. `TEST_MODE` copies [`tests/harness/`](../tests/harness/) to `harness\` via `dos-prepare.ps1`, compiles `th_world.c` / `testharn.c` to `thwld.obj` / `tharn.obj`, and archives both into `gameplay.lib`. Use `goto` labels in `build.bat` for conditionals; parenthesized `if (...)` blocks break under COMMAND.COM.
 
@@ -309,6 +339,10 @@ Runtime seed (native or DOS build): the startup banner always prints the active 
 
 ```sh
 ./dosmud --seed 1234
+make run SEED=1234
+make test-run-bin SEED=1234
+make dos-prepare SEED=1234
+make test-dos-prepare SEED=1234
 ```
 
 Invalid flags print `usage: dosmud [--seed <unsigned>]` to stderr and exit with status 1. Seed values must be decimal, non-negative, and at most `CFG_SEED_CLI_MAX` (4294967295); leading `+`/`-` and out-of-range values are rejected.
@@ -322,7 +356,7 @@ make build-all
 make test-all
 ```
 
-These targets intentionally exercise DOS prep/invocation and native GCC flow together.
+These targets intentionally exercise DOS build prep and native GCC flow together. They call `dos-prepare` with `NORUN=1` so the DOS build is validated without launching the playable DOS runtime.
 
 ## Environment and path model
 
@@ -335,7 +369,7 @@ In `dos-prepare.local.ps1`:
 - `$source` should be Windows-reachable for Linux-hosted project files.
 - `$mountpoint`, `$destination`, `$dospath` should be Windows-visible emulator paths.
 
-The Open Watcom build (`build.bat`) only needs `src/`, `include/`, and `build.bat`. `dos-prepare.ps1` deletes the Windows DOS tree, copies only those paths (separate `robocopy` per directory plus `build.bat`), then strips any stray `.git`, `tests/`, docs, or Linux build junk if an old full mirror left them behind. Add new DOS inputs under `src/` or `include/` (or extend `dos-prepare.ps1` if a new top-level tree is required).
+The Open Watcom build (`build.bat`) only needs `src/`, `include/`, and `build.bat`. `dos-prepare.ps1` deletes the Windows DOS tree, copies only those paths (separate `robocopy` per directory plus `build.bat`), then strips any stray `.git`, `tests/`, docs, or Linux build junk if an old full mirror left them behind. It launches one waited DOS session for `build.bat`, records the elapsed `build.bat` time in the host console, appends the same line to `build.log` when that file exists, verifies success from the executable and available log output, and then launches the runtime DOS session unless `-NoRun` is set. Add new DOS inputs under `src/` or `include/` (or extend `dos-prepare.ps1` if a new top-level tree is required).
 
 ## CI (GitHub Actions)
 

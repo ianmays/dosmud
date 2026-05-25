@@ -1,6 +1,8 @@
 param(
     [string]$Mode = "",
-    [switch]$NoBuild
+    [switch]$NoBuild,
+    [switch]$NoRun,
+    [string]$Seed = ""
 )
 
 $config = Join-Path $PSScriptRoot "dos-prepare.local.ps1"
@@ -58,9 +60,44 @@ function Invoke-RobocopyOk {
     }
 }
 
+function Format-ElapsedSeconds {
+    param([TimeSpan]$Duration)
+    "{0}.{1:D3}s" -f [int]$Duration.TotalSeconds, $Duration.Milliseconds
+}
+
+function Start-DosSession {
+    param(
+        [string[]]$Commands,
+        [switch]$Wait
+    )
+    $args = @(
+        '-c', "mount c $mountpoint",
+        '-c', 'c:',
+        '-c', "cd $projectdirectory"
+    )
+    foreach ($cmd in $Commands) {
+        $args += @('-c', $cmd)
+    }
+    if ($Wait) {
+        $quotedArgs = @()
+        foreach ($arg in $args) {
+            if ($arg -match '[\s"]') {
+                $quotedArgs += '"' + ($arg -replace '"', '\"') + '"'
+            } else {
+                $quotedArgs += $arg
+            }
+        }
+        $proc = Start-Process -FilePath "$dospath$dosexecutable" -ArgumentList ($quotedArgs -join ' ') -Wait -PassThru
+        return $proc.ExitCode
+    }
+    & "$dospath$dosexecutable" @args
+    return $LASTEXITCODE
+}
+
 Get-Process $dosexecutable -ErrorAction SilentlyContinue | Stop-Process -Force
 
 $buildArgs = if ($Mode) { " $Mode" } else { "" }
+$runCommand = if ($Seed) { "$projectname.exe --seed $Seed" } else { "$projectname.exe" }
 
 if (-not $NoBuild) {
   # Refresh the DOS tree before building.
@@ -74,12 +111,32 @@ if (-not $NoBuild) {
   Invoke-RobocopyOk 'build.bat' $source $destination 'build.bat'
   Remove-StaleDosMirrorExtras $destination
 
-  & "$dospath$dosexecutable" `
-    -c "mount c $mountpoint" `
-    -c "c:" `
-    -c "cd $projectdirectory" `
-    -c "call build.bat$buildArgs" `
-    -c "$projectname.exe"
+  $buildStarted = Get-Date
+  Start-DosSession -Commands @("call build.bat$buildArgs", 'exit') -Wait | Out-Null
+  $buildElapsed = (Get-Date) - $buildStarted
+  $buildElapsedText = Format-ElapsedSeconds $buildElapsed
+  $buildLog = Join-Path $destination 'build.log'
+  $buildExe = Join-Path $destination "$projectname.exe"
+
+  if (Test-Path -LiteralPath $buildLog) {
+      Add-Content -LiteralPath $buildLog -Value "elapsed build.bat time: $buildElapsedText"
+  }
+  Write-Host "elapsed build.bat time: $buildElapsedText"
+
+  if (!(Test-Path -LiteralPath $buildExe)) {
+      Write-Error "Missing DOS executable at $buildExe after build.bat. DOS build failed."
+      exit 1
+  }
+
+  if ((Test-Path -LiteralPath $buildLog) -and
+      (-not (Select-String -LiteralPath $buildLog -Pattern 'wcl result: success ERRORLEVEL 0' -Quiet))) {
+      Write-Error "DOS build log does not report success. See $buildLog."
+      exit 1
+  }
+
+  if (-not $NoRun) {
+      Start-DosSession @($runCommand)
+  }
 } else {
   if (!(Test-Path $destination)) {
     Write-Error "Missing prepared DOS tree at $destination. Run make dos-prepare first."
@@ -91,9 +148,5 @@ if (-not $NoBuild) {
     exit 1
   }
 
-  & "$dospath$dosexecutable" `
-    -c "mount c $mountpoint" `
-    -c "c:" `
-    -c "cd $projectdirectory" `
-    -c "$projectname.exe"
+  Start-DosSession @($runCommand)
 }

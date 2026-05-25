@@ -10,27 +10,46 @@ TEST_SRC = $(SRC) $(HARNESS_SRC)
 BIN = dosmud
 REGRESSION_DIR = tests/regression
 UNIT_DIR = tests/unit
+RUN_ARGS = $(if $(SEED),--seed $(SEED))
+
+define RUN_TIMED
+@start=$$(date +%s%3N); \
+status=0; \
+{ $(1); } || status=$$?; \
+end=$$(date +%s%3N); \
+elapsed_ms=$$((end - start)); \
+elapsed_s=$$((elapsed_ms / 1000)); \
+elapsed_rem=$$((elapsed_ms % 1000)); \
+printf 'elapsed: %s.%03ds\n' "$$elapsed_s" "$$elapsed_rem"; \
+exit $$status
+endef
 
 build-all:
 	$(MAKE) clean
-	$(MAKE) dos-prepare
+	$(MAKE) dos-prepare NORUN=1
 	$(MAKE) build
 
 build:
-	$(CC) $(BASE_CFLAGS) -o $(BIN) $(SRC)
+	$(call RUN_TIMED,$(CC) $(BASE_CFLAGS) -o $(BIN) $(SRC))
+
+run: build
+	./$(BIN) $(RUN_ARGS)
 
 # deterministic
 test-all:
 	$(MAKE) check-layers
 	$(MAKE) clean
-	$(MAKE) dos-prepare MODE=$(TEST_MODE_FLAG)
+	$(MAKE) dos-prepare MODE=$(TEST_MODE_FLAG) NORUN=1
 	$(MAKE) test-run
 	$(MAKE) test-unit-coverage
 	$(MAKE) test-soak
 
 # deterministic
 test:
-	$(CC) $(TEST_CFLAGS) -o $(BIN) $(TEST_SRC)
+	$(call RUN_TIMED,$(CC) $(TEST_CFLAGS) -o $(BIN) $(TEST_SRC))
+
+test-run-bin: test
+	./$(BIN) $(RUN_ARGS)
 
 # deterministic tests (see docs/testing.md for snapshot list)
 SNAPSHOT_TESTS = \
@@ -115,7 +134,8 @@ $(UNIT_BIN): $(UNIT_CORE_OBJS) $(UNIT_TEST_OBJS)
 	$(UNIT_LINK_ANNOUNCE)
 	$(UNIT_CC_QUIET)$(CC) $(UNIT_CFLAGS) -o $@ $(UNIT_CORE_OBJS) $(UNIT_TEST_OBJS)
 
-build-unit: $(UNIT_BIN)
+build-unit:
+	$(call RUN_TIMED,$(MAKE) $(UNIT_BIN))
 
 test-unit: $(UNIT_BIN)
 	./$(UNIT_BIN)
@@ -199,7 +219,8 @@ $(SOAK_BIN): $(SOAK_CORE_OBJS) $(SOAK_TEST_OBJS)
 	@echo "building $(SOAK_BIN)..."
 	@$(CC) $(SOAK_CFLAGS) -o $@ $(SOAK_CORE_OBJS) $(SOAK_TEST_OBJS)
 
-build-soak: $(SOAK_BIN)
+build-soak:
+	$(call RUN_TIMED,$(MAKE) $(SOAK_BIN))
 
 test-soak: $(SOAK_BIN)
 	./$(SOAK_BIN)
@@ -212,9 +233,15 @@ clean:
 	rm -f dosmud_unit dosmud_unit-*.gcno dosmud_unit-*.gcda *.gcov src/*.gcno src/*.gcda
 
 dos-prepare:
-	powershell.exe -ExecutionPolicy Bypass -File dos-prepare.ps1 $(if $(MODE),-Mode $(MODE))
+	powershell.exe -ExecutionPolicy Bypass -File dos-prepare.ps1 $(if $(MODE),-Mode $(MODE)) $(if $(NORUN),-NoRun) $(if $(SEED),-Seed $(SEED))
+
+test-dos-prepare:
+	$(MAKE) dos-prepare MODE=$(TEST_MODE_FLAG) $(if $(NORUN),NORUN=1) $(if $(SEED),SEED=$(SEED))
 
 dos-run:
-	powershell.exe -ExecutionPolicy Bypass -File dos-prepare.ps1 -NoBuild
+	powershell.exe -ExecutionPolicy Bypass -File dos-prepare.ps1 -NoBuild $(if $(SEED),-Seed $(SEED))
 
-.PHONY: build-all build test-all test test-run build-unit test-unit test-unit-verbose test-unit-verbose-gameplay test-unit-coverage test-unit-coverage-verbose build-soak test-soak check-layers clean dos-prepare dos-run
+test-dos-run:
+	$(MAKE) dos-run $(if $(SEED),SEED=$(SEED))
+
+.PHONY: build-all build run test-all test test-run-bin test-run build-unit test-unit test-unit-verbose test-unit-verbose-gameplay test-unit-coverage test-unit-coverage-verbose build-soak test-soak check-layers clean dos-prepare test-dos-prepare dos-run test-dos-run
