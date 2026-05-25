@@ -52,8 +52,8 @@ function Invoke-RobocopyOk {
     )
     Write-Host ""
     Write-Host "robocopy ($Label): $Source -> $Destination"
-    $args = @($Source, $Destination) + $ExtraArgs
-    & robocopy @args
+    $roboArgs = @($Source, $Destination) + $ExtraArgs
+    & robocopy @roboArgs
     if ($LASTEXITCODE -ge 8) {
         Write-Error "robocopy failed ($LASTEXITCODE): $Source -> $Destination"
         exit 1
@@ -62,7 +62,7 @@ function Invoke-RobocopyOk {
 
 function Format-ElapsedSeconds {
     param([TimeSpan]$Duration)
-    "{0}.{1:D3}s" -f [int]$Duration.TotalSeconds, $Duration.Milliseconds
+    "{0}.{1:D3}s" -f [Math]::Floor($Duration.TotalSeconds), $Duration.Milliseconds
 }
 
 function Start-DosSession {
@@ -70,17 +70,17 @@ function Start-DosSession {
         [string[]]$Commands,
         [switch]$Wait
     )
-    $args = @(
+    $dosboxArgs = @(
         '-c', "mount c $mountpoint",
         '-c', 'c:',
         '-c', "cd $projectdirectory"
     )
     foreach ($cmd in $Commands) {
-        $args += @('-c', $cmd)
+        $dosboxArgs += @('-c', $cmd)
     }
     if ($Wait) {
         $quotedArgs = @()
-        foreach ($arg in $args) {
+        foreach ($arg in $dosboxArgs) {
             if ($arg -match '[\s"]') {
                 $quotedArgs += '"' + ($arg -replace '"', '\"') + '"'
             } else {
@@ -90,7 +90,7 @@ function Start-DosSession {
         $proc = Start-Process -FilePath "$dospath$dosexecutable" -ArgumentList ($quotedArgs -join ' ') -Wait -PassThru
         return $proc.ExitCode
     }
-    & "$dospath$dosexecutable" @args
+    & "$dospath$dosexecutable" @dosboxArgs
     return $LASTEXITCODE
 }
 

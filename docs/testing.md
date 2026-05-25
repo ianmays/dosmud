@@ -373,7 +373,7 @@ The Open Watcom build (`build.bat`) only needs `src/`, `include/`, and `build.ba
 
 ## CI (GitHub Actions)
 
-On `main` and pull requests, CI runs `scripts/ci-test-report.sh` (layer check, `make build`, `make test`, `make build-unit`, `make build-soak`, `make test-run`, unit binary, `make test-unit-coverage`, soak binary; see [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)). On pull requests, results are posted or updated in a single PR comment (`comment-tag: ci-test-results`). The report includes wall-clock step durations plus a separate **Build timings** table so compile/link cost is visible apart from test execution. CI starts from a clean checkout; for comparable local compile timings, run `make clean` before the build-only targets. DOS prep is not run in CI.
+On `main` and pull requests, CI runs `scripts/ci-test-report.sh` (layer check, `make build`, `make test`, `make build-unit`, `make build-soak`, snapshot inputs against the already-built `./dosmud`, unit binary, `make test-unit-coverage`, soak binary; see [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)). On pull requests, results are posted or updated in a single PR comment (`comment-tag: ci-test-results`). The report includes wall-clock step durations plus a separate **Build timings** table so compile/link cost is visible apart from test execution. CI starts from a clean checkout; for comparable local compile timings, run `make clean` before the build-only targets. DOS prep is not run in CI.
 
 ## Build artifacts
 
