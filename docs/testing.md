@@ -303,6 +303,13 @@ TEST_MODE DOS prep without spelling the mode flag directly:
 make test-dos-prepare
 ```
 
+Build and validate the DOS tree without launching the runtime session:
+
+```sh
+make dos-prepare-norun
+make test-dos-prepare-norun
+```
+
 Start DOS and launch the existing DOS executable without rebuilding or refreshing the tree:
 
 ```sh
@@ -324,6 +331,8 @@ To pass a custom seed through the DOS helper targets, use `SEED=<unsigned>`, for
 ```sh
 make dos-prepare SEED=1234
 make test-dos-prepare SEED=1234
+make dos-prepare-norun SEED=1234
+make test-dos-prepare-norun SEED=1234
 make dos-run SEED=1234
 make test-dos-run SEED=1234
 ```
@@ -357,7 +366,7 @@ make build-all
 make test-all
 ```
 
-These targets intentionally exercise DOS build prep and native GCC flow together. They call `dos-prepare` with `NORUN=1` so the DOS build is validated without launching the playable DOS runtime.
+These targets intentionally exercise DOS build prep and native GCC flow together. They validate the DOS build without launching the playable DOS runtime, equivalent to `make dos-prepare-norun` or `make test-dos-prepare-norun` as appropriate.
 
 ## Environment and path model
 
