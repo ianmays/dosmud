@@ -75,6 +75,21 @@ TEST harness_apply_quiet_camp_dual_ground(void)
     PASS();
 }
 
+TEST harness_apply_quiet_camp_dual_ground_full_bag(void)
+{
+    struct GameState game;
+    int rc;
+
+    unit_game_fresh(&game, 3u);
+    rc = testharn_apply(&game, "@fixture quiet_camp_dual_ground_full_bag");
+    ASSERT_EQ(1, rc);
+    ASSERT_EQ(ITEM_STICK, game.room_item[WORLD_ROOM_CAMP][0]);
+    ASSERT_EQ(ITEM_REED, game.room_item[WORLD_ROOM_CAMP][1]);
+    ASSERT_EQ(game.bag_capacity, game.bag_count);
+    ASSERT_EQ(1, game.test_quiet_ticks);
+    PASS();
+}
+
 TEST harness_seed_repeatable_rolls(void)
 {
     struct GameState game;
@@ -97,5 +112,6 @@ SUITE(harness) {
     RUN_TEST(harness_apply_unknown_fixture);
     RUN_TEST(harness_apply_bag_full_returns_minus2);
     RUN_TEST(harness_apply_quiet_camp_dual_ground);
+    RUN_TEST(harness_apply_quiet_camp_dual_ground_full_bag);
     RUN_TEST(harness_seed_repeatable_rolls);
 }

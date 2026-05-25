@@ -191,7 +191,7 @@ int game_inv_cmd_take(struct GameState *game, int item_arg)
     int room_id;
     int ground_item;
     int slot;
-    
+
     if (game->mode == GAME_MODE_COMBAT) {
         render_inv_no_rummage_combat();
         return 1;

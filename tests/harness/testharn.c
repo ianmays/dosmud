@@ -247,6 +247,21 @@ static int fixture_quiet_camp_dual_ground(struct GameState *game)
     return 1;
 }
 
+static int fixture_quiet_camp_dual_ground_full_bag(struct GameState *game)
+{
+    int i;
+
+    if (!fixture_quiet_camp_dual_ground(game)) {
+        return 0;
+    }
+    for (i = 0; i < game->bag_capacity; ++i) {
+        if (!game_inv_bag_add(game, ITEM_BERRY)) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
 static void fixture_wanderer_dialogue(struct GameState *game)
 {
     game_reset_fixture_baseline(game, WORLD_ROOM_ROAD, 0);
@@ -550,6 +565,12 @@ int testharn_apply(struct GameState *game, const char *line)
     }
     if (fixture_name_is("quiet_camp_dual_ground", name)) {
         if (!fixture_quiet_camp_dual_ground(game)) {
+            return -2;
+        }
+        return 1;
+    }
+    if (fixture_name_is("quiet_camp_dual_ground_full_bag", name)) {
+        if (!fixture_quiet_camp_dual_ground_full_bag(game)) {
             return -2;
         }
         return 1;
