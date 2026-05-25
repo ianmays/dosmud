@@ -21,7 +21,7 @@ function Clear-DosDestination {
     }
     Remove-Item -LiteralPath $Path -Recurse -Force
     if (Test-Path -LiteralPath $Path) {
-        Write-Error "Could not remove existing DOS tree at $Path (close DOSBox/files using it and retry)."
+        Write-Error "Could not remove existing DOS tree at $Path (close DOS/files using it and retry)."
         exit 1
     }
 }

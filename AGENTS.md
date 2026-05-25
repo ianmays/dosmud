@@ -209,7 +209,7 @@ Running `make test`, `make test-run`, and `make test-unit` before a PR does not 
 
 - `make` executes from Linux/WSL.
 - `dos-prepare.ps1` executes through Windows PowerShell.
-- DOSBox-X launches on the Windows side.
+- DOS launches on the Windows side.
 - `dos-prepare.local.ps1` stores machine-specific path configuration.
 - `dos-prepare.ps1` copies only `src/`, `include/`, and `build.bat` into the DOS tree (per-directory `robocopy`, not a repo-root mirror); `.git` and tests never belong in the Windows tree.
 - Do not assume the repository exists under `/mnt/c`.
