@@ -70,17 +70,17 @@ function Start-DosSession {
         [string[]]$Commands,
         [switch]$Wait
     )
-    $dosboxArgs = @(
+    $dosArgs = @(
         '-c', "mount c $mountpoint",
         '-c', 'c:',
         '-c', "cd $projectdirectory"
     )
     foreach ($cmd in $Commands) {
-        $dosboxArgs += @('-c', $cmd)
+        $dosArgs += @('-c', $cmd)
     }
     if ($Wait) {
         $quotedArgs = @()
-        foreach ($arg in $dosboxArgs) {
+        foreach ($arg in $dosArgs) {
             if ($arg -match '[\s"]') {
                 $quotedArgs += '"' + ($arg -replace '"', '\"') + '"'
             } else {
@@ -90,7 +90,7 @@ function Start-DosSession {
         $proc = Start-Process -FilePath "$dospath$dosexecutable" -ArgumentList ($quotedArgs -join ' ') -Wait -PassThru
         return $proc.ExitCode
     }
-    & "$dospath$dosexecutable" @dosboxArgs
+    & "$dospath$dosexecutable" @dosArgs
     return $LASTEXITCODE
 }
 
