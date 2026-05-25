@@ -40,20 +40,6 @@ static int room_ground_is_empty(struct GameState *game, int room_id)
     return 1;
 }
 
-static int room_ground_count(struct GameState *game, int room_id)
-{
-    int s;
-    int count;
-
-    count = 0;
-    for (s = 0; s < CFG_AREA_ITEM_SLOTS; ++s) {
-        if (game->room_item[room_id][s] != ITEM_NONE) {
-            count += 1;
-        }
-    }
-    return count;
-}
-
 static int room_find_item_slot(struct GameState *game, int room_id, int item_id)
 {
     int s;
@@ -229,21 +215,20 @@ int game_inv_cmd_take_all(struct GameState *game)
         return 1;
     }
     room_id = game->player.room_id;
-    if (room_ground_is_empty(game, room_id)) {
-        render_inv_take_nothing();
-        return 1;
-    }
-    ground_count = room_ground_count(game, room_id);
-    if (game->bag_count + ground_count > game->bag_capacity) {
-        render_inv_bag_full(game->bag_capacity);
-        return 1;
-    }
     ground_count = 0;
     for (slot = 0; slot < CFG_AREA_ITEM_SLOTS; ++slot) {
         if (game->room_item[room_id][slot] != ITEM_NONE) {
             ground_items[ground_count] = game->room_item[room_id][slot];
             ground_count += 1;
         }
+    }
+    if (ground_count == 0) {
+        render_inv_take_nothing();
+        return 1;
+    }
+    if (game->bag_count + ground_count > game->bag_capacity) {
+        render_inv_bag_full(game->bag_capacity);
+        return 1;
     }
     for (i = 0; i < ground_count; ++i) {
         game_inv_bag_add(game, ground_items[i]);
