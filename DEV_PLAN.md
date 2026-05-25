@@ -44,7 +44,7 @@ Milestone numbers are **themes**, not strict schedule. Suggested pull order for 
 ```mermaid
 flowchart LR
   subgraph m4 [Workflow_and_Tooling]
-    M4["74,82,34,72"]
+    M4["74,82,150,34,72"]
   end
   subgraph m5 [Advanced_Architecture]
     M5["71,47,16"]
@@ -83,7 +83,7 @@ Workflow (milestone 4) can run in parallel with architecture once unblocked. Con
 | Size | Meaning | Examples (open roadmap) |
 |------|---------|-------------------------|
 | XS | single trivial change | *(none currently)* |
-| S | narrow feature or tooling slice | #4, #72, #82, #128 |
+| S | narrow feature or tooling slice | #4, #72, #82, #128, #150 |
 | M | one subsystem feature or refactor | #5, #7, #9, #31, #49, #51, #54, #74, #100, #101, #102, #129, #130, #131, #132, #145 |
 | L | major mechanism or platform path | #8, #15, #16, #34, #47, #50, #52, #104, #107 |
 | XL | foundational or multi-area epic | #48, #55, #71, #76, #92 |
@@ -412,10 +412,9 @@ dosmud --seed 1234
 |-------|-------|------|
 | [#74](https://github.com/ianmays/dosmud/issues/74) | agent skills | M |
 | [#82](https://github.com/ianmays/dosmud/issues/82) | compile performance | S |
+| [#150](https://github.com/ianmays/dosmud/issues/150) | CI stats reporting | S |
 | [#34](https://github.com/ianmays/dosmud/issues/34) | modern windows build | L |
 | [#72](https://github.com/ianmays/dosmud/issues/72) | sub-agents | S |
-
-Ad-hoc milestone-4 tooling (e.g. [#150](https://github.com/ianmays/dosmud/issues/150) CI stats reporting) may stay on the project board only without a table row here until promoted into the execution-order list.
 
 ### [#74](https://github.com/ianmays/dosmud/issues/74) - Agent skills
 
@@ -431,6 +430,12 @@ Capture:
 ### [#72](https://github.com/ianmays/dosmud/issues/72) - Sub-agents
 
 ### [#82](https://github.com/ianmays/dosmud/issues/82) - Compile performance
+
+Done ✅.
+
+### [#150](https://github.com/ianmays/dosmud/issues/150) - CI stats reporting
+
+Lightweight CI timings/stats workflow: `scripts/ci-stats.sh` (or equivalent) emits `ci-stats.json` and `ci-stats.md`, publishes Markdown to the GitHub Actions job summary, and uploads both as workflow artifacts.
 
 ## [Advanced Architecture](https://github.com/ianmays/dosmud/milestone/5)
 
