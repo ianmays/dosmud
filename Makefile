@@ -67,7 +67,7 @@ SNAPSHOT_TESTS = \
 	unknown_cmd cannot_move give_wrong_context reply_nobody reply_invalid \
 	craft_salve craft_unknown take_nothing take_wrong_item take_all take_all_bag_full
 
-test-run: test
+snapshot-run:
 	@set -e; \
 	n=0; \
 	total=$$(($$(echo $(SNAPSHOT_TESTS) | wc -w) + 1)); \
@@ -82,6 +82,8 @@ test-run: test
 	diff -u $(REGRESSION_DIR)/seed_cli.expect $(REGRESSION_DIR)/seed_cli.output; \
 	n=$$((n + 1)); \
 	echo "snapshot tests passed: $$n/$$total"
+
+test-run: test snapshot-run
 
 # gameplay .c files must not call printf (use grendr render_* instead)
 check-layers:
@@ -244,4 +246,4 @@ dos-run:
 test-dos-run:
 	$(MAKE) dos-run $(if $(SEED),SEED=$(SEED))
 
-.PHONY: build-all build run test-all test test-run-bin test-run build-unit test-unit test-unit-verbose test-unit-verbose-gameplay test-unit-coverage test-unit-coverage-verbose build-soak test-soak check-layers clean dos-prepare test-dos-prepare dos-run test-dos-run
+.PHONY: build-all build run test-all test test-run-bin snapshot-run test-run build-unit test-unit test-unit-verbose test-unit-verbose-gameplay test-unit-coverage test-unit-coverage-verbose build-soak test-soak check-layers clean dos-prepare test-dos-prepare dos-run test-dos-run

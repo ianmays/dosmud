@@ -24,7 +24,8 @@ Purpose:
 - `make check-layers`: core/render boundary guard (no `printf` in `src/*.c` except `main.c`, `grendr.c`, and the platform file `platpos.c` or `platdos.c`)
 - `make test`: strict deterministic compile (`-Werror`, `-DTEST_MODE`, `-g -O0`); does not run `check-layers`; prints `elapsed: <seconds>` after the compile/link step
 - `make test-run-bin`: builds the native `TEST_MODE` binary if needed, then launches it; pass `SEED=<unsigned>` to forward `--seed`
-- `make test-run`: builds the test binary (`make test`), then runs every name in `SNAPSHOT_TESTS` plus `seed_cli` (CLI `--seed` on `smoke.input`; see [Snapshot test files](#snapshot-test-files)). Each step prints `snapshot: <name>`. Finishes with `snapshot tests passed: N/M` (for example `64/64` snapshots plus `seed_cli`, 65 steps total).
+- `make snapshot-run`: runs every name in `SNAPSHOT_TESTS` plus `seed_cli` against the existing native `TEST_MODE` binary (`./dosmud`; see [Snapshot test files](#snapshot-test-files)). Each step prints `snapshot: <name>`. Finishes with `snapshot tests passed: N/M` (for example `64/64` snapshots plus `seed_cli`, 65 steps total).
+- `make test-run`: builds the test binary (`make test`), then runs `make snapshot-run`.
 - `make test-unit`: builds and runs the greatest unit suite (`tests/unit/build/dosmud_unit`, `TEST_MODE` only; not linked into release `dosmud`)
 - `make test-soak`: builds and runs long-run soak/stress checks (`tests/soak/build/dosmud_soak`; separate from unit tests)
 
@@ -32,7 +33,7 @@ Purpose:
 
 | Layer | Command | What it proves |
 |-------|---------|----------------|
-| Snapshots | `make test-run` | Player-visible output matches golden `.expect` files |
+| Snapshots | `make test-run` or `make snapshot-run` | Player-visible output matches golden `.expect` files |
 | Unit tests | `make test-unit` | Small, targeted `GameState` / API behavior |
 | Soak tests | `make test-soak` | Fixed-seed long runs: state stays legal, perf within ceilings |
 
@@ -262,13 +263,13 @@ Add new fixtures in [`tests/harness/testharn.c`](../tests/harness/testharn.c) an
 1. Add `tests/regression/<name>.input` (and prefer one scenario per file).
 2. Use `@fixture` for setup; add inject in the fixture or via a `*_ready` fixture when outcomes must be fixed.
 3. Use `quiet_explore` when the test calls `wait` or `move`.
-4. Run `make test && make test-run` (or `./dosmud < tests/regression/<name>.input > tests/regression/<name>.output`) and copy or diff against `tests/regression/<name>.expect`.
+4. Run `make test && make snapshot-run` (or `./dosmud < tests/regression/<name>.input > tests/regression/<name>.output`) and copy or diff against `tests/regression/<name>.expect`.
 5. Add `<name>` to `SNAPSHOT_TESTS` in the [Makefile](../Makefile) (`seed_cli` stays separate: it uses `--seed` with `smoke.input`).
 6. Document new fixtures in this file.
 
 ### Snapshot test files
 
-Each process run uses one `.input` file until `quit`. `make test-run` runs `SNAPSHOT_TESTS` (includes `smoke`), then `seed_cli`.
+Each process run uses one `.input` file until `quit`. `make snapshot-run` runs `SNAPSHOT_TESTS` (includes `smoke`), then `seed_cli`. `make test-run` is the compile-plus-run wrapper.
 
 **Core / inventory (also in `SNAPSHOT_TESTS`):** `smoke`, `bandit_handover`, `bandit_wielded_give`, `area_items`, `map`, `equipment`, `craft_wielded`, `take_all`, `take_all_bag_full`.
 
@@ -373,7 +374,7 @@ The Open Watcom build (`build.bat`) only needs `src/`, `include/`, and `build.ba
 
 ## CI (GitHub Actions)
 
-On `main` and pull requests, CI runs `scripts/ci-test-report.sh` (layer check, `make build`, `make test`, `make build-unit`, `make build-soak`, snapshot inputs against the already-built `./dosmud`, unit binary, `make test-unit-coverage`, soak binary; see [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)). On pull requests, results are posted or updated in a single PR comment (`comment-tag: ci-test-results`). The report includes wall-clock step durations plus a separate **Build timings** table so compile/link cost is visible apart from test execution. CI starts from a clean checkout; for comparable local compile timings, run `make clean` before the build-only targets. DOS prep is not run in CI.
+On `main` and pull requests, CI runs `scripts/ci-test-report.sh` (layer check, `make build`, `make test`, `make build-unit`, `make build-soak`, `make snapshot-run`, unit binary, `make test-unit-coverage`, soak binary; see [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)). On pull requests, results are posted or updated in a single PR comment (`comment-tag: ci-test-results`). The report includes wall-clock step durations plus a separate **Build timings** table so compile/link cost is visible apart from test execution. CI starts from a clean checkout; for comparable local compile timings, run `make clean` before the build-only targets. DOS prep is not run in CI.
 
 ## Build artifacts
 

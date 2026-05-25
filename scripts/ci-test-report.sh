@@ -83,22 +83,6 @@ append_snapshots_row() {
     fi
 }
 
-run_snapshots_against_existing_bin() {
-    n=0
-    total=$(($(echo "$SNAPSHOT_TESTS" | wc -w) + 1))
-    for t in $SNAPSHOT_TESTS; do
-        echo "snapshot: $t"
-        ./dosmud < "tests/regression/$t.input" > "tests/regression/$t.output"
-        diff -u "tests/regression/$t.expect" "tests/regression/$t.output"
-        n=$((n + 1))
-    done
-    echo "snapshot: seed_cli"
-    ./dosmud --seed 1234 < tests/regression/smoke.input > tests/regression/seed_cli.output
-    diff -u tests/regression/seed_cli.expect tests/regression/seed_cli.output
-    n=$((n + 1))
-    echo "snapshot tests passed: $n/$total"
-}
-
 append_unit_row() {
     duration="$1"
     total=$(grep '^Total:' "$LOG" | tail -1)
@@ -211,21 +195,7 @@ else
     failed=1
 fi
 
-SNAPSHOT_TESTS='smoke
-bandit_handover bandit_wielded_give area_items map equipment craft_wielded
-walk_north walk_map wait_tick
-frog_replies watchman_talk wanderer_replies wanderer_talk_blocked herbalist_talk archivist_talk talk_nobody
-use_salve use_torch use_spear use_stone eat_berry eat_fish eat_berry_heal eat_fish_heal
-eat_not_edible eat_missing bag_stacks
-inspect_rustle inspect_creak inspect_water inspect_grit inspect_none inspect_wrong
-combat_defend combat_salve combat_no_salve combat_invalid combat_take_blocked
-combat_victory_xp level_up
-loot_spear loot_stick loot_berry loot_herb loot_fish loot_empty loot_stripped loot_bag_full
-bandit_fight bandit_intimidate_ok bandit_intimidate_fail bandit_bag_empty
-unknown_cmd cannot_move give_wrong_context reply_nobody reply_invalid
-craft_salve craft_unknown take_nothing take_wrong_item take_all take_all_bag_full'
-
-if run_timed "snapshots" run_snapshots_against_existing_bin; then
+if run_timed "snapshots" make snapshot-run; then
     append_snapshots_row "$(format_duration "$last_duration")"
 else
     append_result_row "snapshots" "**fail**" "$(format_duration "$last_duration")"
