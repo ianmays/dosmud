@@ -115,6 +115,8 @@ $(UNIT_BIN): $(UNIT_CORE_OBJS) $(UNIT_TEST_OBJS)
 	$(UNIT_LINK_ANNOUNCE)
 	$(UNIT_CC_QUIET)$(CC) $(UNIT_CFLAGS) -o $@ $(UNIT_CORE_OBJS) $(UNIT_TEST_OBJS)
 
+build-unit: $(UNIT_BIN)
+
 test-unit: $(UNIT_BIN)
 	./$(UNIT_BIN)
 
@@ -197,6 +199,8 @@ $(SOAK_BIN): $(SOAK_CORE_OBJS) $(SOAK_TEST_OBJS)
 	@echo "building $(SOAK_BIN)..."
 	@$(CC) $(SOAK_CFLAGS) -o $@ $(SOAK_CORE_OBJS) $(SOAK_TEST_OBJS)
 
+build-soak: $(SOAK_BIN)
+
 test-soak: $(SOAK_BIN)
 	./$(SOAK_BIN)
 
@@ -213,4 +217,4 @@ dos-prepare:
 dos-run:
 	powershell.exe -ExecutionPolicy Bypass -File dos-prepare.ps1 -NoBuild
 
-.PHONY: build-all build test-all test test-run test-unit test-unit-verbose test-unit-verbose-gameplay test-unit-coverage test-unit-coverage-verbose test-soak check-layers clean dos-prepare dos-run
+.PHONY: build-all build test-all test test-run build-unit test-unit test-unit-verbose test-unit-verbose-gameplay test-unit-coverage test-unit-coverage-verbose build-soak test-soak check-layers clean dos-prepare dos-run

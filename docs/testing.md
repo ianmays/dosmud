@@ -73,6 +73,7 @@ Unit test coverage ([#95](https://github.com/ianmays/dosmud/issues/95)) uses [gr
 
 ```sh
 make test-unit
+make build-unit                      # build only; useful when timing compile cost
 make test-unit-verbose              # greatest suite/test progress only
 make test-unit-verbose-gameplay     # greatest progress + gameplay render text
 make test-unit-coverage             # runs test-unit, then compact branch/line % table
@@ -111,6 +112,7 @@ make test-unit-coverage-verbose     # same tests, full gcov block per module
 Separate binary from unit tests: `tests/soak/build/dosmud_soak` via `make test-soak`. Uses the same greatest runner and linked game modules as unit tests, but runs long fixed-seed loops and checks that `GameState` stays legal (HP, mode, room, bag, dialogue/combat fields).
 
 ```sh
+make build-soak
 make test-soak
 ```
 
@@ -337,7 +339,7 @@ The Open Watcom build (`build.bat`) only needs `src/`, `include/`, and `build.ba
 
 ## CI (GitHub Actions)
 
-On `main` and pull requests, CI runs `scripts/ci-test-report.sh` (layer check, `make test`, `make test-run`, `make test-unit`, `make test-unit-coverage`; see [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)). On pull requests, results are posted or updated in a single PR comment (`comment-tag: ci-test-results`). DOS prep is not run in CI.
+On `main` and pull requests, CI runs `scripts/ci-test-report.sh` (layer check, `make test`, `make build-unit`, `make build-soak`, `make test-run`, unit binary, `make test-unit-coverage`, soak binary; see [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)). On pull requests, results are posted or updated in a single PR comment (`comment-tag: ci-test-results`). The report includes wall-clock step durations plus a separate **Build timings** table so compile/link cost is visible apart from test execution. CI starts from a clean checkout; for comparable local compile timings, run `make clean` before the build-only targets. DOS prep is not run in CI.
 
 ## Build artifacts
 
@@ -345,8 +347,9 @@ On `main` and pull requests, CI runs `scripts/ci-test-report.sh` (layer check, `
 |--------|--------|
 | `make build` | `./dosmud` (repo root) |
 | `make test` | `./dosmud` with `TEST_MODE` (same path; overwrites release binary) |
-| `make test-unit` / `make test-unit-coverage` / `make test-unit-coverage-verbose` | `tests/unit/build/dosmud_unit`, `*.o`, `*.gcno`, `*.gcda`; `.gcov` under `tests/unit/build/coverage/` (gitignored) |
+| `make build-unit` / `make test-unit` / `make test-unit-coverage` / `make test-unit-coverage-verbose` | `tests/unit/build/dosmud_unit`, `*.o`, `*.gcno`, `*.gcda`; `.gcov` under `tests/unit/build/coverage/` (gitignored) |
 | `make test-run` | `tests/regression/<name>.output` (gitignored) |
+| `make build-soak` / `make test-soak` | `tests/soak/build/dosmud_soak`, `*.o` (gitignored) |
 | `make dos-prepare` | `dosmud.exe` and `build.log` in the prepared DOS tree (`$destination` in `dos-prepare.local.ps1`; not mirrored from Linux) |
 
 `make clean` removes `./dosmud`, `tests/unit/build/`, snapshot `*.output`, and legacy root-level unit/coverage junk.
