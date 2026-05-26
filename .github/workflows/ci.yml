@@ -19,18 +19,34 @@ jobs:
       - name: Install build tools
         run: sudo apt-get update && sudo apt-get install -y gcc make
 
-      - name: Run tests and write report
+      - name: Run CI stats and write report
         id: ci_report
-        run: sh scripts/ci-test-report.sh
+        run: sh scripts/ci-stats.sh
         continue-on-error: true
+
+      - name: Find existing CI results comment
+        if: github.event_name == 'pull_request'
+        id: find_comment
+        uses: peter-evans/find-comment@v3
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: github-actions[bot]
+          body-includes: "<!-- ci-test-results -->"
 
       - name: Post test results on pull request
         if: github.event_name == 'pull_request'
-        uses: peter-evans/create-or-update-comment@v4
+        uses: peter-evans/create-or-update-comment@v5
         with:
+          comment-id: ${{ steps.find_comment.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
           body-path: ci-test-report.md
-          comment-tag: ci-test-results
+          edit-mode: replace
+
+      - name: Upload CI stats artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-stats
+          path: ci-stats.json
 
       - name: Fail if tests failed
         if: steps.ci_report.outcome == 'failure'

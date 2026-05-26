@@ -142,7 +142,7 @@ Each scenario prints a machine-readable benchmark line (limits come from `CFG_TE
 SOAK_BENCH <name> ticks=<n> us_per_tick=<u> limit=<L>
 ```
 
-The test fails if `us_per_tick` exceeds `limit`. CI ([`scripts/ci-test-report.sh`](../scripts/ci-test-report.sh)) runs `make test-soak` as its own step and parses `limit=` from the log for the PR **Soak benchmarks** table (no separate limits file).
+The test fails if `us_per_tick` exceeds `limit`. CI ([`scripts/ci-stats.sh`](../scripts/ci-stats.sh)) runs `make test-soak` as its own step and parses `limit=` from the log for the PR **Soak benchmarks** table (no separate limits file).
 
 After intentional performance changes, run `make test-soak` locally and raise the matching `CFG_TEST_SOAK_LIMIT_*` macros only when the new baseline is expected (~2× measured on the CI runner is a reasonable starting margin). Coarse `clock()` resolution may report `us_per_tick=0` on fast runs; limits are regression guards, not micro-benchmarks.
 
@@ -380,7 +380,9 @@ The Open Watcom build (`build.bat`) only needs `src/`, `include/`, and `build.ba
 
 ## CI (GitHub Actions)
 
-On `main` and pull requests, CI runs `scripts/ci-test-report.sh` (layer check, `make build`, `make test`, `make build-unit`, `make build-soak`, `make snapshot-run`, unit binary, `make test-unit-coverage`, soak binary; see [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)). On pull requests, results are posted or updated in a single PR comment (`comment-tag: ci-test-results`). The report includes wall-clock step durations plus a separate **Build timings** table so compile/link cost is visible apart from test execution. CI starts from a clean checkout; for comparable local compile timings, run `make clean` before the build-only targets. DOS prep is not run in CI.
+On `main` and pull requests, CI runs `scripts/ci-stats.sh` (layer check, `make test`, `make test-run`, `make test-unit`, `make test-unit-coverage`, `make test-soak`; see [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)). On pull requests, results are posted or updated in a single PR comment by finding the prior hidden `ci-test-results` marker comment and replacing it, the stats summary is appended to the GitHub Actions job summary, and `ci-stats.json` is uploaded as the sole metrics artifact. CI starts from a clean checkout; for comparable local timings, run `make clean` before the timing-sensitive targets. DOS prep is not run in CI.
+
+Successful `main` CI runs trigger [`.github/workflows/ci-metrics.yml`](../.github/workflows/ci-metrics.yml), which downloads `ci-stats.json`, appends one normalized record into `history.json` on the dedicated `ci-metrics` branch, and pushes that branch back to GitHub. The metrics dashboard at [CI Metrics](ci-metrics.html) reads that branch directly via raw GitHub content, so persistent history is kept out of both PR branches and `main`.
 
 ## Build artifacts
 

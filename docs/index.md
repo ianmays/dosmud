@@ -6,6 +6,7 @@ This manual is the canonical project documentation set for architecture, testing
 
 - [Architecture](architecture.md)
 - [Testing](testing.md)
+- [CI Metrics](ci-metrics.html)
 - [Contributor Guide](contributor-guide.md)
 
 ## Scope
