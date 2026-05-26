@@ -26,13 +26,21 @@ def build_record(stats):
             continue
         benchmarks[bench["name"]] = us_per_tick
 
-    return {
+    test_counts = stats.get("test_counts")
+    unit_coverage_overall = stats.get("unit_coverage_overall")
+
+    record = {
         "timestamp": stats["generated_at"],
         "sha": stats["sha"],
         "result": stats["result"],
         "steps": steps,
         "benchmarks": benchmarks,
     }
+    if isinstance(test_counts, dict):
+        record["test_counts"] = test_counts
+    if isinstance(unit_coverage_overall, dict):
+        record["unit_coverage_overall"] = unit_coverage_overall
+    return record
 
 
 def load_history(path):

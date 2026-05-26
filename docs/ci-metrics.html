@@ -17,6 +17,8 @@
       --accent-4: #7e5aa6;
       --accent-5: #b57a2a;
       --danger: #8f2d2d;
+      --success: #5d8a4b;
+      --skip: #8d8579;
     }
 
     * {
@@ -231,6 +233,12 @@
       font-size: 0.92rem;
     }
 
+    .chart-note {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
     @media (max-width: 720px) {
       main {
         padding: 24px 14px 44px;
@@ -284,6 +292,35 @@
           <strong id="latest-result">-</strong>
         </article>
       </div>
+
+      <section class="section">
+        <div class="section-title">
+          <h2>Test outcome counts</h2>
+          <p>Snapshots, unit tests, and soak scenarios per merged <code>main</code> run.</p>
+        </div>
+        <div class="chart-card">
+          <div class="chart-wrap">
+            <svg id="test-count-chart" viewBox="0 0 960 360" role="img" aria-label="CI test outcome counts"></svg>
+          </div>
+          <div id="test-count-legend" class="legend"></div>
+          <p class="chart-note">
+            Each run groups three stacked bars from left to right: snapshots, unit, and soak.
+          </p>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">
+          <h2>Overall unit coverage</h2>
+          <p>Overall branch and line coverage percentages from the unit coverage step.</p>
+        </div>
+        <div class="chart-card">
+          <div class="chart-wrap">
+            <svg id="coverage-chart" viewBox="0 0 960 320" role="img" aria-label="CI unit coverage trends"></svg>
+          </div>
+          <div id="coverage-legend" class="legend"></div>
+        </div>
+      </section>
 
       <section class="section">
         <div class="section-title">
@@ -353,6 +390,15 @@
         "command_ticks",
         "combat_rounds"
       ];
+      var TEST_SUITES = [
+        { key: "snapshots", label: "Snapshots" },
+        { key: "unit", label: "Unit" },
+        { key: "soak", label: "Soak" }
+      ];
+      var COVERAGE_KEYS = [
+        { key: "branch_pct", label: "Branch %", color: "#3b6f8f" },
+        { key: "line_pct", label: "Line %", color: "#a24d2f" }
+      ];
       var COLORS = [
         "#a24d2f",
         "#3b6f8f",
@@ -363,6 +409,11 @@
         "#8c4b6e",
         "#4b5f8c"
       ];
+      var STATUS_COLORS = {
+        pass: "#5d8a4b",
+        fail: "#8f2d2d",
+        skip: "#8d8579"
+      };
 
       function $(id) {
         return document.getElementById(id);
@@ -394,6 +445,20 @@
           return "-";
         }
         return value + " us";
+      }
+
+      function formatPct(value) {
+        if (value === null || value === undefined) {
+          return "-";
+        }
+        return value.toFixed(2) + "%";
+      }
+
+      function formatCounts(counts) {
+        if (!counts) {
+          return "-";
+        }
+        return counts.pass + " pass / " + counts.fail + " fail / " + counts.skip + " skip";
       }
 
       function renderLegend(target, series) {
@@ -488,9 +553,104 @@
         renderLegend($(legendId), series);
       }
 
+      function drawStackedBarChart(svgId, legendId, runs) {
+        var svg = $(svgId);
+        var width = 960;
+        var height = 360;
+        var paddingLeft = 60;
+        var paddingRight = 20;
+        var paddingTop = 24;
+        var paddingBottom = 64;
+        var chartWidth = width - paddingLeft - paddingRight;
+        var chartHeight = height - paddingTop - paddingBottom;
+        var groupWidth = runs.length ? chartWidth / runs.length : 0;
+        var statuses = ["pass", "fail", "skip"];
+        var maxValue = 0;
+        var parts = [];
+        var i;
+
+        runs.forEach(function (run) {
+          TEST_SUITES.forEach(function (suite) {
+            var counts = run.test_counts && run.test_counts[suite.key];
+            var total = counts ? counts.pass + counts.fail + counts.skip : 0;
+            if (total > maxValue) {
+              maxValue = total;
+            }
+          });
+        });
+
+        if (!maxValue) {
+          svg.innerHTML = "<text x=\"40\" y=\"180\" fill=\"#6d6257\" font-size=\"18\">No test outcome history yet.</text>";
+          renderLegend($(legendId), [
+            { color: STATUS_COLORS.pass, label: "Pass" },
+            { color: STATUS_COLORS.fail, label: "Fail" },
+            { color: STATUS_COLORS.skip, label: "Skip" }
+          ]);
+          return;
+        }
+
+        parts.push("<rect x=\"0\" y=\"0\" width=\"" + width + "\" height=\"" + height + "\" fill=\"#fffaf0\"></rect>");
+
+        for (i = 0; i <= 4; i += 1) {
+          var y = paddingTop + (chartHeight * i / 4);
+          var value = Math.round(maxValue * (4 - i) / 4);
+          parts.push("<line x1=\"" + paddingLeft + "\" y1=\"" + y + "\" x2=\"" + (width - paddingRight) + "\" y2=\"" + y + "\" stroke=\"#d5c7b5\" stroke-dasharray=\"4 6\"></line>");
+          parts.push("<text x=\"14\" y=\"" + (y + 4) + "\" fill=\"#6d6257\" font-size=\"12\">" + value + "</text>");
+        }
+
+        runs.forEach(function (run, runIdx) {
+          var groupX = paddingLeft + (groupWidth * runIdx);
+          var innerWidth = groupWidth * 0.72;
+          var innerOffset = (groupWidth - innerWidth) / 2;
+          var barGap = innerWidth * 0.08;
+          var barWidth = (innerWidth - (barGap * 2)) / 3;
+          TEST_SUITES.forEach(function (suite, suiteIdx) {
+            var counts = run.test_counts && run.test_counts[suite.key];
+            var x = groupX + innerOffset + (suiteIdx * (barWidth + barGap));
+            var cursorY = paddingTop + chartHeight;
+
+            statuses.forEach(function (status) {
+              var value = counts ? counts[status] : 0;
+              var barHeight = maxValue ? (value / maxValue) * chartHeight : 0;
+              if (!barHeight) {
+                return;
+              }
+              cursorY -= barHeight;
+              parts.push(
+                "<rect x=\"" + x + "\" y=\"" + cursorY + "\" width=\"" + barWidth + "\" height=\"" + barHeight +
+                "\" fill=\"" + STATUS_COLORS[status] + "\"></rect>"
+              );
+            });
+          });
+
+          parts.push(
+            "<text x=\"" + (groupX + (groupWidth / 2)) + "\" y=\"" + (height - 16) +
+            "\" text-anchor=\"middle\" fill=\"#6d6257\" font-size=\"11\">" +
+            (run.sha ? run.sha.slice(0, 7) : String(runIdx + 1)) +
+            "</text>"
+          );
+        });
+
+        svg.innerHTML = parts.join("");
+        renderLegend($(legendId), [
+          { color: STATUS_COLORS.pass, label: "Pass" },
+          { color: STATUS_COLORS.fail, label: "Fail" },
+          { color: STATUS_COLORS.skip, label: "Skip" }
+        ]);
+      }
+
       function renderLatestTable(run) {
         var tbody = $("latest-table");
         var rows = [];
+        if (run.test_counts) {
+          rows.push("<tr><td>snapshots</td><td>" + formatCounts(run.test_counts.snapshots) + "</td></tr>");
+          rows.push("<tr><td>unit tests</td><td>" + formatCounts(run.test_counts.unit) + "</td></tr>");
+          rows.push("<tr><td>soak tests</td><td>" + formatCounts(run.test_counts.soak) + "</td></tr>");
+        }
+        if (run.unit_coverage_overall) {
+          rows.push("<tr><td>overall branch coverage</td><td>" + formatPct(run.unit_coverage_overall.branch_pct) + "</td></tr>");
+          rows.push("<tr><td>overall line coverage</td><td>" + formatPct(run.unit_coverage_overall.line_pct) + "</td></tr>");
+        }
         Object.keys(run.steps).forEach(function (key) {
           rows.push("<tr><td>" + key + "</td><td>" + formatMs(run.steps[key]) + "</td></tr>");
         });
@@ -514,6 +674,24 @@
         $("latest-result").textContent = latest.result;
         renderLatestTable(latest);
 
+        drawStackedBarChart("test-count-chart", "test-count-legend", runs);
+        drawChart(
+          "coverage-chart",
+          "coverage-legend",
+          runs,
+          COVERAGE_KEYS.map(function (item) {
+            return {
+              label: item.label,
+              color: item.color,
+              values: runs.map(function (run) {
+                return run.unit_coverage_overall && run.unit_coverage_overall[item.key] !== undefined
+                  ? run.unit_coverage_overall[item.key]
+                  : null;
+              })
+            };
+          }),
+          function (value) { return formatPct(value); }
+        );
         drawChart(
           "timing-chart",
           "timing-legend",
