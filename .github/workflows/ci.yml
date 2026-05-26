@@ -19,9 +19,9 @@ jobs:
       - name: Install build tools
         run: sudo apt-get update && sudo apt-get install -y gcc make
 
-      - name: Run tests and write report
+      - name: Run CI stats and write report
         id: ci_report
-        run: sh scripts/ci-test-report.sh
+        run: sh scripts/ci-stats.sh
         continue-on-error: true
 
       - name: Post test results on pull request
@@ -31,6 +31,14 @@ jobs:
           issue-number: ${{ github.event.pull_request.number }}
           body-path: ci-test-report.md
           comment-tag: ci-test-results
+
+      - name: Upload CI stats artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-stats
+          path: |
+            ci-stats.json
+            ci-stats.md
 
       - name: Fail if tests failed
         if: steps.ci_report.outcome == 'failure'
