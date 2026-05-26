@@ -41,6 +41,8 @@ write_header() {
     ref=$(ref_name)
     sha=$(sha_short)
     {
+        echo "<!-- ci-test-results -->"
+        echo ""
         echo "## CI test results"
         echo ""
         echo "**Ref:** \`$ref\` @ \`$sha\`"

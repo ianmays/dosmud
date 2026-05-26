@@ -31,7 +31,7 @@ jobs:
         with:
           issue-number: ${{ github.event.pull_request.number }}
           comment-author: github-actions[bot]
-          body-includes: "## CI test results"
+          body-includes: "<!-- ci-test-results -->"
 
       - name: Post test results on pull request
         if: github.event_name == 'pull_request'
