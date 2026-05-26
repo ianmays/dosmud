@@ -11,6 +11,27 @@ SNAPSHOT_RE = re.compile(r"snapshot tests passed: (\d+)/(\d+)")
 UNIT_RE = re.compile(r"^Pass: (\d+), fail: (\d+), skip: (\d+)\.$", re.MULTILINE)
 BENCH_RE = re.compile(r"SOAK_BENCH ([^ ]+)")
 COVERAGE_RE = re.compile(r"^\s*overall\s+([0-9]+\.[0-9]+)\s*/\s*([0-9]+\.[0-9]+)\s*$", re.MULTILINE)
+SECTION_RE_TEMPLATE = r"^=== {name} ===$(.*?)(?=^=== .* ===$|\Z)"
+
+
+def parse_section_counts(text, section_name):
+    section_re = re.compile(
+        SECTION_RE_TEMPLATE.format(name=re.escape(section_name)),
+        re.MULTILINE | re.DOTALL,
+    )
+    match = section_re.search(text)
+    if not match:
+        return None
+
+    summary_match = UNIT_RE.search(match.group(1))
+    if not summary_match:
+        return None
+
+    return {
+        "pass": int(summary_match.group(1)),
+        "fail": int(summary_match.group(2)),
+        "skip": int(summary_match.group(3)),
+    }
 
 
 def load_json(path):
@@ -37,35 +58,36 @@ def parse_log(text):
     else:
         snapshot_counts = {"pass": 0, "fail": 1, "skip": 0}
 
-    unit_match = UNIT_RE.search(text)
-    if unit_match:
-        unit_counts = {
-            "pass": int(unit_match.group(1)),
-            "fail": int(unit_match.group(2)),
-            "skip": int(unit_match.group(3)),
-        }
-    else:
+    unit_counts = parse_section_counts(text, "unit tests")
+    if unit_counts is None:
         unit_counts = {"pass": 0, "fail": 1, "skip": 0}
 
+    soak_counts = parse_section_counts(text, "soak tests")
     benches = sorted(set(BENCH_RE.findall(text)))
-    soak_counts = {"pass": len(benches), "fail": 0, "skip": 0}
+    if soak_counts is None:
+        if benches:
+            soak_counts = {"pass": len(benches), "fail": 0, "skip": 0}
+        else:
+            soak_counts = {"pass": 0, "fail": 1, "skip": 0}
 
     coverage_match = COVERAGE_RE.search(text)
-    if not coverage_match:
-        raise ValueError("Could not parse overall unit coverage from log.")
-    coverage = {
-        "branch_pct": float(coverage_match.group(1)),
-        "line_pct": float(coverage_match.group(2)),
-    }
+    coverage = None
+    if coverage_match:
+        coverage = {
+            "branch_pct": float(coverage_match.group(1)),
+            "line_pct": float(coverage_match.group(2)),
+        }
 
-    return {
+    derived = {
         "test_counts": {
             "snapshots": snapshot_counts,
             "unit": unit_counts,
             "soak": soak_counts,
-        },
-        "unit_coverage_overall": coverage,
+        }
     }
+    if coverage is not None:
+        derived["unit_coverage_overall"] = coverage
+    return derived
 
 
 def main():
@@ -84,7 +106,10 @@ def main():
     for run in history.get("runs", []):
         if run.get("sha") == args.sha:
             run["test_counts"] = derived["test_counts"]
-            run["unit_coverage_overall"] = derived["unit_coverage_overall"]
+            if "unit_coverage_overall" in derived:
+                run["unit_coverage_overall"] = derived["unit_coverage_overall"]
+            else:
+                run.pop("unit_coverage_overall", None)
             write_json(history_path, history)
             return
 

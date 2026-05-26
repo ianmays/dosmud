@@ -384,6 +384,8 @@ On `main` and pull requests, CI runs `scripts/ci-stats.sh` (layer check, `make t
 
 Successful `main` CI runs trigger [`.github/workflows/ci-metrics.yml`](../.github/workflows/ci-metrics.yml), which downloads `ci-stats.json`, appends one normalized record into `history.json` on the dedicated `ci-metrics` branch, and pushes that branch back to GitHub. The metrics dashboard at [CI Metrics](ci-metrics.html) reads that branch directly via raw GitHub content, so persistent history is kept out of both PR branches and `main`. The dashboard trends build/test timings, soak benchmark values, per-suite snapshot/unit/soak pass-fail-skip counts, and overall unit branch/line coverage.
 
+When the metrics schema grows, use [`scripts/backfill-ci-history.py`](../scripts/backfill-ci-history.py) to enrich older `ci-metrics/history.json` entries from an archived CI log. It takes the target history file, the target run SHA, and the source log file, then patches only the matching history record.
+
 ## Build artifacts
 
 | Target | Output |
