@@ -168,7 +168,10 @@ if (-not $NoBuild) {
   }
 
   if (-not $NoRun) {
-      Start-DosSession @($runCommand)
+      $runtimeExitCode = Start-DosSession @($runCommand)
+      if ($runtimeExitCode -ne 0) {
+          exit $runtimeExitCode
+      }
   }
 } else {
   if (!(Test-Path $destination)) {
@@ -181,5 +184,8 @@ if (-not $NoBuild) {
     exit 1
   }
 
-  Start-DosSession @($runCommand)
+  $runtimeExitCode = Start-DosSession @($runCommand)
+  if ($runtimeExitCode -ne 0) {
+    exit $runtimeExitCode
+  }
 }

@@ -8,10 +8,8 @@ Run from project root:
 
 ```sh
 make build
-make run
 make check-layers
 make test
-make test-run-bin
 make test-run
 make test-unit
 make test-soak
@@ -20,14 +18,21 @@ make test-soak
 Purpose:
 
 - `make build`: native GCC development build; prints `elapsed: <seconds>` after the compile/link step
-- `make run`: builds the native release binary if needed, then launches it; pass `SEED=<unsigned>` to forward `--seed`
 - `make check-layers`: core/render boundary guard (no `printf` in `src/*.c` except `main.c`, `grendr.c`, and the platform file `platpos.c` or `platdos.c`)
 - `make test`: strict deterministic compile (`-Werror`, `-DTEST_MODE`, `-g -O0`); does not run `check-layers`; prints `elapsed: <seconds>` after the compile/link step
-- `make test-run-bin`: builds the native `TEST_MODE` binary if needed, then launches it; pass `SEED=<unsigned>` to forward `--seed`
 - `make snapshot-run`: runs every name in `SNAPSHOT_TESTS` plus `seed_cli` against the existing native `TEST_MODE` binary (`./dosmud`; see [Snapshot test files](#snapshot-test-files)). Each step prints `snapshot: <name>`. Finishes with `snapshot tests passed: N/M` (for example `64/64` snapshots plus `seed_cli`, 65 steps total).
 - `make test-run`: builds the test binary (`make test`), then runs `make snapshot-run`.
 - `make test-unit`: builds and runs the greatest unit suite (`tests/unit/build/dosmud_unit`, `TEST_MODE` only; not linked into release `dosmud`)
 - `make test-soak`: builds and runs long-run soak/stress checks (`tests/soak/build/dosmud_soak`; separate from unit tests)
+
+## Interactive helpers
+
+Use these when you want to launch a playable or interactive binary rather than run a validation step:
+
+- `make run`: builds the native release binary if needed, then launches it; pass `SEED=<unsigned>` to forward `--seed`
+- `make test-run-bin`: builds the native `TEST_MODE` binary if needed, then launches it; pass `SEED=<unsigned>` to forward `--seed`
+- `make dos-run`: launches the existing prepared DOS release executable without rebuilding
+- `make test-dos-run`: launches the existing prepared DOS `TEST_MODE` executable without rebuilding
 
 ## Test layers
 

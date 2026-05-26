@@ -64,7 +64,7 @@ run_build_step() {
     duration_var="$1"
     name="$2"
     shift 2
-    run_step "$name" "$@" || true
+    run_step "$name" "$@"
     eval "$duration_var=\$last_duration"
 }
 
@@ -166,11 +166,11 @@ append_build_timing_section() {
 write_header
 : > "$LOG"
 
-run_step "check-layers" make check-layers || true
-run_build_step build_release_duration "build (release)" make build
-run_build_step build_test_duration "build (TEST_MODE)" make test
-run_build_step build_unit_duration "build unit binary" make build-unit
-run_build_step build_soak_duration "build soak binary" make build-soak
+run_step "check-layers" make check-layers
+run_build_step build_release_duration "make build" make build
+run_build_step build_test_duration "make test" make test
+run_build_step build_unit_duration "make build-unit" make build-unit
+run_build_step build_soak_duration "make build-soak" make build-soak
 
 if run_timed "snapshots" make snapshot-run; then
     append_snapshots_row "$(format_duration "$last_duration")"
@@ -193,7 +193,7 @@ else
     failed=1
 fi
 
-run_step "soak tests" ./tests/soak/build/dosmud_soak || true
+run_step "soak tests" ./tests/soak/build/dosmud_soak
 append_soak_benchmark_section || true
 append_build_timing_section
 

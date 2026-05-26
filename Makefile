@@ -83,7 +83,8 @@ snapshot-run:
 	n=$$((n + 1)); \
 	echo "snapshot tests passed: $$n/$$total"
 
-test-run: test snapshot-run
+test-run: test
+	$(MAKE) snapshot-run
 
 # gameplay .c files must not call printf (use grendr render_* instead)
 check-layers:
