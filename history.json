@@ -1,0 +1,25 @@
+{
+  "runs": [
+    {
+      "timestamp": "2026-05-26T21:16:33Z",
+      "sha": "a5f5862",
+      "result": "pass",
+      "steps": {
+        "check-layers": 6,
+        "make build": 520,
+        "make test": 468,
+        "make build-unit": 1381,
+        "make build-soak": 552,
+        "snapshots": 103,
+        "unit tests": 7,
+        "unit coverage": 164,
+        "soak tests": 5
+      },
+      "benchmarks": {
+        "background_ticks": 0,
+        "command_ticks": 0,
+        "combat_rounds": 0
+      }
+    }
+  ]
+}
