@@ -38,6 +38,16 @@ The repo’s GitHub project uses a **Status** field on issues: **Planning** when
 
 Agents automate this with `gh pr view --json number,isDraft` after every push; see [AGENTS.md](../AGENTS.md) and [`.cursor/skills/pr-after-push/SKILL.md`](../.cursor/skills/pr-after-push/SKILL.md).
 
+### CI review surfaces
+
+Use the CI outputs for different review questions:
+
+- the sticky PR comment shows the current pull request run in one place, including step results, coverage, soak benchmarks, and build timings
+- the GitHub Actions job summary shows the same current-run stats on the workflow run page
+- the [CI Metrics](ci-metrics.html) dashboard shows merged `main` history so you can check whether a timing or soak result looks like a one-off spike or part of a trend
+
+For the workflow details behind these outputs, including how `ci-stats.json` is published and how the dashboard history is updated, see [testing.md](testing.md#ci-github-actions).
+
 ## Local Validation Before Opening a PR
 
 Run:
