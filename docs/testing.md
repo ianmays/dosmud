@@ -380,7 +380,9 @@ The Open Watcom build (`build.bat`) only needs `src/`, `include/`, and `build.ba
 
 ## CI (GitHub Actions)
 
-On `main` and pull requests, CI runs `scripts/ci-stats.sh` (layer check, `make test`, `make test-run`, `make test-unit`, `make test-unit-coverage`, `make test-soak`; see [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)). On pull requests, results are posted or updated in a single PR comment by finding the prior hidden `ci-test-results` marker comment and replacing it, the stats summary is appended to the GitHub Actions job summary, and `ci-stats.json` / `ci-stats.md` are uploaded as artifacts. CI starts from a clean checkout; for comparable local timings, run `make clean` before the timing-sensitive targets. DOS prep is not run in CI.
+On `main` and pull requests, CI runs `scripts/ci-stats.sh` (layer check, `make test`, `make test-run`, `make test-unit`, `make test-unit-coverage`, `make test-soak`; see [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)). On pull requests, results are posted or updated in a single PR comment by finding the prior hidden `ci-test-results` marker comment and replacing it, the stats summary is appended to the GitHub Actions job summary, and `ci-stats.json` is uploaded as the sole metrics artifact. CI starts from a clean checkout; for comparable local timings, run `make clean` before the timing-sensitive targets. DOS prep is not run in CI.
+
+Successful `main` CI runs trigger [`.github/workflows/ci-metrics.yml`](../.github/workflows/ci-metrics.yml), which downloads `ci-stats.json`, appends one normalized record into `history.json` on the dedicated `ci-metrics` branch, and pushes that branch back to GitHub. The metrics dashboard at [CI Metrics](ci-metrics.html) reads that branch directly via raw GitHub content, so persistent history is kept out of both PR branches and `main`.
 
 ## Build artifacts
 

@@ -46,9 +46,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ci-stats
-          path: |
-            ci-stats.json
-            ci-stats.md
+          path: ci-stats.json
 
       - name: Fail if tests failed
         if: steps.ci_report.outcome == 'failure'

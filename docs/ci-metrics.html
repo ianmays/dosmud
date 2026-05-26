@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>dosmud CI metrics</title>
+  <style>
+    :root {
+      --bg: #f3efe5;
+      --panel: #fffaf0;
+      --ink: #1f1a16;
+      --muted: #6d6257;
+      --line: #d5c7b5;
+      --accent: #a24d2f;
+      --accent-2: #3b6f8f;
+      --accent-3: #5d8a4b;
+      --accent-4: #7e5aa6;
+      --accent-5: #b57a2a;
+      --danger: #8f2d2d;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top right, rgba(162, 77, 47, 0.10), transparent 28%),
+        radial-gradient(circle at bottom left, rgba(59, 111, 143, 0.10), transparent 30%),
+        var(--bg);
+    }
+
+    main {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 40px 20px 56px;
+    }
+
+    h1,
+    h2 {
+      margin: 0;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    p {
+      margin: 0;
+      line-height: 1.55;
+    }
+
+    a {
+      color: var(--accent);
+    }
+
+    .hero {
+      padding: 28px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: linear-gradient(160deg, rgba(255, 250, 240, 0.96), rgba(246, 238, 226, 0.96));
+      box-shadow: 0 20px 40px rgba(31, 26, 22, 0.08);
+    }
+
+    .hero p,
+    .status p {
+      color: var(--muted);
+    }
+
+    .hero-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .hero-links a {
+      display: inline-block;
+      padding: 10px 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      text-decoration: none;
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    .status,
+    .section,
+    .meta-grid {
+      margin-top: 22px;
+    }
+
+    .status,
+    .card,
+    .chart-card {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--panel);
+      box-shadow: 0 14px 28px rgba(31, 26, 22, 0.06);
+    }
+
+    .status,
+    .card {
+      padding: 18px 20px;
+    }
+
+    .status.error {
+      border-color: rgba(143, 45, 45, 0.35);
+      background: rgba(143, 45, 45, 0.08);
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+    }
+
+    .card h2 {
+      font-size: 0.95rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    .card strong {
+      display: block;
+      font-size: 1.3rem;
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    .section-title p {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .chart-grid {
+      display: grid;
+      gap: 20px;
+    }
+
+    .chart-card {
+      padding: 20px;
+    }
+
+    .chart-card h2 {
+      font-size: 1.2rem;
+      margin-bottom: 8px;
+    }
+
+    .chart-card p {
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    .chart-wrap {
+      overflow-x: auto;
+    }
+
+    svg {
+      width: 100%;
+      min-width: 760px;
+      height: 320px;
+      display: block;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 16px;
+      margin-top: 12px;
+      font-size: 0.92rem;
+      color: var(--muted);
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .legend i {
+      width: 14px;
+      height: 3px;
+      border-radius: 999px;
+      display: inline-block;
+    }
+
+    .table-card {
+      margin-top: 20px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--panel);
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 12px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+      font-size: 0.95rem;
+    }
+
+    th {
+      background: rgba(213, 199, 181, 0.28);
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 0.78rem;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .footnote {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    @media (max-width: 720px) {
+      main {
+        padding: 24px 14px 44px;
+      }
+
+      .hero {
+        padding: 22px 18px;
+      }
+
+      svg {
+        min-width: 640px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <h1>CI Metrics</h1>
+      <p>
+        Trend view for merged <code>main</code> CI runs. The charts read machine-generated history from
+        the dedicated <code>ci-metrics</code> branch, while pull request runs still surface their detail in
+        the sticky PR comment and job summary.
+      </p>
+      <div class="hero-links">
+        <a href="index.md">Back to manual index</a>
+        <a href="testing.md">Testing reference</a>
+      </div>
+    </section>
+
+    <section id="status" class="status">
+      <p>Loading metrics history from the <code>ci-metrics</code> branch.</p>
+    </section>
+
+    <section id="content" hidden>
+      <div class="meta-grid">
+        <article class="card">
+          <h2>Latest SHA</h2>
+          <strong id="latest-sha">-</strong>
+        </article>
+        <article class="card">
+          <h2>Latest timestamp</h2>
+          <strong id="latest-time">-</strong>
+        </article>
+        <article class="card">
+          <h2>Tracked runs</h2>
+          <strong id="run-count">-</strong>
+        </article>
+        <article class="card">
+          <h2>Latest result</h2>
+          <strong id="latest-result">-</strong>
+        </article>
+      </div>
+
+      <section class="section">
+        <div class="section-title">
+          <h2>Timing trends</h2>
+          <p>Wall-clock duration in milliseconds for key build and test stages.</p>
+        </div>
+        <div class="chart-card">
+          <div class="chart-wrap">
+            <svg id="timing-chart" viewBox="0 0 960 320" role="img" aria-label="CI timing trends"></svg>
+          </div>
+          <div id="timing-legend" class="legend"></div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">
+          <h2>Soak benchmark trends</h2>
+          <p>Recorded <code>us_per_tick</code> values from the long-run soak scenarios.</p>
+        </div>
+        <div class="chart-card">
+          <div class="chart-wrap">
+            <svg id="benchmark-chart" viewBox="0 0 960 320" role="img" aria-label="CI soak benchmark trends"></svg>
+          </div>
+          <div id="benchmark-legend" class="legend"></div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">
+          <h2>Latest run details</h2>
+          <p>The most recent merged <code>main</code> run captured in history.</p>
+        </div>
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Metric</th>
+                <th>Latest value</th>
+              </tr>
+            </thead>
+            <tbody id="latest-table"></tbody>
+          </table>
+        </div>
+        <p class="footnote">
+          The source data is fetched directly from
+          <code>https://raw.githubusercontent.com/ianmays/dosmud/ci-metrics/history.json</code>.
+        </p>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      var HISTORY_URL = "https://raw.githubusercontent.com/ianmays/dosmud/ci-metrics/history.json";
+      var TIMING_KEYS = [
+        "make build",
+        "make test",
+        "make build-unit",
+        "make build-soak",
+        "snapshots",
+        "unit tests",
+        "unit coverage",
+        "soak tests"
+      ];
+      var BENCHMARK_KEYS = [
+        "background_ticks",
+        "command_ticks",
+        "combat_rounds"
+      ];
+      var COLORS = [
+        "#a24d2f",
+        "#3b6f8f",
+        "#5d8a4b",
+        "#7e5aa6",
+        "#b57a2a",
+        "#1f6772",
+        "#8c4b6e",
+        "#4b5f8c"
+      ];
+
+      function $(id) {
+        return document.getElementById(id);
+      }
+
+      function setStatus(text, isError) {
+        var box = $("status");
+        box.className = isError ? "status error" : "status";
+        box.innerHTML = "<p>" + text + "</p>";
+      }
+
+      function formatStamp(value) {
+        var date = new Date(value);
+        if (isNaN(date.getTime())) {
+          return value;
+        }
+        return date.toLocaleString();
+      }
+
+      function formatMs(value) {
+        if (value === null || value === undefined) {
+          return "-";
+        }
+        return (value / 1000).toFixed(3) + "s";
+      }
+
+      function formatBench(value) {
+        if (value === null || value === undefined) {
+          return "-";
+        }
+        return value + " us";
+      }
+
+      function renderLegend(target, series) {
+        target.innerHTML = "";
+        series.forEach(function (item) {
+          var row = document.createElement("span");
+          row.innerHTML = "<i style=\"background:" + item.color + "\"></i>" + item.label;
+          target.appendChild(row);
+        });
+      }
+
+      function buildSeries(runs, keys, sourceKey) {
+        return keys.map(function (key, index) {
+          return {
+            label: key,
+            color: COLORS[index % COLORS.length],
+            values: runs.map(function (run) {
+              return run[sourceKey] && run[sourceKey][key] !== undefined ? run[sourceKey][key] : null;
+            })
+          };
+        });
+      }
+
+      function drawChart(svgId, legendId, runs, series, formatter) {
+        var svg = $(svgId);
+        var width = 960;
+        var height = 320;
+        var paddingLeft = 60;
+        var paddingRight = 20;
+        var paddingTop = 24;
+        var paddingBottom = 44;
+        var chartWidth = width - paddingLeft - paddingRight;
+        var chartHeight = height - paddingTop - paddingBottom;
+        var values = [];
+
+        series.forEach(function (item) {
+          item.values.forEach(function (value) {
+            if (value !== null) {
+              values.push(value);
+            }
+          });
+        });
+
+        if (!values.length) {
+          svg.innerHTML = "<text x=\"40\" y=\"160\" fill=\"#6d6257\" font-size=\"18\">No chartable data yet.</text>";
+          renderLegend($(legendId), []);
+          return;
+        }
+
+        var maxValue = Math.max.apply(null, values);
+        if (maxValue === 0) {
+          maxValue = 1;
+        }
+
+        var xStep = runs.length > 1 ? chartWidth / (runs.length - 1) : 0;
+        var ticks = 4;
+        var parts = [];
+        var i;
+
+        parts.push("<rect x=\"0\" y=\"0\" width=\"" + width + "\" height=\"" + height + "\" fill=\"#fffaf0\"></rect>");
+
+        for (i = 0; i <= ticks; i += 1) {
+          var y = paddingTop + (chartHeight * i / ticks);
+          var value = Math.round(maxValue * (ticks - i) / ticks);
+          parts.push("<line x1=\"" + paddingLeft + "\" y1=\"" + y + "\" x2=\"" + (width - paddingRight) + "\" y2=\"" + y + "\" stroke=\"#d5c7b5\" stroke-dasharray=\"4 6\"></line>");
+          parts.push("<text x=\"8\" y=\"" + (y + 4) + "\" fill=\"#6d6257\" font-size=\"12\">" + formatter(value) + "</text>");
+        }
+
+        series.forEach(function (item) {
+          var path = [];
+          item.values.forEach(function (value, idx) {
+            if (value === null) {
+              return;
+            }
+            var x = paddingLeft + (xStep * idx);
+            var y = paddingTop + chartHeight - ((value / maxValue) * chartHeight);
+            path.push((path.length ? "L" : "M") + x + " " + y);
+            parts.push("<circle cx=\"" + x + "\" cy=\"" + y + "\" r=\"4\" fill=\"" + item.color + "\"></circle>");
+          });
+          if (path.length) {
+            parts.push("<path d=\"" + path.join(" ") + "\" fill=\"none\" stroke=\"" + item.color + "\" stroke-width=\"3\"></path>");
+          }
+        });
+
+        runs.forEach(function (run, idx) {
+          var x = paddingLeft + (xStep * idx);
+          var label = run.sha ? run.sha.slice(0, 7) : String(idx + 1);
+          parts.push("<text x=\"" + x + "\" y=\"" + (height - 14) + "\" text-anchor=\"middle\" fill=\"#6d6257\" font-size=\"11\">" + label + "</text>");
+        });
+
+        svg.innerHTML = parts.join("");
+        renderLegend($(legendId), series);
+      }
+
+      function renderLatestTable(run) {
+        var tbody = $("latest-table");
+        var rows = [];
+        Object.keys(run.steps).forEach(function (key) {
+          rows.push("<tr><td>" + key + "</td><td>" + formatMs(run.steps[key]) + "</td></tr>");
+        });
+        Object.keys(run.benchmarks).forEach(function (key) {
+          rows.push("<tr><td>" + key + "</td><td>" + formatBench(run.benchmarks[key]) + "</td></tr>");
+        });
+        tbody.innerHTML = rows.join("");
+      }
+
+      function render(history) {
+        var runs = history && history.runs ? history.runs : [];
+        if (!runs.length) {
+          setStatus("No metrics history yet. The <code>ci-metrics</code> branch exists, but it does not contain any merged <code>main</code> CI records yet.", false);
+          return;
+        }
+
+        var latest = runs[runs.length - 1];
+        $("latest-sha").textContent = latest.sha.slice(0, 7);
+        $("latest-time").textContent = formatStamp(latest.timestamp);
+        $("run-count").textContent = String(runs.length);
+        $("latest-result").textContent = latest.result;
+        renderLatestTable(latest);
+
+        drawChart(
+          "timing-chart",
+          "timing-legend",
+          runs,
+          buildSeries(runs, TIMING_KEYS, "steps"),
+          function (value) { return formatMs(value); }
+        );
+        drawChart(
+          "benchmark-chart",
+          "benchmark-legend",
+          runs,
+          buildSeries(runs, BENCHMARK_KEYS, "benchmarks"),
+          function (value) { return value + " us"; }
+        );
+
+        $("content").hidden = false;
+        $("status").hidden = true;
+      }
+
+      fetch(HISTORY_URL + "?ts=" + Date.now())
+        .then(function (response) {
+          if (!response.ok) {
+            throw new Error("The metrics branch or history file is unavailable (" + response.status + ").");
+          }
+          return response.json();
+        })
+        .then(render)
+        .catch(function (error) {
+          setStatus(
+            "Unable to load metrics history from the <code>ci-metrics</code> branch. " +
+            "Make sure the branch exists and contains <code>history.json</code>. " +
+            "Details: " + error.message,
+            true
+          );
+        });
+    }());
+  </script>
+</body>
+</html>

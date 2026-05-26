@@ -266,8 +266,7 @@ append_artifact_section() {
         echo ""
         echo "### Stats artifacts"
         echo ""
-        echo "- \`ci-stats.md\` - markdown summary uploaded as part of the \`ci-stats\` workflow artifact"
-        echo "- \`ci-stats.json\` - machine-readable timings and soak benchmark data in the same artifact"
+        echo "- \`ci-stats.json\` - machine-readable timings and soak benchmark data uploaded as the CI workflow artifact"
     } >> "$out"
 }
 
