@@ -1,6 +1,8 @@
 param(
     [string]$Mode = "",
-    [switch]$NoBuild
+    [switch]$NoBuild,
+    [switch]$NoRun,
+    [string]$Seed = ""
 )
 
 $config = Join-Path $PSScriptRoot "dos-prepare.local.ps1"
@@ -19,7 +21,7 @@ function Clear-DosDestination {
     }
     Remove-Item -LiteralPath $Path -Recurse -Force
     if (Test-Path -LiteralPath $Path) {
-        Write-Error "Could not remove existing DOS tree at $Path (close DOSBox/files using it and retry)."
+        Write-Error "Could not remove existing DOS tree at $Path (close DOS/files using it and retry)."
         exit 1
     }
 }
@@ -50,17 +52,85 @@ function Invoke-RobocopyOk {
     )
     Write-Host ""
     Write-Host "robocopy ($Label): $Source -> $Destination"
-    $args = @($Source, $Destination) + $ExtraArgs
-    & robocopy @args
+    $roboArgs = @($Source, $Destination) + $ExtraArgs
+    & robocopy @roboArgs
     if ($LASTEXITCODE -ge 8) {
         Write-Error "robocopy failed ($LASTEXITCODE): $Source -> $Destination"
         exit 1
     }
 }
 
+function Format-ElapsedSeconds {
+    param([TimeSpan]$Duration)
+    "{0}.{1:D3}s" -f [Math]::Floor($Duration.TotalSeconds), $Duration.Milliseconds
+}
+
+function Convert-ToWindowsCommandLineArgument {
+    param([string]$Argument)
+    if ($Argument -notmatch '[\s"]') {
+        return $Argument
+    }
+
+    $builder = New-Object System.Text.StringBuilder
+    $backslashCount = 0
+    [void]$builder.Append('"')
+
+    foreach ($ch in $Argument.ToCharArray()) {
+        if ($ch -eq '\') {
+            $backslashCount++
+            continue
+        }
+        if ($ch -eq '"') {
+            if ($backslashCount -gt 0) {
+                [void]$builder.Append(('\' * ($backslashCount * 2)))
+            }
+            [void]$builder.Append('\')
+            [void]$builder.Append('"')
+            $backslashCount = 0
+            continue
+        }
+        if ($backslashCount -gt 0) {
+            [void]$builder.Append(('\' * $backslashCount))
+            $backslashCount = 0
+        }
+        [void]$builder.Append($ch)
+    }
+
+    if ($backslashCount -gt 0) {
+        [void]$builder.Append(('\' * ($backslashCount * 2)))
+    }
+    [void]$builder.Append('"')
+    $builder.ToString()
+}
+
+function Start-DosSession {
+    param(
+        [string[]]$Commands,
+        [switch]$Wait
+    )
+    $dosArgs = @(
+        '-c', "mount c $mountpoint",
+        '-c', 'c:',
+        '-c', "cd $projectdirectory"
+    )
+    foreach ($cmd in $Commands) {
+        $dosArgs += @('-c', $cmd)
+    }
+    if ($Wait) {
+        # Start-Process on Windows PowerShell flattens arrays into one command line.
+        # Build that command line explicitly so mount/cd/build args survive spaces safely.
+        $commandLine = ($dosArgs | ForEach-Object { Convert-ToWindowsCommandLineArgument $_ }) -join ' '
+        $proc = Start-Process -FilePath "$dospath$dosexecutable" -ArgumentList $commandLine -Wait -PassThru
+        return $proc.ExitCode
+    }
+    & "$dospath$dosexecutable" @dosArgs
+    return $LASTEXITCODE
+}
+
 Get-Process $dosexecutable -ErrorAction SilentlyContinue | Stop-Process -Force
 
 $buildArgs = if ($Mode) { " $Mode" } else { "" }
+$runCommand = if ($Seed) { "$projectname.exe --seed $Seed" } else { "$projectname.exe" }
 
 if (-not $NoBuild) {
   # Refresh the DOS tree before building.
@@ -74,12 +144,35 @@ if (-not $NoBuild) {
   Invoke-RobocopyOk 'build.bat' $source $destination 'build.bat'
   Remove-StaleDosMirrorExtras $destination
 
-  & "$dospath$dosexecutable" `
-    -c "mount c $mountpoint" `
-    -c "c:" `
-    -c "cd $projectdirectory" `
-    -c "call build.bat$buildArgs" `
-    -c "$projectname.exe"
+  $buildStarted = Get-Date
+  Start-DosSession -Commands @("call build.bat$buildArgs", 'exit') -Wait | Out-Null
+  $buildElapsed = (Get-Date) - $buildStarted
+  $buildElapsedText = Format-ElapsedSeconds $buildElapsed
+  $buildLog = Join-Path $destination 'build.log'
+  $buildExe = Join-Path $destination "$projectname.exe"
+
+  if (Test-Path -LiteralPath $buildLog) {
+      Add-Content -LiteralPath $buildLog -Value "elapsed build.bat time: $buildElapsedText"
+  }
+  Write-Host "elapsed build.bat time: $buildElapsedText"
+
+  if (!(Test-Path -LiteralPath $buildExe)) {
+      Write-Error "Missing DOS executable at $buildExe after build.bat. DOS build failed."
+      exit 1
+  }
+
+  if ((Test-Path -LiteralPath $buildLog) -and
+      (-not (Select-String -LiteralPath $buildLog -Pattern 'wcl result: success ERRORLEVEL 0' -Quiet))) {
+      Write-Error "DOS build log does not report success. See $buildLog."
+      exit 1
+  }
+
+  if (-not $NoRun) {
+      $runtimeExitCode = Start-DosSession @($runCommand)
+      if ($runtimeExitCode -ne 0) {
+          exit $runtimeExitCode
+      }
+  }
 } else {
   if (!(Test-Path $destination)) {
     Write-Error "Missing prepared DOS tree at $destination. Run make dos-prepare first."
@@ -91,9 +184,8 @@ if (-not $NoBuild) {
     exit 1
   }
 
-  & "$dospath$dosexecutable" `
-    -c "mount c $mountpoint" `
-    -c "c:" `
-    -c "cd $projectdirectory" `
-    -c "$projectname.exe"
+  $runtimeExitCode = Start-DosSession @($runCommand)
+  if ($runtimeExitCode -ne 0) {
+    exit $runtimeExitCode
+  }
 }

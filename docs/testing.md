@@ -17,18 +17,27 @@ make test-soak
 
 Purpose:
 
-- `make build`: native GCC development build
+- `make build`: native GCC development build; prints `elapsed: <seconds>` after the compile/link step
 - `make check-layers`: core/render boundary guard (no `printf` in `src/*.c` except `main.c`, `grendr.c`, and the platform file `platpos.c` or `platdos.c`)
-- `make test`: strict deterministic compile (`-Werror`, `-DTEST_MODE`, `-g -O0`); does not run `check-layers`
-- `make test-run`: builds the test binary (`make test`), then runs every name in `SNAPSHOT_TESTS` plus `seed_cli` (CLI `--seed` on `smoke.input`; see [Snapshot test files](#snapshot-test-files)). Each step prints `snapshot: <name>`. Finishes with `snapshot tests passed: N/M` (for example `64/64` snapshots plus `seed_cli`, 65 steps total).
+- `make test`: strict deterministic compile (`-Werror`, `-DTEST_MODE`, `-g -O0`); does not run `check-layers`; prints `elapsed: <seconds>` after the compile/link step
+- `make snapshot-run`: runs every name in `SNAPSHOT_TESTS` plus `seed_cli` against the existing native `TEST_MODE` binary (`./dosmud`; see [Snapshot test files](#snapshot-test-files)). Each step prints `snapshot: <name>`. Finishes with `snapshot tests passed: N/M` (for example `64/64` snapshots plus `seed_cli`, 65 steps total).
+- `make test-run`: builds the test binary (`make test`), then runs `make snapshot-run`.
 - `make test-unit`: builds and runs the greatest unit suite (`tests/unit/build/dosmud_unit`, `TEST_MODE` only; not linked into release `dosmud`)
 - `make test-soak`: builds and runs long-run soak/stress checks (`tests/soak/build/dosmud_soak`; separate from unit tests)
+
+## Interactive helpers
+
+Use these when you want to launch a playable or interactive binary rather than run a validation step:
+
+- `make run`: builds the native release binary if needed, then launches it; pass `SEED=<unsigned>` to forward `--seed`
+- `make test-run-bin`: builds the native `TEST_MODE` binary if needed, then launches it; pass `SEED=<unsigned>` to forward `--seed`
+- `make dos-run`: launches the existing prepared DOS release executable without rebuilding
 
 ## Test layers
 
 | Layer | Command | What it proves |
 |-------|---------|----------------|
-| Snapshots | `make test-run` | Player-visible output matches golden `.expect` files |
+| Snapshots | `make test-run` or `make snapshot-run` | Player-visible output matches golden `.expect` files |
 | Unit tests | `make test-unit` | Small, targeted `GameState` / API behavior |
 | Soak tests | `make test-soak` | Fixed-seed long runs: state stays legal, perf within ceilings |
 
@@ -73,6 +82,7 @@ Unit test coverage ([#95](https://github.com/ianmays/dosmud/issues/95)) uses [gr
 
 ```sh
 make test-unit
+make build-unit                      # build only; useful when timing compile cost
 make test-unit-verbose              # greatest suite/test progress only
 make test-unit-verbose-gameplay     # greatest progress + gameplay render text
 make test-unit-coverage             # runs test-unit, then compact branch/line % table
@@ -80,6 +90,7 @@ make test-unit-coverage-verbose     # same tests, full gcov block per module
 ```
 
 - Binary: `tests/unit/build/dosmud_unit` (all gameplay modules except `main.c`, plus `tests/unit/unit_*.c`)
+- `make build-unit` prints `elapsed: <seconds>` after the unit binary build finishes
 - Output levels:
 
 | Target / flag | Greatest | Gameplay `render_*` |
@@ -111,8 +122,11 @@ make test-unit-coverage-verbose     # same tests, full gcov block per module
 Separate binary from unit tests: `tests/soak/build/dosmud_soak` via `make test-soak`. Uses the same greatest runner and linked game modules as unit tests, but runs long fixed-seed loops and checks that `GameState` stays legal (HP, mode, room, bag, dialogue/combat fields).
 
 ```sh
+make build-soak
 make test-soak
 ```
+
+`make build-soak` prints `elapsed: <seconds>` after the soak binary build finishes.
 
 Scenarios (see [`tests/soak/soak_sim.c`](../tests/soak/soak_sim.c)):
 
@@ -253,13 +267,13 @@ Add new fixtures in [`tests/harness/testharn.c`](../tests/harness/testharn.c) an
 1. Add `tests/regression/<name>.input` (and prefer one scenario per file).
 2. Use `@fixture` for setup; add inject in the fixture or via a `*_ready` fixture when outcomes must be fixed.
 3. Use `quiet_explore` when the test calls `wait` or `move`.
-4. Run `make test && make test-run` (or `./dosmud < tests/regression/<name>.input > tests/regression/<name>.output`) and copy or diff against `tests/regression/<name>.expect`.
+4. Run `make test && make snapshot-run` (or `./dosmud < tests/regression/<name>.input > tests/regression/<name>.output`) and copy or diff against `tests/regression/<name>.expect`.
 5. Add `<name>` to `SNAPSHOT_TESTS` in the [Makefile](../Makefile) (`seed_cli` stays separate: it uses `--seed` with `smoke.input`).
 6. Document new fixtures in this file.
 
 ### Snapshot test files
 
-Each process run uses one `.input` file until `quit`. `make test-run` runs `SNAPSHOT_TESTS` (includes `smoke`), then `seed_cli`.
+Each process run uses one `.input` file until `quit`. `make snapshot-run` runs `SNAPSHOT_TESTS` (includes `smoke`), then `seed_cli`. `make test-run` is the compile-plus-run wrapper.
 
 **Core / inventory (also in `SNAPSHOT_TESTS`):** `smoke`, `bandit_handover`, `bandit_wielded_give`, `area_items`, `map`, `equipment`, `craft_wielded`, `take_all`, `take_all_bag_full`.
 
@@ -287,13 +301,38 @@ Use PowerShell-driven DOS prep from Linux host shell to build and sync the DOS t
 make dos-prepare
 ```
 
-Start DOS and launch the existing DOS executable without rebuilding or refreshing the tree:
+TEST_MODE DOS prep without spelling the mode flag directly:
+
+```sh
+make test-dos-prepare
+```
+
+Build and validate the DOS tree without launching the runtime session:
+
+```sh
+make dos-prepare-norun
+make test-dos-prepare-norun
+```
+
+Start DOS and launch the most recently prepared DOS executable without rebuilding or refreshing the tree:
 
 ```sh
 make dos-run
 ```
 
-`make dos-run` expects a previously prepared DOS tree. Run `make dos-prepare` first if the mirrored DOS files or executable are missing.
+There is one prepared DOS tree at `$destination`. `make dos-run` launches whatever executable was most recently prepared there. Run `make dos-prepare` for release mode or `make test-dos-prepare` for `TEST_MODE` before using `make dos-run`.
+
+`make dos-prepare` now prints `elapsed build.bat time: <seconds>` after the Open Watcom build finishes and before the runtime DOS session starts. That elapsed time measures `build.bat` only, not the PowerShell tree refresh/copy phase. When `build.log` is present in the prepared DOS tree, `dos-prepare.ps1` appends the same elapsed line there too.
+
+To pass a custom seed through the DOS helper targets, use `SEED=<unsigned>`, for example:
+
+```sh
+make dos-prepare SEED=1234
+make test-dos-prepare SEED=1234
+make dos-prepare-norun SEED=1234
+make test-dos-prepare-norun SEED=1234
+make dos-run SEED=1234
+```
 
 When you add or remove `src\*.c` files, update `Makefile` (`SRC` or `TEST_SRC`) and `build.bat`. For the Open Watcom path, keep every `wcl` and `wlib` line under the COMMAND.COM length limit (about 127 characters): gameplay sources are packed into `gameplay.lib` via several short `wlib` calls; the final `wcl` link lists `main.obj`, `platdos.obj`, `gameplay.lib`, plus the other `.obj` files. `TEST_MODE` copies [`tests/harness/`](../tests/harness/) to `harness\` via `dos-prepare.ps1`, compiles `th_world.c` / `testharn.c` to `thwld.obj` / `tharn.obj`, and archives both into `gameplay.lib`. Use `goto` labels in `build.bat` for conditionals; parenthesized `if (...)` blocks break under COMMAND.COM.
 
@@ -307,6 +346,10 @@ Runtime seed (native or DOS build): the startup banner always prints the active 
 
 ```sh
 ./dosmud --seed 1234
+make run SEED=1234
+make test-run-bin SEED=1234
+make dos-prepare SEED=1234
+make test-dos-prepare SEED=1234
 ```
 
 Invalid flags print `usage: dosmud [--seed <unsigned>]` to stderr and exit with status 1. Seed values must be decimal, non-negative, and at most `CFG_SEED_CLI_MAX` (4294967295); leading `+`/`-` and out-of-range values are rejected.
@@ -320,7 +363,7 @@ make build-all
 make test-all
 ```
 
-These targets intentionally exercise DOS prep/invocation and native GCC flow together.
+These targets intentionally exercise DOS build prep and native GCC flow together. They validate the DOS build without launching the playable DOS runtime, equivalent to `make dos-prepare-norun` or `make test-dos-prepare-norun` as appropriate.
 
 ## Environment and path model
 
@@ -333,11 +376,11 @@ In `dos-prepare.local.ps1`:
 - `$source` should be Windows-reachable for Linux-hosted project files.
 - `$mountpoint`, `$destination`, `$dospath` should be Windows-visible emulator paths.
 
-The Open Watcom build (`build.bat`) only needs `src/`, `include/`, and `build.bat`. `dos-prepare.ps1` deletes the Windows DOS tree, copies only those paths (separate `robocopy` per directory plus `build.bat`), then strips any stray `.git`, `tests/`, docs, or Linux build junk if an old full mirror left them behind. Add new DOS inputs under `src/` or `include/` (or extend `dos-prepare.ps1` if a new top-level tree is required).
+The Open Watcom build (`build.bat`) only needs `src/`, `include/`, and `build.bat`. `dos-prepare.ps1` deletes the Windows DOS tree, copies only those paths (separate `robocopy` per directory plus `build.bat`), then strips any stray `.git`, `tests/`, docs, or Linux build junk if an old full mirror left them behind. It launches one waited DOS session for `build.bat`, records the elapsed `build.bat` time in the host console, appends the same line to `build.log` when that file exists, verifies success from the executable and available log output, and then launches the runtime DOS session unless `-NoRun` is set. Add new DOS inputs under `src/` or `include/` (or extend `dos-prepare.ps1` if a new top-level tree is required).
 
 ## CI (GitHub Actions)
 
-On `main` and pull requests, CI runs `scripts/ci-test-report.sh` (layer check, `make test`, `make test-run`, `make test-unit`, `make test-unit-coverage`; see [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)). On pull requests, results are posted or updated in a single PR comment (`comment-tag: ci-test-results`). DOS prep is not run in CI.
+On `main` and pull requests, CI runs `scripts/ci-test-report.sh` (layer check, `make build`, `make test`, `make build-unit`, `make build-soak`, `make snapshot-run`, unit binary, `make test-unit-coverage`, soak binary; see [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)). On pull requests, results are posted or updated in a single PR comment (`comment-tag: ci-test-results`). The report includes wall-clock step durations plus a separate **Build timings** table so compile/link cost is visible apart from test execution. CI starts from a clean checkout; for comparable local compile timings, run `make clean` before the build-only targets. DOS prep is not run in CI.
 
 ## Build artifacts
 
@@ -345,8 +388,9 @@ On `main` and pull requests, CI runs `scripts/ci-test-report.sh` (layer check, `
 |--------|--------|
 | `make build` | `./dosmud` (repo root) |
 | `make test` | `./dosmud` with `TEST_MODE` (same path; overwrites release binary) |
-| `make test-unit` / `make test-unit-coverage` / `make test-unit-coverage-verbose` | `tests/unit/build/dosmud_unit`, `*.o`, `*.gcno`, `*.gcda`; `.gcov` under `tests/unit/build/coverage/` (gitignored) |
+| `make build-unit` / `make test-unit` / `make test-unit-coverage` / `make test-unit-coverage-verbose` | `tests/unit/build/dosmud_unit`, `*.o`, `*.gcno`, `*.gcda`; `.gcov` under `tests/unit/build/coverage/` (gitignored) |
 | `make test-run` | `tests/regression/<name>.output` (gitignored) |
+| `make build-soak` / `make test-soak` | `tests/soak/build/dosmud_soak`, `*.o` (gitignored) |
 | `make dos-prepare` | `dosmud.exe` and `build.log` in the prepared DOS tree (`$destination` in `dos-prepare.local.ps1`; not mirrored from Linux) |
 
 `make clean` removes `./dosmud`, `tests/unit/build/`, snapshot `*.output`, and legacy root-level unit/coverage junk.
