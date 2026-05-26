@@ -437,6 +437,8 @@ Done ✅.
 
 Lightweight CI timings/stats workflow: `scripts/ci-stats.sh` (or equivalent) emits `ci-stats.json` and `ci-stats.md`, publishes Markdown to the GitHub Actions job summary, and uploads both as workflow artifacts.
 
+Done ✅.
+
 ## [Advanced Architecture](https://github.com/ianmays/dosmud/milestone/5)
 
 | Issue | Title | Size |
