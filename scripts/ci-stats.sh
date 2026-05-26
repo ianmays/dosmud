@@ -43,6 +43,25 @@ json_escape() {
     printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
 }
 
+json_number_or_null() {
+    value="$1"
+    if [ -n "$value" ]; then
+        printf '%s' "$value"
+    else
+        printf 'null'
+    fi
+}
+
+display_number_or_na() {
+    value="$1"
+    suffix="$2"
+    if [ -n "$value" ]; then
+        printf '%s%s' "$value" "$suffix"
+    else
+        printf 'n/a'
+    fi
+}
+
 write_header() {
     ref=$(ref_name)
     sha=$(sha_short)
@@ -206,12 +225,6 @@ capture_soak_benchmarks() {
         us=$(printf '%s\n' "$line" | sed -n 's/.*us_per_tick=\([0-9]*\).*/\1/p')
         limit=$(printf '%s\n' "$line" | sed -n 's/.*limit=\([0-9]*\).*/\1/p')
         ticks=$(printf '%s\n' "$line" | sed -n 's/.*ticks=\([0-9]*\).*/\1/p')
-        if [ -z "$limit" ]; then
-            limit="?"
-        fi
-        if [ -z "$ticks" ]; then
-            ticks="?"
-        fi
         printf '%s|%s|%s|%s\n' "$name" "$ticks" "$us" "$limit" >> "$BENCH_ROWS"
     done
     return 0
@@ -234,7 +247,13 @@ append_soak_benchmark_section() {
         if [ -z "$name" ]; then
             continue
         fi
-        echo "| $name | ${us} us | <= $limit |" >> "$out"
+        measured=$(display_number_or_na "$us" " us")
+        if [ -n "$limit" ]; then
+            limit_display="<= $limit"
+        else
+            limit_display="n/a"
+        fi
+        echo "| $name | $measured | $limit_display |" >> "$out"
     done < "$BENCH_ROWS"
     return 0
 }
@@ -346,7 +365,10 @@ write_json() {
                 fi
                 first=0
                 printf '    {"name":"%s","ticks":%s,"us_per_tick":%s,"limit":%s}' \
-                    "$(json_escape "$name")" "$ticks" "$us" "$limit"
+                    "$(json_escape "$name")" \
+                    "$(json_number_or_null "$ticks")" \
+                    "$(json_number_or_null "$us")" \
+                    "$(json_number_or_null "$limit")"
             done < "$BENCH_ROWS"
             echo
         else
@@ -380,8 +402,11 @@ run_build_step build_soak_duration "make build-soak" make build-soak
 if [ -f ./dosmud ] && grep -q '| make test | pass |' "$REPORT"; then
     if run_timed "snapshots" make snapshot-run; then
         duration=$(format_duration "$last_duration")
-        append_snapshots_row "run" "$duration"
-        record_step_row "snapshots" "pass" "$last_duration"
+        if append_snapshots_row "run" "$duration"; then
+            record_step_row "snapshots" "pass" "$last_duration"
+        else
+            record_step_row "snapshots" "fail" "$last_duration"
+        fi
     else
         duration=$(format_duration "$last_duration")
         append_result_row "$REPORT" "snapshots" "**fail**" "$duration"
@@ -394,8 +419,11 @@ fi
 
 if run_timed "unit tests" ./tests/unit/build/dosmud_unit; then
     duration=$(format_duration "$last_duration")
-    append_unit_row "$duration"
-    record_step_row "unit tests" "pass" "$last_duration"
+    if append_unit_row "$duration"; then
+        record_step_row "unit tests" "pass" "$last_duration"
+    else
+        record_step_row "unit tests" "fail" "$last_duration"
+    fi
 else
     duration=$(format_duration "$last_duration")
     append_result_row "$REPORT" "unit tests" "**fail**" "$duration"

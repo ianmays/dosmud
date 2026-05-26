@@ -21,7 +21,10 @@ def build_record(stats):
 
     benchmarks = {}
     for bench in stats.get("benchmarks", []):
-        benchmarks[bench["name"]] = bench["us_per_tick"]
+        us_per_tick = bench.get("us_per_tick")
+        if us_per_tick is None:
+            continue
+        benchmarks[bench["name"]] = us_per_tick
 
     return {
         "timestamp": stats["generated_at"],
