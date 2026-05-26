@@ -81,8 +81,13 @@ run_step() {
 }
 
 append_snapshots_row() {
-    duration="$1"
+    result="$1"
+    duration="$2"
     line=$(grep 'snapshot tests passed:' "$LOG" | tail -1)
+    if [ "$result" = "skip" ]; then
+        append_result_row "snapshots" "not run (make test failed)" "$duration"
+        return 0
+    fi
     if [ -n "$line" ]; then
         append_result_row "snapshots" "pass ($line)" "$duration"
     else
@@ -172,11 +177,15 @@ run_build_step build_test_duration "make test" make test
 run_build_step build_unit_duration "make build-unit" make build-unit
 run_build_step build_soak_duration "make build-soak" make build-soak
 
-if run_timed "snapshots" make snapshot-run; then
-    append_snapshots_row "$(format_duration "$last_duration")"
+if [ -f ./dosmud ] && grep -q '| make test | pass |' "$REPORT"; then
+    if run_timed "snapshots" make snapshot-run; then
+        append_snapshots_row "run" "$(format_duration "$last_duration")"
+    else
+        append_result_row "snapshots" "**fail**" "$(format_duration "$last_duration")"
+        failed=1
+    fi
 else
-    append_result_row "snapshots" "**fail**" "$(format_duration "$last_duration")"
-    failed=1
+    append_snapshots_row "skip" "-"
 fi
 
 if run_timed "unit tests" ./tests/unit/build/dosmud_unit; then

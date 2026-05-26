@@ -32,7 +32,6 @@ Use these when you want to launch a playable or interactive binary rather than r
 - `make run`: builds the native release binary if needed, then launches it; pass `SEED=<unsigned>` to forward `--seed`
 - `make test-run-bin`: builds the native `TEST_MODE` binary if needed, then launches it; pass `SEED=<unsigned>` to forward `--seed`
 - `make dos-run`: launches the existing prepared DOS release executable without rebuilding
-- `make test-dos-run`: launches the existing prepared DOS `TEST_MODE` executable without rebuilding
 
 ## Test layers
 
@@ -315,19 +314,13 @@ make dos-prepare-norun
 make test-dos-prepare-norun
 ```
 
-Start DOS and launch the existing DOS executable without rebuilding or refreshing the tree:
+Start DOS and launch the most recently prepared DOS executable without rebuilding or refreshing the tree:
 
 ```sh
 make dos-run
 ```
 
-TEST_MODE launch of the existing prepared DOS executable:
-
-```sh
-make test-dos-run
-```
-
-`make dos-run` expects a previously prepared DOS tree. Run `make dos-prepare` first if the mirrored DOS files or executable are missing.
+There is one prepared DOS tree at `$destination`. `make dos-run` launches whatever executable was most recently prepared there. Run `make dos-prepare` for release mode or `make test-dos-prepare` for `TEST_MODE` before using `make dos-run`.
 
 `make dos-prepare` now prints `elapsed build.bat time: <seconds>` after the Open Watcom build finishes and before the runtime DOS session starts. That elapsed time measures `build.bat` only, not the PowerShell tree refresh/copy phase. When `build.log` is present in the prepared DOS tree, `dos-prepare.ps1` appends the same elapsed line there too.
 
@@ -339,7 +332,6 @@ make test-dos-prepare SEED=1234
 make dos-prepare-norun SEED=1234
 make test-dos-prepare-norun SEED=1234
 make dos-run SEED=1234
-make test-dos-run SEED=1234
 ```
 
 When you add or remove `src\*.c` files, update `Makefile` (`SRC` or `TEST_SRC`) and `build.bat`. For the Open Watcom path, keep every `wcl` and `wlib` line under the COMMAND.COM length limit (about 127 characters): gameplay sources are packed into `gameplay.lib` via several short `wlib` calls; the final `wcl` link lists `main.obj`, `platdos.obj`, `gameplay.lib`, plus the other `.obj` files. `TEST_MODE` copies [`tests/harness/`](../tests/harness/) to `harness\` via `dos-prepare.ps1`, compiles `th_world.c` / `testharn.c` to `thwld.obj` / `tharn.obj`, and archives both into `gameplay.lib`. Use `goto` labels in `build.bat` for conditionals; parenthesized `if (...)` blocks break under COMMAND.COM.

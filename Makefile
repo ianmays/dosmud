@@ -250,7 +250,4 @@ test-dos-prepare-norun:
 dos-run:
 	powershell.exe -ExecutionPolicy Bypass -File dos-prepare.ps1 -NoBuild $(if $(SEED),-Seed $(SEED))
 
-test-dos-run:
-	$(MAKE) dos-run $(if $(SEED),SEED=$(SEED))
-
-.PHONY: build-all build run test-all test test-run-bin snapshot-run test-run build-unit test-unit test-unit-verbose test-unit-verbose-gameplay test-unit-coverage test-unit-coverage-verbose build-soak test-soak check-layers clean dos-prepare test-dos-prepare dos-prepare-norun test-dos-prepare-norun dos-run test-dos-run
+.PHONY: build-all build run test-all test test-run-bin snapshot-run test-run build-unit test-unit test-unit-verbose test-unit-verbose-gameplay test-unit-coverage test-unit-coverage-verbose build-soak test-soak check-layers clean dos-prepare test-dos-prepare dos-prepare-norun test-dos-prepare-norun dos-run
