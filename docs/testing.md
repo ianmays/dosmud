@@ -380,7 +380,7 @@ The Open Watcom build (`build.bat`) only needs `src/`, `include/`, and `build.ba
 
 ## CI (GitHub Actions)
 
-On `main` and pull requests, CI runs `scripts/ci-stats.sh` (layer check, `make test`, `make test-run`, `make test-unit`, `make test-unit-coverage`, `make test-soak`; see [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)). On pull requests, results are posted or updated in a single PR comment (`comment-tag: ci-test-results`), the stats summary is appended to the GitHub Actions job summary, and `ci-stats.json` / `ci-stats.md` are uploaded as artifacts. CI starts from a clean checkout; for comparable local timings, run `make clean` before the timing-sensitive targets. DOS prep is not run in CI.
+On `main` and pull requests, CI runs `scripts/ci-stats.sh` (layer check, `make test`, `make test-run`, `make test-unit`, `make test-unit-coverage`, `make test-soak`; see [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)). On pull requests, results are posted or updated in a single PR comment by finding the prior `## CI test results` comment and replacing it, the stats summary is appended to the GitHub Actions job summary, and `ci-stats.json` / `ci-stats.md` are uploaded as artifacts. CI starts from a clean checkout; for comparable local timings, run `make clean` before the timing-sensitive targets. DOS prep is not run in CI.
 
 ## Build artifacts
 

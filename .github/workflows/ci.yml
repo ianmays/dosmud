@@ -24,13 +24,23 @@ jobs:
         run: sh scripts/ci-stats.sh
         continue-on-error: true
 
-      - name: Post test results on pull request
+      - name: Find existing CI results comment
         if: github.event_name == 'pull_request'
-        uses: peter-evans/create-or-update-comment@v4
+        id: find_comment
+        uses: peter-evans/find-comment@v3
         with:
           issue-number: ${{ github.event.pull_request.number }}
+          comment-author: github-actions[bot]
+          body-includes: "## CI test results"
+
+      - name: Post test results on pull request
+        if: github.event_name == 'pull_request'
+        uses: peter-evans/create-or-update-comment@v5
+        with:
+          comment-id: ${{ steps.find_comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
           body-path: ci-test-report.md
-          comment-tag: ci-test-results
+          edit-mode: replace
 
       - name: Upload CI stats artifacts
         uses: actions/upload-artifact@v4
