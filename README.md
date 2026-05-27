@@ -49,6 +49,15 @@ make build
 ./dosmud --seed 1234
 ```
 
+WSL cross-compile for a native Windows console executable:
+
+```sh
+make build-win
+make test-win
+```
+
+This emits `dosmud.exe`. Launch it from PowerShell, `cmd.exe`, or Windows Terminal.
+
 Native layers/strict/test checks:
 
 ```sh

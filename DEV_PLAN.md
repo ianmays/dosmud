@@ -429,6 +429,10 @@ Capture:
 
 ### [#34](https://github.com/ianmays/dosmud/issues/34) - Modern Windows build
 
+Done ✅.
+
+WSL cross-compile path emits a native Windows console `dosmud.exe` via `make build-win` / `make test-win`, keeping gameplay unchanged and leaving the DOS/Open Watcom path separate.
+
 ### [#72](https://github.com/ianmays/dosmud/issues/72) - Sub-agents
 
 ### [#82](https://github.com/ianmays/dosmud/issues/82) - Compile performance

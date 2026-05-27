@@ -1,13 +1,19 @@
 CC ?= gcc
+WIN_CC ?= x86_64-w64-mingw32-gcc
 
 BASE_CFLAGS = -Wall -Wextra -Wshadow -Wstrict-prototypes -Wmissing-prototypes -std=c89 -pedantic -Iinclude -Isrc
 TEST_MODE_FLAG = TEST_MODE
 HARNESS_DIR = tests/harness
 TEST_CFLAGS = $(BASE_CFLAGS) -Werror -D$(TEST_MODE_FLAG) -g -O0 -I$(HARNESS_DIR)
-SRC = src/main.c src/platpos.c src/game.c src/gprog.c src/combat.c src/genc.c src/wanderer.c src/dialogue.c src/gatmos.c src/grendr.c src/fmt.c src/invent.c src/command.c src/world.c src/items.c src/txtres.c
+TARGET ?= posix
+BIN ?= dosmud
+PLAT_SRC = src/platpos.c
+ifeq ($(TARGET),win)
+PLAT_SRC = src/platwin.c
+endif
+SRC = src/main.c $(PLAT_SRC) src/game.c src/gprog.c src/combat.c src/genc.c src/wanderer.c src/dialogue.c src/gatmos.c src/grendr.c src/fmt.c src/invent.c src/command.c src/world.c src/items.c src/txtres.c
 HARNESS_SRC = $(HARNESS_DIR)/testharn.c $(HARNESS_DIR)/th_world.c
 TEST_SRC = $(SRC) $(HARNESS_SRC)
-BIN = dosmud
 REGRESSION_DIR = tests/regression
 UNIT_DIR = tests/unit
 RUN_ARGS = $(if $(SEED),--seed $(SEED))
@@ -32,6 +38,9 @@ build-all:
 build:
 	$(call RUN_TIMED,$(CC) $(BASE_CFLAGS) -o $(BIN) $(SRC))
 
+build-win:
+	$(MAKE) TARGET=win CC=$(WIN_CC) BIN=dosmud.exe build
+
 run: build
 	./$(BIN) $(RUN_ARGS)
 
@@ -47,6 +56,9 @@ test-all:
 # deterministic
 test:
 	$(call RUN_TIMED,$(CC) $(TEST_CFLAGS) -o $(BIN) $(TEST_SRC))
+
+test-win:
+	$(MAKE) TARGET=win CC=$(WIN_CC) BIN=dosmud.exe test
 
 test-run-bin: test
 	./$(BIN) $(RUN_ARGS)
@@ -88,9 +100,9 @@ test-run: test
 
 # gameplay .c files must not call printf (use grendr render_* instead)
 check-layers:
-	@violators=$$(grep -l 'printf' src/*.c 2>/dev/null | grep -vE '/(main|grendr|platdos|platpos)\.c$$' || true); \
+	@violators=$$(grep -l 'printf' src/*.c 2>/dev/null | grep -vE '/(main|grendr|platdos|platpos|platwin)\.c$$' || true); \
 	if [ -n "$$violators" ]; then \
-		echo "layer violation: printf only allowed in main.c, grendr.c, platdos.c, platpos.c"; \
+		echo "layer violation: printf only allowed in main.c, grendr.c, platdos.c, platpos.c, platwin.c"; \
 		echo "$$violators"; \
 		exit 1; \
 	fi
@@ -100,7 +112,7 @@ UNIT_BUILD_DIR = tests/unit/build
 UNIT_COVERAGE_DIR = $(UNIT_BUILD_DIR)/coverage
 UNIT_BIN = $(UNIT_BUILD_DIR)/dosmud_unit
 UNIT_CFLAGS = $(TEST_CFLAGS) -I$(UNIT_DIR) -fprofile-arcs -ftest-coverage
-UNIT_GAMEPLAY_SRC = src/platpos.c src/game.c src/gprog.c src/combat.c src/genc.c \
+UNIT_GAMEPLAY_SRC = $(PLAT_SRC) src/game.c src/gprog.c src/combat.c src/genc.c \
 	src/wanderer.c src/dialogue.c src/gatmos.c src/grendr.c src/fmt.c src/invent.c \
 	src/command.c src/world.c src/items.c src/txtres.c
 UNIT_CORE_SRC = $(UNIT_GAMEPLAY_SRC) $(HARNESS_SRC)
@@ -230,6 +242,7 @@ test-soak: $(SOAK_BIN)
 
 clean:
 	rm -f $(BIN)
+	rm -f dosmud.exe
 	rm -rf $(UNIT_BUILD_DIR)
 	rm -rf $(SOAK_BUILD_DIR)
 	rm -f $(REGRESSION_DIR)/*.output tests/*.output
@@ -250,4 +263,4 @@ test-dos-prepare-norun:
 dos-run:
 	powershell.exe -ExecutionPolicy Bypass -File dos-prepare.ps1 -NoBuild $(if $(SEED),-Seed $(SEED))
 
-.PHONY: build-all build run test-all test test-run-bin snapshot-run test-run build-unit test-unit test-unit-verbose test-unit-verbose-gameplay test-unit-coverage test-unit-coverage-verbose build-soak test-soak check-layers clean dos-prepare test-dos-prepare dos-prepare-norun test-dos-prepare-norun dos-run
+.PHONY: build-all build build-win run test-all test test-win test-run-bin snapshot-run test-run build-unit test-unit test-unit-verbose test-unit-verbose-gameplay test-unit-coverage test-unit-coverage-verbose build-soak test-soak check-layers clean dos-prepare test-dos-prepare dos-prepare-norun test-dos-prepare-norun dos-run
