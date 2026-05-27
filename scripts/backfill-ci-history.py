@@ -12,6 +12,17 @@ UNIT_RE = re.compile(r"^Pass: (\d+), fail: (\d+), skip: (\d+)\.$", re.MULTILINE)
 BENCH_RE = re.compile(r"SOAK_BENCH ([^ ]+)")
 COVERAGE_RE = re.compile(r"^\s*overall\s+([0-9]+\.[0-9]+)\s*/\s*([0-9]+\.[0-9]+)\s*$", re.MULTILINE)
 SECTION_RE_TEMPLATE = r"^=== {name} ===$(.*?)(?=^=== .* ===$|\Z)"
+PREFIX_RE = re.compile(r"^(?:\[[0-9:\-T.Z ]+\]\s+|[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9:.]+Z\s+)")
+
+
+def normalize_log(text):
+    lines = []
+    for line in text.splitlines():
+        lines.append(PREFIX_RE.sub("", line, count=1))
+    normalized = "\n".join(lines)
+    if text.endswith("\n"):
+        normalized += "\n"
+    return normalized
 
 
 def parse_section_counts(text, section_name):
@@ -100,7 +111,7 @@ def main():
     history_path = Path(args.history_path)
     log_path = Path(args.log_path)
     history = load_json(history_path)
-    log_text = log_path.read_text(encoding="utf-8")
+    log_text = normalize_log(log_path.read_text(encoding="utf-8"))
     derived = parse_log(log_text)
 
     for run in history.get("runs", []):

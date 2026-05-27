@@ -517,9 +517,11 @@ if [ -f ./dosmud ] && grep -q '| make test | pass |' "$REPORT"; then
         fi
     else
         duration=$(format_duration "$last_duration")
-        snapshot_pass_count=0
-        snapshot_fail_count=1
-        snapshot_skip_count=0
+        if ! parse_snapshot_counts; then
+            snapshot_pass_count=0
+            snapshot_fail_count=1
+            snapshot_skip_count=0
+        fi
         append_result_row "$REPORT" "snapshots" "**fail**" "$duration"
         record_step_row "snapshots" "fail" "$last_duration"
         failed=1
