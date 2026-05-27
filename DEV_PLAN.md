@@ -418,6 +418,8 @@ dosmud --seed 1234
 
 ### [#74](https://github.com/ianmays/dosmud/issues/74) - Agent skills
 
+Done ✅.
+
 Capture:
 - workflow knowledge
 - repo conventions
