@@ -38,7 +38,11 @@ def build_record(stats):
     }
     if isinstance(test_counts, dict):
         record["test_counts"] = test_counts
-    if isinstance(unit_coverage_overall, dict):
+    if (
+        isinstance(unit_coverage_overall, dict)
+        and unit_coverage_overall.get("branch_pct") is not None
+        and unit_coverage_overall.get("line_pct") is not None
+    ):
         record["unit_coverage_overall"] = unit_coverage_overall
     return record
 

@@ -90,14 +90,20 @@ parse_snapshot_counts() {
     return 0
 }
 
-parse_section_counts() {
+parse_section_line() {
     section_name="$1"
-    passline=$(awk -v heading="=== $section_name ===" '
+    line_re="$2"
+    awk -v heading="=== $section_name ===" -v line_re="$line_re" '
         $0 == heading { in_section = 1; next }
         /^=== .* ===$/ && in_section { exit }
-        in_section && /^Pass: / { line = $0 }
+        in_section && $0 ~ line_re { line = $0 }
         END { if (line) print line }
-    ' "$LOG")
+    ' "$LOG"
+}
+
+parse_section_counts() {
+    section_name="$1"
+    passline=$(parse_section_line "$section_name" '^Pass: ')
     if [ -z "$passline" ]; then
         return 1
     fi
@@ -128,7 +134,7 @@ parse_soak_counts() {
 }
 
 parse_coverage_overall() {
-    line=$(grep 'overall' "$LOG" | tail -1)
+    line=$(parse_section_line "unit coverage" 'overall')
     if [ -z "$line" ]; then
         return 1
     fi
@@ -449,10 +455,12 @@ write_json() {
         printf '    "soak": {"pass":%s,"fail":%s,"skip":%s}\n' \
             "$soak_pass_count" "$soak_fail_count" "$soak_skip_count"
         echo '  },'
-        echo '  "unit_coverage_overall": {'
-        printf '    "branch_pct": %s,\n' "$(json_number_or_null "$coverage_overall_branch")"
-        printf '    "line_pct": %s\n' "$(json_number_or_null "$coverage_overall_line")"
-        echo '  },'
+        if [ -n "$coverage_overall_branch" ] && [ -n "$coverage_overall_line" ]; then
+            echo '  "unit_coverage_overall": {'
+            printf '    "branch_pct": %s,\n' "$(json_number_or_null "$coverage_overall_branch")"
+            printf '    "line_pct": %s\n' "$(json_number_or_null "$coverage_overall_line")"
+            echo '  },'
+        fi
         echo '  "benchmarks": ['
         first=1
         if [ -s "$BENCH_ROWS" ]; then
@@ -529,9 +537,11 @@ if run_timed "unit tests" ./tests/unit/build/dosmud_unit; then
     fi
 else
     duration=$(format_duration "$last_duration")
-    unit_pass_count=0
-    unit_fail_count=1
-    unit_skip_count=0
+    if ! parse_unit_counts; then
+        unit_pass_count=0
+        unit_fail_count=1
+        unit_skip_count=0
+    fi
     append_result_row "$REPORT" "unit tests" "**fail**" "$duration"
     record_step_row "unit tests" "fail" "$last_duration"
     failed=1

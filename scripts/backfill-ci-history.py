@@ -66,7 +66,7 @@ def parse_log(text):
     benches = sorted(set(BENCH_RE.findall(text)))
     if soak_counts is None:
         if benches:
-            soak_counts = {"pass": len(benches), "fail": 0, "skip": 0}
+            soak_counts = {"pass": 0, "fail": len(benches), "skip": 0}
         else:
             soak_counts = {"pass": 0, "fail": 1, "skip": 0}
 
