@@ -12,7 +12,8 @@ UNIT_RE = re.compile(r"^Pass: (\d+), fail: (\d+), skip: (\d+)\.$", re.MULTILINE)
 BENCH_RE = re.compile(r"SOAK_BENCH ([^ ]+)")
 COVERAGE_RE = re.compile(r"^\s*overall\s+([0-9]+\.[0-9]+)\s*/\s*([0-9]+\.[0-9]+)\s*$", re.MULTILINE)
 SECTION_RE_TEMPLATE = r"^=== {name} ===$(.*?)(?=^=== .* ===$|\Z)"
-PREFIX_RE = re.compile(r"^(?:\[[0-9:\-T.Z ]+\]\s+|[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9:.]+Z\s+)")
+TIMESTAMP_RE = r"(?:\[[0-9:\-T.Z ]+\]|[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9:.]+Z)"
+PREFIX_RE = re.compile(r"^(?:(?:[^\t\n]*\t)+)?%s\s+" % TIMESTAMP_RE)
 
 
 def normalize_log(text):
