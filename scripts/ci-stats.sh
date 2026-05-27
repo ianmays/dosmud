@@ -14,6 +14,18 @@ build_test_duration=
 build_unit_duration=
 build_soak_duration=
 last_duration=
+snapshot_pass_count=0
+snapshot_fail_count=0
+snapshot_skip_count=0
+snapshot_summary_line=
+unit_pass_count=0
+unit_fail_count=0
+unit_skip_count=0
+soak_pass_count=0
+soak_fail_count=0
+soak_skip_count=0
+coverage_overall_branch=
+coverage_overall_line=
 
 sha_short() {
     if [ -n "${GITHUB_SHA:-}" ]; then
@@ -60,6 +72,80 @@ display_number_or_na() {
     else
         printf 'n/a'
     fi
+}
+
+parse_snapshot_counts() {
+    snapshot_summary_line=$(grep 'snapshot tests passed:' "$LOG" | tail -1)
+    if [ -z "$snapshot_summary_line" ]; then
+        return 1
+    fi
+    passed=$(printf '%s\n' "$snapshot_summary_line" | sed -n 's/.*snapshot tests passed: \([0-9][0-9]*\)\/\([0-9][0-9]*\).*/\1/p')
+    total=$(printf '%s\n' "$snapshot_summary_line" | sed -n 's/.*snapshot tests passed: \([0-9][0-9]*\)\/\([0-9][0-9]*\).*/\2/p')
+    if [ -z "$passed" ] || [ -z "$total" ]; then
+        return 1
+    fi
+    snapshot_pass_count=$passed
+    snapshot_fail_count=$((total - passed))
+    snapshot_skip_count=0
+    return 0
+}
+
+parse_section_line() {
+    section_name="$1"
+    line_re="$2"
+    awk -v heading="=== $section_name ===" -v line_re="$line_re" '
+        $0 == heading { in_section = 1; next }
+        /^=== .* ===$/ && in_section { exit }
+        in_section && $0 ~ line_re { line = $0 }
+        END { if (line) print line }
+    ' "$LOG"
+}
+
+parse_section_counts() {
+    section_name="$1"
+    passline=$(parse_section_line "$section_name" '^Pass: ')
+    if [ -z "$passline" ]; then
+        return 1
+    fi
+    passcount=$(printf '%s\n' "$passline" | sed -n 's/^Pass: \([0-9][0-9]*\), fail: \([0-9][0-9]*\), skip: \([0-9][0-9]*\).*/\1/p')
+    failcount=$(printf '%s\n' "$passline" | sed -n 's/^Pass: \([0-9][0-9]*\), fail: \([0-9][0-9]*\), skip: \([0-9][0-9]*\).*/\2/p')
+    skipcount=$(printf '%s\n' "$passline" | sed -n 's/^Pass: \([0-9][0-9]*\), fail: \([0-9][0-9]*\), skip: \([0-9][0-9]*\).*/\3/p')
+    if [ -z "$passcount" ] || [ -z "$failcount" ] || [ -z "$skipcount" ]; then
+        return 1
+    fi
+    printf '%s|%s|%s\n' "$passcount" "$failcount" "$skipcount"
+    return 0
+}
+
+parse_unit_counts() {
+    counts=$(parse_section_counts "unit tests") || return 1
+    unit_pass_count=$(printf '%s\n' "$counts" | cut -d'|' -f1)
+    unit_fail_count=$(printf '%s\n' "$counts" | cut -d'|' -f2)
+    unit_skip_count=$(printf '%s\n' "$counts" | cut -d'|' -f3)
+    return 0
+}
+
+parse_soak_counts() {
+    counts=$(parse_section_counts "soak tests") || return 1
+    soak_pass_count=$(printf '%s\n' "$counts" | cut -d'|' -f1)
+    soak_fail_count=$(printf '%s\n' "$counts" | cut -d'|' -f2)
+    soak_skip_count=$(printf '%s\n' "$counts" | cut -d'|' -f3)
+    return 0
+}
+
+parse_coverage_overall() {
+    line=$(parse_section_line "unit coverage" 'overall')
+    if [ -z "$line" ]; then
+        return 1
+    fi
+    branch_pct=$(printf '%s\n' "$line" | sed -n 's/^[[:space:]]*overall[[:space:]]*\([0-9][0-9]*\.[0-9][0-9]*\)[[:space:]]*\/[[:space:]]*\([0-9][0-9]*\.[0-9][0-9]*\).*/\1/p')
+    line_pct=$(printf '%s\n' "$line" | sed -n 's/^[[:space:]]*overall[[:space:]]*\([0-9][0-9]*\.[0-9][0-9]*\)[[:space:]]*\/[[:space:]]*\([0-9][0-9]*\.[0-9][0-9]*\).*/\2/p')
+    if [ -z "$branch_pct" ] || [ -z "$line_pct" ]; then
+        return 1
+    fi
+    coverage_overall_branch=$branch_pct
+    coverage_overall_line=$line_pct
+    return 0
 }
 
 write_header() {
@@ -167,16 +253,21 @@ run_build_step() {
 append_snapshots_row() {
     result="$1"
     duration="$2"
-    line=$(grep 'snapshot tests passed:' "$LOG" | tail -1)
     if [ "$result" = "skip" ]; then
+        snapshot_pass_count=0
+        snapshot_fail_count=0
+        snapshot_skip_count=1
         append_result_row "$REPORT" "snapshots" "not run (make test failed)" "$duration"
         record_step_row "snapshots" "skip" "-1"
         return 0
     fi
-    if [ -n "$line" ]; then
-        append_result_row "$REPORT" "snapshots" "pass ($line)" "$duration"
+    if parse_snapshot_counts; then
+        append_result_row "$REPORT" "snapshots" "pass ($snapshot_summary_line)" "$duration"
         return 0
     fi
+    snapshot_pass_count=0
+    snapshot_fail_count=1
+    snapshot_skip_count=0
     append_result_row "$REPORT" "snapshots" "**fail**" "$duration"
     failed=1
     return 1
@@ -186,10 +277,13 @@ append_unit_row() {
     duration="$1"
     total=$(grep '^Total:' "$LOG" | tail -1)
     passline=$(grep '^Pass:' "$LOG" | tail -1)
-    if [ -n "$total" ] && [ -n "$passline" ]; then
+    if [ -n "$total" ] && [ -n "$passline" ] && parse_unit_counts; then
         append_result_row "$REPORT" "unit tests" "pass ($total; $passline)" "$duration"
         return 0
     fi
+    unit_pass_count=0
+    unit_fail_count=1
+    unit_skip_count=0
     append_result_row "$REPORT" "unit tests" "**fail**" "$duration"
     failed=1
     return 1
@@ -353,6 +447,20 @@ write_json() {
         done < "$BUILD_ROWS"
         echo
         echo '  ],'
+        echo '  "test_counts": {'
+        printf '    "snapshots": {"pass":%s,"fail":%s,"skip":%s},\n' \
+            "$snapshot_pass_count" "$snapshot_fail_count" "$snapshot_skip_count"
+        printf '    "unit": {"pass":%s,"fail":%s,"skip":%s},\n' \
+            "$unit_pass_count" "$unit_fail_count" "$unit_skip_count"
+        printf '    "soak": {"pass":%s,"fail":%s,"skip":%s}\n' \
+            "$soak_pass_count" "$soak_fail_count" "$soak_skip_count"
+        echo '  },'
+        if [ -n "$coverage_overall_branch" ] && [ -n "$coverage_overall_line" ]; then
+            echo '  "unit_coverage_overall": {'
+            printf '    "branch_pct": %s,\n' "$(json_number_or_null "$coverage_overall_branch")"
+            printf '    "line_pct": %s\n' "$(json_number_or_null "$coverage_overall_line")"
+            echo '  },'
+        fi
         echo '  "benchmarks": ['
         first=1
         if [ -s "$BENCH_ROWS" ]; then
@@ -409,6 +517,11 @@ if [ -f ./dosmud ] && grep -q '| make test | pass |' "$REPORT"; then
         fi
     else
         duration=$(format_duration "$last_duration")
+        if ! parse_snapshot_counts; then
+            snapshot_pass_count=0
+            snapshot_fail_count=1
+            snapshot_skip_count=0
+        fi
         append_result_row "$REPORT" "snapshots" "**fail**" "$duration"
         record_step_row "snapshots" "fail" "$last_duration"
         failed=1
@@ -426,6 +539,11 @@ if run_timed "unit tests" ./tests/unit/build/dosmud_unit; then
     fi
 else
     duration=$(format_duration "$last_duration")
+    if ! parse_unit_counts; then
+        unit_pass_count=0
+        unit_fail_count=1
+        unit_skip_count=0
+    fi
     append_result_row "$REPORT" "unit tests" "**fail**" "$duration"
     record_step_row "unit tests" "fail" "$last_duration"
     failed=1
@@ -433,8 +551,14 @@ fi
 
 if run_timed "unit coverage" make test-unit-coverage; then
     duration=$(format_duration "$last_duration")
-    append_result_row "$REPORT" "unit coverage" "pass" "$duration"
-    record_step_row "unit coverage" "pass" "$last_duration"
+    if parse_coverage_overall; then
+        append_result_row "$REPORT" "unit coverage" "pass" "$duration"
+        record_step_row "unit coverage" "pass" "$last_duration"
+    else
+        append_result_row "$REPORT" "unit coverage" "**fail**" "$duration"
+        record_step_row "unit coverage" "fail" "$last_duration"
+        failed=1
+    fi
 else
     duration=$(format_duration "$last_duration")
     append_result_row "$REPORT" "unit coverage" "**fail**" "$duration"
@@ -442,7 +566,30 @@ else
     failed=1
 fi
 
-run_step "soak tests" ./tests/soak/build/dosmud_soak
+if run_timed "soak tests" ./tests/soak/build/dosmud_soak; then
+    duration=$(format_duration "$last_duration")
+    if parse_soak_counts; then
+        append_result_row "$REPORT" "soak tests" "pass" "$duration"
+        record_step_row "soak tests" "pass" "$last_duration"
+    else
+        soak_pass_count=0
+        soak_fail_count=1
+        soak_skip_count=0
+        append_result_row "$REPORT" "soak tests" "**fail**" "$duration"
+        record_step_row "soak tests" "fail" "$last_duration"
+        failed=1
+    fi
+else
+    duration=$(format_duration "$last_duration")
+    if ! parse_soak_counts; then
+        soak_pass_count=0
+        soak_fail_count=1
+        soak_skip_count=0
+    fi
+    append_result_row "$REPORT" "soak tests" "**fail**" "$duration"
+    record_step_row "soak tests" "fail" "$last_duration"
+    failed=1
+fi
 capture_soak_benchmarks || true
 append_coverage_section "$REPORT" || true
 append_soak_benchmark_section "$REPORT" || true

@@ -78,7 +78,7 @@ Snapshot regression lives under [`tests/regression/`](../tests/regression/) (dat
 
 ## Unit tests (greatest)
 
-Unit test coverage ([#95](https://github.com/ianmays/dosmud/issues/95)) uses [greatest](https://github.com/silentbicycle/greatest) **1.5.0** vendored as [`tests/unit/greatest.h`](../tests/unit/greatest.h). Upstream MIT license stays in the header; a small dosmud patch adds quiet-by-default output (`greatest_set_quiet`, `GREATEST_FLAG_QUIET`) in a separate git commit from the unmodified vendor import.
+Unit test coverage ([#95](https://github.com/ianmays/dosmud/issues/95)) uses [greatest](https://github.com/silentbicycle/greatest) **1.5.0** vendored as [`tests/unit/greatest.h`](../tests/unit/greatest.h). Upstream license stays in the header; a small dosmud patch adds quiet-by-default output (`greatest_set_quiet`, `GREATEST_FLAG_QUIET`) in a separate git commit from the unmodified vendor import.
 
 ```sh
 make test-unit
@@ -382,7 +382,9 @@ The Open Watcom build (`build.bat`) only needs `src/`, `include/`, and `build.ba
 
 On `main` and pull requests, CI runs `scripts/ci-stats.sh` (layer check, `make test`, `make test-run`, `make test-unit`, `make test-unit-coverage`, `make test-soak`; see [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)). On pull requests, results are posted or updated in a single PR comment by finding the prior hidden `ci-test-results` marker comment and replacing it, the stats summary is appended to the GitHub Actions job summary, and `ci-stats.json` is uploaded as the sole metrics artifact. CI starts from a clean checkout; for comparable local timings, run `make clean` before the timing-sensitive targets. DOS prep is not run in CI.
 
-Successful `main` CI runs trigger [`.github/workflows/ci-metrics.yml`](../.github/workflows/ci-metrics.yml), which downloads `ci-stats.json`, appends one normalized record into `history.json` on the dedicated `ci-metrics` branch, and pushes that branch back to GitHub. The metrics dashboard at [CI Metrics](ci-metrics.html) reads that branch directly via raw GitHub content, so persistent history is kept out of both PR branches and `main`.
+Successful `main` CI runs trigger [`.github/workflows/ci-metrics.yml`](../.github/workflows/ci-metrics.yml), which downloads `ci-stats.json`, appends one normalized record into `history.json` on the dedicated `ci-metrics` branch, and pushes that branch back to GitHub. The metrics dashboard at [CI Metrics](ci-metrics.html) reads that branch directly via raw GitHub content, so persistent history is kept out of both PR branches and `main`. The dashboard trends build/test timings, soak benchmark values, per-suite snapshot/unit/soak pass-fail-skip counts, and overall unit branch/line coverage.
+
+When the metrics schema grows, use [`scripts/backfill-ci-history.py`](../scripts/backfill-ci-history.py) to enrich older `ci-metrics/history.json` entries from an archived CI log. It takes the target history file, the target run SHA, and the source log file, then patches only the matching history record.
 
 ## Build artifacts
 
