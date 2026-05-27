@@ -70,7 +70,7 @@ Player-facing copy lives in `txtres`; `grendr` owns when a blank line appears be
 
 [`include/platform.h`](../include/platform.h) defines the portable boundary:
 
-- `plat_poll_line` - non-blocking stdin poll (DOS `kbhit`/`getch` or POSIX `select`)
+- `plat_poll_line` - non-blocking stdin poll (DOS `kbhit`/`getch`, Windows console `_kbhit`/`_getch`, or POSIX `select`)
 - `plat_time_now` - wall-clock seconds for idle ticks
 - `plat_seed_rng` - applies `srand((unsigned int)seed)`; `main.c` chooses a `u32` seed (`CFG_TEST_RAND_SEED`, wall clock, or `--seed`). `GameState.seed` stores the full `u32`; libc may use fewer bits (for example 16-bit `unsigned int` on DOS)
 
