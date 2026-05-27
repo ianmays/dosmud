@@ -43,9 +43,7 @@ int plat_poll_line(char *out_line, int out_size)
         return 0;
     }
     if (c == 0 || c == 224) {
-        if (_kbhit()) {
-            (void)_getch();
-        }
+        (void)_getch();
         return 0;
     }
     if (c >= 32 && c <= 126) {
