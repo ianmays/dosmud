@@ -49,6 +49,16 @@ make build
 ./dosmud --seed 1234
 ```
 
+WSL cross-compile for a native Windows console executable:
+
+```sh
+sudo apt-get install -y mingw-w64
+make build-win
+make test-win
+```
+
+This requires the MinGW cross-compiler (`x86_64-w64-mingw32-gcc`) in WSL and emits `dosmud.exe`. Launch it from PowerShell, `cmd.exe`, or Windows Terminal.
+
 Native layers/strict/test checks:
 
 ```sh

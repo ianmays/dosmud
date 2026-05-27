@@ -6,11 +6,11 @@ Thanks for contributing to dosmud.
 
 - Keep code ANSI C89 / ISO C90 compatible.
 - Preserve compatibility with both GCC and OpenWatcom.
-- **FAT 8.3 (8+3) names for `src/` sources and headers:** MS-DOS 5.0 through 6.22 (and our Open Watcom real-mode build) assume classic FAT volumes where the portable primary filename is still eight characters plus a three-letter extension. Longer basenames (for example `progression.h`) fail on those trees and in some DOS-hosted toolchains. Keep basenames at most eight characters (see `grendr.c`, `invent.h`, `gprog.c`, `platpos.c`, `docs/architecture.md`). The DOS build uses `build.bat` (see `docs/testing.md`): gameplay objects are archived into `gameplay.lib` via several short `wlib` lines so each COMMAND.COM invocation stays under the length limit; `TEST_MODE` adds `thwld.obj` and `tharn.obj` from `harness\` in a separate `wlib` pass (`dos-prepare` copies `tests\harness\`). When you add or remove a gameplay translation unit, update `Makefile`, `build.bat` compile lines, and the `wlib` calls that build `gameplay.lib`. Platform sources (`platdos.c` on DOS, `platpos.c` on GCC) link beside `main.obj`, not inside `gameplay.lib`.
+- **FAT 8.3 (8+3) names for `src/` sources and headers:** MS-DOS 5.0 through 6.22 (and our Open Watcom real-mode build) assume classic FAT volumes where the portable primary filename is still eight characters plus a three-letter extension. Longer basenames (for example `progression.h`) fail on those trees and in some DOS-hosted toolchains. Keep basenames at most eight characters (see `grendr.c`, `invent.h`, `gprog.c`, `platpos.c`, `platwin.c`, `docs/architecture.md`). The DOS build uses `build.bat` (see `docs/testing.md`): gameplay objects are archived into `gameplay.lib` via several short `wlib` lines so each COMMAND.COM invocation stays under the length limit; `TEST_MODE` adds `thwld.obj` and `tharn.obj` from `harness\` in a separate `wlib` pass (`dos-prepare` copies `tests\harness\`). When you add or remove a gameplay translation unit, update `Makefile`, `build.bat` compile lines, and the `wlib` calls that build `gameplay.lib`. Platform sources (`platdos.c` on DOS, `platpos.c` on GCC/POSIX, `platwin.c` on Windows cross-builds) link beside `main.obj`, not inside `gameplay.lib`.
 - Keep gameplay deterministic for identical seed + inputs.
 - Prefer simple, explicit, procedural code over heavy abstractions.
 - Avoid unrelated refactors in the same PR.
-- Keep core gameplay free of `printf` and other terminal I/O; use `render_*` in `grendr` instead (`make check-layers` allows `printf` only in `main.c`, `grendr.c`, and the platform file `platpos.c` or `platdos.c`; `make test-all` runs the guard before the test build). Newline and spacing rules for `txtres` and `grendr` are in [architecture.md](architecture.md#newline-and-spacing).
+- Keep core gameplay free of `printf` and other terminal I/O; use `render_*` in `grendr` instead (`make check-layers` allows `printf` only in `main.c`, `grendr.c`, and the platform files `platpos.c`, `platwin.c`, or `platdos.c`; `make test-all` runs the guard before the test build). Newline and spacing rules for `txtres` and `grendr` are in [architecture.md](architecture.md#newline-and-spacing).
 
 ## Pull Requests Required
 
@@ -76,6 +76,15 @@ Recommended for broader tooling/build validation:
 make build-all
 make test-all
 ```
+
+For the WSL -> Windows console cross-build:
+
+```sh
+make build-win
+make test-win
+```
+
+These targets default to `x86_64-w64-mingw32-gcc` and emit `dosmud.exe`. `test-win` is a compile-only `TEST_MODE` build; run the resulting `.exe` from Windows for interactive validation there.
 
 For detailed environment and workflow information, see `testing.md`.
 

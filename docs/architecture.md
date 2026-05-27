@@ -66,11 +66,11 @@ Player-facing copy lives in `txtres`; `grendr` owns when a blank line appears be
   - **Continuation** - atmosphere follow-ups (berry/reed), dialogue after art: no extra gap.
 - **ASCII art:** the first row must be drawing, not a blank spacer row. Section breaks come from `render_gap()`, not padding lines at the top of art.
 
-### Platform (`main`, `platform.h`, `platdos.c` / `platpos.c`)
+### Platform (`main`, `platform.h`, `platdos.c` / `platpos.c` / `platwin.c`)
 
 [`include/platform.h`](../include/platform.h) defines the portable boundary:
 
-- `plat_poll_line` - non-blocking stdin poll (DOS `kbhit`/`getch` or POSIX `select`)
+- `plat_poll_line` - non-blocking stdin poll (DOS `kbhit`/`getch`, Windows console `_kbhit`/`_getch`, or POSIX `select`)
 - `plat_time_now` - wall-clock seconds for idle ticks
 - `plat_seed_rng` - applies `srand((unsigned int)seed)`; `main.c` chooses a `u32` seed (`CFG_TEST_RAND_SEED`, wall clock, or `--seed`). `GameState.seed` stores the full `u32`; libc may use fewer bits (for example 16-bit `unsigned int` on DOS)
 
@@ -78,10 +78,11 @@ Implementations are split by toolchain (FAT 8.3 basenames):
 
 - [`src/platdos.c`](../src/platdos.c) - Open Watcom / DOS (`build.bat` links `platdos.obj`)
 - [`src/platpos.c`](../src/platpos.c) - GCC / POSIX (`Makefile` links `platpos.c`)
+- [`src/platwin.c`](../src/platwin.c) - Windows console path for WSL cross-builds (`make build-win` / `make test-win`)
 
 [`src/main.c`](../src/main.c) orchestrates the main loop and may use `printf` for shell-level prompts and banners. It must not include `conio.h`, `dos.h`, or other platform headers directly.
 
-Run `make check-layers` before opening a PR (or use `make test-all`, which runs it first). That target fails if `printf` appears in any `src/*.c` other than `main.c`, `grendr.c`, `platdos.c`, or `platpos.c`. `make test` compiles only and does not run the guard.
+Run `make check-layers` before opening a PR (or use `make test-all`, which runs it first). That target fails if `printf` appears in any `src/*.c` other than `main.c`, `grendr.c`, `platdos.c`, `platpos.c`, or `platwin.c`. `make test` compiles only and does not run the guard.
 
 ## High-level flow
 
