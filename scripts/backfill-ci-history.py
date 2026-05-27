@@ -26,15 +26,11 @@ def normalize_log(text):
 
 
 def parse_section_counts(text, section_name):
-    section_re = re.compile(
-        SECTION_RE_TEMPLATE.format(name=re.escape(section_name)),
-        re.MULTILINE | re.DOTALL,
-    )
-    match = section_re.search(text)
-    if not match:
+    section_body = parse_section_body(text, section_name)
+    if section_body is None:
         return None
 
-    summary_match = UNIT_RE.search(match.group(1))
+    summary_match = UNIT_RE.search(section_body)
     if not summary_match:
         return None
 
@@ -43,6 +39,17 @@ def parse_section_counts(text, section_name):
         "fail": int(summary_match.group(2)),
         "skip": int(summary_match.group(3)),
     }
+
+
+def parse_section_body(text, section_name):
+    section_re = re.compile(
+        SECTION_RE_TEMPLATE.format(name=re.escape(section_name)),
+        re.MULTILINE | re.DOTALL,
+    )
+    match = section_re.search(text)
+    if not match:
+        return None
+    return match.group(1)
 
 
 def load_json(path):
@@ -81,7 +88,10 @@ def parse_log(text):
         else:
             soak_counts = {"pass": 0, "fail": 1, "skip": 0}
 
-    coverage_match = COVERAGE_RE.search(text)
+    coverage_section = parse_section_body(text, "unit coverage")
+    coverage_match = None
+    if coverage_section is not None:
+        coverage_match = COVERAGE_RE.search(coverage_section)
     coverage = None
     if coverage_match:
         coverage = {
