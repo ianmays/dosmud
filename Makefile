@@ -41,6 +41,18 @@ build:
 build-win:
 	$(MAKE) TARGET=win CC=$(WIN_CC) BIN=dosmud.exe build
 
+win-run:
+	@if [ ! -f dosmud.exe ]; then \
+		echo "missing dosmud.exe - run 'make build-win' first"; \
+		exit 1; \
+	fi
+	@win_exe=$$(wslpath -w "$(CURDIR)/dosmud.exe"); \
+	if [ -n "$(SEED)" ]; then \
+		powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -FilePath '$$win_exe' -ArgumentList '--seed','$(SEED)'"; \
+	else \
+		powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -FilePath '$$win_exe'"; \
+	fi
+
 run: build
 	./$(BIN) $(RUN_ARGS)
 
@@ -263,4 +275,4 @@ test-dos-prepare-norun:
 dos-run:
 	powershell.exe -ExecutionPolicy Bypass -File dos-prepare.ps1 -NoBuild $(if $(SEED),-Seed $(SEED))
 
-.PHONY: build-all build build-win run test-all test test-win test-run-bin snapshot-run test-run build-unit test-unit test-unit-verbose test-unit-verbose-gameplay test-unit-coverage test-unit-coverage-verbose build-soak test-soak check-layers clean dos-prepare test-dos-prepare dos-prepare-norun test-dos-prepare-norun dos-run
+.PHONY: build-all build build-win win-run run test-all test test-win test-run-bin snapshot-run test-run build-unit test-unit test-unit-verbose test-unit-verbose-gameplay test-unit-coverage test-unit-coverage-verbose build-soak test-soak check-layers clean dos-prepare test-dos-prepare dos-prepare-norun test-dos-prepare-norun dos-run

@@ -55,9 +55,10 @@ WSL cross-compile for a native Windows console executable:
 sudo apt-get install -y mingw-w64
 make build-win
 make test-win
+make win-run
 ```
 
-This requires the MinGW cross-compiler (`x86_64-w64-mingw32-gcc`) in WSL and emits `dosmud.exe`. Launch it from PowerShell, `cmd.exe`, or Windows Terminal.
+This requires the MinGW cross-compiler (`x86_64-w64-mingw32-gcc`) in WSL and emits `dosmud.exe`. `make win-run` launches the existing executable in a new Windows console window and supports `SEED=<n>`; run `make build-win` first.
 
 Native layers/strict/test checks:
 

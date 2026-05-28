@@ -19,6 +19,7 @@ Purpose:
 
 - `make build`: native GCC development build; prints `elapsed: <seconds>` after the compile/link step
 - `make build-win`: WSL cross-compile to a native Windows console `dosmud.exe` with `x86_64-w64-mingw32-gcc`
+- `make win-run`: launches the existing Windows `dosmud.exe` in a new Windows console window; does not build
 - `make check-layers`: core/render boundary guard (no `printf` in `src/*.c` except `main.c`, `grendr.c`, and the platform files `platpos.c`, `platwin.c`, and `platdos.c`)
 - `make test`: strict deterministic compile (`-Werror`, `-DTEST_MODE`, `-g -O0`); does not run `check-layers`; prints `elapsed: <seconds>` after the compile/link step
 - `make test-win`: WSL cross-compile of the native Windows console `TEST_MODE` executable (`dosmud.exe`); compile-only, no snapshot run from Linux
@@ -35,7 +36,7 @@ Use these when you want to launch a playable or interactive binary rather than r
 - `make test-run-bin`: builds the native `TEST_MODE` binary if needed, then launches it; pass `SEED=<unsigned>` to forward `--seed`
 - `make dos-run`: launches the existing prepared DOS release executable without rebuilding
 
-For the WSL -> Windows path, build `dosmud.exe` with `make build-win` or `make test-win`, then launch that `.exe` from Windows PowerShell, `cmd.exe`, or Windows Terminal. This issue adds a console app path only; a GUI or alternate renderer remains separate work.
+For the WSL -> Windows path, build `dosmud.exe` with `make build-win` or `make test-win`, then launch it with `make win-run` or directly from Windows PowerShell, `cmd.exe`, or Windows Terminal. `win-run` launches the existing release executable only, opens a new Windows console window, and forwards `SEED=<n>` when set. This issue adds a console app path only; a GUI or alternate renderer remains separate work.
 
 ## Test layers
 
