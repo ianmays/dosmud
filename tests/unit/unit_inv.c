@@ -5,6 +5,78 @@
 #include "items.h"
 #include "unit_util.h"
 
+static int inv_loot(struct GameState *game)
+{
+    struct GameOutput out;
+
+    gout_reset(&out);
+    return game_inv_cmd_loot(game, &out);
+}
+
+static int inv_take_all(struct GameState *game)
+{
+    struct GameOutput out;
+
+    gout_reset(&out);
+    return game_inv_cmd_take_all(game, &out);
+}
+
+static int inv_take(struct GameState *game, int item_id)
+{
+    struct GameOutput out;
+
+    gout_reset(&out);
+    return game_inv_cmd_take(game, item_id, &out);
+}
+
+static int inv_drop(struct GameState *game, int item_id)
+{
+    struct GameOutput out;
+
+    gout_reset(&out);
+    return game_inv_cmd_drop(game, item_id, &out);
+}
+
+static int inv_eat(struct GameState *game, int item_id)
+{
+    struct GameOutput out;
+
+    gout_reset(&out);
+    return game_inv_cmd_eat(game, item_id, &out);
+}
+
+static int inv_use(struct GameState *game, int item_id)
+{
+    struct GameOutput out;
+
+    gout_reset(&out);
+    return game_inv_cmd_use(game, item_id, &out);
+}
+
+static int inv_craft(struct GameState *game, int item_id)
+{
+    struct GameOutput out;
+
+    gout_reset(&out);
+    return game_inv_cmd_craft(game, item_id, &out);
+}
+
+static int inv_wield(struct GameState *game, int item_id)
+{
+    struct GameOutput out;
+
+    gout_reset(&out);
+    return game_inv_cmd_wield(game, item_id, &out);
+}
+
+static int inv_unwield(struct GameState *game)
+{
+    struct GameOutput out;
+
+    gout_reset(&out);
+    return game_inv_cmd_unwield(game, &out);
+}
+
 TEST invent_ground_slots(void)
 {
     struct GameState game;
@@ -46,11 +118,11 @@ TEST invent_take_drop_paths(void)
     unit_game_fresh(&game, 3u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game.room_item[WORLD_ROOM_CAMP][0] = ITEM_STICK;
-    ASSERT_EQ(1, game_inv_cmd_take(&game, ITEM_STICK));
+    ASSERT_EQ(1, inv_take(&game, ITEM_STICK));
     ASSERT_EQ(1, game_inv_player_has_item(&game, ITEM_STICK));
-    ASSERT_EQ(1, game_inv_cmd_drop(&game, ITEM_STICK));
+    ASSERT_EQ(1, inv_drop(&game, ITEM_STICK));
     ASSERT_EQ(0, game_inv_player_has_item(&game, ITEM_STICK));
-    ASSERT_EQ(1, game_inv_cmd_take(&game, ITEM_REED));
+    ASSERT_EQ(1, inv_take(&game, ITEM_REED));
     PASS();
 }
 
@@ -62,7 +134,7 @@ TEST invent_take_all_paths(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game.room_item[WORLD_ROOM_CAMP][0] = ITEM_STICK;
     game.room_item[WORLD_ROOM_CAMP][1] = ITEM_REED;
-    ASSERT_EQ(1, game_inv_cmd_take_all(&game));
+    ASSERT_EQ(1, inv_take_all(&game));
     ASSERT_EQ(2, game.bag_count);
     ASSERT_EQ(ITEM_STICK, game.bag[0]);
     ASSERT_EQ(ITEM_REED, game.bag[1]);
@@ -81,7 +153,7 @@ TEST invent_take_all_bag_full(void)
     game.room_item[WORLD_ROOM_CAMP][1] = ITEM_REED;
     game.bag_count = game.bag_capacity - 1;
     game.bag[0] = ITEM_BERRY;
-    ASSERT_EQ(1, game_inv_cmd_take_all(&game));
+    ASSERT_EQ(1, inv_take_all(&game));
     ASSERT_EQ(game.bag_capacity - 1, game.bag_count);
     ASSERT_EQ(ITEM_STICK, game.room_item[WORLD_ROOM_CAMP][0]);
     ASSERT_EQ(ITEM_REED, game.room_item[WORLD_ROOM_CAMP][1]);
@@ -98,7 +170,7 @@ TEST invent_take_all_nothing(void)
     for (slot = 0; slot < CFG_AREA_ITEM_SLOTS; ++slot) {
         game.room_item[WORLD_ROOM_CAMP][slot] = ITEM_NONE;
     }
-    ASSERT_EQ(1, game_inv_cmd_take_all(&game));
+    ASSERT_EQ(1, inv_take_all(&game));
     ASSERT_EQ(0, game.bag_count);
     PASS();
 }
@@ -111,9 +183,9 @@ TEST invent_take_combat_blocked(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game.room_item[WORLD_ROOM_CAMP][0] = ITEM_STICK;
     game_set_mode_combat(&game);
-    ASSERT_EQ(1, game_inv_cmd_take(&game, ITEM_STICK));
+    ASSERT_EQ(1, inv_take(&game, ITEM_STICK));
     ASSERT_EQ(0, game_inv_player_has_item(&game, ITEM_STICK));
-    ASSERT_EQ(1, game_inv_cmd_take_all(&game));
+    ASSERT_EQ(1, inv_take_all(&game));
     ASSERT_EQ(0, game_inv_player_has_item(&game, ITEM_STICK));
     PASS();
 }
@@ -126,15 +198,15 @@ TEST invent_eat_and_use(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game_inv_bag_add(&game, ITEM_BERRY);
     game_inv_bag_add(&game, ITEM_STONE);
-    ASSERT_EQ(1, game_inv_cmd_eat(&game, ITEM_BERRY));
+    ASSERT_EQ(1, inv_eat(&game, ITEM_BERRY));
     ASSERT_EQ(0, game_inv_player_has_item(&game, ITEM_BERRY));
     ASSERT_EQ(CFG_START_MAX_HP, game.player_hp);
-    ASSERT_EQ(1, game_inv_cmd_eat(&game, ITEM_STONE));
+    ASSERT_EQ(1, inv_eat(&game, ITEM_STONE));
     game_inv_bag_add(&game, ITEM_SALVE);
     game.player_hp = 5;
-    ASSERT_EQ(1, game_inv_cmd_use(&game, ITEM_SALVE));
+    ASSERT_EQ(1, inv_use(&game, ITEM_SALVE));
     ASSERT_EQ(10, game.player_hp);
-    ASSERT_EQ(1, game_inv_cmd_use(&game, ITEM_SPEAR));
+    ASSERT_EQ(1, inv_use(&game, ITEM_SPEAR));
     PASS();
 }
 
@@ -146,11 +218,11 @@ TEST invent_eat_heals_damaged(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game.player_hp = 5;
     game_inv_bag_add(&game, ITEM_BERRY);
-    ASSERT_EQ(1, game_inv_cmd_eat(&game, ITEM_BERRY));
+    ASSERT_EQ(1, inv_eat(&game, ITEM_BERRY));
     ASSERT_EQ(6, game.player_hp);
     game_inv_bag_add(&game, ITEM_FISH);
     game.player_hp = 10;
-    ASSERT_EQ(1, game_inv_cmd_eat(&game, ITEM_FISH));
+    ASSERT_EQ(1, inv_eat(&game, ITEM_FISH));
     ASSERT_EQ(12, game.player_hp);
     PASS();
 }
@@ -162,7 +234,7 @@ TEST invent_salve_at_max_hp(void)
     unit_game_fresh(&game, 17u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game_inv_bag_add(&game, ITEM_SALVE);
-    ASSERT_EQ(1, game_inv_cmd_use(&game, ITEM_SALVE));
+    ASSERT_EQ(1, inv_use(&game, ITEM_SALVE));
     ASSERT_EQ(CFG_START_MAX_HP, game.player_hp);
     ASSERT_EQ(-1, game_inv_bag_find_index(&game, ITEM_SALVE));
     PASS();
@@ -176,9 +248,9 @@ TEST invent_craft_torch(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game_inv_bag_add(&game, ITEM_STICK);
     game_inv_bag_add(&game, ITEM_REED);
-    ASSERT_EQ(1, game_inv_cmd_craft(&game, ITEM_TORCH));
+    ASSERT_EQ(1, inv_craft(&game, ITEM_TORCH));
     ASSERT_EQ(1, game_inv_player_has_item(&game, ITEM_TORCH));
-    ASSERT_EQ(1, game_inv_cmd_craft(&game, ITEM_SALVE));
+    ASSERT_EQ(1, inv_craft(&game, ITEM_SALVE));
     PASS();
 }
 
@@ -188,8 +260,8 @@ TEST invent_craft_missing_ingredients(void)
 
     unit_game_fresh(&game, 7u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
-    ASSERT_EQ(1, game_inv_cmd_craft(&game, ITEM_TORCH));
-    ASSERT_EQ(1, game_inv_cmd_craft(&game, ITEM_SPEAR));
+    ASSERT_EQ(1, inv_craft(&game, ITEM_TORCH));
+    ASSERT_EQ(1, inv_craft(&game, ITEM_SPEAR));
     PASS();
 }
 
@@ -201,11 +273,11 @@ TEST invent_wield_and_unwield(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game_inv_bag_add(&game, ITEM_STICK);
     game_inv_bag_add(&game, ITEM_SPEAR);
-    ASSERT_EQ(1, game_inv_cmd_wield(&game, ITEM_STICK));
+    ASSERT_EQ(1, inv_wield(&game, ITEM_STICK));
     ASSERT_EQ(ITEM_STICK, game.weapon_equipped);
-    ASSERT_EQ(1, game_inv_cmd_wield(&game, ITEM_SPEAR));
+    ASSERT_EQ(1, inv_wield(&game, ITEM_SPEAR));
     ASSERT_EQ(ITEM_SPEAR, game.weapon_equipped);
-    ASSERT_EQ(1, game_inv_cmd_unwield(&game));
+    ASSERT_EQ(1, inv_unwield(&game));
     ASSERT_EQ(ITEM_NONE, game.weapon_equipped);
     PASS();
 }
@@ -218,10 +290,10 @@ TEST invent_loot_corpse(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game.corpse_present[WORLD_ROOM_CAMP] = 1;
     game.corpse_loot[WORLD_ROOM_CAMP] = ITEM_BERRY;
-    ASSERT_EQ(1, game_inv_cmd_loot(&game));
+    ASSERT_EQ(1, inv_loot(&game));
     ASSERT_EQ(1, game_inv_player_has_item(&game, ITEM_BERRY));
     ASSERT_EQ(0, game.corpse_present[WORLD_ROOM_CAMP]);
-    ASSERT_EQ(1, game_inv_cmd_loot(&game));
+    ASSERT_EQ(1, inv_loot(&game));
     PASS();
 }
 
@@ -233,8 +305,8 @@ TEST invent_wield_already_and_not_weapon(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game_inv_bag_add(&game, ITEM_STICK);
     game.weapon_equipped = ITEM_STICK;
-    ASSERT_EQ(1, game_inv_cmd_wield(&game, ITEM_STICK));
-    ASSERT_EQ(1, game_inv_cmd_wield(&game, ITEM_BERRY));
+    ASSERT_EQ(1, inv_wield(&game, ITEM_STICK));
+    ASSERT_EQ(1, inv_wield(&game, ITEM_BERRY));
     PASS();
 }
 
@@ -247,7 +319,7 @@ TEST invent_loot_bag_full(void)
     game.corpse_present[WORLD_ROOM_CAMP] = 1;
     game.corpse_loot[WORLD_ROOM_CAMP] = ITEM_BERRY;
     game.bag_count = game.bag_capacity;
-    ASSERT_EQ(1, game_inv_cmd_loot(&game));
+    ASSERT_EQ(1, inv_loot(&game));
     ASSERT_EQ(1, game.corpse_present[WORLD_ROOM_CAMP]);
     PASS();
 }
@@ -260,7 +332,7 @@ TEST invent_craft_from_wielded_ingredient(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game.weapon_equipped = ITEM_STICK;
     game_inv_bag_add(&game, ITEM_REED);
-    ASSERT_EQ(1, game_inv_cmd_craft(&game, ITEM_TORCH));
+    ASSERT_EQ(1, inv_craft(&game, ITEM_TORCH));
     ASSERT_EQ(1, game_inv_player_has_item(&game, ITEM_TORCH));
     PASS();
 }
@@ -271,7 +343,7 @@ TEST invent_drop_not_carrying(void)
 
     unit_game_fresh(&game, 15u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
-    ASSERT_EQ(1, game_inv_cmd_drop(&game, ITEM_BERRY));
+    ASSERT_EQ(1, inv_drop(&game, ITEM_BERRY));
     PASS();
 }
 
@@ -283,8 +355,8 @@ TEST invent_wield_swap_weapons(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game_inv_bag_add(&game, ITEM_STICK);
     game_inv_bag_add(&game, ITEM_SPEAR);
-    ASSERT_EQ(1, game_inv_cmd_wield(&game, ITEM_STICK));
-    ASSERT_EQ(1, game_inv_cmd_wield(&game, ITEM_SPEAR));
+    ASSERT_EQ(1, inv_wield(&game, ITEM_STICK));
+    ASSERT_EQ(1, inv_wield(&game, ITEM_SPEAR));
     ASSERT_EQ(ITEM_SPEAR, game.weapon_equipped);
     ASSERT_EQ(1, game_inv_player_has_item(&game, ITEM_STICK));
     PASS();
@@ -298,7 +370,7 @@ TEST invent_unwield_to_ground(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game.weapon_equipped = ITEM_STICK;
     game.bag_count = game.bag_capacity;
-    ASSERT_EQ(1, game_inv_cmd_unwield(&game));
+    ASSERT_EQ(1, inv_unwield(&game));
     ASSERT_EQ(ITEM_NONE, game.weapon_equipped);
     PASS();
 }

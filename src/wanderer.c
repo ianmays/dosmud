@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include "wanderer.h"
 #include "game.h"
-#include "grendr.h"
+#include "gout.h"
 
 /*
  * The wanderer is a separate roaming actor, so its movement and encounter
@@ -46,7 +46,7 @@ void wanderer_step(struct GameState *game)
     game->wanderer_room = r->exits[dirs[pick]];
 }
 
-void wanderer_begin_encounter(struct GameState *game)
+void wanderer_begin_encounter(struct GameState *game, struct GameOutput *out)
 {
     /* The separation flag prevents the same room from retriggering the encounter immediately. */
     if (game_is_busy_dialogue(game)) {
@@ -55,23 +55,23 @@ void wanderer_begin_encounter(struct GameState *game)
     if (game->wanderer_need_separation) {
         return;
     }
-    render_wanderer_scene();
+    gout_push(out, GAME_OUT_WANDERER_SCENE, 0, 0, 0, 0, 0);
     game_set_mode_dialogue(game, DIALOGUE_WANDERER);
     game->wanderer_need_separation = 1;
 }
 
-void wanderer_apply_reply(int choice)
+void wanderer_apply_reply(int choice, struct GameOutput *out)
 {
-    render_wanderer_reply(choice);
+    gout_push(out, GAME_OUT_WANDERER_REPLY, choice, 0, 0, 0, 0);
 }
 
-int wanderer_cmd_reply(struct GameState *game, int choice)
+int wanderer_cmd_reply(struct GameState *game, int choice, struct GameOutput *out)
 {
     if (choice < 1 || choice > 3) {
-        render_msg_pick_123();
+        gout_push(out, GAME_OUT_MSG_PICK_123, 0, 0, 0, 0, 0);
         return 1;
     }
-    wanderer_apply_reply(choice);
+    wanderer_apply_reply(choice, out);
     game_set_mode_explore(game);
     game->wanderer_active = 0;
     game->wanderer_room = -1;

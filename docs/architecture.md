@@ -25,6 +25,8 @@ Owns state mutation, command handling, world ticks, combat, inventory logic, and
 
 Modules include `game`, `command`, `world`, `invent`, `combat`, `gatmos`, `gprog`, `genc`, `wanderer`, `dialogue`, and `items`.
 
+Simulation steps append fixed-size `GameOutput` records (`gout`) while mutating `GameState`. Core does not print directly; callers may inspect those records headlessly or hand them to the DOSMUD render adapter.
+
 Core must **not** use:
 
 - `printf` or other terminal output (call `render_*` in `grendr` instead)
@@ -50,9 +52,9 @@ Presentation only: room art, HUD, combat text, inventory messages, and explorati
 
 - **`txtres`** holds static copy; it does not print
 - **`fmt`** builds player-visible strings from `GameState` into caller buffers (no terminal I/O); logic-heavy formatting (for example aggregated bag lists) lives here
-- **`grendr`** is the only gameplay-adjacent module that may call `printf`; it prints `fmt` output, applies newline/spacing tiers, and draws ASCII art
+- **`grendr`** is the only gameplay-adjacent module that may call `printf`; it prints `fmt` output, applies newline/spacing tiers, draws ASCII art, and translates `GameOutput` records into DOSMUD-specific `render_*` calls
 
-Core calls `render_*` after mutating `GameState`; render never changes simulation state.
+Platform or frontend code runs simulation first, then hands the resulting `GameOutput` records to render; render never changes simulation state.
 
 ### Newline and spacing
 
@@ -150,6 +152,7 @@ Conventions:
 - top-level gameplay orchestration
 - command routing
 - world update sequencing
+- headless step surface: `game_describe_current_room`, `game_process_input`, and `game_background_step` mutate `GameState` and append `GameOutput` records supplied by the caller
 - explicit game modes in [`game.h`](../src/game.h): `GameMode` (explore, dialogue, combat), `DialogueKind` for the active dialogue when in dialogue mode (room NPCs including the pond frog, wanderer, enemy), and `CombatState` for combat-only fields
 - mode transitions via `game_set_mode_explore`, `game_set_mode_dialogue`, and `game_set_mode_combat` (only one major mode at a time)
 - `game_is_busy_dialogue` returns true whenever `mode != GAME_MODE_EXPLORE` (ambient encounters, idle background ticks)

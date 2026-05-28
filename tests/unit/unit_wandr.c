@@ -4,6 +4,22 @@
 #include "wanderer.h"
 #include "unit_util.h"
 
+static void begin_wanderer(struct GameState *game)
+{
+    struct GameOutput out;
+
+    gout_reset(&out);
+    wanderer_begin_encounter(game, &out);
+}
+
+static int wanderer_reply_out(struct GameState *game, int choice)
+{
+    struct GameOutput out;
+
+    gout_reset(&out);
+    return wanderer_cmd_reply(game, choice, &out);
+}
+
 TEST wanderer_separation_clears(void)
 {
     struct GameState game;
@@ -39,12 +55,12 @@ TEST wanderer_encounter_guards(void)
     unit_game_fresh(&game, 3u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game.wanderer_need_separation = 1;
-    wanderer_begin_encounter(&game);
+    begin_wanderer(&game);
     ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
 
     game.wanderer_need_separation = 0;
     game.wanderer_room = game.player.room_id;
-    wanderer_begin_encounter(&game);
+    begin_wanderer(&game);
     ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
     ASSERT_EQ(DIALOGUE_WANDERER, game.dialogue);
     PASS();
@@ -57,7 +73,7 @@ TEST wanderer_reply_cmd_explore(void)
     unit_game_fresh(&game, 4u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game_set_mode_dialogue(&game, DIALOGUE_WANDERER);
-    ASSERT_EQ(1, wanderer_cmd_reply(&game, 2));
+    ASSERT_EQ(1, wanderer_reply_out(&game, 2));
     ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
     ASSERT_EQ(0, game.wanderer_active);
     PASS();
@@ -70,7 +86,7 @@ TEST wanderer_reply_cmd_invalid_choice(void)
     unit_game_fresh(&game, 5u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game_set_mode_dialogue(&game, DIALOGUE_WANDERER);
-    ASSERT_EQ(1, wanderer_cmd_reply(&game, 0));
+    ASSERT_EQ(1, wanderer_reply_out(&game, 0));
     ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
     PASS();
 }

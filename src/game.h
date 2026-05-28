@@ -3,6 +3,7 @@
 
 #include "base.h"
 #include "command.h"
+#include "gout.h"
 #include "world.h"
 #include "gprog.h"
 
@@ -27,6 +28,13 @@ enum DialogueKind {
     DIALOGUE_WANDERER,
     DIALOGUE_ENEMY
 };
+
+/* Stored in GameState.env_focus_kind; render consumes the same values. */
+#define GAME_ENV_NONE 0
+#define GAME_ENV_RUSTLE 1
+#define GAME_ENV_CREAK 2
+#define GAME_ENV_WATER 3
+#define GAME_ENV_GRIT 4
 
 struct CombatState {
     int enemy_hp;
@@ -78,9 +86,9 @@ struct GameState {
 };
 
 void game_init(struct GameState *game, u32 seed);
-void game_describe_current_room(struct GameState *game);
-int game_process_input(struct GameState *game, char *line);
-void game_background_step(struct GameState *game);
+void game_describe_current_room(struct GameState *game, struct GameOutput *out);
+int game_process_input(struct GameState *game, char *line, struct GameOutput *out);
+void game_background_step(struct GameState *game, struct GameOutput *out);
 
 void game_set_mode_explore(struct GameState *game);
 void game_set_mode_dialogue(struct GameState *game, enum DialogueKind kind);

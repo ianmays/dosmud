@@ -11,7 +11,7 @@ PLAT_SRC = src/platpos.c
 ifeq ($(TARGET),win)
 PLAT_SRC = src/platwin.c
 endif
-SRC = src/main.c $(PLAT_SRC) src/game.c src/gprog.c src/combat.c src/genc.c src/wanderer.c src/dialogue.c src/gatmos.c src/grendr.c src/fmt.c src/invent.c src/command.c src/world.c src/items.c src/txtres.c
+SRC = src/main.c $(PLAT_SRC) src/game.c src/gout.c src/gprog.c src/combat.c src/genc.c src/wanderer.c src/dialogue.c src/gatmos.c src/grendr.c src/fmt.c src/invent.c src/command.c src/world.c src/items.c src/txtres.c
 HARNESS_SRC = $(HARNESS_DIR)/testharn.c $(HARNESS_DIR)/th_world.c
 TEST_SRC = $(SRC) $(HARNESS_SRC)
 REGRESSION_DIR = tests/regression
@@ -124,7 +124,7 @@ UNIT_BUILD_DIR = tests/unit/build
 UNIT_COVERAGE_DIR = $(UNIT_BUILD_DIR)/coverage
 UNIT_BIN = $(UNIT_BUILD_DIR)/dosmud_unit
 UNIT_CFLAGS = $(TEST_CFLAGS) -I$(UNIT_DIR) -fprofile-arcs -ftest-coverage
-UNIT_GAMEPLAY_SRC = $(PLAT_SRC) src/game.c src/gprog.c src/combat.c src/genc.c \
+UNIT_GAMEPLAY_SRC = $(PLAT_SRC) src/game.c src/gout.c src/gprog.c src/combat.c src/genc.c \
 	src/wanderer.c src/dialogue.c src/gatmos.c src/grendr.c src/fmt.c src/invent.c \
 	src/command.c src/world.c src/items.c src/txtres.c
 UNIT_CORE_SRC = $(UNIT_GAMEPLAY_SRC) $(HARNESS_SRC)

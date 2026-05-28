@@ -30,6 +30,11 @@ static void camp_clear_ground(struct GameState *game)
     }
 }
 
+static void harness_drop_output(struct GameOutput *out)
+{
+    gout_reset(out);
+}
+
 static void fixture_wanderer_off(struct GameState *game)
 {
     game->wanderer_active = 0;
@@ -51,18 +56,26 @@ static void fixture_bandit_base(struct GameState *game)
 
 static int fixture_bandit_dialogue(struct GameState *game)
 {
+    struct GameOutput out;
+
     fixture_bandit_base(game);
     if (!game_inv_bag_add(game, ITEM_STICK)) {
         return 0;
     }
-    enemy_begin_encounter(game);
+    harness_drop_output(&out);
+    enemy_begin_encounter(game, &out);
+    game_render_output(game, &out);
     return 1;
 }
 
 static void fixture_bandit_dialogue_empty(struct GameState *game)
 {
+    struct GameOutput out;
+
     fixture_bandit_base(game);
-    enemy_begin_encounter(game);
+    harness_drop_output(&out);
+    enemy_begin_encounter(game, &out);
+    game_render_output(game, &out);
 }
 
 static int fixture_bandit_handover_pick(struct GameState *game)
@@ -77,9 +90,13 @@ static int fixture_bandit_handover_pick(struct GameState *game)
 
 static void fixture_bandit_wielded_pick(struct GameState *game)
 {
+    struct GameOutput out;
+
     fixture_bandit_base(game);
     game->weapon_equipped = ITEM_STICK;
-    enemy_begin_encounter(game);
+    harness_drop_output(&out);
+    enemy_begin_encounter(game, &out);
+    game_render_output(game, &out);
     game->enemy_handover_pick = 1;
     render_bandit_handover_pick_prompt();
 }
@@ -98,6 +115,7 @@ static void fixture_bandit_combat_turn1(struct GameState *game)
 
 static int fixture_bandit_combat_turn1_resolve(struct GameState *game)
 {
+    struct GameOutput out;
     static const int equipment_rolls[2] = {
         CFG_TEST_EQUIPMENT_ROLL_PLAYER_HIT,
         CFG_TEST_EQUIPMENT_ROLL_ENEMY_DMG
@@ -105,7 +123,9 @@ static int fixture_bandit_combat_turn1_resolve(struct GameState *game)
 
     fixture_bandit_combat_turn1(game);
     game_roll_inject_begin(game, equipment_rolls, 2);
-    combat_resolve_reply(game, 1);
+    harness_drop_output(&out);
+    combat_resolve_reply(game, 1, &out);
+    game_render_output(game, &out);
     if (!game_roll_inject_fully_consumed(game)) {
         game_roll_inject_clear(game);
         return 0;
@@ -269,12 +289,16 @@ static int fixture_quiet_camp_dual_ground_full_bag(struct GameState *game)
 
 static void fixture_wanderer_dialogue(struct GameState *game)
 {
+    struct GameOutput out;
+
     game_reset_fixture_baseline(game, WORLD_ROOM_ROAD, 0);
     game->room_explored[WORLD_ROOM_ROAD] = 1;
     game->wanderer_active = 1;
     game->wanderer_room = WORLD_ROOM_ROAD;
     game->wanderer_need_separation = 0;
-    wanderer_begin_encounter(game);
+    harness_drop_output(&out);
+    wanderer_begin_encounter(game, &out);
+    game_render_output(game, &out);
 }
 
 static int fixture_bag_item(struct GameState *game, int room_id, int item_id)

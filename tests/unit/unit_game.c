@@ -11,10 +11,13 @@
 
 static int run_cmd(struct GameState *game, const char *line)
 {
+    struct GameOutput out;
     char buf[CFG_INPUT_MAX];
+
+    gout_reset(&out);
     strncpy(buf, line, CFG_INPUT_MAX - 1);
     buf[CFG_INPUT_MAX - 1] = '\0';
-    return game_process_input(game, buf);
+    return game_process_input(game, buf, &out);
 }
 
 TEST game_heal_player_applies(void)
@@ -66,6 +69,19 @@ TEST game_mode_setters(void)
     PASS();
 }
 
+TEST game_describe_current_room_emits_look(void)
+{
+    struct GameState game;
+    struct GameOutput out;
+
+    unit_game_fresh(&game, 33u);
+    gout_reset(&out);
+    game_describe_current_room(&game, &out);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_OUT_ROOM_LOOK, out.events[0].kind);
+    PASS();
+}
+
 TEST game_roll_inject_consume(void)
 {
     struct GameState game;
@@ -103,7 +119,12 @@ TEST game_quiet_ticks(void)
     game.test_quiet_ticks = 1;
     game.wanderer_active = 0;
     tick_before = game.tick;
-    game_background_step(&game);
+    {
+        struct GameOutput out;
+
+        gout_reset(&out);
+        game_background_step(&game, &out);
+    }
     ASSERT_EQ(tick_before + 1, game.tick);
     PASS();
 }
@@ -116,10 +137,20 @@ TEST game_bandit_intimidate_success(void)
 
     unit_game_fresh(&game, 5u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
-    enemy_begin_encounter(&game);
+    {
+        struct GameOutput out;
+
+        gout_reset(&out);
+        enemy_begin_encounter(&game, &out);
+    }
     rolls[0] = CFG_TEST_INTIMIDATE_OK;
     game_roll_inject_begin(&game, rolls, 1);
-    game_process_input(&game, line);
+    {
+        struct GameOutput out;
+
+        gout_reset(&out);
+        game_process_input(&game, line, &out);
+    }
     ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
     PASS();
 }
@@ -158,8 +189,14 @@ TEST game_bandit_fight_reply(void)
 
     unit_game_fresh(&game, 10u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
-    enemy_begin_encounter(&game);
-    game_process_input(&game, line);
+    {
+        struct GameOutput out;
+
+        gout_reset(&out);
+        enemy_begin_encounter(&game, &out);
+        gout_reset(&out);
+        game_process_input(&game, line, &out);
+    }
     ASSERT_EQ(GAME_MODE_COMBAT, game.mode);
     PASS();
 }
@@ -172,10 +209,20 @@ TEST game_bandit_intimidate_fail(void)
 
     unit_game_fresh(&game, 11u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
-    enemy_begin_encounter(&game);
+    {
+        struct GameOutput out;
+
+        gout_reset(&out);
+        enemy_begin_encounter(&game, &out);
+    }
     rolls[0] = CFG_TEST_INTIMIDATE_FAIL;
     game_roll_inject_begin(&game, rolls, 1);
-    game_process_input(&game, line);
+    {
+        struct GameOutput out;
+
+        gout_reset(&out);
+        game_process_input(&game, line, &out);
+    }
     ASSERT_EQ(GAME_MODE_COMBAT, game.mode);
     PASS();
 }
@@ -188,8 +235,14 @@ TEST game_bandit_handover_pick(void)
     unit_game_fresh(&game, 12u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game_inv_bag_add(&game, ITEM_STICK);
-    enemy_begin_encounter(&game);
-    game_process_input(&game, line);
+    {
+        struct GameOutput out;
+
+        gout_reset(&out);
+        enemy_begin_encounter(&game, &out);
+        gout_reset(&out);
+        game_process_input(&game, line, &out);
+    }
     ASSERT_EQ(1, game.enemy_handover_pick);
     PASS();
 }
@@ -333,6 +386,41 @@ TEST game_pass_time_wait_ticks(void)
     PASS();
 }
 
+TEST game_wait_emits_output_record(void)
+{
+    struct GameState game;
+    struct GameOutput out;
+    char line[] = "wait";
+
+    unit_game_fresh(&game, 34u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game.test_quiet_ticks = 1;
+    game.wanderer_active = 0;
+    gout_reset(&out);
+    ASSERT_EQ(1, game_process_input(&game, line, &out));
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_OUT_MSG_WAIT, out.events[0].kind);
+    PASS();
+}
+
+TEST game_move_emits_move_then_look(void)
+{
+    struct GameState game;
+    struct GameOutput out;
+    char line[] = "move north";
+
+    unit_game_fresh(&game, 35u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game.test_quiet_ticks = 1;
+    game.wanderer_active = 0;
+    gout_reset(&out);
+    ASSERT_EQ(1, game_process_input(&game, line, &out));
+    ASSERT_EQ(2, out.count);
+    ASSERT_EQ(GAME_OUT_MSG_MOVED, out.events[0].kind);
+    ASSERT_EQ(GAME_OUT_ROOM_LOOK, out.events[1].kind);
+    PASS();
+}
+
 TEST game_roll_spread_zero(void)
 {
     struct GameState game;
@@ -357,6 +445,7 @@ SUITE(game) {
     RUN_TEST(game_heal_player_at_max);
     RUN_TEST(game_heal_player_clamps);
     RUN_TEST(game_mode_setters);
+    RUN_TEST(game_describe_current_room_emits_look);
     RUN_TEST(game_roll_inject_consume);
     RUN_TEST(game_move_blocked_and_ok);
     RUN_TEST(game_quiet_ticks);
@@ -377,6 +466,8 @@ SUITE(game) {
     RUN_TEST(game_session_help_no_tick);
     RUN_TEST(game_observe_look_no_tick);
     RUN_TEST(game_pass_time_wait_ticks);
+    RUN_TEST(game_wait_emits_output_record);
+    RUN_TEST(game_move_emits_move_then_look);
     RUN_TEST(game_roll_spread_zero);
     RUN_TEST(game_quit_ends_run);
 }

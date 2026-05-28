@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include "game.h"
-#include "grendr.h"
 #include "invent.h"
 #include "items.h"
 #include "gatmos.h"
@@ -57,19 +56,32 @@ int game_heal_player(struct GameState *game, int amount)
     return 1;
 }
 
-static void do_look(struct GameState *game)
+static void do_look(struct GameState *game, struct GameOutput *out)
 {
-    render_room_look(game, npc_in_room(game->player.room_id));
+    int i;
+    struct GameOutEvent *ev;
+
+    gout_push(out, GAME_OUT_ROOM_LOOK, npc_in_room(game->player.room_id),
+        game->corpse_present[game->player.room_id],
+        game->env_focus_active &&
+            game->env_focus_room == game->player.room_id &&
+            game->tick < game->env_focus_expires_tick,
+        game->env_focus_kind, 0);
+    ev = &out->events[out->count - 1];
+    ev->room_id = game->player.room_id;
+    for (i = 0; i < CFG_AREA_ITEM_SLOTS; ++i) {
+        ev->room_item[i] = game->room_item[game->player.room_id][i];
+    }
 }
 
-static void do_map(struct GameState *game)
+static void do_map(struct GameOutput *out)
 {
-    render_exploration_map(game);
+    gout_push(out, GAME_OUT_MAP, 0, 0, 0, 0, 0);
 }
 
-void game_describe_current_room(struct GameState *game)
+void game_describe_current_room(struct GameState *game, struct GameOutput *out)
 {
-    do_look(game);
+    do_look(game, out);
 }
 
 static void reset_mutable_state(struct GameState *game, int room_id, u32 tick)
@@ -198,7 +210,8 @@ int game_roll_percent(struct GameState *game)
     return game_roll_spread(game, CFG_ROLL_PERCENT_RANGE);
 }
 
-static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd)
+static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd,
+                                    struct GameOutput *out)
 {
     /*
      * Combat and enemy handover are narrow modal states; only the small
@@ -214,7 +227,7 @@ static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd)
             cmd->type != CMD_UNWIELD &&
             cmd->type != CMD_HELP &&
             cmd->type != CMD_QUIT) {
-        render_msg_bandit_waiting_reply();
+        gout_push(out, GAME_OUT_MSG_BANDIT_WAITING_REPLY, 0, 0, 0, 0, 0);
         return 0;
     }
 
@@ -230,9 +243,10 @@ static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd)
             cmd->type != CMD_QUIT &&
             !(game->enemy_handover_pick == 1 && cmd->type == CMD_GIVE)) {
         if (game->enemy_handover_pick == 1) {
-            render_msg_bandit_waiting_handover_pick();
+            gout_push(out, GAME_OUT_MSG_BANDIT_WAITING_HANDOVER_PICK,
+                0, 0, 0, 0, 0);
         } else {
-            render_msg_bandit_waiting_reply();
+            gout_push(out, GAME_OUT_MSG_BANDIT_WAITING_REPLY, 0, 0, 0, 0, 0);
         }
         return 0;
     }
@@ -240,10 +254,11 @@ static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd)
     return 1;
 }
 
-static int game_cmd_session(struct GameState *game, struct Command *cmd)
+static int game_cmd_session(struct GameState *game, struct Command *cmd,
+                            struct GameOutput *out)
 {
     if (cmd->type == CMD_HELP) {
-        game_print_help(cmd->arg);
+        gout_push(out, GAME_OUT_HELP, cmd->arg, 0, 0, 0, 0);
         return 1;
     }
     if (cmd->type == CMD_QUIT) {
@@ -253,36 +268,41 @@ static int game_cmd_session(struct GameState *game, struct Command *cmd)
     return 0;
 }
 
-static int game_cmd_observe(struct GameState *game, struct Command *cmd)
+static int game_cmd_observe(struct GameState *game, struct Command *cmd,
+                            struct GameOutput *out)
 {
+    (void)game;
     if (cmd->type == CMD_LOOK) {
-        do_look(game);
+        do_look(game, out);
         return 1;
     }
     if (cmd->type == CMD_MAP) {
-        do_map(game);
+        do_map(out);
         return 1;
     }
     return 0;
 }
 
-static int game_cmd_pass_time(struct GameState *game, struct Command *cmd)
+static int game_cmd_pass_time(struct GameState *game, struct Command *cmd,
+                              struct GameOutput *out)
 {
     (void)game;
     if (cmd->type != CMD_WAIT) {
         return 0;
     }
-    render_msg_wait();
+    gout_push(out, GAME_OUT_MSG_WAIT, 0, 0, 0, 0, 0);
     return 1;
 }
 
-static int game_cmd_move(struct GameState *game, struct Command *cmd)
+static int game_cmd_move(struct GameState *game, struct Command *cmd,
+                         struct GameOutput *out)
 {
     if (cmd->type != CMD_MOVE) {
         return 0;
     }
     if (!world_can_move(&game->world, game->player.room_id, cmd->dir)) {
-        render_msg_cannot_move(world_dir_name(cmd->dir));
+        gout_push(out, GAME_OUT_MSG_CANNOT_MOVE, 0, 0, 0, 0,
+            world_dir_name(cmd->dir));
         return 0;
     }
     game->player.room_id = world_move(&game->world, game->player.room_id, cmd->dir);
@@ -290,104 +310,108 @@ static int game_cmd_move(struct GameState *game, struct Command *cmd)
     if (game->mode == GAME_MODE_DIALOGUE) {
         game_set_mode_explore(game);
     }
-    render_msg_moved(world_dir_name(cmd->dir));
-    do_look(game);
+    gout_push(out, GAME_OUT_MSG_MOVED, 0, 0, 0, 0, world_dir_name(cmd->dir));
+    do_look(game, out);
     return 1;
 }
 
-static int game_cmd_inventory(struct GameState *game, struct Command *cmd)
+static int game_cmd_inventory(struct GameState *game, struct Command *cmd,
+                              struct GameOutput *out)
 {
     if (cmd->type == CMD_LOOT) {
-        return game_inv_cmd_loot(game);
+        return game_inv_cmd_loot(game, out);
     }
     if (cmd->type == CMD_TAKE) {
         if (cmd->arg == CMD_TAKE_ALL) {
-            return game_inv_cmd_take_all(game);
+            return game_inv_cmd_take_all(game, out);
         }
-        return game_inv_cmd_take(game, cmd->arg);
+        return game_inv_cmd_take(game, cmd->arg, out);
     }
     if (cmd->type == CMD_DROP) {
-        return game_inv_cmd_drop(game, cmd->arg);
+        return game_inv_cmd_drop(game, cmd->arg, out);
     }
     if (cmd->type == CMD_BAG) {
-        return game_inv_cmd_bag(game);
+        return game_inv_cmd_bag(game, out);
     }
     if (cmd->type == CMD_WIELD) {
-        return game_inv_cmd_wield(game, cmd->arg);
+        return game_inv_cmd_wield(game, cmd->arg, out);
     }
     if (cmd->type == CMD_UNWIELD) {
-        return game_inv_cmd_unwield(game);
+        return game_inv_cmd_unwield(game, out);
     }
     if (cmd->type == CMD_EAT) {
-        return game_inv_cmd_eat(game, cmd->arg);
+        return game_inv_cmd_eat(game, cmd->arg, out);
     }
     if (cmd->type == CMD_USE) {
-        return game_inv_cmd_use(game, cmd->arg);
+        return game_inv_cmd_use(game, cmd->arg, out);
     }
     if (cmd->type == CMD_CRAFT) {
-        return game_inv_cmd_craft(game, cmd->arg);
+        return game_inv_cmd_craft(game, cmd->arg, out);
     }
     return 0;
 }
 
-static int game_cmd_reply(struct GameState *game, struct Command *cmd)
+static int game_cmd_reply(struct GameState *game, struct Command *cmd,
+                          struct GameOutput *out)
 {
     if (cmd->type != CMD_REPLY) {
         return 0;
     }
     if (game->mode == GAME_MODE_COMBAT) {
-        combat_resolve_reply(game, cmd->arg);
+        combat_resolve_reply(game, cmd->arg, out);
         return 1;
     }
-    if (dialogue_cmd_reply(game, cmd->arg)) {
+    if (dialogue_cmd_reply(game, cmd->arg, out)) {
         return 1;
     }
     if (game->mode == GAME_MODE_DIALOGUE && game->dialogue == DIALOGUE_ENEMY) {
-        return genc_cmd_reply(game, cmd->arg);
+        return genc_cmd_reply(game, cmd->arg, out);
     }
     if (game->mode == GAME_MODE_DIALOGUE && game->dialogue == DIALOGUE_WANDERER) {
-        return wanderer_cmd_reply(game, cmd->arg);
+        return wanderer_cmd_reply(game, cmd->arg, out);
     }
-    render_msg_nobody_waiting_reply();
+    gout_push(out, GAME_OUT_MSG_NOBODY_WAITING_REPLY, 0, 0, 0, 0, 0);
     return 1;
 }
 
-static int apply_command(struct GameState *game, struct Command *cmd)
+static int apply_command(struct GameState *game, struct Command *cmd,
+                         struct GameOutput *out)
 {
-    if (!game_cmd_allowed_in_mode(game, cmd)) {
+    if (!game_cmd_allowed_in_mode(game, cmd, out)) {
         return 0;
     }
-    if (game_cmd_session(game, cmd)) {
+    if (game_cmd_session(game, cmd, out)) {
         return 1;
     }
-    if (game_cmd_observe(game, cmd)) {
+    if (game_cmd_observe(game, cmd, out)) {
         return 1;
     }
-    if (game_cmd_pass_time(game, cmd)) {
+    if (game_cmd_pass_time(game, cmd, out)) {
         return 1;
     }
-    if (game_cmd_move(game, cmd)) {
+    if (game_cmd_move(game, cmd, out)) {
         return 1;
     }
-    if (game_cmd_inventory(game, cmd)) {
+    if (game_cmd_inventory(game, cmd, out)) {
         return 1;
     }
     if (cmd->type == CMD_INSPECT) {
-        return gatmos_cmd_inspect(game, cmd->arg);
+        return gatmos_cmd_inspect(game, cmd->arg, out);
     }
     if (cmd->type == CMD_TALK) {
-        return dialogue_cmd_talk(game);
+        return dialogue_cmd_talk(game, out);
     }
-    if (game_cmd_reply(game, cmd)) {
+    if (game_cmd_reply(game, cmd, out)) {
         return 1;
     }
     if (cmd->type == CMD_GIVE) {
-        return genc_cmd_give(game, cmd->arg);
+        return genc_cmd_give(game, cmd->arg, out);
     }
     return 0;
 }
 
-static void advance_world_tick(struct GameState *game, int wanderer_moves_first)
+static void advance_world_tick(struct GameState *game, int wanderer_moves_first,
+                               struct GameOutput *out)
 {
     int old_wanderer_room;
 
@@ -416,28 +440,28 @@ static void advance_world_tick(struct GameState *game, int wanderer_moves_first)
             wanderer_step(game);
         }
         if (game->player.room_id == game->wanderer_room) {
-            wanderer_begin_encounter(game);
+            wanderer_begin_encounter(game, out);
         } else if (!wanderer_moves_first) {
             wanderer_step(game);
             if (game->player.room_id == game->wanderer_room) {
-                wanderer_begin_encounter(game);
+                wanderer_begin_encounter(game, out);
             }
         } else if (old_wanderer_room != game->wanderer_room &&
                 game->player.room_id == game->wanderer_room) {
-            wanderer_begin_encounter(game);
+            wanderer_begin_encounter(game, out);
         }
     }
 
     world_step(&game->world, game->tick);
-    maybe_emit_animal_noise(game);
-    maybe_emit_atmosphere(game);
+    maybe_emit_animal_noise(game, out);
+    maybe_emit_atmosphere(game, out);
     if (!game_is_busy_dialogue(game) &&
             (rand() % CFG_ROLL_PERCENT_RANGE) < CFG_BANDIT_ENCOUNTER_CHANCE_BELOW) {
-        enemy_begin_encounter(game);
+        enemy_begin_encounter(game, out);
     }
 }
 
-int game_process_input(struct GameState *game, char *line)
+int game_process_input(struct GameState *game, char *line, struct GameOutput *out)
 {
     struct Command cmd;
     int parsed;
@@ -445,27 +469,27 @@ int game_process_input(struct GameState *game, char *line)
 
     parsed = command_parse(line, &cmd);
     if (!parsed) {
-        render_msg_unknown_command();
+        gout_push(out, GAME_OUT_MSG_UNKNOWN_COMMAND, 0, 0, 0, 0, 0);
         return 0;
     }
 
-    applied = apply_command(game, &cmd);
+    applied = apply_command(game, &cmd, out);
     if (!applied) {
         return 0;
     }
 
     if (command_advances_time(cmd.type)) {
         if (cmd.type == CMD_MOVE) {
-            advance_world_tick(game, 0);
+            advance_world_tick(game, 0, out);
         } else {
-            advance_world_tick(game, 1);
+            advance_world_tick(game, 1, out);
         }
     }
 
     return 1;
 }
 
-void game_background_step(struct GameState *game)
+void game_background_step(struct GameState *game, struct GameOutput *out)
 {
-    advance_world_tick(game, 1);
+    advance_world_tick(game, 1, out);
 }
