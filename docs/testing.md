@@ -19,6 +19,7 @@ Purpose:
 
 - `make build`: native GCC development build; prints `elapsed: <seconds>` after the compile/link step
 - `make build-win`: WSL cross-compile to a native Windows console `dosmud.exe` with `x86_64-w64-mingw32-gcc`
+- `make win-run`: launches the existing Windows `dosmud.exe` in a new Windows console window; does not build
 - `make check-layers`: core/render boundary guard (no `printf` in `src/*.c` except `main.c`, `grendr.c`, and the platform files `platpos.c`, `platwin.c`, and `platdos.c`)
 - `make test`: strict deterministic compile (`-Werror`, `-DTEST_MODE`, `-g -O0`); does not run `check-layers`; prints `elapsed: <seconds>` after the compile/link step
 - `make test-win`: WSL cross-compile of the native Windows console `TEST_MODE` executable (`dosmud.exe`); compile-only, no snapshot run from Linux
@@ -34,8 +35,9 @@ Use these when you want to launch a playable or interactive binary rather than r
 - `make run`: builds the native release binary if needed, then launches it; pass `SEED=<unsigned>` to forward `--seed`
 - `make test-run-bin`: builds the native `TEST_MODE` binary if needed, then launches it; pass `SEED=<unsigned>` to forward `--seed`
 - `make dos-run`: launches the existing prepared DOS release executable without rebuilding
+- `make win-run`: launches the existing repo-root Windows `dosmud.exe` from the most recent `make build-win` or `make test-win`; pass `SEED=<unsigned>` to forward `--seed`
 
-For the WSL -> Windows path, build `dosmud.exe` with `make build-win` or `make test-win`, then launch that `.exe` from Windows PowerShell, `cmd.exe`, or Windows Terminal. This issue adds a console app path only; a GUI or alternate renderer remains separate work.
+For the WSL -> Windows path, build `dosmud.exe` with `make build-win` or `make test-win`, then launch it with `make win-run` or directly from Windows PowerShell, `cmd.exe`, or Windows Terminal. `win-run` launches whatever repo-root `dosmud.exe` was produced by the most recent Windows cross-build, opens a new Windows console window, and forwards `SEED=<n>` when set. This issue adds a console app path only; a GUI or alternate renderer remains separate work.
 
 ## Test layers
 
@@ -352,6 +354,7 @@ Runtime seed (native or DOS build): the startup banner always prints the active 
 ./dosmud --seed 1234
 make run SEED=1234
 make test-run-bin SEED=1234
+make win-run SEED=1234
 make dos-prepare SEED=1234
 make test-dos-prepare SEED=1234
 ```

@@ -82,9 +82,10 @@ For the WSL -> Windows console cross-build:
 ```sh
 make build-win
 make test-win
+make win-run
 ```
 
-These targets default to `x86_64-w64-mingw32-gcc` and emit `dosmud.exe`. `test-win` is a compile-only `TEST_MODE` build; run the resulting `.exe` from Windows for interactive validation there.
+These targets default to `x86_64-w64-mingw32-gcc` and emit `dosmud.exe`. `test-win` is a compile-only `TEST_MODE` build. `win-run` launches the existing repo-root `dosmud.exe` from the most recent Windows cross-build (`make build-win` or `make test-win`) in a new Windows console window and forwards `SEED=<n>` as `--seed <n>`.
 
 For detailed environment and workflow information, see `testing.md`.
 
