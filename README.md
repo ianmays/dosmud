@@ -58,7 +58,7 @@ make test-win
 make win-run
 ```
 
-This requires the MinGW cross-compiler (`x86_64-w64-mingw32-gcc`) in WSL and emits `dosmud.exe`. `make win-run` launches the existing executable in a new Windows console window and supports `SEED=<n>`; run `make build-win` first.
+This requires the MinGW cross-compiler (`x86_64-w64-mingw32-gcc`) in WSL and emits `dosmud.exe`. `make win-run` launches the existing executable in a new Windows console window and supports `SEED=<n>`; run `make build-win` or `make test-win` first.
 
 Native layers/strict/test checks:
 
