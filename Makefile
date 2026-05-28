@@ -43,7 +43,7 @@ build-win:
 
 win-run:
 	@if [ ! -f dosmud.exe ]; then \
-		echo "missing dosmud.exe - run 'make build-win' first"; \
+		echo "missing dosmud.exe - run 'make build-win' or 'make test-win' first"; \
 		exit 1; \
 	fi
 	@win_exe=$$(wslpath -w "$(CURDIR)/dosmud.exe"); \

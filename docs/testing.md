@@ -35,8 +35,9 @@ Use these when you want to launch a playable or interactive binary rather than r
 - `make run`: builds the native release binary if needed, then launches it; pass `SEED=<unsigned>` to forward `--seed`
 - `make test-run-bin`: builds the native `TEST_MODE` binary if needed, then launches it; pass `SEED=<unsigned>` to forward `--seed`
 - `make dos-run`: launches the existing prepared DOS release executable without rebuilding
+- `make win-run`: launches the existing repo-root Windows `dosmud.exe` from the most recent `make build-win` or `make test-win`; pass `SEED=<unsigned>` to forward `--seed`
 
-For the WSL -> Windows path, build `dosmud.exe` with `make build-win` or `make test-win`, then launch it with `make win-run` or directly from Windows PowerShell, `cmd.exe`, or Windows Terminal. `win-run` launches the existing release executable only, opens a new Windows console window, and forwards `SEED=<n>` when set. This issue adds a console app path only; a GUI or alternate renderer remains separate work.
+For the WSL -> Windows path, build `dosmud.exe` with `make build-win` or `make test-win`, then launch it with `make win-run` or directly from Windows PowerShell, `cmd.exe`, or Windows Terminal. `win-run` launches whatever repo-root `dosmud.exe` was produced by the most recent Windows cross-build, opens a new Windows console window, and forwards `SEED=<n>` when set. This issue adds a console app path only; a GUI or alternate renderer remains separate work.
 
 ## Test layers
 
@@ -353,6 +354,7 @@ Runtime seed (native or DOS build): the startup banner always prints the active 
 ./dosmud --seed 1234
 make run SEED=1234
 make test-run-bin SEED=1234
+make win-run SEED=1234
 make dos-prepare SEED=1234
 make test-dos-prepare SEED=1234
 ```
