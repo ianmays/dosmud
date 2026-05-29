@@ -17,6 +17,7 @@ REM then link with one short wcl line (same shape as before the game.c split).
 
 if exist main.obj del main.obj
 if exist game.obj del game.obj
+if exist gout.obj del gout.obj
 if exist gprog.obj del gprog.obj
 if exist combat.obj del combat.obj
 if exist genc.obj del genc.obj
@@ -49,6 +50,11 @@ if errorlevel 1 goto wcl_bad
 echo Compiling game.c ... >> %LOG%
 echo Compiling game.c ...
 wcl %WFL% -c -fo=game.obj src\game.c >> %LOG%
+if errorlevel 1 goto wcl_bad
+
+echo Compiling gout.c ... >> %LOG%
+echo Compiling gout.c ...
+wcl %WFL% -c -fo=gout.obj src\gout.c >> %LOG%
 if errorlevel 1 goto wcl_bad
 
 echo Compiling gprog.c ... >> %LOG%
@@ -130,9 +136,11 @@ if errorlevel 1 goto wcl_bad
 echo Archiving gameplay.lib ... >> %LOG%
 echo Archiving gameplay.lib ...
 REM Keep each wlib line under COMMAND.COM ~127 chars (TEST_MODE adds +tharn.obj).
-wlib -n gameplay.lib +game.obj +gprog.obj +combat.obj +genc.obj >> %LOG%
+wlib -n gameplay.lib +game.obj +gout.obj +gprog.obj +combat.obj >> %LOG%
 if errorlevel 1 goto wcl_bad
-wlib gameplay.lib +wanderer.obj +dialogue.obj +gatmos.obj +fmt.obj >> %LOG%
+wlib gameplay.lib +genc.obj +wanderer.obj +dialogue.obj +gatmos.obj >> %LOG%
+if errorlevel 1 goto wcl_bad
+wlib gameplay.lib +fmt.obj >> %LOG%
 if errorlevel 1 goto wcl_bad
 if not "%1"=="TEST_MODE" goto wlib_done
 wlib gameplay.lib +thwld.obj +tharn.obj >> %LOG%
