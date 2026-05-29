@@ -413,11 +413,9 @@ static void render_room_look_snapshot(const struct GameState *game, int room_id,
                                       int npc_in_room_hint, int focus_active,
                                       int focus_kind)
 {
+    char ground_buf[CFG_FMT_GROUND_MAX];
     const struct Room *room;
     int dir;
-    int slot;
-    int ground_count;
-    int first_ground;
 
     room = &game->world.rooms[room_id];
     game_print_location_art(room_id);
@@ -431,27 +429,9 @@ static void render_room_look_snapshot(const struct GameState *game, int room_id,
         }
     }
     RENDER_PRINTF("\n");
-    ground_count = 0;
-    first_ground = ITEM_NONE;
-    for (slot = 0; slot < CFG_AREA_ITEM_SLOTS; ++slot) {
-        if (room_items[slot] != ITEM_NONE) {
-            if (ground_count == 0) {
-                first_ground = room_items[slot];
-            }
-            ground_count += 1;
-        }
-    }
-    if (ground_count == 1) {
-        RENDER_PRINTF(TXT_UI_GROUND_ITEM_FMT,
-            item_name(first_ground), item_name(first_ground));
-    } else if (ground_count > 1) {
-        RENDER_PRINTF("%s", TXT_UI_GROUND_ITEMS_HEADER);
-        for (slot = 0; slot < CFG_AREA_ITEM_SLOTS; ++slot) {
-            if (room_items[slot] != ITEM_NONE) {
-                RENDER_PRINTF(TXT_UI_GROUND_ITEM_LINE_FMT,
-                    item_name(room_items[slot]), item_name(room_items[slot]));
-            }
-        }
+    if (fmt_room_ground_items(room_items, ground_buf,
+            (int)sizeof(ground_buf)) > 0) {
+        RENDER_PRINTF("%s", ground_buf);
     }
     if (corpse_present) {
         RENDER_PRINTF("%s", TXT_UI_BANDIT_CORPSE);
@@ -504,7 +484,7 @@ void game_render_output(const struct GameState *game, const struct GameOutput *o
                 ev->arg1, ev->arg0, ev->arg2, ev->arg3);
             break;
         case GAME_OUT_MAP:
-            render_exploration_map((struct GameState *)game);
+            render_exploration_map(game);
             break;
         case GAME_OUT_HELP:
             game_print_help(ev->arg0);
@@ -1408,7 +1388,7 @@ void render_inv_unwield_ground(const char *item_name)
     RENDER_PRINTF(TXT_INV_UNWIELD_GROUND_FMT, item_name);
 }
 
-void render_exploration_map(struct GameState *game)
+void render_exploration_map(const struct GameState *game)
 {
     char mapbuf[CFG_FMT_MAP_MAX];
     int len;

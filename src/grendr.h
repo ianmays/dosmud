@@ -15,7 +15,7 @@ void render_set_suppress(int on);
 #endif
 
 void game_print_location_art(int room_id);
-void render_exploration_map(struct GameState *game);
+void render_exploration_map(const struct GameState *game);
 void game_render(const struct GameState *game);
 void game_render_output(const struct GameState *game, const struct GameOutput *out);
 void game_print_help(int topic);
