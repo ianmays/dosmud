@@ -17,6 +17,13 @@
  * that bridges platform I/O to game orchestration.
  */
 
+/*
+ * DOS has a small default stack. Keep the fixed-size engine output buffer in
+ * static storage so command/tick stepping does not consume stack in nested
+ * main-loop frames.
+ */
+static struct GameOutput g_main_out;
+
 static void print_prompt(void)
 {
     printf("%s", TXT_MAIN_PROMPT);
@@ -90,14 +97,12 @@ static int main_parse_args(int argc, char **argv, u32 *out_seed)
 
 static void main_startup(struct GameState *game, u32 rng_seed)
 {
-    struct GameOutput out;
-
     game_init(game, rng_seed);
-    gout_reset(&out);
+    gout_reset(&g_main_out);
     printf(TXT_MAIN_TITLE_SEED_FMT, TXT_MAIN_TITLE, (unsigned long)rng_seed);
     printf("%s\n", TXT_MAIN_HELP_HINT);
-    game_describe_current_room(game, &out);
-    game_render_output(game, &out);
+    game_describe_current_room(game, &g_main_out);
+    game_render_output(game, &g_main_out);
     game_render(game);
     print_prompt();
 }
@@ -128,12 +133,11 @@ static void main_report_testharn_error(int th_rc)
  */
 static int main_dispatch_line(struct GameState *game, char *line)
 {
-    struct GameOutput out;
 #ifdef TEST_MODE
     int th_rc;
 #endif
 
-    gout_reset(&out);
+    gout_reset(&g_main_out);
 
 #ifdef TEST_MODE
     th_rc = testharn_apply(game, line);
@@ -142,14 +146,14 @@ static int main_dispatch_line(struct GameState *game, char *line)
         return 1;
     }
     if (th_rc == 0) {
-        game_process_input(game, line, &out);
-        game_render_output(game, &out);
+        game_process_input(game, line, &g_main_out);
+        game_render_output(game, &g_main_out);
     } else {
         plat_seed_rng(game->seed);
     }
 #else
-    game_process_input(game, line, &out);
-    game_render_output(game, &out);
+    game_process_input(game, line, &g_main_out);
+    game_render_output(game, &g_main_out);
 #endif
     return 0;
 }
@@ -203,7 +207,6 @@ static int main_run_idle_ticks(struct GameState *game, time_t *last_tick_time,
 int main(int argc, char **argv)
 {
     static struct GameState game;
-    struct GameOutput out;
     char line[CFG_INPUT_MAX];
     time_t last_tick_time;
     u32 rng_seed;
@@ -232,10 +235,10 @@ int main(int argc, char **argv)
             }
             continue;
         }
-        gout_reset(&out);
+        gout_reset(&g_main_out);
         if (main_run_idle_ticks(&game, &last_tick_time,
-                                (time_t)CFG_MAIN_IDLE_TICK_SECONDS, &out)) {
-            game_render_output(&game, &out);
+                                (time_t)CFG_MAIN_IDLE_TICK_SECONDS, &g_main_out)) {
+            game_render_output(&game, &g_main_out);
             main_render_and_prompt(&game);
         }
     }
