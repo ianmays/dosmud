@@ -6,14 +6,8 @@
  * gameplay-adjacent code allowed to print to stdout.
  */
 
-/* Stored in GameState.env_focus_kind; keep in sync with game logic. */
-#define GAME_ENV_NONE 0
-#define GAME_ENV_RUSTLE 1
-#define GAME_ENV_CREAK 2
-#define GAME_ENV_WATER 3
-#define GAME_ENV_GRIT 4
-
 struct GameState;
+struct GameOutput;
 
 #ifdef TEST_MODE
 /* Suppress render printf during unit tests (snapshots leave this off). */
@@ -21,9 +15,9 @@ void render_set_suppress(int on);
 #endif
 
 void game_print_location_art(int room_id);
-void render_room_look(struct GameState *game, int npc_in_room_hint);
-void render_exploration_map(struct GameState *game);
+void render_exploration_map(const struct GameState *game);
 void game_render(const struct GameState *game);
+void game_render_output(const struct GameState *game, const struct GameOutput *out);
 void game_print_help(int topic);
 
 void render_bandit_encounter_open(void);

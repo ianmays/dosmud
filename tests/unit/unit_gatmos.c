@@ -14,6 +14,30 @@ static void reset_camp(struct GameState *game)
     game_reset_fixture_baseline(game, WORLD_ROOM_CAMP, 0);
 }
 
+static void emit_atmosphere(struct GameState *game)
+{
+    struct GameOutput out;
+
+    gout_reset(&out);
+    maybe_emit_atmosphere(game, &out);
+}
+
+static void emit_noise(struct GameState *game)
+{
+    struct GameOutput out;
+
+    gout_reset(&out);
+    maybe_emit_animal_noise(game, &out);
+}
+
+static int inspect_focus(struct GameState *game, int item_arg)
+{
+    struct GameOutput out;
+
+    gout_reset(&out);
+    return gatmos_cmd_inspect(game, item_arg, &out);
+}
+
 TEST gatmos_seed_world_items(void)
 {
     struct GameState game;
@@ -39,7 +63,7 @@ TEST gatmos_focus_expiry(void)
         game.env_focus_expires_tick = 1;
         game.tick = 2;
         plat_seed_rng(seed);
-        maybe_emit_atmosphere(&game);
+        emit_atmosphere(&game);
         if (game.env_focus_active == 0) {
             cleared = 1;
             break;
@@ -60,7 +84,7 @@ TEST gatmos_animal_noise_tick_gate(void)
 
     reset_camp(&game);
     game.tick = 1;
-    maybe_emit_animal_noise(&game);
+    emit_noise(&game);
     r_skip = rand();
 
     reset_camp(&game);
@@ -69,7 +93,7 @@ TEST gatmos_animal_noise_tick_gate(void)
 
     reset_camp(&game);
     game.tick = 2;
-    maybe_emit_animal_noise(&game);
+    emit_noise(&game);
     r_after = rand();
 
     reset_camp(&game);
@@ -84,7 +108,7 @@ TEST gatmos_animal_noise_tick_gate(void)
         reset_camp(&game);
         game.tick = 2;
         plat_seed_rng(seed);
-        maybe_emit_animal_noise(&game);
+        emit_noise(&game);
     }
     PASS();
 }
@@ -101,7 +125,7 @@ TEST gatmos_atmosphere_branches(void)
     for (seed = 0; seed < 500u; ++seed) {
         reset_camp(&game);
         plat_seed_rng(seed);
-        maybe_emit_atmosphere(&game);
+        emit_atmosphere(&game);
         if (game.env_focus_kind == GAME_ENV_RUSTLE) {
             found_rustle = 1;
         }
@@ -129,7 +153,7 @@ TEST gatmos_water_and_grit_focus(void)
     for (seed = 0; seed < 800u; ++seed) {
         reset_camp(&game);
         plat_seed_rng(seed);
-        maybe_emit_atmosphere(&game);
+        emit_atmosphere(&game);
         if (game.env_focus_kind == GAME_ENV_WATER) {
             found_water = 1;
         }
@@ -159,7 +183,7 @@ TEST gatmos_room_item_spawn_gate(void)
         game.room_item[WORLD_ROOM_CAMP][2] = ITEM_NONE;
         game.room_item[WORLD_ROOM_CAMP][3] = ITEM_NONE;
         plat_seed_rng(seed);
-        maybe_emit_atmosphere(&game);
+        emit_atmosphere(&game);
         if (game.room_item[WORLD_ROOM_CAMP][0] != ITEM_NONE ||
                 game.room_item[WORLD_ROOM_CAMP][1] != ITEM_NONE) {
             spawned = 1;
@@ -184,7 +208,7 @@ TEST gatmos_rustle_berry_drop(void)
         game.room_item[WORLD_ROOM_CAMP][2] = ITEM_NONE;
         game.room_item[WORLD_ROOM_CAMP][3] = ITEM_NONE;
         plat_seed_rng(seed);
-        maybe_emit_atmosphere(&game);
+        emit_atmosphere(&game);
         if (game.env_focus_kind == GAME_ENV_RUSTLE &&
                 game.room_item[WORLD_ROOM_CAMP][0] == ITEM_BERRY) {
             found = 1;
@@ -204,7 +228,7 @@ TEST gatmos_cmd_inspect_focus(void)
     game.env_focus_room = WORLD_ROOM_CAMP;
     game.env_focus_kind = GAME_ENV_WATER;
     game.env_focus_expires_tick = game.tick + 10;
-    ASSERT_EQ(1, gatmos_cmd_inspect(&game, GAME_ENV_WATER));
+    ASSERT_EQ(1, inspect_focus(&game, GAME_ENV_WATER));
     ASSERT_EQ(0, game.env_focus_active);
     PASS();
 }
@@ -214,7 +238,7 @@ TEST gatmos_cmd_inspect_none(void)
     struct GameState game;
 
     reset_camp(&game);
-    ASSERT_EQ(1, gatmos_cmd_inspect(&game, 0));
+    ASSERT_EQ(1, inspect_focus(&game, 0));
     ASSERT_EQ(0, game.env_focus_active);
     PASS();
 }
@@ -228,7 +252,7 @@ TEST gatmos_cmd_inspect_wrong_focus(void)
     game.env_focus_room = WORLD_ROOM_CAMP;
     game.env_focus_kind = GAME_ENV_RUSTLE;
     game.env_focus_expires_tick = game.tick + 10;
-    ASSERT_EQ(1, gatmos_cmd_inspect(&game, GAME_ENV_WATER));
+    ASSERT_EQ(1, inspect_focus(&game, GAME_ENV_WATER));
     ASSERT_EQ(1, game.env_focus_active);
     PASS();
 }

@@ -6,6 +6,22 @@
 #include "items.h"
 #include "unit_util.h"
 
+static void start_combat_out(struct GameState *game)
+{
+    struct GameOutput out;
+
+    gout_reset(&out);
+    combat_start(game, &out);
+}
+
+static void resolve_reply_out(struct GameState *game, int choice)
+{
+    struct GameOutput out;
+
+    gout_reset(&out);
+    combat_resolve_reply(game, choice, &out);
+}
+
 TEST combat_attack_bonus(void)
 {
     struct GameState game;
@@ -28,7 +44,7 @@ TEST combat_start_mode(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     rolls[0] = CFG_TEST_FIGHT_ENEMY_HP_SPREAD;
     game_roll_inject_begin(&game, rolls, 1);
-    combat_start(&game);
+    start_combat_out(&game);
     ASSERT_EQ(GAME_MODE_COMBAT, game.mode);
     ASSERT_EQ(CFG_COMBAT_ENEMY_HP_BASE + CFG_TEST_FIGHT_ENEMY_HP_SPREAD, game.combat.enemy_hp);
     PASS();
@@ -45,7 +61,7 @@ TEST combat_reply_defend_reduces_damage(void)
     game.combat.enemy_hp = 20;
     rolls[0] = CFG_TEST_COMBAT_DEFEND_ENEMY_DMG;
     game_roll_inject_begin(&game, rolls, 1);
-    combat_resolve_reply(&game, 2);
+    resolve_reply_out(&game, 2);
     ASSERT_EQ(0, game.combat.defending);
     ASSERT_EQ(20, game.player_hp);
     PASS();
@@ -64,7 +80,7 @@ TEST combat_reply_salve_in_combat(void)
     ASSERT_EQ(1, game_inv_bag_add(&game, ITEM_SALVE));
     rolls[0] = 0;
     game_roll_inject_begin(&game, rolls, 1);
-    combat_resolve_reply(&game, 3);
+    resolve_reply_out(&game, 3);
     ASSERT_EQ(9, game.player_hp);
     ASSERT_EQ(-1, game_inv_bag_find_index(&game, ITEM_SALVE));
     PASS();
@@ -83,7 +99,7 @@ TEST combat_reply_salve_at_full_hp(void)
     ASSERT_EQ(1, game_inv_bag_add(&game, ITEM_SALVE));
     rolls[0] = CFG_TEST_COMBAT_SALVE_ENEMY_DMG;
     game_roll_inject_begin(&game, rolls, 1);
-    combat_resolve_reply(&game, 3);
+    resolve_reply_out(&game, 3);
     ASSERT_EQ(CFG_START_MAX_HP - 1, game.player_hp);
     ASSERT_EQ(-1, game_inv_bag_find_index(&game, ITEM_SALVE));
     PASS();
@@ -102,7 +118,7 @@ TEST combat_victory_loot_and_xp(void)
     rolls[1] = CFG_TEST_VICTORY_LOOT_STICK;
     rolls[2] = CFG_TEST_VICTORY_XP_SPREAD;
     game_roll_inject_begin(&game, rolls, 3);
-    combat_resolve_reply(&game, 1);
+    resolve_reply_out(&game, 1);
     ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
     ASSERT_EQ(1, game.corpse_present[WORLD_ROOM_CAMP]);
     ASSERT_EQ(ITEM_STICK, game.corpse_loot[WORLD_ROOM_CAMP]);
@@ -118,7 +134,7 @@ TEST combat_invalid_choice(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game_set_mode_combat(&game);
     game.combat.enemy_hp = 10;
-    combat_resolve_reply(&game, 9);
+    resolve_reply_out(&game, 9);
     ASSERT_EQ(GAME_MODE_COMBAT, game.mode);
     PASS();
 }
@@ -136,7 +152,7 @@ TEST combat_player_death(void)
     rolls[0] = 0;
     rolls[1] = 99;
     game_roll_inject_begin(&game, rolls, 2);
-    combat_resolve_reply(&game, 1);
+    resolve_reply_out(&game, 1);
     ASSERT_EQ(0, game.running);
     PASS();
 }
@@ -154,7 +170,7 @@ TEST combat_loot_tiers(void)
     rolls[1] = CFG_TEST_VICTORY_LOOT_SPEAR;
     rolls[2] = 0;
     game_roll_inject_begin(&game, rolls, 3);
-    combat_resolve_reply(&game, 1);
+    resolve_reply_out(&game, 1);
     ASSERT_EQ(ITEM_SPEAR, game.corpse_loot[WORLD_ROOM_CAMP]);
 
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
@@ -162,7 +178,7 @@ TEST combat_loot_tiers(void)
     game.combat.enemy_hp = 1;
     rolls[1] = CFG_TEST_VICTORY_LOOT_FISH;
     game_roll_inject_begin(&game, rolls, 3);
-    combat_resolve_reply(&game, 1);
+    resolve_reply_out(&game, 1);
     ASSERT_EQ(ITEM_FISH, game.corpse_loot[WORLD_ROOM_CAMP]);
     PASS();
 }

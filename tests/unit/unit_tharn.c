@@ -28,6 +28,39 @@ TEST testharn_seed_invalid(void)
     PASS();
 }
 
+TEST testharn_seed_missing_value(void)
+{
+    struct GameState game;
+    int rc;
+
+    unit_game_fresh(&game, 21u);
+    rc = testharn_apply(&game, "@seed");
+    ASSERT_EQ(-3, rc);
+    PASS();
+}
+
+TEST testharn_fixture_missing_name(void)
+{
+    struct GameState game;
+    int rc;
+
+    unit_game_fresh(&game, 22u);
+    rc = testharn_apply(&game, "@fixture");
+    ASSERT_EQ(-1, rc);
+    PASS();
+}
+
+TEST testharn_unknown_at_directive_is_not_fixture(void)
+{
+    struct GameState game;
+    int rc;
+
+    unit_game_fresh(&game, 23u);
+    rc = testharn_apply(&game, "@bogus");
+    ASSERT_EQ(0, rc);
+    PASS();
+}
+
 TEST testharn_fixture_at_camp(void)
 {
     struct GameState game;
@@ -120,7 +153,21 @@ TEST testharn_fixture_sweep(void)
     ASSERT_EQ(1, rc);
     rc = testharn_apply(&game, "@fixture quiet_explore");
     ASSERT_EQ(1, rc);
+    rc = testharn_apply(&game, "@fixture quiet_camp_dual_ground");
+    ASSERT_EQ(1, rc);
+    rc = testharn_apply(&game, "@fixture quiet_camp_dual_ground_full_bag");
+    ASSERT_EQ(1, rc);
     rc = testharn_apply(&game, "@fixture wanderer_dialogue");
+    ASSERT_EQ(1, rc);
+    rc = testharn_apply(&game, "@fixture bag_berry");
+    ASSERT_EQ(1, rc);
+    rc = testharn_apply(&game, "@fixture bag_stacked");
+    ASSERT_EQ(1, rc);
+    rc = testharn_apply(&game, "@fixture bag_berry_low_hp");
+    ASSERT_EQ(1, rc);
+    rc = testharn_apply(&game, "@fixture bag_fish_low_hp");
+    ASSERT_EQ(1, rc);
+    rc = testharn_apply(&game, "@fixture bag_salve");
     ASSERT_EQ(1, rc);
     rc = testharn_apply(&game, "@fixture bag_torch");
     ASSERT_EQ(1, rc);
@@ -130,7 +177,11 @@ TEST testharn_fixture_sweep(void)
     ASSERT_EQ(1, rc);
     rc = testharn_apply(&game, "@fixture env_focus_creak");
     ASSERT_EQ(1, rc);
+    rc = testharn_apply(&game, "@fixture env_focus_rustle");
+    ASSERT_EQ(1, rc);
     rc = testharn_apply(&game, "@fixture bandit_intimidate_fail");
+    ASSERT_EQ(1, rc);
+    rc = testharn_apply(&game, "@fixture bandit_intimidate_ok");
     ASSERT_EQ(1, rc);
     rc = testharn_apply(&game, "@fixture bandit_fight_ready");
     ASSERT_EQ(1, rc);
@@ -174,6 +225,9 @@ TEST testharn_fixture_sweep(void)
 SUITE(testharn) {
     RUN_TEST(testharn_seed_directive);
     RUN_TEST(testharn_seed_invalid);
+    RUN_TEST(testharn_seed_missing_value);
+    RUN_TEST(testharn_fixture_missing_name);
+    RUN_TEST(testharn_unknown_at_directive_is_not_fixture);
     RUN_TEST(testharn_fixture_at_camp);
     RUN_TEST(testharn_fixture_world_boot);
     RUN_TEST(testharn_fixture_quiet_explore);

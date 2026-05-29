@@ -6,6 +6,7 @@
 GREATEST_MAIN_DEFS();
 
 SUITE_EXTERN(items);
+SUITE_EXTERN(gout);
 SUITE_EXTERN(command);
 SUITE_EXTERN(harness);
 SUITE_EXTERN(invent);
@@ -84,6 +85,7 @@ int main(int argc, char **argv)
     unit_test_apply_verbosity(level);
 
     RUN_SUITE(items);
+    RUN_SUITE(gout);
     RUN_SUITE(command);
     RUN_SUITE(harness);
     RUN_SUITE(invent);

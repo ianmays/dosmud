@@ -17,6 +17,13 @@
  * that bridges platform I/O to game orchestration.
  */
 
+/*
+ * DOS has a small default stack. Keep the fixed-size engine output buffer in
+ * static storage so command/tick stepping does not consume stack in nested
+ * main-loop frames.
+ */
+static struct GameOutput g_main_out;
+
 static void print_prompt(void)
 {
     printf("%s", TXT_MAIN_PROMPT);
@@ -91,9 +98,11 @@ static int main_parse_args(int argc, char **argv, u32 *out_seed)
 static void main_startup(struct GameState *game, u32 rng_seed)
 {
     game_init(game, rng_seed);
+    gout_reset(&g_main_out);
     printf(TXT_MAIN_TITLE_SEED_FMT, TXT_MAIN_TITLE, (unsigned long)rng_seed);
     printf("%s\n", TXT_MAIN_HELP_HINT);
-    game_describe_current_room(game);
+    game_describe_current_room(game, &g_main_out);
+    game_render_output(game, &g_main_out);
     game_render(game);
     print_prompt();
 }
@@ -117,6 +126,15 @@ static void main_report_testharn_error(int th_rc)
         fprintf(stderr, "unknown test fixture\n");
     }
 }
+
+static int main_check_output_overflow(void)
+{
+    if (!g_main_out.overflowed) {
+        return 0;
+    }
+    fprintf(stderr, "game output overflow\n");
+    return 1;
+}
 #endif
 
 /*
@@ -126,19 +144,28 @@ static int main_dispatch_line(struct GameState *game, char *line)
 {
 #ifdef TEST_MODE
     int th_rc;
+#endif
 
+    gout_reset(&g_main_out);
+
+#ifdef TEST_MODE
     th_rc = testharn_apply(game, line);
     if (th_rc < 0) {
         main_report_testharn_error(th_rc);
         return 1;
     }
     if (th_rc == 0) {
-        game_process_input(game, line);
+        game_process_input(game, line, &g_main_out);
+        game_render_output(game, &g_main_out);
+        if (main_check_output_overflow() != 0) {
+            return 1;
+        }
     } else {
         plat_seed_rng(game->seed);
     }
 #else
-    game_process_input(game, line);
+    game_process_input(game, line, &g_main_out);
+    game_render_output(game, &g_main_out);
 #endif
     return 0;
 }
@@ -167,7 +194,8 @@ static int main_handle_polled_line(struct GameState *game, char *line, time_t *l
 }
 
 /*
- * Run idle background ticks while in explore mode. Returns 1 if any tick ran.
+ * Run idle background ticks while in explore mode.
+ * Returns 1 if any tick ran, 0 if none ran, and -1 on fatal overflow.
  */
 static int main_run_idle_ticks(struct GameState *game, time_t *last_tick_time,
                                time_t idle_tick_seconds)
@@ -182,7 +210,14 @@ static int main_run_idle_ticks(struct GameState *game, time_t *last_tick_time,
             *last_tick_time = now_time;
             break;
         }
-        game_background_step(game);
+        gout_reset(&g_main_out);
+        game_background_step(game, &g_main_out);
+        game_render_output(game, &g_main_out);
+#ifdef TEST_MODE
+        if (main_check_output_overflow() != 0) {
+            return -1;
+        }
+#endif
         *last_tick_time += idle_tick_seconds;
         ran_tick = 1;
     }
@@ -220,8 +255,12 @@ int main(int argc, char **argv)
             }
             continue;
         }
-        if (main_run_idle_ticks(&game, &last_tick_time,
-                                (time_t)CFG_MAIN_IDLE_TICK_SECONDS)) {
+        poll_rc = main_run_idle_ticks(&game, &last_tick_time,
+                                      (time_t)CFG_MAIN_IDLE_TICK_SECONDS);
+        if (poll_rc < 0) {
+            return 1;
+        }
+        if (poll_rc > 0) {
             main_render_and_prompt(&game);
         }
     }

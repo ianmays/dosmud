@@ -457,6 +457,8 @@ Done ✅.
 
 Separate deterministic gameplay/simulation from rendering, platform, and front-end so the engine can support alternative interfaces or games. Blocks [#47](https://github.com/ianmays/dosmud/issues/47), [#104](https://github.com/ianmays/dosmud/issues/104), [#48](https://github.com/ianmays/dosmud/issues/48), and [#92](https://github.com/ianmays/dosmud/issues/92).
 
+Done ✅.
+
 ### [#47](https://github.com/ianmays/dosmud/issues/47) - Event queue architecture
 
 Future direction:

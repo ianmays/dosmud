@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include "gatmos.h"
 #include "game.h"
-#include "grendr.h"
+#include "gout.h"
 #include "invent.h"
 #include "items.h"
 #include "world.h"
@@ -34,7 +34,7 @@ void seed_world_items(struct GameState *game)
     game->room_item[WORLD_ROOM_CAVE][0] = ITEM_HERB;
 }
 
-static void maybe_spawn_room_item(struct GameState *game)
+static void maybe_spawn_room_item(struct GameState *game, struct GameOutput *out)
 {
     int room_id;
     int roll;
@@ -61,10 +61,10 @@ static void maybe_spawn_room_item(struct GameState *game)
     if (!game_room_ground_try_add(game, room_id, spawned)) {
         return;
     }
-    render_nearby_item_notice(item_name(spawned));
+    gout_push(out, GAME_OUT_NEARBY_ITEM_NOTICE, 0, 0, 0, 0, item_name(spawned));
 }
 
-void maybe_emit_animal_noise(struct GameState *game)
+void maybe_emit_animal_noise(struct GameState *game, struct GameOutput *out)
 {
     if ((game->tick % (u32)CFG_ANIMAL_NOISE_TICK_PERIOD) != 0UL) {
         return;
@@ -72,11 +72,11 @@ void maybe_emit_animal_noise(struct GameState *game)
     if ((rand() % CFG_ROLL_PERCENT_RANGE) >= CFG_ANIMAL_NOISE_SKIP_ROLL_GE) {
         return;
     }
-    render_animal_noise_line(
+    gout_push(out, GAME_OUT_ANIMAL_NOISE_LINE, 0, 0, 0, 0,
         world_room_animal_noise(&game->world, game->player.room_id));
 }
 
-void maybe_emit_atmosphere(struct GameState *game)
+void maybe_emit_atmosphere(struct GameState *game, struct GameOutput *out)
 {
     int roll;
 
@@ -90,11 +90,11 @@ void maybe_emit_atmosphere(struct GameState *game)
 
     roll = rand() % CFG_ROLL_PERCENT_RANGE;
     if (roll < CFG_ATMOSPHERE_ROLL_GUST_BELOW) {
-        render_atmosphere_gust();
+        gout_push(out, GAME_OUT_ATMOSPHERE_GUST, 0, 0, 0, 0, 0);
         return;
     }
     if (roll < CFG_ATMOSPHERE_ROLL_RUSTLE_BELOW) {
-        render_atmosphere_rustle();
+        gout_push(out, GAME_OUT_ATMOSPHERE_RUSTLE, 0, 0, 0, 0, 0);
         game->env_focus_active = 1;
         game->env_focus_room = game->player.room_id;
         game->env_focus_kind = GAME_ENV_RUSTLE;
@@ -102,13 +102,13 @@ void maybe_emit_atmosphere(struct GameState *game)
         if (game_room_ground_has_space(game, game->player.room_id) &&
                 (rand() % CFG_ROLL_PERCENT_RANGE) < CFG_ATMOSPHERE_FOCUS_EXTRA_ITEM_BELOW) {
             if (game_room_ground_try_add(game, game->player.room_id, ITEM_BERRY)) {
-                render_atmosphere_berry_drop();
+                gout_push(out, GAME_OUT_ATMOSPHERE_BERRY_DROP, 0, 0, 0, 0, 0);
             }
         }
         return;
     }
     if (roll < CFG_ATMOSPHERE_ROLL_CREAK_BELOW) {
-        render_atmosphere_creak();
+        gout_push(out, GAME_OUT_ATMOSPHERE_CREAK, 0, 0, 0, 0, 0);
         game->env_focus_active = 1;
         game->env_focus_room = game->player.room_id;
         game->env_focus_kind = GAME_ENV_CREAK;
@@ -116,7 +116,7 @@ void maybe_emit_atmosphere(struct GameState *game)
         return;
     }
     if (roll < CFG_ATMOSPHERE_ROLL_WATER_BELOW) {
-        render_atmosphere_water();
+        gout_push(out, GAME_OUT_ATMOSPHERE_WATER, 0, 0, 0, 0, 0);
         game->env_focus_active = 1;
         game->env_focus_room = game->player.room_id;
         game->env_focus_kind = GAME_ENV_WATER;
@@ -124,29 +124,29 @@ void maybe_emit_atmosphere(struct GameState *game)
         if (game_room_ground_has_space(game, game->player.room_id) &&
                 (rand() % CFG_ROLL_PERCENT_RANGE) < CFG_ATMOSPHERE_FOCUS_EXTRA_ITEM_BELOW) {
             if (game_room_ground_try_add(game, game->player.room_id, ITEM_REED)) {
-                render_atmosphere_reed_drop();
+                gout_push(out, GAME_OUT_ATMOSPHERE_REED_DROP, 0, 0, 0, 0, 0);
             }
         }
         return;
     }
     if (roll < CFG_ATMOSPHERE_ROLL_GRIT_BELOW) {
-        render_atmosphere_grit();
+        gout_push(out, GAME_OUT_ATMOSPHERE_GRIT, 0, 0, 0, 0, 0);
         game->env_focus_active = 1;
         game->env_focus_room = game->player.room_id;
         game->env_focus_kind = GAME_ENV_GRIT;
         game->env_focus_expires_tick = game->tick + CFG_ENV_FOCUS_DURATION_TICKS;
         return;
     }
-    maybe_spawn_room_item(game);
+    maybe_spawn_room_item(game, out);
 }
 
-int gatmos_cmd_inspect(struct GameState *game, int item_arg)
+int gatmos_cmd_inspect(struct GameState *game, int item_arg, struct GameOutput *out)
 {
     /* Inspection only succeeds while the current room still has an active ambient focus. */
     if (!game->env_focus_active ||
             game->env_focus_room != game->player.room_id ||
             game->tick >= game->env_focus_expires_tick) {
-        render_msg_inspect_nothing();
+        gout_push(out, GAME_OUT_MSG_INSPECT_NOTHING, 0, 0, 0, 0, 0);
         game->env_focus_active = 0;
         game->env_focus_room = -1;
         game->env_focus_kind = GAME_ENV_NONE;
@@ -154,17 +154,17 @@ int gatmos_cmd_inspect(struct GameState *game, int item_arg)
         return 1;
     }
     if (item_arg != 0 && item_arg != game->env_focus_kind) {
-        render_msg_inspect_wrong_focus();
+        gout_push(out, GAME_OUT_MSG_INSPECT_WRONG_FOCUS, 0, 0, 0, 0, 0);
         return 1;
     }
     if (game->env_focus_kind == GAME_ENV_RUSTLE) {
-        render_msg_inspect_rustle();
+        gout_push(out, GAME_OUT_MSG_INSPECT_RUSTLE, 0, 0, 0, 0, 0);
     } else if (game->env_focus_kind == GAME_ENV_CREAK) {
-        render_msg_inspect_creak();
+        gout_push(out, GAME_OUT_MSG_INSPECT_CREAK, 0, 0, 0, 0, 0);
     } else if (game->env_focus_kind == GAME_ENV_WATER) {
-        render_msg_inspect_water();
+        gout_push(out, GAME_OUT_MSG_INSPECT_WATER, 0, 0, 0, 0, 0);
     } else if (game->env_focus_kind == GAME_ENV_GRIT) {
-        render_msg_inspect_grit();
+        gout_push(out, GAME_OUT_MSG_INSPECT_GRIT, 0, 0, 0, 0, 0);
     }
     game->env_focus_active = 0;
     game->env_focus_room = -1;

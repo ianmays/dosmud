@@ -119,27 +119,23 @@ static int fmt_buf_append_two_s_fmt(char *buf, int bufsize, int pos,
     return pos;
 }
 
-int fmt_room_ground_items(const struct GameState *game, int room_id,
-    char *buf, int bufsize)
+int fmt_room_ground_items(const int *room_items, char *buf, int bufsize)
 {
     int s;
     int ground_count;
     int first_ground;
     int pos;
 
-    if (buf == 0 || bufsize <= 0 || game == 0) {
-        return -1;
-    }
-    if (room_id < 0 || room_id >= CFG_ROOM_MAX) {
+    if (buf == 0 || bufsize <= 0 || room_items == 0) {
         return -1;
     }
     buf[0] = '\0';
     ground_count = 0;
     first_ground = ITEM_NONE;
     for (s = 0; s < CFG_AREA_ITEM_SLOTS; ++s) {
-        if (game->room_item[room_id][s] != ITEM_NONE) {
+        if (room_items[s] != ITEM_NONE) {
             if (ground_count == 0) {
-                first_ground = game->room_item[room_id][s];
+                first_ground = room_items[s];
             }
             ground_count += 1;
         }
@@ -161,10 +157,9 @@ int fmt_room_ground_items(const struct GameState *game, int room_id,
         return -1;
     }
     for (s = 0; s < CFG_AREA_ITEM_SLOTS; ++s) {
-        if (game->room_item[room_id][s] != ITEM_NONE) {
+        if (room_items[s] != ITEM_NONE) {
             pos = fmt_buf_append_two_s_fmt(buf, bufsize, pos,
-                TXT_UI_GROUND_ITEM_LINE_FMT,
-                item_name(game->room_item[room_id][s]));
+                TXT_UI_GROUND_ITEM_LINE_FMT, item_name(room_items[s]));
             if (pos < 0) {
                 return -1;
             }

@@ -1,6 +1,6 @@
 #include "gprog.h"
 #include "game.h"
-#include "grendr.h"
+#include "gout.h"
 
 /*
  * Experience progression is centralized so level thresholds and reward side
@@ -12,12 +12,12 @@ int game_xp_to_next_level(int level)
     return CFG_XP_LEVEL_BASE + ((level - 1) * CFG_XP_LEVEL_PER_LEVEL);
 }
 
-void progression_gain_xp(struct GameState *game, int amount)
+void progression_gain_xp(struct GameState *game, int amount, struct GameOutput *out)
 {
     int needed;
     /* Multiple level-ups can happen in one grant, so the threshold is recomputed each loop. */
     game->xp += amount;
-    render_xp_gained(amount);
+    gout_push(out, GAME_OUT_XP_GAINED, amount, 0, 0, 0, 0);
     needed = game_xp_to_next_level(game->level);
     while (game->xp >= needed) {
         game->xp -= needed;
@@ -28,8 +28,8 @@ void progression_gain_xp(struct GameState *game, int amount)
             game->bag_capacity += CFG_LEVELUP_BAG_CAPACITY_DELTA;
         }
         game->player_hp = game->max_hp;
-        render_level_up(game->level, game->max_hp, game->damage_bonus,
-            game->bag_capacity);
+        gout_push(out, GAME_OUT_LEVEL_UP, game->level, game->max_hp,
+            game->damage_bonus, game->bag_capacity, 0);
         needed = game_xp_to_next_level(game->level);
     }
 }

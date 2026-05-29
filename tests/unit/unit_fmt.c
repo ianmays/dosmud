@@ -111,7 +111,7 @@ TEST fmt_ground_empty(void)
     game.room_item[WORLD_ROOM_CAMP][1] = ITEM_NONE;
     game.room_item[WORLD_ROOM_CAMP][2] = ITEM_NONE;
     game.room_item[WORLD_ROOM_CAMP][3] = ITEM_NONE;
-    len = fmt_room_ground_items(&game, WORLD_ROOM_CAMP, out, (int)sizeof(out));
+    len = fmt_room_ground_items(game.room_item[WORLD_ROOM_CAMP], out, (int)sizeof(out));
     ASSERT_EQ(0, len);
     ASSERT_EQ('\0', out[0]);
     PASS();
@@ -126,7 +126,7 @@ TEST fmt_ground_single(void)
     unit_game_fresh(&game, 11u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game.room_item[WORLD_ROOM_CAMP][0] = ITEM_STICK;
-    len = fmt_room_ground_items(&game, WORLD_ROOM_CAMP, out, (int)sizeof(out));
+    len = fmt_room_ground_items(game.room_item[WORLD_ROOM_CAMP], out, (int)sizeof(out));
     ASSERT_EQ(35, len);
     ASSERT_STR_EQ("On the ground: stick. (take stick)\n", out);
     PASS();
@@ -142,7 +142,7 @@ TEST fmt_ground_many(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game.room_item[WORLD_ROOM_CAMP][0] = ITEM_STICK;
     game.room_item[WORLD_ROOM_CAMP][1] = ITEM_BERRY;
-    len = fmt_room_ground_items(&game, WORLD_ROOM_CAMP, out, (int)sizeof(out));
+    len = fmt_room_ground_items(game.room_item[WORLD_ROOM_CAMP], out, (int)sizeof(out));
     ASSERT_EQ(57, len);
     ASSERT_STR_EQ(
         "On the ground:\n"
@@ -158,10 +158,9 @@ TEST fmt_ground_bad_args(void)
     char out[8];
 
     unit_game_fresh(&game, 13u);
-    ASSERT_EQ(-1, fmt_room_ground_items(&game, WORLD_ROOM_CAMP, 0, 8));
-    ASSERT_EQ(-1, fmt_room_ground_items(&game, WORLD_ROOM_CAMP, out, 0));
-    ASSERT_EQ(-1, fmt_room_ground_items(0, WORLD_ROOM_CAMP, out, 8));
-    ASSERT_EQ(-1, fmt_room_ground_items(&game, -1, out, 8));
+    ASSERT_EQ(-1, fmt_room_ground_items(game.room_item[WORLD_ROOM_CAMP], 0, 8));
+    ASSERT_EQ(-1, fmt_room_ground_items(game.room_item[WORLD_ROOM_CAMP], out, 0));
+    ASSERT_EQ(-1, fmt_room_ground_items(0, out, 8));
     PASS();
 }
 
@@ -173,7 +172,8 @@ TEST fmt_ground_buf_too_small(void)
     unit_game_fresh(&game, 14u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game.room_item[WORLD_ROOM_CAMP][0] = ITEM_STICK;
-    ASSERT_EQ(-1, fmt_room_ground_items(&game, WORLD_ROOM_CAMP, out, (int)sizeof(out)));
+    ASSERT_EQ(-1, fmt_room_ground_items(game.room_item[WORLD_ROOM_CAMP], out,
+        (int)sizeof(out)));
     PASS();
 }
 

@@ -6,6 +6,30 @@
 #include "items.h"
 #include "unit_util.h"
 
+static void begin_enemy(struct GameState *game)
+{
+    struct GameOutput out;
+
+    gout_reset(&out);
+    enemy_begin_encounter(game, &out);
+}
+
+static int enemy_reply(struct GameState *game, int choice)
+{
+    struct GameOutput out;
+
+    gout_reset(&out);
+    return genc_cmd_reply(game, choice, &out);
+}
+
+static int enemy_give(struct GameState *game, int item_id)
+{
+    struct GameOutput out;
+
+    gout_reset(&out);
+    return genc_cmd_give(game, item_id, &out);
+}
+
 TEST genc_skips_when_busy(void)
 {
     struct GameState game;
@@ -13,7 +37,7 @@ TEST genc_skips_when_busy(void)
     unit_game_fresh(&game, 1u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game_set_mode_combat(&game);
-    enemy_begin_encounter(&game);
+    begin_enemy(&game);
     ASSERT_EQ(GAME_MODE_COMBAT, game.mode);
     PASS();
 }
@@ -24,7 +48,7 @@ TEST genc_opens_dialogue(void)
 
     unit_game_fresh(&game, 2u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
-    enemy_begin_encounter(&game);
+    begin_enemy(&game);
     ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
     ASSERT_EQ(DIALOGUE_ENEMY, game.dialogue);
     PASS();
@@ -36,8 +60,8 @@ TEST genc_cmd_reply_fight(void)
 
     unit_game_fresh(&game, 3u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
-    enemy_begin_encounter(&game);
-    ASSERT_EQ(1, genc_cmd_reply(&game, 1));
+    begin_enemy(&game);
+    ASSERT_EQ(1, enemy_reply(&game, 1));
     ASSERT_EQ(GAME_MODE_COMBAT, game.mode);
     PASS();
 }
@@ -49,10 +73,10 @@ TEST genc_cmd_reply_intimidate_ok(void)
 
     unit_game_fresh(&game, 4u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
-    enemy_begin_encounter(&game);
+    begin_enemy(&game);
     rolls[0] = CFG_TEST_INTIMIDATE_OK;
     game_roll_inject_begin(&game, rolls, 1);
-    ASSERT_EQ(1, genc_cmd_reply(&game, 3));
+    ASSERT_EQ(1, enemy_reply(&game, 3));
     ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
     PASS();
 }
@@ -63,7 +87,7 @@ TEST genc_cmd_give_wrong_context(void)
 
     unit_game_fresh(&game, 5u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
-    ASSERT_EQ(1, genc_cmd_give(&game, ITEM_STICK));
+    ASSERT_EQ(1, enemy_give(&game, ITEM_STICK));
     ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
     PASS();
 }
@@ -74,10 +98,10 @@ TEST genc_cmd_give_handover(void)
 
     unit_game_fresh(&game, 6u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
-    enemy_begin_encounter(&game);
+    begin_enemy(&game);
     game_inv_bag_add(&game, ITEM_STICK);
     game.enemy_handover_pick = 1;
-    ASSERT_EQ(1, genc_cmd_give(&game, ITEM_STICK));
+    ASSERT_EQ(1, enemy_give(&game, ITEM_STICK));
     ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
     PASS();
 }
@@ -88,9 +112,9 @@ TEST genc_cmd_reply_handover_pick(void)
 
     unit_game_fresh(&game, 7u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
-    enemy_begin_encounter(&game);
+    begin_enemy(&game);
     game_inv_bag_add(&game, ITEM_STICK);
-    ASSERT_EQ(1, genc_cmd_reply(&game, 2));
+    ASSERT_EQ(1, enemy_reply(&game, 2));
     ASSERT_EQ(1, game.enemy_handover_pick);
     ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
     PASS();
@@ -103,10 +127,10 @@ TEST genc_cmd_reply_intimidate_fail(void)
 
     unit_game_fresh(&game, 8u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
-    enemy_begin_encounter(&game);
+    begin_enemy(&game);
     rolls[0] = CFG_TEST_INTIMIDATE_FAIL;
     game_roll_inject_begin(&game, rolls, 1);
-    ASSERT_EQ(1, genc_cmd_reply(&game, 3));
+    ASSERT_EQ(1, enemy_reply(&game, 3));
     ASSERT_EQ(GAME_MODE_COMBAT, game.mode);
     PASS();
 }
@@ -117,8 +141,8 @@ TEST genc_cmd_reply_invalid_choice(void)
 
     unit_game_fresh(&game, 9u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
-    enemy_begin_encounter(&game);
-    ASSERT_EQ(1, genc_cmd_reply(&game, 0));
+    begin_enemy(&game);
+    ASSERT_EQ(1, enemy_reply(&game, 0));
     ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
     PASS();
 }
