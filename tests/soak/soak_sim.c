@@ -11,16 +11,19 @@
 
 static int soak_run_cmd(struct GameState *game, const char *line)
 {
+    struct GameOutput out;
     char buf[CFG_INPUT_MAX];
 
+    gout_reset(&out);
     strncpy(buf, line, CFG_INPUT_MAX - 1);
     buf[CFG_INPUT_MAX - 1] = '\0';
-    return game_process_input(game, buf);
+    return game_process_input(game, buf, &out);
 }
 
 TEST soak_background_ticks(void)
 {
     struct GameState game;
+    struct GameOutput out;
     unsigned long i;
     clock_t start;
     clock_t end;
@@ -30,7 +33,9 @@ TEST soak_background_ticks(void)
     ASSERT(soak_assert_game_state_ok(&game));
     start = clock();
     for (i = 1; i <= CFG_TEST_SOAK_TICKS; i++) {
-        game_background_step(&game);
+        gout_reset(&out);
+        game_background_step(&game, &out);
+        ASSERT_EQ(0, out.overflowed);
         if ((i % CFG_TEST_SOAK_CHECK_INTERVAL) == 0) {
             ASSERT(soak_assert_game_state_ok(&game));
         }
@@ -75,6 +80,7 @@ TEST soak_command_wait_move(void)
 TEST soak_combat_loop(void)
 {
     struct GameState game;
+    struct GameOutput out;
     int rolls[3];
     unsigned long i;
     clock_t start;
@@ -93,7 +99,9 @@ TEST soak_combat_loop(void)
         rolls[1] = CFG_TEST_VICTORY_LOOT_BERRY;
         rolls[2] = CFG_TEST_VICTORY_XP_SPREAD;
         game_roll_inject_begin(&game, rolls, 3);
-        combat_resolve_reply(&game, 1);
+        gout_reset(&out);
+        combat_resolve_reply(&game, 1, &out);
+        ASSERT_EQ(0, out.overflowed);
         if ((i % CFG_TEST_SOAK_COMBAT_CHECK_INTERVAL) == 0) {
             ASSERT(soak_assert_game_state_ok(&game));
         }
