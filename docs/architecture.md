@@ -29,15 +29,18 @@ Simulation steps append fixed-size `GameOutput` records (`gout`) while mutating 
 
 Core must **not** use:
 
-- `printf` or other terminal output (call `render_*` in `grendr` instead)
+- `printf`, `render_*`, or other terminal output APIs
 - DOS, SDL, or platform timing/input APIs
 - `#ifdef __WATCOMC__` or similar platform switches
 
 Good:
 
 ```c
-game_process_input(game, line);
-render_msg_moved(world_dir_name(cmd->dir));
+struct GameOutput out;
+
+gout_reset(&out);
+game_process_input(game, line, &out);
+game_render_output(game, &out);
 ```
 
 Bad in core:

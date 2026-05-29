@@ -273,7 +273,6 @@ static int game_cmd_session(struct GameState *game, struct Command *cmd,
 static int game_cmd_observe(struct GameState *game, struct Command *cmd,
                             struct GameOutput *out)
 {
-    (void)game;
     if (cmd->type == CMD_LOOK) {
         do_look(game, out);
         return 1;
