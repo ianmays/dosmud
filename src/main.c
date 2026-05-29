@@ -126,6 +126,15 @@ static void main_report_testharn_error(int th_rc)
         fprintf(stderr, "unknown test fixture\n");
     }
 }
+
+static int main_check_output_overflow(void)
+{
+    if (!g_main_out.overflowed) {
+        return 0;
+    }
+    fprintf(stderr, "game output overflow\n");
+    return 1;
+}
 #endif
 
 /*
@@ -148,6 +157,9 @@ static int main_dispatch_line(struct GameState *game, char *line)
     if (th_rc == 0) {
         game_process_input(game, line, &g_main_out);
         game_render_output(game, &g_main_out);
+        if (main_check_output_overflow() != 0) {
+            return 1;
+        }
     } else {
         plat_seed_rng(game->seed);
     }
@@ -182,10 +194,11 @@ static int main_handle_polled_line(struct GameState *game, char *line, time_t *l
 }
 
 /*
- * Run idle background ticks while in explore mode. Returns 1 if any tick ran.
+ * Run idle background ticks while in explore mode.
+ * Returns 1 if any tick ran, 0 if none ran, and -1 on fatal overflow.
  */
 static int main_run_idle_ticks(struct GameState *game, time_t *last_tick_time,
-                               time_t idle_tick_seconds, struct GameOutput *out)
+                               time_t idle_tick_seconds)
 {
     time_t now_time;
     int ran_tick;
@@ -197,8 +210,16 @@ static int main_run_idle_ticks(struct GameState *game, time_t *last_tick_time,
             *last_tick_time = now_time;
             break;
         }
-        game_background_step(game, out);
+        gout_reset(&g_main_out);
+        game_background_step(game, &g_main_out);
+        game_render_output(game, &g_main_out);
+#ifdef TEST_MODE
+        if (main_check_output_overflow() != 0) {
+            return -1;
+        }
+#endif
         *last_tick_time += idle_tick_seconds;
+        main_render_and_prompt(game);
         ran_tick = 1;
     }
     return ran_tick;
@@ -235,11 +256,10 @@ int main(int argc, char **argv)
             }
             continue;
         }
-        gout_reset(&g_main_out);
-        if (main_run_idle_ticks(&game, &last_tick_time,
-                                (time_t)CFG_MAIN_IDLE_TICK_SECONDS, &g_main_out)) {
-            game_render_output(&game, &g_main_out);
-            main_render_and_prompt(&game);
+        poll_rc = main_run_idle_ticks(&game, &last_tick_time,
+                                      (time_t)CFG_MAIN_IDLE_TICK_SECONDS);
+        if (poll_rc < 0) {
+            return 1;
         }
     }
 

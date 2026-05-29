@@ -82,6 +82,30 @@ TEST game_describe_current_room_emits_look(void)
     PASS();
 }
 
+TEST game_describe_current_room_overflow_keeps_prior_event(void)
+{
+    struct GameState game;
+    struct GameOutput out;
+    int i;
+
+    unit_game_fresh(&game, 36u);
+    gout_reset(&out);
+    for (i = 0; i < CFG_GAME_OUT_MAX; ++i) {
+        ASSERT_EQ(1, gout_push(&out, GAME_OUT_MSG_WAIT, i, 0, 0, 0, 0));
+    }
+    out.events[out.count - 1].room_id = 77;
+    out.events[out.count - 1].room_item[0] = ITEM_STICK;
+
+    game_describe_current_room(&game, &out);
+
+    ASSERT_EQ(CFG_GAME_OUT_MAX, out.count);
+    ASSERT_EQ(1, out.overflowed);
+    ASSERT_EQ(GAME_OUT_MSG_WAIT, out.events[out.count - 1].kind);
+    ASSERT_EQ(77, out.events[out.count - 1].room_id);
+    ASSERT_EQ(ITEM_STICK, out.events[out.count - 1].room_item[0]);
+    PASS();
+}
+
 TEST game_roll_inject_consume(void)
 {
     struct GameState game;
@@ -446,6 +470,7 @@ SUITE(game) {
     RUN_TEST(game_heal_player_clamps);
     RUN_TEST(game_mode_setters);
     RUN_TEST(game_describe_current_room_emits_look);
+    RUN_TEST(game_describe_current_room_overflow_keeps_prior_event);
     RUN_TEST(game_roll_inject_consume);
     RUN_TEST(game_move_blocked_and_ok);
     RUN_TEST(game_quiet_ticks);

@@ -61,12 +61,14 @@ static void do_look(struct GameState *game, struct GameOutput *out)
     int i;
     struct GameOutEvent *ev;
 
-    gout_push(out, GAME_OUT_ROOM_LOOK, npc_in_room(game->player.room_id),
+    if (!gout_push(out, GAME_OUT_ROOM_LOOK, npc_in_room(game->player.room_id),
         game->corpse_present[game->player.room_id],
         game->env_focus_active &&
             game->env_focus_room == game->player.room_id &&
             game->tick < game->env_focus_expires_tick,
-        game->env_focus_kind, 0);
+        game->env_focus_kind, 0)) {
+        return;
+    }
     ev = &out->events[out->count - 1];
     ev->room_id = game->player.room_id;
     for (i = 0; i < CFG_AREA_ITEM_SLOTS; ++i) {

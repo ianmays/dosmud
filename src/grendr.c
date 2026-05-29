@@ -472,17 +472,6 @@ static void render_room_look_snapshot(const struct GameState *game, int room_id,
     }
 }
 
-void render_room_look(struct GameState *game, int npc_in_room_hint)
-{
-    render_room_look_snapshot(game, game->player.room_id,
-        game->room_item[game->player.room_id],
-        game->corpse_present[game->player.room_id], npc_in_room_hint,
-        game->env_focus_active &&
-            game->env_focus_room == game->player.room_id &&
-            game->tick < game->env_focus_expires_tick,
-        game->env_focus_kind);
-}
-
 void game_render(const struct GameState *game)
 {
     const struct Room *room;
