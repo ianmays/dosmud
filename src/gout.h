@@ -6,6 +6,7 @@
 /*
  * Fixed-size simulation output records. Core gameplay appends semantic render
  * requests here so command/tick stepping can run headlessly.
+ * See docs/architecture.md for engine vs game-logic ownership at this seam.
  */
 
 enum GameOutKind {

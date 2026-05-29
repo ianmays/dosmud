@@ -416,6 +416,7 @@ static void render_room_look_snapshot(const struct GameState *game, int room_id,
     char ground_buf[CFG_FMT_GROUND_MAX];
     const struct Room *room;
     int dir;
+    int ground_len;
 
     room = &game->world.rooms[room_id];
     game_print_location_art(room_id);
@@ -429,9 +430,12 @@ static void render_room_look_snapshot(const struct GameState *game, int room_id,
         }
     }
     RENDER_PRINTF("\n");
-    if (fmt_room_ground_items(room_items, ground_buf,
-            (int)sizeof(ground_buf)) > 0) {
+    ground_len = fmt_room_ground_items(room_items, ground_buf,
+        (int)sizeof(ground_buf));
+    if (ground_len > 0) {
         RENDER_PRINTF("%s", ground_buf);
+    } else if (ground_len < 0) {
+        RENDER_PRINTF("%s", TXT_UI_GROUND_ITEMS_TOO_LONG);
     }
     if (corpse_present) {
         RENDER_PRINTF("%s", TXT_UI_BANDIT_CORPSE);

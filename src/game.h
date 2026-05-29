@@ -11,6 +11,7 @@
  * game.h defines the orchestration-layer state: GameState owns the persistent
  * simulation snapshot that command handling, encounters, rendering, and tests
  * all read or mutate through explicit subsystem APIs.
+ * See docs/architecture.md for engine vs game-logic ownership in core.
  */
 
 enum GameMode {

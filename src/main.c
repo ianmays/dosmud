@@ -219,7 +219,6 @@ static int main_run_idle_ticks(struct GameState *game, time_t *last_tick_time,
         }
 #endif
         *last_tick_time += idle_tick_seconds;
-        main_render_and_prompt(game);
         ran_tick = 1;
     }
     return ran_tick;
@@ -260,6 +259,9 @@ int main(int argc, char **argv)
                                       (time_t)CFG_MAIN_IDLE_TICK_SECONDS);
         if (poll_rc < 0) {
             return 1;
+        }
+        if (poll_rc > 0) {
+            main_render_and_prompt(&game);
         }
     }
 
