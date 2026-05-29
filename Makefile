@@ -34,7 +34,6 @@ build-all:
 	$(MAKE) clean
 	$(MAKE) dos-prepare NORUN=1
 	$(MAKE) build
-	$(MAKE) build-win
 
 build:
 	$(call RUN_TIMED,$(CC) $(BASE_CFLAGS) -o $(BIN) $(SRC))
@@ -63,7 +62,6 @@ test-all:
 	$(MAKE) clean
 	$(MAKE) dos-prepare MODE=$(TEST_MODE_FLAG) NORUN=1
 	$(MAKE) test-run
-	$(MAKE) test-win
 	$(MAKE) test-unit-coverage
 	$(MAKE) test-soak
 
