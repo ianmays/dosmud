@@ -78,7 +78,7 @@ Workflow (milestone 4) can run in parallel with architecture once unblocked. Con
 
 ### Relative size (GitHub project)
 
-**Size** (XS–XL on [project #1](https://github.com/users/ianmays/projects/1)) is relative effort / blast radius, not schedule. It is independent of **Priority** (P0/P1/P2) and column **stack order** (execution order above). Board **Status** may differ from pull order (e.g. [#72](https://github.com/ianmays/dosmud/issues/72) in Parked while still sequenced after #34 in the m4 list).
+**Size** (XS–XL on [project 1](https://github.com/users/ianmays/projects/1)) is relative effort / blast radius, not schedule. It is independent of **Priority** (P0/P1/P2) and column **stack order** (execution order above). Board **Status** may differ from pull order (e.g. [#72](https://github.com/ianmays/dosmud/issues/72) in Parked while still sequenced after issue 34 in the m4 list).
 
 | Size | Meaning | Examples (open roadmap) |
 |------|---------|-------------------------|
@@ -304,16 +304,16 @@ Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 
 - **[#66](https://github.com/ianmays/dosmud/issues/66)** Done ✅ - `TEST_MODE` harness and fixture DSL (see combined section with [#112](https://github.com/ianmays/dosmud/issues/112) above)
 - **[#112](https://github.com/ianmays/dosmud/issues/112)** Done ✅ - migrated `equipment`, `area_items`, `craft_wielded`, `map`, `smoke` to fixtures; `seed_cli` still uses CLI `--seed` on `smoke.input`.
-- **[#115](https://github.com/ianmays/dosmud/issues/115)** Done ✅ - snapshot coverage (PR [#123](https://github.com/ianmays/dosmud/pull/123)); details in the section below.
-- **[#122](https://github.com/ianmays/dosmud/issues/122)** Done ✅ - optional `@seed <unsigned>` line in snapshot `.input` files (PR [#124](https://github.com/ianmays/dosmud/pull/124)).
-- **[#95](https://github.com/ianmays/dosmud/issues/95)** Done ✅ - unit tests (PR [#127](https://github.com/ianmays/dosmud/pull/127)); **~96%** weighted branch coverage on core modules
+- **[#115](https://github.com/ianmays/dosmud/issues/115)** Done ✅ - snapshot coverage ([PR 123](https://github.com/ianmays/dosmud/pull/123)); details in the section below.
+- **[#122](https://github.com/ianmays/dosmud/issues/122)** Done ✅ - optional `@seed <unsigned>` line in snapshot `.input` files ([PR 124](https://github.com/ianmays/dosmud/pull/124)).
+- **[#95](https://github.com/ianmays/dosmud/issues/95)** Done ✅ - unit tests ([PR 127](https://github.com/ianmays/dosmud/pull/127)); **~96%** weighted branch coverage on core modules
 - **[#116](https://github.com/ianmays/dosmud/issues/116)** Done ✅ - soak / stress harness (`make test-soak`, CI benchmarks)
 - **[#113](https://github.com/ianmays/dosmud/issues/113)** Done ✅ - wanderer snapshot fixtures (`wanderer_dialogue` fixture; `wanderer_replies`, `wanderer_talk_blocked` snapshots)
 - **[#114](https://github.com/ianmays/dosmud/issues/114)** Done ✅ - custom world boot fixture (`world_boot` / `world_linear`; `world_apply_graph` + harness tables in TEST_MODE)
 
 ### [#40](https://github.com/ianmays/dosmud/issues/40) - Gameplay test coverage (umbrella epic) — Done ✅
 
-**[#40](https://github.com/ianmays/dosmud/issues/40)** tracked overall coverage; work landed via child issues (no mega-PR on [#40](https://github.com/ianmays/dosmud/issues/40)). **Epic complete** as of merge of [#116](https://github.com/ianmays/dosmud/issues/116) (PR [#133](https://github.com/ianmays/dosmud/pull/133)).
+**[#40](https://github.com/ianmays/dosmud/issues/40)** tracked overall coverage; work landed via child issues (no mega-PR on [#40](https://github.com/ianmays/dosmud/issues/40)). **Epic complete** as of merge of [#116](https://github.com/ianmays/dosmud/issues/116) ([PR 133](https://github.com/ianmays/dosmud/pull/133)).
 
 | Issue | Role |
 |-------|------|
@@ -325,8 +325,8 @@ Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 | [#114](https://github.com/ianmays/dosmud/issues/114) | Done ✅: custom world boot fixture |
 | [#115](https://github.com/ianmays/dosmud/issues/115) | Done ✅: snapshot coverage + RNG hardening ([`docs/testing.md`](docs/testing.md)) |
 | [#122](https://github.com/ianmays/dosmud/issues/122) | Done ✅: optional `@seed` harness directive for `.input` files |
-| [#95](https://github.com/ianmays/dosmud/issues/95) | Done ✅: unit tests (PR [#127](https://github.com/ianmays/dosmud/pull/127)); **96%+** branch coverage on core modules |
-| [#116](https://github.com/ianmays/dosmud/issues/116) | Done ✅: soak / stress (`make test-soak`, PR [#133](https://github.com/ianmays/dosmud/pull/133)) |
+| [#95](https://github.com/ianmays/dosmud/issues/95) | Done ✅: unit tests ([PR 127](https://github.com/ianmays/dosmud/pull/127)); **96%+** branch coverage on core modules |
+| [#116](https://github.com/ianmays/dosmud/issues/116) | Done ✅: soak / stress (`make test-soak`, [PR 133](https://github.com/ianmays/dosmud/pull/133)) |
 
 **Three layers (see [`docs/testing.md`](docs/testing.md)):** snapshots (`make test-run`), unit tests (`make test-unit`), soak/stress (`make test-soak`). `make test-all` runs check-layers, snapshots, unit coverage, and soak.
 
@@ -336,7 +336,7 @@ Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 
 ### [#115](https://github.com/ianmays/dosmud/issues/115) - Snapshot coverage (Done ✅)
 
-Delivered in PR [#123](https://github.com/ianmays/dosmud/pull/123).
+Delivered in [PR 123](https://github.com/ianmays/dosmud/pull/123).
 
 **Gameplay / harness**
 
@@ -358,7 +358,7 @@ Delivered in PR [#123](https://github.com/ianmays/dosmud/pull/123).
 
 ### [#95](https://github.com/ianmays/dosmud/issues/95) - Unit tests (Done ✅)
 
-Delivered in PR [#127](https://github.com/ianmays/dosmud/pull/127).
+Delivered in [PR 127](https://github.com/ianmays/dosmud/pull/127).
 
 **Framework**
 
@@ -382,7 +382,7 @@ Delivered in PR [#127](https://github.com/ianmays/dosmud/pull/127).
 
 ### [#116](https://github.com/ianmays/dosmud/issues/116) - Soak / stress tests (Done ✅)
 
-Delivered in PR [#133](https://github.com/ianmays/dosmud/pull/133).
+Delivered in [PR 133](https://github.com/ianmays/dosmud/pull/133).
 
 **Harness**
 
@@ -394,7 +394,7 @@ Delivered in PR [#133](https://github.com/ianmays/dosmud/pull/133).
 - `SOAK_BENCH` lines with `us_per_tick` and `limit=` from `CFG_TEST_SOAK_LIMIT_*` in `config.h`.
 - [`scripts/ci-test-report.sh`](scripts/ci-test-report.sh) soak step + PR benchmark table (parsed from log).
 
-**Related cleanup in PR [#133](https://github.com/ianmays/dosmud/pull/133)**
+**Related cleanup in [PR 133](https://github.com/ianmays/dosmud/pull/133)**
 
 - `testharn` moved from `src/` to `tests/harness/`; `dos-prepare.ps1` copies `tests/harness` for DOS `TEST_MODE`.
 
@@ -451,6 +451,14 @@ Done ✅.
 |-------|-------|------|
 | [#71](https://github.com/ianmays/dosmud/issues/71) | separate core game engine from game logic | XL |
 | [#47](https://github.com/ianmays/dosmud/issues/47) | event queue architecture | L |
+| [#157](https://github.com/ianmays/dosmud/issues/157) | migrate remaining command and navigation output to generic GameEvent families | M |
+| [#158](https://github.com/ianmays/dosmud/issues/158) | migrate inventory and item interaction flows to generic GameEvent families | L |
+| [#159](https://github.com/ianmays/dosmud/issues/159) | migrate combat and progression output to generic GameEvent families | L |
+| [#160](https://github.com/ianmays/dosmud/issues/160) | migrate dialogue and encounter output to generic GameEvent families | L |
+| [#161](https://github.com/ianmays/dosmud/issues/161) | migrate ambient and inspect output to generic GameEvent families | M |
+| [#162](https://github.com/ianmays/dosmud/issues/162) | remove legacy GAME_OUT compatibility and finalize GameEvent API | M |
+| [#163](https://github.com/ianmays/dosmud/issues/163) | expand harness and tests for generic GameEvent semantics | M |
+| [#156](https://github.com/ianmays/dosmud/issues/156) | deterministic replay event log capability (adjacent track) | L |
 | [#16](https://github.com/ianmays/dosmud/issues/16) | save / load | L |
 
 ### [#71](https://github.com/ianmays/dosmud/issues/71) - Separate core game engine from game logic
@@ -492,6 +500,82 @@ Potential benefits:
 - save/load consistency
 
 This is one of the most important architectural upgrades in the long-term roadmap.
+
+Direct follow-up migration chain (separate from replay/logging):
+- [#157](https://github.com/ianmays/dosmud/issues/157)
+- [#158](https://github.com/ianmays/dosmud/issues/158)
+- [#159](https://github.com/ianmays/dosmud/issues/159)
+- [#160](https://github.com/ianmays/dosmud/issues/160)
+- [#161](https://github.com/ianmays/dosmud/issues/161)
+- [#162](https://github.com/ianmays/dosmud/issues/162)
+- [#163](https://github.com/ianmays/dosmud/issues/163)
+
+Adjacent but separate follow-up track:
+- [#156](https://github.com/ianmays/dosmud/issues/156) (replay/event log capability)
+
+### [#157](https://github.com/ianmays/dosmud/issues/157) - Command/navigation GameEvent migration
+
+Direct `#47` follow-up. Migrate remaining command/navigation output to generic event families while keeping visible output stable.
+
+### Testing
+- Unit: update command/navigation producer assertions that still reference legacy `GAME_OUT_*` constants
+- Snapshots: cover deterministic command/navigation paths through `main`/`testharn` and `grendr`
+
+### [#158](https://github.com/ianmays/dosmud/issues/158) - Inventory/item GameEvent migration
+
+Direct `#47` follow-up. Move inventory and item-interaction output to generic item/bag/crafting/equipment event families.
+
+### Testing
+- Unit: update `tests/unit/unit_invent.c` and queue/payload assertions impacted by inventory migration
+- Snapshots: cover deterministic bag capacity, missing-item, and wield/unwield or craft outcomes
+
+### [#159](https://github.com/ianmays/dosmud/issues/159) - Combat/progression GameEvent migration
+
+Direct `#47` follow-up. Replace legacy combat/progression outputs with generic combat, damage, defeat, XP, and stat-change events.
+
+### Testing
+- Unit: update combat/progression producer assertions for migrated output kinds
+- Snapshots: cover deterministic turn ordering, salve outcomes, defeat, XP gain, and level-up
+
+### [#160](https://github.com/ianmays/dosmud/issues/160) - Dialogue/encounter GameEvent migration
+
+Direct `#47` follow-up. Migrate dialogue, NPC, and encounter output to generic actor/dialogue/encounter event families.
+
+### Testing
+- Unit: update dialogue, wanderer, and encounter assertions for migrated output kinds
+- Snapshots: cover deterministic NPC reply branching, wanderer interaction, bandit handover, and intimidate paths
+
+### [#161](https://github.com/ianmays/dosmud/issues/161) - Ambient/inspect GameEvent migration
+
+Direct `#47` follow-up. Migrate ambient, inspect, and world-tick output to generic environment/observation event families.
+
+### Testing
+- Unit: update atmosphere/inspect assertions for migrated output kinds
+- Snapshots: cover deterministic tick-controlled ambient and inspect paths
+
+### [#162](https://github.com/ianmays/dosmud/issues/162) - Remove legacy GAME_OUT compatibility layer
+
+Direct `#47` follow-up. Remove transitional compatibility APIs after migration slices are complete.
+
+### Testing
+- Unit: update queue/API tests to assert final event names and payload semantics only
+- Snapshots: existing snapshots should remain stable unless copy/layout changes are intentionally introduced
+
+### [#163](https://github.com/ianmays/dosmud/issues/163) - Final GameEvent test coverage pass
+
+Direct `#47` follow-up. Expand unit and snapshot coverage for the stabilized generic event schema.
+
+### Testing
+- Unit: cover queue semantics plus representative payload assertions for each migrated event family
+- Snapshots: add/update representative end-to-end coverage only where needed
+
+### [#156](https://github.com/ianmays/dosmud/issues/156) - Deterministic replay event log capability
+
+Adjacent track to `#47` follow-ups, but not part of the direct migration chain. Keep scoped to deterministic replay/log capture without coupling completion of migration slices.
+
+### Testing
+- Unit: add replay/log append/reset/overflow tests if new replay module/API is introduced
+- Snapshots: add a deterministic replay/logging regression only if visible output changes
 
 ### [#16](https://github.com/ianmays/dosmud/issues/16) - Save/load system
 
@@ -624,7 +708,7 @@ Done ✅.
 
 ### [#145](https://github.com/ianmays/dosmud/issues/145) - Local map viewport (region/world map deferred)
 
-Follow-up to [#142](https://github.com/ianmays/dosmud/issues/142) / PR #144. Player-centered viewport for `map`. Region/world tiers are future issues, not this issue's M scope.
+Follow-up to [#142](https://github.com/ianmays/dosmud/issues/142) / PR 144. Player-centered viewport for `map`. Region/world tiers are future issues, not this issue's M scope.
 
 ## [Engine Enhancements](https://github.com/ianmays/dosmud/milestone/9)
 
