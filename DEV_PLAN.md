@@ -507,6 +507,8 @@ Potential benefits:
 
 This is one of the most important architectural upgrades in the long-term roadmap.
 
+Done ✅.
+
 Direct follow-up migration chain (separate from replay/logging):
 - [#157](https://github.com/ianmays/dosmud/issues/157)
 - [#158](https://github.com/ianmays/dosmud/issues/158)

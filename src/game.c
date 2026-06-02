@@ -56,32 +56,33 @@ int game_heal_player(struct GameState *game, int amount)
     return 1;
 }
 
-static void do_look(struct GameState *game, struct GameOutput *out)
+static void do_look(struct GameState *game, GameEventQueue *out)
 {
     int i;
-    struct GameOutEvent *ev;
+    GameEvent *ev;
 
-    if (!gout_push(out, GAME_OUT_ROOM_LOOK, npc_in_room(game->player.room_id),
+    ev = game_event_push(out, GAME_EVENT_ROOM_LOOK,
+        npc_in_room(game->player.room_id),
         game->corpse_present[game->player.room_id],
         game->env_focus_active &&
             game->env_focus_room == game->player.room_id &&
             game->tick < game->env_focus_expires_tick,
-        game->env_focus_kind, 0)) {
+        game->env_focus_kind, 0);
+    if (ev == 0) {
         return;
     }
-    ev = &out->events[out->count - 1];
     ev->room_id = game->player.room_id;
     for (i = 0; i < CFG_AREA_ITEM_SLOTS; ++i) {
         ev->room_item[i] = game->room_item[game->player.room_id][i];
     }
 }
 
-static void do_map(struct GameOutput *out)
+static void do_map(GameEventQueue *out)
 {
     gout_push(out, GAME_OUT_MAP, 0, 0, 0, 0, 0);
 }
 
-void game_describe_current_room(struct GameState *game, struct GameOutput *out)
+void game_describe_current_room(struct GameState *game, GameEventQueue *out)
 {
     do_look(game, out);
 }
@@ -213,7 +214,7 @@ int game_roll_percent(struct GameState *game)
 }
 
 static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd,
-                                    struct GameOutput *out)
+                                    GameEventQueue *out)
 {
     /*
      * Combat and enemy handover are narrow modal states; only the small
@@ -257,7 +258,7 @@ static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd,
 }
 
 static int game_cmd_session(struct GameState *game, struct Command *cmd,
-                            struct GameOutput *out)
+                            GameEventQueue *out)
 {
     if (cmd->type == CMD_HELP) {
         gout_push(out, GAME_OUT_HELP, cmd->arg, 0, 0, 0, 0);
@@ -271,7 +272,7 @@ static int game_cmd_session(struct GameState *game, struct Command *cmd,
 }
 
 static int game_cmd_observe(struct GameState *game, struct Command *cmd,
-                            struct GameOutput *out)
+                            GameEventQueue *out)
 {
     if (cmd->type == CMD_LOOK) {
         do_look(game, out);
@@ -285,7 +286,7 @@ static int game_cmd_observe(struct GameState *game, struct Command *cmd,
 }
 
 static int game_cmd_pass_time(struct GameState *game, struct Command *cmd,
-                              struct GameOutput *out)
+                              GameEventQueue *out)
 {
     (void)game;
     if (cmd->type != CMD_WAIT) {
@@ -296,7 +297,7 @@ static int game_cmd_pass_time(struct GameState *game, struct Command *cmd,
 }
 
 static int game_cmd_move(struct GameState *game, struct Command *cmd,
-                         struct GameOutput *out)
+                         GameEventQueue *out)
 {
     if (cmd->type != CMD_MOVE) {
         return 0;
@@ -311,13 +312,13 @@ static int game_cmd_move(struct GameState *game, struct Command *cmd,
     if (game->mode == GAME_MODE_DIALOGUE) {
         game_set_mode_explore(game);
     }
-    gout_push(out, GAME_OUT_MSG_MOVED, 0, 0, 0, 0, world_dir_name(cmd->dir));
+    game_event_push(out, GAME_EVENT_MOVE, 0, 0, 0, 0, world_dir_name(cmd->dir));
     do_look(game, out);
     return 1;
 }
 
 static int game_cmd_inventory(struct GameState *game, struct Command *cmd,
-                              struct GameOutput *out)
+                              GameEventQueue *out)
 {
     if (cmd->type == CMD_LOOT) {
         return game_inv_cmd_loot(game, out);
@@ -353,7 +354,7 @@ static int game_cmd_inventory(struct GameState *game, struct Command *cmd,
 }
 
 static int game_cmd_reply(struct GameState *game, struct Command *cmd,
-                          struct GameOutput *out)
+                          GameEventQueue *out)
 {
     if (cmd->type != CMD_REPLY) {
         return 0;
@@ -376,7 +377,7 @@ static int game_cmd_reply(struct GameState *game, struct Command *cmd,
 }
 
 static int apply_command(struct GameState *game, struct Command *cmd,
-                         struct GameOutput *out)
+                         GameEventQueue *out)
 {
     if (!game_cmd_allowed_in_mode(game, cmd, out)) {
         return 0;
@@ -412,7 +413,7 @@ static int apply_command(struct GameState *game, struct Command *cmd,
 }
 
 static void advance_world_tick(struct GameState *game, int wanderer_moves_first,
-                               struct GameOutput *out)
+                               GameEventQueue *out)
 {
     int old_wanderer_room;
 
@@ -462,7 +463,7 @@ static void advance_world_tick(struct GameState *game, int wanderer_moves_first,
     }
 }
 
-int game_process_input(struct GameState *game, char *line, struct GameOutput *out)
+int game_process_input(struct GameState *game, char *line, GameEventQueue *out)
 {
     struct Command cmd;
     int parsed;
@@ -490,7 +491,7 @@ int game_process_input(struct GameState *game, char *line, struct GameOutput *ou
     return 1;
 }
 
-void game_background_step(struct GameState *game, struct GameOutput *out)
+void game_background_step(struct GameState *game, GameEventQueue *out)
 {
     advance_world_tick(game, 1, out);
 }

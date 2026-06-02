@@ -87,9 +87,9 @@ struct GameState {
 };
 
 void game_init(struct GameState *game, u32 seed);
-void game_describe_current_room(struct GameState *game, struct GameOutput *out);
-int game_process_input(struct GameState *game, char *line, struct GameOutput *out);
-void game_background_step(struct GameState *game, struct GameOutput *out);
+void game_describe_current_room(struct GameState *game, GameEventQueue *out);
+int game_process_input(struct GameState *game, char *line, GameEventQueue *out);
+void game_background_step(struct GameState *game, GameEventQueue *out);
 
 void game_set_mode_explore(struct GameState *game);
 void game_set_mode_dialogue(struct GameState *game, enum DialogueKind kind);

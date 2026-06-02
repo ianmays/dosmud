@@ -4,10 +4,17 @@
 #include "config.h"
 
 /*
- * Fixed-size simulation output records. Core gameplay appends semantic render
- * requests here so command/tick stepping can run headlessly.
+ * Fixed-size simulation event queue. Core gameplay appends GameEvent records
+ * here so command/tick stepping can run headlessly.
  * See docs/architecture.md for engine vs game-logic ownership at this seam.
  */
+
+enum GameEventKind {
+    GAME_EVENT_NONE = 0,
+    GAME_EVENT_LEGACY,
+    GAME_EVENT_MOVE,
+    GAME_EVENT_ROOM_LOOK
+};
 
 enum GameOutKind {
     GAME_OUT_NONE = 0,
@@ -118,6 +125,7 @@ enum GameOutKind {
 
 struct GameOutEvent {
     int kind;
+    int legacy_kind;
     int arg0;
     int arg1;
     int arg2;
@@ -133,6 +141,17 @@ struct GameOutput {
     int overflowed;
 };
 
+typedef struct GameOutEvent GameEvent;
+typedef struct GameOutput GameEventQueue;
+
+void game_event_queue_reset(GameEventQueue *out);
+GameEvent *game_event_push(GameEventQueue *out, int kind, int arg0, int arg1,
+                           int arg2, int arg3, const char *text);
+GameEvent *game_event_push_legacy(GameEventQueue *out, int legacy_kind,
+                                  int arg0, int arg1, int arg2, int arg3,
+                                  const char *text);
+
+/* Transitional helpers for legacy GAME_OUT_* producers. */
 void gout_reset(struct GameOutput *out);
 int gout_push(struct GameOutput *out, int kind, int arg0, int arg1, int arg2,
               int arg3, const char *text);
