@@ -1,6 +1,12 @@
 #include "config.h"
 #include "gout.h"
 
+/*
+ * Event queue implementation for the engine-to-render seam.
+ * Core producers append fixed-size records here; legacy helpers stay as a
+ * temporary bridge while #47 follow-up migration slices land.
+ */
+
 void game_event_queue_reset(GameEventQueue *out)
 {
     if (out == 0) {
@@ -20,6 +26,7 @@ GameEvent *game_event_push(GameEventQueue *out, int kind, int arg0, int arg1,
         return 0;
     }
     if (out->count >= CFG_GAME_OUT_MAX) {
+        /* Preserve deterministic behavior by flagging overflow and dropping. */
         out->overflowed = 1;
         return 0;
     }
@@ -45,6 +52,7 @@ GameEvent *game_event_push_legacy(GameEventQueue *out, int legacy_kind,
 {
     GameEvent *ev;
 
+    /* Legacy producers are wrapped in a generic event until follow-ups migrate. */
     ev = game_event_push(out, GAME_EVENT_LEGACY, arg0, arg1, arg2, arg3, text);
     if (ev == 0) {
         return 0;
@@ -55,6 +63,7 @@ GameEvent *game_event_push_legacy(GameEventQueue *out, int legacy_kind,
 
 void gout_reset(struct GameOutput *out)
 {
+    /* Transitional API retained for unchanged GAME_OUT_* producers. */
     game_event_queue_reset(out);
 }
 
