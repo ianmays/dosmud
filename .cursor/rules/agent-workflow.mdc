@@ -21,7 +21,7 @@ When the user asks for the next task, to pick up work, or to start a new issue:
 - GitHub project status transitions (Planning, In progress, Review)
 - Posting implementation plan comments on the linked issue
 - Read-only exploration (`gh issue view`, reading files, `git log`)
-- Milestone issue hygiene **GitHub-only** (project #1 Size/Priority, blocked-by, issue body, stack order, hygiene comment) per [milestone-issue-hygiene](../skills/milestone-issue-hygiene/SKILL.md) when creating or grooming roadmap issues — **not** `DEV_PLAN.md` file commits (those belong in a docs or implementation PR after plan mode)
+- Milestone issue hygiene **GitHub-only** (project #1 Size/Priority, blocked-by, issue body, stack order, hygiene comment) per [milestone-issue-hygiene](../skills/milestone-issue-hygiene/SKILL.md) when creating or grooming roadmap issues - **not** `DEV_PLAN.md` file commits (those belong in a docs or implementation PR after plan mode)
 
 ### Not allowed in plan mode
 
@@ -38,8 +38,10 @@ When the user asks for the next task, to pick up work, or to start a new issue:
 
 ## Before opening a PR
 
-- Update [`DEV_PLAN.md`](../../DEV_PLAN.md) per **DEV_PLAN updates** in [`AGENTS.md`](../../AGENTS.md) when opening the draft PR.
 - Run `make test`, `make test-run`, and `make test-unit` (or `make test-all`).
+- Run a **code-commenter** pass when `src/` / `include/` changed ([code-commenter-after-implement.mdc](code-commenter-after-implement.mdc)).
+- Run a **documentation** pass ([documentation-after-implement.mdc](documentation-after-implement.mdc), [documentation-maintainer skill](../skills/documentation-maintainer/SKILL.md)).
+- Update [`DEV_PLAN.md`](../../DEV_PLAN.md) per **DEV_PLAN updates** in [`AGENTS.md`](../../AGENTS.md) when opening the draft PR.
 - Follow [When to add or update tests](../../docs/testing.md#when-to-add-or-update-tests); if in-scope `src/*.c` gained or changed **exported** gameplay APIs (module `.h`), update matching `tests/unit/unit_*.c` or explain why not in the PR **Test plan**.
 - PR body **Test plan** lists new or updated tests (not only "all green").
 - Open a **draft** PR linked to the issue; move project status to **Review**.
@@ -47,11 +49,11 @@ When the user asks for the next task, to pick up work, or to start a new issue:
 
 ## After pushing to an open PR (mandatory)
 
-See [`.cursor/rules/pr-after-push.mdc`](pr-after-push.mdc) and [`.cursor/skills/pr-after-push/SKILL.md`](../skills/pr-after-push/SKILL.md). Complete that gate in the **same turn** as `git push` before the user-facing summary.
+Complete the post-push gate in the **same turn** as `git push` ([`pr-after-push` skill](../skills/pr-after-push/SKILL.md); policy in [`AGENTS.md`](../../AGENTS.md)).
 
 ### PR push checklist (complete before replying)
 
 - [ ] `git push` succeeded
 - [ ] Open PR exists for this branch
-- [ ] Post-push gate completed ([`pr-after-push.mdc`](pr-after-push.mdc))
+- [ ] Post-push gate completed ([`pr-after-push` skill](../skills/pr-after-push/SKILL.md))
 - [ ] Only then: user-facing summary

@@ -25,7 +25,7 @@ Owns state mutation, command handling, world ticks, combat, inventory logic, and
 
 Modules include `game`, `command`, `world`, `invent`, `combat`, `gatmos`, `gprog`, `genc`, `wanderer`, `dialogue`, and `items`.
 
-Simulation steps append fixed-size `GameOutput` records (`gout`) while mutating `GameState`. Core does not print directly; callers may inspect those records headlessly or hand them to the DOSMUD render adapter.
+Simulation steps append fixed-size output records through `gout` while mutating `GameState`. On `main`, producers use `GameOutput` and `GAME_OUT_*` kinds; roadmap issues [#47](https://github.com/ianmays/dosmud/issues/47) and [#157](https://github.com/ianmays/dosmud/issues/157)-[#163](https://github.com/ianmays/dosmud/issues/163) generalize the queue as `GameEvent`. Core does not print directly; callers may inspect those records headlessly or hand them to the DOSMUD render adapter.
 
 Within core, keep the ownership split explicit:
 

@@ -24,6 +24,15 @@ Recommended workflow:
 - keep commits small and reviewable
 - update documentation when behavior or workflows change
 
+Before opening a draft PR (agents and contributors with automation):
+
+```text
+implement → make test* → code-commenter pass (if src/ or include/ changed) → documentation pass → draft PR
+```
+
+- Comment pass: [`.cursor/skills/code-commenter/SKILL.md`](../.cursor/skills/code-commenter/SKILL.md) (see AGENTS.md **Comment pass**)
+- Documentation pass: [`.cursor/skills/documentation-maintainer/SKILL.md`](../.cursor/skills/documentation-maintainer/SKILL.md) (see AGENTS.md **Documentation pass**)
+
 The repo’s GitHub project uses a **Status** field on issues: **Planning** when forming an implementation plan (add decided plan as a comment), **In progress** while you implement (before the PR exists), **Review** once the draft PR is up, **Done** after merge. Details for agents: [AGENTS.md](../AGENTS.md).
 
 [`DEV_PLAN.md`](../DEV_PLAN.md) is a manually curated roadmap log tied to [GitHub milestones](https://github.com/ianmays/dosmud/milestones). When you open a draft **implementation** PR for an issue that already has a section here, mark **Done ✅** (optional PR link). Do not mark Done on hygiene or docs-only PRs. Issue **blocked-by** relationships on GitHub express sequencing. It is not a living status tracker (no updates on push or merge).
@@ -36,7 +45,7 @@ The repo’s GitHub project uses a **Status** field on issues: **Planning** when
 - After you mark the PR **Ready for review** (non-draft): comment `review this` on the PR after **each** push that should re-trigger review. Use that exact body text only.
 - Project board **Review** can be set when the draft PR is opened; GitHub **Ready for review** (`isDraft` false) is what triggers the `review this` convention, not board status alone.
 
-Agents automate this with `gh pr view --json number,isDraft` after every push; see [AGENTS.md](../AGENTS.md) and [`.cursor/skills/pr-after-push/SKILL.md`](../.cursor/skills/pr-after-push/SKILL.md).
+Agents: policy in [AGENTS.md](../AGENTS.md) (**After `git push` to a PR branch**); procedure in [`.cursor/skills/pr-after-push/SKILL.md`](../.cursor/skills/pr-after-push/SKILL.md).
 
 ### CI review surfaces
 
@@ -99,10 +108,8 @@ For detailed environment and workflow information, see `testing.md`.
 - Squash-merge and agent drafting: [`.cursor/skills/squash-commit-message/SKILL.md`](../.cursor/skills/squash-commit-message/SKILL.md), [`.cursor/rules/commit-messages.mdc`](../.cursor/rules/commit-messages.mdc).
 - Keep commits logically focused and easy to review.
 
-## Documentation Ownership
+## Documentation
 
-- `README.md` = quick-start entrypoint.
-- `/docs` = long-form canonical documentation.
-- `architecture.md` = subsystem and design guidance.
-- `testing.md` = deterministic testing and build workflow.
-- Prefer linking across documents rather than duplicating long sections.
+Canonical ownership and the documentation-pass policy: [AGENTS.md](../AGENTS.md#documentation-ownership) and [AGENTS.md](../AGENTS.md#documentation-pass).
+
+Roadmap hygiene when filing milestone issues: [milestone-issue-hygiene](../.cursor/skills/milestone-issue-hygiene/SKILL.md). Drift audits: [audit-github-devplan](../.cursor/skills/audit-github-devplan/SKILL.md).
