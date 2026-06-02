@@ -37,6 +37,7 @@ GameEvent *game_event_push(GameEventQueue *out, int kind, int arg0, int arg1,
     ev->arg1 = arg1;
     ev->arg2 = arg2;
     ev->arg3 = arg3;
+    /* Room snapshot fields are filled by the producer when needed (e.g. look). */
     ev->room_id = -1;
     for (i = 0; i < CFG_AREA_ITEM_SLOTS; ++i) {
         ev->room_item[i] = 0;

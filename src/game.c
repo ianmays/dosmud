@@ -56,6 +56,7 @@ int game_heal_player(struct GameState *game, int amount)
     return 1;
 }
 
+/* Snapshot current room into a generic look event (render reads room_id/items). */
 static void do_look(struct GameState *game, GameEventQueue *out)
 {
     int i;
@@ -312,6 +313,7 @@ static int game_cmd_move(struct GameState *game, struct Command *cmd,
     if (game->mode == GAME_MODE_DIALOGUE) {
         game_set_mode_explore(game);
     }
+    /* #47 proof slice: successful move uses generic events; cannot-move stays legacy. */
     game_event_push(out, GAME_EVENT_MOVE, 0, 0, 0, 0, world_dir_name(cmd->dir));
     do_look(game, out);
     return 1;

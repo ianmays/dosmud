@@ -9,6 +9,7 @@
  * See docs/architecture.md for engine vs game-logic ownership at this seam.
  */
 
+/* Generic kinds for #47; most producers still use GAME_EVENT_LEGACY + GameOutKind. */
 enum GameEventKind {
     GAME_EVENT_NONE = 0,
     GAME_EVENT_LEGACY,
@@ -124,8 +125,8 @@ enum GameOutKind {
 };
 
 struct GameOutEvent {
-    int kind;
-    int legacy_kind;
+    int kind;         /* GameEventKind, or GAME_EVENT_LEGACY for old producers */
+    int legacy_kind;  /* GameOutKind when kind is GAME_EVENT_LEGACY */
     int arg0;
     int arg1;
     int arg2;

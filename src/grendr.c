@@ -1,5 +1,11 @@
 #include <stdio.h>
 #include <stdarg.h>
+
+/*
+ * grendr owns terminal presentation: it consumes GameEvent records from core
+ * and maps them to printf output, spacing tiers, and ASCII art.
+ */
+
 #include "grendr.h"
 #include "dialogue.h"
 #include "game.h"
@@ -475,6 +481,7 @@ void game_print_help(int topic)
     RENDER_PRINTF("%s\n", command_help_line(topic));
 }
 
+/* Transitional adapter: GAME_EVENT_LEGACY events still dispatch by GAME_OUT_* kind. */
 static void render_legacy_output_event(const struct GameState *game,
                                        const GameEvent *ev)
 {
@@ -794,6 +801,10 @@ static void render_legacy_output_event(const struct GameState *game,
     }
 }
 
+/*
+ * Drain the per-step event queue in enqueue order. Core must not print; this is
+ * the DOSMUD text adapter for both generic kinds and legacy-wrapped events.
+ */
 void game_render_output(const struct GameState *game, const GameEventQueue *out)
 {
     int i;
