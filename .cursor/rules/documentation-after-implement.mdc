@@ -18,7 +18,7 @@ After **behavioral** implementation is done on a feature branch (logic in place;
 
 - Change is comment-only in `src/` with no doc/workflow impact and user confirms skip
 - User explicitly skips the documentation pass
-- The same branch diff already had a documentation pass this session
+- The branch diff vs `main` is unchanged since a documentation pass completed this session (re-run after commits that change the diff)
 
 ## Workflow order
 

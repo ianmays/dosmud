@@ -90,7 +90,7 @@ After behavioral implementation and tests pass, delegate a **code-commenter** pa
 
 Order (with documentation pass): `implement → make test (and related targets) → code-commenter pass (if src/ or include/ touched) → documentation pass → draft PR`.
 
-Skip when the change is docs/tooling-only with no `src/` or `include/` edits, the user opts out, or the same diff already had a pass this session. Comment-only edits in that pass; do not change executable behavior.
+Skip when the change is docs/tooling-only with no `src/` or `include/` edits, the user opts out, or the branch diff vs `main` is unchanged since a code-commenter pass completed this session (re-run after commits that change the diff). Comment-only edits in that pass; do not change executable behavior.
 
 #### Documentation pass
 
@@ -107,7 +107,7 @@ After behavioral implementation, tests, and any code-commenter pass, run a **doc
 
 Order: `implement → make test (and related targets) → code-commenter pass (if src/ or include/ touched) → documentation pass → draft PR`.
 
-Skip when the user opts out, the same diff already had a documentation pass this session, or the change truly has no doc impact (confirm in summary). Plan mode: defer `DEV_PLAN.md` commits per milestone hygiene skill.
+Skip when the user opts out, the branch diff vs `main` is unchanged since a documentation pass completed this session (re-run after commits that change the diff), or the change truly has no doc impact (confirm in summary). Plan mode: defer `DEV_PLAN.md` commits per milestone hygiene skill.
 
 #### Documentation ownership
 

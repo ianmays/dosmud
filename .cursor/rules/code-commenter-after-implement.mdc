@@ -19,12 +19,12 @@ After **behavioral** implementation is done on a feature branch (logic in place;
 
 - Change is docs-only, tooling-only, or has no edits under `src/` or `include/`
 - User explicitly skips a comment pass
-- The same branch diff already had a code-commenter pass this session
+- The branch diff vs `main` is unchanged since a code-commenter pass completed this session (re-run after commits that change the diff)
 
 ## Workflow order
 
 ```text
-implement → make test (and related targets) → code-commenter pass → documentation pass → draft PR
+implement → make test (and related targets) → code-commenter pass (if src/ or include/ touched) → documentation pass → draft PR
 ```
 
 See [agent-workflow.mdc](agent-workflow.mdc) for PR and GitHub steps.
