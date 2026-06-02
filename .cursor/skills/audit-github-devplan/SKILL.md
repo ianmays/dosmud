@@ -11,7 +11,7 @@ disable-model-invocation: true
 
 # Audit GitHub issues and DEV_PLAN
 
-**See also:** proactive setup when creating milestone issues — [milestone-issue-hygiene](../milestone-issue-hygiene/SKILL.md). This skill is for **reactive** audits and reconciliation.
+**See also:** proactive setup when creating milestone issues — [milestone-issue-hygiene](../milestone-issue-hygiene/SKILL.md); documentation pass before draft PR — [documentation-maintainer](../documentation-maintainer/SKILL.md). This skill is for **reactive** audits and reconciliation.
 
 Cross-check **GitHub** (issues, milestones, project #1, blocked-by) against **[`DEV_PLAN.md`](../../../DEV_PLAN.md)**. Report mismatches; apply fixes only when the user asks.
 

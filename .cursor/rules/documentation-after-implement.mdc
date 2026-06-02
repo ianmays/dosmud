@@ -1,0 +1,29 @@
+---
+description: After behavioral implementation, run a documentation pass before draft PR
+alwaysApply: true
+---
+
+# Documentation after implement (mandatory)
+
+After **behavioral** implementation is done on a feature branch (logic in place; tests run per [testing-discipline.mdc](testing-discipline.mdc); [code-commenter pass](code-commenter-after-implement.mdc) when `src/` / `include/` changed), run a **documentation pass** before opening a draft PR or ending the implementation handoff.
+
+## Required step
+
+1. Scope: files changed vs `main` under `docs/`, `AGENTS.md`, `README.md`, `DEV_PLAN.md`, `.cursor/`, per branch diff.
+2. Delegate to the **docs-steward** subagent ([`docs-steward.md`](../agents/docs-steward.md)) or follow [documentation-maintainer skill](../skills/documentation-maintainer/SKILL.md).
+3. Commit documentation updates on the same feature branch when the pass adds or fixes material worth keeping.
+4. For milestone-tracked issues: use [milestone-issue-hygiene](../skills/milestone-issue-hygiene/SKILL.md) when creating/grooming; use [audit-github-devplan](../skills/audit-github-devplan/SKILL.md) only when auditing (fix with user approval).
+
+## Skip when
+
+- Change is comment-only in `src/` with no doc/workflow impact and user confirms skip
+- User explicitly skips the documentation pass
+- The same branch diff already had a documentation pass this session
+
+## Workflow order
+
+```text
+implement → make test (and related targets) → code-commenter pass (if src/ touched) → documentation pass → draft PR
+```
+
+See [agent-workflow.mdc](agent-workflow.mdc) for PR and GitHub steps.

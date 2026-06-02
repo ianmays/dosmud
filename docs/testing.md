@@ -51,7 +51,7 @@ For the WSL -> Windows path, build `dosmud.exe` with `make build-win` or `make t
 
 ## When to add or update tests
 
-Use this section when deciding what to write, not only what to run. Agents and contributors should follow it before opening a PR.
+Use this section when deciding what to write, not only what to run. Agents and contributors should follow it before opening a PR. Pre-PR runs: [`.cursor/rules/testing-discipline.mdc`](../.cursor/rules/testing-discipline.mdc) and [AGENTS.md](../AGENTS.md#testing-expectations).
 
 | Change | Snapshots | Unit (`tests/unit/unit_*.c`) |
 |--------|-----------|------------------------------|

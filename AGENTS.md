@@ -17,14 +17,17 @@ Guidance for AI/code agents working in this repository.
 - Update [`DEV_PLAN.md`](DEV_PLAN.md) per **DEV_PLAN updates** below when opening a draft PR. That file is a roadmap log, not a living status tracker - do not change it on pushes or after merge.
 - ALWAYS open draft PRs first.
 - ALWAYS link PRs to their corresponding Issues.
-- ALWAYS check whether documentation updates are required.
+- ALWAYS complete a **documentation pass** before opening a draft PR (see [Documentation pass](#documentation-pass)).
 - ALWAYS preserve deterministic gameplay behavior.
 - NEVER introduce gameplay/render/platform coupling.
 - NEVER use em dash - use standard hyphen only.
 - NEVER introduce C99/C11 features or compiler-specific extensions.
-- After `git push` to an open PR: complete the [post-push checklist](.cursor/rules/pr-after-push.mdc) in the **same turn** before replying (see [pr-after-push skill](.cursor/skills/pr-after-push/SKILL.md)).
+- After behavioral implementation: run **code-commenter** (when `src/` / `include/` changed) and **documentation** passes before draft PR (see [Comment pass](#comment-pass), [Documentation pass](#documentation-pass)).
+- After `git push` to an open PR: complete the [post-push gate](#after-git-push-to-a-pr-branch-mandatory) in the **same turn** before replying.
 
 ## GitHub Workflow (dosmud project)
+
+Task-start and PR gates: [`.cursor/rules/agent-workflow.mdc`](.cursor/rules/agent-workflow.mdc) (always applied; this file is the long-form reference).
 
 ### Task start checklist
 
@@ -40,7 +43,7 @@ Plan mode forbids code and repo changes, but GitHub project status updates and i
 
 ### Issue selection
 
-- When asked to pick up a new issue, ALWAYS select the top issue from the `Agent-ready` column in the dosmud GitHub project.
+- When asked to pick up a new issue, ALWAYS select the top issue from the `Agent-ready` column in the dosmud GitHub project (procedure: [find-next-agent-ready-task](.codex/skills/find-next-agent-ready-task/SKILL.md)).
 - NEVER begin work on an issue you believe should be abandoned, deferred, or reconsidered - challenge the work instead.
 
 ### Issue creation
@@ -77,6 +80,49 @@ See [Testing expectations](#testing-expectations) and [`docs/testing.md`](docs/t
 
 ### PR expectations
 
+#### Comment pass
+
+After behavioral implementation and tests pass, delegate a **code-commenter** pass on translation units touched by the branch diff (vs `main`) before opening a draft PR.
+
+- Rule: [`.cursor/rules/code-commenter-after-implement.mdc`](.cursor/rules/code-commenter-after-implement.mdc)
+- Subagent (judgement): [`.cursor/agents/code-commenter.md`](.cursor/agents/code-commenter.md)
+- Skill (procedure): [`.cursor/skills/code-commenter/SKILL.md`](.cursor/skills/code-commenter/SKILL.md)
+
+Order (with documentation pass): `implement → make test (and related targets) → code-commenter pass (if src/ touched) → documentation pass → draft PR`.
+
+Skip when the change is docs/tooling-only with no `src/` or `include/` edits, the user opts out, or the same diff already had a pass this session. Comment-only edits in that pass; do not change executable behavior.
+
+#### Documentation pass
+
+After behavioral implementation, tests, and any code-commenter pass, run a **documentation pass** on the branch diff (vs `main`) before opening a draft PR.
+
+| Layer | Role |
+|-------|------|
+| [documentation-discipline rule](.cursor/rules/documentation-discipline.mdc) | Always-on reminder; points to gate |
+| [documentation-after-implement rule](.cursor/rules/documentation-after-implement.mdc) | Gate before draft PR |
+| [documentation-maintainer skill](.cursor/skills/documentation-maintainer/SKILL.md) | Checklist and output format |
+| [docs-steward agent](.cursor/agents/docs-steward.md) | Judgement; what to update or delegate |
+| [milestone-issue-hygiene skill](.cursor/skills/milestone-issue-hygiene/SKILL.md) | Milestone issue create/groom (GitHub + DEV_PLAN when committing) |
+| [audit-github-devplan skill](.cursor/skills/audit-github-devplan/SKILL.md) | Roadmap drift audit (fix only if user asks) |
+
+Order: `implement → make test (and related targets) → code-commenter pass (if src/ touched) → documentation pass → draft PR`.
+
+Skip when the user opts out, the same diff already had a documentation pass this session, or the change truly has no doc impact (confirm in summary). Plan mode: defer `DEV_PLAN.md` commits per milestone hygiene skill.
+
+#### Documentation ownership
+
+| Path | Role |
+|------|------|
+| `README.md` | quick-start / operator usage |
+| `docs/index.md` | documentation entrypoint |
+| `docs/architecture.md` | subsystem boundaries and rationale |
+| `docs/testing.md` | deterministic testing and build workflow |
+| `docs/contributor-guide.md` | contributor and PR workflow |
+| `AGENTS.md` | agent workflow, Cursor index, DEV_PLAN policy |
+| `DEV_PLAN.md` | curated roadmap log (see **DEV_PLAN updates** below) |
+
+Prefer linking between documents over duplicating large instruction blocks.
+
 #### DEV_PLAN updates
 
 [`DEV_PLAN.md`](DEV_PLAN.md) is a manually curated roadmap log aligned with GitHub milestones, not a catalog of every GitHub issue.
@@ -108,24 +154,29 @@ When auditing milestone alignment, execution order, blocked-by links, or project
 
 ### After `git push` to a PR branch (mandatory)
 
-Whenever you `git push` and the branch has an open pull request:
+Complete the post-push gate in the **same turn** as `git push`, **before** the user-facing summary, whenever the branch has an open pull request.
 
-1. Run `gh pr view --json number,isDraft` (or check the PR on GitHub).
-2. If the PR is **not a draft**: in the **same turn** as the push, **before** you finish your message to the user, run:
-   `gh pr comment <number> --body "review this"`
-3. Use that exact body text only. NEVER ask whether re-review is needed.
+| Layer | Role |
+|-------|------|
+| [pr-after-push rule](.cursor/rules/pr-after-push.mdc) | Same-turn gate; workflow failure if skipped |
+| [pr-after-push skill](.cursor/skills/pr-after-push/SKILL.md) | Commands, pitfalls, checklist |
+| This section | Policy - when `review this` is required |
+
+#### Policy
 
 | PR state | `review this` required? |
 |----------|-------------------------|
-| Draft | No — skip until **Ready for review** |
+| Draft (`isDraft` true) | No — skip until **Ready for review** on GitHub |
 | Ready for review (non-draft) | Yes — **every** push, including review fixes and docs-only commits |
-| Project board **Review** + non-draft | Yes — same as ready for review |
+| Project board **Review** + non-draft | Yes — same as ready for review; board status does not replace `isDraft` |
 
-The first push after marking the PR ready for review starts this rule; it applies to all later pushes until merge.
+The first push after **Ready for review** starts the requirement; it applies to every later push until merge.
 
-Do **not** skip because the PR was draft when opened. Re-check `isDraft` after **every** push. If the user marked the PR **Ready for review** since the last push, the next push requires `review this` even when earlier pushes in the session did not.
+Do **not** skip because the PR was opened as draft, because board status is **Review**, or because an earlier push this session did not need `review this`. Re-check `isDraft` after **every** push.
 
-A missed `review this` comment is a **workflow failure** (same severity as skipping project status updates). Procedure: [`.cursor/rules/pr-after-push.mdc`](.cursor/rules/pr-after-push.mdc), [`.cursor/skills/pr-after-push/SKILL.md`](.cursor/skills/pr-after-push/SKILL.md), [`.cursor/rules/agent-workflow.mdc`](.cursor/rules/agent-workflow.mdc).
+Comment body must be exactly `review this`. Do not ask whether re-review is needed.
+
+A missed `review this` on a non-draft PR is a **workflow failure** (same severity as skipping project status updates). See also [agent-workflow.mdc](.cursor/rules/agent-workflow.mdc) PR push checklist.
 
 ### Completion workflow
 
@@ -142,8 +193,11 @@ After merge:
 
 ## Technical Constraints
 
+See [`.cursor/rules/c89-portability.mdc`](.cursor/rules/c89-portability.mdc) for portability detail (including FAT 8.3 basenames under `src/`).
+
 - Target language: ANSI C89 / ISO C90.
 - Must remain compatible with both GCC and OpenWatcom.
+- Use FAT 8.3 basenames for new `src/` `.c` / `.h` files (at most eight characters before the extension).
 - Prefer fixed-size arrays and static storage.
 - Avoid dynamic allocation unless explicitly justified.
 - Avoid recursion.
@@ -151,6 +205,8 @@ After merge:
 - Avoid hidden globals and cross-module state mutation.
 
 ## Architecture Principles
+
+Always-applied rules: [architecture-boundaries](.cursor/rules/architecture-boundaries.mdc), [subsystem-ownership](.cursor/rules/subsystem-ownership.mdc). Rationale: [`docs/architecture.md`](docs/architecture.md).
 
 - Keep gameplay deterministic for identical seed + inputs.
 - Keep simulation, rendering, and platform concerns separated.
@@ -195,7 +251,7 @@ make dos-prepare MODE=TEST_MODE
 
 ## Testing expectations
 
-Canonical detail: [`docs/testing.md`](docs/testing.md) (especially [When to add or update tests](docs/testing.md#when-to-add-or-update-tests)).
+Canonical detail: [`docs/testing.md`](docs/testing.md) (especially [When to add or update tests](docs/testing.md#when-to-add-or-update-tests)). Authoring and pre-PR runs: [`.cursor/rules/testing-discipline.mdc`](.cursor/rules/testing-discipline.mdc).
 
 - **New gameplay behavior:** add or update snapshot tests when player-visible output changes; add unit tests in the owning `tests/unit/unit_<module>.c`; keep tests deterministic per `docs/testing.md`.
 - **New or moved exported APIs** in coverage-scope modules listed in [`docs/testing.md`](docs/testing.md#unit-tests-greatest): at least one **direct** unit test per new function or distinct branch in the matching `tests/unit/unit_*.c` (see [When to add or update tests](docs/testing.md#when-to-add-or-update-tests)). Passing only through `game_process_input` is not enough when logic lives in a named slice API (see #90).
@@ -213,16 +269,6 @@ Running `make test`, `make test-run`, and `make test-unit` before a PR does not 
 - `dos-prepare.local.ps1` stores machine-specific path configuration.
 - `dos-prepare.ps1` copies only `src/`, `include/`, and `build.bat` into the DOS tree (per-directory `robocopy`, not a repo-root mirror); `.git` and tests never belong in the Windows tree.
 - Do not assume the repository exists under `/mnt/c`.
-
-## Documentation Ownership
-
-- `README.md` = quick-start/operator usage
-- `docs/index.md` = documentation entrypoint
-- `docs/architecture.md` = subsystem boundaries and rationale
-- `docs/testing.md` = deterministic testing workflow
-- `docs/contributor-guide.md` = contributor and PR workflow
-
-Prefer linking between documents over duplicating large instruction blocks.
 
 ## Editing and Change Hygiene
 
@@ -258,6 +304,51 @@ Additional notes:
 - DOS validation targets are unavailable in cloud VMs.
 - No lint tooling exists beyond GCC warning enforcement.
 - NEVER include co-author statements in commits.
+
+## Cursor configuration
+
+Index of project Cursor rules, skills, and agents. Several rules are **always applied** at edit time; skills are invoked for specific workflows.
+
+### Rules (`.cursor/rules/`)
+
+| Rule | Role |
+|------|------|
+| [agent-workflow](.cursor/rules/agent-workflow.mdc) | Task start, plan mode, before PR/push |
+| [architecture-boundaries](.cursor/rules/architecture-boundaries.mdc) | Module focus; avoid ECS/framework drift |
+| [subsystem-ownership](.cursor/rules/subsystem-ownership.mdc) | Owning module; core vs render/platform |
+| [c89-portability](.cursor/rules/c89-portability.mdc) | C89, FAT 8.3, OpenWatcom/GCC |
+| [testing-discipline](.cursor/rules/testing-discipline.mdc) | When to author tests; pre-PR `make test*` |
+| [documentation-discipline](.cursor/rules/documentation-discipline.mdc) | Docs alignment reminder |
+| [documentation-after-implement](.cursor/rules/documentation-after-implement.mdc) | Documentation pass before draft PR |
+| [commit-messages](.cursor/rules/commit-messages.mdc) | PR titles and commit body style |
+| [pr-after-push](.cursor/rules/pr-after-push.mdc) | Same-turn post-push gate |
+| [code-commenter-after-implement](.cursor/rules/code-commenter-after-implement.mdc) | Comment pass after behavioral impl |
+
+### Skills (`.cursor/skills/`)
+
+| Skill | When |
+|-------|------|
+| [milestone-issue-hygiene](.cursor/skills/milestone-issue-hygiene/SKILL.md) | New or groomed milestone-tracked issues |
+| [audit-github-devplan](.cursor/skills/audit-github-devplan/SKILL.md) | Roadmap/board/DEV_PLAN alignment audit |
+| [code-commenter](.cursor/skills/code-commenter/SKILL.md) | Comment pass procedure and summary format |
+| [documentation-maintainer](.cursor/skills/documentation-maintainer/SKILL.md) | Documentation pass checklist |
+| [squash-commit-message](.cursor/skills/squash-commit-message/SKILL.md) | Squash-merge title and bullets |
+| [pr-after-push](.cursor/skills/pr-after-push/SKILL.md) | Post-push commands and checklist |
+| [post-merge-cleanup](.cursor/skills/post-merge-cleanup/SKILL.md) | After merge: branch cleanup |
+| [human-interventions](.cursor/skills/human-interventions/SKILL.md) | Key Human Interventions draft (user approval) |
+
+### Codex skills (`.codex/skills/`)
+
+| Skill | When |
+|-------|------|
+| [find-next-agent-ready-task](.codex/skills/find-next-agent-ready-task/SKILL.md) | Next task from project board **Agent-ready** column |
+
+### Agents (`.cursor/agents/`)
+
+| Agent | When |
+|-------|------|
+| [code-commenter](.cursor/agents/code-commenter.md) | Delegate full comment pass (judgement); pair with skill above |
+| [docs-steward](.cursor/agents/docs-steward.md) | Delegate full documentation pass; pair with skill above |
 
 ## When in Doubt
 

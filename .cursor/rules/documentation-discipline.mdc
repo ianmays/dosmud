@@ -1,10 +1,25 @@
 ---
-description: Keep documentation aligned when the codebase or developer expectations change
+description: Keep documentation aligned before draft PR; gate points to documentation-maintainer skill
 alwaysApply: true
 ---
 
 # Documentation discipline
 
-- Update related documentation when architecture, tooling, workflows, or developer expectations change.
-- Check whether docs need updates before finishing a task; prefer linking over duplicating large blocks (see `AGENTS.md` documentation ownership).
-- Avoid introducing temporary behaviour, TODOs, or partial systems without documenting intent and follow-up work.
+Documentation must stay aligned as the codebase and agent workflows evolve.
+
+## Gate
+
+Before opening a draft PR or ending an implementation handoff, complete a **documentation pass** unless skipped per [documentation-after-implement.mdc](documentation-after-implement.mdc).
+
+Do **not** open a draft PR until the pass completes or the user explicitly skips.
+
+## Where detail lives
+
+| Layer | Location |
+|-------|----------|
+| Procedure | [documentation-maintainer skill](../skills/documentation-maintainer/SKILL.md) |
+| Judgement | [docs-steward agent](../agents/docs-steward.md) |
+| Policy | [`AGENTS.md`](../../AGENTS.md) **Documentation pass** |
+| Roadmap issues | [milestone-issue-hygiene](../skills/milestone-issue-hygiene/SKILL.md), [audit-github-devplan](../skills/audit-github-devplan/SKILL.md) |
+
+Prefer linking over duplicating large blocks across files.

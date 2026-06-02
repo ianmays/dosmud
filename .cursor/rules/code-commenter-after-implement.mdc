@@ -1,0 +1,30 @@
+---
+description: After behavioral implementation, delegate a code-commenter pass on touched src/ and include/
+alwaysApply: true
+---
+
+# Code commenter after implementation
+
+After **behavioral** implementation is done on a feature branch (logic in place; tests run per [testing-discipline.mdc](testing-discipline.mdc)), run a **comment pass** before opening a draft PR or ending the implementation handoff.
+
+## Required step
+
+1. Scope: translation units touched by the branch diff vs `main`, or paths the user named.
+2. Delegate to the **code-commenter** subagent ([`code-commenter.md`](../agents/code-commenter.md)).
+3. Follow [`code-commenter` skill](../skills/code-commenter/SKILL.md) for checklist and summary format if not delegating.
+4. **Comment-only** edits in scope; do not change executable behavior in this pass.
+5. Commit comment updates on the same feature branch when the pass adds seams, ownership, or transitional notes worth keeping.
+
+## Skip when
+
+- Change is docs-only, tooling-only, or has no edits under `src/` or `include/`
+- User explicitly skips a comment pass
+- The same branch diff already had a code-commenter pass this session
+
+## Workflow order
+
+```text
+implement → make test (and related targets) → code-commenter pass → documentation pass → draft PR
+```
+
+See [agent-workflow.mdc](agent-workflow.mdc) for PR and GitHub steps.
