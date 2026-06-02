@@ -13,7 +13,7 @@ Procedure and checklist: [`.cursor/skills/documentation-maintainer/SKILL.md`](..
 
 ## When invoked
 
-1. Scope: branch diff vs `main`, or paths the user named.
+1. **Inventory** the full branch diff vs `main` (or user paths) for signals; **edit** documentation paths only per the skill.
 2. Read [`AGENTS.md`](../../AGENTS.md) **Documentation pass** and **Documentation ownership** before editing.
 3. Update only what the change set requires; prefer links over copying AGENTS or skill text.
 4. Report what you updated, skipped, and delegated.
