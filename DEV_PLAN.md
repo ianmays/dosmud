@@ -507,8 +507,6 @@ Potential benefits:
 
 This is one of the most important architectural upgrades in the long-term roadmap.
 
-Done ✅.
-
 Direct follow-up migration chain (separate from replay/logging):
 - [#157](https://github.com/ianmays/dosmud/issues/157)
 - [#158](https://github.com/ianmays/dosmud/issues/158)
@@ -520,6 +518,8 @@ Direct follow-up migration chain (separate from replay/logging):
 
 Adjacent but separate follow-up track:
 - [#156](https://github.com/ianmays/dosmud/issues/156) (replay/event log capability)
+
+Done ✅ ([#164](https://github.com/ianmays/dosmud/pull/164)).
 
 ### [#157](https://github.com/ianmays/dosmud/issues/157) - Command/navigation GameEvent migration
 
