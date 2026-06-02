@@ -26,7 +26,7 @@ When applying edits: comment-only within scope; do not change executable behavio
 
 ## Scope
 
-- Default: files in the current `git diff` vs base branch, or paths the user listed.
+- Default: `src/` and `include/` files in the current `git diff` vs base branch, or paths the user listed.
 - Read one or two nearby modules first (`src/game.c`, `src/invent.c`, `src/gout.c`) for style, then edit in scope only.
 - Do not run repo-wide comment sweeps unless the user asks.
 
