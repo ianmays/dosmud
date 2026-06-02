@@ -223,7 +223,7 @@ Contributors creating milestone issues manually should run this checklist (or as
 
 ## Related
 
-- [AGENTS.md](../../../AGENTS.md) — Issue creation, DEV_PLAN updates
-- [documentation-maintainer](../documentation-maintainer/SKILL.md) — documentation pass before draft PR
-- [audit-github-devplan](../audit-github-devplan/SKILL.md) — reconcile drift
-- [contributor-guide.md](../../../docs/contributor-guide.md) — project + DEV_PLAN overview
+- [AGENTS.md](../../../AGENTS.md) - Issue creation, DEV_PLAN updates
+- [documentation-maintainer](../documentation-maintainer/SKILL.md) - documentation pass before draft PR
+- [audit-github-devplan](../audit-github-devplan/SKILL.md) - reconcile drift
+- [contributor-guide.md](../../../docs/contributor-guide.md) - project + DEV_PLAN overview
