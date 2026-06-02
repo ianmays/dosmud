@@ -88,7 +88,7 @@ After behavioral implementation and tests pass, delegate a **code-commenter** pa
 - Subagent (judgement): [`.cursor/agents/code-commenter.md`](.cursor/agents/code-commenter.md)
 - Skill (procedure): [`.cursor/skills/code-commenter/SKILL.md`](.cursor/skills/code-commenter/SKILL.md)
 
-Order (with documentation pass): `implement → make test (and related targets) → code-commenter pass (if src/ touched) → documentation pass → draft PR`.
+Order (with documentation pass): `implement → make test (and related targets) → code-commenter pass (if src/ or include/ touched) → documentation pass → draft PR`.
 
 Skip when the change is docs/tooling-only with no `src/` or `include/` edits, the user opts out, or the same diff already had a pass this session. Comment-only edits in that pass; do not change executable behavior.
 
@@ -105,7 +105,7 @@ After behavioral implementation, tests, and any code-commenter pass, run a **doc
 | [milestone-issue-hygiene skill](.cursor/skills/milestone-issue-hygiene/SKILL.md) | Milestone issue create/groom (GitHub + DEV_PLAN when committing) |
 | [audit-github-devplan skill](.cursor/skills/audit-github-devplan/SKILL.md) | Roadmap drift audit (fix only if user asks) |
 
-Order: `implement → make test (and related targets) → code-commenter pass (if src/ touched) → documentation pass → draft PR`.
+Order: `implement → make test (and related targets) → code-commenter pass (if src/ or include/ touched) → documentation pass → draft PR`.
 
 Skip when the user opts out, the same diff already had a documentation pass this session, or the change truly has no doc impact (confirm in summary). Plan mode: defer `DEV_PLAN.md` commits per milestone hygiene skill.
 
@@ -166,9 +166,9 @@ Complete the post-push gate in the **same turn** as `git push`, **before** the u
 
 | PR state | `review this` required? |
 |----------|-------------------------|
-| Draft (`isDraft` true) | No — skip until **Ready for review** on GitHub |
-| Ready for review (non-draft) | Yes — **every** push, including review fixes and docs-only commits |
-| Project board **Review** + non-draft | Yes — same as ready for review; board status does not replace `isDraft` |
+| Draft (`isDraft` true) | No - skip until **Ready for review** on GitHub |
+| Ready for review (non-draft) | Yes - **every** push, including review fixes and docs-only commits |
+| Project board **Review** + non-draft | Yes - same as ready for review; board status does not replace `isDraft` |
 
 The first push after **Ready for review** starts the requirement; it applies to every later push until merge.
 

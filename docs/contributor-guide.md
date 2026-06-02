@@ -27,7 +27,7 @@ Recommended workflow:
 Before opening a draft PR (agents and contributors with automation):
 
 ```text
-implement → make test* → code-commenter pass (if src/ changed) → documentation pass → draft PR
+implement → make test* → code-commenter pass (if src/ or include/ changed) → documentation pass → draft PR
 ```
 
 - Comment pass: [`.cursor/skills/code-commenter/SKILL.md`](../.cursor/skills/code-commenter/SKILL.md) (see AGENTS.md **Comment pass**)

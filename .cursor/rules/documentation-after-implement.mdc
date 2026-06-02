@@ -23,7 +23,7 @@ After **behavioral** implementation is done on a feature branch (logic in place;
 ## Workflow order
 
 ```text
-implement → make test (and related targets) → code-commenter pass (if src/ touched) → documentation pass → draft PR
+implement → make test (and related targets) → code-commenter pass (if src/ or include/ touched) → documentation pass → draft PR
 ```
 
 See [agent-workflow.mdc](agent-workflow.mdc) for PR and GitHub steps.

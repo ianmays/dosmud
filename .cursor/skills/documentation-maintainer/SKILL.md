@@ -27,8 +27,8 @@ description: >-
 
 ## Scope
 
-- Default: `git diff main...HEAD` for paths under `docs/`, `AGENTS.md`, `README.md`, `DEV_PLAN.md`, `.cursor/`.
-- Do not rewrite gameplay code in this pass.
+- **Inventory:** `git diff main...HEAD` over the **whole branch** to detect change signals (`src/`, `include/`, tests, Makefile, `.cursor/`, etc.).
+- **Edits:** limit to documentation paths (`docs/`, `AGENTS.md`, `README.md`, `DEV_PLAN.md`, `.cursor/` rules/skills/agents). Do not rewrite gameplay code in this pass.
 - Prefer links over duplicating AGENTS or other skill bodies.
 
 ## Checklist by change signal
@@ -65,7 +65,7 @@ Documentation pass:
 
 ## Workflow
 
-1. `git diff main...HEAD --stat` (or user paths).
+1. `git diff main...HEAD --stat` over the full branch (or user paths) to inventory signals; then open doc targets only when warranted.
 2. Walk checklist rows that apply; open each target doc only when the diff warrants it.
 3. Verify links and Makefile/`make` targets if testing or build docs touched.
 4. If milestone issue work: run hygiene skill steps (GitHub + DEV_PLAN when committing).
