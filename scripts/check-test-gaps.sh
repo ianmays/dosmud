@@ -32,6 +32,12 @@ read_makefile_lists() {
         | sed 's/^/tests\/harness\//' \
         | sort -u)
     HARNESS_SRC_PATHS=$(echo "$harness" | tr '\n' ' ')
+    SNAPSHOT_TESTS=$(sed -n '/^SNAPSHOT_TESTS =/,/^$/p' "$mf" \
+        | sed '1d;$d' \
+        | tr '\t\\' '  ' \
+        | tr ' ' '\n' \
+        | grep -v '^$' \
+        | tr '\n' ' ')
     PLAYER_PATHS=$(printf '%s\n%s\n%s\n' "$gameplay" "$plat" "$harness" | sort -u | grep -v '^$' | tr '\n' ' ')
 }
 
@@ -125,6 +131,16 @@ path_added_in_diff() {
     if git diff HEAD --diff-filter=A -- "$path" 2>/dev/null | grep -q .; then
         return 0
     fi
+    return 1
+}
+
+snapshot_listed() {
+    name="$1"
+    for t in $SNAPSHOT_TESTS; do
+        if [ "$t" = "$name" ]; then
+            return 0
+        fi
+    done
     return 1
 }
 
@@ -259,7 +275,7 @@ for path in $NAME_ONLY; do
         continue
     fi
     name=$(basename "$path" .input)
-    if ! grep -q "$name" "$ROOT/Makefile" 2>/dev/null; then
+    if ! snapshot_listed "$name"; then
         echo "test-gap: snapshot gap: new $path not listed in Makefile SNAPSHOT_TESTS" >&2
         FAIL=1
     fi
