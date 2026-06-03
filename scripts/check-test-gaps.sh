@@ -462,6 +462,20 @@ if echo "$NAME_ONLY" | grep -qx 'include/config.h'; then
     fi
 fi
 
+# --- Copy headers: outside unit bar; snapshots required when player-visible copy changes ---
+for path in src/grendr.h src/txtres.h; do
+    if ! echo "$NAME_ONLY" | grep -qx "$path"; then
+        continue
+    fi
+    if ! file_changed_non_whitespace "$path"; then
+        continue
+    fi
+    if ! snapshot_coverage_touched; then
+        echo "test-gap: snapshot gap: $path changed without tests/regression or SNAPSHOT_TESTS update" >&2
+        FAIL=1
+    fi
+done
+
 # --- Heuristic 2: coverage-module .c without unit update ---
 check_coverage_source_unit_gap() {
     src="$1"
