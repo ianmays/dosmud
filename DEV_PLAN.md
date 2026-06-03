@@ -44,10 +44,9 @@ Milestone numbers are **themes**, not strict schedule. Suggested pull order for 
 ```mermaid
 flowchart LR
   subgraph m4 [Workflow_and_Tooling]
-    M4["74,82,150,34,72"]
+    M4["72"]
   end
   subgraph m5 [Advanced_Architecture]
-    M5base["71,47"]
     M5chain["157,158,159,160,161,162,163"]
     M5adj["156"]
     M5late["16"]
@@ -56,7 +55,7 @@ flowchart LR
     M9a["104,100,101"]
   end
   subgraph m8 [Advanced_Mechanics]
-    M8["15,128,129,4,5,50,132,102,107,9,31,52,49,145"]
+    M8["15,129,4,5,50,132,102,107,9,31,52,49,145"]
   end
   subgraph m6 [Content_Expansion]
     M6["55,7,8,51,54,76,130,131"]
@@ -67,34 +66,35 @@ flowchart LR
   subgraph m9b [Engine_late]
     M9b["92"]
   end
-  m4 --> m5base
-  m5base --> M5chain
-  m5base --> M5adj
-  m5base --> M5late
-  m5base --> m9a
+  m4 --> M5chain
+  M5chain --> M5adj
+  M5chain --> M5late
+  M5chain --> m9a
   m9a --> m8
   m8 --> m6
-  m5base --> m7
-  m5base --> m9b
+  M5chain --> m7
+  M5chain --> m9b
 ```
 
-Workflow (milestone 4) can run in parallel with architecture once unblocked. In milestone 5, the direct `#47` migration chain is `#157` through `#163`, while `#156` is a separate adjacent replay/logging lane. Content (6) and renderer (7) are not gated on all of mechanics (8).
+**Completed (m5 foundation):** [#71](https://github.com/ianmays/dosmud/issues/71) engine boundary, [#47](https://github.com/ianmays/dosmud/issues/47) event queue ([#164](https://github.com/ianmays/dosmud/pull/164)). **Active m5 pull order:** #157 through #163, then adjacent #156 and #16 per blocked-by.
 
-**Dependencies:** native GitHub **blocked-by** links on issues (Relationships sidebar). Key chains: [#71](https://github.com/ianmays/dosmud/issues/71) before [#47](https://github.com/ianmays/dosmud/issues/47) / [#104](https://github.com/ianmays/dosmud/issues/104); [#47](https://github.com/ianmays/dosmud/issues/47) before [#157](https://github.com/ianmays/dosmud/issues/157), [#158](https://github.com/ianmays/dosmud/issues/158), [#159](https://github.com/ianmays/dosmud/issues/159), [#160](https://github.com/ianmays/dosmud/issues/160), [#161](https://github.com/ianmays/dosmud/issues/161), [#162](https://github.com/ianmays/dosmud/issues/162), [#163](https://github.com/ianmays/dosmud/issues/163), and separate lane [#156](https://github.com/ianmays/dosmud/issues/156); direct migration chain order: [#157](https://github.com/ianmays/dosmud/issues/157) before [#158](https://github.com/ianmays/dosmud/issues/158) before [#159](https://github.com/ianmays/dosmud/issues/159) before [#160](https://github.com/ianmays/dosmud/issues/160) before [#161](https://github.com/ianmays/dosmud/issues/161) before [#162](https://github.com/ianmays/dosmud/issues/162) before [#163](https://github.com/ianmays/dosmud/issues/163); [#71](https://github.com/ianmays/dosmud/issues/71) and [#47](https://github.com/ianmays/dosmud/issues/47) before [#48](https://github.com/ianmays/dosmud/issues/48); [#104](https://github.com/ianmays/dosmud/issues/104) before [#100](https://github.com/ianmays/dosmud/issues/100) / [#101](https://github.com/ianmays/dosmud/issues/101) / [#8](https://github.com/ianmays/dosmud/issues/8); [#101](https://github.com/ianmays/dosmud/issues/101) before [#102](https://github.com/ianmays/dosmud/issues/102) / [#107](https://github.com/ianmays/dosmud/issues/107); [#50](https://github.com/ianmays/dosmud/issues/50) before [#132](https://github.com/ianmays/dosmud/issues/132); [#52](https://github.com/ianmays/dosmud/issues/52) before [#49](https://github.com/ianmays/dosmud/issues/49); [#142](https://github.com/ianmays/dosmud/issues/142) (fmt render migration) before [#145](https://github.com/ianmays/dosmud/issues/145) (local map viewport); [#92](https://github.com/ianmays/dosmud/issues/92) after [#16](https://github.com/ianmays/dosmud/issues/16), [#71](https://github.com/ianmays/dosmud/issues/71), [#47](https://github.com/ianmays/dosmud/issues/47).
+Workflow (milestone 4) can run in parallel with architecture once unblocked. In milestone 5, the **GameEvent migration** chain (#157 through #163) follows the completed #47 foundation; [#156](https://github.com/ianmays/dosmud/issues/156) is a separate adjacent replay/logging lane. Content (6) and renderer (7) are not gated on all of mechanics (8).
+
+**Dependencies:** native GitHub **blocked-by** links on issues (Relationships sidebar). [#71](https://github.com/ianmays/dosmud/issues/71) and [#47](https://github.com/ianmays/dosmud/issues/47) are **closed**; downstream issues may still list them as blockers in GitHub Relationships. Key chains: [#71](https://github.com/ianmays/dosmud/issues/71) before [#47](https://github.com/ianmays/dosmud/issues/47) / [#104](https://github.com/ianmays/dosmud/issues/104); [#47](https://github.com/ianmays/dosmud/issues/47) before [#157](https://github.com/ianmays/dosmud/issues/157), [#158](https://github.com/ianmays/dosmud/issues/158), [#159](https://github.com/ianmays/dosmud/issues/159), [#160](https://github.com/ianmays/dosmud/issues/160), [#161](https://github.com/ianmays/dosmud/issues/161), [#162](https://github.com/ianmays/dosmud/issues/162), [#163](https://github.com/ianmays/dosmud/issues/163), and separate lane [#156](https://github.com/ianmays/dosmud/issues/156); direct migration chain order: [#157](https://github.com/ianmays/dosmud/issues/157) before [#158](https://github.com/ianmays/dosmud/issues/158) before [#159](https://github.com/ianmays/dosmud/issues/159) before [#160](https://github.com/ianmays/dosmud/issues/160) before [#161](https://github.com/ianmays/dosmud/issues/161) before [#162](https://github.com/ianmays/dosmud/issues/162) before [#163](https://github.com/ianmays/dosmud/issues/163); [#71](https://github.com/ianmays/dosmud/issues/71) and [#47](https://github.com/ianmays/dosmud/issues/47) before [#48](https://github.com/ianmays/dosmud/issues/48); [#104](https://github.com/ianmays/dosmud/issues/104) before [#100](https://github.com/ianmays/dosmud/issues/100) / [#101](https://github.com/ianmays/dosmud/issues/101) / [#8](https://github.com/ianmays/dosmud/issues/8); [#101](https://github.com/ianmays/dosmud/issues/101) before [#102](https://github.com/ianmays/dosmud/issues/102) / [#107](https://github.com/ianmays/dosmud/issues/107); [#50](https://github.com/ianmays/dosmud/issues/50) before [#132](https://github.com/ianmays/dosmud/issues/132); [#52](https://github.com/ianmays/dosmud/issues/52) before [#49](https://github.com/ianmays/dosmud/issues/49); [#142](https://github.com/ianmays/dosmud/issues/142) (fmt render migration) before [#145](https://github.com/ianmays/dosmud/issues/145) (local map viewport); [#92](https://github.com/ianmays/dosmud/issues/92) after [#16](https://github.com/ianmays/dosmud/issues/16), [#71](https://github.com/ianmays/dosmud/issues/71), [#47](https://github.com/ianmays/dosmud/issues/47).
 
 ### Relative size (GitHub project)
 
-**Size** (XS–XL on [project 1](https://github.com/users/ianmays/projects/1)) is relative effort / blast radius, not schedule. It is independent of **Priority** (P0/P1/P2) and column **stack order** (execution order above). Board **Status** may differ from pull order (e.g. [#72](https://github.com/ianmays/dosmud/issues/72) in Parked while still sequenced after issue 34 in the m4 list).
+**Size** (XS–XL on [project 1](https://github.com/users/ianmays/projects/1)) is relative effort / blast radius, not schedule. It is independent of **Priority** (P0/P1/P2) and column **stack order** (execution order above). Board **Status** may differ from pull order (e.g. [#72](https://github.com/ianmays/dosmud/issues/72) In progress while [#104](https://github.com/ianmays/dosmud/issues/104) stays in Backlog).
 
 | Size | Meaning | Examples (open roadmap) |
 |------|---------|-------------------------|
 | XS | single trivial change | *(none currently)* |
-| S | narrow feature or tooling slice | #4, #72, #82, #128, #150 |
-| M | one subsystem feature or refactor | #5, #7, #9, #31, #49, #51, #54, #74, #100, #101, #102, #129, #130, #131, #132, #145 |
-| L | major mechanism or platform path | #8, #15, #16, #34, #47, #50, #52, #104, #107 |
-| XL | foundational or multi-area epic | #48, #55, #71, #76, #92 |
+| S | narrow feature or tooling slice | #4, #72 |
+| M | one subsystem feature or refactor | #5, #7, #9, #31, #49, #51, #54, #100, #101, #102, #129, #130, #131, #132, #145, #157, #161, #162, #163 |
+| L | major mechanism or platform path | #8, #15, #16, #50, #52, #104, #107, #156, #158, #159, #160 |
+| XL | foundational or multi-area epic | #48, #55, #76, #92 |
 
-[#71](https://github.com/ianmays/dosmud/issues/71) **XL** is the architectural foundation gate (engine vs game-logic boundary); it blocks #47, #104, #48, and #92. Downstream L/XL items build on it.
+[#71](https://github.com/ianmays/dosmud/issues/71) **XL** and [#47](https://github.com/ianmays/dosmud/issues/47) **L** established the engine boundary and event-queue seam ([#164](https://github.com/ianmays/dosmud/pull/164)). Remaining gates: [#104](https://github.com/ianmays/dosmud/issues/104), [#48](https://github.com/ianmays/dosmud/issues/48), and [#92](https://github.com/ianmays/dosmud/issues/92) still build on that work.
 
 ### Current Project Priority
 
@@ -467,45 +467,17 @@ Done ✅.
 | [#156](https://github.com/ianmays/dosmud/issues/156) | deterministic replay event log capability (adjacent track) | L |
 | [#16](https://github.com/ianmays/dosmud/issues/16) | save / load | L |
 
+Rows [#71](https://github.com/ianmays/dosmud/issues/71) and [#47](https://github.com/ianmays/dosmud/issues/47) are complete (historical index).
+
 ### [#71](https://github.com/ianmays/dosmud/issues/71) - Separate core game engine from game logic
 
-Separate deterministic gameplay/simulation from rendering, platform, and front-end so the engine can support alternative interfaces or games. Blocks [#47](https://github.com/ianmays/dosmud/issues/47), [#104](https://github.com/ianmays/dosmud/issues/104), [#48](https://github.com/ianmays/dosmud/issues/48), and [#92](https://github.com/ianmays/dosmud/issues/92).
+Separate deterministic gameplay/simulation from rendering, platform, and front-end so the engine can support alternative interfaces or games. Unblocked [#47](https://github.com/ianmays/dosmud/issues/47) (done); still relevant for [#104](https://github.com/ianmays/dosmud/issues/104), [#48](https://github.com/ianmays/dosmud/issues/48), and [#92](https://github.com/ianmays/dosmud/issues/92).
 
 Done ✅.
 
 ### [#47](https://github.com/ianmays/dosmud/issues/47) - Event queue architecture
 
-Future direction:
-
-```text
-gameplay -> event queue -> renderer
-```
-
-Introduce:
-
-```c
-struct GameEvent
-```
-
-Example event types:
-
-```text
-EVENT_DAMAGE
-EVENT_MOVE
-EVENT_DIALOGUE
-EVENT_ITEM
-EVENT_NOISE
-```
-
-Potential benefits:
-- replay systems
-- logging
-- renderer flexibility
-- deterministic event capture
-- improved testing
-- save/load consistency
-
-This is one of the most important architectural upgrades in the long-term roadmap.
+Foundation landed in [#164](https://github.com/ianmays/dosmud/pull/164): `GameEvent` / `GameEventQueue` on `gout`, per-step drain via `game_render_output` in `grendr`, and transitional `GAME_EVENT_LEGACY` for `GAME_OUT_*`. Proof slice: successful `move` plus `game_describe_current_room` emit generic kinds; other paths stay legacy until the migration chain below. Seam ownership: [`docs/architecture.md`](docs/architecture.md) Engine and Render sections.
 
 Direct follow-up migration chain (separate from replay/logging):
 - [#157](https://github.com/ianmays/dosmud/issues/157)
