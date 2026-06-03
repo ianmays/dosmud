@@ -1,11 +1,20 @@
-# Optional unit-suite overrides for scripts/check-test-gaps.sh
+# Canonical unit-suite ownership for scripts/check-test-gaps.sh
 #
-# Default: any tests/unit/unit_*.c that #include "<module>.h" counts as the suite
-# for that module (see COVERAGE_MODULES in the Makefile).
-# Harness .c paths (testharn, th_world) come from Makefile HARNESS_SRC, not module-map.
+# One owning suite per COVERAGE_MODULES entry (see docs/testing.md unit file convention).
+# Helper includes in other unit_*.c files do not satisfy a module's gap obligation.
 #
-# Add a line only when that grep is not enough:
-#   <module>: <unit_file.c> [more unit files...]
-#
-# Examples (commented; not needed today):
-# testharn: unit_tharn.c unit_harn.c
+# Format: <module>: <unit_file.c> [more unit files...]
+
+command: unit_cmd.c
+invent: unit_inv.c
+combat: unit_cbt.c
+game: unit_game.c
+genc: unit_genc.c
+wanderer: unit_wandr.c
+dialogue: unit_dial.c
+gatmos: unit_gatmos.c
+world: unit_wrld.c
+gprog: unit_gprog.c
+items: unit_item.c
+fmt: unit_fmt.c
+testharn: unit_tharn.c unit_harn.c

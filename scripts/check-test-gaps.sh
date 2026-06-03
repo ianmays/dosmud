@@ -1,7 +1,7 @@
 #!/bin/sh
 # Compare branch diff vs base for missing unit/snapshot test updates.
 # Module lists: COVERAGE_MODULES, UNIT_GAMEPLAY_SRC, PLAT_SRC, HARNESS_SRC from Makefile.
-# Unit suites: tests/unit/unit_*.c that #include "<mod>.h" (see tests/unit/module-map overrides).
+# Unit suites: owning tests/unit/unit_*.c per tests/unit/module-map.
 
 set -e
 
@@ -56,10 +56,10 @@ if [ -z "$NAME_ONLY" ]; then
 fi
 
 makefile_touches_snapshot_tests() {
-    if git diff "$DIFF_RANGE" -- Makefile 2>/dev/null | grep -q 'SNAPSHOT_TESTS'; then
+    if git diff "$DIFF_RANGE" -- Makefile 2>/dev/null | grep -q '^[+-].*SNAPSHOT_TESTS'; then
         return 0
     fi
-    if git diff HEAD -- Makefile 2>/dev/null | grep -q 'SNAPSHOT_TESTS'; then
+    if git diff HEAD -- Makefile 2>/dev/null | grep -q '^[+-].*SNAPSHOT_TESTS'; then
         return 0
     fi
     return 1
@@ -144,29 +144,25 @@ snapshot_listed() {
     return 1
 }
 
-# Resolve unit_*.c for a module: #include "<mod>.h" in tests/unit, plus optional module-map.
+# Resolve owning unit_*.c for a module from tests/unit/module-map.
 unit_files_for_module() {
     mod="$1"
     found=""
 
-    for u in tests/unit/unit_*.c; do
-        [ -f "$u" ] || continue
-        if grep -q "#include \"$mod.h\"" "$u" 2>/dev/null; then
-            found="$found $u"
-        fi
-    done
+    if [ ! -f "$MAP" ]; then
+        echo "$found"
+        return
+    fi
 
-    if [ -f "$MAP" ]; then
-        line=$(grep "^${mod}:" "$MAP" 2>/dev/null | head -1)
-        if [ -n "$line" ]; then
-            set -- $(echo "$line" | sed 's/^[^:]*://')
-            for u in "$@"; do
-                case "$u" in
-                    tests/unit/*) found="$found $u" ;;
-                    unit_*.c) found="$found tests/unit/$u" ;;
-                esac
-            done
-        fi
+    line=$(grep "^${mod}:" "$MAP" 2>/dev/null | head -1)
+    if [ -n "$line" ]; then
+        set -- $(echo "$line" | sed 's/^[^:]*://')
+        for u in "$@"; do
+            case "$u" in
+                tests/unit/*) found="$found $u" ;;
+                unit_*.c) found="$found tests/unit/$u" ;;
+            esac
+        done
     fi
 
     found=$(echo "$found" | tr ' ' '\n' | sort -u | grep -v '^$' || true)

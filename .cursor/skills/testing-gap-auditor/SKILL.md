@@ -56,7 +56,7 @@ Test-gap pass:
 | `grendr` / `fmt` render logic | When logic changes | If output changes |
 | Refactor, behavior preserved | Update if APIs moved | Only if `.expect` drift |
 
-**In-scope modules:** `COVERAGE_MODULES` in the [`Makefile`](../../../Makefile). **Unit suites:** `tests/unit/unit_*.c` that `#include "<module>.h"` (resolved by `scripts/check-test-gaps.sh`). Optional overrides: [`tests/unit/module-map`](../../../tests/unit/module-map). Naming abbreviations (e.g. `command` → `unit_cmd.c`): [`docs/testing.md`](../../../docs/testing.md#when-to-add-or-update-tests) and `UNIT_TEST_SRC` in the Makefile - do not duplicate a module table here.
+**In-scope modules:** `COVERAGE_MODULES` in the [`Makefile`](../../../Makefile). **Unit suites:** owning files in [`tests/unit/module-map`](../../../tests/unit/module-map) (one suite per module; helper `#include`s in other `unit_*.c` files do not count). Naming abbreviations (e.g. `command` → `unit_cmd.c`): [`docs/testing.md`](../../../docs/testing.md#when-to-add-or-update-tests) and `UNIT_TEST_SRC` in the Makefile - do not duplicate a module table here.
 
 ## Script
 
