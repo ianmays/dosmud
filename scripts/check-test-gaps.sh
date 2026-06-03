@@ -61,11 +61,56 @@ if [ -z "$NAME_ONLY" ]; then
     exit 0
 fi
 
+snapshot_tests_sorted_from_stream() {
+    sed -n '/^SNAPSHOT_TESTS =/,/^$/p' \
+        | sed '1d;$d' \
+        | tr '\t\\' '  ' \
+        | tr ' ' '\n' \
+        | grep -v '^$' \
+        | sort \
+        | tr '\n' ' '
+}
+
+snapshot_tests_sorted_at_ref() {
+    ref="$1"
+    if [ "$ref" = "worktree" ]; then
+        snapshot_tests_sorted_from_stream < "$ROOT/Makefile"
+    else
+        git show "${ref}:Makefile" 2>/dev/null | snapshot_tests_sorted_from_stream
+    fi
+}
+
+unit_test_src_sorted_from_stream() {
+    sed -n '/^UNIT_TEST_SRC =/,/^UNIT_CORE_OBJS =/p' \
+        | grep -oE 'unit_[a-zA-Z0-9_]+\.c' \
+        | sed 's|^|tests/unit/|' \
+        | sort \
+        | tr '\n' ' '
+}
+
+unit_test_src_sorted_at_ref() {
+    ref="$1"
+    if [ "$ref" = "worktree" ]; then
+        unit_test_src_sorted_from_stream < "$ROOT/Makefile"
+    else
+        git show "${ref}:Makefile" 2>/dev/null | unit_test_src_sorted_from_stream
+    fi
+}
+
 makefile_touches_snapshot_tests() {
     if git diff "$DIFF_RANGE" -- Makefile 2>/dev/null | grep -q '^[+-].*SNAPSHOT_TESTS'; then
         return 0
     fi
     if git diff HEAD -- Makefile 2>/dev/null | grep -q '^[+-].*SNAPSHOT_TESTS'; then
+        return 0
+    fi
+    base_list=$(snapshot_tests_sorted_at_ref "$MERGE_BASE")
+    head_list=$(snapshot_tests_sorted_at_ref "HEAD")
+    work_list=$(snapshot_tests_sorted_at_ref "worktree")
+    if [ "$base_list" != "$head_list" ]; then
+        return 0
+    fi
+    if [ "$head_list" != "$work_list" ]; then
         return 0
     fi
     return 1
@@ -81,6 +126,25 @@ makefile_touches_coverage_modules() {
     return 1
 }
 
+makefile_touches_unit_test_src() {
+    if git diff "$DIFF_RANGE" -- Makefile 2>/dev/null | grep -q '^[+-].*UNIT_TEST_SRC'; then
+        return 0
+    fi
+    if git diff HEAD -- Makefile 2>/dev/null | grep -q '^[+-].*UNIT_TEST_SRC'; then
+        return 0
+    fi
+    base_list=$(unit_test_src_sorted_at_ref "$MERGE_BASE")
+    head_list=$(unit_test_src_sorted_at_ref "HEAD")
+    work_list=$(unit_test_src_sorted_at_ref "worktree")
+    if [ "$base_list" != "$head_list" ]; then
+        return 0
+    fi
+    if [ "$head_list" != "$work_list" ]; then
+        return 0
+    fi
+    return 1
+}
+
 needs_check=0
 for path in $NAME_ONLY; do
     case "$path" in
@@ -89,7 +153,8 @@ for path in $NAME_ONLY; do
             break
             ;;
         Makefile)
-            if makefile_touches_snapshot_tests || makefile_touches_coverage_modules; then
+            if makefile_touches_snapshot_tests || makefile_touches_coverage_modules \
+                || makefile_touches_unit_test_src; then
                 needs_check=1
                 break
             fi
