@@ -65,6 +65,16 @@ makefile_touches_snapshot_tests() {
     return 1
 }
 
+makefile_touches_coverage_modules() {
+    if git diff "$DIFF_RANGE" -- Makefile 2>/dev/null | grep -q '^[+-].*COVERAGE_MODULES'; then
+        return 0
+    fi
+    if git diff HEAD -- Makefile 2>/dev/null | grep -q '^[+-].*COVERAGE_MODULES'; then
+        return 0
+    fi
+    return 1
+}
+
 needs_check=0
 for path in $NAME_ONLY; do
     case "$path" in
@@ -73,7 +83,7 @@ for path in $NAME_ONLY; do
             break
             ;;
         Makefile)
-            if makefile_touches_snapshot_tests; then
+            if makefile_touches_snapshot_tests || makefile_touches_coverage_modules; then
                 needs_check=1
                 break
             fi
@@ -264,18 +274,28 @@ for mod in $COVERAGE_MODULES; do
     FAIL=1
 done
 
-# --- Heuristic 3: UNIT_GAMEPLAY_SRC + HARNESS_SRC paths without snapshot touch ---
+# --- Heuristic 3: player paths without snapshot touch (unit-only changes ok) ---
 player_changed=0
+player_needs_snapshot=0
 for p in $PLAYER_PATHS; do
-    if echo "$NAME_ONLY" | grep -qx "$p"; then
-        if file_changed_non_whitespace "$p"; then
-            player_changed=1
-            break
+    if ! echo "$NAME_ONLY" | grep -qx "$p"; then
+        continue
+    fi
+    if ! file_changed_non_whitespace "$p"; then
+        continue
+    fi
+    player_changed=1
+    mod=$(basename "$p" .c)
+    if module_in_coverage "$mod"; then
+        if ! unit_touched_for_module "$mod"; then
+            player_needs_snapshot=1
         fi
+    else
+        player_needs_snapshot=1
     fi
 done
 
-if [ "$player_changed" = "1" ]; then
+if [ "$player_changed" = "1" ] && [ "$player_needs_snapshot" = "1" ]; then
     if ! snapshot_coverage_touched; then
         echo "test-gap: snapshot gap: player-visible source changed without tests/regression or SNAPSHOT_TESTS update" >&2
         FAIL=1
