@@ -26,11 +26,6 @@ read_makefile_lists() {
     gameplay=$(sed -n '/^UNIT_GAMEPLAY_SRC =/,/^UNIT_CORE_SRC =/p' "$mf" \
         | grep -oE 'src/[a-zA-Z0-9_]+\.c|tests/harness/[a-zA-Z0-9_]+\.c' \
         | sort -u)
-    TARGET="${TEST_GAP_TARGET:-posix}"
-    case "$TARGET" in
-        win) plat="src/platwin.c" ;;
-        *) plat="src/platpos.c" ;;
-    esac
     harness=$(sed -n 's/^HARNESS_SRC = //p' "$mf" \
         | grep -oE '[a-zA-Z0-9_]+\.c' \
         | sed 's/^/tests\/harness\//' \
@@ -47,8 +42,8 @@ read_makefile_lists() {
         | sed 's|^|tests/unit/|' \
         | sort -u \
         | tr '\n' ' ')
-    entrypoints="src/main.c src/platdos.c"
-    PLAYER_PATHS=$(printf '%s\n%s\n%s\n%s\n' "$gameplay" "$plat" "$harness" "$entrypoints" | sort -u | grep -v '^$' | tr '\n' ' ')
+    entrypoints="src/main.c src/platdos.c src/platpos.c src/platwin.c"
+    PLAYER_PATHS=$(printf '%s\n%s\n%s\n' "$gameplay" "$harness" "$entrypoints" | sort -u | grep -v '^$' | tr '\n' ' ')
 }
 
 read_makefile_lists
