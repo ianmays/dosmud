@@ -22,7 +22,12 @@ fi
 
 read_makefile_lists() {
     mf="$ROOT/Makefile"
-    COVERAGE_MODULES=$(sed -n 's/^COVERAGE_MODULES = //p' "$mf" | head -1)
+    COVERAGE_MODULES=$(sed -n '/^COVERAGE_MODULES =/,/^$/p' "$mf" \
+        | sed '1s/^COVERAGE_MODULES = //' \
+        | tr '\t\\' '  ' \
+        | tr ' ' '\n' \
+        | grep -v '^$' \
+        | tr '\n' ' ')
     gameplay=$(sed -n '/^UNIT_GAMEPLAY_SRC =/,/^UNIT_CORE_SRC =/p' "$mf" \
         | grep -oE 'src/[a-zA-Z0-9_]+\.c|tests/harness/[a-zA-Z0-9_]+\.c' \
         | sort -u)
@@ -49,7 +54,10 @@ read_makefile_lists() {
 read_makefile_lists
 cd "$ROOT"
 
-MERGE_BASE=$(git merge-base "$BASE" HEAD 2>/dev/null || echo "$BASE")
+MERGE_BASE=$(git merge-base "$BASE" HEAD 2>/dev/null) || {
+    echo "test-gap: error: no merge base between $BASE and HEAD (fetch full history or use a related base ref)" >&2
+    exit 1
+}
 DIFF_RANGE="${MERGE_BASE}...HEAD"
 COMMITTED=$(git diff --name-only "$DIFF_RANGE" 2>/dev/null || true)
 UNCOMMITTED=$(git diff --name-only HEAD 2>/dev/null || true)
@@ -115,11 +123,39 @@ makefile_touches_snapshot_tests() {
     return 1
 }
 
+coverage_modules_sorted_from_stream() {
+    sed -n '/^COVERAGE_MODULES =/,/^$/p' \
+        | sed '1s/^COVERAGE_MODULES = //' \
+        | tr '\t\\' '  ' \
+        | tr ' ' '\n' \
+        | grep -v '^$' \
+        | sort \
+        | tr '\n' ' '
+}
+
+coverage_modules_sorted_at_ref() {
+    ref="$1"
+    if [ "$ref" = "worktree" ]; then
+        coverage_modules_sorted_from_stream < "$ROOT/Makefile"
+    else
+        git show "${ref}:Makefile" 2>/dev/null | coverage_modules_sorted_from_stream
+    fi
+}
+
 makefile_touches_coverage_modules() {
     if git diff "$DIFF_RANGE" -- Makefile 2>/dev/null | grep -q '^[+-].*COVERAGE_MODULES'; then
         return 0
     fi
     if git diff HEAD -- Makefile 2>/dev/null | grep -q '^[+-].*COVERAGE_MODULES'; then
+        return 0
+    fi
+    base_list=$(coverage_modules_sorted_at_ref "$MERGE_BASE")
+    head_list=$(coverage_modules_sorted_at_ref "HEAD")
+    work_list=$(coverage_modules_sorted_at_ref "worktree")
+    if [ "$base_list" != "$head_list" ]; then
+        return 0
+    fi
+    if [ "$head_list" != "$work_list" ]; then
         return 0
     fi
     return 1
