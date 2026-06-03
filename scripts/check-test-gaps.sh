@@ -26,7 +26,11 @@ read_makefile_lists() {
     gameplay=$(sed -n '/^UNIT_GAMEPLAY_SRC =/,/^UNIT_CORE_SRC =/p' "$mf" \
         | grep -oE 'src/[a-zA-Z0-9_]+\.c|tests/harness/[a-zA-Z0-9_]+\.c' \
         | sort -u)
-    plat=$(grep '^PLAT_SRC = ' "$mf" | sed 's/^PLAT_SRC = //' | tr ' ' '\n' | sort -u)
+    TARGET="${TEST_GAP_TARGET:-posix}"
+    case "$TARGET" in
+        win) plat="src/platwin.c" ;;
+        *) plat="src/platpos.c" ;;
+    esac
     harness=$(sed -n 's/^HARNESS_SRC = //p' "$mf" \
         | grep -oE '[a-zA-Z0-9_]+\.c' \
         | sed 's/^/tests\/harness\//' \
