@@ -201,7 +201,19 @@ snapshot_coverage_touched() {
     return 1
 }
 
+# Every COVERAGE_MODULES entry must have an owning suite in module-map.
+verify_module_map_coverage() {
+    for mod in $COVERAGE_MODULES; do
+        units=$(unit_files_for_module "$mod")
+        if [ -z "$units" ]; then
+            echo "test-gap: config gap: COVERAGE_MODULES lists $mod but $MAP has no owning suite (add $mod: unit_*.c)" >&2
+            FAIL=1
+        fi
+    done
+}
+
 # --- Heuristic 1: in-scope header without unit update ---
+verify_module_map_coverage
 for path in $NAME_ONLY; do
     case "$path" in
         include/*.h|src/*.h|tests/harness/*.h)
@@ -219,6 +231,8 @@ for path in $NAME_ONLY; do
     fi
     units=$(unit_files_for_module "$mod")
     if [ -z "$units" ]; then
+        echo "test-gap: unit gap: $path changed but module-map has no suite for $mod (add $mod: unit_*.c to $MAP)" >&2
+        FAIL=1
         continue
     fi
     if unit_touched_for_module "$mod"; then
@@ -239,6 +253,8 @@ for mod in $COVERAGE_MODULES; do
     fi
     units=$(unit_files_for_module "$mod")
     if [ -z "$units" ]; then
+        echo "test-gap: unit gap: $src changed but module-map has no suite for $mod (add $mod: unit_*.c to $MAP)" >&2
+        FAIL=1
         continue
     fi
     if unit_touched_for_module "$mod"; then
