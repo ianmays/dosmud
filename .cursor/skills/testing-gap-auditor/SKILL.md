@@ -22,7 +22,7 @@ description: >-
 
 1. After `make test`, `make test-run`, and `make test-unit` (or `make test-all`) on a behavioral feature branch.
 2. Before code-commenter and documentation passes.
-3. When CI **Check test gaps** fails on a PR.
+3. When CI **Check test gaps** reports gaps in the job log (informative mode; step stays green).
 4. User asks whether unit/snapshot coverage is missing.
 
 ## Skip when
