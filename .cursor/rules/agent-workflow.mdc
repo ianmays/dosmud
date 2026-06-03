@@ -39,6 +39,7 @@ When the user asks for the next task, to pick up work, or to start a new issue:
 ## Before opening a PR
 
 - Run `make test`, `make test-run`, and `make test-unit` (or `make test-all`).
+- Run a **test-gap** pass (`sh scripts/check-test-gaps.sh origin/main`; [testing-gap-after-implement.mdc](testing-gap-after-implement.mdc)).
 - Run a **code-commenter** pass when `src/` / `include/` changed ([code-commenter-after-implement.mdc](code-commenter-after-implement.mdc)).
 - Run a **documentation** pass ([documentation-after-implement.mdc](documentation-after-implement.mdc), [documentation-maintainer skill](../skills/documentation-maintainer/SKILL.md)).
 - Update [`DEV_PLAN.md`](../../DEV_PLAN.md) per **DEV_PLAN updates** in [`AGENTS.md`](../../AGENTS.md) when opening the draft PR.

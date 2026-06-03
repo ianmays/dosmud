@@ -1,0 +1,33 @@
+---
+description: After behavioral implementation and make test*, run test-gap audit before code-commenter and draft PR
+alwaysApply: true
+---
+
+# Test gap audit after implementation
+
+After **behavioral** implementation and `make test` / `make test-run` / `make test-unit` (or `make test-all`) on a feature branch, run a **test-gap pass** before the code-commenter and documentation passes.
+
+## Required step
+
+1. Scope: branch diff vs `main` under `src/`, `include/`, `tests/`, `Makefile`.
+2. Run `sh scripts/check-test-gaps.sh origin/main` (must exit 0 before draft PR).
+3. Delegate to the **test-auditor** subagent ([`test-auditor.md`](../agents/test-auditor.md)) or follow [`testing-gap-auditor` skill](../skills/testing-gap-auditor/SKILL.md).
+4. Fix gaps (add unit/snapshot tests) or commit [`tests/.test-gap-waiver`](../../tests/.test-gap-waiver) with a one-line reason when intentional.
+5. PR **Test plan** and issue **Testing** subsection must list tests added/updated or explain waiver.
+
+## Skip when
+
+- Docs/tooling-only: no gameplay/test diff vs `main` (script exits 0)
+- User explicitly skips
+- Branch diff unchanged since a completed test-gap pass this session
+- `tests/.test-gap-waiver` already committed for this branch
+
+## Workflow order
+
+```text
+implement → make test (and related targets) → test-gap pass → code-commenter (if src/ or include/) → documentation pass → draft PR
+```
+
+CI runs the same script on pull requests as a **hard fail** (see [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml)).
+
+See [agent-workflow.mdc](agent-workflow.mdc) for GitHub steps.

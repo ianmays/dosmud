@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Testing discipline
 
-Follow [`AGENTS.md`](../../AGENTS.md) [Testing expectations](../../AGENTS.md#testing-expectations) and [`docs/testing.md`](../../docs/testing.md#when-to-add-or-update-tests).
+Follow [`AGENTS.md`](../../AGENTS.md) [Testing expectations](../../AGENTS.md#testing-expectations) and [`docs/testing.md`](../../docs/testing.md#when-to-add-or-update-tests). Before draft PR, run the [test-gap pass](testing-gap-after-implement.mdc) (`scripts/check-test-gaps.sh`).
 
 ## Authoring tests (not only running them)
 

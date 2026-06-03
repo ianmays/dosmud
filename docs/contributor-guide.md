@@ -27,9 +27,10 @@ Recommended workflow:
 Before opening a draft PR (agents and contributors with automation):
 
 ```text
-implement → make test* → code-commenter pass (if src/ or include/ changed) → documentation pass → draft PR
+implement → make test* → test-gap pass (`scripts/check-test-gaps.sh`) → code-commenter pass (if src/ or include/ changed) → documentation pass → draft PR
 ```
 
+- Test-gap pass: [`.cursor/skills/testing-gap-auditor/SKILL.md`](../.cursor/skills/testing-gap-auditor/SKILL.md) (see AGENTS.md **Testing pass**); CI hard-fails PRs when `scripts/check-test-gaps.sh` exits 1
 - Comment pass: [`.cursor/skills/code-commenter/SKILL.md`](../.cursor/skills/code-commenter/SKILL.md) (see AGENTS.md **Comment pass**)
 - Documentation pass: [`.cursor/skills/documentation-maintainer/SKILL.md`](../.cursor/skills/documentation-maintainer/SKILL.md) (see AGENTS.md **Documentation pass**)
 

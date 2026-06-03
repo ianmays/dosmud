@@ -65,6 +65,19 @@ Use this section when deciding what to write, not only what to run. Agents and c
 
 **Lesson from [#90](https://github.com/ianmays/dosmud/issues/90):** when command handling moves from `game.c` into a slice module, add tests in that slice's `unit_*.c` file. Green `unit_game.c` tests that only call `game_process_input` do not document slice ownership or catch regressions in new entry points.
 
+## Test gap audit (agents and CI)
+
+Before a draft PR, agents run a **test-gap pass** ([`.cursor/skills/testing-gap-auditor/SKILL.md`](../.cursor/skills/testing-gap-auditor/SKILL.md), [`.cursor/rules/testing-gap-after-implement.mdc`](../.cursor/rules/testing-gap-after-implement.mdc)):
+
+```sh
+git fetch origin main
+sh scripts/check-test-gaps.sh origin/main
+```
+
+Pull requests to `main` run the same script in CI as a **hard fail** (no `continue-on-error`). The script compares the branch diff to `main` and flags likely missing unit or snapshot updates (in-scope `.h` / `.c` without matching `tests/unit/`, player-visible paths without `tests/regression/` or `SNAPSHOT_TESTS` changes, new `.input` files not listed in the `Makefile`).
+
+**Waiver:** commit [`tests/.test-gap-waiver`](../tests/.test-gap-waiver) with a one-line reason when gaps are intentional (behavior-preserving refactor, copy-only `grendr` path, etc.). Do not set `TEST_GAP_WAIVE=1` in CI. `make test-unit-coverage` remains the branch-coverage bar; the gap script does not replace it.
+
 ## Test layout
 
 ```text
