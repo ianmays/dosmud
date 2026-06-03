@@ -74,7 +74,7 @@ git fetch origin main
 sh scripts/check-test-gaps.sh origin/main
 ```
 
-Pull requests to `main` run the same script in CI as a **hard fail** (no `continue-on-error`). The script compares the branch diff to `main` and flags likely missing unit or snapshot updates (in-scope `.h` / `.c` without matching `tests/unit/`, player-visible paths without `tests/regression/` or `SNAPSHOT_TESTS` changes, new `.input` files not listed in the `Makefile`).
+Pull requests to `main` run the same script in CI as a **hard fail** (no `continue-on-error`). The script reads `COVERAGE_MODULES` and `UNIT_GAMEPLAY_SRC` from the `Makefile`, resolves unit suites by `#include "<module>.h"` in `tests/unit/unit_*.c` (optional overrides in [`tests/unit/module-map`](../tests/unit/module-map)), and flags likely missing unit or snapshot updates.
 
 **Waiver:** commit [`tests/.test-gap-waiver`](../tests/.test-gap-waiver) with a one-line reason when gaps are intentional (behavior-preserving refactor, copy-only `grendr` path, etc.). Do not set `TEST_GAP_WAIVE=1` in CI. `make test-unit-coverage` remains the branch-coverage bar; the gap script does not replace it.
 

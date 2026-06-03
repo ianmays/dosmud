@@ -58,28 +58,7 @@ Test-gap pass:
 | `grendr` / `fmt` render logic | When logic changes | If output changes |
 | Refactor, behavior preserved | Update if APIs moved | Only if `.expect` drift |
 
-**In-scope modules (coverage bar):** `command`, `invent`, `combat`, `game`, `genc`, `wanderer`, `dialogue`, `gatmos`, `world`, `gprog`, `items`, `fmt`, `gout`, `testharn` (see `COVERAGE_MODULES` in `Makefile`).
-
-## Unit file map
-
-| `src/` module | Unit suite |
-|---------------|------------|
-| `command.c` | `unit_cmd.c` |
-| `invent.c` | `unit_inv.c` |
-| `combat.c` | `unit_cbt.c` |
-| `dialogue.c` | `unit_dial.c` |
-| `world.c` | `unit_wrld.c` |
-| `game.c` | `unit_game.c` |
-| `gout.c` | `unit_gout.c` |
-| `genc.c` | `unit_genc.c` |
-| `gprog.c` | `unit_gprog.c` |
-| `gatmos.c` | `unit_gatmos.c` |
-| `wanderer.c` | `unit_wandr.c` |
-| `fmt.c` | `unit_fmt.c` |
-| `items.c` | `unit_item.c` |
-| `testharn.c` | `unit_tharn.c`, `unit_harn.c` |
-
-Abbreviated basenames match [`docs/testing.md`](../../../docs/testing.md#when-to-add-or-update-tests).
+**In-scope modules:** `COVERAGE_MODULES` in the [`Makefile`](../../../Makefile). **Unit suites:** `tests/unit/unit_*.c` that `#include "<module>.h"` (resolved by `scripts/check-test-gaps.sh`). Optional overrides: [`tests/unit/module-map`](../../../tests/unit/module-map). Naming abbreviations (e.g. `command` → `unit_cmd.c`): [`docs/testing.md`](../../../docs/testing.md#when-to-add-or-update-tests) and `UNIT_TEST_SRC` in the Makefile - do not duplicate a module table here.
 
 ## Script
 

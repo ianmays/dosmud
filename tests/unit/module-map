@@ -1,0 +1,10 @@
+# Optional unit-suite overrides for scripts/check-test-gaps.sh
+#
+# Default: any tests/unit/unit_*.c that #include "<module>.h" counts as the suite
+# for that module (see COVERAGE_MODULES in the Makefile).
+#
+# Add a line only when that grep is not enough:
+#   <module>: <unit_file.c> [more unit files...]
+#
+# Examples (commented; not needed today):
+# testharn: unit_tharn.c unit_harn.c
