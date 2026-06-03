@@ -211,6 +211,19 @@ snapshot_coverage_touched() {
     return 1
 }
 
+unit_tests_touched() {
+    for path in $NAME_ONLY; do
+        case "$path" in
+            tests/unit/unit_*.c)
+                if file_changed_non_whitespace "$path"; then
+                    return 0
+                fi
+                ;;
+        esac
+    done
+    return 1
+}
+
 # Every COVERAGE_MODULES entry must have an owning suite in module-map.
 verify_module_map_coverage() {
     for mod in $COVERAGE_MODULES; do
@@ -251,6 +264,16 @@ for path in $NAME_ONLY; do
     echo "test-gap: unit gap: $path changed without matching unit test update ($units)" >&2
     FAIL=1
 done
+
+# --- Shared config header: gameplay constants drive unit and snapshot behavior ---
+if echo "$NAME_ONLY" | grep -qx 'include/config.h'; then
+    if file_changed_non_whitespace 'include/config.h'; then
+        if ! unit_tests_touched && ! snapshot_coverage_touched; then
+            echo "test-gap: test gap: include/config.h changed without tests/unit or tests/regression update" >&2
+            FAIL=1
+        fi
+    fi
+fi
 
 # --- Heuristic 2: coverage-module .c without unit update ---
 for mod in $COVERAGE_MODULES; do
