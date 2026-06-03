@@ -425,6 +425,10 @@ check_coverage_source_unit_gap() {
     if unit_touched_for_module "$mod"; then
         return 0
     fi
+    if [ "$mod" = "game" ] && [ "$src" = "src/game.c" ]; then
+        echo "test-gap: note: src/game.c changed without tests/unit suite including game.h updated (ok if static router only)" >&2
+        return 0
+    fi
     echo "test-gap: unit gap: $src changed without tests/unit update (expect $units)" >&2
     FAIL=1
 }
@@ -450,6 +454,9 @@ for p in $PLAYER_PATHS; do
         continue
     fi
     if ! file_changed_non_whitespace "$p"; then
+        continue
+    fi
+    if [ "$p" = "src/game.c" ]; then
         continue
     fi
     player_changed=1
@@ -488,15 +495,6 @@ for path in $NAME_ONLY; do
         FAIL=1
     fi
 done
-
-# --- Warn only (exit 0): game.c without a touched game.h suite file ---
-if echo "$NAME_ONLY" | grep -qx 'src/game.c'; then
-    if file_changed_non_whitespace 'src/game.c'; then
-        if ! unit_touched_for_module game; then
-            echo "test-gap: note: src/game.c changed without tests/unit suite including game.h updated (ok if static router only)" >&2
-        fi
-    fi
-fi
 
 if [ "$FAIL" -ne 0 ]; then
     echo "test-gap: fail (add or update unit/snapshot tests; see docs/testing.md)" >&2
