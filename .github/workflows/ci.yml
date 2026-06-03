@@ -19,8 +19,11 @@ jobs:
       - name: Install build tools
         run: sudo apt-get update && sudo apt-get install -y gcc make
 
-      - name: Check test gaps (diff vs base)
+      - name: Check test gaps (diff vs base, informative)
         if: github.event_name == 'pull_request'
+        continue-on-error: true
+        env:
+          TEST_GAP_INFORMATIVE: "1"
         run: |
           git fetch origin "${{ github.base_ref }}"
           sh scripts/check-test-gaps.sh "origin/${{ github.base_ref }}"

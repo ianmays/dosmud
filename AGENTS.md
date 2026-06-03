@@ -99,14 +99,14 @@ After behavioral implementation and `make test` / `make test-run` / `make test-u
 | Layer | Role |
 |-------|------|
 | [testing-gap-after-implement rule](.cursor/rules/testing-gap-after-implement.mdc) | Gate before draft PR |
-| [testing-gap-auditor skill](.cursor/skills/testing-gap-auditor/SKILL.md) | Checklist, obligation matrix, waiver |
+| [testing-gap-auditor skill](.cursor/skills/testing-gap-auditor/SKILL.md) | Checklist, obligation matrix |
 | [test-auditor agent](.cursor/agents/test-auditor.md) | Delegate full pass; may add tests |
 
-Run `sh scripts/check-test-gaps.sh origin/main` (exit 0 required). CI runs the same check on pull requests as a **hard fail**.
+Run `sh scripts/check-test-gaps.sh origin/main` (exit 0 required locally before draft PR). CI runs the same script in **informative** mode (logs gaps, does not fail the job).
 
 Order: `implement → make test (and related targets) → test-gap pass → code-commenter pass (if src/ or include/ touched) → documentation pass → draft PR`.
 
-Skip when the script passes with no gameplay/test diff, `tests/.test-gap-waiver` is committed, the user opts out, or the branch diff is unchanged since a completed test-gap pass this session.
+Skip when the script passes with no gameplay/test diff, the user opts out, or the branch diff is unchanged since a completed test-gap pass this session.
 
 #### Documentation pass
 

@@ -3,7 +3,7 @@ name: testing-gap-auditor
 description: >-
   Audit branch diffs for missing unit or snapshot tests before draft PR.
   Run scripts/check-test-gaps.sh, interpret coverage, and add tests or
-  tests/.test-gap-waiver. Use after make test* on gameplay branches or when
+  Use after make test* on gameplay branches or when
   CI test-gap step fails.
 ---
 
@@ -17,7 +17,7 @@ description: >-
 
 **Gate (rule).** [testing-gap-after-implement.mdc](../../rules/testing-gap-after-implement.mdc).
 
-**CI.** PRs to `main` run `scripts/check-test-gaps.sh` as a **hard fail** (no `continue-on-error`). Escape hatch: commit [`tests/.test-gap-waiver`](../../../tests/.test-gap-waiver) with a one-line reason.
+**CI.** PRs run `scripts/check-test-gaps.sh` in **informative** mode (`TEST_GAP_INFORMATIVE=1`): gaps are logged, job stays green. Fix gaps or tune the script before merge; no CI waiver.
 
 ## When to run
 
@@ -29,7 +29,6 @@ description: >-
 ## Skip when
 
 - Branch diff vs `main` has no `src/`, `include/`, `tests/unit/`, `tests/regression/`, or `Makefile` `SNAPSHOT_TESTS` changes (script exits 0).
-- `tests/.test-gap-waiver` is committed with reason.
 - User opts out.
 - Diff unchanged since a completed test-gap pass this session.
 
@@ -43,7 +42,7 @@ Test-gap pass:
 - [ ] 4. make test-unit-coverage if in-scope src/ changed
 - [ ] 5. Direct unit tests for new exports (#90 lesson)
 - [ ] 6. Snapshot obligation for player-visible paths
-- [ ] 7. Report; fix tests or waiver; PR Test plan / issue Testing subsection
+- [ ] 7. Report; fix tests; PR Test plan / issue Testing subsection
 ```
 
 ## Obligation matrix
@@ -68,20 +67,9 @@ sh scripts/check-test-gaps.sh origin/main
 ```
 
 - Exit **0:** pass or waived.
-- Exit **1:** hard gap; add tests or `tests/.test-gap-waiver`.
-- `TEST_GAP_WAIVE=1`: local debug only; do not set in CI.
-
-## Waiver file
-
-Path: `tests/.test-gap-waiver`
-
-Example (one line):
-
-```text
-behavior-preserving grendr refactor; snapshots unchanged per make test-run
-```
-
-Commit in the PR when heuristics misfire under the hard CI gate. Do not leave a permanent waiver on `main` without cause.
+- Exit **1:** gaps found (default locally; required before draft PR).
+- Exit **0** with gap messages: `TEST_GAP_INFORMATIVE=1` (CI only).
+- `TEST_GAP_WAIVE=1`: skip script locally; not used in CI.
 
 ## Output format
 
@@ -98,9 +86,6 @@ Commit in the PR when heuristics misfire under the hard CI gate. Do not leave a 
 ### Snapshot gaps
 | Path | Signal | Required action |
 
-### Waivers
-- (none) or reason + path
-
 ### Recommended next step
 - add tests / update snapshots / none - reason
 ```
@@ -109,6 +94,4 @@ Commit in the PR when heuristics misfire under the hard CI gate. Do not leave a 
 
 - Add or update `tests/unit/unit_*.c`, `tests/regression/*`, `Makefile` `SNAPSHOT_TESTS`.
 - Re-run `make test`, `make test-run`, `make test-unit`.
-- Commit `tests/.test-gap-waiver` when intentional (document reason in report).
-
 Do **not** change gameplay behavior except through tests. Use `unit_game_fresh`, `plat_seed_rng`, `game_roll_inject_*`, and `@fixture` per [`docs/testing.md`](../../../docs/testing.md).

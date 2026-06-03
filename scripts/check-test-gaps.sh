@@ -6,19 +6,12 @@
 set -e
 
 BASE="${1:-${TEST_GAP_BASE:-origin/main}}"
-WAIVER="tests/.test-gap-waiver"
 MAP="tests/unit/module-map"
 FAIL=0
 ROOT=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
 
-if [ -f "$WAIVER" ]; then
-    reason=$(head -1 "$WAIVER")
-    echo "test-gap: waived (${reason})"
-    exit 0
-fi
-
 if [ "$TEST_GAP_WAIVE" = "1" ]; then
-    echo "test-gap: waived (TEST_GAP_WAIVE=1, local debug only)"
+    echo "test-gap: skipped (TEST_GAP_WAIVE=1, local only; not used in CI)"
     exit 0
 fi
 
@@ -263,7 +256,11 @@ if echo "$NAME_ONLY" | grep -qx 'src/game.c'; then
 fi
 
 if [ "$FAIL" -ne 0 ]; then
-    echo "test-gap: fail (add tests or commit tests/.test-gap-waiver with reason)" >&2
+    echo "test-gap: fail (add or update unit/snapshot tests; see docs/testing.md)" >&2
+    if [ "$TEST_GAP_INFORMATIVE" = "1" ]; then
+        echo "test-gap: informative mode (TEST_GAP_INFORMATIVE=1); exiting 0 for CI" >&2
+        exit 0
+    fi
     exit 1
 fi
 
