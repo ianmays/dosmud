@@ -189,8 +189,27 @@ src_path_for_module() {
     echo "src/${mod}.c"
 }
 
+module_for_basename() {
+    base="$1"
+    case "$base" in
+        th_world) echo world ;;
+        *) echo "$base" ;;
+    esac
+}
+
+module_for_source_path() {
+    path="$1"
+    case "$path" in
+        tests/harness/testharn.c) echo testharn ;;
+        tests/harness/th_world.c) echo world ;;
+        *)
+            module_for_basename "$(basename "$path" .c)"
+            ;;
+    esac
+}
+
 module_from_header() {
-    basename "$1" .h
+    module_for_basename "$(basename "$1" .h)"
 }
 
 file_changed_non_whitespace() {
@@ -389,25 +408,39 @@ if echo "$NAME_ONLY" | grep -qx 'include/config.h'; then
 fi
 
 # --- Heuristic 2: coverage-module .c without unit update ---
-for mod in $COVERAGE_MODULES; do
-    src=$(src_path_for_module "$mod")
+check_coverage_source_unit_gap() {
+    src="$1"
+    mod="$2"
     if ! echo "$NAME_ONLY" | grep -qx "$src"; then
-        continue
+        return 0
     fi
     if ! file_changed_non_whitespace "$src"; then
-        continue
+        return 0
     fi
     units=$(unit_files_for_module "$mod")
     if [ -z "$units" ]; then
         echo "test-gap: unit gap: $src changed but module-map has no suite for $mod (add $mod: unit_*.c to $MAP)" >&2
         FAIL=1
-        continue
+        return 0
     fi
     if unit_touched_for_module "$mod"; then
-        continue
+        return 0
     fi
     echo "test-gap: unit gap: $src changed without tests/unit update (expect $units)" >&2
     FAIL=1
+}
+
+for mod in $COVERAGE_MODULES; do
+    check_coverage_source_unit_gap "$(src_path_for_module "$mod")" "$mod"
+done
+
+for hp in $HARNESS_SRC_PATHS; do
+    mod=$(module_for_source_path "$hp")
+    base=$(basename "$hp" .c)
+    if [ "$mod" = "$base" ]; then
+        continue
+    fi
+    check_coverage_source_unit_gap "$hp" "$mod"
 done
 
 # --- Heuristic 3: player paths without snapshot touch (unit-only changes ok) ---
@@ -421,7 +454,7 @@ for p in $PLAYER_PATHS; do
         continue
     fi
     player_changed=1
-    mod=$(basename "$p" .c)
+    mod=$(module_for_source_path "$p")
     if module_in_coverage "$mod"; then
         if ! unit_touched_for_module "$mod"; then
             player_needs_snapshot=1

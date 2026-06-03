@@ -4,6 +4,7 @@
 # Helper includes in other unit_*.c files do not satisfy a module's gap obligation.
 #
 # Format: <module>: <unit_file.c> [more unit files...]
+# Harness th_world.c maps to world in check-test-gaps.sh (see HARNESS_SRC in Makefile).
 
 command: unit_cmd.c
 invent: unit_inv.c
