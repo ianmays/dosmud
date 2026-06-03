@@ -38,7 +38,13 @@ read_makefile_lists() {
         | tr ' ' '\n' \
         | grep -v '^$' \
         | tr '\n' ' ')
-    PLAYER_PATHS=$(printf '%s\n%s\n%s\n' "$gameplay" "$plat" "$harness" | sort -u | grep -v '^$' | tr '\n' ' ')
+    UNIT_TEST_SRC_PATHS=$(sed -n '/^UNIT_TEST_SRC =/,/^UNIT_CORE_OBJS =/p' "$mf" \
+        | grep -oE 'unit_[a-zA-Z0-9_]+\.c' \
+        | sed 's|^|tests/unit/|' \
+        | sort -u \
+        | tr '\n' ' ')
+    entrypoints="src/main.c src/platdos.c"
+    PLAYER_PATHS=$(printf '%s\n%s\n%s\n%s\n' "$gameplay" "$plat" "$harness" "$entrypoints" | sort -u | grep -v '^$' | tr '\n' ' ')
 }
 
 read_makefile_lists
@@ -154,7 +160,17 @@ snapshot_listed() {
     return 1
 }
 
-# Resolve owning unit_*.c for a module from tests/unit/module-map.
+# Resolve owning unit_*.c for a module from tests/unit/module-map (UNIT_TEST_SRC only).
+unit_suite_in_build() {
+    u="$1"
+    for b in $UNIT_TEST_SRC_PATHS; do
+        if [ "$b" = "$u" ]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
 unit_files_for_module() {
     mod="$1"
     found=""
@@ -169,8 +185,17 @@ unit_files_for_module() {
         set -- $(echo "$line" | sed 's/^[^:]*://')
         for u in "$@"; do
             case "$u" in
-                tests/unit/*) found="$found $u" ;;
-                unit_*.c) found="$found tests/unit/$u" ;;
+                tests/unit/*)
+                    if unit_suite_in_build "$u"; then
+                        found="$found $u"
+                    fi
+                    ;;
+                unit_*.c)
+                    full="tests/unit/$u"
+                    if unit_suite_in_build "$full"; then
+                        found="$found $full"
+                    fi
+                    ;;
             esac
         done
     fi
@@ -227,9 +252,32 @@ unit_tests_touched() {
 # Every COVERAGE_MODULES entry must have an owning suite in module-map.
 verify_module_map_coverage() {
     for mod in $COVERAGE_MODULES; do
+        if [ ! -f "$MAP" ]; then
+            echo "test-gap: config gap: missing $MAP" >&2
+            FAIL=1
+            return
+        fi
+        line=$(grep "^${mod}:" "$MAP" 2>/dev/null | head -1)
+        if [ -z "$line" ]; then
+            echo "test-gap: config gap: COVERAGE_MODULES lists $mod but $MAP has no owning suite (add $mod: unit_*.c)" >&2
+            FAIL=1
+            continue
+        fi
+        set -- $(echo "$line" | sed 's/^[^:]*://')
+        for u in "$@"; do
+            case "$u" in
+                tests/unit/*) full="$u" ;;
+                unit_*.c) full="tests/unit/$u" ;;
+                *) continue ;;
+            esac
+            if ! unit_suite_in_build "$full"; then
+                echo "test-gap: config gap: $MAP lists $full for $mod but it is not in Makefile UNIT_TEST_SRC" >&2
+                FAIL=1
+            fi
+        done
         units=$(unit_files_for_module "$mod")
         if [ -z "$units" ]; then
-            echo "test-gap: config gap: COVERAGE_MODULES lists $mod but $MAP has no owning suite (add $mod: unit_*.c)" >&2
+            echo "test-gap: config gap: COVERAGE_MODULES lists $mod but no UNIT_TEST_SRC suite is mapped in $MAP" >&2
             FAIL=1
         fi
     done
