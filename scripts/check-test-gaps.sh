@@ -181,26 +181,34 @@ unit_touched_for_module() {
     fi
     for u in $units; do
         if echo "$NAME_ONLY" | grep -qx "$u"; then
-            return 0
+            if file_changed_non_whitespace "$u"; then
+                return 0
+            fi
         fi
     done
     return 1
 }
 
-regression_touched() {
-    echo "$NAME_ONLY" | grep -q '^tests/regression/' && return 0
-    if echo "$NAME_ONLY" | grep -qx 'Makefile'; then
-        if makefile_touches_snapshot_tests; then
-            return 0
-        fi
+snapshot_coverage_touched() {
+    if makefile_touches_snapshot_tests; then
+        return 0
     fi
+    for path in $NAME_ONLY; do
+        case "$path" in
+            tests/regression/*.input|tests/regression/*.expect)
+                if file_changed_non_whitespace "$path"; then
+                    return 0
+                fi
+                ;;
+        esac
+    done
     return 1
 }
 
 # --- Heuristic 1: in-scope header without unit update ---
 for path in $NAME_ONLY; do
     case "$path" in
-        include/*.h|src/*.h)
+        include/*.h|src/*.h|tests/harness/*.h)
             ;;
         *)
             continue
@@ -256,7 +264,7 @@ for p in $PLAYER_PATHS; do
 done
 
 if [ "$player_changed" = "1" ]; then
-    if ! regression_touched; then
+    if ! snapshot_coverage_touched; then
         echo "test-gap: snapshot gap: player-visible source changed without tests/regression or SNAPSHOT_TESTS update" >&2
         FAIL=1
     fi
