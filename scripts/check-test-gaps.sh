@@ -58,6 +58,16 @@ MERGE_BASE=$(git merge-base "$BASE" HEAD 2>/dev/null) || {
     echo "test-gap: error: no merge base between $BASE and HEAD (fetch full history or use a related base ref)" >&2
     exit 1
 }
+BASE_COVERAGE_MODULES=$(git show "${MERGE_BASE}:Makefile" 2>/dev/null \
+    | sed -n '/^COVERAGE_MODULES =/,/^$/p' \
+    | sed '1s/^COVERAGE_MODULES = //' \
+    | tr '\t\\' '  ' \
+    | tr ' ' '\n' \
+    | grep -v '^$' \
+    | sort \
+    | tr '\n' ' ')
+COVERAGE_MODULES_ALL=$(printf '%s\n%s\n' "$BASE_COVERAGE_MODULES" "$COVERAGE_MODULES" \
+    | tr ' ' '\n' | sort -u | grep -v '^$' | tr '\n' ' ')
 DIFF_RANGE="${MERGE_BASE}...HEAD"
 COMMITTED=$(git diff --name-only "$DIFF_RANGE" 2>/dev/null || true)
 UNCOMMITTED=$(git diff --name-only HEAD 2>/dev/null || true)
@@ -205,6 +215,16 @@ fi
 module_in_coverage() {
     mod="$1"
     for m in $COVERAGE_MODULES; do
+        if [ "$m" = "$mod" ]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+module_in_coverage_scope() {
+    mod="$1"
+    for m in $COVERAGE_MODULES_ALL; do
         if [ "$m" = "$mod" ]; then
             return 0
         fi
@@ -416,7 +436,7 @@ for path in $NAME_ONLY; do
         continue
     fi
     mod=$(module_from_header "$path")
-    if ! module_in_coverage "$mod"; then
+    if ! module_in_coverage_scope "$mod"; then
         continue
     fi
     units=$(unit_files_for_module "$mod")
@@ -469,7 +489,7 @@ check_coverage_source_unit_gap() {
     FAIL=1
 }
 
-for mod in $COVERAGE_MODULES; do
+for mod in $COVERAGE_MODULES_ALL; do
     check_coverage_source_unit_gap "$(src_path_for_module "$mod")" "$mod"
 done
 
