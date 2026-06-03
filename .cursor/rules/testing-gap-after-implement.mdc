@@ -20,6 +20,7 @@ After **behavioral** implementation and `make test` / `make test-run` / `make te
 - Docs/tooling-only: no gameplay/test diff vs `main` (script exits 0)
 - User explicitly skips
 - Branch diff unchanged since a completed test-gap pass this session
+
 ## Workflow order
 
 ```text

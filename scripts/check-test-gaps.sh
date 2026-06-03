@@ -1,6 +1,7 @@
 #!/bin/sh
 # Compare branch diff vs base for missing unit/snapshot test updates.
 # Module lists: COVERAGE_MODULES and UNIT_GAMEPLAY_SRC from Makefile.
+# Harness paths: HARNESS_SRC line (tests/harness/*.c).
 # Unit suites: tests/unit/unit_*.c that #include "<mod>.h" (see tests/unit/module-map overrides).
 
 set -e
@@ -23,24 +24,40 @@ fi
 read_makefile_lists() {
     mf="$ROOT/Makefile"
     COVERAGE_MODULES=$(sed -n 's/^COVERAGE_MODULES = //p' "$mf" | head -1)
-    PLAYER_PATHS=$(sed -n '/^UNIT_GAMEPLAY_SRC =/,/^UNIT_CORE_SRC =/p' "$mf" \
+    gameplay=$(sed -n '/^UNIT_GAMEPLAY_SRC =/,/^UNIT_CORE_SRC =/p' "$mf" \
         | grep -oE 'src/[a-zA-Z0-9_]+\.c|tests/harness/[a-zA-Z0-9_]+\.c' \
-        | sort -u \
-        | tr '\n' ' ')
+        | sort -u)
+    harness=$(sed -n 's/^HARNESS_SRC = //p' "$mf" \
+        | grep -oE '[a-zA-Z0-9_]+\.c' \
+        | sed 's/^/tests\/harness\//' \
+        | sort -u)
+    HARNESS_SRC_PATHS=$(echo "$harness" | tr '\n' ' ')
+    PLAYER_PATHS=$(printf '%s\n%s\n' "$gameplay" "$harness" | sort -u | grep -v '^$' | tr '\n' ' ')
 }
 
 read_makefile_lists
 cd "$ROOT"
 
-DIFF_RANGE="${BASE}...HEAD"
-NAME_ONLY=$(git diff --name-only "$BASE" 2>/dev/null || true)
+MERGE_BASE=$(git merge-base "$BASE" HEAD 2>/dev/null || echo "$BASE")
+DIFF_RANGE="${MERGE_BASE}...HEAD"
 COMMITTED=$(git diff --name-only "$DIFF_RANGE" 2>/dev/null || true)
-NAME_ONLY=$(printf '%s\n%s' "$NAME_ONLY" "$COMMITTED" | sort -u | grep -v '^$' || true)
+UNCOMMITTED=$(git diff --name-only HEAD 2>/dev/null || true)
+NAME_ONLY=$(printf '%s\n%s' "$COMMITTED" "$UNCOMMITTED" | sort -u | grep -v '^$' || true)
 
 if [ -z "$NAME_ONLY" ]; then
     echo "test-gap: pass (no diff vs $BASE)"
     exit 0
 fi
+
+makefile_touches_snapshot_tests() {
+    if git diff "$DIFF_RANGE" -- Makefile 2>/dev/null | grep -q 'SNAPSHOT_TESTS'; then
+        return 0
+    fi
+    if git diff HEAD -- Makefile 2>/dev/null | grep -q 'SNAPSHOT_TESTS'; then
+        return 0
+    fi
+    return 1
+}
 
 needs_check=0
 for path in $NAME_ONLY; do
@@ -50,11 +67,7 @@ for path in $NAME_ONLY; do
             break
             ;;
         Makefile)
-            if git diff "$BASE" -- Makefile 2>/dev/null | grep -q 'SNAPSHOT_TESTS'; then
-                needs_check=1
-                break
-            fi
-            if git diff "$DIFF_RANGE" -- Makefile 2>/dev/null | grep -q 'SNAPSHOT_TESTS'; then
+            if makefile_touches_snapshot_tests; then
                 needs_check=1
                 break
             fi
@@ -79,10 +92,13 @@ module_in_coverage() {
 
 src_path_for_module() {
     mod="$1"
-    if [ "$mod" = "testharn" ]; then
-        echo "tests/harness/testharn.c"
-        return 0
-    fi
+    for p in $HARNESS_SRC_PATHS; do
+        base=$(basename "$p" .c)
+        if [ "$base" = "$mod" ]; then
+            echo "$p"
+            return 0
+        fi
+    done
     echo "src/${mod}.c"
 }
 
@@ -92,10 +108,21 @@ module_from_header() {
 
 file_changed_non_whitespace() {
     path="$1"
-    if git diff -w "$BASE" -- "$path" 2>/dev/null | grep -q '^[+-][^+-]'; then
+    if git diff -w "$DIFF_RANGE" -- "$path" 2>/dev/null | grep -q '^[+-][^+-]'; then
         return 0
     fi
-    if git diff -w "$DIFF_RANGE" -- "$path" 2>/dev/null | grep -q '^[+-][^+-]'; then
+    if git diff -w HEAD -- "$path" 2>/dev/null | grep -q '^[+-][^+-]'; then
+        return 0
+    fi
+    return 1
+}
+
+path_added_in_diff() {
+    path="$1"
+    if git diff "$DIFF_RANGE" --diff-filter=A -- "$path" 2>/dev/null | grep -q .; then
+        return 0
+    fi
+    if git diff HEAD --diff-filter=A -- "$path" 2>/dev/null | grep -q .; then
         return 0
     fi
     return 1
@@ -147,10 +174,7 @@ unit_touched_for_module() {
 regression_touched() {
     echo "$NAME_ONLY" | grep -q '^tests/regression/' && return 0
     if echo "$NAME_ONLY" | grep -qx 'Makefile'; then
-        if git diff "$BASE" -- Makefile 2>/dev/null | grep -q 'SNAPSHOT_TESTS'; then
-            return 0
-        fi
-        if git diff "$DIFF_RANGE" -- Makefile 2>/dev/null | grep -q 'SNAPSHOT_TESTS'; then
+        if makefile_touches_snapshot_tests; then
             return 0
         fi
     fi
@@ -207,7 +231,7 @@ for mod in $COVERAGE_MODULES; do
     FAIL=1
 done
 
-# --- Heuristic 3: UNIT_GAMEPLAY_SRC paths without snapshot touch ---
+# --- Heuristic 3: UNIT_GAMEPLAY_SRC + HARNESS_SRC paths without snapshot touch ---
 player_changed=0
 for p in $PLAYER_PATHS; do
     if echo "$NAME_ONLY" | grep -qx "$p"; then
@@ -234,10 +258,8 @@ for path in $NAME_ONLY; do
             continue
             ;;
     esac
-    if ! git diff "$BASE" --diff-filter=A -- "$path" 2>/dev/null | grep -q .; then
-        if ! git diff "$DIFF_RANGE" --diff-filter=A -- "$path" 2>/dev/null | grep -q .; then
-            continue
-        fi
+    if ! path_added_in_diff "$path"; then
+        continue
     fi
     name=$(basename "$path" .input)
     if ! grep -q "$name" "$ROOT/Makefile" 2>/dev/null; then

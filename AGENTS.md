@@ -80,18 +80,6 @@ See [Testing expectations](#testing-expectations) and [`docs/testing.md`](docs/t
 
 ### PR expectations
 
-#### Comment pass
-
-After behavioral implementation and tests pass, delegate a **code-commenter** pass on translation units touched by the branch diff (vs `main`) before opening a draft PR.
-
-- Rule: [`.cursor/rules/code-commenter-after-implement.mdc`](.cursor/rules/code-commenter-after-implement.mdc)
-- Subagent (judgement): [`.cursor/agents/code-commenter.md`](.cursor/agents/code-commenter.md)
-- Skill (procedure): [`.cursor/skills/code-commenter/SKILL.md`](.cursor/skills/code-commenter/SKILL.md)
-
-Order (with documentation pass): `implement → make test (and related targets) → test-gap pass → code-commenter pass (if src/ or include/ touched) → documentation pass → draft PR`.
-
-Skip when the change is docs/tooling-only with no `src/` or `include/` edits, the user opts out, or the branch diff vs `main` is unchanged since a code-commenter pass completed this session (re-run after commits that change the diff). Comment-only edits in that pass; do not change executable behavior.
-
 #### Testing pass
 
 After behavioral implementation and `make test` / `make test-run` / `make test-unit` (or `make test-all`), run a **test-gap** audit before the code-commenter and documentation passes.
@@ -107,6 +95,16 @@ Run `sh scripts/check-test-gaps.sh origin/main` (exit 0 required locally before 
 Order: `implement → make test (and related targets) → test-gap pass → code-commenter pass (if src/ or include/ touched) → documentation pass → draft PR`.
 
 Skip when the script passes with no gameplay/test diff, the user opts out, or the branch diff is unchanged since a completed test-gap pass this session.
+
+#### Comment pass
+
+After behavioral implementation, `make test*` targets, and the test-gap pass, delegate a **code-commenter** pass on translation units touched by the branch diff (vs `main`) before the documentation pass and draft PR.
+
+- Rule: [`.cursor/rules/code-commenter-after-implement.mdc`](.cursor/rules/code-commenter-after-implement.mdc)
+- Subagent (judgement): [`.cursor/agents/code-commenter.md`](.cursor/agents/code-commenter.md)
+- Skill (procedure): [`.cursor/skills/code-commenter/SKILL.md`](.cursor/skills/code-commenter/SKILL.md)
+
+Skip when the change is docs/tooling-only with no `src/` or `include/` edits, the user opts out, or the branch diff vs `main` is unchanged since a code-commenter pass completed this session (re-run after commits that change the diff). Comment-only edits in that pass; do not change executable behavior.
 
 #### Documentation pass
 

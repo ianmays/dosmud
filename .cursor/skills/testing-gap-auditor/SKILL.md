@@ -2,9 +2,8 @@
 name: testing-gap-auditor
 description: >-
   Audit branch diffs for missing unit or snapshot tests before draft PR.
-  Run scripts/check-test-gaps.sh, interpret coverage, and add tests or
-  Use after make test* on gameplay branches or when
-  CI test-gap step fails.
+  Run scripts/check-test-gaps.sh, interpret coverage, and add or update tests.
+  Use after make test* on gameplay branches or when informative CI logs gaps.
 ---
 
 # Testing gap auditor

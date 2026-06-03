@@ -441,6 +441,8 @@ WSL cross-compile path emits a native Windows console `dosmud.exe` via `make bui
 
 ### [#72](https://github.com/ianmays/dosmud/issues/72) - Sub-agents
 
+Done ✅ — [PR #166](https://github.com/ianmays/dosmud/pull/166).
+
 ### [#82](https://github.com/ianmays/dosmud/issues/82) - Compile performance
 
 Done ✅.

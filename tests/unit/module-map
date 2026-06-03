@@ -2,6 +2,7 @@
 #
 # Default: any tests/unit/unit_*.c that #include "<module>.h" counts as the suite
 # for that module (see COVERAGE_MODULES in the Makefile).
+# Harness .c paths (testharn, th_world) come from Makefile HARNESS_SRC, not module-map.
 #
 # Add a line only when that grep is not enough:
 #   <module>: <unit_file.c> [more unit files...]
