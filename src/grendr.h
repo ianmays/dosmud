@@ -1,13 +1,14 @@
 #ifndef GRENDR_H
 #define GRENDR_H
 
+#include "gout.h"
+
 /*
  * Render/UI declarations. grendr.* stays FAT 8+3 friendly and is the only
  * gameplay-adjacent code allowed to print to stdout.
  */
 
 struct GameState;
-struct GameOutput;
 
 #ifdef TEST_MODE
 /* Suppress render printf during unit tests (snapshots leave this off). */
@@ -17,7 +18,8 @@ void render_set_suppress(int on);
 void game_print_location_art(int room_id);
 void render_exploration_map(const struct GameState *game);
 void game_render(const struct GameState *game);
-void game_render_output(const struct GameState *game, const struct GameOutput *out);
+/* Drain per-step GameEventQueue; generic kinds plus GAME_EVENT_LEGACY adapter. */
+void game_render_output(const struct GameState *game, const GameEventQueue *out);
 void game_print_help(int topic);
 
 void render_bandit_encounter_open(void);

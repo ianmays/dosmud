@@ -519,6 +519,8 @@ Direct follow-up migration chain (separate from replay/logging):
 Adjacent but separate follow-up track:
 - [#156](https://github.com/ianmays/dosmud/issues/156) (replay/event log capability)
 
+Done ✅ ([#164](https://github.com/ianmays/dosmud/pull/164)).
+
 ### [#157](https://github.com/ianmays/dosmud/issues/157) - Command/navigation GameEvent migration
 
 Direct `#47` follow-up. Migrate remaining command/navigation output to generic event families while keeping visible output stable.

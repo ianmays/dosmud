@@ -11,7 +11,7 @@
 
 static int run_cmd(struct GameState *game, const char *line)
 {
-    struct GameOutput out;
+    GameEventQueue out;
     char buf[CFG_INPUT_MAX];
 
     gout_reset(&out);
@@ -72,20 +72,20 @@ TEST game_mode_setters(void)
 TEST game_describe_current_room_emits_look(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
 
     unit_game_fresh(&game, 33u);
     gout_reset(&out);
     game_describe_current_room(&game, &out);
     ASSERT_EQ(1, out.count);
-    ASSERT_EQ(GAME_OUT_ROOM_LOOK, out.events[0].kind);
+    ASSERT_EQ(GAME_EVENT_ROOM_LOOK, out.events[0].kind);
     PASS();
 }
 
 TEST game_describe_current_room_overflow_keeps_prior_event(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
     int i;
 
     unit_game_fresh(&game, 36u);
@@ -100,7 +100,8 @@ TEST game_describe_current_room_overflow_keeps_prior_event(void)
 
     ASSERT_EQ(CFG_GAME_OUT_MAX, out.count);
     ASSERT_EQ(1, out.overflowed);
-    ASSERT_EQ(GAME_OUT_MSG_WAIT, out.events[out.count - 1].kind);
+    ASSERT_EQ(GAME_EVENT_LEGACY, out.events[out.count - 1].kind);
+    ASSERT_EQ(GAME_OUT_MSG_WAIT, out.events[out.count - 1].legacy_kind);
     ASSERT_EQ(77, out.events[out.count - 1].room_id);
     ASSERT_EQ(ITEM_STICK, out.events[out.count - 1].room_item[0]);
     PASS();
@@ -144,7 +145,7 @@ TEST game_quiet_ticks(void)
     game.wanderer_active = 0;
     tick_before = game.tick;
     {
-        struct GameOutput out;
+        GameEventQueue out;
 
         gout_reset(&out);
         game_background_step(&game, &out);
@@ -162,7 +163,7 @@ TEST game_bandit_intimidate_success(void)
     unit_game_fresh(&game, 5u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     {
-        struct GameOutput out;
+        GameEventQueue out;
 
         gout_reset(&out);
         enemy_begin_encounter(&game, &out);
@@ -170,7 +171,7 @@ TEST game_bandit_intimidate_success(void)
     rolls[0] = CFG_TEST_INTIMIDATE_OK;
     game_roll_inject_begin(&game, rolls, 1);
     {
-        struct GameOutput out;
+        GameEventQueue out;
 
         gout_reset(&out);
         game_process_input(&game, line, &out);
@@ -214,7 +215,7 @@ TEST game_bandit_fight_reply(void)
     unit_game_fresh(&game, 10u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     {
-        struct GameOutput out;
+        GameEventQueue out;
 
         gout_reset(&out);
         enemy_begin_encounter(&game, &out);
@@ -234,7 +235,7 @@ TEST game_bandit_intimidate_fail(void)
     unit_game_fresh(&game, 11u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     {
-        struct GameOutput out;
+        GameEventQueue out;
 
         gout_reset(&out);
         enemy_begin_encounter(&game, &out);
@@ -242,7 +243,7 @@ TEST game_bandit_intimidate_fail(void)
     rolls[0] = CFG_TEST_INTIMIDATE_FAIL;
     game_roll_inject_begin(&game, rolls, 1);
     {
-        struct GameOutput out;
+        GameEventQueue out;
 
         gout_reset(&out);
         game_process_input(&game, line, &out);
@@ -413,7 +414,7 @@ TEST game_pass_time_wait_ticks(void)
 TEST game_wait_emits_output_record(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
     char line[] = "wait";
 
     unit_game_fresh(&game, 34u);
@@ -423,14 +424,15 @@ TEST game_wait_emits_output_record(void)
     gout_reset(&out);
     ASSERT_EQ(1, game_process_input(&game, line, &out));
     ASSERT_EQ(1, out.count);
-    ASSERT_EQ(GAME_OUT_MSG_WAIT, out.events[0].kind);
+    ASSERT_EQ(GAME_EVENT_LEGACY, out.events[0].kind);
+    ASSERT_EQ(GAME_OUT_MSG_WAIT, out.events[0].legacy_kind);
     PASS();
 }
 
 TEST game_move_emits_move_then_look(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
     char line[] = "move north";
 
     unit_game_fresh(&game, 35u);
@@ -440,8 +442,9 @@ TEST game_move_emits_move_then_look(void)
     gout_reset(&out);
     ASSERT_EQ(1, game_process_input(&game, line, &out));
     ASSERT_EQ(2, out.count);
-    ASSERT_EQ(GAME_OUT_MSG_MOVED, out.events[0].kind);
-    ASSERT_EQ(GAME_OUT_ROOM_LOOK, out.events[1].kind);
+    ASSERT_EQ(GAME_EVENT_MOVE, out.events[0].kind);
+    ASSERT_STR_EQ("north", out.events[0].text);
+    ASSERT_EQ(GAME_EVENT_ROOM_LOOK, out.events[1].kind);
     PASS();
 }
 

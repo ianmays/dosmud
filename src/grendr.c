@@ -1,5 +1,11 @@
 #include <stdio.h>
 #include <stdarg.h>
+
+/*
+ * grendr owns terminal presentation: it consumes GameEvent records from core
+ * and maps them to printf output, spacing tiers, and ASCII art.
+ */
+
 #include "grendr.h"
 #include "dialogue.h"
 #include "game.h"
@@ -475,323 +481,347 @@ void game_print_help(int topic)
     RENDER_PRINTF("%s\n", command_help_line(topic));
 }
 
-void game_render_output(const struct GameState *game, const struct GameOutput *out)
+/* Transitional adapter: GAME_EVENT_LEGACY events still dispatch by GAME_OUT_* kind. */
+static void render_legacy_output_event(const struct GameState *game,
+                                       const GameEvent *ev)
+{
+    switch (ev->legacy_kind) {
+    case GAME_OUT_ROOM_LOOK:
+        render_room_look_snapshot(game, ev->room_id, ev->room_item,
+            ev->arg1, ev->arg0, ev->arg2, ev->arg3);
+        break;
+    case GAME_OUT_MAP:
+        render_exploration_map(game);
+        break;
+    case GAME_OUT_HELP:
+        game_print_help(ev->arg0);
+        break;
+    case GAME_OUT_BANDIT_ENCOUNTER_OPEN:
+        render_bandit_encounter_open();
+        break;
+    case GAME_OUT_COMBAT_START:
+        render_combat_start(ev->arg0, ev->arg1);
+        break;
+    case GAME_OUT_COMBAT_ENEMY_STRIKE:
+        render_combat_enemy_strike(ev->arg0);
+        break;
+    case GAME_OUT_COMBAT_PLAYER_FALLEN:
+        render_combat_player_fallen();
+        break;
+    case GAME_OUT_COMBAT_STATUS_LINE:
+        render_combat_status_line(ev->arg0, ev->arg1);
+        break;
+    case GAME_OUT_COMBAT_PLAYER_HIT:
+        render_combat_player_hit(ev->arg0);
+        break;
+    case GAME_OUT_COMBAT_BRACED:
+        render_combat_braced();
+        break;
+    case GAME_OUT_COMBAT_NO_SALVE_BAG:
+        render_combat_no_salve_bag();
+        break;
+    case GAME_OUT_COMBAT_SALVE_IN_COMBAT:
+        render_combat_salve_in_combat(ev->arg0);
+        break;
+    case GAME_OUT_COMBAT_SALVE_FULL:
+        render_combat_salve_full();
+        break;
+    case GAME_OUT_COMBAT_INVALID_CHOICE:
+        render_combat_invalid_choice();
+        break;
+    case GAME_OUT_COMBAT_BANDIT_DEFEATED:
+        render_combat_bandit_defeated();
+        break;
+    case GAME_OUT_COMBAT_MENU:
+        render_combat_menu();
+        break;
+    case GAME_OUT_XP_GAINED:
+        render_xp_gained(ev->arg0);
+        break;
+    case GAME_OUT_LEVEL_UP:
+        render_level_up(ev->arg0, ev->arg1, ev->arg2, ev->arg3);
+        break;
+    case GAME_OUT_NEARBY_ITEM_NOTICE:
+        render_nearby_item_notice(ev->text);
+        break;
+    case GAME_OUT_ANIMAL_NOISE_LINE:
+        render_animal_noise_line(ev->text);
+        break;
+    case GAME_OUT_ATMOSPHERE_GUST:
+        render_atmosphere_gust();
+        break;
+    case GAME_OUT_ATMOSPHERE_RUSTLE:
+        render_atmosphere_rustle();
+        break;
+    case GAME_OUT_ATMOSPHERE_BERRY_DROP:
+        render_atmosphere_berry_drop();
+        break;
+    case GAME_OUT_ATMOSPHERE_CREAK:
+        render_atmosphere_creak();
+        break;
+    case GAME_OUT_ATMOSPHERE_WATER:
+        render_atmosphere_water();
+        break;
+    case GAME_OUT_ATMOSPHERE_REED_DROP:
+        render_atmosphere_reed_drop();
+        break;
+    case GAME_OUT_ATMOSPHERE_GRIT:
+        render_atmosphere_grit();
+        break;
+    case GAME_OUT_WANDERER_SCENE:
+        render_wanderer_scene();
+        break;
+    case GAME_OUT_WANDERER_REPLY:
+        render_wanderer_reply(ev->arg0);
+        break;
+    case GAME_OUT_FROG_DIALOGUE_INTRO:
+        render_frog_dialogue_intro();
+        break;
+    case GAME_OUT_FROG_DIALOGUE_BRANCH:
+        render_frog_dialogue_branch(ev->arg0);
+        break;
+    case GAME_OUT_MSG_BANDIT_WAITING_REPLY:
+        render_msg_bandit_waiting_reply();
+        break;
+    case GAME_OUT_MSG_BANDIT_WAITING_HANDOVER_PICK:
+        render_msg_bandit_waiting_handover_pick();
+        break;
+    case GAME_OUT_BANDIT_HANDOVER_PICK_PROMPT:
+        render_bandit_handover_pick_prompt();
+        break;
+    case GAME_OUT_MSG_BANDIT_GIVE_NOT_CARRYING:
+        render_msg_bandit_give_not_carrying();
+        break;
+    case GAME_OUT_MSG_GIVE_WRONG_CONTEXT:
+        render_msg_give_wrong_context();
+        break;
+    case GAME_OUT_MSG_UNKNOWN_COMMAND:
+        render_msg_unknown_command();
+        break;
+    case GAME_OUT_MSG_WAIT:
+        render_msg_wait();
+        break;
+    case GAME_OUT_MSG_CANNOT_MOVE:
+        render_msg_cannot_move(ev->text);
+        break;
+    case GAME_OUT_MSG_MOVED:
+        render_msg_moved(ev->text);
+        break;
+    case GAME_OUT_MSG_INSPECT_NOTHING:
+        render_msg_inspect_nothing();
+        break;
+    case GAME_OUT_MSG_INSPECT_WRONG_FOCUS:
+        render_msg_inspect_wrong_focus();
+        break;
+    case GAME_OUT_MSG_INSPECT_RUSTLE:
+        render_msg_inspect_rustle();
+        break;
+    case GAME_OUT_MSG_INSPECT_CREAK:
+        render_msg_inspect_creak();
+        break;
+    case GAME_OUT_MSG_INSPECT_WATER:
+        render_msg_inspect_water();
+        break;
+    case GAME_OUT_MSG_INSPECT_GRIT:
+        render_msg_inspect_grit();
+        break;
+    case GAME_OUT_MSG_BANDIT_BLOCKS_TALK:
+        render_msg_bandit_blocks_talk();
+        break;
+    case GAME_OUT_MSG_TRAVELER_WAITING:
+        render_msg_traveler_waiting();
+        break;
+    case GAME_OUT_MSG_WATCHMAN_TALK:
+        render_msg_watchman_talk();
+        break;
+    case GAME_OUT_MSG_HERBALIST_TALK:
+        render_msg_herbalist_talk();
+        break;
+    case GAME_OUT_MSG_ARCHIVIST_TALK:
+        render_msg_archivist_talk();
+        break;
+    case GAME_OUT_MSG_NOBODY_TALK:
+        render_msg_nobody_talk();
+        break;
+    case GAME_OUT_MSG_WATCHMAN_REPLY:
+        render_msg_watchman_reply(ev->arg0);
+        break;
+    case GAME_OUT_MSG_HERBALIST_REPLY:
+        render_msg_herbalist_reply(ev->arg0);
+        break;
+    case GAME_OUT_MSG_ARCHIVIST_REPLY:
+        render_msg_archivist_reply(ev->arg0);
+        break;
+    case GAME_OUT_MSG_HAND_OVER_ITEM:
+        render_msg_hand_over_item(ev->text);
+        break;
+    case GAME_OUT_MSG_BAG_EMPTY_BANDIT:
+        render_msg_bag_empty_bandit();
+        break;
+    case GAME_OUT_MSG_INTIMIDATE_SUCCESS:
+        render_msg_intimidate_success();
+        break;
+    case GAME_OUT_MSG_INTIMIDATE_FAIL:
+        render_msg_intimidate_fail();
+        break;
+    case GAME_OUT_MSG_PICK_123:
+        render_msg_pick_123();
+        break;
+    case GAME_OUT_MSG_NOBODY_WAITING_REPLY:
+        render_msg_nobody_waiting_reply();
+        break;
+    case GAME_OUT_INV_NO_BODY_LOOT:
+        render_inv_no_body_loot();
+        break;
+    case GAME_OUT_INV_BODY_STRIPPED:
+        render_inv_body_stripped();
+        break;
+    case GAME_OUT_INV_BAG_FULL_DROP:
+        render_inv_bag_full_drop();
+        break;
+    case GAME_OUT_INV_LOOT:
+        render_inv_loot(ev->text);
+        break;
+    case GAME_OUT_INV_NO_RUMMAGE_COMBAT:
+        render_inv_no_rummage_combat();
+        break;
+    case GAME_OUT_INV_TAKE_NOTHING:
+        render_inv_take_nothing();
+        break;
+    case GAME_OUT_INV_CANNOT_TAKE_HERE:
+        render_inv_cannot_take_here();
+        break;
+    case GAME_OUT_INV_BAG_FULL:
+        render_inv_bag_full(ev->arg0);
+        break;
+    case GAME_OUT_INV_PICKUP:
+        render_inv_pickup(ev->text);
+        break;
+    case GAME_OUT_INV_NO_DROP_COMBAT:
+        render_inv_no_drop_combat();
+        break;
+    case GAME_OUT_INV_NOT_CARRYING:
+        render_inv_not_carrying(ev->text);
+        break;
+    case GAME_OUT_INV_GROUND_FULL:
+        render_inv_ground_full(ev->arg0);
+        break;
+    case GAME_OUT_INV_DROP:
+        render_inv_drop(ev->text);
+        break;
+    case GAME_OUT_INV_BAG:
+        render_inv_bag(game);
+        break;
+    case GAME_OUT_INV_NO_EAT_COMBAT:
+        render_inv_no_eat_combat();
+        break;
+    case GAME_OUT_INV_CANNOT_EAT:
+        render_inv_cannot_eat(ev->text);
+        break;
+    case GAME_OUT_INV_EAT_BERRY_HEALED:
+        render_inv_eat_berry_healed(ev->arg0);
+        break;
+    case GAME_OUT_INV_EAT_BERRY_FULL:
+        render_inv_eat_berry_full();
+        break;
+    case GAME_OUT_INV_EAT_FISH_HEALED:
+        render_inv_eat_fish_healed(ev->arg0);
+        break;
+    case GAME_OUT_INV_EAT_FISH_FULL:
+        render_inv_eat_fish_full();
+        break;
+    case GAME_OUT_INV_USE_REPLY_COMBAT:
+        render_inv_use_reply_combat();
+        break;
+    case GAME_OUT_INV_USE_TORCH:
+        render_inv_use_torch();
+        break;
+    case GAME_OUT_INV_USE_SALVE:
+        render_inv_use_salve(ev->arg0);
+        break;
+    case GAME_OUT_INV_USE_SALVE_FULL:
+        render_inv_use_salve_full();
+        break;
+    case GAME_OUT_INV_USE_SPEAR:
+        render_inv_use_spear();
+        break;
+    case GAME_OUT_INV_NO_USE:
+        render_inv_no_use(ev->text);
+        break;
+    case GAME_OUT_INV_NO_CRAFT_COMBAT:
+        render_inv_no_craft_combat();
+        break;
+    case GAME_OUT_INV_NEED_TORCH:
+        render_inv_need_torch();
+        break;
+    case GAME_OUT_INV_CRAFT_TORCH:
+        render_inv_craft_torch();
+        break;
+    case GAME_OUT_INV_NEED_SALVE:
+        render_inv_need_salve();
+        break;
+    case GAME_OUT_INV_CRAFT_SALVE:
+        render_inv_craft_salve();
+        break;
+    case GAME_OUT_INV_NEED_SPEAR:
+        render_inv_need_spear();
+        break;
+    case GAME_OUT_INV_CRAFT_SPEAR:
+        render_inv_craft_spear();
+        break;
+    case GAME_OUT_INV_CRAFT_UNKNOWN:
+        render_inv_craft_unknown();
+        break;
+    case GAME_OUT_INV_ALREADY_WIELDING:
+        render_inv_already_wielding(ev->text);
+        break;
+    case GAME_OUT_INV_WIELD_NOT_WEAPON:
+        render_inv_wield_not_weapon();
+        break;
+    case GAME_OUT_INV_WIELD_STOW_FAIL:
+        render_inv_wield_stow_fail();
+        break;
+    case GAME_OUT_INV_WIELD:
+        render_inv_wield(ev->text);
+        break;
+    case GAME_OUT_INV_UNWIELD_EMPTY:
+        render_inv_unwield_empty();
+        break;
+    case GAME_OUT_INV_UNWIELD:
+        render_inv_unwield();
+        break;
+    case GAME_OUT_INV_UNWIELD_CANNOT:
+        render_inv_unwield_cannot();
+        break;
+    case GAME_OUT_INV_UNWIELD_GROUND:
+        render_inv_unwield_ground(ev->text);
+        break;
+    default:
+        break;
+    }
+}
+
+/*
+ * Drain the per-step event queue in enqueue order. Core must not print; this is
+ * the DOSMUD text adapter for both generic kinds and legacy-wrapped events.
+ */
+void game_render_output(const struct GameState *game, const GameEventQueue *out)
 {
     int i;
-    const struct GameOutEvent *ev;
+    const GameEvent *ev;
 
     for (i = 0; i < out->count; ++i) {
         ev = &out->events[i];
         switch (ev->kind) {
-        case GAME_OUT_ROOM_LOOK:
+        case GAME_EVENT_ROOM_LOOK:
             render_room_look_snapshot(game, ev->room_id, ev->room_item,
                 ev->arg1, ev->arg0, ev->arg2, ev->arg3);
             break;
-        case GAME_OUT_MAP:
-            render_exploration_map(game);
-            break;
-        case GAME_OUT_HELP:
-            game_print_help(ev->arg0);
-            break;
-        case GAME_OUT_BANDIT_ENCOUNTER_OPEN:
-            render_bandit_encounter_open();
-            break;
-        case GAME_OUT_COMBAT_START:
-            render_combat_start(ev->arg0, ev->arg1);
-            break;
-        case GAME_OUT_COMBAT_ENEMY_STRIKE:
-            render_combat_enemy_strike(ev->arg0);
-            break;
-        case GAME_OUT_COMBAT_PLAYER_FALLEN:
-            render_combat_player_fallen();
-            break;
-        case GAME_OUT_COMBAT_STATUS_LINE:
-            render_combat_status_line(ev->arg0, ev->arg1);
-            break;
-        case GAME_OUT_COMBAT_PLAYER_HIT:
-            render_combat_player_hit(ev->arg0);
-            break;
-        case GAME_OUT_COMBAT_BRACED:
-            render_combat_braced();
-            break;
-        case GAME_OUT_COMBAT_NO_SALVE_BAG:
-            render_combat_no_salve_bag();
-            break;
-        case GAME_OUT_COMBAT_SALVE_IN_COMBAT:
-            render_combat_salve_in_combat(ev->arg0);
-            break;
-        case GAME_OUT_COMBAT_SALVE_FULL:
-            render_combat_salve_full();
-            break;
-        case GAME_OUT_COMBAT_INVALID_CHOICE:
-            render_combat_invalid_choice();
-            break;
-        case GAME_OUT_COMBAT_BANDIT_DEFEATED:
-            render_combat_bandit_defeated();
-            break;
-        case GAME_OUT_COMBAT_MENU:
-            render_combat_menu();
-            break;
-        case GAME_OUT_XP_GAINED:
-            render_xp_gained(ev->arg0);
-            break;
-        case GAME_OUT_LEVEL_UP:
-            render_level_up(ev->arg0, ev->arg1, ev->arg2, ev->arg3);
-            break;
-        case GAME_OUT_NEARBY_ITEM_NOTICE:
-            render_nearby_item_notice(ev->text);
-            break;
-        case GAME_OUT_ANIMAL_NOISE_LINE:
-            render_animal_noise_line(ev->text);
-            break;
-        case GAME_OUT_ATMOSPHERE_GUST:
-            render_atmosphere_gust();
-            break;
-        case GAME_OUT_ATMOSPHERE_RUSTLE:
-            render_atmosphere_rustle();
-            break;
-        case GAME_OUT_ATMOSPHERE_BERRY_DROP:
-            render_atmosphere_berry_drop();
-            break;
-        case GAME_OUT_ATMOSPHERE_CREAK:
-            render_atmosphere_creak();
-            break;
-        case GAME_OUT_ATMOSPHERE_WATER:
-            render_atmosphere_water();
-            break;
-        case GAME_OUT_ATMOSPHERE_REED_DROP:
-            render_atmosphere_reed_drop();
-            break;
-        case GAME_OUT_ATMOSPHERE_GRIT:
-            render_atmosphere_grit();
-            break;
-        case GAME_OUT_WANDERER_SCENE:
-            render_wanderer_scene();
-            break;
-        case GAME_OUT_WANDERER_REPLY:
-            render_wanderer_reply(ev->arg0);
-            break;
-        case GAME_OUT_FROG_DIALOGUE_INTRO:
-            render_frog_dialogue_intro();
-            break;
-        case GAME_OUT_FROG_DIALOGUE_BRANCH:
-            render_frog_dialogue_branch(ev->arg0);
-            break;
-        case GAME_OUT_MSG_BANDIT_WAITING_REPLY:
-            render_msg_bandit_waiting_reply();
-            break;
-        case GAME_OUT_MSG_BANDIT_WAITING_HANDOVER_PICK:
-            render_msg_bandit_waiting_handover_pick();
-            break;
-        case GAME_OUT_BANDIT_HANDOVER_PICK_PROMPT:
-            render_bandit_handover_pick_prompt();
-            break;
-        case GAME_OUT_MSG_BANDIT_GIVE_NOT_CARRYING:
-            render_msg_bandit_give_not_carrying();
-            break;
-        case GAME_OUT_MSG_GIVE_WRONG_CONTEXT:
-            render_msg_give_wrong_context();
-            break;
-        case GAME_OUT_MSG_UNKNOWN_COMMAND:
-            render_msg_unknown_command();
-            break;
-        case GAME_OUT_MSG_WAIT:
-            render_msg_wait();
-            break;
-        case GAME_OUT_MSG_CANNOT_MOVE:
-            render_msg_cannot_move(ev->text);
-            break;
-        case GAME_OUT_MSG_MOVED:
+        case GAME_EVENT_MOVE:
             render_msg_moved(ev->text);
             break;
-        case GAME_OUT_MSG_INSPECT_NOTHING:
-            render_msg_inspect_nothing();
-            break;
-        case GAME_OUT_MSG_INSPECT_WRONG_FOCUS:
-            render_msg_inspect_wrong_focus();
-            break;
-        case GAME_OUT_MSG_INSPECT_RUSTLE:
-            render_msg_inspect_rustle();
-            break;
-        case GAME_OUT_MSG_INSPECT_CREAK:
-            render_msg_inspect_creak();
-            break;
-        case GAME_OUT_MSG_INSPECT_WATER:
-            render_msg_inspect_water();
-            break;
-        case GAME_OUT_MSG_INSPECT_GRIT:
-            render_msg_inspect_grit();
-            break;
-        case GAME_OUT_MSG_BANDIT_BLOCKS_TALK:
-            render_msg_bandit_blocks_talk();
-            break;
-        case GAME_OUT_MSG_TRAVELER_WAITING:
-            render_msg_traveler_waiting();
-            break;
-        case GAME_OUT_MSG_WATCHMAN_TALK:
-            render_msg_watchman_talk();
-            break;
-        case GAME_OUT_MSG_HERBALIST_TALK:
-            render_msg_herbalist_talk();
-            break;
-        case GAME_OUT_MSG_ARCHIVIST_TALK:
-            render_msg_archivist_talk();
-            break;
-        case GAME_OUT_MSG_NOBODY_TALK:
-            render_msg_nobody_talk();
-            break;
-        case GAME_OUT_MSG_WATCHMAN_REPLY:
-            render_msg_watchman_reply(ev->arg0);
-            break;
-        case GAME_OUT_MSG_HERBALIST_REPLY:
-            render_msg_herbalist_reply(ev->arg0);
-            break;
-        case GAME_OUT_MSG_ARCHIVIST_REPLY:
-            render_msg_archivist_reply(ev->arg0);
-            break;
-        case GAME_OUT_MSG_HAND_OVER_ITEM:
-            render_msg_hand_over_item(ev->text);
-            break;
-        case GAME_OUT_MSG_BAG_EMPTY_BANDIT:
-            render_msg_bag_empty_bandit();
-            break;
-        case GAME_OUT_MSG_INTIMIDATE_SUCCESS:
-            render_msg_intimidate_success();
-            break;
-        case GAME_OUT_MSG_INTIMIDATE_FAIL:
-            render_msg_intimidate_fail();
-            break;
-        case GAME_OUT_MSG_PICK_123:
-            render_msg_pick_123();
-            break;
-        case GAME_OUT_MSG_NOBODY_WAITING_REPLY:
-            render_msg_nobody_waiting_reply();
-            break;
-        case GAME_OUT_INV_NO_BODY_LOOT:
-            render_inv_no_body_loot();
-            break;
-        case GAME_OUT_INV_BODY_STRIPPED:
-            render_inv_body_stripped();
-            break;
-        case GAME_OUT_INV_BAG_FULL_DROP:
-            render_inv_bag_full_drop();
-            break;
-        case GAME_OUT_INV_LOOT:
-            render_inv_loot(ev->text);
-            break;
-        case GAME_OUT_INV_NO_RUMMAGE_COMBAT:
-            render_inv_no_rummage_combat();
-            break;
-        case GAME_OUT_INV_TAKE_NOTHING:
-            render_inv_take_nothing();
-            break;
-        case GAME_OUT_INV_CANNOT_TAKE_HERE:
-            render_inv_cannot_take_here();
-            break;
-        case GAME_OUT_INV_BAG_FULL:
-            render_inv_bag_full(ev->arg0);
-            break;
-        case GAME_OUT_INV_PICKUP:
-            render_inv_pickup(ev->text);
-            break;
-        case GAME_OUT_INV_NO_DROP_COMBAT:
-            render_inv_no_drop_combat();
-            break;
-        case GAME_OUT_INV_NOT_CARRYING:
-            render_inv_not_carrying(ev->text);
-            break;
-        case GAME_OUT_INV_GROUND_FULL:
-            render_inv_ground_full(ev->arg0);
-            break;
-        case GAME_OUT_INV_DROP:
-            render_inv_drop(ev->text);
-            break;
-        case GAME_OUT_INV_BAG:
-            render_inv_bag(game);
-            break;
-        case GAME_OUT_INV_NO_EAT_COMBAT:
-            render_inv_no_eat_combat();
-            break;
-        case GAME_OUT_INV_CANNOT_EAT:
-            render_inv_cannot_eat(ev->text);
-            break;
-        case GAME_OUT_INV_EAT_BERRY_HEALED:
-            render_inv_eat_berry_healed(ev->arg0);
-            break;
-        case GAME_OUT_INV_EAT_BERRY_FULL:
-            render_inv_eat_berry_full();
-            break;
-        case GAME_OUT_INV_EAT_FISH_HEALED:
-            render_inv_eat_fish_healed(ev->arg0);
-            break;
-        case GAME_OUT_INV_EAT_FISH_FULL:
-            render_inv_eat_fish_full();
-            break;
-        case GAME_OUT_INV_USE_REPLY_COMBAT:
-            render_inv_use_reply_combat();
-            break;
-        case GAME_OUT_INV_USE_TORCH:
-            render_inv_use_torch();
-            break;
-        case GAME_OUT_INV_USE_SALVE:
-            render_inv_use_salve(ev->arg0);
-            break;
-        case GAME_OUT_INV_USE_SALVE_FULL:
-            render_inv_use_salve_full();
-            break;
-        case GAME_OUT_INV_USE_SPEAR:
-            render_inv_use_spear();
-            break;
-        case GAME_OUT_INV_NO_USE:
-            render_inv_no_use(ev->text);
-            break;
-        case GAME_OUT_INV_NO_CRAFT_COMBAT:
-            render_inv_no_craft_combat();
-            break;
-        case GAME_OUT_INV_NEED_TORCH:
-            render_inv_need_torch();
-            break;
-        case GAME_OUT_INV_CRAFT_TORCH:
-            render_inv_craft_torch();
-            break;
-        case GAME_OUT_INV_NEED_SALVE:
-            render_inv_need_salve();
-            break;
-        case GAME_OUT_INV_CRAFT_SALVE:
-            render_inv_craft_salve();
-            break;
-        case GAME_OUT_INV_NEED_SPEAR:
-            render_inv_need_spear();
-            break;
-        case GAME_OUT_INV_CRAFT_SPEAR:
-            render_inv_craft_spear();
-            break;
-        case GAME_OUT_INV_CRAFT_UNKNOWN:
-            render_inv_craft_unknown();
-            break;
-        case GAME_OUT_INV_ALREADY_WIELDING:
-            render_inv_already_wielding(ev->text);
-            break;
-        case GAME_OUT_INV_WIELD_NOT_WEAPON:
-            render_inv_wield_not_weapon();
-            break;
-        case GAME_OUT_INV_WIELD_STOW_FAIL:
-            render_inv_wield_stow_fail();
-            break;
-        case GAME_OUT_INV_WIELD:
-            render_inv_wield(ev->text);
-            break;
-        case GAME_OUT_INV_UNWIELD_EMPTY:
-            render_inv_unwield_empty();
-            break;
-        case GAME_OUT_INV_UNWIELD:
-            render_inv_unwield();
-            break;
-        case GAME_OUT_INV_UNWIELD_CANNOT:
-            render_inv_unwield_cannot();
-            break;
-        case GAME_OUT_INV_UNWIELD_GROUND:
-            render_inv_unwield_ground(ev->text);
+        case GAME_EVENT_LEGACY:
+            render_legacy_output_event(game, ev);
             break;
         default:
             break;
