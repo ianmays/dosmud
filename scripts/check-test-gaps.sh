@@ -1,7 +1,6 @@
 #!/bin/sh
 # Compare branch diff vs base for missing unit/snapshot test updates.
-# Module lists: COVERAGE_MODULES and UNIT_GAMEPLAY_SRC from Makefile.
-# Harness paths: HARNESS_SRC line (tests/harness/*.c).
+# Module lists: COVERAGE_MODULES, UNIT_GAMEPLAY_SRC, PLAT_SRC, HARNESS_SRC from Makefile.
 # Unit suites: tests/unit/unit_*.c that #include "<mod>.h" (see tests/unit/module-map overrides).
 
 set -e
@@ -27,12 +26,13 @@ read_makefile_lists() {
     gameplay=$(sed -n '/^UNIT_GAMEPLAY_SRC =/,/^UNIT_CORE_SRC =/p' "$mf" \
         | grep -oE 'src/[a-zA-Z0-9_]+\.c|tests/harness/[a-zA-Z0-9_]+\.c' \
         | sort -u)
+    plat=$(grep '^PLAT_SRC = ' "$mf" | sed 's/^PLAT_SRC = //' | tr ' ' '\n' | sort -u)
     harness=$(sed -n 's/^HARNESS_SRC = //p' "$mf" \
         | grep -oE '[a-zA-Z0-9_]+\.c' \
         | sed 's/^/tests\/harness\//' \
         | sort -u)
     HARNESS_SRC_PATHS=$(echo "$harness" | tr '\n' ' ')
-    PLAYER_PATHS=$(printf '%s\n%s\n' "$gameplay" "$harness" | sort -u | grep -v '^$' | tr '\n' ' ')
+    PLAYER_PATHS=$(printf '%s\n%s\n%s\n' "$gameplay" "$plat" "$harness" | sort -u | grep -v '^$' | tr '\n' ' ')
 }
 
 read_makefile_lists
@@ -204,14 +204,11 @@ for path in $NAME_ONLY; do
     if unit_touched_for_module "$mod"; then
         continue
     fi
-    if regression_touched; then
-        continue
-    fi
     echo "test-gap: unit gap: $path changed without matching unit test update ($units)" >&2
     FAIL=1
 done
 
-# --- Heuristic 2: coverage-module .c without unit or regression ---
+# --- Heuristic 2: coverage-module .c without unit update ---
 for mod in $COVERAGE_MODULES; do
     src=$(src_path_for_module "$mod")
     if ! echo "$NAME_ONLY" | grep -qx "$src"; then
@@ -220,14 +217,14 @@ for mod in $COVERAGE_MODULES; do
     if ! file_changed_non_whitespace "$src"; then
         continue
     fi
+    units=$(unit_files_for_module "$mod")
+    if [ -z "$units" ]; then
+        continue
+    fi
     if unit_touched_for_module "$mod"; then
         continue
     fi
-    if regression_touched; then
-        continue
-    fi
-    units=$(unit_files_for_module "$mod")
-    echo "test-gap: unit gap: $src changed without tests/unit or tests/regression update (expect $units)" >&2
+    echo "test-gap: unit gap: $src changed without tests/unit update (expect $units)" >&2
     FAIL=1
 done
 

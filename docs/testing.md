@@ -74,7 +74,7 @@ git fetch origin main
 sh scripts/check-test-gaps.sh origin/main
 ```
 
-Pull requests to `main` run the same script in CI in **informative** mode (`TEST_GAP_INFORMATIVE=1`, `continue-on-error`): gaps are logged but do not fail the job. Treat reported gaps as merge blockers until fixed or the heuristics are tuned. The script reads `COVERAGE_MODULES` and `UNIT_GAMEPLAY_SRC` from the `Makefile`, resolves unit suites by `#include "<module>.h"` in `tests/unit/unit_*.c` (optional overrides in [`tests/unit/module-map`](../tests/unit/module-map)), and flags likely missing unit or snapshot updates.
+Pull requests to `main` run the same script in CI in **informative** mode (`TEST_GAP_INFORMATIVE=1`, `continue-on-error`): gaps are logged but do not fail the job. Treat reported gaps as merge blockers until fixed or the heuristics are tuned. The script reads `COVERAGE_MODULES`, `UNIT_GAMEPLAY_SRC`, `PLAT_SRC`, and `HARNESS_SRC` from the `Makefile`, resolves unit suites by `#include "<module>.h"` in `tests/unit/unit_*.c` (optional overrides in [`tests/unit/module-map`](../tests/unit/module-map)), and flags likely missing unit or snapshot updates. Unit gaps are not waived by unrelated snapshot-only changes on the same branch.
 
 **Local:** run without `TEST_GAP_INFORMATIVE` before a draft PR (exit 1 on gaps). **`TEST_GAP_WAIVE=1`** skips the script locally for debugging only; CI does not set it. `make test-unit-coverage` remains the branch-coverage bar; the gap script does not replace it.
 
