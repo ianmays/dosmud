@@ -519,7 +519,7 @@ Done ✅ ([#173](https://github.com/ianmays/dosmud/pull/173)).
 
 Direct `#47` follow-up. Replace legacy combat/progression outputs with generic combat, damage, defeat, XP, and stat-change events.
 
-Done ✅ (draft PR pending).
+Done ✅ ([#174](https://github.com/ianmays/dosmud/pull/174)).
 
 ### Testing
 - Unit: `unit_cbt.c`, `unit_gprog.c`, and `unit_gout.c` assert `GAME_EVENT_COMBAT`, `GAME_EVENT_XP_GAIN`, and `GAME_EVENT_STAT_CHANGE`
