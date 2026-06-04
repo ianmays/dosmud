@@ -519,9 +519,11 @@ Done ✅ ([#173](https://github.com/ianmays/dosmud/pull/173)).
 
 Direct `#47` follow-up. Replace legacy combat/progression outputs with generic combat, damage, defeat, XP, and stat-change events.
 
+Done ✅ (draft PR pending).
+
 ### Testing
-- Unit: update combat/progression producer assertions for migrated output kinds
-- Snapshots: cover deterministic turn ordering, salve outcomes, defeat, XP gain, and level-up
+- Unit: `unit_cbt.c`, `unit_gprog.c`, and `unit_gout.c` assert `GAME_EVENT_COMBAT`, `GAME_EVENT_XP_GAIN`, and `GAME_EVENT_STAT_CHANGE`
+- Snapshots: existing `combat_*` and `level_up` unchanged (render mapping identical)
 
 ### [#160](https://github.com/ianmays/dosmud/issues/160) - Dialogue/encounter GameEvent migration
 

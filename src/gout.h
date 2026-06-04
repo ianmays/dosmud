@@ -29,7 +29,11 @@ enum GameEventKind {
     GAME_EVENT_ITEM_RESULT,
     GAME_EVENT_BAG_VIEW,
     GAME_EVENT_CRAFT_RESULT,
-    GAME_EVENT_EQUIP_RESULT
+    GAME_EVENT_EQUIP_RESULT,
+    /* #159: combat.c and gprog.c emit generic combat/progression payloads. */
+    GAME_EVENT_COMBAT,
+    GAME_EVENT_XP_GAIN,
+    GAME_EVENT_STAT_CHANGE
 };
 
 /*
@@ -84,6 +88,28 @@ enum GameEventEquipOutcome {
     GAME_EQUIP_OUTCOME_UNWIELD_STOWED,
     GAME_EQUIP_OUTCOME_UNWIELD_CANNOT,
     GAME_EQUIP_OUTCOME_UNWIELD_DROPPED
+};
+
+/*
+ * Combat/progression payload contract (#159):
+ * COMBAT      arg0=GameEventCombatPhase; other args per phase (see enum)
+ * XP_GAIN     arg0=amount
+ * STAT_CHANGE arg0=level arg1=max_hp arg2=damage_bonus arg3=bag_capacity
+ */
+enum GameEventCombatPhase {
+    GAME_COMBAT_PHASE_NONE = 0,
+    GAME_COMBAT_PHASE_START,
+    GAME_COMBAT_PHASE_ENEMY_DAMAGE,
+    GAME_COMBAT_PHASE_PLAYER_DOWN,
+    GAME_COMBAT_PHASE_STATUS,
+    GAME_COMBAT_PHASE_PLAYER_DAMAGE,
+    GAME_COMBAT_PHASE_BRACED,
+    GAME_COMBAT_PHASE_SALVE_NO_BAG,
+    GAME_COMBAT_PHASE_SALVE_HEAL,
+    GAME_COMBAT_PHASE_SALVE_FULL,
+    GAME_COMBAT_PHASE_INVALID_CHOICE,
+    GAME_COMBAT_PHASE_ENEMY_DEFEATED,
+    GAME_COMBAT_PHASE_MENU
 };
 
 /*

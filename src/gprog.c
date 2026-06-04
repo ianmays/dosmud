@@ -4,7 +4,7 @@
 
 /*
  * Experience progression is centralized so level thresholds and reward side
- * effects stay in sync.
+ * effects stay in sync. #159: queues GAME_EVENT_XP_GAIN and STAT_CHANGE.
  */
 
 int game_xp_to_next_level(int level)
@@ -17,7 +17,7 @@ void progression_gain_xp(struct GameState *game, int amount, struct GameOutput *
     int needed;
     /* Multiple level-ups can happen in one grant, so the threshold is recomputed each loop. */
     game->xp += amount;
-    gout_push(out, GAME_OUT_XP_GAINED, amount, 0, 0, 0, 0);
+    game_event_push(out, GAME_EVENT_XP_GAIN, amount, 0, 0, 0, 0);
     needed = game_xp_to_next_level(game->level);
     while (game->xp >= needed) {
         game->xp -= needed;
@@ -28,7 +28,7 @@ void progression_gain_xp(struct GameState *game, int amount, struct GameOutput *
             game->bag_capacity += CFG_LEVELUP_BAG_CAPACITY_DELTA;
         }
         game->player_hp = game->max_hp;
-        gout_push(out, GAME_OUT_LEVEL_UP, game->level, game->max_hp,
+        game_event_push(out, GAME_EVENT_STAT_CHANGE, game->level, game->max_hp,
             game->damage_bonus, game->bag_capacity, 0);
         needed = game_xp_to_next_level(game->level);
     }

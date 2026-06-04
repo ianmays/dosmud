@@ -123,6 +123,29 @@ TEST game_event_push_records_inventory_kinds(void)
     PASS();
 }
 
+TEST game_event_push_records_combat_progression_kinds(void)
+{
+    GameEventQueue out;
+
+    game_event_queue_reset(&out);
+    ASSERT(0 != game_event_push(&out, GAME_EVENT_COMBAT,
+        GAME_COMBAT_PHASE_START, 10, 20, 0, 0));
+    ASSERT(0 != game_event_push(&out, GAME_EVENT_XP_GAIN, 7, 0, 0, 0, 0));
+    ASSERT(0 != game_event_push(&out, GAME_EVENT_STAT_CHANGE,
+        2, 14, 1, 6, 0));
+    ASSERT_EQ(3, out.count);
+    ASSERT_EQ(GAME_EVENT_COMBAT, out.events[0].kind);
+    ASSERT_EQ(GAME_COMBAT_PHASE_START, out.events[0].arg0);
+    ASSERT_EQ(10, out.events[0].arg1);
+    ASSERT_EQ(20, out.events[0].arg2);
+    ASSERT_EQ(GAME_EVENT_XP_GAIN, out.events[1].kind);
+    ASSERT_EQ(7, out.events[1].arg0);
+    ASSERT_EQ(GAME_EVENT_STAT_CHANGE, out.events[2].kind);
+    ASSERT_EQ(2, out.events[2].arg0);
+    ASSERT_EQ(14, out.events[2].arg1);
+    PASS();
+}
+
 SUITE(gout) {
     RUN_TEST(gout_reset_clears_state);
     RUN_TEST(gout_push_records_event_fields);
@@ -131,4 +154,5 @@ SUITE(gout) {
     RUN_TEST(game_event_push_records_generic_move);
     RUN_TEST(game_event_push_records_command_nav_kinds);
     RUN_TEST(game_event_push_records_inventory_kinds);
+    RUN_TEST(game_event_push_records_combat_progression_kinds);
 }

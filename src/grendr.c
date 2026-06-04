@@ -1002,6 +1002,53 @@ static void render_equip_result_event(const GameEvent *ev)
 }
 
 /*
+ * #159: combat.c emits GAME_EVENT_COMBAT phases; adapters reuse render_combat_*.
+ */
+static void render_combat_event(const GameEvent *ev)
+{
+    switch (ev->arg0) {
+    case GAME_COMBAT_PHASE_START:
+        render_combat_start(ev->arg1, ev->arg2);
+        break;
+    case GAME_COMBAT_PHASE_ENEMY_DAMAGE:
+        render_combat_enemy_strike(ev->arg1);
+        break;
+    case GAME_COMBAT_PHASE_PLAYER_DOWN:
+        render_combat_player_fallen();
+        break;
+    case GAME_COMBAT_PHASE_STATUS:
+        render_combat_status_line(ev->arg1, ev->arg2);
+        break;
+    case GAME_COMBAT_PHASE_PLAYER_DAMAGE:
+        render_combat_player_hit(ev->arg1);
+        break;
+    case GAME_COMBAT_PHASE_BRACED:
+        render_combat_braced();
+        break;
+    case GAME_COMBAT_PHASE_SALVE_NO_BAG:
+        render_combat_no_salve_bag();
+        break;
+    case GAME_COMBAT_PHASE_SALVE_HEAL:
+        render_combat_salve_in_combat(ev->arg1);
+        break;
+    case GAME_COMBAT_PHASE_SALVE_FULL:
+        render_combat_salve_full();
+        break;
+    case GAME_COMBAT_PHASE_INVALID_CHOICE:
+        render_combat_invalid_choice();
+        break;
+    case GAME_COMBAT_PHASE_ENEMY_DEFEATED:
+        render_combat_bandit_defeated();
+        break;
+    case GAME_COMBAT_PHASE_MENU:
+        render_combat_menu();
+        break;
+    default:
+        break;
+    }
+}
+
+/*
  * Drain the per-step event queue in enqueue order. Core must not print; this is
  * the DOSMUD text adapter for both generic kinds and legacy-wrapped events.
  */
@@ -1048,6 +1095,16 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
             break;
         case GAME_EVENT_EQUIP_RESULT:
             render_equip_result_event(ev);
+            break;
+        /* #159 combat/progression: direct dispatch (combat/gprog no longer LEGACY). */
+        case GAME_EVENT_COMBAT:
+            render_combat_event(ev);
+            break;
+        case GAME_EVENT_XP_GAIN:
+            render_xp_gained(ev->arg0);
+            break;
+        case GAME_EVENT_STAT_CHANGE:
+            render_level_up(ev->arg0, ev->arg1, ev->arg2, ev->arg3);
             break;
         case GAME_EVENT_LEGACY:
             render_legacy_output_event(game, ev);
