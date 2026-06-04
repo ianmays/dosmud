@@ -41,22 +41,35 @@ Re-run `gh pr view --json number,isDraft` after **every** push; never infer draf
 
 When this push addresses inline PR review comments, **resolve the matching threads on GitHub in the same turn** (after push, before the user-facing summary). Do not leave fixed threads open.
 
-1. List unresolved threads:
+1. List threads with **path, line, and comment preview** so you can map each `id` to the fix (do not resolve by guessing):
 
 ```bash
+NUM="$(gh pr view --json number -q .number)"
+
 gh api graphql -f query='
 query($owner: String!, $repo: String!, $number: Int!) {
   repository(owner: $owner, name: $repo) {
     pullRequest(number: $number) {
       reviewThreads(first: 50) {
-        nodes { id isResolved }
+        nodes {
+          id
+          isResolved
+          comments(first: 1) {
+            nodes { path line body }
+          }
+        }
       }
     }
   }
-}' -f owner=ianmays -f repo=dosmud -F number="$(gh pr view --json number -q .number)"
+}' -f owner=ianmays -f repo=dosmud -F number="$NUM" \
+  --jq '.data.repository.pullRequest.reviewThreads.nodes[]
+    | {id, isResolved, path: .comments.nodes[0].path, line: .comments.nodes[0].line,
+       preview: (.comments.nodes[0].body | split("\n")[0])}'
 ```
 
-2. For each thread that this push fixes, resolve (repeat per `id` where `isResolved` is false):
+Resolve only rows where `isResolved` is `false` and this push addresses that `path` / comment.
+
+2. For each matching thread, resolve (one `threadId` per call):
 
 ```bash
 gh api graphql -f query='
@@ -80,6 +93,7 @@ Optional: reply on the thread before resolving when the fix is non-obvious (one 
 | Skip because the issue is on project board **Review** | Use GitHub `isDraft`, not board status alone |
 | Skip because an earlier push this session did not need `review this` | Re-check after **Ready for review** |
 | Push review fixes but leave resolved threads open on GitHub | Run **Resolve review threads** when comments were addressed |
+| Resolve threads without reading path/line/preview | Use step 1 `jq` output to pick the correct `id` per fixed comment |
 
 Example: [#136](https://github.com/ianmays/dosmud/pull/136) - review fixes after **ready for review** required `review this` that turn.
 
