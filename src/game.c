@@ -78,9 +78,10 @@ static void do_look(struct GameState *game, GameEventQueue *out)
     }
 }
 
+/* MAP: generic event only; map layout and terminal output stay in grendr. */
 static void do_map(GameEventQueue *out)
 {
-    gout_push(out, GAME_OUT_MAP, 0, 0, 0, 0, 0);
+    game_event_push(out, GAME_EVENT_MAP, 0, 0, 0, 0, 0);
 }
 
 void game_describe_current_room(struct GameState *game, GameEventQueue *out)
@@ -262,7 +263,8 @@ static int game_cmd_session(struct GameState *game, struct Command *cmd,
                             GameEventQueue *out)
 {
     if (cmd->type == CMD_HELP) {
-        gout_push(out, GAME_OUT_HELP, cmd->arg, 0, 0, 0, 0);
+        /* HELP topic in arg0; copy and render owned by grendr (game_print_help). */
+        game_event_push(out, GAME_EVENT_HELP, cmd->arg, 0, 0, 0, 0);
         return 1;
     }
     if (cmd->type == CMD_QUIT) {
@@ -293,7 +295,8 @@ static int game_cmd_pass_time(struct GameState *game, struct Command *cmd,
     if (cmd->type != CMD_WAIT) {
         return 0;
     }
-    gout_push(out, GAME_OUT_MSG_WAIT, 0, 0, 0, 0, 0);
+    /* WAIT: generic hold message; tick advance is separate orchestration. */
+    game_event_push(out, GAME_EVENT_WAIT, 0, 0, 0, 0, 0);
     return 1;
 }
 
@@ -304,7 +307,8 @@ static int game_cmd_move(struct GameState *game, struct Command *cmd,
         return 0;
     }
     if (!world_can_move(&game->world, game->player.room_id, cmd->dir)) {
-        gout_push(out, GAME_OUT_MSG_CANNOT_MOVE, 0, 0, 0, 0,
+        /* blocked exit: direction in text; no state change */
+        game_event_push(out, GAME_EVENT_CANNOT_MOVE, 0, 0, 0, 0,
             world_dir_name(cmd->dir));
         return 0;
     }
@@ -313,7 +317,7 @@ static int game_cmd_move(struct GameState *game, struct Command *cmd,
     if (game->mode == GAME_MODE_DIALOGUE) {
         game_set_mode_explore(game);
     }
-    /* #47 proof slice: successful move uses generic events; cannot-move stays legacy. */
+    /* room_id already updated; MOVE then ROOM_LOOK preserve render enqueue order */
     game_event_push(out, GAME_EVENT_MOVE, 0, 0, 0, 0, world_dir_name(cmd->dir));
     do_look(game, out);
     return 1;
@@ -473,7 +477,8 @@ int game_process_input(struct GameState *game, char *line, GameEventQueue *out)
 
     parsed = command_parse(line, &cmd);
     if (!parsed) {
-        gout_push(out, GAME_OUT_MSG_UNKNOWN_COMMAND, 0, 0, 0, 0, 0);
+        /* parse failure: generic unknown-command; no slice handler runs */
+        game_event_push(out, GAME_EVENT_UNKNOWN_COMMAND, 0, 0, 0, 0, 0);
         return 0;
     }
 

@@ -34,6 +34,8 @@ Within core, keep the ownership split explicit:
 
 [`src/game.h`](../src/game.h) defines the engine-facing stepping surface and persistent simulation state; [`src/gout.h`](../src/gout.h) defines the fixed-size event queue that carries engine results to the render edge.
 
+Command and navigation stepping in `game.c` emit generic `GameEventKind` values (handled in `grendr` without the legacy adapter): `GAME_EVENT_MOVE` and `GAME_EVENT_ROOM_LOOK` (successful move plus room look), `GAME_EVENT_MAP`, `GAME_EVENT_HELP` (`arg0` = `CMD_HELP_*` topic), `GAME_EVENT_WAIT`, `GAME_EVENT_CANNOT_MOVE` (`text` = direction name), and `GAME_EVENT_UNKNOWN_COMMAND`. Other producers still append `GAME_EVENT_LEGACY` with a `GameOutKind` until the `#47` migration finishes.
+
 Core must **not** use:
 
 - `printf`, `render_*`, or other terminal output APIs

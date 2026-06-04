@@ -9,14 +9,28 @@
  * See docs/architecture.md for engine vs game-logic ownership at this seam.
  */
 
-/* Generic kinds for #47; most producers still use GAME_EVENT_LEGACY + GameOutKind. */
+/*
+ * Generic kinds (#47 room/move look; #157 command/nav). Slice producers use
+ * game_event_push; everything else still wraps GameOutKind as GAME_EVENT_LEGACY.
+ */
 enum GameEventKind {
     GAME_EVENT_NONE = 0,
     GAME_EVENT_LEGACY,
     GAME_EVENT_MOVE,
-    GAME_EVENT_ROOM_LOOK
+    GAME_EVENT_ROOM_LOOK,
+    /* #157: game.c command router emits; grendr maps to former GAME_OUT_* text. */
+    GAME_EVENT_MAP,
+    GAME_EVENT_HELP,           /* arg0 = command help topic (CMD_HELP_*) */
+    GAME_EVENT_WAIT,
+    GAME_EVENT_CANNOT_MOVE,    /* text = direction name */
+    GAME_EVENT_UNKNOWN_COMMAND
 };
 
+/*
+ * Legacy presentation kinds (GAME_EVENT_LEGACY + legacy_kind). Command/nav
+ * MAP, HELP, WAIT, CANNOT_MOVE, UNKNOWN_COMMAND, and MOVED also have
+ * GAME_EVENT_* kinds after #157; keep these until all gout_push callers migrate.
+ */
 enum GameOutKind {
     GAME_OUT_NONE = 0,
     GAME_OUT_ROOM_LOOK,

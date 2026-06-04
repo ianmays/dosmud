@@ -91,7 +91,7 @@ TEST game_describe_current_room_overflow_keeps_prior_event(void)
     unit_game_fresh(&game, 36u);
     gout_reset(&out);
     for (i = 0; i < CFG_GAME_OUT_MAX; ++i) {
-        ASSERT_EQ(1, gout_push(&out, GAME_OUT_MSG_WAIT, i, 0, 0, 0, 0));
+        ASSERT(0 != game_event_push(&out, GAME_EVENT_WAIT, i, 0, 0, 0, 0));
     }
     out.events[out.count - 1].room_id = 77;
     out.events[out.count - 1].room_item[0] = ITEM_STICK;
@@ -100,8 +100,8 @@ TEST game_describe_current_room_overflow_keeps_prior_event(void)
 
     ASSERT_EQ(CFG_GAME_OUT_MAX, out.count);
     ASSERT_EQ(1, out.overflowed);
-    ASSERT_EQ(GAME_EVENT_LEGACY, out.events[out.count - 1].kind);
-    ASSERT_EQ(GAME_OUT_MSG_WAIT, out.events[out.count - 1].legacy_kind);
+    ASSERT_EQ(GAME_EVENT_WAIT, out.events[out.count - 1].kind);
+    ASSERT_EQ(CFG_GAME_OUT_MAX - 1, out.events[out.count - 1].arg0);
     ASSERT_EQ(77, out.events[out.count - 1].room_id);
     ASSERT_EQ(ITEM_STICK, out.events[out.count - 1].room_item[0]);
     PASS();
@@ -424,8 +424,75 @@ TEST game_wait_emits_output_record(void)
     gout_reset(&out);
     ASSERT_EQ(1, game_process_input(&game, line, &out));
     ASSERT_EQ(1, out.count);
-    ASSERT_EQ(GAME_EVENT_LEGACY, out.events[0].kind);
-    ASSERT_EQ(GAME_OUT_MSG_WAIT, out.events[0].legacy_kind);
+    ASSERT_EQ(GAME_EVENT_WAIT, out.events[0].kind);
+    PASS();
+}
+
+TEST game_help_emits_help_event(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    char line[] = "help move";
+
+    unit_game_fresh(&game, 37u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game.test_quiet_ticks = 1;
+    game.wanderer_active = 0;
+    gout_reset(&out);
+    ASSERT_EQ(1, game_process_input(&game, line, &out));
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_HELP, out.events[0].kind);
+    ASSERT_EQ(CMD_HELP_TOPIC_MOVE, out.events[0].arg0);
+    PASS();
+}
+
+TEST game_map_emits_map_event(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    char line[] = "map";
+
+    unit_game_fresh(&game, 38u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game.test_quiet_ticks = 1;
+    game.wanderer_active = 0;
+    gout_reset(&out);
+    ASSERT_EQ(1, game_process_input(&game, line, &out));
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_MAP, out.events[0].kind);
+    PASS();
+}
+
+TEST game_unknown_command_emits_event(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    char line[] = "flibble";
+
+    unit_game_fresh(&game, 39u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    gout_reset(&out);
+    ASSERT_EQ(0, game_process_input(&game, line, &out));
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_UNKNOWN_COMMAND, out.events[0].kind);
+    PASS();
+}
+
+TEST game_cannot_move_emits_event(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    char line[] = "move east";
+
+    unit_game_fresh(&game, 40u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game.test_quiet_ticks = 1;
+    game.wanderer_active = 0;
+    gout_reset(&out);
+    ASSERT_EQ(0, game_process_input(&game, line, &out));
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_CANNOT_MOVE, out.events[0].kind);
+    ASSERT_STR_EQ("east", out.events[0].text);
     PASS();
 }
 
@@ -495,6 +562,10 @@ SUITE(game) {
     RUN_TEST(game_observe_look_no_tick);
     RUN_TEST(game_pass_time_wait_ticks);
     RUN_TEST(game_wait_emits_output_record);
+    RUN_TEST(game_help_emits_help_event);
+    RUN_TEST(game_map_emits_map_event);
+    RUN_TEST(game_unknown_command_emits_event);
+    RUN_TEST(game_cannot_move_emits_event);
     RUN_TEST(game_move_emits_move_then_look);
     RUN_TEST(game_roll_spread_zero);
     RUN_TEST(game_quit_ends_run);
