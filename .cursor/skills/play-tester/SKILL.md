@@ -200,10 +200,59 @@ Do not use a category table or jargon-heavy issue titles. Do not pre-fill **If y
 
 When the user cites numbers (see agent), draft issues on demand - do not post without approval.
 
-| Source | Title | Body |
-|--------|-------|------|
-| Improvement `N` | improvement `N` **What** sentence (lower-case first char) | scope bullet; repro: seed + commands from **Seen when** / session |
-| Idea `N` | idea line `N` text (trimmed; lower-case first char) | scope bullet; repro optional unless user asks |
+| Source | Title |
+|--------|-------|
+| Improvement `N` | improvement **What** sentence (lower-case first char) |
+| Idea `N` | idea line text (trimmed; lower-case first char) |
+
+**Body:** use markdown **headings**, not bullet lists as the main structure. Plain English; no internal report numbers (e.g. do not write "improvement 1"). Do not link or cite `playtest/sessions/` paths (gitignored) - write numbered **steps to reproduce** with `./dosmud --seed <N>` when a seed helps replay.
+
+### Issue body template
+
+**Bug / improvement (player-facing problem):**
+
+```markdown
+## Problem
+(one or two sentences from improvement **What**)
+
+## Why it matters
+(short plain-language reason from **Why**)
+
+## Steps to reproduce
+1. make build && ./dosmud --seed <N>
+2. … (commands the player would type)
+3. …
+
+**Expected:** …
+**Actual:** …
+
+## Extra detail
+(optional; only if useful)
+
+## Source
+Playtest feedback, YYYY-MM-DD.
+```
+
+**Idea (feature / copy improvement):**
+
+```markdown
+## Problem
+(what is missing or unclear today)
+
+## What we want
+(one sentence from the idea line)
+
+## Why it matters
+(why a player would care)
+
+## Steps to reproduce
+(optional; numbered steps when replay helps)
+
+## Source
+Playtest feedback, YYYY-MM-DD.
+```
+
+Omit empty sections. Skip **Steps to reproduce** on ideas when the change is self-explanatory.
 
 ### After approval (mandatory GitHub metadata)
 
@@ -211,7 +260,7 @@ Per [`AGENTS.md`](../../../AGENTS.md) **Issue creation**, for each issue created
 
 1. `gh issue create` (or create with labels in one step) using the approved title and body.
 2. Domain label: `gameplay`, `tooling`, `documentation`, etc. (match the item; player-facing feedback is usually `gameplay`).
-3. `agent` label on every agent-created issue.
+3. `agent` and `playtest` labels on every agent-created playtest follow-up issue.
 4. `gh project item-add 1 --owner ianmays --url https://github.com/ianmays/dosmud/issues/<N>` unless the issue is already on project #1.
 5. If the issue has a **Milestone** in [`DEV_PLAN.md`](../../../DEV_PLAN.md) milestone index: run [milestone-issue-hygiene](../milestone-issue-hygiene/SKILL.md) create-time checklist in the same turn (not optional). Otherwise labels + project only.
 
@@ -229,7 +278,8 @@ Per [`AGENTS.md`](../../../AGENTS.md) **Issue creation**, for each issue created
 - Edit `src/` or `include/` during a playtest pass
 - Open implementation PRs or move project board status
 - File GitHub issues without explicit user approval
-- Create playtest follow-up issues without domain label, `agent` label, and project #1 entry
+- Create playtest follow-up issues without domain label, `agent` label, `playtest` label, and project #1 entry
+- Use bullet-only issue bodies, cite gitignored session files, or reference report item numbers in posted issues
 - Replace or skip `make test*` on feature branches
 - List deterministic seed beats under **Improvements**
 - Repeat the same opening phrase on every numbered idea

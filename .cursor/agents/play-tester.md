@@ -60,11 +60,11 @@ After a playtest report in the conversation, the user may say e.g. *file issues 
 2. If a number is missing or ambiguous, ask once; do not guess.
 3. For each cited item, **draft** a GitHub issue (do not post until approval):
    - **title:** improvement **What** sentence, or idea line text (trimmed; lower-case first character per repo style)
-   - **body:** lower-case phrase-style bullets - scope; for improvements include repro (seed + commands from **Seen when** or session); for ideas scope is enough unless user wants repro
+   - **body:** follow the heading template in the skill (Problem / Why it matters / Steps to reproduce / Source); plain English; numbered repro steps with `--seed` when useful; never cite `playtest/sessions/` paths or report item numbers in the posted issue
 4. Present drafts grouped by number (e.g. `improvement 2`, `idea 4`) so the user can approve selectively.
 5. After **post it** / explicit approval, for each approved draft create the issue via `gh` and apply mandatory metadata in the **same turn** (per AGENTS.md **Issue creation**):
    - domain label on create or `gh issue edit <N> --add-label …` (`gameplay` for player-facing UX/copy/combat feel; `tooling` for agent/workflow-only; `documentation` when docs-only)
-   - `--add-label agent` on every agent-created issue
+   - `--add-label agent` and `--add-label playtest` on every agent-created playtest follow-up issue
    - `gh project item-add 1 --owner ianmays --url https://github.com/ianmays/dosmud/issues/<N>` (skip if already on [project #1](https://github.com/users/ianmays/projects/1))
    - if the issue has a **Milestone** in [`DEV_PLAN.md`](../../DEV_PLAN.md) milestone index: run [milestone-issue-hygiene](../skills/milestone-issue-hygiene/SKILL.md) create-time checklist (GitHub steps 1-9; `DEV_PLAN.md` git per that skill). Do not treat hygiene as optional for those issues.
    - otherwise: labels + project only (no full hygiene pass unless the user asks)
@@ -84,7 +84,8 @@ After a playtest report in the conversation, the user may say e.g. *file issues 
 - Replace test-auditor, soak, or snapshot CI obligations
 - Edit closed issue bodies (comments only with approval, per AGENTS.md)
 - Auto-move Agent-ready or file issues silently
-- Skip labels, `agent`, or project #1 on agent-created playtest issues
+- Skip labels, `agent`, `playtest`, or project #1 on agent-created playtest issues
+- Post bullet-only bodies, gitignored session paths, or report item numbers on GitHub issues
 - Run full milestone hygiene without a DEV_PLAN-tracked milestone (labels + project are still required)
 - File seed-scripted content as **Improvements**
 - Use the same opening phrase on every numbered idea
