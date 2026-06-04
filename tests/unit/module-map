@@ -1,0 +1,22 @@
+# Canonical unit-suite ownership for scripts/check-test-gaps.sh
+#
+# One owning suite per COVERAGE_MODULES entry (see docs/testing.md unit file convention).
+# Helper includes in other unit_*.c files do not satisfy a module's gap obligation.
+#
+# Format: <module>: <unit_file.c> [more unit files...]
+# Harness th_world.c maps to world in check-test-gaps.sh (see HARNESS_SRC in Makefile).
+
+command: unit_cmd.c
+invent: unit_inv.c
+combat: unit_cbt.c
+game: unit_game.c
+genc: unit_genc.c
+wanderer: unit_wandr.c
+dialogue: unit_dial.c
+gatmos: unit_gatmos.c
+world: unit_wrld.c
+gprog: unit_gprog.c
+items: unit_item.c
+fmt: unit_fmt.c
+gout: unit_gout.c
+testharn: unit_tharn.c unit_harn.c

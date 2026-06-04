@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Code commenter after implementation
 
-After **behavioral** implementation is done on a feature branch (logic in place; tests run per [testing-discipline.mdc](testing-discipline.mdc)), run a **comment pass** before opening a draft PR or ending the implementation handoff.
+After **behavioral** implementation is done on a feature branch (logic in place; tests and [test-gap pass](testing-gap-after-implement.mdc) done per [testing-discipline.mdc](testing-discipline.mdc)), run a **comment pass** before opening a draft PR or ending the implementation handoff.
 
 ## Required step
 
@@ -24,7 +24,7 @@ After **behavioral** implementation is done on a feature branch (logic in place;
 ## Workflow order
 
 ```text
-implement → make test (and related targets) → code-commenter pass (if src/ or include/ touched) → documentation pass → draft PR
+implement → make test (and related targets) → test-gap pass → code-commenter pass (if src/ or include/ touched) → documentation pass → draft PR
 ```
 
 See [agent-workflow.mdc](agent-workflow.mdc) for PR and GitHub steps.

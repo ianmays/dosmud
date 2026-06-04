@@ -19,7 +19,7 @@ description: >-
 
 ## When to run
 
-1. After behavioral implementation and tests, before opening a draft PR.
+1. After behavioral implementation, tests, and test-gap pass, before opening a draft PR.
 2. User asks for a documentation review or sweep on named paths.
 3. New or changed Cursor rule, skill, or agent (update AGENTS **Cursor configuration**).
 4. Milestone issue create/groom (delegate [milestone-issue-hygiene](../milestone-issue-hygiene/SKILL.md)).
@@ -47,7 +47,7 @@ Documentation pass:
 | Change signal | Likely targets | Delegate |
 |---------------|----------------|----------|
 | `src/` or `include/` subsystem, seam, exported API | [`docs/architecture.md`](../../../docs/architecture.md) | [code-commenter](../code-commenter/SKILL.md) comment-only pass on `src/` and `include/` |
-| Tests, Makefile, `make` targets | [`docs/testing.md`](../../../docs/testing.md) | - |
+| Tests, Makefile, `make` targets | [`docs/testing.md`](../../../docs/testing.md) | [testing-gap-auditor](../testing-gap-auditor/SKILL.md) if gaps remain |
 | PR, GitHub, agent workflow | [`docs/contributor-guide.md`](../../../docs/contributor-guide.md), [`AGENTS.md`](../../../AGENTS.md) | - |
 | New/changed `.cursor/` rule, skill, agent | [`AGENTS.md`](../../../AGENTS.md) Cursor configuration table | - |
 | Quick-start, clone, run | [`README.md`](../../../README.md) | - |

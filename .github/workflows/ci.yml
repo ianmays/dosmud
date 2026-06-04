@@ -15,9 +15,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Install build tools
         run: sudo apt-get update && sudo apt-get install -y gcc make
+
+      - name: Check test gaps (diff vs base, informative)
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+        env:
+          TEST_GAP_INFORMATIVE: "1"
+        run: sh scripts/check-test-gaps.sh "origin/${{ github.base_ref }}"
 
       - name: Run CI stats and write report
         id: ci_report

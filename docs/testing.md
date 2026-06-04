@@ -65,6 +65,19 @@ Use this section when deciding what to write, not only what to run. Agents and c
 
 **Lesson from [#90](https://github.com/ianmays/dosmud/issues/90):** when command handling moves from `game.c` into a slice module, add tests in that slice's `unit_*.c` file. Green `unit_game.c` tests that only call `game_process_input` do not document slice ownership or catch regressions in new entry points.
 
+## Test gap audit (agents and CI)
+
+Before a draft PR, agents run a **test-gap pass** ([`.cursor/skills/testing-gap-auditor/SKILL.md`](../.cursor/skills/testing-gap-auditor/SKILL.md), [`.cursor/rules/testing-gap-after-implement.mdc`](../.cursor/rules/testing-gap-after-implement.mdc)):
+
+```sh
+git fetch origin main
+sh scripts/check-test-gaps.sh origin/main
+```
+
+Pull requests to `main` run the same script in CI in **informative** mode (`TEST_GAP_INFORMATIVE=1`, `continue-on-error`): gaps are logged but do not fail the job. Treat reported gaps as merge blockers until fixed or the heuristics are tuned. The script reads `COVERAGE_MODULES`, `UNIT_GAMEPLAY_SRC`, `PLAT_SRC`, and `HARNESS_SRC` from the `Makefile`, resolves owning unit suites from [`tests/unit/module-map`](../tests/unit/module-map), and flags likely missing unit or snapshot updates. Unit gaps are not waived by unrelated snapshot-only changes on the same branch.
+
+**Local:** run without `TEST_GAP_INFORMATIVE` before a draft PR (exit 1 on gaps). **`TEST_GAP_WAIVE=1`** skips the script locally for debugging only; CI does not set it. `make test-unit-coverage` remains the branch-coverage bar; the gap script does not replace it.
+
 ## Test layout
 
 ```text
@@ -117,7 +130,7 @@ make test-unit-coverage-verbose     # same tests, full gcov block per module
 - Determinism: call `plat_seed_rng(fixed_seed)` in setup; use `game_roll_inject_*` and `CFG_TEST_*` for asserted combat/intimidate outcomes
 - Snapshots assert player-visible output; unit tests assert `GameState` and parse results
 
-**In-scope modules (branch coverage target ~90%+):** `command`, `invent`, `combat`, `game`, `genc`, `wanderer`, `dialogue`, `gatmos`, `world`, `gprog`, `items`, `fmt`, `testharn`
+**In-scope modules (branch coverage target ~90%+):** `command`, `invent`, `combat`, `game`, `genc`, `wanderer`, `dialogue`, `gatmos`, `world`, `gprog`, `items`, `fmt`, `gout`, `testharn`
 
 **Out of scope for the unit coverage bar:** `grendr`, `txtres`, `main`, `platpos` / `platwin` / `platdos` (presentation glue; `fmt` holds testable format logic; snapshots cover printed output and ASCII art)
 
