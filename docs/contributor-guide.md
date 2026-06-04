@@ -46,6 +46,7 @@ The repo’s GitHub project uses a **Status** field on issues: **Planning** when
 
 - While the PR is a **draft** on GitHub: do not post `review this`.
 - After you mark the PR **Ready for review** (non-draft): comment `review this` on the PR after **each** push that should re-trigger review. Use that exact body text only.
+- When a push addresses inline review comments, resolve those PR review threads on GitHub (agents: same-turn step in [pr-after-push skill](../.cursor/skills/pr-after-push/SKILL.md)).
 - Project board **Review** can be set when the draft PR is opened; GitHub **Ready for review** (`isDraft` false) is what triggers the `review this` convention, not board status alone.
 
 Agents: policy in [AGENTS.md](../AGENTS.md) (**After `git push` to a PR branch**); procedure in [`.cursor/skills/pr-after-push/SKILL.md`](../.cursor/skills/pr-after-push/SKILL.md).

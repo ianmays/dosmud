@@ -190,6 +190,8 @@ Do **not** skip because the PR was opened as draft, because board status is **Re
 
 Comment body must be exactly `review this`. Do not ask whether re-review is needed.
 
+When a push fixes inline review comments, **resolve the corresponding PR review threads on GitHub in the same turn** (procedure: [pr-after-push skill](.cursor/skills/pr-after-push/SKILL.md) **Resolve review threads**). Leave threads open only if still disputed or not yet fixed.
+
 A missed `review this` on a non-draft PR is a **workflow failure** (same severity as skipping project status updates). See also [agent-workflow.mdc](.cursor/rules/agent-workflow.mdc) PR push checklist.
 
 ### Completion workflow

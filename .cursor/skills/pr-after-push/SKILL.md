@@ -37,6 +37,40 @@ If `isDraft` is **true**: skip until the PR is **Ready for review** on GitHub.
 
 Re-run `gh pr view --json number,isDraft` after **every** push; never infer draft state from an earlier turn or project board **Review**.
 
+## Resolve review threads (review fixes)
+
+When this push addresses inline PR review comments, **resolve the matching threads on GitHub in the same turn** (after push, before the user-facing summary). Do not leave fixed threads open.
+
+1. List unresolved threads:
+
+```bash
+gh api graphql -f query='
+query($owner: String!, $repo: String!, $number: Int!) {
+  repository(owner: $owner, name: $repo) {
+    pullRequest(number: $number) {
+      reviewThreads(first: 50) {
+        nodes { id isResolved }
+      }
+    }
+  }
+}' -f owner=ianmays -f repo=dosmud -F number="$(gh pr view --json number -q .number)"
+```
+
+2. For each thread that this push fixes, resolve (repeat per `id` where `isResolved` is false):
+
+```bash
+gh api graphql -f query='
+mutation($threadId: ID!) {
+  resolveReviewThread(input: { threadId: $threadId }) {
+    thread { isResolved }
+  }
+}' -f threadId='PRRT_...'
+```
+
+Resolve only threads the commit actually addresses. If the user said "resolve threads as needed", resolve all fixed threads; if a thread still needs discussion, leave it open.
+
+Optional: reply on the thread before resolving when the fix is non-obvious (one short line pointing at the commit).
+
 ## Common mistakes
 
 | Mistake | Fix |
@@ -45,6 +79,7 @@ Re-run `gh pr view --json number,isDraft` after **every** push; never infer draf
 | Assume the PR is still draft because it was opened as draft | Re-check `isDraft` this turn |
 | Skip because the issue is on project board **Review** | Use GitHub `isDraft`, not board status alone |
 | Skip because an earlier push this session did not need `review this` | Re-check after **Ready for review** |
+| Push review fixes but leave resolved threads open on GitHub | Run **Resolve review threads** when comments were addressed |
 
 Example: [#136](https://github.com/ianmays/dosmud/pull/136) - review fixes after **ready for review** required `review this` that turn.
 
@@ -52,5 +87,6 @@ Example: [#136](https://github.com/ianmays/dosmud/pull/136) - review fixes after
 
 - [ ] `git push` succeeded
 - [ ] `gh pr view --json number,isDraft` ran this turn
+- [ ] If push addressed review comments: unresolved fixed threads resolved on GitHub (or none to resolve)
 - [ ] If not draft: `gh pr comment <N> --body "review this"` ran this turn
 - [ ] Only then: user-facing summary
