@@ -1,3 +1,4 @@
 @fixture quiet_explore
 wait
+map
 quit
