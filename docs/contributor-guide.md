@@ -34,7 +34,7 @@ implement → make test* → test-gap pass (`scripts/check-test-gaps.sh`) → co
 - Comment pass: [`.cursor/skills/code-commenter/SKILL.md`](../.cursor/skills/code-commenter/SKILL.md) (see AGENTS.md **Comment pass**)
 - Documentation pass: [`.cursor/skills/documentation-maintainer/SKILL.md`](../.cursor/skills/documentation-maintainer/SKILL.md) (see AGENTS.md **Documentation pass**)
 
-**Qualitative playtesting (optional):** agents or contributors can run interactive play sessions with the [play-tester skill](../.cursor/skills/play-tester/SKILL.md) (`make build`, `./dosmud --seed <N>`, transcripts under `playtest/sessions/` which are gitignored). Reports emphasize plain-language feedback and blue-sky ideas; seed-scripted events are replay context, not automatic backlog items. See AGENTS.md **Playtesting (optional)**.
+**Qualitative playtesting (optional):** agents or contributors can run interactive play sessions with the [play-tester skill](../.cursor/skills/play-tester/SKILL.md) (`make build`, `./dosmud --seed <N>`, transcripts under `playtest/sessions/` which are gitignored). Reports number **ideas** and **improvements** for easy follow-up (e.g. file issues for `ideas 4` and `improvements 2`); seed-scripted events stay in the session log, not the backlog. See AGENTS.md **Playtesting (optional)**.
 
 The repo’s GitHub project uses a **Status** field on issues: **Planning** when forming an implementation plan (add decided plan as a comment), **In progress** while you implement (before the PR exists), **Review** once the draft PR is up, **Done** after merge. Details for agents: [AGENTS.md](../AGENTS.md).
 

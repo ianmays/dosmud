@@ -209,7 +209,7 @@ After merge:
 
 - Qualitative sessions via [play-tester skill](.cursor/skills/play-tester/SKILL.md) and [play-tester agent](.cursor/agents/play-tester.md); not a PR gate and does not replace `make test*`.
 - Interactive LLM play uses release `./dosmud --seed <N>` with growing scripts under `playtest/sessions/` (gitignored).
-- Reports use plain-English **What felt rough** items and required **The game would be better if …** ideas; deterministic seed beats go in **Session log** only, not as defects.
+- Reports use numbered **ideas** (1–10) and **improvements** (what felt rough, 1–6); file issues by reference (e.g. `ideas 4, 7`, `improvements 2, 5`); seed-scripted beats go in **Session log** only.
 - File GitHub issues only when the user approves a draft.
 
 ## Technical Constraints

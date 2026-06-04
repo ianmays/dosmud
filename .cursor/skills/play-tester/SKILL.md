@@ -1,12 +1,12 @@
 ---
 name: play-tester
-description: Run interactive LLM-driven play sessions against release dosmud, capture gitignored transcripts, and deliver plain-English reports with required blue-sky ideas. Use when the user asks to playtest or before prioritizing backlog work. Pair with the play-tester agent for judgement.
+description: Run interactive LLM play sessions against release dosmud; deliver plain-English reports with numbered ideas and improvements, varied idea phrasing, and issue filing by number (e.g. ideas 4, improvements 2). Pair with the play-tester agent.
 disable-model-invocation: true
 ---
 
 # Play-tester
 
-**Procedure (this skill).** Session setup, deterministic replay loop, report format, filtering.
+**Procedure (this skill).** Session setup, deterministic replay loop, report format, filtering, issue-by-number workflow.
 
 **Judgement (agent).** [`.cursor/agents/play-tester.md`](../../agents/play-tester.md) when delegating a full session.
 
@@ -81,7 +81,7 @@ Playtest session:
 - [ ] 4. Run ./dosmud --seed N < SESSION > OUT
 - [ ] 5. Read tail of OUT (HUD, room, recent > lines, combat/menu text)
 - [ ] 6. Choose next commands; append; repeat 4-5 until quit, budget, or stuck
-- [ ] 7. Generalize findings (filter seed-only beats); write report (format below)
+- [ ] 7. Generalize findings (filter seed-only beats); write numbered report (format below)
 ```
 
 **Choosing commands:**
@@ -98,13 +98,13 @@ Playtest session:
 - Command budget reached
 - Stuck loop (same unknown command three times) — note in report
 
-**Parse failures:** count "Unknown command" lines; if they block play, put under **What felt rough** with plain **What** wording and quote the turn.
+**Parse failures:** count "Unknown command" lines; if they block play, add a numbered **Improvements** item with plain **What** wording and quote the turn.
 
 ## What counts as feedback (filter before you write)
 
 **Seed is for replay, not for blaming the seed.** Record seed and session paths in **Session**. Do not treat "what happened on this run" as automatically backlog-worthy.
 
-Before adding **What felt rough** or an issue draft, ask:
+Before adding an **Improvements** item, ask:
 
 *Would this confuse or disappoint someone on a different seed, or someone who already expects this fight or event?*
 
@@ -112,7 +112,7 @@ If **no** — put it in **Session log** only (expected scripted beat for this pa
 
 If **unsure** — optional short second-seed probe (~10 commands) with another seed (e.g. `5678`); document both seeds in **Session**. Compare [`tests/regression/*.expect`](../../../tests/regression/) when behavior may be locked test content.
 
-### Examples — do not elevate to "What felt rough"
+### Examples — do not elevate to Improvements
 
 | Session fact | Why skip |
 |--------------|----------|
@@ -120,24 +120,32 @@ If **unsure** — optional short second-seed probe (~10 commands) with another s
 | Combat starts at T:1 right after `take stick` | Expected pacing for that seed |
 | Map only shows `@` until you have left camp | Player has not explored yet |
 
-### Examples — OK as general feedback (plain player voice)
+### Examples — OK as Improvements (numbered in report)
 
-| What (headline) | Notes |
-|-----------------|-------|
-| After a fight I still see "the bandit is waiting" when I try to walk — I am not sure the fight is over or what to type next. | Messaging when menus block normal commands; not "bandit at camp on seed 1234" |
+| What (one sentence) | Notes |
+|---------------------|-------|
+| After a fight I still see "the bandit is waiting" when I try to walk — I am not sure the fight is over or what to type next. | Messaging when menus block normal commands |
 | Right after I won a fight, "Nobody is waiting for an answer" sounds like I did something wrong. | Copy tone; cite turn in **Seen when** |
-| When a command is blocked during a fight, `help craft` told me why — more commands could do that. | Positive pattern; generalize |
 
-### Examples — Ideas (no repro required)
+### Examples — Ideas (numbered, varied phrasing)
 
-- The game would be better if the first room had a short "type help" nudge before any threat.
-- The game would be better if the map showed where I last fought.
+```markdown
+### Ideas
+Blue-sky ideas — pick numbers if you want issues filed (e.g. "ideas 4, 7").
 
-Write for a **designer or product reader**, not a systems engineer. No internal jargon ("encounter state", "handover") in **What** lines or issue title candidates.
+1. Show a short "type help" nudge in the first room before any threat.
+2. Players always know when a fight is really over.
+3. First `map` could print a tiny legend (@ = you).
+```
+
+- At most **two** lines per report may use "would be better if"; prefer imperative or outcome sentences.
+- **Forbidden:** every idea starting with the same phrase.
+
+Write for a **designer or product reader**, not a systems engineer. No internal jargon ("encounter state", "handover") in improvement **What** lines or issue title candidates.
 
 ## Report format (required)
 
-Deliver in chat:
+Deliver in chat. Use **stable numbering** so the user can say e.g. *file issues for ideas 4, 7 and improvements 2, 5*.
 
 ```markdown
 ## Playtest report
@@ -151,42 +159,49 @@ Deliver in chat:
 - note: this run is replayable; findings below are meant to generalize beyond this seed unless noted
 
 ### What felt good
-- … (2–5 bullets, plain English; optional "(turn N)")
+- … (2–5 unnumbered bullets, plain English; optional "(turn N)")
 
-### What felt rough
-(0–6 items; cap for scannability; skip if nothing generalizes)
+### Improvements (what felt rough)
+_None — nothing generalized beyond this seed,_ **or:**
 
-- **What:** … (one sentence, player voice)
-- **Why it matters:** …
-- **Seen when:** … (optional turn or quote; *What* must still make sense without knowing the seed)
+1. **What:** … (one plain sentence, player voice)
+   **Why:** …
+   **Seen when:** … (optional; *What* must make sense without knowing the seed)
+
+2. **What:** …
+   …
+(up to 6 numbered items)
 
 ### Ideas
-(required: 5–10 bullets, each starting with "The game would be better if …")
+Blue-sky ideas — pick numbers if you want issues filed (e.g. "ideas 4, 7").
 
-- …
-- … (at least half may be aspirational; tag `[from this run]` when directly inspired by the transcript)
+1. …
+2. …
+… (5–10 numbered lines; one short standalone sentence each; vary phrasing; at most two may use "would be better if"; tag `[from this run]` when transcript-inspired)
 
-### If you want to track it
-(optional; use the same plain **What** sentence as the issue title candidate)
-
-- **Title:** …
-- scope: …
-- repro: seed + command sequence (repro lives here, not in the headline)
-
-### Suggested actions
-- [ ] file issue (draft above — not posted unless user approves)
-- [ ] comment on existing issue #…
-- [ ] defer / no action (default when the report is mostly Ideas)
+### How to act on this report
+- Reference items by number: **ideas 4, 7** and **improvements 2, 5** (singular *idea* / *improvement* also OK).
+- Say **"file issues for …"** or **"post it"** — agent drafts GitHub issues from those numbers (improvement **What** or idea line as title; repro in body for improvements).
+- **Defer** is fine when you only wanted the list; do not pre-list full issue drafts in the report.
 
 ### Session log (seed-specific, not backlog)
-- … (expected beats on this seed/path only, e.g. "bandit on take stick at camp")
+- … (expected beats on this seed/path only)
 ```
 
-**Required sections:** Session, What felt good, Ideas.
+**Required sections:** Session, What felt good, Ideas (numbered 1–10), How to act on this report.
 
-**Optional:** What felt rough (if none, say so in one line), If you want to track it, Session log.
+**Optional:** Improvements (or one line that none generalized), Session log.
 
-Do not use a category table or jargon-heavy issue titles. Omit vague praise with no player-facing effect.
+Do not use a category table or jargon-heavy issue titles. Do not pre-fill **If you want to track it** or checkbox **Suggested actions** blocks in the default report.
+
+## Issue filing by number (after the report)
+
+When the user cites numbers (see agent), draft issues on demand — do not post without approval.
+
+| Source | Title | Body |
+|--------|-------|------|
+| Improvement `N` | improvement `N` **What** sentence (lower-case first char) | scope bullet; repro: seed + commands from **Seen when** / session |
+| Idea `N` | idea line `N` text (trimmed; lower-case first char) | scope bullet; repro optional unless user asks |
 
 ## Relationship to other workflows
 
@@ -203,7 +218,8 @@ Do not use a category table or jargon-heavy issue titles. Omit vague praise with
 - Open implementation PRs or move project board status
 - File GitHub issues without explicit user approval
 - Replace or skip `make test*` on feature branches
-- List deterministic seed beats as defects in **What felt rough**
+- List deterministic seed beats under **Improvements**
+- Repeat the same opening phrase on every numbered idea
 
 ## Appendix (optional modes)
 
