@@ -317,6 +317,7 @@ static int game_cmd_move(struct GameState *game, struct Command *cmd,
     if (game->mode == GAME_MODE_DIALOGUE) {
         game_set_mode_explore(game);
     }
+    /* room_id already updated; MOVE then ROOM_LOOK preserve render enqueue order */
     game_event_push(out, GAME_EVENT_MOVE, 0, 0, 0, 0, world_dir_name(cmd->dir));
     do_look(game, out);
     return 1;

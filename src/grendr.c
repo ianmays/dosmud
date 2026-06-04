@@ -490,6 +490,10 @@ static void render_legacy_output_event(const struct GameState *game,
         render_room_look_snapshot(game, ev->room_id, ev->room_item,
             ev->arg1, ev->arg0, ev->arg2, ev->arg3);
         break;
+    /*
+     * #157 command/nav: legacy GAME_OUT_* mirrors; game.c uses GAME_EVENT_* in
+     * game_render_output. Same render helpers until gout_push callers migrate.
+     */
     case GAME_OUT_MAP:
         render_exploration_map(game);
         break;

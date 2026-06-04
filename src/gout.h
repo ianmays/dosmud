@@ -26,6 +26,11 @@ enum GameEventKind {
     GAME_EVENT_UNKNOWN_COMMAND
 };
 
+/*
+ * Legacy presentation kinds (GAME_EVENT_LEGACY + legacy_kind). Command/nav
+ * MAP, HELP, WAIT, CANNOT_MOVE, UNKNOWN_COMMAND, and MOVED also have
+ * GAME_EVENT_* kinds after #157; keep these until all gout_push callers migrate.
+ */
 enum GameOutKind {
     GAME_OUT_NONE = 0,
     GAME_OUT_ROOM_LOOK,
