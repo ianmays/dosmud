@@ -10,8 +10,9 @@
  */
 
 /*
- * Generic kinds (#47 room/move look; #157 command/nav). Slice producers use
- * game_event_push; everything else still wraps GameOutKind as GAME_EVENT_LEGACY.
+ * Generic kinds (#47 room/move look; #157 command/nav; #158 invent). Slice
+ * producers use game_event_push; everything else still wraps GameOutKind as
+ * GAME_EVENT_LEGACY.
  */
 enum GameEventKind {
     GAME_EVENT_NONE = 0,
@@ -23,13 +24,73 @@ enum GameEventKind {
     GAME_EVENT_HELP,           /* arg0 = command help topic (CMD_HELP_*) */
     GAME_EVENT_WAIT,
     GAME_EVENT_CANNOT_MOVE,    /* text = direction name */
-    GAME_EVENT_UNKNOWN_COMMAND
+    GAME_EVENT_UNKNOWN_COMMAND,
+    /* #158: inventory/item slice emits generic action + outcome payloads. */
+    GAME_EVENT_ITEM_RESULT,
+    GAME_EVENT_BAG_VIEW,
+    GAME_EVENT_CRAFT_RESULT,
+    GAME_EVENT_EQUIP_RESULT
+};
+
+/*
+ * Inventory/item payload contract (#158):
+ * ITEM_RESULT  arg0=GameEventItemAction arg1=GameEventItemOutcome
+ *              arg2=item id or ITEM_NONE arg3=value/capacity/slots when needed
+ * CRAFT_RESULT arg0=crafted/attempted item id arg1=GameEventCraftOutcome
+ * EQUIP_RESULT arg0=item id or ITEM_NONE arg1=GameEventEquipOutcome
+ */
+
+enum GameEventItemAction {
+    GAME_ITEM_ACTION_NONE = 0,
+    GAME_ITEM_ACTION_LOOT,
+    GAME_ITEM_ACTION_TAKE,
+    GAME_ITEM_ACTION_DROP,
+    GAME_ITEM_ACTION_EAT,
+    GAME_ITEM_ACTION_USE
+};
+
+enum GameEventItemOutcome {
+    GAME_ITEM_OUTCOME_NONE = 0,
+    GAME_ITEM_OUTCOME_OK,
+    GAME_ITEM_OUTCOME_BLOCKED_COMBAT,
+    GAME_ITEM_OUTCOME_NO_BODY,
+    GAME_ITEM_OUTCOME_BODY_STRIPPED,
+    GAME_ITEM_OUTCOME_BAG_FULL_DROP,
+    GAME_ITEM_OUTCOME_NOTHING_HERE,
+    GAME_ITEM_OUTCOME_NOT_HERE,
+    GAME_ITEM_OUTCOME_BAG_FULL,
+    GAME_ITEM_OUTCOME_NOT_CARRYING,
+    GAME_ITEM_OUTCOME_GROUND_FULL,
+    GAME_ITEM_OUTCOME_WRONG_ITEM,
+    GAME_ITEM_OUTCOME_HP_FULL
+};
+
+enum GameEventCraftOutcome {
+    GAME_CRAFT_OUTCOME_NONE = 0,
+    GAME_CRAFT_OUTCOME_OK,
+    GAME_CRAFT_OUTCOME_BLOCKED_COMBAT,
+    GAME_CRAFT_OUTCOME_NEED_INGREDIENTS,
+    GAME_CRAFT_OUTCOME_UNKNOWN
+};
+
+enum GameEventEquipOutcome {
+    GAME_EQUIP_OUTCOME_NONE = 0,
+    GAME_EQUIP_OUTCOME_ALREADY_WIELDING,
+    GAME_EQUIP_OUTCOME_NOT_CARRYING,
+    GAME_EQUIP_OUTCOME_NOT_WEAPON,
+    GAME_EQUIP_OUTCOME_STOW_FAIL,
+    GAME_EQUIP_OUTCOME_WIELDED,
+    GAME_EQUIP_OUTCOME_UNWIELD_EMPTY,
+    GAME_EQUIP_OUTCOME_UNWIELD_STOWED,
+    GAME_EQUIP_OUTCOME_UNWIELD_CANNOT,
+    GAME_EQUIP_OUTCOME_UNWIELD_DROPPED
 };
 
 /*
  * Legacy presentation kinds (GAME_EVENT_LEGACY + legacy_kind). Command/nav
  * MAP, HELP, WAIT, CANNOT_MOVE, UNKNOWN_COMMAND, and MOVED also have
- * GAME_EVENT_* kinds after #157; keep these until all gout_push callers migrate.
+ * GAME_EVENT_* kinds after #157; invent after #158. Keep GAME_OUT_INV_* until
+ * legacy queue paths no longer emit them.
  */
 enum GameOutKind {
     GAME_OUT_NONE = 0,

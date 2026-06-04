@@ -1,6 +1,7 @@
 /*
  * Inventory and ground-slot ownership live here; the module keeps bag, hand,
  * and room storage explicit so the DOS-sized buffers stay predictable.
+ * #158: command handlers queue GAME_EVENT_* outcomes; grendr maps them to text.
  */
 
 #include "config.h"
@@ -8,6 +9,27 @@
 #include "game.h"
 #include "gout.h"
 #include "items.h"
+
+/*
+ * #158: typed inventory events (payload layout in gout.h). Queue carries item
+ * ids and numeric context only; grendr resolves item_name and player copy.
+ */
+static void push_item_result(struct GameOutput *out, int action, int outcome,
+                             int item_id, int value)
+{
+    game_event_push(out, GAME_EVENT_ITEM_RESULT, action, outcome, item_id,
+        value, 0);
+}
+
+static void push_craft_result(struct GameOutput *out, int item_id, int outcome)
+{
+    game_event_push(out, GAME_EVENT_CRAFT_RESULT, item_id, outcome, 0, 0, 0);
+}
+
+static void push_equip_result(struct GameOutput *out, int item_id, int outcome)
+{
+    game_event_push(out, GAME_EVENT_EQUIP_RESULT, item_id, outcome, 0, 0, 0);
+}
 
 int game_room_ground_try_add(struct GameState *game, int room_id, int item_id)
 {
@@ -159,19 +181,23 @@ int game_inv_cmd_loot(struct GameState *game, struct GameOutput *out)
 
     room_id = game->player.room_id;
     if (!game->corpse_present[room_id]) {
-        gout_push(out, GAME_OUT_INV_NO_BODY_LOOT, 0, 0, 0, 0, 0);
+        push_item_result(out, GAME_ITEM_ACTION_LOOT, GAME_ITEM_OUTCOME_NO_BODY,
+            ITEM_NONE, 0);
         return 1;
     }
     ground_item = game->corpse_loot[room_id];
     if (ground_item == ITEM_NONE) {
-        gout_push(out, GAME_OUT_INV_BODY_STRIPPED, 0, 0, 0, 0, 0);
+        push_item_result(out, GAME_ITEM_ACTION_LOOT,
+            GAME_ITEM_OUTCOME_BODY_STRIPPED, ITEM_NONE, 0);
         return 1;
     }
     if (!game_inv_bag_add(game, ground_item)) {
-        gout_push(out, GAME_OUT_INV_BAG_FULL_DROP, 0, 0, 0, 0, 0);
+        push_item_result(out, GAME_ITEM_ACTION_LOOT,
+            GAME_ITEM_OUTCOME_BAG_FULL_DROP, ground_item, 0);
         return 1;
     }
-    gout_push(out, GAME_OUT_INV_LOOT, 0, 0, 0, 0, item_name(ground_item));
+    push_item_result(out, GAME_ITEM_ACTION_LOOT, GAME_ITEM_OUTCOME_OK,
+        ground_item, 0);
     game->corpse_loot[room_id] = ITEM_NONE;
     game->corpse_present[room_id] = 0;
     return 1;
@@ -184,26 +210,31 @@ int game_inv_cmd_take(struct GameState *game, int item_arg, struct GameOutput *o
     int slot;
 
     if (game->mode == GAME_MODE_COMBAT) {
-        gout_push(out, GAME_OUT_INV_NO_RUMMAGE_COMBAT, 0, 0, 0, 0, 0);
+        push_item_result(out, GAME_ITEM_ACTION_TAKE,
+            GAME_ITEM_OUTCOME_BLOCKED_COMBAT, item_arg, 0);
         return 1;
     }
     room_id = game->player.room_id;
     if (room_ground_is_empty(game, room_id)) {
-        gout_push(out, GAME_OUT_INV_TAKE_NOTHING, 0, 0, 0, 0, 0);
+        push_item_result(out, GAME_ITEM_ACTION_TAKE,
+            GAME_ITEM_OUTCOME_NOTHING_HERE, ITEM_NONE, 0);
         return 1;
     }
     slot = room_find_item_slot(game, room_id, item_arg);
     if (slot < 0) {
-        gout_push(out, GAME_OUT_INV_CANNOT_TAKE_HERE, 0, 0, 0, 0, 0);
+        push_item_result(out, GAME_ITEM_ACTION_TAKE,
+            GAME_ITEM_OUTCOME_NOT_HERE, item_arg, 0);
         return 1;
     }
     ground_item = game->room_item[room_id][slot];
     if (!game_inv_bag_add(game, ground_item)) {
-        gout_push(out, GAME_OUT_INV_BAG_FULL, game->bag_capacity, 0, 0, 0, 0);
+        push_item_result(out, GAME_ITEM_ACTION_TAKE,
+            GAME_ITEM_OUTCOME_BAG_FULL, ground_item, game->bag_capacity);
         return 1;
     }
     room_remove_slot_compact(game, room_id, slot);
-    gout_push(out, GAME_OUT_INV_PICKUP, 0, 0, 0, 0, item_name(ground_item));
+    push_item_result(out, GAME_ITEM_ACTION_TAKE, GAME_ITEM_OUTCOME_OK,
+        ground_item, 0);
     return 1;
 }
 
@@ -216,7 +247,8 @@ int game_inv_cmd_take_all(struct GameState *game, struct GameOutput *out)
     int i;
 
     if (game->mode == GAME_MODE_COMBAT) {
-        gout_push(out, GAME_OUT_INV_NO_RUMMAGE_COMBAT, 0, 0, 0, 0, 0);
+        push_item_result(out, GAME_ITEM_ACTION_TAKE,
+            GAME_ITEM_OUTCOME_BLOCKED_COMBAT, ITEM_NONE, 0);
         return 1;
     }
     room_id = game->player.room_id;
@@ -228,11 +260,13 @@ int game_inv_cmd_take_all(struct GameState *game, struct GameOutput *out)
         }
     }
     if (ground_count == 0) {
-        gout_push(out, GAME_OUT_INV_TAKE_NOTHING, 0, 0, 0, 0, 0);
+        push_item_result(out, GAME_ITEM_ACTION_TAKE,
+            GAME_ITEM_OUTCOME_NOTHING_HERE, ITEM_NONE, 0);
         return 1;
     }
     if (game->bag_count + ground_count > game->bag_capacity) {
-        gout_push(out, GAME_OUT_INV_BAG_FULL, game->bag_capacity, 0, 0, 0, 0);
+        push_item_result(out, GAME_ITEM_ACTION_TAKE,
+            GAME_ITEM_OUTCOME_BAG_FULL, ITEM_NONE, game->bag_capacity);
         return 1;
     }
     for (i = 0; i < ground_count; ++i) {
@@ -242,7 +276,8 @@ int game_inv_cmd_take_all(struct GameState *game, struct GameOutput *out)
         game->room_item[room_id][slot] = ITEM_NONE;
     }
     for (i = 0; i < ground_count; ++i) {
-        gout_push(out, GAME_OUT_INV_PICKUP, 0, 0, 0, 0, item_name(ground_items[i]));
+        push_item_result(out, GAME_ITEM_ACTION_TAKE, GAME_ITEM_OUTCOME_OK,
+            ground_items[i], 0);
     }
     return 1;
 }
@@ -253,17 +288,20 @@ int game_inv_cmd_drop(struct GameState *game, int item_arg, struct GameOutput *o
     int slot;
 
     if (game->mode == GAME_MODE_COMBAT) {
-        gout_push(out, GAME_OUT_INV_NO_DROP_COMBAT, 0, 0, 0, 0, 0);
+        push_item_result(out, GAME_ITEM_ACTION_DROP,
+            GAME_ITEM_OUTCOME_BLOCKED_COMBAT, item_arg, 0);
         return 1;
     }
     room_id = game->player.room_id;
     if (!game_inv_player_has_item(game, item_arg)) {
-        gout_push(out, GAME_OUT_INV_NOT_CARRYING, 0, 0, 0, 0, item_name(item_arg));
+        push_item_result(out, GAME_ITEM_ACTION_DROP,
+            GAME_ITEM_OUTCOME_NOT_CARRYING, item_arg, 0);
         return 1;
     }
     slot = room_first_free_slot(game, room_id);
     if (slot < 0) {
-        gout_push(out, GAME_OUT_INV_GROUND_FULL, CFG_AREA_ITEM_SLOTS, 0, 0, 0, 0);
+        push_item_result(out, GAME_ITEM_ACTION_DROP,
+            GAME_ITEM_OUTCOME_GROUND_FULL, item_arg, CFG_AREA_ITEM_SLOTS);
         return 1;
     }
     {
@@ -276,47 +314,48 @@ int game_inv_cmd_drop(struct GameState *game, int item_arg, struct GameOutput *o
         } else if (game->weapon_equipped == item_arg) {
             game->weapon_equipped = ITEM_NONE;
         } else {
-            gout_push(out, GAME_OUT_INV_NOT_CARRYING, 0, 0, 0, 0, item_name(item_arg));
+            push_item_result(out, GAME_ITEM_ACTION_DROP,
+                GAME_ITEM_OUTCOME_NOT_CARRYING, item_arg, 0);
             return 1;
         }
     }
     game->room_item[room_id][slot] = item_arg;
-    gout_push(out, GAME_OUT_INV_DROP, 0, 0, 0, 0, item_name(item_arg));
+    push_item_result(out, GAME_ITEM_ACTION_DROP, GAME_ITEM_OUTCOME_OK,
+        item_arg, 0);
     return 1;
 }
 
 int game_inv_cmd_bag(struct GameState *game, struct GameOutput *out)
 {
     (void)game;
-    gout_push(out, GAME_OUT_INV_BAG, 0, 0, 0, 0, 0);
+    game_event_push(out, GAME_EVENT_BAG_VIEW, 0, 0, 0, 0, 0);
     return 1;
 }
 
 int game_inv_cmd_eat(struct GameState *game, int item_arg, struct GameOutput *out)
 {
     if (game->mode == GAME_MODE_COMBAT) {
-        gout_push(out, GAME_OUT_INV_NO_EAT_COMBAT, 0, 0, 0, 0, 0);
+        push_item_result(out, GAME_ITEM_ACTION_EAT,
+            GAME_ITEM_OUTCOME_BLOCKED_COMBAT, item_arg, 0);
         return 1;
     }
     if (game_inv_bag_find_index(game, item_arg) < 0) {
-        gout_push(out, GAME_OUT_INV_NOT_CARRYING, 0, 0, 0, 0, item_name(item_arg));
+        push_item_result(out, GAME_ITEM_ACTION_EAT,
+            GAME_ITEM_OUTCOME_NOT_CARRYING, item_arg, 0);
         return 1;
     }
     if (!item_is_edible(item_arg)) {
-        gout_push(out, GAME_OUT_INV_CANNOT_EAT, 0, 0, 0, 0, item_name(item_arg));
+        push_item_result(out, GAME_ITEM_ACTION_EAT,
+            GAME_ITEM_OUTCOME_WRONG_ITEM, item_arg, 0);
         return 1;
     }
     game_inv_bag_remove_item(game, item_arg);
     if (!game_heal_player(game, item_food_heal_amount(item_arg))) {
-        if (item_arg == ITEM_BERRY) {
-            gout_push(out, GAME_OUT_INV_EAT_BERRY_FULL, 0, 0, 0, 0, 0);
-        } else {
-            gout_push(out, GAME_OUT_INV_EAT_FISH_FULL, 0, 0, 0, 0, 0);
-        }
-    } else if (item_arg == ITEM_BERRY) {
-        gout_push(out, GAME_OUT_INV_EAT_BERRY_HEALED, game->player_hp, 0, 0, 0, 0);
+        push_item_result(out, GAME_ITEM_ACTION_EAT, GAME_ITEM_OUTCOME_HP_FULL,
+            item_arg, 0);
     } else {
-        gout_push(out, GAME_OUT_INV_EAT_FISH_HEALED, game->player_hp, 0, 0, 0, 0);
+        push_item_result(out, GAME_ITEM_ACTION_EAT, GAME_ITEM_OUTCOME_OK,
+            item_arg, game->player_hp);
     }
     return 1;
 }
@@ -324,31 +363,38 @@ int game_inv_cmd_eat(struct GameState *game, int item_arg, struct GameOutput *ou
 int game_inv_cmd_use(struct GameState *game, int item_arg, struct GameOutput *out)
 {
     if (game->mode == GAME_MODE_COMBAT) {
-        gout_push(out, GAME_OUT_INV_USE_REPLY_COMBAT, 0, 0, 0, 0, 0);
+        push_item_result(out, GAME_ITEM_ACTION_USE,
+            GAME_ITEM_OUTCOME_BLOCKED_COMBAT, item_arg, 0);
         return 1;
     }
     if (game_inv_bag_find_index(game, item_arg) < 0) {
-        gout_push(out, GAME_OUT_INV_NOT_CARRYING, 0, 0, 0, 0, item_name(item_arg));
+        push_item_result(out, GAME_ITEM_ACTION_USE,
+            GAME_ITEM_OUTCOME_NOT_CARRYING, item_arg, 0);
         return 1;
     }
     if (item_arg == ITEM_TORCH) {
-        gout_push(out, GAME_OUT_INV_USE_TORCH, 0, 0, 0, 0, 0);
+        push_item_result(out, GAME_ITEM_ACTION_USE, GAME_ITEM_OUTCOME_OK,
+            item_arg, 0);
         return 1;
     }
     if (item_arg == ITEM_SALVE) {
         game_inv_bag_remove_item(game, item_arg);
         if (game_heal_player(game, CFG_SALVE_HEAL_AMOUNT)) {
-            gout_push(out, GAME_OUT_INV_USE_SALVE, game->player_hp, 0, 0, 0, 0);
+            push_item_result(out, GAME_ITEM_ACTION_USE, GAME_ITEM_OUTCOME_OK,
+                item_arg, game->player_hp);
         } else {
-            gout_push(out, GAME_OUT_INV_USE_SALVE_FULL, 0, 0, 0, 0, 0);
+            push_item_result(out, GAME_ITEM_ACTION_USE,
+                GAME_ITEM_OUTCOME_HP_FULL, item_arg, 0);
         }
         return 1;
     }
     if (item_arg == ITEM_SPEAR) {
-        gout_push(out, GAME_OUT_INV_USE_SPEAR, 0, 0, 0, 0, 0);
+        push_item_result(out, GAME_ITEM_ACTION_USE, GAME_ITEM_OUTCOME_OK,
+            item_arg, 0);
         return 1;
     }
-    gout_push(out, GAME_OUT_INV_NO_USE, 0, 0, 0, 0, item_name(item_arg));
+    push_item_result(out, GAME_ITEM_ACTION_USE, GAME_ITEM_OUTCOME_WRONG_ITEM,
+        item_arg, 0);
     return 1;
 }
 
@@ -368,46 +414,49 @@ static int craft_consume_one(struct GameState *game, int item_id)
 int game_inv_cmd_craft(struct GameState *game, int item_arg, struct GameOutput *out)
 {
     if (game->mode == GAME_MODE_COMBAT) {
-        gout_push(out, GAME_OUT_INV_NO_CRAFT_COMBAT, 0, 0, 0, 0, 0);
+        push_craft_result(out, item_arg, GAME_CRAFT_OUTCOME_BLOCKED_COMBAT);
         return 1;
     }
     if (item_arg == ITEM_TORCH) {
         if (!game_inv_player_has_item(game, ITEM_STICK) ||
                 !game_inv_player_has_item(game, ITEM_REED)) {
-            gout_push(out, GAME_OUT_INV_NEED_TORCH, 0, 0, 0, 0, 0);
+            push_craft_result(out, item_arg,
+                GAME_CRAFT_OUTCOME_NEED_INGREDIENTS);
             return 1;
         }
         craft_consume_one(game, ITEM_STICK);
         craft_consume_one(game, ITEM_REED);
         game_inv_bag_add(game, ITEM_TORCH);
-        gout_push(out, GAME_OUT_INV_CRAFT_TORCH, 0, 0, 0, 0, 0);
+        push_craft_result(out, item_arg, GAME_CRAFT_OUTCOME_OK);
         return 1;
     }
     if (item_arg == ITEM_SALVE) {
         if (!game_inv_player_has_item(game, ITEM_HERB) ||
                 !game_inv_player_has_item(game, ITEM_BERRY)) {
-            gout_push(out, GAME_OUT_INV_NEED_SALVE, 0, 0, 0, 0, 0);
+            push_craft_result(out, item_arg,
+                GAME_CRAFT_OUTCOME_NEED_INGREDIENTS);
             return 1;
         }
         craft_consume_one(game, ITEM_HERB);
         craft_consume_one(game, ITEM_BERRY);
         game_inv_bag_add(game, ITEM_SALVE);
-        gout_push(out, GAME_OUT_INV_CRAFT_SALVE, 0, 0, 0, 0, 0);
+        push_craft_result(out, item_arg, GAME_CRAFT_OUTCOME_OK);
         return 1;
     }
     if (item_arg == ITEM_SPEAR) {
         if (!game_inv_player_has_item(game, ITEM_STICK) ||
                 !game_inv_player_has_item(game, ITEM_STONE)) {
-            gout_push(out, GAME_OUT_INV_NEED_SPEAR, 0, 0, 0, 0, 0);
+            push_craft_result(out, item_arg,
+                GAME_CRAFT_OUTCOME_NEED_INGREDIENTS);
             return 1;
         }
         craft_consume_one(game, ITEM_STICK);
         craft_consume_one(game, ITEM_STONE);
         game_inv_bag_add(game, ITEM_SPEAR);
-        gout_push(out, GAME_OUT_INV_CRAFT_SPEAR, 0, 0, 0, 0, 0);
+        push_craft_result(out, item_arg, GAME_CRAFT_OUTCOME_OK);
         return 1;
     }
-    gout_push(out, GAME_OUT_INV_CRAFT_UNKNOWN, 0, 0, 0, 0, 0);
+    push_craft_result(out, item_arg, GAME_CRAFT_OUTCOME_UNKNOWN);
     return 1;
 }
 
@@ -417,16 +466,17 @@ int game_inv_cmd_wield(struct GameState *game, int item_arg, struct GameOutput *
     int old_weapon;
 
     if (item_arg == game->weapon_equipped) {
-        gout_push(out, GAME_OUT_INV_ALREADY_WIELDING, 0, 0, 0, 0, item_name(item_arg));
+        push_equip_result(out, item_arg,
+            GAME_EQUIP_OUTCOME_ALREADY_WIELDING);
         return 1;
     }
     idx = game_inv_bag_find_index(game, item_arg);
     if (idx < 0) {
-        gout_push(out, GAME_OUT_INV_NOT_CARRYING, 0, 0, 0, 0, item_name(item_arg));
+        push_equip_result(out, item_arg, GAME_EQUIP_OUTCOME_NOT_CARRYING);
         return 1;
     }
     if (!item_is_weapon(item_arg)) {
-        gout_push(out, GAME_OUT_INV_WIELD_NOT_WEAPON, 0, 0, 0, 0, 0);
+        push_equip_result(out, item_arg, GAME_EQUIP_OUTCOME_NOT_WEAPON);
         return 1;
     }
     old_weapon = game->weapon_equipped;
@@ -440,12 +490,12 @@ int game_inv_cmd_wield(struct GameState *game, int item_arg, struct GameOutput *
                 return 1;
             }
             game->weapon_equipped = old_weapon;
-            gout_push(out, GAME_OUT_INV_WIELD_STOW_FAIL, 0, 0, 0, 0, 0);
+            push_equip_result(out, item_arg, GAME_EQUIP_OUTCOME_STOW_FAIL);
             return 1;
         }
     }
     game->weapon_equipped = item_arg;
-    gout_push(out, GAME_OUT_INV_WIELD, 0, 0, 0, 0, item_name(item_arg));
+    push_equip_result(out, item_arg, GAME_EQUIP_OUTCOME_WIELDED);
     return 1;
 }
 
@@ -456,27 +506,27 @@ int game_inv_cmd_unwield(struct GameState *game, struct GameOutput *out)
     int w;
 
     if (game->weapon_equipped == ITEM_NONE) {
-        gout_push(out, GAME_OUT_INV_UNWIELD_EMPTY, 0, 0, 0, 0, 0);
+        push_equip_result(out, ITEM_NONE, GAME_EQUIP_OUTCOME_UNWIELD_EMPTY);
         return 1;
     }
     w = game->weapon_equipped;
     if (game_inv_bag_add(game, w)) {
         game->weapon_equipped = ITEM_NONE;
-        gout_push(out, GAME_OUT_INV_UNWIELD, 0, 0, 0, 0, 0);
+        push_equip_result(out, w, GAME_EQUIP_OUTCOME_UNWIELD_STOWED);
         return 1;
     }
     if (game->mode == GAME_MODE_COMBAT) {
-        gout_push(out, GAME_OUT_INV_UNWIELD_CANNOT, 0, 0, 0, 0, 0);
+        push_equip_result(out, w, GAME_EQUIP_OUTCOME_UNWIELD_CANNOT);
         return 1;
     }
     room_id = game->player.room_id;
     slot = room_first_free_slot(game, room_id);
     if (slot < 0) {
-        gout_push(out, GAME_OUT_INV_UNWIELD_CANNOT, 0, 0, 0, 0, 0);
+        push_equip_result(out, w, GAME_EQUIP_OUTCOME_UNWIELD_CANNOT);
         return 1;
     }
     game->weapon_equipped = ITEM_NONE;
     game->room_item[room_id][slot] = w;
-    gout_push(out, GAME_OUT_INV_UNWIELD_GROUND, 0, 0, 0, 0, item_name(w));
+    push_equip_result(out, w, GAME_EQUIP_OUTCOME_UNWIELD_DROPPED);
     return 1;
 }
