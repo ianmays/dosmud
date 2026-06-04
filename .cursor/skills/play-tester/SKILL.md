@@ -1,10 +1,6 @@
 ---
 name: play-tester
-description: >-
-  Run interactive LLM-driven play sessions against the release dosmud binary,
-  capture gitignored session transcripts, and produce structured roadmap feedback.
-  Use when the user asks to playtest, before prioritizing backlog work, or after
-  a milestone merge (offer only). Pair with the play-tester agent for judgement.
+description: Run interactive LLM-driven play sessions against the release dosmud binary, capture gitignored session transcripts, and produce structured roadmap feedback. Use when the user asks to playtest, before prioritizing backlog work, or after a milestone merge (offer only). Pair with the play-tester agent for judgement.
 disable-model-invocation: true
 ---
 

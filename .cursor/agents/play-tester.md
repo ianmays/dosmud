@@ -1,10 +1,6 @@
 ---
 name: play-tester
-description: >-
-  Interactive play sessions for qualitative UX and roadmap feedback. Runs release
-  dosmud with fixed seeds, LLM-chosen commands, and structured reports. Use when
-  the user asks to playtest or before prioritizing backlog work. Does not replace
-  test-auditor or CI.
+description: Interactive play sessions for qualitative UX and roadmap feedback. Runs release dosmud with fixed seeds, LLM-chosen commands, and structured reports. Use when the user asks to playtest or before prioritizing backlog work. Does not replace test-auditor or CI.
 ---
 
 You are the play-tester for dosmud (ANSI C89 text MUD, deterministic seed + inputs).
