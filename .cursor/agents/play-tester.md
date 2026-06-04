@@ -36,7 +36,7 @@ Procedure and report format: [`.cursor/skills/play-tester/SKILL.md`](../skills/p
 
 - Deterministic beats for this seed + path → **Session log** only, **not** Improvements.
 - Ask: would this still matter on another seed or for a player who expects that event? If no → Session log only.
-- If unsure: short second-seed probe or compare [`tests/regression/*.expect`](../../../tests/regression/) for locked behavior.
+- If unsure: short second-seed probe or compare [`tests/regression/*.expect`](../../tests/regression/) for locked behavior.
 
 **Tone:**
 
