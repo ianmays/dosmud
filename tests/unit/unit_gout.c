@@ -2,6 +2,7 @@
 #include "config.h"
 #include "command.h"
 #include "gout.h"
+#include "items.h"
 
 TEST gout_reset_clears_state(void)
 {
@@ -94,6 +95,34 @@ TEST game_event_push_records_command_nav_kinds(void)
     PASS();
 }
 
+TEST game_event_push_records_inventory_kinds(void)
+{
+    GameEventQueue out;
+
+    game_event_queue_reset(&out);
+    ASSERT(0 != game_event_push(&out, GAME_EVENT_ITEM_RESULT,
+        GAME_ITEM_ACTION_TAKE, GAME_ITEM_OUTCOME_OK, 42, 5, 0));
+    ASSERT(0 != game_event_push(&out, GAME_EVENT_BAG_VIEW, 0, 0, 0, 0, 0));
+    ASSERT(0 != game_event_push(&out, GAME_EVENT_CRAFT_RESULT,
+        ITEM_TORCH, GAME_CRAFT_OUTCOME_OK, 0, 0, 0));
+    ASSERT(0 != game_event_push(&out, GAME_EVENT_EQUIP_RESULT,
+        ITEM_STICK, GAME_EQUIP_OUTCOME_WIELDED, 0, 0, 0));
+    ASSERT_EQ(4, out.count);
+    ASSERT_EQ(GAME_EVENT_ITEM_RESULT, out.events[0].kind);
+    ASSERT_EQ(GAME_ITEM_ACTION_TAKE, out.events[0].arg0);
+    ASSERT_EQ(GAME_ITEM_OUTCOME_OK, out.events[0].arg1);
+    ASSERT_EQ(42, out.events[0].arg2);
+    ASSERT_EQ(5, out.events[0].arg3);
+    ASSERT_EQ(GAME_EVENT_BAG_VIEW, out.events[1].kind);
+    ASSERT_EQ(GAME_EVENT_CRAFT_RESULT, out.events[2].kind);
+    ASSERT_EQ(ITEM_TORCH, out.events[2].arg0);
+    ASSERT_EQ(GAME_CRAFT_OUTCOME_OK, out.events[2].arg1);
+    ASSERT_EQ(GAME_EVENT_EQUIP_RESULT, out.events[3].kind);
+    ASSERT_EQ(ITEM_STICK, out.events[3].arg0);
+    ASSERT_EQ(GAME_EQUIP_OUTCOME_WIELDED, out.events[3].arg1);
+    PASS();
+}
+
 SUITE(gout) {
     RUN_TEST(gout_reset_clears_state);
     RUN_TEST(gout_push_records_event_fields);
@@ -101,4 +130,5 @@ SUITE(gout) {
     RUN_TEST(gout_push_marks_overflow_at_capacity);
     RUN_TEST(game_event_push_records_generic_move);
     RUN_TEST(game_event_push_records_command_nav_kinds);
+    RUN_TEST(game_event_push_records_inventory_kinds);
 }

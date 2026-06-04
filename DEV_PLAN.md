@@ -509,9 +509,11 @@ Done ✅ ([#167](https://github.com/ianmays/dosmud/pull/167)).
 
 Direct `#47` follow-up. Move inventory and item-interaction output to generic item/bag/crafting/equipment event families.
 
+Done ✅.
+
 ### Testing
-- Unit: update `tests/unit/unit_invent.c` and queue/payload assertions impacted by inventory migration
-- Snapshots: cover deterministic bag capacity, missing-item, and wield/unwield or craft outcomes
+- Unit: `unit_inv.c` asserts generic inventory payloads for loot, take, drop, bag, eat, use, craft, and wield/unwield paths; `unit_gout.c` covers the added inventory event families
+- Snapshots: `bag_view` covers the generic bag-display path; existing inventory snapshots remain stable for bag capacity, missing-item, and wield/unwield or craft outcomes
 
 ### [#159](https://github.com/ianmays/dosmud/issues/159) - Combat/progression GameEvent migration
 

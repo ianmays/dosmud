@@ -64,7 +64,7 @@ Presentation only: room art, HUD, combat text, inventory messages, and explorati
 
 - **`txtres`** holds static copy; it does not print
 - **`fmt`** builds player-visible strings from `GameState` into caller buffers (no terminal I/O); logic-heavy formatting (for example aggregated bag lists) lives here
-- **`grendr`** is the only gameplay-adjacent module that may call `printf`; it prints `fmt` output, applies newline/spacing tiers, draws ASCII art, and acts as the DOSMUD text-render adapter over the event queue. During the `#47` migration it supports both generic `GameEvent` kinds and a temporary legacy `GAME_OUT_*` compatibility path.
+- **`grendr`** is the only gameplay-adjacent module that may call `printf`; it prints `fmt` output, applies newline/spacing tiers, draws ASCII art, and acts as the DOSMUD text-render adapter over the event queue. During the `#47` migration it supports generic `GameEvent` kinds for room/move, command/navigation, and inventory/item flows alongside a temporary legacy `GAME_OUT_*` compatibility path for the remaining slices.
 
 Platform or frontend code runs simulation first, then hands the resulting `GameEvent` records to render; render never changes simulation state.
 

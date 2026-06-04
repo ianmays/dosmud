@@ -805,6 +805,194 @@ static void render_legacy_output_event(const struct GameState *game,
     }
 }
 
+static void render_item_result_event(const GameEvent *ev)
+{
+    switch (ev->arg0) {
+    case GAME_ITEM_ACTION_LOOT:
+        switch (ev->arg1) {
+        case GAME_ITEM_OUTCOME_OK:
+            render_inv_loot(item_name(ev->arg2));
+            break;
+        case GAME_ITEM_OUTCOME_NO_BODY:
+            render_inv_no_body_loot();
+            break;
+        case GAME_ITEM_OUTCOME_BODY_STRIPPED:
+            render_inv_body_stripped();
+            break;
+        case GAME_ITEM_OUTCOME_BAG_FULL_DROP:
+            render_inv_bag_full_drop();
+            break;
+        default:
+            break;
+        }
+        break;
+    case GAME_ITEM_ACTION_TAKE:
+        switch (ev->arg1) {
+        case GAME_ITEM_OUTCOME_OK:
+            render_inv_pickup(item_name(ev->arg2));
+            break;
+        case GAME_ITEM_OUTCOME_BLOCKED_COMBAT:
+            render_inv_no_rummage_combat();
+            break;
+        case GAME_ITEM_OUTCOME_NOTHING_HERE:
+            render_inv_take_nothing();
+            break;
+        case GAME_ITEM_OUTCOME_NOT_HERE:
+            render_inv_cannot_take_here();
+            break;
+        case GAME_ITEM_OUTCOME_BAG_FULL:
+            render_inv_bag_full(ev->arg3);
+            break;
+        default:
+            break;
+        }
+        break;
+    case GAME_ITEM_ACTION_DROP:
+        switch (ev->arg1) {
+        case GAME_ITEM_OUTCOME_OK:
+            render_inv_drop(item_name(ev->arg2));
+            break;
+        case GAME_ITEM_OUTCOME_BLOCKED_COMBAT:
+            render_inv_no_drop_combat();
+            break;
+        case GAME_ITEM_OUTCOME_NOT_CARRYING:
+            render_inv_not_carrying(item_name(ev->arg2));
+            break;
+        case GAME_ITEM_OUTCOME_GROUND_FULL:
+            render_inv_ground_full(ev->arg3);
+            break;
+        default:
+            break;
+        }
+        break;
+    case GAME_ITEM_ACTION_EAT:
+        switch (ev->arg1) {
+        case GAME_ITEM_OUTCOME_OK:
+            if (ev->arg2 == ITEM_BERRY) {
+                render_inv_eat_berry_healed(ev->arg3);
+            } else {
+                render_inv_eat_fish_healed(ev->arg3);
+            }
+            break;
+        case GAME_ITEM_OUTCOME_BLOCKED_COMBAT:
+            render_inv_no_eat_combat();
+            break;
+        case GAME_ITEM_OUTCOME_NOT_CARRYING:
+            render_inv_not_carrying(item_name(ev->arg2));
+            break;
+        case GAME_ITEM_OUTCOME_WRONG_ITEM:
+            render_inv_cannot_eat(item_name(ev->arg2));
+            break;
+        case GAME_ITEM_OUTCOME_HP_FULL:
+            if (ev->arg2 == ITEM_BERRY) {
+                render_inv_eat_berry_full();
+            } else {
+                render_inv_eat_fish_full();
+            }
+            break;
+        default:
+            break;
+        }
+        break;
+    case GAME_ITEM_ACTION_USE:
+        switch (ev->arg1) {
+        case GAME_ITEM_OUTCOME_OK:
+            if (ev->arg2 == ITEM_TORCH) {
+                render_inv_use_torch();
+            } else if (ev->arg2 == ITEM_SALVE) {
+                render_inv_use_salve(ev->arg3);
+            } else if (ev->arg2 == ITEM_SPEAR) {
+                render_inv_use_spear();
+            }
+            break;
+        case GAME_ITEM_OUTCOME_BLOCKED_COMBAT:
+            render_inv_use_reply_combat();
+            break;
+        case GAME_ITEM_OUTCOME_NOT_CARRYING:
+            render_inv_not_carrying(item_name(ev->arg2));
+            break;
+        case GAME_ITEM_OUTCOME_WRONG_ITEM:
+            render_inv_no_use(item_name(ev->arg2));
+            break;
+        case GAME_ITEM_OUTCOME_HP_FULL:
+            render_inv_use_salve_full();
+            break;
+        default:
+            break;
+        }
+        break;
+    default:
+        break;
+    }
+}
+
+static void render_craft_result_event(const GameEvent *ev)
+{
+    switch (ev->arg1) {
+    case GAME_CRAFT_OUTCOME_OK:
+        if (ev->arg0 == ITEM_TORCH) {
+            render_inv_craft_torch();
+        } else if (ev->arg0 == ITEM_SALVE) {
+            render_inv_craft_salve();
+        } else if (ev->arg0 == ITEM_SPEAR) {
+            render_inv_craft_spear();
+        }
+        break;
+    case GAME_CRAFT_OUTCOME_BLOCKED_COMBAT:
+        render_inv_no_craft_combat();
+        break;
+    case GAME_CRAFT_OUTCOME_NEED_INGREDIENTS:
+        if (ev->arg0 == ITEM_TORCH) {
+            render_inv_need_torch();
+        } else if (ev->arg0 == ITEM_SALVE) {
+            render_inv_need_salve();
+        } else if (ev->arg0 == ITEM_SPEAR) {
+            render_inv_need_spear();
+        }
+        break;
+    case GAME_CRAFT_OUTCOME_UNKNOWN:
+        render_inv_craft_unknown();
+        break;
+    default:
+        break;
+    }
+}
+
+static void render_equip_result_event(const GameEvent *ev)
+{
+    switch (ev->arg1) {
+    case GAME_EQUIP_OUTCOME_ALREADY_WIELDING:
+        render_inv_already_wielding(item_name(ev->arg0));
+        break;
+    case GAME_EQUIP_OUTCOME_NOT_CARRYING:
+        render_inv_not_carrying(item_name(ev->arg0));
+        break;
+    case GAME_EQUIP_OUTCOME_NOT_WEAPON:
+        render_inv_wield_not_weapon();
+        break;
+    case GAME_EQUIP_OUTCOME_STOW_FAIL:
+        render_inv_wield_stow_fail();
+        break;
+    case GAME_EQUIP_OUTCOME_WIELDED:
+        render_inv_wield(item_name(ev->arg0));
+        break;
+    case GAME_EQUIP_OUTCOME_UNWIELD_EMPTY:
+        render_inv_unwield_empty();
+        break;
+    case GAME_EQUIP_OUTCOME_UNWIELD_STOWED:
+        render_inv_unwield();
+        break;
+    case GAME_EQUIP_OUTCOME_UNWIELD_CANNOT:
+        render_inv_unwield_cannot();
+        break;
+    case GAME_EQUIP_OUTCOME_UNWIELD_DROPPED:
+        render_inv_unwield_ground(item_name(ev->arg0));
+        break;
+    default:
+        break;
+    }
+}
+
 /*
  * Drain the per-step event queue in enqueue order. Core must not print; this is
  * the DOSMUD text adapter for both generic kinds and legacy-wrapped events.
@@ -839,6 +1027,18 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
             break;
         case GAME_EVENT_UNKNOWN_COMMAND:
             render_msg_unknown_command();
+            break;
+        case GAME_EVENT_ITEM_RESULT:
+            render_item_result_event(ev);
+            break;
+        case GAME_EVENT_BAG_VIEW:
+            render_inv_bag(game);
+            break;
+        case GAME_EVENT_CRAFT_RESULT:
+            render_craft_result_event(ev);
+            break;
+        case GAME_EVENT_EQUIP_RESULT:
+            render_equip_result_event(ev);
             break;
         case GAME_EVENT_LEGACY:
             render_legacy_output_event(game, ev);
