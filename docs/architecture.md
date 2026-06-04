@@ -34,7 +34,7 @@ Within core, keep the ownership split explicit:
 
 [`src/game.h`](../src/game.h) defines the engine-facing stepping surface and persistent simulation state; [`src/gout.h`](../src/gout.h) defines the fixed-size event queue that carries engine results to the render edge.
 
-Command and navigation stepping in `game.c` emit generic `GameEventKind` values (handled in `grendr` without the legacy adapter): `GAME_EVENT_MOVE` and `GAME_EVENT_ROOM_LOOK` (successful move plus room look), `GAME_EVENT_MAP`, `GAME_EVENT_HELP` (`arg0` = `CMD_HELP_*` topic), `GAME_EVENT_WAIT`, `GAME_EVENT_CANNOT_MOVE` (`text` = direction name), and `GAME_EVENT_UNKNOWN_COMMAND`. Other producers still append `GAME_EVENT_LEGACY` with a `GameOutKind` until the `#47` migration finishes.
+Command and navigation stepping in `game.c` emit generic `GameEventKind` values (handled in `grendr` without the legacy adapter): `GAME_EVENT_MOVE` and `GAME_EVENT_ROOM_LOOK` (successful move plus room look), `GAME_EVENT_MAP`, `GAME_EVENT_HELP` (`arg0` = `CMD_HELP_*` topic), `GAME_EVENT_WAIT`, `GAME_EVENT_CANNOT_MOVE` (`text` = direction name), and `GAME_EVENT_UNKNOWN_COMMAND`. Inventory and item handlers in `invent.c` emit `GAME_EVENT_ITEM_RESULT`, `GAME_EVENT_BAG_VIEW`, `GAME_EVENT_CRAFT_RESULT`, and `GAME_EVENT_EQUIP_RESULT` (payload contract in [`gout.h`](../src/gout.h)). Other producers still append `GAME_EVENT_LEGACY` with a `GameOutKind` until the `#47` migration finishes.
 
 Core must **not** use:
 
@@ -222,7 +222,7 @@ New `src/*.c` and `src/*.h` basenames must stay within **classic FAT 8+3** (at m
 
 ### `invent`
 
-- bag/inventory state mutation
+- bag/inventory state mutation; command outcomes queue generic `GameEvent` records (`gout`) for `grendr` to render
 - item use and crafting behavior
 - `eat` and inventory `use salve` restore HP via `game_heal_player`; at max HP the item is still consumed but no heal is applied (player sees an already-full message)
 - wield/unwield commands track `weapon_equipped` on `GameState`; a wielded weapon is not stored in `bag[]` (it occupies the hand slot only until unwield, drop, or bandit handover moves it)

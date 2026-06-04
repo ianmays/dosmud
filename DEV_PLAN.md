@@ -76,7 +76,7 @@ flowchart LR
   M5chain --> m9b
 ```
 
-**Completed (m5 foundation):** [#71](https://github.com/ianmays/dosmud/issues/71) engine boundary, [#47](https://github.com/ianmays/dosmud/issues/47) event queue ([#164](https://github.com/ianmays/dosmud/pull/164)), [#157](https://github.com/ianmays/dosmud/issues/157) command/navigation GameEvent migration ([#167](https://github.com/ianmays/dosmud/pull/167)). **Active m5 pull order:** #158 through #163, then adjacent #156 and #16 per blocked-by.
+**Completed (m5 foundation):** [#71](https://github.com/ianmays/dosmud/issues/71) engine boundary, [#47](https://github.com/ianmays/dosmud/issues/47) event queue ([#164](https://github.com/ianmays/dosmud/pull/164)), [#157](https://github.com/ianmays/dosmud/issues/157) command/navigation GameEvent migration ([#167](https://github.com/ianmays/dosmud/pull/167)), [#158](https://github.com/ianmays/dosmud/issues/158) inventory/item GameEvent migration ([#173](https://github.com/ianmays/dosmud/pull/173)). **Active m5 pull order:** #159 through #163, then adjacent #156 and #16 per blocked-by.
 
 Workflow (milestone 4) can run in parallel with architecture once unblocked. In milestone 5, the **GameEvent migration** chain (#157 through #163) follows the completed #47 foundation; [#156](https://github.com/ianmays/dosmud/issues/156) is a separate adjacent replay/logging lane. Content (6) and renderer (7) are not gated on all of mechanics (8).
 
@@ -509,10 +509,10 @@ Done ✅ ([#167](https://github.com/ianmays/dosmud/pull/167)).
 
 Direct `#47` follow-up. Move inventory and item-interaction output to generic item/bag/crafting/equipment event families.
 
-Done ✅.
+Done ✅ ([#173](https://github.com/ianmays/dosmud/pull/173)).
 
 ### Testing
-- Unit: `unit_inv.c` asserts generic inventory payloads for loot, take, drop, bag, eat, use, craft, and wield/unwield paths; `unit_gout.c` covers the added inventory event families
+- Unit: `unit_inv.c` asserts generic inventory payloads for loot, take, drop, bag, eat, use, craft, and wield/unwield paths; `unit_gout.c` covers the added inventory event families ([#173](https://github.com/ianmays/dosmud/pull/173))
 - Snapshots: `bag_view` covers the generic bag-display path; existing inventory snapshots remain stable for bag capacity, missing-item, and wield/unwield or craft outcomes
 
 ### [#159](https://github.com/ianmays/dosmud/issues/159) - Combat/progression GameEvent migration
