@@ -820,6 +820,22 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
         case GAME_EVENT_MOVE:
             render_msg_moved(ev->text);
             break;
+        /* #157 command/nav: direct dispatch (no GAME_EVENT_LEGACY wrapper). */
+        case GAME_EVENT_MAP:
+            render_exploration_map(game);
+            break;
+        case GAME_EVENT_HELP:
+            game_print_help(ev->arg0);
+            break;
+        case GAME_EVENT_WAIT:
+            render_msg_wait();
+            break;
+        case GAME_EVENT_CANNOT_MOVE:
+            render_msg_cannot_move(ev->text);
+            break;
+        case GAME_EVENT_UNKNOWN_COMMAND:
+            render_msg_unknown_command();
+            break;
         case GAME_EVENT_LEGACY:
             render_legacy_output_event(game, ev);
             break;
