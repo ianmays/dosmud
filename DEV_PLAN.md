@@ -499,6 +499,8 @@ Done ✅ ([#164](https://github.com/ianmays/dosmud/pull/164)).
 
 Direct `#47` follow-up. Migrate remaining command/navigation output to generic event families while keeping visible output stable.
 
+Done ✅ (draft PR).
+
 ### Testing
 - Unit: update command/navigation producer assertions that still reference legacy `GAME_OUT_*` constants
 - Snapshots: cover deterministic command/navigation paths through `main`/`testharn` and `grendr`
