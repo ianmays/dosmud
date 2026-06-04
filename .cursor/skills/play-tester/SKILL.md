@@ -1,12 +1,12 @@
 ---
 name: play-tester
-description: Run interactive LLM-driven play sessions against the release dosmud binary, capture gitignored session transcripts, and produce structured roadmap feedback. Use when the user asks to playtest, before prioritizing backlog work, or after a milestone merge (offer only). Pair with the play-tester agent for judgement.
+description: Run interactive LLM-driven play sessions against release dosmud, capture gitignored transcripts, and deliver plain-English reports with required blue-sky ideas. Use when the user asks to playtest or before prioritizing backlog work. Pair with the play-tester agent for judgement.
 disable-model-invocation: true
 ---
 
 # Play-tester
 
-**Procedure (this skill).** Session setup, deterministic replay loop, report format.
+**Procedure (this skill).** Session setup, deterministic replay loop, report format, filtering.
 
 **Judgement (agent).** [`.cursor/agents/play-tester.md`](../../agents/play-tester.md) when delegating a full session.
 
@@ -51,13 +51,23 @@ OUT="${SESSION%.input}.output"
 ```
 
 - Append **one command per line** (no `#` comment lines in v1; the game does not treat them as harness directives in release build).
-- Re-run the **full** script every turn:
+- Re-run the **full** script after each batch of new lines:
 
 ```sh
 ./dosmud --seed "$SEED" < "$SESSION" > "$OUT" 2>&1
 ```
 
 Full replay from line 1 keeps determinism for a fixed seed (same model as snapshot `.input` files).
+
+### Stdin and replay (important)
+
+When input is a file, the main loop reads lines until **EOF**, then exits (often printing `bye`). A script with only one command processes that command and then quits.
+
+For agent-driven play:
+
+- **Do not** append a single line and re-run expecting another interactive turn; EOF ends the session.
+- **Do** grow the script in **batches** (several commands per append) or build the full script through `quit`, then re-run the whole file and read `OUT`.
+- End the script with `quit` when you want a clean stop before budget is spent.
 
 ## Turn loop (interactive LLM)
 
@@ -67,11 +77,11 @@ Copy and track:
 Playtest session:
 - [ ] 1. make build
 - [ ] 2. Create SESSION / OUT paths; record seed in report
-- [ ] 3. Run ./dosmud --seed N < SESSION > OUT
-- [ ] 4. Read tail of OUT (HUD, room, recent > lines, combat/menu text)
-- [ ] 5. Choose one valid command; append to SESSION
-- [ ] 6. Repeat until quit, game ends, or budget exhausted
-- [ ] 7. Write playtest report (format below)
+- [ ] 3. Append commands (batch or full script); include quit when done
+- [ ] 4. Run ./dosmud --seed N < SESSION > OUT
+- [ ] 5. Read tail of OUT (HUD, room, recent > lines, combat/menu text)
+- [ ] 6. Choose next commands; append; repeat 4-5 until quit, budget, or stuck
+- [ ] 7. Generalize findings (filter seed-only beats); write report (format below)
 ```
 
 **Choosing commands:**
@@ -88,7 +98,42 @@ Playtest session:
 - Command budget reached
 - Stuck loop (same unknown command three times) — note in report
 
-**Parse failures:** count "Unknown command" lines; quote the offending turn in the report.
+**Parse failures:** count "Unknown command" lines; if they block play, put under **What felt rough** with plain **What** wording and quote the turn.
+
+## What counts as feedback (filter before you write)
+
+**Seed is for replay, not for blaming the seed.** Record seed and session paths in **Session**. Do not treat "what happened on this run" as automatically backlog-worthy.
+
+Before adding **What felt rough** or an issue draft, ask:
+
+*Would this confuse or disappoint someone on a different seed, or someone who already expects this fight or event?*
+
+If **no** — put it in **Session log** only (expected scripted beat for this path).
+
+If **unsure** — optional short second-seed probe (~10 commands) with another seed (e.g. `5678`); document both seeds in **Session**. Compare [`tests/regression/*.expect`](../../../tests/regression/) when behavior may be locked test content.
+
+### Examples — do not elevate to "What felt rough"
+
+| Session fact | Why skip |
+|--------------|----------|
+| Bandit appears when you pick up the stick at camp (seed 1234) | Deterministic beat for that path, not a defect |
+| Combat starts at T:1 right after `take stick` | Expected pacing for that seed |
+| Map only shows `@` until you have left camp | Player has not explored yet |
+
+### Examples — OK as general feedback (plain player voice)
+
+| What (headline) | Notes |
+|-----------------|-------|
+| After a fight I still see "the bandit is waiting" when I try to walk — I am not sure the fight is over or what to type next. | Messaging when menus block normal commands; not "bandit at camp on seed 1234" |
+| Right after I won a fight, "Nobody is waiting for an answer" sounds like I did something wrong. | Copy tone; cite turn in **Seen when** |
+| When a command is blocked during a fight, `help craft` told me why — more commands could do that. | Positive pattern; generalize |
+
+### Examples — Ideas (no repro required)
+
+- The game would be better if the first room had a short "type help" nudge before any threat.
+- The game would be better if the map showed where I last fought.
+
+Write for a **designer or product reader**, not a systems engineer. No internal jargon ("encounter state", "handover") in **What** lines or issue title candidates.
 
 ## Report format (required)
 
@@ -98,30 +143,50 @@ Deliver in chat:
 ## Playtest report
 
 ### Session
-- seed: …
+- seed: … (optional second seed if probed: …)
 - binary: ./dosmud (release build)
 - commands: N
 - persona / focus: …
 - session files: playtest/sessions/… (local, gitignored)
+- note: this run is replayable; findings below are meant to generalize beyond this seed unless noted
 
-### Observations
-| # | Category | Observation | Evidence (turn / output) | Roadmap suggestion |
+### What felt good
+- … (2–5 bullets, plain English; optional "(turn N)")
 
-Categories: UX, clarity, pacing, balance-feel, dead-end, bug-suspect, positive
+### What felt rough
+(0–6 items; cap for scannability; skip if nothing generalizes)
+
+- **What:** … (one sentence, player voice)
+- **Why it matters:** …
+- **Seen when:** … (optional turn or quote; *What* must still make sense without knowing the seed)
+
+### Ideas
+(required: 5–10 bullets, each starting with "The game would be better if …")
+
+- …
+- … (at least half may be aspirational; tag `[from this run]` when directly inspired by the transcript)
+
+### If you want to track it
+(optional; use the same plain **What** sentence as the issue title candidate)
+
+- **Title:** …
+- scope: …
+- repro: seed + command sequence (repro lives here, not in the headline)
 
 ### Suggested actions
-- [ ] file issue (draft below — not posted unless user approves)
+- [ ] file issue (draft above — not posted unless user approves)
 - [ ] comment on existing issue #…
-- [ ] defer / no action
+- [ ] defer / no action (default when the report is mostly Ideas)
 
-### Issue draft (optional)
-<title one line, lower-case first character per repo commit style>
-
-- bullet scope
-- bullet repro (seed + command sequence)
+### Session log (seed-specific, not backlog)
+- … (expected beats on this seed/path only, e.g. "bandit on take stick at camp")
 ```
 
-Each observation needs **evidence** (turn number or quoted output). Omit vague praise or nitpicks without repro.
+**Required sections:** Session, What felt good, Ideas.
+
+**Optional:** What felt rough (if none, say so in one line), If you want to track it, Session log.
+
+Do not use a category table or jargon-heavy issue titles. Omit vague praise with no player-facing effect.
 
 ## Relationship to other workflows
 
@@ -138,6 +203,7 @@ Each observation needs **evidence** (turn number or quoted output). Omit vague p
 - Open implementation PRs or move project board status
 - File GitHub issues without explicit user approval
 - Replace or skip `make test*` on feature branches
+- List deterministic seed beats as defects in **What felt rough**
 
 ## Appendix (optional modes)
 
