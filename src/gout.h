@@ -92,7 +92,14 @@ enum GameEventEquipOutcome {
 
 /*
  * Combat/progression payload contract (#159):
- * COMBAT      arg0=GameEventCombatPhase; other args per phase (see enum)
+ * COMBAT      arg0=GameEventCombatPhase; arg1/arg2 per phase (combat.c
+ *             push_combat_phase; grendr render_combat_event):
+ *   START            arg1=player_hp arg2=enemy_hp
+ *   ENEMY_DAMAGE     arg1=damage
+ *   STATUS           arg1=player_hp arg2=enemy_hp
+ *   PLAYER_DAMAGE    arg1=damage
+ *   SALVE_HEAL       arg1=player_hp after heal
+ *   (other phases leave arg1/arg2 zero)
  * XP_GAIN     arg0=amount
  * STAT_CHANGE arg0=level arg1=max_hp arg2=damage_bonus arg3=bag_capacity
  */
@@ -115,8 +122,9 @@ enum GameEventCombatPhase {
 /*
  * Legacy presentation kinds (GAME_EVENT_LEGACY + legacy_kind). Command/nav
  * MAP, HELP, WAIT, CANNOT_MOVE, UNKNOWN_COMMAND, and MOVED also have
- * GAME_EVENT_* kinds after #157; invent after #158. Keep GAME_OUT_INV_* until
- * legacy queue paths no longer emit them.
+ * GAME_EVENT_* kinds after #157; invent after #158; combat/progression after
+ * #159. Keep GAME_OUT_COMBAT_*, GAME_OUT_XP_GAINED, GAME_OUT_LEVEL_UP, and
+ * GAME_OUT_INV_* here until #162 removes legacy queue paths.
  */
 enum GameOutKind {
     GAME_OUT_NONE = 0,

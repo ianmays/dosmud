@@ -12,6 +12,10 @@
  * #159: queues GAME_EVENT_COMBAT phases; grendr maps them to combat copy.
  */
 
+/*
+ * #159: typed combat phases (payload layout in gout.h). phase -> event arg0;
+ * payload slots -> arg1/arg2; grendr render_combat_event mirrors this layout.
+ */
 static void push_combat_phase(struct GameOutput *out, int phase,
                               int arg0, int arg1)
 {

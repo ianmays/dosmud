@@ -503,6 +503,10 @@ static void render_legacy_output_event(const struct GameState *game,
     case GAME_OUT_BANDIT_ENCOUNTER_OPEN:
         render_bandit_encounter_open();
         break;
+    /*
+     * #159: combat.c and gprog.c emit GAME_EVENT_*; keep legacy mirrors until
+     * #162 removes GAME_OUT_COMBAT_*, GAME_OUT_XP_GAINED, GAME_OUT_LEVEL_UP.
+     */
     case GAME_OUT_COMBAT_START:
         render_combat_start(ev->arg0, ev->arg1);
         break;
@@ -1002,7 +1006,8 @@ static void render_equip_result_event(const GameEvent *ev)
 }
 
 /*
- * #159: combat.c emits GAME_EVENT_COMBAT phases; adapters reuse render_combat_*.
+ * #159: GAME_EVENT_COMBAT adapter; arg0=phase, arg1/arg2 match combat.c
+ * push_combat_phase (see gout.h). Same render_combat_* helpers as legacy path.
  */
 static void render_combat_event(const GameEvent *ev)
 {
