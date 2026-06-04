@@ -76,7 +76,7 @@ flowchart LR
   M5chain --> m9b
 ```
 
-**Completed (m5 foundation):** [#71](https://github.com/ianmays/dosmud/issues/71) engine boundary, [#47](https://github.com/ianmays/dosmud/issues/47) event queue ([#164](https://github.com/ianmays/dosmud/pull/164)). **Active m5 pull order:** #157 through #163, then adjacent #156 and #16 per blocked-by.
+**Completed (m5 foundation):** [#71](https://github.com/ianmays/dosmud/issues/71) engine boundary, [#47](https://github.com/ianmays/dosmud/issues/47) event queue ([#164](https://github.com/ianmays/dosmud/pull/164)), [#157](https://github.com/ianmays/dosmud/issues/157) command/navigation GameEvent migration ([#167](https://github.com/ianmays/dosmud/pull/167)). **Active m5 pull order:** #158 through #163, then adjacent #156 and #16 per blocked-by.
 
 Workflow (milestone 4) can run in parallel with architecture once unblocked. In milestone 5, the **GameEvent migration** chain (#157 through #163) follows the completed #47 foundation; [#156](https://github.com/ianmays/dosmud/issues/156) is a separate adjacent replay/logging lane. Content (6) and renderer (7) are not gated on all of mechanics (8).
 
@@ -90,7 +90,7 @@ Workflow (milestone 4) can run in parallel with architecture once unblocked. In 
 |------|---------|-------------------------|
 | XS | single trivial change | *(none currently)* |
 | S | narrow feature or tooling slice | #4, #72 |
-| M | one subsystem feature or refactor | #5, #7, #9, #31, #49, #51, #54, #100, #101, #102, #129, #130, #131, #132, #145, #157, #161, #162, #163 |
+| M | one subsystem feature or refactor | #5, #7, #9, #31, #49, #51, #54, #100, #101, #102, #129, #130, #131, #132, #145, #161, #162, #163 |
 | L | major mechanism or platform path | #8, #15, #16, #50, #52, #104, #107, #156, #158, #159, #160 |
 | XL | foundational or multi-area epic | #48, #55, #76, #92 |
 
@@ -502,8 +502,8 @@ Direct `#47` follow-up. Migrate remaining command/navigation output to generic e
 Done ✅ ([#167](https://github.com/ianmays/dosmud/pull/167)).
 
 ### Testing
-- Unit: update command/navigation producer assertions that still reference legacy `GAME_OUT_*` constants
-- Snapshots: cover deterministic command/navigation paths through `main`/`testharn` and `grendr`
+- Unit: `unit_game.c` asserts `GAME_EVENT_*` for help, map, wait, cannot move, and unknown command; `unit_gout.c` covers `game_event_push` for command/nav kinds ([#167](https://github.com/ianmays/dosmud/pull/167))
+- Snapshots: `wait_tick` adds `map`; `unknown_cmd`, `cannot_move`, `walk_north`, and `walk_map` stable through `grendr`
 
 ### [#158](https://github.com/ianmays/dosmud/issues/158) - Inventory/item GameEvent migration
 
