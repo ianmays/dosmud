@@ -78,7 +78,7 @@ static void do_look(struct GameState *game, GameEventQueue *out)
     }
 }
 
-/* MAP: generic event only; map layout and printf stay in grendr. */
+/* MAP: generic event only; map layout and terminal output stay in grendr. */
 static void do_map(GameEventQueue *out)
 {
     game_event_push(out, GAME_EVENT_MAP, 0, 0, 0, 0, 0);
@@ -263,7 +263,7 @@ static int game_cmd_session(struct GameState *game, struct Command *cmd,
                             GameEventQueue *out)
 {
     if (cmd->type == CMD_HELP) {
-        /* HELP topic in arg0; copy/printf owned by grendr (game_print_help). */
+        /* HELP topic in arg0; copy and render owned by grendr (game_print_help). */
         game_event_push(out, GAME_EVENT_HELP, cmd->arg, 0, 0, 0, 0);
         return 1;
     }
