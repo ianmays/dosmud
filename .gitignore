@@ -9,6 +9,10 @@ dos-prepare.local.ps1
 # Snapshot regression (make test-run)
 *.output
 
+# Interactive play-tester sessions (see .cursor/skills/play-tester/SKILL.md)
+playtest/sessions/*
+!playtest/sessions/.gitkeep
+
 # Compile artifacts
 *.o
 *.obj

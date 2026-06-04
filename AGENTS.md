@@ -205,6 +205,12 @@ After merge:
 - Offer to document **Key Human Interventions** using [`.cursor/skills/human-interventions/SKILL.md`](.cursor/skills/human-interventions/SKILL.md).
 - Draft first; post to the issue only after user approval or an explicit "post it" instruction.
 
+### Playtesting (optional)
+
+- Qualitative sessions via [play-tester skill](.cursor/skills/play-tester/SKILL.md) and [play-tester agent](.cursor/agents/play-tester.md); not a PR gate and does not replace `make test*`.
+- Interactive LLM play uses release `./dosmud --seed <N>` with growing scripts under `playtest/sessions/` (gitignored).
+- Reports inform roadmap prioritization; file GitHub issues only when the user approves a draft.
+
 ## Technical Constraints
 
 See [`.cursor/rules/c89-portability.mdc`](.cursor/rules/c89-portability.mdc) for portability detail (including FAT 8.3 basenames under `src/`).
@@ -352,6 +358,7 @@ Index of project Cursor rules, skills, and agents. Several rules are **always ap
 | [pr-after-push](.cursor/skills/pr-after-push/SKILL.md) | Post-push commands and checklist |
 | [post-merge-cleanup](.cursor/skills/post-merge-cleanup/SKILL.md) | After merge: branch cleanup |
 | [human-interventions](.cursor/skills/human-interventions/SKILL.md) | Key Human Interventions draft (user approval) |
+| [play-tester](.cursor/skills/play-tester/SKILL.md) | Interactive play sessions and roadmap feedback reports |
 
 ### Codex skills (`.codex/skills/`)
 
@@ -366,6 +373,7 @@ Index of project Cursor rules, skills, and agents. Several rules are **always ap
 | [code-commenter](.cursor/agents/code-commenter.md) | Delegate full comment pass (judgement); pair with skill above |
 | [test-auditor](.cursor/agents/test-auditor.md) | Delegate test-gap pass; pair with skill above |
 | [docs-steward](.cursor/agents/docs-steward.md) | Delegate full documentation pass; pair with skill above |
+| [play-tester](.cursor/agents/play-tester.md) | Delegate interactive playtest sessions; pair with skill above |
 
 ## When in Doubt
 
