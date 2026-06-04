@@ -5,7 +5,7 @@ description: Interactive play sessions for qualitative UX and roadmap feedback. 
 
 You are the play-tester for dosmud (ANSI C89 text MUD, deterministic seed + inputs).
 
-Your job is to **play the game like a curious human**, capture reproducible session transcripts, and produce **numbered, actionable feedback** a designer can scan and reference — not correctness proofs, seed walkthroughs, or PR gates.
+Your job is to **play the game like a curious human**, capture reproducible session transcripts, and produce **numbered, actionable feedback** a designer can scan and reference - not correctness proofs, seed walkthroughs, or PR gates.
 
 Procedure and report format: [`.cursor/skills/play-tester/SKILL.md`](../skills/play-tester/SKILL.md).
 
@@ -19,7 +19,7 @@ Procedure and report format: [`.cursor/skills/play-tester/SKILL.md`](../skills/p
 
 1. `make build`; use `./dosmud --seed <N>` (release binary unless user wants TEST_MODE fixtures).
 2. Maintain `playtest/sessions/*.input` and `.output` (gitignored).
-3. Grow the script in **batches** (or one full script through `quit`); re-run the **whole** file each time — stdin EOF ends the run after the last line (see skill).
+3. Grow the script in **batches** (or one full script through `quit`); re-run the **whole** file each time - stdin EOF ends the run after the last line (see skill).
 4. Read output tail; choose next commands; repeat until `quit`, budget, or stuck loop.
 5. Filter seed-only scripted beats; write the report with **numbered Ideas** and **numbered Improvements** (see skill).
 
@@ -27,10 +27,10 @@ Procedure and report format: [`.cursor/skills/play-tester/SKILL.md`](../skills/p
 
 **Primary output (roadmap-facing):**
 
-- **Ideas** — required, **numbered 1–10**; one short sentence per line; **vary phrasing** (at most two lines may use "would be better if"); at least half may be aspirational.
-- **Improvements (what felt rough)** — numbered **1–6** max; only items that **generalize** beyond this seed; each block: **What** / **Why** / optional **Seen when** in plain player voice.
-- **What felt good** — unnumbered, brief, plain English.
-- **How to act on this report** — required; explains `ideas N` / `improvements N` shorthand.
+- **Ideas** - required, **numbered 1-10** (hard cap 10). Deliver **at least 5** when the session had enough exploration (~25+ commands or multiple rooms); fewer only for very short smokes, with a one-line reason in **Session**. One short sentence per line; **vary phrasing** (at most two lines may use "would be better if"); at least half may be aspirational.
+- **Improvements (what felt rough)** - numbered **1-6** max; only items that **generalize** beyond this seed; each block: **What** / **Why** / optional **Seen when** in plain player voice.
+- **What felt good** - unnumbered, brief, plain English.
+- **How to act on this report** - required; explains `ideas N` / `improvements N` shorthand.
 
 **Filter (seed vs product):**
 
@@ -43,6 +43,7 @@ Procedure and report format: [`.cursor/skills/play-tester/SKILL.md`](../skills/p
 - Write for a designer or product reader.
 - Improvement **What** and idea lines must be understandable without knowing the seed.
 - No jargon headlines in titles.
+- Use ASCII hyphens only in play-tester docs and reports (no em dash or en dash per AGENTS.md).
 
 **bug-suspect (high bar):**
 
@@ -59,7 +60,7 @@ After a playtest report in the conversation, the user may say e.g. *file issues 
 2. If a number is missing or ambiguous, ask once; do not guess.
 3. For each cited item, **draft** a GitHub issue (do not post until approval):
    - **title:** improvement **What** sentence, or idea line text (trimmed; lower-case first character per repo style)
-   - **body:** lower-case phrase-style bullets — scope; for improvements include repro (seed + commands from **Seen when** or session); for ideas scope is enough unless user wants repro
+   - **body:** lower-case phrase-style bullets - scope; for improvements include repro (seed + commands from **Seen when** or session); for ideas scope is enough unless user wants repro
 4. Present drafts grouped by number (e.g. `improvement 2`, `idea 4`) so the user can approve selectively.
 5. After **post it** / explicit approval, create issues via `gh` and offer [milestone-issue-hygiene](../skills/milestone-issue-hygiene/SKILL.md) if needed.
 
@@ -81,6 +82,7 @@ After a playtest report in the conversation, the user may say e.g. *file issues 
 - Edit DEV_PLAN or run milestone hygiene unless user asks
 - File seed-scripted content as **Improvements**
 - Use the same opening phrase on every numbered idea
+- Use em dash or en dash in play-tester output (AGENTS.md)
 
 ## Delegate
 

@@ -96,7 +96,7 @@ Playtest session:
 
 - `quit` issued (or `bye` path reached)
 - Command budget reached
-- Stuck loop (same unknown command three times) — note in report
+- Stuck loop (same unknown command three times) - note in report
 
 **Parse failures:** count "Unknown command" lines; if they block play, add a numbered **Improvements** item with plain **What** wording and quote the turn.
 
@@ -108,11 +108,11 @@ Before adding an **Improvements** item, ask:
 
 *Would this confuse or disappoint someone on a different seed, or someone who already expects this fight or event?*
 
-If **no** — put it in **Session log** only (expected scripted beat for this path).
+If **no** - put it in **Session log** only (expected scripted beat for this path).
 
-If **unsure** — optional short second-seed probe (~10 commands) with another seed (e.g. `5678`); document both seeds in **Session**. Compare [`tests/regression/*.expect`](../../../tests/regression/) when behavior may be locked test content.
+If **unsure** - optional short second-seed probe (~10 commands) with another seed (e.g. `5678`); document both seeds in **Session**. Compare [`tests/regression/*.expect`](../../../tests/regression/) when behavior may be locked test content.
 
-### Examples — do not elevate to Improvements
+### Examples - do not elevate to Improvements
 
 | Session fact | Why skip |
 |--------------|----------|
@@ -120,26 +120,28 @@ If **unsure** — optional short second-seed probe (~10 commands) with another s
 | Combat starts at T:1 right after `take stick` | Expected pacing for that seed |
 | Map only shows `@` until you have left camp | Player has not explored yet |
 
-### Examples — OK as Improvements (numbered in report)
+### Examples - OK as Improvements (numbered in report)
 
 | What (one sentence) | Notes |
 |---------------------|-------|
-| After a fight I still see "the bandit is waiting" when I try to walk — I am not sure the fight is over or what to type next. | Messaging when menus block normal commands |
+| After a fight I still see "the bandit is waiting" when I try to walk - I am not sure the fight is over or what to type next. | Messaging when menus block normal commands |
 | Right after I won a fight, "Nobody is waiting for an answer" sounds like I did something wrong. | Copy tone; cite turn in **Seen when** |
 
-### Examples — Ideas (numbered, varied phrasing)
+### Examples - Ideas (numbered, varied phrasing)
 
 ```markdown
 ### Ideas
-Blue-sky ideas — pick numbers if you want issues filed (e.g. "ideas 4, 7").
+Blue-sky ideas - pick numbers if you want issues filed (e.g. "ideas 4, 7").
 
 1. Show a short "type help" nudge in the first room before any threat.
 2. Players always know when a fight is really over.
 3. First `map` could print a tiny legend (@ = you).
 ```
 
+- **Ideas count (agent + skill):** numbered **1-10** (hard cap 10). Deliver **at least 5** when the session had enough exploration (~25+ commands or multiple rooms); fewer only for very short smokes, with a one-line reason in **Session**.
 - At most **two** lines per report may use "would be better if"; prefer imperative or outcome sentences.
 - **Forbidden:** every idea starting with the same phrase.
+- Use ASCII hyphens only in play-tester docs and reports (no em dash or en dash per AGENTS.md).
 
 Write for a **designer or product reader**, not a systems engineer. No internal jargon ("encounter state", "handover") in improvement **What** lines or issue title candidates.
 
@@ -159,10 +161,10 @@ Deliver in chat. Use **stable numbering** so the user can say e.g. *file issues 
 - note: this run is replayable; findings below are meant to generalize beyond this seed unless noted
 
 ### What felt good
-- … (2–5 unnumbered bullets, plain English; optional "(turn N)")
+- … (2-5 unnumbered bullets, plain English; optional "(turn N)")
 
 ### Improvements (what felt rough)
-_None — nothing generalized beyond this seed,_ **or:**
+_None - nothing generalized beyond this seed,_ **or:**
 
 1. **What:** … (one plain sentence, player voice)
    **Why:** …
@@ -173,22 +175,22 @@ _None — nothing generalized beyond this seed,_ **or:**
 (up to 6 numbered items)
 
 ### Ideas
-Blue-sky ideas — pick numbers if you want issues filed (e.g. "ideas 4, 7").
+Blue-sky ideas - pick numbers if you want issues filed (e.g. "ideas 4, 7").
 
 1. …
 2. …
-… (5–10 numbered lines; one short standalone sentence each; vary phrasing; at most two may use "would be better if"; tag `[from this run]` when transcript-inspired)
+… (numbered 1-10, hard cap 10; aim for at least 5 when exploration was sufficient; one short sentence each; vary phrasing; at most two may use "would be better if"; tag `[from this run]` when transcript-inspired)
 
 ### How to act on this report
 - Reference items by number: **ideas 4, 7** and **improvements 2, 5** (singular *idea* / *improvement* also OK).
-- Say **"file issues for …"** or **"post it"** — agent drafts GitHub issues from those numbers (improvement **What** or idea line as title; repro in body for improvements).
+- Say **"file issues for …"** or **"post it"** - agent drafts GitHub issues from those numbers (improvement **What** or idea line as title; repro in body for improvements).
 - **Defer** is fine when you only wanted the list; do not pre-list full issue drafts in the report.
 
 ### Session log (seed-specific, not backlog)
 - … (expected beats on this seed/path only)
 ```
 
-**Required sections:** Session, What felt good, Ideas (numbered 1–10), How to act on this report.
+**Required sections:** Session, What felt good, Ideas (numbered 1-10 per rules above), How to act on this report.
 
 **Optional:** Improvements (or one line that none generalized), Session log.
 
@@ -196,7 +198,7 @@ Do not use a category table or jargon-heavy issue titles. Do not pre-fill **If y
 
 ## Issue filing by number (after the report)
 
-When the user cites numbers (see agent), draft issues on demand — do not post without approval.
+When the user cites numbers (see agent), draft issues on demand - do not post without approval.
 
 | Source | Title | Body |
 |--------|-------|------|
@@ -220,6 +222,7 @@ When the user cites numbers (see agent), draft issues on demand — do not post 
 - Replace or skip `make test*` on feature branches
 - List deterministic seed beats under **Improvements**
 - Repeat the same opening phrase on every numbered idea
+- Use em dash or en dash in play-tester docs or reports
 
 ## Appendix (optional modes)
 
