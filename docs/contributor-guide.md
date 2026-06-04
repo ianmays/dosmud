@@ -34,6 +34,8 @@ implement → make test* → test-gap pass (`scripts/check-test-gaps.sh`) → co
 - Comment pass: [`.cursor/skills/code-commenter/SKILL.md`](../.cursor/skills/code-commenter/SKILL.md) (see AGENTS.md **Comment pass**)
 - Documentation pass: [`.cursor/skills/documentation-maintainer/SKILL.md`](../.cursor/skills/documentation-maintainer/SKILL.md) (see AGENTS.md **Documentation pass**)
 
+**Qualitative playtesting (optional):** agents or contributors can run interactive play sessions with the [play-tester skill](../.cursor/skills/play-tester/SKILL.md) (`make build`, `./dosmud --seed <N>`, transcripts under `playtest/sessions/` which are gitignored). Reports number **ideas** and **improvements** for easy follow-up (e.g. file issues for `ideas 4` and `improvements 2`); seed-scripted events stay in the session log, not the backlog. See AGENTS.md **Playtesting (optional)**.
+
 The repo’s GitHub project uses a **Status** field on issues: **Planning** when forming an implementation plan (add decided plan as a comment), **In progress** while you implement (before the PR exists), **Review** once the draft PR is up, **Done** after merge. Details for agents: [AGENTS.md](../AGENTS.md).
 
 [`DEV_PLAN.md`](../DEV_PLAN.md) is a manually curated roadmap log tied to [GitHub milestones](https://github.com/ianmays/dosmud/milestones). When you open a draft **implementation** PR for an issue that already has a section here, mark **Done ✅** (optional PR link). Do not mark Done on hygiene or docs-only PRs. Issue **blocked-by** relationships on GitHub express sequencing. It is not a living status tracker (no updates on push or merge).
@@ -44,6 +46,7 @@ The repo’s GitHub project uses a **Status** field on issues: **Planning** when
 
 - While the PR is a **draft** on GitHub: do not post `review this`.
 - After you mark the PR **Ready for review** (non-draft): comment `review this` on the PR after **each** push that should re-trigger review. Use that exact body text only.
+- When a push addresses inline review comments, resolve those PR review threads on GitHub (agents: same-turn step in [pr-after-push skill](../.cursor/skills/pr-after-push/SKILL.md)).
 - Project board **Review** can be set when the draft PR is opened; GitHub **Ready for review** (`isDraft` false) is what triggers the `review this` convention, not board status alone.
 
 Agents: policy in [AGENTS.md](../AGENTS.md) (**After `git push` to a PR branch**); procedure in [`.cursor/skills/pr-after-push/SKILL.md`](../.cursor/skills/pr-after-push/SKILL.md).
