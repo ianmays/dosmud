@@ -198,7 +198,7 @@ After merge:
 - switch back to `main`
 - pull latest changes
 - delete completed local branches
-- agents: [post-merge-cleanup skill](.cursor/skills/post-merge-cleanup/SKILL.md)
+- agents: [post-merge-cleanup skill](.cursor/skills/post-merge-cleanup/SKILL.md) (project board: closing issue **Done**, card at **top** of Done column)
 
 ### After merge or issue closure
 
