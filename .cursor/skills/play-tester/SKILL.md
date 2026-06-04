@@ -205,12 +205,22 @@ When the user cites numbers (see agent), draft issues on demand - do not post wi
 | Improvement `N` | improvement `N` **What** sentence (lower-case first char) | scope bullet; repro: seed + commands from **Seen when** / session |
 | Idea `N` | idea line `N` text (trimmed; lower-case first char) | scope bullet; repro optional unless user asks |
 
+### After approval (mandatory GitHub metadata)
+
+Per [`AGENTS.md`](../../../AGENTS.md) **Issue creation**, for each issue created from playtest follow-up in the **same turn**:
+
+1. `gh issue create` (or create with labels in one step) using the approved title and body.
+2. Domain label: `gameplay`, `tooling`, `documentation`, etc. (match the item; player-facing feedback is usually `gameplay`).
+3. `agent` label on every agent-created issue.
+4. `gh project item-add 1 --owner ianmays --url https://github.com/ianmays/dosmud/issues/<N>` unless the issue is already on project #1.
+5. If the issue has a **Milestone** in [`DEV_PLAN.md`](../../../DEV_PLAN.md) milestone index: run [milestone-issue-hygiene](../milestone-issue-hygiene/SKILL.md) create-time checklist in the same turn (not optional). Otherwise labels + project only.
+
 ## Relationship to other workflows
 
 | Tool | Relationship |
 |------|----------------|
 | [testing-gap-auditor](../testing-gap-auditor/SKILL.md) | Play-tester may recommend a snapshot; test-auditor still owns `check-test-gaps.sh` |
-| [milestone-issue-hygiene](../milestone-issue-hygiene/SKILL.md) | User approves before creating issues |
+| [milestone-issue-hygiene](../milestone-issue-hygiene/SKILL.md) | Required same-turn pass when filing issues with a DEV_PLAN-tracked milestone |
 | [audit-github-devplan](../audit-github-devplan/SKILL.md) | Play-tester feeds backlog candidates; audit reconciles DEV_PLAN |
 | [human-interventions](../human-interventions/SKILL.md) | Documents user design steering during impl, not play sessions |
 
@@ -219,6 +229,7 @@ When the user cites numbers (see agent), draft issues on demand - do not post wi
 - Edit `src/` or `include/` during a playtest pass
 - Open implementation PRs or move project board status
 - File GitHub issues without explicit user approval
+- Create playtest follow-up issues without domain label, `agent` label, and project #1 entry
 - Replace or skip `make test*` on feature branches
 - List deterministic seed beats under **Improvements**
 - Repeat the same opening phrase on every numbered idea
