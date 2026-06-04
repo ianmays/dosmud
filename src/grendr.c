@@ -674,6 +674,10 @@ static void render_legacy_output_event(const struct GameState *game,
     case GAME_OUT_MSG_NOBODY_WAITING_REPLY:
         render_msg_nobody_waiting_reply();
         break;
+    /*
+     * #158: invent uses GAME_EVENT_*; legacy GAME_OUT_INV_* mirrors until
+     * gout_push inventory callers are gone. Same render_inv_* helpers.
+     */
     case GAME_OUT_INV_NO_BODY_LOOT:
         render_inv_no_body_loot();
         break;
@@ -805,6 +809,10 @@ static void render_legacy_output_event(const struct GameState *game,
     }
 }
 
+/*
+ * #158: invent emits GAME_EVENT_ITEM/CRAFT/EQUIP_RESULT and BAG_VIEW; adapters
+ * map arg slots to the same render_inv_* helpers as legacy GAME_OUT_INV_*.
+ */
 static void render_item_result_event(const GameEvent *ev)
 {
     switch (ev->arg0) {
@@ -1028,6 +1036,7 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
         case GAME_EVENT_UNKNOWN_COMMAND:
             render_msg_unknown_command();
             break;
+        /* #158 inventory: direct dispatch (invent no longer wraps LEGACY). */
         case GAME_EVENT_ITEM_RESULT:
             render_item_result_event(ev);
             break;

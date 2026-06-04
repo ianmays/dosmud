@@ -1,6 +1,7 @@
 /*
  * Inventory and ground-slot ownership live here; the module keeps bag, hand,
  * and room storage explicit so the DOS-sized buffers stay predictable.
+ * #158: command handlers queue GAME_EVENT_* outcomes; grendr maps them to text.
  */
 
 #include "config.h"
@@ -9,10 +10,13 @@
 #include "gout.h"
 #include "items.h"
 
+/*
+ * #158: typed inventory events (payload layout in gout.h). Queue carries item
+ * ids and numeric context only; grendr resolves item_name and player copy.
+ */
 static void push_item_result(struct GameOutput *out, int action, int outcome,
                              int item_id, int value)
 {
-    /* Inventory emits stable item ids and outcome codes; grendr owns the copy. */
     game_event_push(out, GAME_EVENT_ITEM_RESULT, action, outcome, item_id,
         value, 0);
 }

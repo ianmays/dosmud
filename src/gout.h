@@ -10,8 +10,9 @@
  */
 
 /*
- * Generic kinds (#47 room/move look; #157 command/nav). Slice producers use
- * game_event_push; everything else still wraps GameOutKind as GAME_EVENT_LEGACY.
+ * Generic kinds (#47 room/move look; #157 command/nav; #158 invent). Slice
+ * producers use game_event_push; everything else still wraps GameOutKind as
+ * GAME_EVENT_LEGACY.
  */
 enum GameEventKind {
     GAME_EVENT_NONE = 0,
@@ -88,7 +89,8 @@ enum GameEventEquipOutcome {
 /*
  * Legacy presentation kinds (GAME_EVENT_LEGACY + legacy_kind). Command/nav
  * MAP, HELP, WAIT, CANNOT_MOVE, UNKNOWN_COMMAND, and MOVED also have
- * GAME_EVENT_* kinds after #157; keep these until all gout_push callers migrate.
+ * GAME_EVENT_* kinds after #157; invent after #158. Keep GAME_OUT_INV_* until
+ * legacy queue paths no longer emit them.
  */
 enum GameOutKind {
     GAME_OUT_NONE = 0,
