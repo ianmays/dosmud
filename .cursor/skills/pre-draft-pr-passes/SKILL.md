@@ -17,6 +17,22 @@ disable-model-invocation: true
 
 **Per-pass procedure.** Child skills remain authoritative when running a single pass inline: [testing-gap-auditor](../testing-gap-auditor/SKILL.md), [code-commenter](../code-commenter/SKILL.md), [documentation-maintainer](../documentation-maintainer/SKILL.md).
 
+## Branch diff scope
+
+Match [`scripts/check-test-gaps.sh`](../../../scripts/check-test-gaps.sh): union **committed branch diff** and **uncommitted working tree vs HEAD**. Do not scope subagents on `origin/main...HEAD` alone - that misses edits not yet committed.
+
+```sh
+BASE="${BASE_REF:-origin/main}"
+MERGE_BASE=$(git merge-base "$BASE" HEAD)
+COMMITTED=$(git diff --name-only "${MERGE_BASE}...HEAD")
+UNCOMMITTED=$(git diff --name-only HEAD)
+SCOPE_FILES=$(printf '%s\n%s' "$COMMITTED" "$UNCOMMITTED" | sort -u | grep -v '^$' || true)
+```
+
+Parent computes `SCOPE_FILES` before Steps 1-3. Use it for skip checks, dedup fingerprints, and subagent prompts. Recompute after any subagent commit or before opening draft PR.
+
+Recommend committing implementation on the feature branch before draft PR; passes may still run while the worktree has uncommitted edits.
+
 ## When to run
 
 1. **Default:** end of behavioral implementation on a feature branch, **before** opening a draft PR.
@@ -27,7 +43,7 @@ disable-model-invocation: true
 
 ## When to skip entire composite
 
-- All applicable passes already reported complete this session on current `git diff main...HEAD`.
+- All applicable passes already reported complete this session on current `SCOPE_FILES` (committed + uncommitted vs base).
 - User opted out of pre-PR passes.
 
 **Tooling-only or docs-only branches:** do not skip the entire composite. Skip steps 1-2 per their per-step rules (no gameplay/test obligations or `src/` / `include/` / `tests/` C-source diff). Still run step 3 (docs-steward) when the diff touches documentation signals (`.cursor/` rules/skills/agents, `docs/`, `AGENTS.md`, `README.md`, `DEV_PLAN.md`, contributor workflow).
@@ -37,6 +53,7 @@ disable-model-invocation: true
 ```text
 Pre-draft PR passes:
 - [ ] 0. make test, make test-run, make test-unit (or make test-all) - stop on failure
+- [ ] 0b. compute SCOPE_FILES (committed branch diff union git diff HEAD)
 - [ ] 1. test-auditor subagent (or skip)
 - [ ] 2. code-commenter subagent (or skip)
 - [ ] 3. docs-steward subagent (or skip)
@@ -55,26 +72,26 @@ Or `make test-all` when touching build/runtime paths. Do not delegate this step.
 
 ## Step 1: test-auditor
 
-**Skip when:** no gameplay/test diff vs `main`; user opted out; diff unchanged since a completed test-gap pass this session (see dedup guard).
+**Skip when:** no gameplay/test paths in `SCOPE_FILES`; user opted out; scope unchanged since a completed test-gap pass this session (see dedup guard).
 
 **Delegate** via `Task` with `subagent_type: test-auditor`:
 
 ```markdown
-Scope: git diff origin/main...HEAD (or user base ref).
+Scope: SCOPE_FILES = committed branch diff (${MERGE_BASE}...HEAD) union git diff --name-only HEAD (see pre-draft-pr-passes skill Branch diff scope). Base ref: origin/main unless user named another.
 Follow .cursor/skills/testing-gap-auditor/SKILL.md and .cursor/agents/test-auditor.md.
-Run sh scripts/check-test-gaps.sh origin/main without TEST_GAP_INFORMATIVE; must exit 0.
+Run sh scripts/check-test-gaps.sh origin/main without TEST_GAP_INFORMATIVE; must exit 0 (script already unions committed + uncommitted).
 May add or update tests; re-run make test, make test-run, make test-unit after changes.
 Report using the testing-gap-auditor skill output format.
 ```
 
 ## Step 2: code-commenter
 
-**Skip when:** no `src/`, `include/`, or `tests/` C sources (`.c` under `tests/unit/`, `tests/harness/`, `tests/soak/`) in diff vs `main`; user opted out; diff unchanged since a completed comment pass this session.
+**Skip when:** no `src/`, `include/`, or `tests/` C sources in `SCOPE_FILES`; user opted out; scope unchanged since a completed comment pass this session.
 
 **Delegate** via `Task` with `subagent_type: code-commenter`:
 
 ```markdown
-Scope: translation units in git diff origin/main...HEAD under src/, include/, and tests/ (.c under tests/unit/, tests/harness/, tests/soak/).
+Scope: translation units in SCOPE_FILES (committed + uncommitted) under src/, include/, and tests/ (.c under tests/unit/, tests/harness/, tests/soak/).
 Follow .cursor/skills/code-commenter/SKILL.md and .cursor/agents/code-commenter.md.
 Comment-only edits; do not change executable behavior.
 Report using the code-commenter skill output format.
@@ -89,25 +106,25 @@ Report using the code-commenter skill output format.
 **Delegate** via `Task` with `subagent_type: docs-steward`:
 
 ```markdown
-Scope: full branch diff origin/main...HEAD for change signals; edit documentation paths only.
+Scope: full SCOPE_FILES (committed + uncommitted vs base) for change signals; edit documentation paths only.
 Follow .cursor/skills/documentation-maintainer/SKILL.md and .cursor/agents/docs-steward.md.
 Report using the documentation-maintainer skill output format.
 ```
 
 ## Between steps
 
-- If a subagent committed, parent re-checks `git diff` before the next step.
+- If a subagent committed or edited files, parent recomputes `SCOPE_FILES` before the next step.
 - Do not open draft PR until all non-skipped steps complete.
 - Draft PR, DEV_PLAN Done marking, GitHub board moves stay in [agent-workflow](../../rules/agent-workflow.mdc).
 
 ## Deduplication guard
 
-Before each subagent, check conversation history for a completed pass report on the **same base ref and diff**.
+Before each subagent, check conversation history for a completed pass report on the **same base ref and `SCOPE_FILES` set** (committed + uncommitted).
 
 | If found | Action |
 |----------|--------|
-| Complete report for this pass on same diff | Skip step; note "already completed this session" in combined output |
-| New commits after prior report | Re-run affected steps |
+| Complete report for this pass on same scope | Skip step; note "already completed this session" in combined output |
+| New commits or working-tree edits changed `SCOPE_FILES` | Re-run affected steps |
 | User explicitly requests re-audit | Re-run requested steps |
 | Prior report noted failures or incomplete work | Re-run that step |
 
