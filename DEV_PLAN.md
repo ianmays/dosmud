@@ -539,9 +539,11 @@ Done ✅ ([#175](https://github.com/ianmays/dosmud/pull/175)).
 
 Direct `#47` follow-up. Migrate ambient, inspect, and world-tick output to generic environment/observation event families.
 
+Done ✅ ([#176](https://github.com/ianmays/dosmud/pull/176)).
+
 ### Testing
-- Unit: update atmosphere/inspect assertions for migrated output kinds
-- Snapshots: cover deterministic tick-controlled ambient and inspect paths
+- Unit: `unit_gatmos.c`, `unit_gout.c`, and `unit_harn.c` assert generic ambient/observation queue payloads ([#176](https://github.com/ianmays/dosmud/pull/176))
+- Snapshots: `ambient_rustle`, `ambient_tick_order`, `ambient_item`; existing inspect snapshots unchanged
 
 ### [#162](https://github.com/ianmays/dosmud/issues/162) - Remove legacy GAME_OUT compatibility layer
 
