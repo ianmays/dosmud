@@ -27,9 +27,10 @@ disable-model-invocation: true
 
 ## When to skip entire composite
 
-- All three passes (or all applicable passes) already reported complete this session on current `git diff main...HEAD`.
+- All applicable passes already reported complete this session on current `git diff main...HEAD`.
 - User opted out of pre-PR passes.
-- Docs/tooling-only branch with no gameplay obligations (test-gap and comment passes typically N/A).
+
+**Tooling-only or docs-only branches:** do not skip the entire composite. Skip steps 1-2 per their per-step rules (no gameplay/test or `src/` / `include/` diff). Still run step 3 (docs-steward) when the diff touches documentation signals (`.cursor/` rules/skills/agents, `docs/`, `AGENTS.md`, `README.md`, `DEV_PLAN.md`, contributor workflow).
 
 ## Checklist
 
@@ -81,7 +82,9 @@ Report using the code-commenter skill output format.
 
 ## Step 3: docs-steward
 
-**Skip when:** user opted out; diff unchanged since a completed documentation pass this session; comment-only src/ with no doc/workflow impact (confirm in summary).
+**Skip when:** user opted out; diff unchanged since a completed documentation pass this session; comment-only `src/` with no doc/workflow impact (confirm in summary).
+
+**Do not skip** on tooling-only branches that change `.cursor/` workflow files, agent guidance, or other documentation signals - those still need inventory and alignment before draft PR.
 
 **Delegate** via `Task` with `subagent_type: docs-steward`:
 
