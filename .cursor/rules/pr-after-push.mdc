@@ -17,6 +17,6 @@ Do **not** send the final message to the user until the post-push checklist comp
 
 Follow [`.cursor/skills/pr-after-push/SKILL.md`](../skills/pr-after-push/SKILL.md) (commands, mistakes, checklist). When review fixes are pushed, resolve addressed inline PR threads on GitHub in the same turn.
 
-**Policy** (when `review this` is required): [`AGENTS.md`](../../AGENTS.md) section **After `git push` to a PR branch**.
+**Policy** (review-this decision tree): [`AGENTS.md`](../../AGENTS.md) section **After `git push` to a PR branch**.
 
-A missed `review this` on a non-draft PR is a workflow failure.
+Workflow failure: missed required `review this`, skipped without `skip ai review: ...` on a non-draft PR, or gate not completed same turn.

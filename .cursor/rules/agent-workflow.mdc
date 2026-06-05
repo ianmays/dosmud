@@ -54,5 +54,5 @@ Complete the post-push gate in the **same turn** as `git push` ([`pr-after-push`
 
 - [ ] `git push` succeeded
 - [ ] Open PR exists for this branch
-- [ ] Post-push gate completed ([`pr-after-push` skill](../skills/pr-after-push/SKILL.md); resolve fixed review threads when applicable)
+- [ ] Post-push gate completed ([`pr-after-push` skill](../skills/pr-after-push/SKILL.md); decision tree; `review this` or `skip ai review`; resolve fixed review threads when applicable)
 - [ ] Only then: user-facing summary
