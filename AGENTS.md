@@ -22,7 +22,7 @@ Guidance for AI/code agents working in this repository.
 - NEVER introduce gameplay/render/platform coupling.
 - NEVER use em dash - use standard hyphen only.
 - NEVER introduce C99/C11 features or compiler-specific extensions.
-- After behavioral implementation: run **test-gap**, **code-commenter** (when `src/` / `include/` changed), and **documentation** passes before draft PR (see [Testing pass](#testing-pass), [Comment pass](#comment-pass), [Documentation pass](#documentation-pass)).
+- After behavioral implementation: run [pre-draft-pr-passes](.cursor/skills/pre-draft-pr-passes/SKILL.md) before draft PR (or complete test-gap, code-commenter, and documentation passes per [Pre-draft PR passes](#pre-draft-pr-passes) and individual pass sections below).
 - After `git push` to an open PR: complete the [post-push gate](#after-git-push-to-a-pr-branch-mandatory) in the **same turn** before replying.
 
 ## GitHub Workflow (dosmud project)
@@ -79,6 +79,12 @@ See [Testing expectations](#testing-expectations) and [`docs/testing.md`](docs/t
 
 
 ### PR expectations
+
+#### Pre-draft PR passes
+
+On behavioral feature branches, prefer [pre-draft-pr-passes](.cursor/skills/pre-draft-pr-passes/SKILL.md) to complete test-gap, comment, and documentation passes via subagent delegation before opening a draft PR.
+
+Or complete each pass individually per [Testing pass](#testing-pass), [Comment pass](#comment-pass), and [Documentation pass](#documentation-pass) below (inline or per-pass subagent).
 
 #### Testing pass
 
@@ -354,6 +360,7 @@ Index of project Cursor rules, skills, and agents. Several rules are **always ap
 |-------|------|
 | [milestone-issue-hygiene](.cursor/skills/milestone-issue-hygiene/SKILL.md) | New or groomed milestone-tracked issues |
 | [audit-github-devplan](.cursor/skills/audit-github-devplan/SKILL.md) | Roadmap/board/DEV_PLAN alignment audit |
+| [pre-draft-pr-passes](.cursor/skills/pre-draft-pr-passes/SKILL.md) | Default pre-draft-PR orchestrator (test-gap, comment, docs subagents) |
 | [code-commenter](.cursor/skills/code-commenter/SKILL.md) | Comment pass procedure and summary format |
 | [testing-gap-auditor](.cursor/skills/testing-gap-auditor/SKILL.md) | Unit/snapshot gap audit before draft PR |
 | [documentation-maintainer](.cursor/skills/documentation-maintainer/SKILL.md) | Documentation pass checklist |

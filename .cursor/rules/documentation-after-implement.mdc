@@ -10,7 +10,7 @@ After **behavioral** implementation is done on a feature branch (logic in place;
 ## Required step
 
 1. **Inventory** the full branch diff vs `main` for change signals (`src/`, `include/`, tests, Makefile, `.cursor/`, etc.). **Edit** only documentation paths (`docs/`, `AGENTS.md`, `README.md`, `DEV_PLAN.md`, `.cursor/`) per the skill.
-2. Delegate to the **docs-steward** subagent ([`docs-steward.md`](../agents/docs-steward.md)) or follow [documentation-maintainer skill](../skills/documentation-maintainer/SKILL.md).
+2. Delegate to the **docs-steward** subagent ([`docs-steward.md`](../agents/docs-steward.md)) or follow [documentation-maintainer skill](../skills/documentation-maintainer/SKILL.md); or run full sequence via [`pre-draft-pr-passes`](../skills/pre-draft-pr-passes/SKILL.md).
 3. Commit documentation updates on the same feature branch when the pass adds or fixes material worth keeping.
 4. For milestone-tracked issues: use [milestone-issue-hygiene](../skills/milestone-issue-hygiene/SKILL.md) when creating/grooming; use [audit-github-devplan](../skills/audit-github-devplan/SKILL.md) only when auditing (fix with user approval).
 
