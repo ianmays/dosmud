@@ -22,7 +22,7 @@ Guidance for AI/code agents working in this repository.
 - NEVER introduce gameplay/render/platform coupling.
 - NEVER use em dash - use standard hyphen only.
 - NEVER introduce C99/C11 features or compiler-specific extensions.
-- After behavioral implementation: run **test-gap**, **code-commenter** (when `src/` / `include/` changed), and **documentation** passes before draft PR (see [Testing pass](#testing-pass), [Comment pass](#comment-pass), [Documentation pass](#documentation-pass)).
+- After behavioral implementation: run [pre-draft-pr-passes](.cursor/skills/pre-draft-pr-passes/SKILL.md) before draft PR (or complete test-gap, code-commenter, and documentation passes per [Pre-draft PR passes](#pre-draft-pr-passes) and individual pass sections below).
 - After `git push` to an open PR: complete the [post-push gate](#after-git-push-to-a-pr-branch-mandatory) in the **same turn** before replying.
 
 ## GitHub Workflow (dosmud project)
@@ -80,6 +80,14 @@ See [Testing expectations](#testing-expectations) and [`docs/testing.md`](docs/t
 
 ### PR expectations
 
+#### Pre-draft PR passes
+
+On behavioral feature branches, prefer [pre-draft-pr-passes](.cursor/skills/pre-draft-pr-passes/SKILL.md) to complete test-gap, comment, and documentation passes via subagent delegation before opening a draft PR.
+
+On docs-only, tooling-only, or other non-behavioral branches, still complete a [Documentation pass](#documentation-pass) before draft PR (composite step 3 with steps 1-2 skipped, or standalone docs-steward).
+
+Or complete each pass individually per [Testing pass](#testing-pass), [Comment pass](#comment-pass), and [Documentation pass](#documentation-pass) below (inline or per-pass subagent).
+
 #### Testing pass
 
 After behavioral implementation and `make test` / `make test-run` / `make test-unit` (or `make test-all`), run a **test-gap** audit before the code-commenter and documentation passes.
@@ -92,19 +100,19 @@ After behavioral implementation and `make test` / `make test-run` / `make test-u
 
 Run `sh scripts/check-test-gaps.sh origin/main` (exit 0 required locally before draft PR). CI runs the same script in **informative** mode (logs gaps, does not fail the job).
 
-Order: `implement → make test (and related targets) → test-gap pass → code-commenter pass (if src/ or include/ touched) → documentation pass → draft PR`.
+Order: `implement → make test (and related targets) → test-gap pass → code-commenter pass (if src/, include/, or tests/ C sources touched) → documentation pass → draft PR`.
 
 Skip when the script passes with no gameplay/test diff, the user opts out, or the branch diff is unchanged since a completed test-gap pass this session.
 
 #### Comment pass
 
-After behavioral implementation, `make test*` targets, and the test-gap pass, delegate a **code-commenter** pass on translation units touched by the branch diff (vs `main`) before the documentation pass and draft PR.
+After behavioral implementation, `make test*` targets, and the test-gap pass, delegate a **code-commenter** pass on translation units touched by the branch diff (vs `main`) under `src/`, `include/`, and `tests/` (`.c` under `tests/unit/`, `tests/harness/`, `tests/soak/`) before the documentation pass and draft PR.
 
 - Rule: [`.cursor/rules/code-commenter-after-implement.mdc`](.cursor/rules/code-commenter-after-implement.mdc)
 - Subagent (judgement): [`.cursor/agents/code-commenter.md`](.cursor/agents/code-commenter.md)
 - Skill (procedure): [`.cursor/skills/code-commenter/SKILL.md`](.cursor/skills/code-commenter/SKILL.md)
 
-Skip when the change is docs/tooling-only with no `src/` or `include/` edits, the user opts out, or the branch diff vs `main` is unchanged since a code-commenter pass completed this session (re-run after commits that change the diff). Comment-only edits in that pass; do not change executable behavior.
+Skip when the change is docs/tooling-only with no `src/`, `include/`, or `tests/` C-source edits, the user opts out, or the branch diff vs `main` is unchanged since a code-commenter pass completed this session (re-run after commits that change the diff). Comment-only edits in that pass; do not change executable behavior.
 
 #### Documentation pass
 
@@ -119,7 +127,7 @@ After behavioral implementation, tests, and any code-commenter pass, run a **doc
 | [milestone-issue-hygiene skill](.cursor/skills/milestone-issue-hygiene/SKILL.md) | Milestone issue create/groom (GitHub + DEV_PLAN when committing) |
 | [audit-github-devplan skill](.cursor/skills/audit-github-devplan/SKILL.md) | Roadmap drift audit (fix only if user asks) |
 
-Order: `implement → make test (and related targets) → test-gap pass → code-commenter pass (if src/ or include/ touched) → documentation pass → draft PR`.
+Order: `implement → make test (and related targets) → test-gap pass → code-commenter pass (if src/, include/, or tests/ C sources touched) → documentation pass → draft PR`.
 
 Skip when the user opts out, the branch diff vs `main` is unchanged since a documentation pass completed this session (re-run after commits that change the diff), or the change truly has no doc impact (confirm in summary). Plan mode: defer `DEV_PLAN.md` commits per milestone hygiene skill.
 
@@ -354,6 +362,7 @@ Index of project Cursor rules, skills, and agents. Several rules are **always ap
 |-------|------|
 | [milestone-issue-hygiene](.cursor/skills/milestone-issue-hygiene/SKILL.md) | New or groomed milestone-tracked issues |
 | [audit-github-devplan](.cursor/skills/audit-github-devplan/SKILL.md) | Roadmap/board/DEV_PLAN alignment audit |
+| [pre-draft-pr-passes](.cursor/skills/pre-draft-pr-passes/SKILL.md) | Default pre-draft-PR orchestrator (test-gap, comment, docs subagents) |
 | [code-commenter](.cursor/skills/code-commenter/SKILL.md) | Comment pass procedure and summary format |
 | [testing-gap-auditor](.cursor/skills/testing-gap-auditor/SKILL.md) | Unit/snapshot gap audit before draft PR |
 | [documentation-maintainer](.cursor/skills/documentation-maintainer/SKILL.md) | Documentation pass checklist |

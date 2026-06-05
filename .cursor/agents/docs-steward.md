@@ -32,7 +32,7 @@ Procedure and checklist: [`.cursor/skills/documentation-maintainer/SKILL.md`](..
 |-----------|----------|
 | Milestone issue create/groom, Size/Priority, blocked-by, stack order | [milestone-issue-hygiene](../skills/milestone-issue-hygiene/SKILL.md) |
 | Bulk roadmap / board / DEV_PLAN reconciliation | [audit-github-devplan](../skills/audit-github-devplan/SKILL.md) |
-| `src/` or `include/` comment pass | [code-commenter](code-commenter.md) |
+| `src/`, `include/`, or `tests/` comment pass | [code-commenter](code-commenter.md) |
 
 ## What not to do
 

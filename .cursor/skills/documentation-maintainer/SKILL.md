@@ -46,7 +46,7 @@ Documentation pass:
 
 | Change signal | Likely targets | Delegate |
 |---------------|----------------|----------|
-| `src/` or `include/` subsystem, seam, exported API | [`docs/architecture.md`](../../../docs/architecture.md) | [code-commenter](../code-commenter/SKILL.md) comment-only pass on `src/` and `include/` |
+| `src/`, `include/`, or `tests/` C sources | [`docs/architecture.md`](../../../docs/architecture.md), [`docs/testing.md`](../../../docs/testing.md) when harness/fixture seams change | [code-commenter](../code-commenter/SKILL.md) comment-only pass on `src/`, `include/`, and `tests/` |
 | Tests, Makefile, `make` targets | [`docs/testing.md`](../../../docs/testing.md) | [testing-gap-auditor](../testing-gap-auditor/SKILL.md) if gaps remain |
 | PR, GitHub, agent workflow | [`docs/contributor-guide.md`](../../../docs/contributor-guide.md), [`AGENTS.md`](../../../AGENTS.md) | - |
 | New/changed `.cursor/` rule, skill, agent | [`AGENTS.md`](../../../AGENTS.md) Cursor configuration table | - |
