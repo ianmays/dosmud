@@ -38,6 +38,7 @@ Recommend committing implementation on the feature branch before draft PR; passe
 1. **Default:** end of behavioral implementation on a feature branch, **before** opening a draft PR.
 2. User asks to "run pre-PR gates", "pre-draft passes", or similar.
 3. **Catch-up:** parent skipped one or more passes before draft PR; re-run with skip logic below.
+4. **Non-behavioral branches:** docs-only or tooling-only PRs - run step 3 (docs-steward) at minimum; steps 1-2 per skip rules (`Makefile` in `SCOPE_FILES` still triggers step 1).
 
 **Not** the normal path after draft PR is open (that is [pr-after-push](../pr-after-push/SKILL.md)). Re-run only when the branch diff changed after the last pass or the user explicitly requests audit.
 
@@ -46,7 +47,7 @@ Recommend committing implementation on the feature branch before draft PR; passe
 - All applicable passes already reported complete this session on current `SCOPE_FILES` (committed + uncommitted vs base).
 - User opted out of pre-PR passes.
 
-**Tooling-only or docs-only branches:** do not skip the entire composite. Skip steps 1-2 per their per-step rules (no gameplay/test obligations or `src/` / `include/` / `tests/` C-source diff). Still run step 3 (docs-steward) when the diff touches documentation signals (`.cursor/` rules/skills/agents, `docs/`, `AGENTS.md`, `README.md`, `DEV_PLAN.md`, contributor workflow).
+**Tooling-only or docs-only branches:** do not skip the entire composite. Skip steps 1-2 per their per-step rules when `SCOPE_FILES` has no test-gap or comment obligations. Still run step 1 when `Makefile` is in `SCOPE_FILES` (test list or coverage metadata may have changed). Still run step 3 (docs-steward) when the diff touches documentation signals (`.cursor/` rules/skills/agents, `docs/`, `AGENTS.md`, `README.md`, `DEV_PLAN.md`, contributor workflow).
 
 ## Checklist
 
@@ -72,7 +73,7 @@ Or `make test-all` when touching build/runtime paths. Do not delegate this step.
 
 ## Step 1: test-auditor
 
-**Skip when:** no gameplay/test paths in `SCOPE_FILES`; user opted out; scope unchanged since a completed test-gap pass this session (see dedup guard).
+**Skip when:** no `src/`, `include/`, `tests/`, or `Makefile` paths in `SCOPE_FILES` (Makefile-only branches may change `SNAPSHOT_TESTS`, `UNIT_TEST_SRC`, or `COVERAGE_MODULES` per `check-test-gaps.sh`); user opted out; scope unchanged since a completed test-gap pass this session (see dedup guard).
 
 **Delegate** via `Task` with `subagent_type: test-auditor`:
 

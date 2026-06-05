@@ -84,6 +84,8 @@ See [Testing expectations](#testing-expectations) and [`docs/testing.md`](docs/t
 
 On behavioral feature branches, prefer [pre-draft-pr-passes](.cursor/skills/pre-draft-pr-passes/SKILL.md) to complete test-gap, comment, and documentation passes via subagent delegation before opening a draft PR.
 
+On docs-only, tooling-only, or other non-behavioral branches, still complete a [Documentation pass](#documentation-pass) before draft PR (composite step 3 with steps 1-2 skipped, or standalone docs-steward).
+
 Or complete each pass individually per [Testing pass](#testing-pass), [Comment pass](#comment-pass), and [Documentation pass](#documentation-pass) below (inline or per-pass subagent).
 
 #### Testing pass
