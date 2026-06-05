@@ -96,8 +96,12 @@ TEST combat_reply_salve_in_combat(void)
     resolve_reply_out(&game, 3, &out);
     ASSERT_EQ(9, game.player_hp);
     ASSERT_EQ(-1, game_inv_bag_find_index(&game, ITEM_SALVE));
+    ASSERT_EQ(4, out.count);
+    ASSERT_EQ(GAME_EVENT_COMBAT, out.events[0].kind);
     ASSERT_EQ(GAME_COMBAT_PHASE_SALVE_HEAL, out.events[0].arg0);
-    ASSERT_EQ(GAME_COMBAT_PHASE_MENU, out.events[out.count - 1].arg0);
+    ASSERT_EQ(GAME_COMBAT_PHASE_ENEMY_DAMAGE, out.events[1].arg0);
+    ASSERT_EQ(GAME_COMBAT_PHASE_STATUS, out.events[2].arg0);
+    ASSERT_EQ(GAME_COMBAT_PHASE_MENU, out.events[3].arg0);
     PASS();
 }
 
@@ -118,8 +122,12 @@ TEST combat_reply_salve_at_full_hp(void)
     resolve_reply_out(&game, 3, &out);
     ASSERT_EQ(CFG_START_MAX_HP - 1, game.player_hp);
     ASSERT_EQ(-1, game_inv_bag_find_index(&game, ITEM_SALVE));
+    ASSERT_EQ(4, out.count);
+    ASSERT_EQ(GAME_EVENT_COMBAT, out.events[0].kind);
     ASSERT_EQ(GAME_COMBAT_PHASE_SALVE_FULL, out.events[0].arg0);
     ASSERT_EQ(GAME_COMBAT_PHASE_ENEMY_DAMAGE, out.events[1].arg0);
+    ASSERT_EQ(GAME_COMBAT_PHASE_STATUS, out.events[2].arg0);
+    ASSERT_EQ(GAME_COMBAT_PHASE_MENU, out.events[3].arg0);
     PASS();
 }
 
