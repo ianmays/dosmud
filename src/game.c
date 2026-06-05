@@ -14,6 +14,12 @@
  * rules in the wrong layer.
  */
 
+static void push_dialogue_guard(struct GameOutput *out, int reason)
+{
+    /* #160: orchestration-layer modal guards; grendr maps reason to copy. */
+    game_event_push(out, GAME_EVENT_DIALOGUE_GUARD, reason, 0, 0, 0, 0);
+}
+
 void game_set_mode_explore(struct GameState *game)
 {
     game->mode = GAME_MODE_EXPLORE;
@@ -232,7 +238,7 @@ static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd,
             cmd->type != CMD_UNWIELD &&
             cmd->type != CMD_HELP &&
             cmd->type != CMD_QUIT) {
-        gout_push(out, GAME_OUT_MSG_BANDIT_WAITING_REPLY, 0, 0, 0, 0, 0);
+        push_dialogue_guard(out, GAME_DIALOGUE_GUARD_BANDIT_WAITING_REPLY);
         return 0;
     }
 
@@ -248,10 +254,10 @@ static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd,
             cmd->type != CMD_QUIT &&
             !(game->enemy_handover_pick == 1 && cmd->type == CMD_GIVE)) {
         if (game->enemy_handover_pick == 1) {
-            gout_push(out, GAME_OUT_MSG_BANDIT_WAITING_HANDOVER_PICK,
-                0, 0, 0, 0, 0);
+            push_dialogue_guard(out,
+                GAME_DIALOGUE_GUARD_BANDIT_WAITING_HANDOVER_PICK);
         } else {
-            gout_push(out, GAME_OUT_MSG_BANDIT_WAITING_REPLY, 0, 0, 0, 0, 0);
+            push_dialogue_guard(out, GAME_DIALOGUE_GUARD_BANDIT_WAITING_REPLY);
         }
         return 0;
     }
@@ -378,7 +384,7 @@ static int game_cmd_reply(struct GameState *game, struct Command *cmd,
     if (game->mode == GAME_MODE_DIALOGUE && game->dialogue == DIALOGUE_WANDERER) {
         return wanderer_cmd_reply(game, cmd->arg, out);
     }
-    gout_push(out, GAME_OUT_MSG_NOBODY_WAITING_REPLY, 0, 0, 0, 0, 0);
+    push_dialogue_guard(out, GAME_DIALOGUE_GUARD_NOBODY_WAITING_REPLY);
     return 1;
 }
 

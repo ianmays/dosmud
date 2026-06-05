@@ -6,7 +6,25 @@
 /*
  * The wanderer is a separate roaming actor, so its movement and encounter
  * gates stay explicit.
+ * #160: queues GAME_EVENT_ENCOUNTER / DIALOGUE / DIALOGUE_GUARD; grendr maps.
  */
+
+static void push_encounter_open(struct GameOutput *out, int kind)
+{
+    game_event_push(out, GAME_EVENT_ENCOUNTER, kind,
+        GAME_ENCOUNTER_ACTION_OPEN, GAME_ENCOUNTER_OUTCOME_NONE, 0, 0);
+}
+
+static void push_dialogue(struct GameOutput *out, int actor, int phase,
+                          int choice)
+{
+    game_event_push(out, GAME_EVENT_DIALOGUE, actor, phase, choice, 0, 0);
+}
+
+static void push_dialogue_guard(struct GameOutput *out, int reason)
+{
+    game_event_push(out, GAME_EVENT_DIALOGUE_GUARD, reason, 0, 0, 0, 0);
+}
 
 void wanderer_update_separation(struct GameState *game)
 {
@@ -55,20 +73,21 @@ void wanderer_begin_encounter(struct GameState *game, struct GameOutput *out)
     if (game->wanderer_need_separation) {
         return;
     }
-    gout_push(out, GAME_OUT_WANDERER_SCENE, 0, 0, 0, 0, 0);
+    push_encounter_open(out, GAME_ENCOUNTER_WANDERER);
     game_set_mode_dialogue(game, DIALOGUE_WANDERER);
     game->wanderer_need_separation = 1;
 }
 
 void wanderer_apply_reply(int choice, struct GameOutput *out)
 {
-    gout_push(out, GAME_OUT_WANDERER_REPLY, choice, 0, 0, 0, 0);
+    push_dialogue(out, GAME_DIALOGUE_ACTOR_WANDERER, GAME_DIALOGUE_PHASE_REPLY,
+        choice);
 }
 
 int wanderer_cmd_reply(struct GameState *game, int choice, struct GameOutput *out)
 {
     if (choice < 1 || choice > 3) {
-        gout_push(out, GAME_OUT_MSG_PICK_123, 0, 0, 0, 0, 0);
+        push_dialogue_guard(out, GAME_DIALOGUE_GUARD_PICK_123);
         return 1;
     }
     wanderer_apply_reply(choice, out);

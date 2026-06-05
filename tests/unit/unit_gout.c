@@ -146,6 +146,30 @@ TEST game_event_push_records_combat_progression_kinds(void)
     PASS();
 }
 
+TEST game_event_push_records_dialogue_encounter_kinds(void)
+{
+    GameEventQueue out;
+
+    game_event_queue_reset(&out);
+    ASSERT(0 != game_event_push(&out, GAME_EVENT_DIALOGUE,
+        GAME_DIALOGUE_ACTOR_FROG, GAME_DIALOGUE_PHASE_BRANCH, 2, 0, 0));
+    ASSERT(0 != game_event_push(&out, GAME_EVENT_ENCOUNTER,
+        GAME_ENCOUNTER_BANDIT, GAME_ENCOUNTER_ACTION_GIVE,
+        GAME_ENCOUNTER_OUTCOME_OK, ITEM_STICK, "stick"));
+    ASSERT(0 != game_event_push(&out, GAME_EVENT_DIALOGUE_GUARD,
+        GAME_DIALOGUE_GUARD_PICK_123, 0, 0, 0, 0));
+    ASSERT_EQ(3, out.count);
+    ASSERT_EQ(GAME_EVENT_DIALOGUE, out.events[0].kind);
+    ASSERT_EQ(GAME_DIALOGUE_ACTOR_FROG, out.events[0].arg0);
+    ASSERT_EQ(2, out.events[0].arg2);
+    ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[1].kind);
+    ASSERT_EQ(GAME_ENCOUNTER_BANDIT, out.events[1].arg0);
+    ASSERT_EQ(ITEM_STICK, out.events[1].arg3);
+    ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[2].kind);
+    ASSERT_EQ(GAME_DIALOGUE_GUARD_PICK_123, out.events[2].arg0);
+    PASS();
+}
+
 SUITE(gout) {
     RUN_TEST(gout_reset_clears_state);
     RUN_TEST(gout_push_records_event_fields);
@@ -155,4 +179,5 @@ SUITE(gout) {
     RUN_TEST(game_event_push_records_command_nav_kinds);
     RUN_TEST(game_event_push_records_inventory_kinds);
     RUN_TEST(game_event_push_records_combat_progression_kinds);
+    RUN_TEST(game_event_push_records_dialogue_encounter_kinds);
 }
