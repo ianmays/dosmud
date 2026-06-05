@@ -39,7 +39,7 @@ Use backticks for commands, paths, and symbols (`make test-soak`, `config.h`, `t
 
 | Exclude | Examples |
 |---------|----------|
-| Workflow / process only | `review this`, board moves, plan approval, "why is this marked resolved" without engaging on the design |
+| Workflow / process only | `review this`, `skip ai review`, board moves, plan approval, "why is this marked resolved" without engaging on the design |
 | Review-bot-only | Bugbot/CodeRabbit raised it; user only chased resolution status |
 | No user engagement | Agent decided alone; user never commented on that area |
 | Meta hygiene | CI grep fixes, lint nits, commit style unless user explicitly steered them |

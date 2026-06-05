@@ -173,26 +173,39 @@ Complete the post-push gate in the **same turn** as `git push`, **before** the u
 | Layer | Role |
 |-------|------|
 | [pr-after-push rule](.cursor/rules/pr-after-push.mdc) | Same-turn gate; workflow failure if skipped |
-| [pr-after-push skill](.cursor/skills/pr-after-push/SKILL.md) | Commands, pitfalls, checklist |
-| This section | Policy - when `review this` is required |
+| [pr-after-push skill](.cursor/skills/pr-after-push/SKILL.md) | Decision tree, commands, pitfalls, checklist |
+| This section | Policy - review-this decision tree |
 
 #### Policy
 
-| PR state | `review this` required? |
-|----------|-------------------------|
-| Draft (`isDraft` true) | No - skip until **Ready for review** on GitHub |
-| Ready for review (non-draft) | Yes - **every** push, including review fixes and docs-only commits |
-| Project board **Review** + non-draft | Yes - same as ready for review; board status does not replace `isDraft` |
+Re-check `isDraft` after **every** push. Do **not** infer draft state from project board **Review** or from an earlier turn.
 
-The first push after **Ready for review** starts the requirement; it applies to every later push until merge.
+| PR state | Review trigger |
+|----------|----------------|
+| Draft (`isDraft` true) | No `review this` or skip comment until **Ready for review** on GitHub |
+| Ready for review (non-draft) | Run the decision tree below; post `review this` or `skip ai review: ...` |
 
-Do **not** skip because the PR was opened as draft, because board status is **Review**, or because an earlier push this session did not need `review this`. Re-check `isDraft` after **every** push.
+Use generic **AI reviewer** wording in PR comments and docs. Do not name specific review products. Bugbot may be named when contrasting auto-on-push review vs the `review this` path.
 
-Comment body must be exactly `review this`. Do not ask whether re-review is needed.
+**Layer 1 - always trigger:** first push after **Ready for review** (zero prior exact-body `review this` comments) - always post `review this`.
+
+**Layer 2 - reviewer-driven re-review:** after the first pass, when this push addresses reviewer feedback (resolved threads and/or human `CHANGES_REQUESTED`), post `review this` if the fix is substantive (logic/behaviour change, test expectation change, Bugbot or AI reviewer rework, multi-file fix, or agent uncertainty). Skip with rationale when the fix is non-substantive (doc/copy alignment, comment-only nits, CI glue, typos) - judged by fix nature, not file path.
+
+**Layer 3 - maturity dampening:** count prior `review this` comments (exact body). Pass 1: bias review when uncertain. Pass 2+: bias skip for final tweaks unless Layer 2 is substantive. Pass 3+: strong skip bias unless human `CHANGES_REQUESTED` or clear logic rework.
+
+**Layer 4 - push without reviewer feedback:** default skip + rationale; exception when the user explicitly asks for re-review.
+
+When posting `review this`, body must be exactly `review this`. When skipping on a non-draft PR, post `skip ai review: <one-line reason>` in the same turn.
 
 When a push fixes inline review comments, **resolve the corresponding PR review threads on GitHub in the same turn** (procedure: [pr-after-push skill](.cursor/skills/pr-after-push/SKILL.md) **Resolve review threads**). Leave threads open only if still disputed or not yet fixed.
 
-A missed `review this` on a non-draft PR is a **workflow failure** (same severity as skipping project status updates). See also [agent-workflow.mdc](.cursor/rules/agent-workflow.mdc) PR push checklist.
+**Workflow failures** (same severity as skipping project status updates):
+
+- missed `review this` on first ready-for-review push or substantive reviewer-fix push where judgement says review
+- skipped `review this` on a non-draft push without posting `skip ai review: ...`
+- missed thread resolution or ended the turn before the post-push gate
+
+See also [agent-workflow.mdc](.cursor/rules/agent-workflow.mdc) PR push checklist.
 
 ### Completion workflow
 

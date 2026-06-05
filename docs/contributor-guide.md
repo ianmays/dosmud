@@ -44,10 +44,12 @@ The repo’s GitHub project uses a **Status** field on issues: **Planning** when
 
 ### After you push
 
-- While the PR is a **draft** on GitHub: do not post `review this`.
-- After you mark the PR **Ready for review** (non-draft): comment `review this` on the PR after **each** push that should re-trigger review. Use that exact body text only.
+- While the PR is a **draft** on GitHub: do not post `review this` or `skip ai review`.
+- After you mark the PR **Ready for review** (non-draft):
+  - **First push:** always comment `review this` (exact body).
+  - **Later pushes:** post `review this` when fixes are substantive (logic, tests, rework from Bugbot or an AI reviewer); post `skip ai review: <reason>` when fixes are trivial or the PR has already had multiple review passes. Agents follow the full decision tree in [pr-after-push skill](../.cursor/skills/pr-after-push/SKILL.md).
 - When a push addresses inline review comments, resolve those PR review threads on GitHub (agents: same-turn step in [pr-after-push skill](../.cursor/skills/pr-after-push/SKILL.md)).
-- Project board **Review** can be set when the draft PR is opened; GitHub **Ready for review** (`isDraft` false) is what triggers the `review this` convention, not board status alone.
+- Project board **Review** can be set when the draft PR is opened; GitHub **Ready for review** (`isDraft` false) starts the review-trigger convention, not board status alone.
 
 Agents: policy in [AGENTS.md](../AGENTS.md) (**After `git push` to a PR branch**); procedure in [`.cursor/skills/pr-after-push/SKILL.md`](../.cursor/skills/pr-after-push/SKILL.md).
 
