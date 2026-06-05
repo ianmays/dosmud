@@ -1,7 +1,8 @@
 ---
 name: code-commenter
 description: >-
-  Add or review ANSI C89 comments in dosmud src/ and include/ for subsystem
+  Add or review ANSI C89 comments in dosmud src/, include/, and tests/ for
+  subsystem
   ownership, architecture seams, determinism, and transitional layers. Use when
   the user asks for a comment pass, after refactors that move ownership or
   seams, on PR-touched translation units, or to clarify intent without behavior
@@ -26,8 +27,9 @@ When applying edits: comment-only within scope; do not change executable behavio
 
 ## Scope
 
-- Default: `src/` and `include/` files in the current `git diff` vs base branch, or paths the user listed.
-- Read one or two nearby modules first (`src/game.c`, `src/invent.c`, `src/gout.c`) for style, then edit in scope only.
+- Default: `src/`, `include/`, and `tests/` C sources (`.c` under `tests/unit/`, `tests/harness/`, `tests/soak/`) in the current `git diff` vs base branch, or paths the user listed.
+- Read one or two nearby modules first (`src/game.c`, `src/invent.c`, `src/gout.c`, `tests/harness/testharn.c`) for style, then edit in scope only.
+- Skip snapshot data (`tests/regression/*.input`, `*.expect`) unless parsing or harness logic needs explanation.
 - Do not run repo-wide comment sweeps unless the user asks.
 
 ## Repository conventions
@@ -50,6 +52,7 @@ Architecture context: [`docs/architecture.md`](../../../docs/architecture.md), e
 3. **Determinism** - RNG, tick order, queue overflow, fixed-size limits.
 4. **Transitional scaffolding** - mark temporary paths; cite a follow-up issue only if it is already filed (e.g. `/* Temporary legacy output path until #157 migrates remaining command events. */`).
 5. **Non-obvious control flow** - mode gates, handover state, compact slot removal, quiet-tick test behavior.
+6. **Test harness and fixtures** - determinism setup (`plat_seed_rng`, `game_roll_inject_*`, `@fixture`), fixture ownership, and why a unit test avoids `game_process_input` alone.
 
 ## Do not comment
 

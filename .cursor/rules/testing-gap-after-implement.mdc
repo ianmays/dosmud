@@ -24,7 +24,7 @@ After **behavioral** implementation and `make test` / `make test-run` / `make te
 ## Workflow order
 
 ```text
-implement → make test (and related targets) → test-gap pass → code-commenter (if src/ or include/) → documentation pass → draft PR
+implement → make test (and related targets) → test-gap pass → code-commenter (if src/, include/, or tests/ C sources) → documentation pass → draft PR
 ```
 
 CI runs the same script in **informative** mode (see [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml)).

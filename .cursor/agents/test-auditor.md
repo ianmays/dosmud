@@ -32,7 +32,7 @@ Procedure and report format: [`.cursor/skills/testing-gap-auditor/SKILL.md`](../
 ## Workflow position
 
 ```text
-implement → make test* → test-gap pass (this agent) → code-commenter → documentation pass → draft PR
+implement → make test* → test-gap pass (this agent) → code-commenter (src/, include/, tests/) → documentation pass → draft PR
 ```
 
 Skip when the script passes with no gameplay diff or user opts out.

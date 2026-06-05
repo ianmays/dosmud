@@ -30,7 +30,7 @@ disable-model-invocation: true
 - All applicable passes already reported complete this session on current `git diff main...HEAD`.
 - User opted out of pre-PR passes.
 
-**Tooling-only or docs-only branches:** do not skip the entire composite. Skip steps 1-2 per their per-step rules (no gameplay/test or `src/` / `include/` diff). Still run step 3 (docs-steward) when the diff touches documentation signals (`.cursor/` rules/skills/agents, `docs/`, `AGENTS.md`, `README.md`, `DEV_PLAN.md`, contributor workflow).
+**Tooling-only or docs-only branches:** do not skip the entire composite. Skip steps 1-2 per their per-step rules (no gameplay/test obligations or `src/` / `include/` / `tests/` C-source diff). Still run step 3 (docs-steward) when the diff touches documentation signals (`.cursor/` rules/skills/agents, `docs/`, `AGENTS.md`, `README.md`, `DEV_PLAN.md`, contributor workflow).
 
 ## Checklist
 
@@ -69,12 +69,12 @@ Report using the testing-gap-auditor skill output format.
 
 ## Step 2: code-commenter
 
-**Skip when:** no `src/` or `include/` in diff vs `main`; user opted out; diff unchanged since a completed comment pass this session.
+**Skip when:** no `src/`, `include/`, or `tests/` C sources (`.c` under `tests/unit/`, `tests/harness/`, `tests/soak/`) in diff vs `main`; user opted out; diff unchanged since a completed comment pass this session.
 
 **Delegate** via `Task` with `subagent_type: code-commenter`:
 
 ```markdown
-Scope: translation units in git diff origin/main...HEAD under src/ and include/.
+Scope: translation units in git diff origin/main...HEAD under src/, include/, and tests/ (.c under tests/unit/, tests/harness/, tests/soak/).
 Follow .cursor/skills/code-commenter/SKILL.md and .cursor/agents/code-commenter.md.
 Comment-only edits; do not change executable behavior.
 Report using the code-commenter skill output format.

@@ -15,7 +15,7 @@ This manual is the canonical project documentation set for architecture, testing
 - [AGENTS.md](../AGENTS.md) - coding agent workflow, Cursor rules/skills index, DEV_PLAN policy
 - [GitHub project #1](https://github.com/users/ianmays/projects/1) - Status, Priority, Size, stack order
 
-Agents: after implementation, run **code-commenter** (when `src/` or `include/` changed) and **documentation** passes before a draft PR. See AGENTS.md **Comment pass** and **Documentation pass**.
+Agents: after implementation, run **code-commenter** (when `src/`, `include/`, or `tests/` C sources changed) and **documentation** passes before a draft PR. See AGENTS.md **Comment pass** and **Documentation pass**.
 
 ## Scope
 
