@@ -17,9 +17,9 @@
  * payload slots -> arg1/arg2; grendr render_combat_event mirrors this layout.
  */
 static void push_combat_phase(struct GameOutput *out, int phase,
-                              int arg0, int arg1)
+                              int val0, int val1)
 {
-    game_event_push(out, GAME_EVENT_COMBAT, phase, arg0, arg1, 0, 0);
+    game_event_push(out, GAME_EVENT_COMBAT, phase, val0, val1, 0, 0);
 }
 
 int combat_player_attack_bonus(const struct GameState *game)

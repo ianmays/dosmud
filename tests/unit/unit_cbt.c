@@ -49,6 +49,9 @@ TEST combat_start_mode(void)
     ASSERT_EQ(1, out.count);
     ASSERT_EQ(GAME_EVENT_COMBAT, out.events[0].kind);
     ASSERT_EQ(GAME_COMBAT_PHASE_START, out.events[0].arg0);
+    ASSERT_EQ(game.player_hp, out.events[0].arg1);
+    ASSERT_EQ(CFG_COMBAT_ENEMY_HP_BASE + CFG_TEST_FIGHT_ENEMY_HP_SPREAD,
+        out.events[0].arg2);
     PASS();
 }
 
