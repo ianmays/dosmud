@@ -529,9 +529,11 @@ Done ✅ ([#174](https://github.com/ianmays/dosmud/pull/174)).
 
 Direct `#47` follow-up. Migrate dialogue, NPC, and encounter output to generic actor/dialogue/encounter event families.
 
+Done ✅ ([#175](https://github.com/ianmays/dosmud/pull/175)).
+
 ### Testing
-- Unit: update dialogue, wanderer, and encounter assertions for migrated output kinds
-- Snapshots: cover deterministic NPC reply branching, wanderer interaction, bandit handover, and intimidate paths
+- Unit: `unit_dial.c`, `unit_wandr.c`, `unit_genc.c`, `unit_game.c`, and `unit_gout.c` assert `GAME_EVENT_DIALOGUE`, `GAME_EVENT_ENCOUNTER`, and `GAME_EVENT_DIALOGUE_GUARD` payloads ([#175](https://github.com/ianmays/dosmud/pull/175))
+- Snapshots: existing frog, bandit handover/intimidate, and wanderer regression suites unchanged
 
 ### [#161](https://github.com/ianmays/dosmud/issues/161) - Ambient/inspect GameEvent migration
 
