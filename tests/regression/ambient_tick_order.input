@@ -1,0 +1,5 @@
+@fixture ambient_camp
+@seed 3
+wait
+wait
+quit

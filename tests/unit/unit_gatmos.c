@@ -3,6 +3,7 @@
 #include "config.h"
 #include "game.h"
 #include "gatmos.h"
+#include "gout.h"
 #include "grendr.h"
 #include "items.h"
 #include "platform.h"
@@ -14,28 +15,23 @@ static void reset_camp(struct GameState *game)
     game_reset_fixture_baseline(game, WORLD_ROOM_CAMP, 0);
 }
 
-static void emit_atmosphere(struct GameState *game)
+static void emit_atmosphere(struct GameState *game, struct GameOutput *out)
 {
-    struct GameOutput out;
-
-    gout_reset(&out);
-    maybe_emit_atmosphere(game, &out);
+    gout_reset(out);
+    maybe_emit_atmosphere(game, out);
 }
 
-static void emit_noise(struct GameState *game)
+static void emit_noise(struct GameState *game, struct GameOutput *out)
 {
-    struct GameOutput out;
-
-    gout_reset(&out);
-    maybe_emit_animal_noise(game, &out);
+    gout_reset(out);
+    maybe_emit_animal_noise(game, out);
 }
 
-static int inspect_focus(struct GameState *game, int item_arg)
+static int inspect_focus(struct GameState *game, int item_arg,
+                         struct GameOutput *out)
 {
-    struct GameOutput out;
-
-    gout_reset(&out);
-    return gatmos_cmd_inspect(game, item_arg, &out);
+    gout_reset(out);
+    return gatmos_cmd_inspect(game, item_arg, out);
 }
 
 TEST gatmos_seed_world_items(void)
@@ -51,6 +47,7 @@ TEST gatmos_seed_world_items(void)
 TEST gatmos_focus_expiry(void)
 {
     struct GameState game;
+    struct GameOutput out;
     u32 seed;
     int cleared;
 
@@ -63,7 +60,7 @@ TEST gatmos_focus_expiry(void)
         game.env_focus_expires_tick = 1;
         game.tick = 2;
         plat_seed_rng(seed);
-        emit_atmosphere(&game);
+        emit_atmosphere(&game, &out);
         if (game.env_focus_active == 0) {
             cleared = 1;
             break;
@@ -76,6 +73,7 @@ TEST gatmos_focus_expiry(void)
 TEST gatmos_animal_noise_tick_gate(void)
 {
     struct GameState game;
+    struct GameOutput out;
     u32 seed;
     int r_skip;
     int r_first;
@@ -84,7 +82,7 @@ TEST gatmos_animal_noise_tick_gate(void)
 
     reset_camp(&game);
     game.tick = 1;
-    emit_noise(&game);
+    emit_noise(&game, &out);
     r_skip = rand();
 
     reset_camp(&game);
@@ -93,7 +91,7 @@ TEST gatmos_animal_noise_tick_gate(void)
 
     reset_camp(&game);
     game.tick = 2;
-    emit_noise(&game);
+    emit_noise(&game, &out);
     r_after = rand();
 
     reset_camp(&game);
@@ -108,7 +106,7 @@ TEST gatmos_animal_noise_tick_gate(void)
         reset_camp(&game);
         game.tick = 2;
         plat_seed_rng(seed);
-        emit_noise(&game);
+        emit_noise(&game, &out);
     }
     PASS();
 }
@@ -116,6 +114,7 @@ TEST gatmos_animal_noise_tick_gate(void)
 TEST gatmos_atmosphere_branches(void)
 {
     struct GameState game;
+    struct GameOutput out;
     u32 seed;
     int found_rustle;
     int found_creak;
@@ -125,7 +124,7 @@ TEST gatmos_atmosphere_branches(void)
     for (seed = 0; seed < 500u; ++seed) {
         reset_camp(&game);
         plat_seed_rng(seed);
-        emit_atmosphere(&game);
+        emit_atmosphere(&game, &out);
         if (game.env_focus_kind == GAME_ENV_RUSTLE) {
             found_rustle = 1;
         }
@@ -144,6 +143,7 @@ TEST gatmos_atmosphere_branches(void)
 TEST gatmos_water_and_grit_focus(void)
 {
     struct GameState game;
+    struct GameOutput out;
     u32 seed;
     int found_water;
     int found_grit;
@@ -153,7 +153,7 @@ TEST gatmos_water_and_grit_focus(void)
     for (seed = 0; seed < 800u; ++seed) {
         reset_camp(&game);
         plat_seed_rng(seed);
-        emit_atmosphere(&game);
+        emit_atmosphere(&game, &out);
         if (game.env_focus_kind == GAME_ENV_WATER) {
             found_water = 1;
         }
@@ -172,6 +172,7 @@ TEST gatmos_water_and_grit_focus(void)
 TEST gatmos_room_item_spawn_gate(void)
 {
     struct GameState game;
+    struct GameOutput out;
     u32 seed;
     int spawned;
 
@@ -183,7 +184,7 @@ TEST gatmos_room_item_spawn_gate(void)
         game.room_item[WORLD_ROOM_CAMP][2] = ITEM_NONE;
         game.room_item[WORLD_ROOM_CAMP][3] = ITEM_NONE;
         plat_seed_rng(seed);
-        emit_atmosphere(&game);
+        emit_atmosphere(&game, &out);
         if (game.room_item[WORLD_ROOM_CAMP][0] != ITEM_NONE ||
                 game.room_item[WORLD_ROOM_CAMP][1] != ITEM_NONE) {
             spawned = 1;
@@ -197,6 +198,7 @@ TEST gatmos_room_item_spawn_gate(void)
 TEST gatmos_rustle_berry_drop(void)
 {
     struct GameState game;
+    struct GameOutput out;
     u32 seed;
     int found;
 
@@ -208,9 +210,112 @@ TEST gatmos_rustle_berry_drop(void)
         game.room_item[WORLD_ROOM_CAMP][2] = ITEM_NONE;
         game.room_item[WORLD_ROOM_CAMP][3] = ITEM_NONE;
         plat_seed_rng(seed);
-        emit_atmosphere(&game);
+        emit_atmosphere(&game, &out);
         if (game.env_focus_kind == GAME_ENV_RUSTLE &&
                 game.room_item[WORLD_ROOM_CAMP][0] == ITEM_BERRY) {
+            found = 1;
+            break;
+        }
+    }
+    ASSERT_EQ(1, found);
+    PASS();
+}
+
+TEST gatmos_environment_gust_event(void)
+{
+    struct GameState game;
+    struct GameOutput out;
+    u32 seed;
+    int found;
+
+    found = 0;
+    for (seed = 0; seed < 500u; ++seed) {
+        reset_camp(&game);
+        plat_seed_rng(seed);
+        emit_atmosphere(&game, &out);
+        if (out.count == 1 &&
+                out.events[0].kind == GAME_EVENT_ENVIRONMENT &&
+                out.events[0].arg0 == GAME_ENV_EVENT_GUST) {
+            found = 1;
+            break;
+        }
+    }
+    ASSERT_EQ(1, found);
+    PASS();
+}
+
+TEST gatmos_ambient_noise_event(void)
+{
+    struct GameState game;
+    struct GameOutput out;
+    u32 seed;
+    int found;
+
+    found = 0;
+    for (seed = 0; seed < 500u; ++seed) {
+        reset_camp(&game);
+        game.tick = 2;
+        plat_seed_rng(seed);
+        emit_noise(&game, &out);
+        if (out.count == 1 &&
+                out.events[0].kind == GAME_EVENT_AMBIENT_NOISE &&
+                out.events[0].text != 0 && out.events[0].text[0] != '\0') {
+            found = 1;
+            break;
+        }
+    }
+    ASSERT_EQ(1, found);
+    PASS();
+}
+
+TEST gatmos_item_presence_event(void)
+{
+    struct GameState game;
+    struct GameOutput out;
+    u32 seed;
+    int found;
+
+    found = 0;
+    for (seed = 0; seed < 1000u; ++seed) {
+        reset_camp(&game);
+        game.room_item[WORLD_ROOM_CAMP][0] = ITEM_NONE;
+        game.room_item[WORLD_ROOM_CAMP][1] = ITEM_NONE;
+        game.room_item[WORLD_ROOM_CAMP][2] = ITEM_NONE;
+        game.room_item[WORLD_ROOM_CAMP][3] = ITEM_NONE;
+        plat_seed_rng(seed);
+        emit_atmosphere(&game, &out);
+        if (out.count == 1 &&
+                out.events[0].kind == GAME_EVENT_ITEM_PRESENCE &&
+                out.events[0].arg0 != ITEM_NONE) {
+            found = 1;
+            break;
+        }
+    }
+    ASSERT_EQ(1, found);
+    PASS();
+}
+
+TEST gatmos_tick_event_order(void)
+{
+    struct GameState game;
+    struct GameOutput out;
+    u32 seed;
+    int found;
+
+    found = 0;
+    for (seed = 0; seed < 2000u; ++seed) {
+        reset_camp(&game);
+        game.room_item[WORLD_ROOM_CAMP][0] = ITEM_NONE;
+        game.room_item[WORLD_ROOM_CAMP][1] = ITEM_NONE;
+        game.room_item[WORLD_ROOM_CAMP][2] = ITEM_NONE;
+        game.room_item[WORLD_ROOM_CAMP][3] = ITEM_NONE;
+        plat_seed_rng(seed);
+        emit_atmosphere(&game, &out);
+        if (out.count == 2 &&
+                out.events[0].kind == GAME_EVENT_ENVIRONMENT &&
+                out.events[0].arg0 == GAME_ENV_EVENT_RUSTLE &&
+                out.events[1].kind == GAME_EVENT_ENVIRONMENT &&
+                out.events[1].arg0 == GAME_ENV_EVENT_BERRY_DROP) {
             found = 1;
             break;
         }
@@ -222,13 +327,17 @@ TEST gatmos_rustle_berry_drop(void)
 TEST gatmos_cmd_inspect_focus(void)
 {
     struct GameState game;
+    struct GameOutput out;
 
     reset_camp(&game);
     game.env_focus_active = 1;
     game.env_focus_room = WORLD_ROOM_CAMP;
     game.env_focus_kind = GAME_ENV_WATER;
     game.env_focus_expires_tick = game.tick + 10;
-    ASSERT_EQ(1, inspect_focus(&game, GAME_ENV_WATER));
+    ASSERT_EQ(1, inspect_focus(&game, GAME_ENV_WATER, &out));
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_OBSERVATION, out.events[0].kind);
+    ASSERT_EQ(GAME_OBS_OUTCOME_WATER, out.events[0].arg0);
     ASSERT_EQ(0, game.env_focus_active);
     PASS();
 }
@@ -236,9 +345,13 @@ TEST gatmos_cmd_inspect_focus(void)
 TEST gatmos_cmd_inspect_none(void)
 {
     struct GameState game;
+    struct GameOutput out;
 
     reset_camp(&game);
-    ASSERT_EQ(1, inspect_focus(&game, 0));
+    ASSERT_EQ(1, inspect_focus(&game, 0, &out));
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_OBSERVATION, out.events[0].kind);
+    ASSERT_EQ(GAME_OBS_OUTCOME_NOTHING, out.events[0].arg0);
     ASSERT_EQ(0, game.env_focus_active);
     PASS();
 }
@@ -246,13 +359,17 @@ TEST gatmos_cmd_inspect_none(void)
 TEST gatmos_cmd_inspect_wrong_focus(void)
 {
     struct GameState game;
+    struct GameOutput out;
 
     reset_camp(&game);
     game.env_focus_active = 1;
     game.env_focus_room = WORLD_ROOM_CAMP;
     game.env_focus_kind = GAME_ENV_RUSTLE;
     game.env_focus_expires_tick = game.tick + 10;
-    ASSERT_EQ(1, inspect_focus(&game, GAME_ENV_WATER));
+    ASSERT_EQ(1, inspect_focus(&game, GAME_ENV_WATER, &out));
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_OBSERVATION, out.events[0].kind);
+    ASSERT_EQ(GAME_OBS_OUTCOME_WRONG_FOCUS, out.events[0].arg0);
     ASSERT_EQ(1, game.env_focus_active);
     PASS();
 }
@@ -265,6 +382,10 @@ SUITE(gatmos) {
     RUN_TEST(gatmos_water_and_grit_focus);
     RUN_TEST(gatmos_room_item_spawn_gate);
     RUN_TEST(gatmos_rustle_berry_drop);
+    RUN_TEST(gatmos_environment_gust_event);
+    RUN_TEST(gatmos_ambient_noise_event);
+    RUN_TEST(gatmos_item_presence_event);
+    RUN_TEST(gatmos_tick_event_order);
     RUN_TEST(gatmos_cmd_inspect_focus);
     RUN_TEST(gatmos_cmd_inspect_none);
     RUN_TEST(gatmos_cmd_inspect_wrong_focus);

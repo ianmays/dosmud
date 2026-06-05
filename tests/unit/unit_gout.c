@@ -146,6 +146,31 @@ TEST game_event_push_records_combat_progression_kinds(void)
     PASS();
 }
 
+TEST game_event_push_records_ambient_observation_kinds(void)
+{
+    GameEventQueue out;
+
+    game_event_queue_reset(&out);
+    ASSERT(0 != game_event_push(&out, GAME_EVENT_ENVIRONMENT,
+        GAME_ENV_EVENT_RUSTLE, 0, 0, 0, 0));
+    ASSERT(0 != game_event_push(&out, GAME_EVENT_AMBIENT_NOISE,
+        0, 0, 0, 0, "crickets"));
+    ASSERT(0 != game_event_push(&out, GAME_EVENT_ITEM_PRESENCE,
+        ITEM_BERRY, 0, 0, 0, "berry"));
+    ASSERT(0 != game_event_push(&out, GAME_EVENT_OBSERVATION,
+        GAME_OBS_OUTCOME_WATER, 0, 0, 0, 0));
+    ASSERT_EQ(4, out.count);
+    ASSERT_EQ(GAME_EVENT_ENVIRONMENT, out.events[0].kind);
+    ASSERT_EQ(GAME_ENV_EVENT_RUSTLE, out.events[0].arg0);
+    ASSERT_EQ(GAME_EVENT_AMBIENT_NOISE, out.events[1].kind);
+    ASSERT_STR_EQ("crickets", out.events[1].text);
+    ASSERT_EQ(GAME_EVENT_ITEM_PRESENCE, out.events[2].kind);
+    ASSERT_EQ(ITEM_BERRY, out.events[2].arg0);
+    ASSERT_EQ(GAME_EVENT_OBSERVATION, out.events[3].kind);
+    ASSERT_EQ(GAME_OBS_OUTCOME_WATER, out.events[3].arg0);
+    PASS();
+}
+
 TEST game_event_push_records_dialogue_encounter_kinds(void)
 {
     GameEventQueue out;
@@ -179,5 +204,6 @@ SUITE(gout) {
     RUN_TEST(game_event_push_records_command_nav_kinds);
     RUN_TEST(game_event_push_records_inventory_kinds);
     RUN_TEST(game_event_push_records_combat_progression_kinds);
+    RUN_TEST(game_event_push_records_ambient_observation_kinds);
     RUN_TEST(game_event_push_records_dialogue_encounter_kinds);
 }
