@@ -12,13 +12,13 @@
  * #160: typed dialogue payloads (layout in gout.h). actor/phase/choice ->
  * DIALOGUE arg0/1/2; guard reasons -> DIALOGUE_GUARD arg0.
  */
-static void push_dialogue(struct GameOutput *out, int actor, int phase,
+static void push_dialogue(GameEventQueue *out, int actor, int phase,
                           int choice)
 {
     game_event_push(out, GAME_EVENT_DIALOGUE, actor, phase, choice, 0, 0);
 }
 
-static void push_dialogue_guard(struct GameOutput *out, int reason)
+static void push_dialogue_guard(GameEventQueue *out, int reason)
 {
     game_event_push(out, GAME_EVENT_DIALOGUE_GUARD, reason, 0, 0, 0, 0);
 }
@@ -32,18 +32,18 @@ int npc_in_room(int room_id)
     return 0;
 }
 
-void frog_dialogue_intro(struct GameOutput *out)
+void frog_dialogue_intro(GameEventQueue *out)
 {
     push_dialogue(out, GAME_DIALOGUE_ACTOR_FROG, GAME_DIALOGUE_PHASE_INTRO, 0);
 }
 
-void frog_dialogue_branch(int choice, struct GameOutput *out)
+void frog_dialogue_branch(int choice, GameEventQueue *out)
 {
     push_dialogue(out, GAME_DIALOGUE_ACTOR_FROG, GAME_DIALOGUE_PHASE_BRANCH,
         choice);
 }
 
-int dialogue_cmd_reply(struct GameState *game, int choice, struct GameOutput *out)
+int dialogue_cmd_reply(struct GameState *game, int choice, GameEventQueue *out)
 {
     if (game->mode != GAME_MODE_DIALOGUE) {
         return 0;
@@ -79,7 +79,7 @@ int dialogue_cmd_reply(struct GameState *game, int choice, struct GameOutput *ou
     return 0;
 }
 
-int dialogue_cmd_talk(struct GameState *game, struct GameOutput *out)
+int dialogue_cmd_talk(struct GameState *game, GameEventQueue *out)
 {
     /* Talk is blocked while the player is already in an enemy or wanderer branch. */
     if (game->mode == GAME_MODE_DIALOGUE && game->dialogue == DIALOGUE_ENEMY) {

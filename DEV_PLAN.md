@@ -549,9 +549,11 @@ Done ✅ ([#176](https://github.com/ianmays/dosmud/pull/176)).
 
 Direct `#47` follow-up. Remove transitional compatibility APIs after migration slices are complete.
 
+Done ✅.
+
 ### Testing
-- Unit: update queue/API tests to assert final event names and payload semantics only
-- Snapshots: existing snapshots should remain stable unless copy/layout changes are intentionally introduced
+- Unit: `unit_gout.c` asserts `game_event_queue_reset` and `game_event_push` only (no legacy kinds); mechanical `game_event_queue_reset` sweep in harness and slice tests
+- Snapshots: all 69 regression tests unchanged (render output identical)
 
 ### [#163](https://github.com/ianmays/dosmud/issues/163) - Final GameEvent test coverage pass
 

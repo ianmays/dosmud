@@ -13,19 +13,19 @@
  * #160: module-local push helpers (same payload layout as dialogue.c/genc.c;
  * see gout.h). Not shared across slices to keep ownership explicit.
  */
-static void push_encounter_open(struct GameOutput *out, int kind)
+static void push_encounter_open(GameEventQueue *out, int kind)
 {
     game_event_push(out, GAME_EVENT_ENCOUNTER, kind,
         GAME_ENCOUNTER_ACTION_OPEN, GAME_ENCOUNTER_OUTCOME_NONE, 0, 0);
 }
 
-static void push_dialogue(struct GameOutput *out, int actor, int phase,
+static void push_dialogue(GameEventQueue *out, int actor, int phase,
                           int choice)
 {
     game_event_push(out, GAME_EVENT_DIALOGUE, actor, phase, choice, 0, 0);
 }
 
-static void push_dialogue_guard(struct GameOutput *out, int reason)
+static void push_dialogue_guard(GameEventQueue *out, int reason)
 {
     game_event_push(out, GAME_EVENT_DIALOGUE_GUARD, reason, 0, 0, 0, 0);
 }
@@ -68,7 +68,7 @@ void wanderer_step(struct GameState *game)
     game->wanderer_room = r->exits[dirs[pick]];
 }
 
-void wanderer_begin_encounter(struct GameState *game, struct GameOutput *out)
+void wanderer_begin_encounter(struct GameState *game, GameEventQueue *out)
 {
     /* The separation flag prevents the same room from retriggering the encounter immediately. */
     if (game_is_busy_dialogue(game)) {
@@ -82,13 +82,13 @@ void wanderer_begin_encounter(struct GameState *game, struct GameOutput *out)
     game->wanderer_need_separation = 1;
 }
 
-void wanderer_apply_reply(int choice, struct GameOutput *out)
+void wanderer_apply_reply(int choice, GameEventQueue *out)
 {
     push_dialogue(out, GAME_DIALOGUE_ACTOR_WANDERER, GAME_DIALOGUE_PHASE_REPLY,
         choice);
 }
 
-int wanderer_cmd_reply(struct GameState *game, int choice, struct GameOutput *out)
+int wanderer_cmd_reply(struct GameState *game, int choice, GameEventQueue *out)
 {
     if (choice < 1 || choice > 3) {
         push_dialogue_guard(out, GAME_DIALOGUE_GUARD_PICK_123);

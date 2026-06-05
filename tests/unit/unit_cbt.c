@@ -7,16 +7,16 @@
 #include "items.h"
 #include "unit_util.h"
 
-static void start_combat_out(struct GameState *game, struct GameOutput *out)
+static void start_combat_out(struct GameState *game, GameEventQueue *out)
 {
-    gout_reset(out);
+    game_event_queue_reset(out);
     combat_start(game, out);
 }
 
 static void resolve_reply_out(struct GameState *game, int choice,
-                              struct GameOutput *out)
+                              GameEventQueue *out)
 {
-    gout_reset(out);
+    game_event_queue_reset(out);
     combat_resolve_reply(game, choice, out);
 }
 
@@ -36,7 +36,7 @@ TEST combat_attack_bonus(void)
 TEST combat_start_mode(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
     int rolls[1];
 
     unit_game_fresh(&game, 2u);
@@ -58,7 +58,7 @@ TEST combat_start_mode(void)
 TEST combat_reply_defend_reduces_damage(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
     int rolls[1];
 
     unit_game_fresh(&game, 3u);
@@ -82,7 +82,7 @@ TEST combat_reply_defend_reduces_damage(void)
 TEST combat_reply_salve_in_combat(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
     int rolls[1];
 
     unit_game_fresh(&game, 8u);
@@ -108,7 +108,7 @@ TEST combat_reply_salve_in_combat(void)
 TEST combat_reply_salve_at_full_hp(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
     int rolls[1];
 
     unit_game_fresh(&game, 11u);
@@ -134,7 +134,7 @@ TEST combat_reply_salve_at_full_hp(void)
 TEST combat_victory_loot_and_xp(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
     int rolls[3];
 
     unit_game_fresh(&game, 4u);
@@ -160,7 +160,7 @@ TEST combat_victory_loot_and_xp(void)
 TEST combat_invalid_choice(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
 
     unit_game_fresh(&game, 5u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
@@ -176,7 +176,7 @@ TEST combat_invalid_choice(void)
 TEST combat_player_death(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
     int rolls[2];
 
     unit_game_fresh(&game, 6u);
@@ -197,7 +197,7 @@ TEST combat_player_death(void)
 TEST combat_loot_tiers(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
     int rolls[3];
 
     unit_game_fresh(&game, 10u);

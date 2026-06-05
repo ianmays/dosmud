@@ -30,9 +30,9 @@ static void camp_clear_ground(struct GameState *game)
     }
 }
 
-static void harness_drop_output(struct GameOutput *out)
+static void harness_drop_output(GameEventQueue *out)
 {
-    gout_reset(out);
+    game_event_queue_reset(out);
 }
 
 static void fixture_wanderer_off(struct GameState *game)
@@ -56,7 +56,7 @@ static void fixture_bandit_base(struct GameState *game)
 
 static int fixture_bandit_dialogue(struct GameState *game)
 {
-    struct GameOutput out;
+    GameEventQueue out;
 
     fixture_bandit_base(game);
     if (!game_inv_bag_add(game, ITEM_STICK)) {
@@ -70,7 +70,7 @@ static int fixture_bandit_dialogue(struct GameState *game)
 
 static void fixture_bandit_dialogue_empty(struct GameState *game)
 {
-    struct GameOutput out;
+    GameEventQueue out;
 
     fixture_bandit_base(game);
     harness_drop_output(&out);
@@ -90,7 +90,7 @@ static int fixture_bandit_handover_pick(struct GameState *game)
 
 static void fixture_bandit_wielded_pick(struct GameState *game)
 {
-    struct GameOutput out;
+    GameEventQueue out;
 
     fixture_bandit_base(game);
     game->weapon_equipped = ITEM_STICK;
@@ -115,7 +115,7 @@ static void fixture_bandit_combat_turn1(struct GameState *game)
 
 static int fixture_bandit_combat_turn1_resolve(struct GameState *game)
 {
-    struct GameOutput out;
+    GameEventQueue out;
     static const int equipment_rolls[2] = {
         CFG_TEST_EQUIPMENT_ROLL_PLAYER_HIT,
         CFG_TEST_EQUIPMENT_ROLL_ENEMY_DMG
@@ -296,7 +296,7 @@ static int fixture_quiet_camp_dual_ground_full_bag(struct GameState *game)
 
 static void fixture_wanderer_dialogue(struct GameState *game)
 {
-    struct GameOutput out;
+    GameEventQueue out;
 
     game_reset_fixture_baseline(game, WORLD_ROOM_ROAD, 0);
     game->room_explored[WORLD_ROOM_ROAD] = 1;

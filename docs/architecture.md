@@ -34,7 +34,7 @@ Within core, keep the ownership split explicit:
 
 [`src/game.h`](../src/game.h) defines the engine-facing stepping surface and persistent simulation state; [`src/gout.h`](../src/gout.h) defines the fixed-size event queue that carries engine results to the render edge.
 
-Command and navigation stepping in `game.c` emit generic `GameEventKind` values (handled in `grendr` without the legacy adapter): `GAME_EVENT_MOVE` and `GAME_EVENT_ROOM_LOOK` (successful move plus room look), `GAME_EVENT_MAP`, `GAME_EVENT_HELP` (`arg0` = `CMD_HELP_*` topic), `GAME_EVENT_WAIT`, `GAME_EVENT_CANNOT_MOVE` (`text` = direction name), and `GAME_EVENT_UNKNOWN_COMMAND`. Inventory and item handlers in `invent.c` emit `GAME_EVENT_ITEM_RESULT`, `GAME_EVENT_BAG_VIEW`, `GAME_EVENT_CRAFT_RESULT`, and `GAME_EVENT_EQUIP_RESULT` (payload contract in [`gout.h`](../src/gout.h)). Combat and progression in [`combat.c`](../src/combat.c) and [`gprog.c`](../src/gprog.c) emit `GAME_EVENT_COMBAT` (`GameEventCombatPhase` in `arg0`), `GAME_EVENT_XP_GAIN`, and `GAME_EVENT_STAT_CHANGE` (payload contract in [`gout.h`](../src/gout.h)). Dialogue and encounter slices in [`dialogue.c`](../src/dialogue.c), [`wanderer.c`](../src/wanderer.c), and [`genc.c`](../src/genc.c) emit `GAME_EVENT_DIALOGUE`, `GAME_EVENT_ENCOUNTER`, and `GAME_EVENT_DIALOGUE_GUARD`; modal guards in `game.c` emit `GAME_EVENT_DIALOGUE_GUARD` when reply or handover context blocks a command (payload contract in [`gout.h`](../src/gout.h)). Ambient and inspect output in [`gatmos.c`](../src/gatmos.c) emit `GAME_EVENT_ENVIRONMENT`, `GAME_EVENT_AMBIENT_NOISE`, `GAME_EVENT_ITEM_PRESENCE`, and `GAME_EVENT_OBSERVATION` on world ticks and the inspect command (payload contract in [`gout.h`](../src/gout.h)). No production slice still appends `GAME_EVENT_LEGACY`; the enum catalog remains for `#162` compatibility cleanup.
+Command and navigation stepping in `game.c` emit generic `GameEventKind` values (handled in `grendr`): `GAME_EVENT_MOVE` and `GAME_EVENT_ROOM_LOOK` (successful move plus room look), `GAME_EVENT_MAP`, `GAME_EVENT_HELP` (`arg0` = `CMD_HELP_*` topic), `GAME_EVENT_WAIT`, `GAME_EVENT_CANNOT_MOVE` (`text` = direction name), and `GAME_EVENT_UNKNOWN_COMMAND`. Inventory and item handlers in `invent.c` emit `GAME_EVENT_ITEM_RESULT`, `GAME_EVENT_BAG_VIEW`, `GAME_EVENT_CRAFT_RESULT`, and `GAME_EVENT_EQUIP_RESULT` (payload contract in [`gout.h`](../src/gout.h)). Combat and progression in [`combat.c`](../src/combat.c) and [`gprog.c`](../src/gprog.c) emit `GAME_EVENT_COMBAT` (`GameEventCombatPhase` in `arg0`), `GAME_EVENT_XP_GAIN`, and `GAME_EVENT_STAT_CHANGE` (payload contract in [`gout.h`](../src/gout.h)). Dialogue and encounter slices in [`dialogue.c`](../src/dialogue.c), [`wanderer.c`](../src/wanderer.c), and [`genc.c`](../src/genc.c) emit `GAME_EVENT_DIALOGUE`, `GAME_EVENT_ENCOUNTER`, and `GAME_EVENT_DIALOGUE_GUARD`; modal guards in `game.c` emit `GAME_EVENT_DIALOGUE_GUARD` when reply or handover context blocks a command (payload contract in [`gout.h`](../src/gout.h)). Ambient and inspect output in [`gatmos.c`](../src/gatmos.c) emit `GAME_EVENT_ENVIRONMENT`, `GAME_EVENT_AMBIENT_NOISE`, `GAME_EVENT_ITEM_PRESENCE`, and `GAME_EVENT_OBSERVATION` on world ticks and the inspect command (payload contract in [`gout.h`](../src/gout.h)). All production slices append generic `GameEventKind` values only; `grendr` dispatches them to player-visible text.
 
 Core must **not** use:
 
@@ -47,7 +47,7 @@ Good:
 ```c
 GameEventQueue out;
 
-gout_reset(&out);
+game_event_queue_reset(&out);
 game_process_input(game, line, &out);
 game_render_output(game, &out);
 ```
@@ -64,7 +64,7 @@ Presentation only: room art, HUD, combat text, inventory messages, and explorati
 
 - **`txtres`** holds static copy; it does not print
 - **`fmt`** builds player-visible strings from `GameState` into caller buffers (no terminal I/O); logic-heavy formatting (for example aggregated bag lists) lives here
-- **`grendr`** is the only gameplay-adjacent module that may call `printf`; it prints `fmt` output, applies newline/spacing tiers, draws ASCII art, and acts as the DOSMUD text-render adapter over the event queue. During the `#47` migration it supports generic `GameEvent` kinds for room/move, command/navigation, inventory/item, combat/progression, and dialogue/encounter flows alongside a temporary legacy `GAME_OUT_*` compatibility path for the remaining slices.
+- **`grendr`** is the only gameplay-adjacent module that may call `printf`; it prints `fmt` output, applies newline/spacing tiers, draws ASCII art, and acts as the DOSMUD text-render adapter over the generic `GameEvent` queue (room/move, command/navigation, inventory/item, combat/progression, dialogue/encounter, ambient/inspect).
 
 Platform or frontend code runs simulation first, then hands the resulting `GameEvent` records to render; render never changes simulation state.
 

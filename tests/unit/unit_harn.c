@@ -28,11 +28,11 @@ TEST harness_baseline_matches_start_fields(void)
 TEST harness_enemy_begin_after_baseline(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
 
     unit_game_fresh(&game, 1234u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
-    gout_reset(&out);
+    game_event_queue_reset(&out);
     enemy_begin_encounter(&game, &out);
     ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
     ASSERT_EQ(DIALOGUE_ENEMY, game.dialogue);

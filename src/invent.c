@@ -14,19 +14,19 @@
  * #158: typed inventory events (payload layout in gout.h). Queue carries item
  * ids and numeric context only; grendr resolves item_name and player copy.
  */
-static void push_item_result(struct GameOutput *out, int action, int outcome,
+static void push_item_result(GameEventQueue *out, int action, int outcome,
                              int item_id, int value)
 {
     game_event_push(out, GAME_EVENT_ITEM_RESULT, action, outcome, item_id,
         value, 0);
 }
 
-static void push_craft_result(struct GameOutput *out, int item_id, int outcome)
+static void push_craft_result(GameEventQueue *out, int item_id, int outcome)
 {
     game_event_push(out, GAME_EVENT_CRAFT_RESULT, item_id, outcome, 0, 0, 0);
 }
 
-static void push_equip_result(struct GameOutput *out, int item_id, int outcome)
+static void push_equip_result(GameEventQueue *out, int item_id, int outcome)
 {
     game_event_push(out, GAME_EVENT_EQUIP_RESULT, item_id, outcome, 0, 0, 0);
 }
@@ -174,7 +174,7 @@ int game_inv_bag_remove_item(struct GameState *game, int item_id)
     return game_inv_bag_remove_index(game, idx);
 }
 
-int game_inv_cmd_loot(struct GameState *game, struct GameOutput *out)
+int game_inv_cmd_loot(struct GameState *game, GameEventQueue *out)
 {
     int room_id;
     int ground_item;
@@ -203,7 +203,7 @@ int game_inv_cmd_loot(struct GameState *game, struct GameOutput *out)
     return 1;
 }
 
-int game_inv_cmd_take(struct GameState *game, int item_arg, struct GameOutput *out)
+int game_inv_cmd_take(struct GameState *game, int item_arg, GameEventQueue *out)
 {
     int room_id;
     int ground_item;
@@ -238,7 +238,7 @@ int game_inv_cmd_take(struct GameState *game, int item_arg, struct GameOutput *o
     return 1;
 }
 
-int game_inv_cmd_take_all(struct GameState *game, struct GameOutput *out)
+int game_inv_cmd_take_all(struct GameState *game, GameEventQueue *out)
 {
     int room_id;
     int ground_count;
@@ -282,7 +282,7 @@ int game_inv_cmd_take_all(struct GameState *game, struct GameOutput *out)
     return 1;
 }
 
-int game_inv_cmd_drop(struct GameState *game, int item_arg, struct GameOutput *out)
+int game_inv_cmd_drop(struct GameState *game, int item_arg, GameEventQueue *out)
 {
     int room_id;
     int slot;
@@ -325,14 +325,14 @@ int game_inv_cmd_drop(struct GameState *game, int item_arg, struct GameOutput *o
     return 1;
 }
 
-int game_inv_cmd_bag(struct GameState *game, struct GameOutput *out)
+int game_inv_cmd_bag(struct GameState *game, GameEventQueue *out)
 {
     (void)game;
     game_event_push(out, GAME_EVENT_BAG_VIEW, 0, 0, 0, 0, 0);
     return 1;
 }
 
-int game_inv_cmd_eat(struct GameState *game, int item_arg, struct GameOutput *out)
+int game_inv_cmd_eat(struct GameState *game, int item_arg, GameEventQueue *out)
 {
     if (game->mode == GAME_MODE_COMBAT) {
         push_item_result(out, GAME_ITEM_ACTION_EAT,
@@ -360,7 +360,7 @@ int game_inv_cmd_eat(struct GameState *game, int item_arg, struct GameOutput *ou
     return 1;
 }
 
-int game_inv_cmd_use(struct GameState *game, int item_arg, struct GameOutput *out)
+int game_inv_cmd_use(struct GameState *game, int item_arg, GameEventQueue *out)
 {
     if (game->mode == GAME_MODE_COMBAT) {
         push_item_result(out, GAME_ITEM_ACTION_USE,
@@ -411,7 +411,7 @@ static int craft_consume_one(struct GameState *game, int item_id)
     return 0;
 }
 
-int game_inv_cmd_craft(struct GameState *game, int item_arg, struct GameOutput *out)
+int game_inv_cmd_craft(struct GameState *game, int item_arg, GameEventQueue *out)
 {
     if (game->mode == GAME_MODE_COMBAT) {
         push_craft_result(out, item_arg, GAME_CRAFT_OUTCOME_BLOCKED_COMBAT);
@@ -460,7 +460,7 @@ int game_inv_cmd_craft(struct GameState *game, int item_arg, struct GameOutput *
     return 1;
 }
 
-int game_inv_cmd_wield(struct GameState *game, int item_arg, struct GameOutput *out)
+int game_inv_cmd_wield(struct GameState *game, int item_arg, GameEventQueue *out)
 {
     int idx;
     int old_weapon;
@@ -499,7 +499,7 @@ int game_inv_cmd_wield(struct GameState *game, int item_arg, struct GameOutput *
     return 1;
 }
 
-int game_inv_cmd_unwield(struct GameState *game, struct GameOutput *out)
+int game_inv_cmd_unwield(struct GameState *game, GameEventQueue *out)
 {
     int room_id;
     int slot;

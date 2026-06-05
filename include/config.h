@@ -11,7 +11,7 @@
 #define CFG_DIR_MAX   4
 
 #define CFG_BAG_MAX   12
-#define CFG_GAME_OUT_MAX 64
+#define CFG_GAME_EVENT_MAX 64
 /* Max chars for fmt_inv_bag_items output (worst case full bag with stack suffixes). */
 #define CFG_FMT_BAG_LIST_MAX 128
 /* Max chars for fmt_room_ground_items (header + CFG_AREA_ITEM_SLOTS lines). */

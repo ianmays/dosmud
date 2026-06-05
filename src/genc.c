@@ -15,25 +15,25 @@
  * #160: typed encounter payloads (layout in gout.h). kind/action/outcome ->
  * ENCOUNTER arg0/1/2; item id -> arg3; text for GIVE/OK item names.
  */
-static void push_encounter(struct GameOutput *out, int kind, int action,
+static void push_encounter(GameEventQueue *out, int kind, int action,
                            int outcome, int item_id, const char *text)
 {
     game_event_push(out, GAME_EVENT_ENCOUNTER, kind, action, outcome, item_id,
         text);
 }
 
-static void push_encounter_open(struct GameOutput *out, int kind)
+static void push_encounter_open(GameEventQueue *out, int kind)
 {
     push_encounter(out, kind, GAME_ENCOUNTER_ACTION_OPEN,
         GAME_ENCOUNTER_OUTCOME_NONE, 0, 0);
 }
 
-static void push_dialogue_guard(struct GameOutput *out, int reason)
+static void push_dialogue_guard(GameEventQueue *out, int reason)
 {
     game_event_push(out, GAME_EVENT_DIALOGUE_GUARD, reason, 0, 0, 0, 0);
 }
 
-void enemy_begin_encounter(struct GameState *game, struct GameOutput *out)
+void enemy_begin_encounter(struct GameState *game, GameEventQueue *out)
 {
     if (game_is_busy_dialogue(game)) {
         return;
@@ -42,7 +42,7 @@ void enemy_begin_encounter(struct GameState *game, struct GameOutput *out)
     game_set_mode_dialogue(game, DIALOGUE_ENEMY);
 }
 
-int genc_cmd_give(struct GameState *game, int item_arg, struct GameOutput *out)
+int genc_cmd_give(struct GameState *game, int item_arg, GameEventQueue *out)
 {
     if (game->mode == GAME_MODE_DIALOGUE &&
             game->dialogue == DIALOGUE_ENEMY &&
@@ -67,7 +67,7 @@ int genc_cmd_give(struct GameState *game, int item_arg, struct GameOutput *out)
     return 1;
 }
 
-int genc_cmd_reply(struct GameState *game, int choice, struct GameOutput *out)
+int genc_cmd_reply(struct GameState *game, int choice, GameEventQueue *out)
 {
     /* Reply choice decides whether the enemy opens combat, asks for tribute, or reacts to intimidation. */
     if (choice == 1) {

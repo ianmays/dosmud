@@ -7,11 +7,11 @@
 #define GATMOS_H
 
 struct GameState;
-struct GameOutput;
+struct GameEventQueue;
 
 void seed_world_items(struct GameState *game);
-void maybe_emit_animal_noise(struct GameState *game, struct GameOutput *out);
-void maybe_emit_atmosphere(struct GameState *game, struct GameOutput *out);
-int gatmos_cmd_inspect(struct GameState *game, int item_arg, struct GameOutput *out);
+void maybe_emit_animal_noise(struct GameState *game, struct GameEventQueue *out);
+void maybe_emit_atmosphere(struct GameState *game, struct GameEventQueue *out);
+int gatmos_cmd_inspect(struct GameState *game, int item_arg, struct GameEventQueue *out);
 
 #endif
