@@ -138,7 +138,7 @@ Large-scale gameplay/content expansion should remain secondary until the core ar
 
 ### [#42](https://github.com/ianmays/dosmud/issues/42) - Split `game.c`
 
-Done ✅.
+Done ✅ ([#181](https://github.com/ianmays/dosmud/pull/181)).
 
 Highest-priority architecture task.
 
