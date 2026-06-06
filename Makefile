@@ -82,6 +82,7 @@ SNAPSHOT_TESTS = \
 	bandit_handover bandit_wielded_give area_items map equipment craft_wielded \
 	walk_north walk_map wait_tick \
 	frog_replies watchman_talk wanderer_replies wanderer_talk_blocked herbalist_talk archivist_talk talk_nobody \
+	game_event_dialogue \
 	use_salve use_torch use_spear use_stone eat_berry eat_fish eat_berry_heal eat_fish_heal \
 	eat_not_edible eat_missing bag_stacks bag_view \
 	inspect_rustle inspect_creak inspect_water inspect_grit inspect_none inspect_wrong \
