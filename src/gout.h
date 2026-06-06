@@ -128,8 +128,8 @@ enum GameEventCombatPhase {
  * DIALOGUE       arg0=GameEventDialogueActor arg1=GameEventDialoguePhase
  *                arg2=choice (1-3) for REPLY/BRANCH
  * ENCOUNTER      arg0=GameEventEncounterKind arg1=GameEventEncounterAction
- *                arg2=GameEventEncounterOutcome or item id; arg3=item id when
- *                arg2 holds outcome; text=item name for GIVE/OK when needed
+ *                arg2=GameEventEncounterOutcome arg3=item id (GIVE/OK only)
+ *                text=item_name for GIVE/OK; zero otherwise
  * DIALOGUE_GUARD arg0=GameEventDialogueGuardReason
  */
 enum GameEventDialogueActor {
