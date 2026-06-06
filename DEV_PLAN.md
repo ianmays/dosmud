@@ -138,7 +138,7 @@ Large-scale gameplay/content expansion should remain secondary until the core ar
 
 ### [#42](https://github.com/ianmays/dosmud/issues/42) - Split `game.c`
 
-Done ✅ ([#181](https://github.com/ianmays/dosmud/pull/181)).
+Done ✅.
 
 Highest-priority architecture task.
 
@@ -559,7 +559,7 @@ Done ✅ ([#177](https://github.com/ianmays/dosmud/pull/177)).
 
 Direct `#47` follow-up. Expand unit and snapshot coverage for the stabilized generic event schema.
 
-Done ✅.
+Done ✅ ([#181](https://github.com/ianmays/dosmud/pull/181)).
 
 ### Testing
 - Unit: cover queue semantics plus representative payload assertions for each migrated event family
