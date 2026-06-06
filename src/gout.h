@@ -11,8 +11,8 @@
 
 /*
  * Generic kinds (#47 room/move look; #157 command/nav; #158 invent; #159 combat;
- * #160 dialogue/encounter). Slice producers use game_event_push; everything
- * else still wraps GameOutKind as GAME_EVENT_LEGACY.
+ * #160 dialogue/encounter; #161 ambient/inspect). Slice producers use
+ * game_event_push; everything else still wraps GameOutKind as GAME_EVENT_LEGACY.
  */
 enum GameEventKind {
     GAME_EVENT_NONE = 0,
@@ -37,7 +37,12 @@ enum GameEventKind {
     /* #160: dialogue, wanderer, and encounter slice emit actor/dialogue payloads. */
     GAME_EVENT_DIALOGUE,
     GAME_EVENT_ENCOUNTER,
-    GAME_EVENT_DIALOGUE_GUARD
+    GAME_EVENT_DIALOGUE_GUARD,
+    /* #161: gatmos.c emits environment/observation payloads on world ticks. */
+    GAME_EVENT_ENVIRONMENT,
+    GAME_EVENT_AMBIENT_NOISE,
+    GAME_EVENT_ITEM_PRESENCE,
+    GAME_EVENT_OBSERVATION
 };
 
 /*
@@ -186,12 +191,41 @@ enum GameEventDialogueGuardReason {
 };
 
 /*
+ * Ambient/inspect payload contract (#161):
+ * ENVIRONMENT    arg0=GameEventEnvironmentKind
+ * AMBIENT_NOISE  text=room animal noise line
+ * ITEM_PRESENCE  arg0=item id; text=item name
+ * OBSERVATION    arg0=GameEventObservationOutcome
+ */
+enum GameEventEnvironmentKind {
+    GAME_ENV_EVENT_NONE = 0,
+    GAME_ENV_EVENT_GUST,
+    GAME_ENV_EVENT_RUSTLE,
+    GAME_ENV_EVENT_BERRY_DROP,
+    GAME_ENV_EVENT_CREAK,
+    GAME_ENV_EVENT_WATER,
+    GAME_ENV_EVENT_REED_DROP,
+    GAME_ENV_EVENT_GRIT
+};
+
+enum GameEventObservationOutcome {
+    GAME_OBS_OUTCOME_NONE = 0,
+    GAME_OBS_OUTCOME_NOTHING,
+    GAME_OBS_OUTCOME_WRONG_FOCUS,
+    GAME_OBS_OUTCOME_RUSTLE,
+    GAME_OBS_OUTCOME_CREAK,
+    GAME_OBS_OUTCOME_WATER,
+    GAME_OBS_OUTCOME_GRIT
+};
+
+/*
  * Legacy presentation kinds (GAME_EVENT_LEGACY + legacy_kind). Command/nav
  * MAP, HELP, WAIT, CANNOT_MOVE, UNKNOWN_COMMAND, and MOVED also have
  * GAME_EVENT_* kinds after #157; invent after #158; combat/progression after
- * #159; dialogue/encounter after #160. Keep GAME_OUT_COMBAT_*,
- * GAME_OUT_XP_GAINED, GAME_OUT_LEVEL_UP, GAME_OUT_INV_*, and dialogue/encounter
- * GAME_OUT_* mirrors here until #162 removes legacy queue paths.
+ * #159; dialogue/encounter after #160; ambient/inspect after #161. Keep
+ * GAME_OUT_COMBAT_*, GAME_OUT_XP_GAINED, GAME_OUT_LEVEL_UP, GAME_OUT_INV_*,
+ * dialogue/encounter, and ambient/inspect GAME_OUT_* mirrors here until #162
+ * removes legacy queue paths.
  */
 enum GameOutKind {
     GAME_OUT_NONE = 0,

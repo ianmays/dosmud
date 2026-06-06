@@ -304,6 +304,8 @@ Each process run uses one `.input` file until `quit`. `make snapshot-run` runs `
 
 **Inspect:** `inspect_rustle`, `inspect_creak`, `inspect_water`, `inspect_grit`, `inspect_none`, `inspect_wrong`.
 
+**Ambient (tick-driven):** `ambient_rustle`, `ambient_tick_order`, `ambient_item` (`@fixture ambient_camp` plus `@seed` for deterministic atmosphere, animal noise, and nearby-item paths).
+
 **Combat:** `combat_defend`, `combat_salve`, `combat_no_salve`, `combat_invalid`, `combat_take_blocked`, `combat_victory_xp`, `level_up`.
 
 **Loot:** `loot_spear`, `loot_stick`, `loot_berry`, `loot_herb`, `loot_fish`, `loot_empty`, `loot_stripped`, `loot_bag_full`.

@@ -264,6 +264,13 @@ static void fixture_quiet_explore(struct GameState *game)
     fixture_quiet_ticks_on(game);
 }
 
+/* Ambient snapshots: camp baseline with wanderer off; ticks still emit atmosphere. */
+static void fixture_ambient_camp(struct GameState *game)
+{
+    fixture_at_camp(game);
+    fixture_wanderer_off(game);
+}
+
 static void fixture_quiet_camp_dual_ground(struct GameState *game)
 {
     game_reset_fixture_baseline(game, WORLD_ROOM_CAMP, 0);
@@ -590,6 +597,10 @@ int testharn_apply(struct GameState *game, const char *line)
     }
     if (fixture_name_is("quiet_explore", name)) {
         fixture_quiet_explore(game);
+        return 1;
+    }
+    if (fixture_name_is("ambient_camp", name)) {
+        fixture_ambient_camp(game);
         return 1;
     }
     if (fixture_name_is("quiet_camp_dual_ground", name)) {

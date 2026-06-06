@@ -1108,6 +1108,84 @@ static void render_encounter_event(const GameEvent *ev)
 }
 
 /*
+ * #161: GAME_EVENT_ENVIRONMENT adapter; arg0=GameEventEnvironmentKind.
+ * Same render_atmosphere_* helpers as legacy path.
+ */
+static void render_environment_event(const GameEvent *ev)
+{
+    switch (ev->arg0) {
+    case GAME_ENV_EVENT_GUST:
+        render_atmosphere_gust();
+        break;
+    case GAME_ENV_EVENT_RUSTLE:
+        render_atmosphere_rustle();
+        break;
+    case GAME_ENV_EVENT_BERRY_DROP:
+        render_atmosphere_berry_drop();
+        break;
+    case GAME_ENV_EVENT_CREAK:
+        render_atmosphere_creak();
+        break;
+    case GAME_ENV_EVENT_WATER:
+        render_atmosphere_water();
+        break;
+    case GAME_ENV_EVENT_REED_DROP:
+        render_atmosphere_reed_drop();
+        break;
+    case GAME_ENV_EVENT_GRIT:
+        render_atmosphere_grit();
+        break;
+    default:
+        break;
+    }
+}
+
+/*
+ * #161: GAME_EVENT_AMBIENT_NOISE adapter; text=animal noise line.
+ */
+static void render_ambient_noise_event(const GameEvent *ev)
+{
+    render_animal_noise_line(ev->text);
+}
+
+/*
+ * #161: GAME_EVENT_ITEM_PRESENCE adapter; text=item name.
+ */
+static void render_item_presence_event(const GameEvent *ev)
+{
+    render_nearby_item_notice(ev->text);
+}
+
+/*
+ * #161: GAME_EVENT_OBSERVATION adapter; arg0=GameEventObservationOutcome.
+ */
+static void render_observation_event(const GameEvent *ev)
+{
+    switch (ev->arg0) {
+    case GAME_OBS_OUTCOME_NOTHING:
+        render_msg_inspect_nothing();
+        break;
+    case GAME_OBS_OUTCOME_WRONG_FOCUS:
+        render_msg_inspect_wrong_focus();
+        break;
+    case GAME_OBS_OUTCOME_RUSTLE:
+        render_msg_inspect_rustle();
+        break;
+    case GAME_OBS_OUTCOME_CREAK:
+        render_msg_inspect_creak();
+        break;
+    case GAME_OBS_OUTCOME_WATER:
+        render_msg_inspect_water();
+        break;
+    case GAME_OBS_OUTCOME_GRIT:
+        render_msg_inspect_grit();
+        break;
+    default:
+        break;
+    }
+}
+
+/*
  * #160: GAME_EVENT_DIALOGUE_GUARD adapter; arg0=GameEventDialogueGuardReason.
  */
 static void render_dialogue_guard_event(const GameEvent *ev)
@@ -1251,6 +1329,19 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
             break;
         case GAME_EVENT_DIALOGUE_GUARD:
             render_dialogue_guard_event(ev);
+            break;
+        /* #161 ambient/inspect: direct dispatch (gatmos no longer LEGACY). */
+        case GAME_EVENT_ENVIRONMENT:
+            render_environment_event(ev);
+            break;
+        case GAME_EVENT_AMBIENT_NOISE:
+            render_ambient_noise_event(ev);
+            break;
+        case GAME_EVENT_ITEM_PRESENCE:
+            render_item_presence_event(ev);
+            break;
+        case GAME_EVENT_OBSERVATION:
+            render_observation_event(ev);
             break;
         case GAME_EVENT_LEGACY:
             render_legacy_output_event(game, ev);

@@ -9,7 +9,30 @@
 /*
  * Ambient systems live here: starter ground items, atmospheric focus, and
  * room-scoped incidental events.
+ * #161: queues GAME_EVENT_ENVIRONMENT / AMBIENT_NOISE / ITEM_PRESENCE /
+ * OBSERVATION; grendr maps to text.
  */
+
+static void push_environment(struct GameOutput *out, int kind)
+{
+    game_event_push(out, GAME_EVENT_ENVIRONMENT, kind, 0, 0, 0, 0);
+}
+
+static void push_ambient_noise(struct GameOutput *out, const char *line)
+{
+    game_event_push(out, GAME_EVENT_AMBIENT_NOISE, 0, 0, 0, 0, line);
+}
+
+static void push_item_presence(struct GameOutput *out, int item_id,
+                               const char *name)
+{
+    game_event_push(out, GAME_EVENT_ITEM_PRESENCE, item_id, 0, 0, 0, name);
+}
+
+static void push_observation(struct GameOutput *out, int outcome)
+{
+    game_event_push(out, GAME_EVENT_OBSERVATION, outcome, 0, 0, 0, 0);
+}
 
 void seed_world_items(struct GameState *game)
 {
@@ -61,7 +84,7 @@ static void maybe_spawn_room_item(struct GameState *game, struct GameOutput *out
     if (!game_room_ground_try_add(game, room_id, spawned)) {
         return;
     }
-    gout_push(out, GAME_OUT_NEARBY_ITEM_NOTICE, 0, 0, 0, 0, item_name(spawned));
+    push_item_presence(out, spawned, item_name(spawned));
 }
 
 void maybe_emit_animal_noise(struct GameState *game, struct GameOutput *out)
@@ -72,7 +95,7 @@ void maybe_emit_animal_noise(struct GameState *game, struct GameOutput *out)
     if ((rand() % CFG_ROLL_PERCENT_RANGE) >= CFG_ANIMAL_NOISE_SKIP_ROLL_GE) {
         return;
     }
-    gout_push(out, GAME_OUT_ANIMAL_NOISE_LINE, 0, 0, 0, 0,
+    push_ambient_noise(out,
         world_room_animal_noise(&game->world, game->player.room_id));
 }
 
@@ -90,11 +113,11 @@ void maybe_emit_atmosphere(struct GameState *game, struct GameOutput *out)
 
     roll = rand() % CFG_ROLL_PERCENT_RANGE;
     if (roll < CFG_ATMOSPHERE_ROLL_GUST_BELOW) {
-        gout_push(out, GAME_OUT_ATMOSPHERE_GUST, 0, 0, 0, 0, 0);
+        push_environment(out, GAME_ENV_EVENT_GUST);
         return;
     }
     if (roll < CFG_ATMOSPHERE_ROLL_RUSTLE_BELOW) {
-        gout_push(out, GAME_OUT_ATMOSPHERE_RUSTLE, 0, 0, 0, 0, 0);
+        push_environment(out, GAME_ENV_EVENT_RUSTLE);
         game->env_focus_active = 1;
         game->env_focus_room = game->player.room_id;
         game->env_focus_kind = GAME_ENV_RUSTLE;
@@ -102,13 +125,13 @@ void maybe_emit_atmosphere(struct GameState *game, struct GameOutput *out)
         if (game_room_ground_has_space(game, game->player.room_id) &&
                 (rand() % CFG_ROLL_PERCENT_RANGE) < CFG_ATMOSPHERE_FOCUS_EXTRA_ITEM_BELOW) {
             if (game_room_ground_try_add(game, game->player.room_id, ITEM_BERRY)) {
-                gout_push(out, GAME_OUT_ATMOSPHERE_BERRY_DROP, 0, 0, 0, 0, 0);
+                push_environment(out, GAME_ENV_EVENT_BERRY_DROP);
             }
         }
         return;
     }
     if (roll < CFG_ATMOSPHERE_ROLL_CREAK_BELOW) {
-        gout_push(out, GAME_OUT_ATMOSPHERE_CREAK, 0, 0, 0, 0, 0);
+        push_environment(out, GAME_ENV_EVENT_CREAK);
         game->env_focus_active = 1;
         game->env_focus_room = game->player.room_id;
         game->env_focus_kind = GAME_ENV_CREAK;
@@ -116,7 +139,7 @@ void maybe_emit_atmosphere(struct GameState *game, struct GameOutput *out)
         return;
     }
     if (roll < CFG_ATMOSPHERE_ROLL_WATER_BELOW) {
-        gout_push(out, GAME_OUT_ATMOSPHERE_WATER, 0, 0, 0, 0, 0);
+        push_environment(out, GAME_ENV_EVENT_WATER);
         game->env_focus_active = 1;
         game->env_focus_room = game->player.room_id;
         game->env_focus_kind = GAME_ENV_WATER;
@@ -124,13 +147,13 @@ void maybe_emit_atmosphere(struct GameState *game, struct GameOutput *out)
         if (game_room_ground_has_space(game, game->player.room_id) &&
                 (rand() % CFG_ROLL_PERCENT_RANGE) < CFG_ATMOSPHERE_FOCUS_EXTRA_ITEM_BELOW) {
             if (game_room_ground_try_add(game, game->player.room_id, ITEM_REED)) {
-                gout_push(out, GAME_OUT_ATMOSPHERE_REED_DROP, 0, 0, 0, 0, 0);
+                push_environment(out, GAME_ENV_EVENT_REED_DROP);
             }
         }
         return;
     }
     if (roll < CFG_ATMOSPHERE_ROLL_GRIT_BELOW) {
-        gout_push(out, GAME_OUT_ATMOSPHERE_GRIT, 0, 0, 0, 0, 0);
+        push_environment(out, GAME_ENV_EVENT_GRIT);
         game->env_focus_active = 1;
         game->env_focus_room = game->player.room_id;
         game->env_focus_kind = GAME_ENV_GRIT;
@@ -146,7 +169,7 @@ int gatmos_cmd_inspect(struct GameState *game, int item_arg, struct GameOutput *
     if (!game->env_focus_active ||
             game->env_focus_room != game->player.room_id ||
             game->tick >= game->env_focus_expires_tick) {
-        gout_push(out, GAME_OUT_MSG_INSPECT_NOTHING, 0, 0, 0, 0, 0);
+        push_observation(out, GAME_OBS_OUTCOME_NOTHING);
         game->env_focus_active = 0;
         game->env_focus_room = -1;
         game->env_focus_kind = GAME_ENV_NONE;
@@ -154,17 +177,17 @@ int gatmos_cmd_inspect(struct GameState *game, int item_arg, struct GameOutput *
         return 1;
     }
     if (item_arg != 0 && item_arg != game->env_focus_kind) {
-        gout_push(out, GAME_OUT_MSG_INSPECT_WRONG_FOCUS, 0, 0, 0, 0, 0);
+        push_observation(out, GAME_OBS_OUTCOME_WRONG_FOCUS);
         return 1;
     }
     if (game->env_focus_kind == GAME_ENV_RUSTLE) {
-        gout_push(out, GAME_OUT_MSG_INSPECT_RUSTLE, 0, 0, 0, 0, 0);
+        push_observation(out, GAME_OBS_OUTCOME_RUSTLE);
     } else if (game->env_focus_kind == GAME_ENV_CREAK) {
-        gout_push(out, GAME_OUT_MSG_INSPECT_CREAK, 0, 0, 0, 0, 0);
+        push_observation(out, GAME_OBS_OUTCOME_CREAK);
     } else if (game->env_focus_kind == GAME_ENV_WATER) {
-        gout_push(out, GAME_OUT_MSG_INSPECT_WATER, 0, 0, 0, 0, 0);
+        push_observation(out, GAME_OBS_OUTCOME_WATER);
     } else if (game->env_focus_kind == GAME_ENV_GRIT) {
-        gout_push(out, GAME_OUT_MSG_INSPECT_GRIT, 0, 0, 0, 0, 0);
+        push_observation(out, GAME_OBS_OUTCOME_GRIT);
     }
     game->env_focus_active = 0;
     game->env_focus_room = -1;
