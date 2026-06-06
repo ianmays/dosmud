@@ -9,7 +9,18 @@
 /*
  * combat.c resolves the short battle loop only: it applies a reply, advances
  * the enemy turn, and converts a defeat into corpse state plus XP.
+ * #159: queues GAME_EVENT_COMBAT phases; grendr maps them to combat copy.
  */
+
+/*
+ * #159: typed combat phases (payload layout in gout.h). phase -> event arg0;
+ * payload slots -> arg1/arg2; grendr render_combat_event mirrors this layout.
+ */
+static void push_combat_phase(struct GameOutput *out, int phase,
+                              int val0, int val1)
+{
+    game_event_push(out, GAME_EVENT_COMBAT, phase, val0, val1, 0, 0);
+}
 
 int combat_player_attack_bonus(const struct GameState *game)
 {
@@ -34,15 +45,15 @@ static void combat_enemy_turn(struct GameState *game, struct GameOutput *out)
     if (dmg > 0) {
         game->player_hp -= dmg;
     }
-    gout_push(out, GAME_OUT_COMBAT_ENEMY_STRIKE, dmg, 0, 0, 0, 0);
+    push_combat_phase(out, GAME_COMBAT_PHASE_ENEMY_DAMAGE, dmg, 0);
     if (game->player_hp <= 0) {
         game->player_hp = 0;
-        gout_push(out, GAME_OUT_COMBAT_PLAYER_FALLEN, 0, 0, 0, 0, 0);
+        push_combat_phase(out, GAME_COMBAT_PHASE_PLAYER_DOWN, 0, 0);
         game->running = 0;
         return;
     }
-    gout_push(out, GAME_OUT_COMBAT_STATUS_LINE,
-        game->player_hp, game->combat.enemy_hp, 0, 0, 0);
+    push_combat_phase(out, GAME_COMBAT_PHASE_STATUS,
+        game->player_hp, game->combat.enemy_hp);
 }
 
 void combat_start(struct GameState *game, struct GameOutput *out)
@@ -51,8 +62,8 @@ void combat_start(struct GameState *game, struct GameOutput *out)
     game->combat.enemy_hp = CFG_COMBAT_ENEMY_HP_BASE +
         game_roll_spread(game, CFG_COMBAT_ENEMY_HP_SPREAD);
     game->combat.defending = 0;
-    gout_push(out, GAME_OUT_COMBAT_START, game->player_hp,
-        game->combat.enemy_hp, 0, 0, 0);
+    push_combat_phase(out, GAME_COMBAT_PHASE_START,
+        game->player_hp, game->combat.enemy_hp);
 }
 
 void combat_resolve_reply(struct GameState *game, int choice, struct GameOutput *out)
@@ -63,24 +74,24 @@ void combat_resolve_reply(struct GameState *game, int choice, struct GameOutput 
             game_roll_spread(game, CFG_COMBAT_PLAYER_HIT_SPREAD) +
             combat_player_attack_bonus(game);
         game->combat.enemy_hp -= dmg;
-        gout_push(out, GAME_OUT_COMBAT_PLAYER_HIT, dmg, 0, 0, 0, 0);
+        push_combat_phase(out, GAME_COMBAT_PHASE_PLAYER_DAMAGE, dmg, 0);
     } else if (choice == 2) {
         game->combat.defending = 1;
-        gout_push(out, GAME_OUT_COMBAT_BRACED, 0, 0, 0, 0, 0);
+        push_combat_phase(out, GAME_COMBAT_PHASE_BRACED, 0, 0);
     } else if (choice == 3) {
         if (game_inv_bag_find_index(game, ITEM_SALVE) < 0) {
-            gout_push(out, GAME_OUT_COMBAT_NO_SALVE_BAG, 0, 0, 0, 0, 0);
+            push_combat_phase(out, GAME_COMBAT_PHASE_SALVE_NO_BAG, 0, 0);
         } else {
             game_inv_bag_remove_item(game, ITEM_SALVE);
             if (game_heal_player(game, CFG_SALVE_HEAL_AMOUNT)) {
-                gout_push(out, GAME_OUT_COMBAT_SALVE_IN_COMBAT,
-                    game->player_hp, 0, 0, 0, 0);
+                push_combat_phase(out, GAME_COMBAT_PHASE_SALVE_HEAL,
+                    game->player_hp, 0);
             } else {
-                gout_push(out, GAME_OUT_COMBAT_SALVE_FULL, 0, 0, 0, 0, 0);
+                push_combat_phase(out, GAME_COMBAT_PHASE_SALVE_FULL, 0, 0);
             }
         }
     } else {
-        gout_push(out, GAME_OUT_COMBAT_INVALID_CHOICE, 0, 0, 0, 0, 0);
+        push_combat_phase(out, GAME_COMBAT_PHASE_INVALID_CHOICE, 0, 0);
         return;
     }
 
@@ -88,7 +99,7 @@ void combat_resolve_reply(struct GameState *game, int choice, struct GameOutput 
         /* Defeat is resolved immediately so corpse state is fixed on the same turn. */
         game->combat.enemy_hp = 0;
         game_set_mode_explore(game);
-        gout_push(out, GAME_OUT_COMBAT_BANDIT_DEFEATED, 0, 0, 0, 0, 0);
+        push_combat_phase(out, GAME_COMBAT_PHASE_ENEMY_DEFEATED, 0, 0);
         game->corpse_present[game->player.room_id] = 1;
         {
             int roll;
@@ -116,6 +127,6 @@ void combat_resolve_reply(struct GameState *game, int choice, struct GameOutput 
     combat_enemy_turn(game, out);
     game->combat.defending = 0;
     if (game->running && game->mode == GAME_MODE_COMBAT) {
-        gout_push(out, GAME_OUT_COMBAT_MENU, 0, 0, 0, 0, 0);
+        push_combat_phase(out, GAME_COMBAT_PHASE_MENU, 0, 0);
     }
 }

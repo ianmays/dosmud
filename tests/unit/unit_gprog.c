@@ -1,6 +1,7 @@
 #include "greatest.h"
 #include "config.h"
 #include "game.h"
+#include "gout.h"
 #include "gprog.h"
 #include "unit_util.h"
 
@@ -22,6 +23,9 @@ TEST gprog_gain_xp_no_level(void)
     progression_gain_xp(&game, 5, &out);
     ASSERT_EQ(5, game.xp);
     ASSERT_EQ(CFG_START_LEVEL, game.level);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_XP_GAIN, out.events[0].kind);
+    ASSERT_EQ(5, out.events[0].arg0);
     PASS();
 }
 
@@ -39,6 +43,10 @@ TEST gprog_level_up_once(void)
     ASSERT_EQ(2, game.level);
     ASSERT_EQ(CFG_START_MAX_HP + CFG_LEVELUP_MAX_HP_DELTA, game.max_hp);
     ASSERT_EQ(game.max_hp, game.player_hp);
+    ASSERT_EQ(2, out.count);
+    ASSERT_EQ(GAME_EVENT_XP_GAIN, out.events[0].kind);
+    ASSERT_EQ(GAME_EVENT_STAT_CHANGE, out.events[1].kind);
+    ASSERT_EQ(2, out.events[1].arg0);
     PASS();
 }
 
