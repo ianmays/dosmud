@@ -43,14 +43,14 @@ When applying edits: comment-only within scope; do not change executable behavio
 | Skip | Obvious loops, null checks, assignments unless **why** is non-obvious. |
 | TODOs | Do not add unless they reference an existing issue number. |
 
-Architecture context: [`docs/architecture.md`](../../../docs/architecture.md), especially core/render/platform boundaries and the current `gout` / `GameOutput` seam (`GameEvent` is roadmap migration per filed issues).
+Architecture context: [`docs/architecture.md`](../../../docs/architecture.md), especially core/render/platform boundaries and the `gout` / `GameEventQueue` seam (generic `GameEventKind` payloads only after #162).
 
 ## Comment priorities
 
 1. **Subsystem ownership** - who mutates state; no platform/render leakage in core.
-2. **Architecture seams** - e.g. core appends `GameOutput` through `gout`, `grendr` drains and prints; label `GameEvent` only when documenting filed migration work (#47, #157+).
+2. **Architecture seams** - e.g. core appends `GameEvent` records to `GameEventQueue` through `gout`, `grendr` drains generic kinds and prints.
 3. **Determinism** - RNG, tick order, queue overflow, fixed-size limits.
-4. **Transitional scaffolding** - mark temporary paths; cite a follow-up issue only if it is already filed (e.g. `/* Temporary legacy output path until #157 migrates remaining command events. */`).
+4. **Transitional scaffolding** - mark temporary paths; cite a follow-up issue only if it is already filed. After #162, do not describe `GAME_OUT_*` or `GAME_EVENT_LEGACY` as active seams.
 5. **Non-obvious control flow** - mode gates, handover state, compact slot removal, quiet-tick test behavior.
 6. **Test harness and fixtures** - determinism setup (`plat_seed_rng`, `game_roll_inject_*`, `@fixture`), fixture ownership, and why a unit test avoids `game_process_input` alone.
 

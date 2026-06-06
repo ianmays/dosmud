@@ -6,16 +6,16 @@
 #include "unit_util.h"
 
 /* out-taking helpers assert #160 encounter/dialogue events from wanderer.c. */
-static void begin_wanderer(struct GameState *game, struct GameOutput *out)
+static void begin_wanderer(struct GameState *game, GameEventQueue *out)
 {
-    gout_reset(out);
+    game_event_queue_reset(out);
     wanderer_begin_encounter(game, out);
 }
 
 static int wanderer_reply_out(struct GameState *game, int choice,
-                              struct GameOutput *out)
+                              GameEventQueue *out)
 {
-    gout_reset(out);
+    game_event_queue_reset(out);
     return wanderer_cmd_reply(game, choice, out);
 }
 
@@ -50,7 +50,7 @@ TEST wanderer_step_moves(void)
 TEST wanderer_encounter_guards(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
 
     unit_game_fresh(&game, 3u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
@@ -69,7 +69,7 @@ TEST wanderer_encounter_guards(void)
 TEST wanderer_reply_cmd_explore(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
 
     unit_game_fresh(&game, 4u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
@@ -83,7 +83,7 @@ TEST wanderer_reply_cmd_explore(void)
 TEST wanderer_reply_cmd_invalid_choice(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
 
     unit_game_fresh(&game, 5u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
@@ -96,7 +96,7 @@ TEST wanderer_reply_cmd_invalid_choice(void)
 TEST wanderer_encounter_event(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
 
     unit_game_fresh(&game, 6u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
@@ -113,7 +113,7 @@ TEST wanderer_encounter_event(void)
 TEST wanderer_reply_event(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
 
     unit_game_fresh(&game, 7u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);

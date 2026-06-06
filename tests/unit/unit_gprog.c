@@ -15,11 +15,11 @@ TEST gprog_xp_to_next_level(void)
 TEST gprog_gain_xp_no_level(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
 
     unit_game_fresh(&game, 1u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
-    gout_reset(&out);
+    game_event_queue_reset(&out);
     progression_gain_xp(&game, 5, &out);
     ASSERT_EQ(5, game.xp);
     ASSERT_EQ(CFG_START_LEVEL, game.level);
@@ -32,13 +32,13 @@ TEST gprog_gain_xp_no_level(void)
 TEST gprog_level_up_once(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
     int needed;
 
     unit_game_fresh(&game, 2u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     needed = game_xp_to_next_level(game.level);
-    gout_reset(&out);
+    game_event_queue_reset(&out);
     progression_gain_xp(&game, needed, &out);
     ASSERT_EQ(2, game.level);
     ASSERT_EQ(CFG_START_MAX_HP + CFG_LEVELUP_MAX_HP_DELTA, game.max_hp);

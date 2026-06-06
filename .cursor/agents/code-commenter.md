@@ -32,9 +32,9 @@ Match existing style in files like `src/game.c`, `src/invent.c`, and `src/gout.c
 ## What to comment (priority)
 
 1. **Subsystem ownership** - which module owns state and which layer must not leak (see `docs/architecture.md`).
-2. **Architecture seams** - e.g. gameplay appends `GameOutput` via `gout`, renderer consumes at the edge; use `GameEvent` in comments only for filed migration context.
+2. **Architecture seams** - e.g. gameplay appends `GameEvent` records to `GameEventQueue` via `gout`, `grendr` drains generic kinds at the render edge.
 3. **Determinism** - RNG reseeding, tick ordering, overflow handling, fixed-size queue/array limits.
-4. **Transitional scaffolding** - legacy vs new paths; mark as temporary when a follow-up issue is already filed (e.g. `/* Temporary legacy output path until #157 migrates remaining command events. */`). Do not cite issue numbers that are not filed yet.
+4. **Transitional scaffolding** - mark temporary paths; cite a follow-up issue only if it is already filed. After #162, do not describe `GAME_OUT_*` or `GAME_EVENT_LEGACY` as active seams.
 5. **Non-obvious control flow** - mode gates, handover state, compact slot removal, quiet-tick test behavior.
 
 ## What not to comment

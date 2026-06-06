@@ -16,7 +16,7 @@
  * #159: typed combat phases (payload layout in gout.h). phase -> event arg0;
  * payload slots -> arg1/arg2; grendr render_combat_event mirrors this layout.
  */
-static void push_combat_phase(struct GameOutput *out, int phase,
+static void push_combat_phase(GameEventQueue *out, int phase,
                               int val0, int val1)
 {
     game_event_push(out, GAME_EVENT_COMBAT, phase, val0, val1, 0, 0);
@@ -33,7 +33,7 @@ int combat_player_attack_bonus(const struct GameState *game)
     return bonus;
 }
 
-static void combat_enemy_turn(struct GameState *game, struct GameOutput *out)
+static void combat_enemy_turn(struct GameState *game, GameEventQueue *out)
 {
     int dmg;
     /* The enemy turn happens only after a non-terminal player reply. */
@@ -56,7 +56,7 @@ static void combat_enemy_turn(struct GameState *game, struct GameOutput *out)
         game->player_hp, game->combat.enemy_hp);
 }
 
-void combat_start(struct GameState *game, struct GameOutput *out)
+void combat_start(struct GameState *game, GameEventQueue *out)
 {
     game_set_mode_combat(game);
     game->combat.enemy_hp = CFG_COMBAT_ENEMY_HP_BASE +
@@ -66,7 +66,7 @@ void combat_start(struct GameState *game, struct GameOutput *out)
         game->player_hp, game->combat.enemy_hp);
 }
 
-void combat_resolve_reply(struct GameState *game, int choice, struct GameOutput *out)
+void combat_resolve_reply(struct GameState *game, int choice, GameEventQueue *out)
 {
     int dmg;
     if (choice == 1) {

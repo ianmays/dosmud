@@ -8,30 +8,30 @@
 
 /*
  * out-taking helpers assert #160 GameEvent payloads; *_state wraps a local
- * GameOutput for mode-only tests that do not inspect the queue.
+ * GameEventQueue for mode-only tests that do not inspect the queue.
  */
-static int talk_out(struct GameState *game, struct GameOutput *out)
+static int talk_out(struct GameState *game, GameEventQueue *out)
 {
-    gout_reset(out);
+    game_event_queue_reset(out);
     return dialogue_cmd_talk(game, out);
 }
 
-static int reply_out(struct GameState *game, int choice, struct GameOutput *out)
+static int reply_out(struct GameState *game, int choice, GameEventQueue *out)
 {
-    gout_reset(out);
+    game_event_queue_reset(out);
     return dialogue_cmd_reply(game, choice, out);
 }
 
 static int talk_out_state(struct GameState *game)
 {
-    struct GameOutput out;
+    GameEventQueue out;
 
     return talk_out(game, &out);
 }
 
 static int reply_out_state(struct GameState *game, int choice)
 {
-    struct GameOutput out;
+    GameEventQueue out;
 
     return reply_out(game, choice, &out);
 }
@@ -47,9 +47,9 @@ TEST dialogue_npc_in_room(void)
 
 TEST dialogue_frog_render_paths(void)
 {
-    struct GameOutput out;
+    GameEventQueue out;
 
-    gout_reset(&out);
+    game_event_queue_reset(&out);
     frog_dialogue_intro(&out);
     ASSERT_EQ(1, out.count);
     ASSERT_EQ(GAME_EVENT_DIALOGUE, out.events[0].kind);
@@ -223,7 +223,7 @@ TEST dialogue_cmd_reply_archivist(void)
 TEST dialogue_cmd_talk_watchman_event(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
 
     unit_game_fresh(&game, 20u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_TOWER, 0);
@@ -237,7 +237,7 @@ TEST dialogue_cmd_talk_watchman_event(void)
 TEST dialogue_cmd_talk_nobody_event(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
 
     unit_game_fresh(&game, 21u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
@@ -250,7 +250,7 @@ TEST dialogue_cmd_talk_nobody_event(void)
 TEST dialogue_cmd_talk_bandit_blocks_event(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
 
     unit_game_fresh(&game, 22u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
@@ -264,7 +264,7 @@ TEST dialogue_cmd_talk_bandit_blocks_event(void)
 TEST dialogue_cmd_reply_frog_invalid_event(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
 
     unit_game_fresh(&game, 23u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_POND, 0);

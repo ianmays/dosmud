@@ -8,61 +8,61 @@
 
 static int inv_loot(struct GameState *game, GameEventQueue *out)
 {
-    gout_reset(out);
+    game_event_queue_reset(out);
     return game_inv_cmd_loot(game, out);
 }
 
 static int inv_take_all(struct GameState *game, GameEventQueue *out)
 {
-    gout_reset(out);
+    game_event_queue_reset(out);
     return game_inv_cmd_take_all(game, out);
 }
 
 static int inv_take(struct GameState *game, int item_id, GameEventQueue *out)
 {
-    gout_reset(out);
+    game_event_queue_reset(out);
     return game_inv_cmd_take(game, item_id, out);
 }
 
 static int inv_drop(struct GameState *game, int item_id, GameEventQueue *out)
 {
-    gout_reset(out);
+    game_event_queue_reset(out);
     return game_inv_cmd_drop(game, item_id, out);
 }
 
 static int inv_bag(struct GameState *game, GameEventQueue *out)
 {
-    gout_reset(out);
+    game_event_queue_reset(out);
     return game_inv_cmd_bag(game, out);
 }
 
 static int inv_eat(struct GameState *game, int item_id, GameEventQueue *out)
 {
-    gout_reset(out);
+    game_event_queue_reset(out);
     return game_inv_cmd_eat(game, item_id, out);
 }
 
 static int inv_use(struct GameState *game, int item_id, GameEventQueue *out)
 {
-    gout_reset(out);
+    game_event_queue_reset(out);
     return game_inv_cmd_use(game, item_id, out);
 }
 
 static int inv_craft(struct GameState *game, int item_id, GameEventQueue *out)
 {
-    gout_reset(out);
+    game_event_queue_reset(out);
     return game_inv_cmd_craft(game, item_id, out);
 }
 
 static int inv_wield(struct GameState *game, int item_id, GameEventQueue *out)
 {
-    gout_reset(out);
+    game_event_queue_reset(out);
     return game_inv_cmd_wield(game, item_id, out);
 }
 
 static int inv_unwield(struct GameState *game, GameEventQueue *out)
 {
-    gout_reset(out);
+    game_event_queue_reset(out);
     return game_inv_cmd_unwield(game, out);
 }
 

@@ -9,29 +9,29 @@
 
 /*
  * out-taking helpers assert #160 encounter events; *_state wraps a local
- * GameOutput for mode-only tests that do not inspect the queue.
+ * GameEventQueue for mode-only tests that do not inspect the queue.
  */
-static void begin_enemy(struct GameState *game, struct GameOutput *out)
+static void begin_enemy(struct GameState *game, GameEventQueue *out)
 {
-    gout_reset(out);
+    game_event_queue_reset(out);
     enemy_begin_encounter(game, out);
 }
 
-static int enemy_reply(struct GameState *game, int choice, struct GameOutput *out)
+static int enemy_reply(struct GameState *game, int choice, GameEventQueue *out)
 {
-    gout_reset(out);
+    game_event_queue_reset(out);
     return genc_cmd_reply(game, choice, out);
 }
 
-static int enemy_give(struct GameState *game, int item_id, struct GameOutput *out)
+static int enemy_give(struct GameState *game, int item_id, GameEventQueue *out)
 {
-    gout_reset(out);
+    game_event_queue_reset(out);
     return genc_cmd_give(game, item_id, out);
 }
 
 static void begin_enemy_state(struct GameState *game)
 {
-    struct GameOutput out;
+    GameEventQueue out;
 
     begin_enemy(game, &out);
 }
@@ -51,7 +51,7 @@ TEST genc_skips_when_busy(void)
 TEST genc_opens_dialogue(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
 
     unit_game_fresh(&game, 2u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
@@ -68,7 +68,7 @@ TEST genc_opens_dialogue(void)
 TEST genc_cmd_reply_fight(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
 
     unit_game_fresh(&game, 3u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
@@ -84,7 +84,7 @@ TEST genc_cmd_reply_fight(void)
 TEST genc_cmd_reply_intimidate_ok(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
     int rolls[1];
 
     unit_game_fresh(&game, 4u);
@@ -103,7 +103,7 @@ TEST genc_cmd_reply_intimidate_ok(void)
 TEST genc_cmd_give_wrong_context(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
 
     unit_game_fresh(&game, 5u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
@@ -117,7 +117,7 @@ TEST genc_cmd_give_wrong_context(void)
 TEST genc_cmd_give_handover(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
 
     unit_game_fresh(&game, 6u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
@@ -136,7 +136,7 @@ TEST genc_cmd_give_handover(void)
 TEST genc_cmd_reply_handover_pick(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
 
     unit_game_fresh(&game, 7u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
@@ -153,7 +153,7 @@ TEST genc_cmd_reply_handover_pick(void)
 TEST genc_cmd_reply_intimidate_fail(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
     int rolls[1];
 
     unit_game_fresh(&game, 8u);
@@ -173,7 +173,7 @@ TEST genc_cmd_reply_intimidate_fail(void)
 TEST genc_cmd_reply_invalid_choice(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
 
     unit_game_fresh(&game, 9u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
@@ -188,7 +188,7 @@ TEST genc_cmd_reply_invalid_choice(void)
 TEST genc_cmd_reply_bag_empty_then_combat(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
 
     unit_game_fresh(&game, 10u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);

@@ -12,7 +12,7 @@ int game_xp_to_next_level(int level)
     return CFG_XP_LEVEL_BASE + ((level - 1) * CFG_XP_LEVEL_PER_LEVEL);
 }
 
-void progression_gain_xp(struct GameState *game, int amount, struct GameOutput *out)
+void progression_gain_xp(struct GameState *game, int amount, GameEventQueue *out)
 {
     int needed;
     /* Multiple level-ups can happen in one grant, so the threshold is recomputed each loop. */

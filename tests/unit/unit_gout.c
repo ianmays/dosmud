@@ -4,57 +4,37 @@
 #include "gout.h"
 #include "items.h"
 
-TEST gout_reset_clears_state(void)
+TEST game_event_queue_reset_clears_state(void)
 {
     GameEventQueue out;
 
     out.count = 7;
     out.overflowed = 1;
-    gout_reset(&out);
+    game_event_queue_reset(&out);
     ASSERT_EQ(0, out.count);
     ASSERT_EQ(0, out.overflowed);
     PASS();
 }
 
-TEST gout_push_records_event_fields(void)
+TEST game_event_push_ignores_null_output(void)
 {
-    GameEventQueue out;
-
-    game_event_queue_reset(&out);
-    ASSERT(0 != game_event_push_legacy(&out, GAME_OUT_MSG_WAIT, 1, 2, 3, 4, "txt"));
-    ASSERT_EQ(1, out.count);
-    ASSERT_EQ(0, out.overflowed);
-    ASSERT_EQ(GAME_EVENT_LEGACY, out.events[0].kind);
-    ASSERT_EQ(GAME_OUT_MSG_WAIT, out.events[0].legacy_kind);
-    ASSERT_EQ(1, out.events[0].arg0);
-    ASSERT_EQ(2, out.events[0].arg1);
-    ASSERT_EQ(3, out.events[0].arg2);
-    ASSERT_EQ(4, out.events[0].arg3);
-    ASSERT_EQ(-1, out.events[0].room_id);
-    ASSERT_EQ(0, out.events[0].room_item[0]);
-    ASSERT_STR_EQ("txt", out.events[0].text);
+    ASSERT(0 == game_event_push(0, GAME_EVENT_WAIT, 0, 0, 0, 0, 0));
     PASS();
 }
 
-TEST gout_push_ignores_null_output(void)
-{
-    ASSERT(0 == game_event_push_legacy(0, GAME_OUT_MSG_WAIT, 0, 0, 0, 0, 0));
-    PASS();
-}
-
-TEST gout_push_marks_overflow_at_capacity(void)
+TEST game_event_push_marks_overflow_at_capacity(void)
 {
     GameEventQueue out;
     int i;
 
     game_event_queue_reset(&out);
-    for (i = 0; i < CFG_GAME_OUT_MAX; ++i) {
-        ASSERT(0 != game_event_push_legacy(&out, GAME_OUT_MSG_WAIT, i, 0, 0, 0, 0));
+    for (i = 0; i < CFG_GAME_EVENT_MAX; ++i) {
+        ASSERT(0 != game_event_push(&out, GAME_EVENT_WAIT, i, 0, 0, 0, 0));
     }
-    ASSERT_EQ(CFG_GAME_OUT_MAX, out.count);
+    ASSERT_EQ(CFG_GAME_EVENT_MAX, out.count);
     ASSERT_EQ(0, out.overflowed);
-    ASSERT(0 == game_event_push_legacy(&out, GAME_OUT_MSG_WAIT, 99, 0, 0, 0, 0));
-    ASSERT_EQ(CFG_GAME_OUT_MAX, out.count);
+    ASSERT(0 == game_event_push(&out, GAME_EVENT_WAIT, 99, 0, 0, 0, 0));
+    ASSERT_EQ(CFG_GAME_EVENT_MAX, out.count);
     ASSERT_EQ(1, out.overflowed);
     PASS();
 }
@@ -69,7 +49,6 @@ TEST game_event_push_records_generic_move(void)
     ASSERT(0 != ev);
     ASSERT_EQ(1, out.count);
     ASSERT_EQ(GAME_EVENT_MOVE, out.events[0].kind);
-    ASSERT_EQ(GAME_OUT_NONE, out.events[0].legacy_kind);
     ASSERT_STR_EQ("north", out.events[0].text);
     PASS();
 }
@@ -196,10 +175,9 @@ TEST game_event_push_records_dialogue_encounter_kinds(void)
 }
 
 SUITE(gout) {
-    RUN_TEST(gout_reset_clears_state);
-    RUN_TEST(gout_push_records_event_fields);
-    RUN_TEST(gout_push_ignores_null_output);
-    RUN_TEST(gout_push_marks_overflow_at_capacity);
+    RUN_TEST(game_event_queue_reset_clears_state);
+    RUN_TEST(game_event_push_ignores_null_output);
+    RUN_TEST(game_event_push_marks_overflow_at_capacity);
     RUN_TEST(game_event_push_records_generic_move);
     RUN_TEST(game_event_push_records_command_nav_kinds);
     RUN_TEST(game_event_push_records_inventory_kinds);

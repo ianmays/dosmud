@@ -14,7 +14,7 @@ static int run_cmd(struct GameState *game, const char *line)
     GameEventQueue out;
     char buf[CFG_INPUT_MAX];
 
-    gout_reset(&out);
+    game_event_queue_reset(&out);
     strncpy(buf, line, CFG_INPUT_MAX - 1);
     buf[CFG_INPUT_MAX - 1] = '\0';
     return game_process_input(game, buf, &out);
@@ -75,7 +75,7 @@ TEST game_describe_current_room_emits_look(void)
     GameEventQueue out;
 
     unit_game_fresh(&game, 33u);
-    gout_reset(&out);
+    game_event_queue_reset(&out);
     game_describe_current_room(&game, &out);
     ASSERT_EQ(1, out.count);
     ASSERT_EQ(GAME_EVENT_ROOM_LOOK, out.events[0].kind);
@@ -89,8 +89,8 @@ TEST game_describe_current_room_overflow_keeps_prior_event(void)
     int i;
 
     unit_game_fresh(&game, 36u);
-    gout_reset(&out);
-    for (i = 0; i < CFG_GAME_OUT_MAX; ++i) {
+    game_event_queue_reset(&out);
+    for (i = 0; i < CFG_GAME_EVENT_MAX; ++i) {
         ASSERT(0 != game_event_push(&out, GAME_EVENT_WAIT, i, 0, 0, 0, 0));
     }
     out.events[out.count - 1].room_id = 77;
@@ -98,10 +98,10 @@ TEST game_describe_current_room_overflow_keeps_prior_event(void)
 
     game_describe_current_room(&game, &out);
 
-    ASSERT_EQ(CFG_GAME_OUT_MAX, out.count);
+    ASSERT_EQ(CFG_GAME_EVENT_MAX, out.count);
     ASSERT_EQ(1, out.overflowed);
     ASSERT_EQ(GAME_EVENT_WAIT, out.events[out.count - 1].kind);
-    ASSERT_EQ(CFG_GAME_OUT_MAX - 1, out.events[out.count - 1].arg0);
+    ASSERT_EQ(CFG_GAME_EVENT_MAX - 1, out.events[out.count - 1].arg0);
     ASSERT_EQ(77, out.events[out.count - 1].room_id);
     ASSERT_EQ(ITEM_STICK, out.events[out.count - 1].room_item[0]);
     PASS();
@@ -147,7 +147,7 @@ TEST game_quiet_ticks(void)
     {
         GameEventQueue out;
 
-        gout_reset(&out);
+        game_event_queue_reset(&out);
         game_background_step(&game, &out);
     }
     ASSERT_EQ(tick_before + 1, game.tick);
@@ -165,7 +165,7 @@ TEST game_bandit_intimidate_success(void)
     {
         GameEventQueue out;
 
-        gout_reset(&out);
+        game_event_queue_reset(&out);
         enemy_begin_encounter(&game, &out);
     }
     rolls[0] = CFG_TEST_INTIMIDATE_OK;
@@ -173,7 +173,7 @@ TEST game_bandit_intimidate_success(void)
     {
         GameEventQueue out;
 
-        gout_reset(&out);
+        game_event_queue_reset(&out);
         game_process_input(&game, line, &out);
     }
     ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
@@ -217,9 +217,9 @@ TEST game_bandit_fight_reply(void)
     {
         GameEventQueue out;
 
-        gout_reset(&out);
+        game_event_queue_reset(&out);
         enemy_begin_encounter(&game, &out);
-        gout_reset(&out);
+        game_event_queue_reset(&out);
         game_process_input(&game, line, &out);
     }
     ASSERT_EQ(GAME_MODE_COMBAT, game.mode);
@@ -237,7 +237,7 @@ TEST game_bandit_intimidate_fail(void)
     {
         GameEventQueue out;
 
-        gout_reset(&out);
+        game_event_queue_reset(&out);
         enemy_begin_encounter(&game, &out);
     }
     rolls[0] = CFG_TEST_INTIMIDATE_FAIL;
@@ -245,7 +245,7 @@ TEST game_bandit_intimidate_fail(void)
     {
         GameEventQueue out;
 
-        gout_reset(&out);
+        game_event_queue_reset(&out);
         game_process_input(&game, line, &out);
     }
     ASSERT_EQ(GAME_MODE_COMBAT, game.mode);
@@ -261,11 +261,11 @@ TEST game_bandit_handover_pick(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game_inv_bag_add(&game, ITEM_STICK);
     {
-        struct GameOutput out;
+        GameEventQueue out;
 
-        gout_reset(&out);
+        game_event_queue_reset(&out);
         enemy_begin_encounter(&game, &out);
-        gout_reset(&out);
+        game_event_queue_reset(&out);
         game_process_input(&game, line, &out);
     }
     ASSERT_EQ(1, game.enemy_handover_pick);
@@ -421,7 +421,7 @@ TEST game_wait_emits_output_record(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game.test_quiet_ticks = 1;
     game.wanderer_active = 0;
-    gout_reset(&out);
+    game_event_queue_reset(&out);
     ASSERT_EQ(1, game_process_input(&game, line, &out));
     ASSERT_EQ(1, out.count);
     ASSERT_EQ(GAME_EVENT_WAIT, out.events[0].kind);
@@ -438,7 +438,7 @@ TEST game_help_emits_help_event(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game.test_quiet_ticks = 1;
     game.wanderer_active = 0;
-    gout_reset(&out);
+    game_event_queue_reset(&out);
     ASSERT_EQ(1, game_process_input(&game, line, &out));
     ASSERT_EQ(1, out.count);
     ASSERT_EQ(GAME_EVENT_HELP, out.events[0].kind);
@@ -456,7 +456,7 @@ TEST game_map_emits_map_event(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game.test_quiet_ticks = 1;
     game.wanderer_active = 0;
-    gout_reset(&out);
+    game_event_queue_reset(&out);
     ASSERT_EQ(1, game_process_input(&game, line, &out));
     ASSERT_EQ(1, out.count);
     ASSERT_EQ(GAME_EVENT_MAP, out.events[0].kind);
@@ -471,7 +471,7 @@ TEST game_unknown_command_emits_event(void)
 
     unit_game_fresh(&game, 39u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
-    gout_reset(&out);
+    game_event_queue_reset(&out);
     ASSERT_EQ(0, game_process_input(&game, line, &out));
     ASSERT_EQ(1, out.count);
     ASSERT_EQ(GAME_EVENT_UNKNOWN_COMMAND, out.events[0].kind);
@@ -488,7 +488,7 @@ TEST game_cannot_move_emits_event(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game.test_quiet_ticks = 1;
     game.wanderer_active = 0;
-    gout_reset(&out);
+    game_event_queue_reset(&out);
     ASSERT_EQ(0, game_process_input(&game, line, &out));
     ASSERT_EQ(1, out.count);
     ASSERT_EQ(GAME_EVENT_CANNOT_MOVE, out.events[0].kind);
@@ -506,7 +506,7 @@ TEST game_move_emits_move_then_look(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game.test_quiet_ticks = 1;
     game.wanderer_active = 0;
-    gout_reset(&out);
+    game_event_queue_reset(&out);
     ASSERT_EQ(1, game_process_input(&game, line, &out));
     ASSERT_EQ(2, out.count);
     ASSERT_EQ(GAME_EVENT_MOVE, out.events[0].kind);
@@ -543,7 +543,7 @@ TEST game_bandit_waiting_reply_guard_event(void)
     unit_game_fresh(&game, 40u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game_set_mode_dialogue(&game, DIALOGUE_ENEMY);
-    gout_reset(&out);
+    game_event_queue_reset(&out);
     ASSERT_EQ(0, game_process_input(&game, line, &out));
     ASSERT_EQ(1, out.count);
     ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[0].kind);
@@ -559,7 +559,7 @@ TEST game_nobody_waiting_reply_guard_event(void)
 
     unit_game_fresh(&game, 41u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
-    gout_reset(&out);
+    game_event_queue_reset(&out);
     ASSERT_EQ(1, game_process_input(&game, line, &out));
     ASSERT_EQ(1, out.count);
     ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[0].kind);

@@ -13,23 +13,23 @@
  * OBSERVATION; grendr maps to text.
  */
 
-static void push_environment(struct GameOutput *out, int kind)
+static void push_environment(GameEventQueue *out, int kind)
 {
     game_event_push(out, GAME_EVENT_ENVIRONMENT, kind, 0, 0, 0, 0);
 }
 
-static void push_ambient_noise(struct GameOutput *out, const char *line)
+static void push_ambient_noise(GameEventQueue *out, const char *line)
 {
     game_event_push(out, GAME_EVENT_AMBIENT_NOISE, 0, 0, 0, 0, line);
 }
 
-static void push_item_presence(struct GameOutput *out, int item_id,
+static void push_item_presence(GameEventQueue *out, int item_id,
                                const char *name)
 {
     game_event_push(out, GAME_EVENT_ITEM_PRESENCE, item_id, 0, 0, 0, name);
 }
 
-static void push_observation(struct GameOutput *out, int outcome)
+static void push_observation(GameEventQueue *out, int outcome)
 {
     game_event_push(out, GAME_EVENT_OBSERVATION, outcome, 0, 0, 0, 0);
 }
@@ -57,7 +57,7 @@ void seed_world_items(struct GameState *game)
     game->room_item[WORLD_ROOM_CAVE][0] = ITEM_HERB;
 }
 
-static void maybe_spawn_room_item(struct GameState *game, struct GameOutput *out)
+static void maybe_spawn_room_item(struct GameState *game, GameEventQueue *out)
 {
     int room_id;
     int roll;
@@ -87,7 +87,7 @@ static void maybe_spawn_room_item(struct GameState *game, struct GameOutput *out
     push_item_presence(out, spawned, item_name(spawned));
 }
 
-void maybe_emit_animal_noise(struct GameState *game, struct GameOutput *out)
+void maybe_emit_animal_noise(struct GameState *game, GameEventQueue *out)
 {
     if ((game->tick % (u32)CFG_ANIMAL_NOISE_TICK_PERIOD) != 0UL) {
         return;
@@ -99,7 +99,7 @@ void maybe_emit_animal_noise(struct GameState *game, struct GameOutput *out)
         world_room_animal_noise(&game->world, game->player.room_id));
 }
 
-void maybe_emit_atmosphere(struct GameState *game, struct GameOutput *out)
+void maybe_emit_atmosphere(struct GameState *game, GameEventQueue *out)
 {
     int roll;
 
@@ -163,7 +163,7 @@ void maybe_emit_atmosphere(struct GameState *game, struct GameOutput *out)
     maybe_spawn_room_item(game, out);
 }
 
-int gatmos_cmd_inspect(struct GameState *game, int item_arg, struct GameOutput *out)
+int gatmos_cmd_inspect(struct GameState *game, int item_arg, GameEventQueue *out)
 {
     /* Inspection only succeeds while the current room still has an active ambient focus. */
     if (!game->env_focus_active ||

@@ -14,7 +14,7 @@
  * rules in the wrong layer.
  */
 
-static void push_dialogue_guard(struct GameOutput *out, int reason)
+static void push_dialogue_guard(GameEventQueue *out, int reason)
 {
     /* #160: orchestration-layer modal guards; grendr maps reason to copy. */
     game_event_push(out, GAME_EVENT_DIALOGUE_GUARD, reason, 0, 0, 0, 0);

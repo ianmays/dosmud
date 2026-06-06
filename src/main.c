@@ -22,7 +22,7 @@
  * static storage so command/tick stepping does not consume stack in nested
  * main-loop frames.
  */
-static struct GameOutput g_main_out;
+static GameEventQueue g_main_out;
 
 static void print_prompt(void)
 {
@@ -98,7 +98,7 @@ static int main_parse_args(int argc, char **argv, u32 *out_seed)
 static void main_startup(struct GameState *game, u32 rng_seed)
 {
     game_init(game, rng_seed);
-    gout_reset(&g_main_out);
+    game_event_queue_reset(&g_main_out);
     printf(TXT_MAIN_TITLE_SEED_FMT, TXT_MAIN_TITLE, (unsigned long)rng_seed);
     printf("%s\n", TXT_MAIN_HELP_HINT);
     game_describe_current_room(game, &g_main_out);
@@ -146,7 +146,7 @@ static int main_dispatch_line(struct GameState *game, char *line)
     int th_rc;
 #endif
 
-    gout_reset(&g_main_out);
+    game_event_queue_reset(&g_main_out);
 
 #ifdef TEST_MODE
     th_rc = testharn_apply(game, line);
@@ -210,7 +210,7 @@ static int main_run_idle_ticks(struct GameState *game, time_t *last_tick_time,
             *last_tick_time = now_time;
             break;
         }
-        gout_reset(&g_main_out);
+        game_event_queue_reset(&g_main_out);
         game_background_step(game, &g_main_out);
         game_render_output(game, &g_main_out);
 #ifdef TEST_MODE

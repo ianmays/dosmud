@@ -7,10 +7,10 @@
 #define GENC_H
 
 struct GameState;
-struct GameOutput;
+struct GameEventQueue;
 
-void enemy_begin_encounter(struct GameState *game, struct GameOutput *out);
-int genc_cmd_reply(struct GameState *game, int choice, struct GameOutput *out);
-int genc_cmd_give(struct GameState *game, int item_arg, struct GameOutput *out);
+void enemy_begin_encounter(struct GameState *game, struct GameEventQueue *out);
+int genc_cmd_reply(struct GameState *game, int choice, struct GameEventQueue *out);
+int genc_cmd_give(struct GameState *game, int item_arg, struct GameEventQueue *out);
 
 #endif

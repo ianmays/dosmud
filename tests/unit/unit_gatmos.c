@@ -15,22 +15,22 @@ static void reset_camp(struct GameState *game)
     game_reset_fixture_baseline(game, WORLD_ROOM_CAMP, 0);
 }
 
-static void emit_atmosphere(struct GameState *game, struct GameOutput *out)
+static void emit_atmosphere(struct GameState *game, GameEventQueue *out)
 {
-    gout_reset(out);
+    game_event_queue_reset(out);
     maybe_emit_atmosphere(game, out);
 }
 
-static void emit_noise(struct GameState *game, struct GameOutput *out)
+static void emit_noise(struct GameState *game, GameEventQueue *out)
 {
-    gout_reset(out);
+    game_event_queue_reset(out);
     maybe_emit_animal_noise(game, out);
 }
 
 static int inspect_focus(struct GameState *game, int item_arg,
-                         struct GameOutput *out)
+                         GameEventQueue *out)
 {
-    gout_reset(out);
+    game_event_queue_reset(out);
     return gatmos_cmd_inspect(game, item_arg, out);
 }
 
@@ -47,7 +47,7 @@ TEST gatmos_seed_world_items(void)
 TEST gatmos_focus_expiry(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
     u32 seed;
     int cleared;
 
@@ -73,7 +73,7 @@ TEST gatmos_focus_expiry(void)
 TEST gatmos_animal_noise_tick_gate(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
     u32 seed;
     int r_skip;
     int r_first;
@@ -114,7 +114,7 @@ TEST gatmos_animal_noise_tick_gate(void)
 TEST gatmos_atmosphere_branches(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
     u32 seed;
     int found_rustle;
     int found_creak;
@@ -143,7 +143,7 @@ TEST gatmos_atmosphere_branches(void)
 TEST gatmos_water_and_grit_focus(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
     u32 seed;
     int found_water;
     int found_grit;
@@ -172,7 +172,7 @@ TEST gatmos_water_and_grit_focus(void)
 TEST gatmos_room_item_spawn_gate(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
     u32 seed;
     int spawned;
 
@@ -198,7 +198,7 @@ TEST gatmos_room_item_spawn_gate(void)
 TEST gatmos_rustle_berry_drop(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
     u32 seed;
     int found;
 
@@ -224,7 +224,7 @@ TEST gatmos_rustle_berry_drop(void)
 TEST gatmos_environment_gust_event(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
     u32 seed;
     int found;
 
@@ -247,7 +247,7 @@ TEST gatmos_environment_gust_event(void)
 TEST gatmos_ambient_noise_event(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
     u32 seed;
     int found;
 
@@ -271,7 +271,7 @@ TEST gatmos_ambient_noise_event(void)
 TEST gatmos_item_presence_event(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
     u32 seed;
     int found;
 
@@ -298,7 +298,7 @@ TEST gatmos_item_presence_event(void)
 TEST gatmos_tick_event_order(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
     u32 seed;
     int found;
 
@@ -327,7 +327,7 @@ TEST gatmos_tick_event_order(void)
 TEST gatmos_cmd_inspect_focus(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
 
     reset_camp(&game);
     game.env_focus_active = 1;
@@ -345,7 +345,7 @@ TEST gatmos_cmd_inspect_focus(void)
 TEST gatmos_cmd_inspect_none(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
 
     reset_camp(&game);
     ASSERT_EQ(1, inspect_focus(&game, 0, &out));
@@ -359,7 +359,7 @@ TEST gatmos_cmd_inspect_none(void)
 TEST gatmos_cmd_inspect_wrong_focus(void)
 {
     struct GameState game;
-    struct GameOutput out;
+    GameEventQueue out;
 
     reset_camp(&game);
     game.env_focus_active = 1;

@@ -479,7 +479,7 @@ Done ✅.
 
 ### [#47](https://github.com/ianmays/dosmud/issues/47) - Event queue architecture
 
-Foundation landed in [#164](https://github.com/ianmays/dosmud/pull/164): `GameEvent` / `GameEventQueue` on `gout`, per-step drain via `game_render_output` in `grendr`, and transitional `GAME_EVENT_LEGACY` for `GAME_OUT_*`. Proof slice: successful `move` plus `game_describe_current_room` emit generic kinds; other paths stay legacy until the migration chain below. Seam ownership: [`docs/architecture.md`](docs/architecture.md) Engine and Render sections.
+Foundation landed in [#164](https://github.com/ianmays/dosmud/pull/164): `GameEvent` / `GameEventQueue` on `gout`, per-step drain via `game_render_output` in `grendr`. Migration slices [#157](https://github.com/ianmays/dosmud/issues/157)-[#161](https://github.com/ianmays/dosmud/issues/161) moved producers to generic `GameEventKind` payloads; [#162](https://github.com/ianmays/dosmud/issues/162) / [#177](https://github.com/ianmays/dosmud/pull/177) removed transitional `GAME_EVENT_LEGACY` and `GAME_OUT_*` compatibility. Seam ownership: [`docs/architecture.md`](docs/architecture.md) Engine and Render sections.
 
 Direct follow-up migration chain (separate from replay/logging):
 - [#157](https://github.com/ianmays/dosmud/issues/157)
@@ -549,9 +549,11 @@ Done ✅ ([#176](https://github.com/ianmays/dosmud/pull/176)).
 
 Direct `#47` follow-up. Remove transitional compatibility APIs after migration slices are complete.
 
+Done ✅ ([#177](https://github.com/ianmays/dosmud/pull/177)).
+
 ### Testing
-- Unit: update queue/API tests to assert final event names and payload semantics only
-- Snapshots: existing snapshots should remain stable unless copy/layout changes are intentionally introduced
+- Unit: `unit_gout.c` asserts `game_event_queue_reset` and `game_event_push` only (no legacy kinds); mechanical `game_event_queue_reset` sweep in harness and slice tests
+- Snapshots: all 70 regression snapshots unchanged (render output identical)
 
 ### [#163](https://github.com/ianmays/dosmud/issues/163) - Final GameEvent test coverage pass
 

@@ -7,7 +7,7 @@
 #define INVENT_H
 
 struct GameState;
-struct GameOutput;
+struct GameEventQueue;
 
 /* Places item_id on the ground if a slot is free; returns 1 if stored. */
 int game_room_ground_try_add(struct GameState *game, int room_id, int item_id);
@@ -21,15 +21,15 @@ int game_inv_bag_add(struct GameState *game, int item_id);
 int game_inv_bag_remove_index(struct GameState *game, int index);
 int game_inv_bag_remove_item(struct GameState *game, int item_id);
 
-int game_inv_cmd_loot(struct GameState *game, struct GameOutput *out);
-int game_inv_cmd_take_all(struct GameState *game, struct GameOutput *out);
-int game_inv_cmd_take(struct GameState *game, int item_arg, struct GameOutput *out);
-int game_inv_cmd_drop(struct GameState *game, int item_arg, struct GameOutput *out);
-int game_inv_cmd_bag(struct GameState *game, struct GameOutput *out);
-int game_inv_cmd_eat(struct GameState *game, int item_arg, struct GameOutput *out);
-int game_inv_cmd_use(struct GameState *game, int item_arg, struct GameOutput *out);
-int game_inv_cmd_craft(struct GameState *game, int item_arg, struct GameOutput *out);
-int game_inv_cmd_wield(struct GameState *game, int item_arg, struct GameOutput *out);
-int game_inv_cmd_unwield(struct GameState *game, struct GameOutput *out);
+int game_inv_cmd_loot(struct GameState *game, struct GameEventQueue *out);
+int game_inv_cmd_take_all(struct GameState *game, struct GameEventQueue *out);
+int game_inv_cmd_take(struct GameState *game, int item_arg, struct GameEventQueue *out);
+int game_inv_cmd_drop(struct GameState *game, int item_arg, struct GameEventQueue *out);
+int game_inv_cmd_bag(struct GameState *game, struct GameEventQueue *out);
+int game_inv_cmd_eat(struct GameState *game, int item_arg, struct GameEventQueue *out);
+int game_inv_cmd_use(struct GameState *game, int item_arg, struct GameEventQueue *out);
+int game_inv_cmd_craft(struct GameState *game, int item_arg, struct GameEventQueue *out);
+int game_inv_cmd_wield(struct GameState *game, int item_arg, struct GameEventQueue *out);
+int game_inv_cmd_unwield(struct GameState *game, struct GameEventQueue *out);
 
 #endif
