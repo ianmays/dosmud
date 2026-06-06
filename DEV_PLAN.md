@@ -76,7 +76,7 @@ flowchart LR
   M5chain --> m9b
 ```
 
-**Completed (m5 foundation):** [#71](https://github.com/ianmays/dosmud/issues/71) engine boundary, [#47](https://github.com/ianmays/dosmud/issues/47) event queue ([#164](https://github.com/ianmays/dosmud/pull/164)), [#157](https://github.com/ianmays/dosmud/issues/157) command/navigation GameEvent migration ([#167](https://github.com/ianmays/dosmud/pull/167)), [#158](https://github.com/ianmays/dosmud/issues/158) inventory/item GameEvent migration ([#173](https://github.com/ianmays/dosmud/pull/173)), [#159](https://github.com/ianmays/dosmud/issues/159) combat/progression GameEvent migration ([#174](https://github.com/ianmays/dosmud/pull/174)). **Active m5 pull order:** #160 through #163, then adjacent #156 and #16 per blocked-by.
+**Completed (m5 foundation):** [#71](https://github.com/ianmays/dosmud/issues/71) engine boundary, [#47](https://github.com/ianmays/dosmud/issues/47) event queue ([#164](https://github.com/ianmays/dosmud/pull/164)), [#157](https://github.com/ianmays/dosmud/issues/157) command/navigation GameEvent migration ([#167](https://github.com/ianmays/dosmud/pull/167)), [#158](https://github.com/ianmays/dosmud/issues/158) inventory/item GameEvent migration ([#173](https://github.com/ianmays/dosmud/pull/173)), [#159](https://github.com/ianmays/dosmud/issues/159) combat/progression GameEvent migration ([#174](https://github.com/ianmays/dosmud/pull/174)), [#160](https://github.com/ianmays/dosmud/issues/160) dialogue/encounter GameEvent migration ([#175](https://github.com/ianmays/dosmud/pull/175)). **Active m5 pull order:** #161 through #163, then adjacent #156 and #16 per blocked-by.
 
 Workflow (milestone 4) can run in parallel with architecture once unblocked. In milestone 5, the **GameEvent migration** chain (#157 through #163) follows the completed #47 foundation; [#156](https://github.com/ianmays/dosmud/issues/156) is a separate adjacent replay/logging lane. Content (6) and renderer (7) are not gated on all of mechanics (8).
 
@@ -533,7 +533,7 @@ Done ✅ ([#175](https://github.com/ianmays/dosmud/pull/175)).
 
 ### Testing
 - Unit: `unit_dial.c`, `unit_wandr.c`, `unit_genc.c`, `unit_game.c`, and `unit_gout.c` assert `GAME_EVENT_DIALOGUE`, `GAME_EVENT_ENCOUNTER`, and `GAME_EVENT_DIALOGUE_GUARD` payloads ([#175](https://github.com/ianmays/dosmud/pull/175))
-- Snapshots: existing frog, bandit handover/intimidate, and wanderer regression suites unchanged
+- Snapshots: `game_event_dialogue` covers pond frog, bandit camp talk, and tower watchman through generic dialogue/encounter events ([#175](https://github.com/ianmays/dosmud/pull/175)); existing frog, bandit handover/intimidate, and wanderer regression suites unchanged
 
 ### [#161](https://github.com/ianmays/dosmud/issues/161) - Ambient/inspect GameEvent migration
 
