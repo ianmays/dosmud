@@ -91,7 +91,7 @@ SNAPSHOT_TESTS = \
 	combat_victory_xp level_up \
 	loot_spear loot_stick loot_berry loot_herb loot_fish loot_empty loot_stripped loot_bag_full \
 	bandit_fight bandit_intimidate_ok bandit_intimidate_fail bandit_bag_empty \
-	unknown_cmd cannot_move give_wrong_context reply_nobody reply_invalid \
+	unknown_cmd cannot_move give_wrong_context reply_nobody post_combat_reply_guard reply_invalid \
 	craft_salve craft_unknown take_nothing take_wrong_item take_all take_all_bag_full
 
 snapshot-run:
