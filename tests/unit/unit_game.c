@@ -9,15 +9,22 @@
 #include "testharn.h"
 #include "unit_util.h"
 
+static int run_cmd_out(struct GameState *game, const char *line,
+                       GameEventQueue *out)
+{
+    char buf[CFG_INPUT_MAX];
+
+    game_event_queue_reset(out);
+    strncpy(buf, line, CFG_INPUT_MAX - 1);
+    buf[CFG_INPUT_MAX - 1] = '\0';
+    return game_process_input(game, buf, out);
+}
+
 static int run_cmd(struct GameState *game, const char *line)
 {
     GameEventQueue out;
-    char buf[CFG_INPUT_MAX];
 
-    game_event_queue_reset(&out);
-    strncpy(buf, line, CFG_INPUT_MAX - 1);
-    buf[CFG_INPUT_MAX - 1] = '\0';
-    return game_process_input(game, buf, &out);
+    return run_cmd_out(game, line, &out);
 }
 
 TEST game_heal_player_applies(void)
@@ -183,6 +190,7 @@ TEST game_bandit_intimidate_success(void)
 TEST game_inspect_with_focus(void)
 {
     struct GameState game;
+    GameEventQueue out;
 
     unit_game_fresh(&game, 6u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
@@ -190,8 +198,11 @@ TEST game_inspect_with_focus(void)
     game.env_focus_room = WORLD_ROOM_CAMP;
     game.env_focus_kind = GAME_ENV_WATER;
     game.env_focus_expires_tick = game.tick + 10;
-    ASSERT_EQ(1, run_cmd(&game, "inspect water"));
+    ASSERT_EQ(1, run_cmd_out(&game, "inspect water", &out));
     ASSERT_EQ(0, game.env_focus_active);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_OBSERVATION, out.events[0].kind);
+    ASSERT_EQ(GAME_OBS_OUTCOME_WATER, out.events[0].arg0);
     PASS();
 }
 
@@ -210,65 +221,59 @@ TEST game_talk_frog(void)
 TEST game_bandit_fight_reply(void)
 {
     struct GameState game;
-    char line[] = "1";
+    GameEventQueue out;
 
     unit_game_fresh(&game, 10u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
-    {
-        GameEventQueue out;
-
-        game_event_queue_reset(&out);
-        enemy_begin_encounter(&game, &out);
-        game_event_queue_reset(&out);
-        game_process_input(&game, line, &out);
-    }
+    game_event_queue_reset(&out);
+    enemy_begin_encounter(&game, &out);
+    ASSERT_EQ(1, run_cmd_out(&game, "1", &out));
     ASSERT_EQ(GAME_MODE_COMBAT, game.mode);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_COMBAT, out.events[0].kind);
+    ASSERT_EQ(GAME_COMBAT_PHASE_START, out.events[0].arg0);
     PASS();
 }
 
 TEST game_bandit_intimidate_fail(void)
 {
     struct GameState game;
+    GameEventQueue out;
     int rolls[1];
-    char line[] = "3";
 
     unit_game_fresh(&game, 11u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
-    {
-        GameEventQueue out;
-
-        game_event_queue_reset(&out);
-        enemy_begin_encounter(&game, &out);
-    }
+    game_event_queue_reset(&out);
+    enemy_begin_encounter(&game, &out);
     rolls[0] = CFG_TEST_INTIMIDATE_FAIL;
     game_roll_inject_begin(&game, rolls, 1);
-    {
-        GameEventQueue out;
-
-        game_event_queue_reset(&out);
-        game_process_input(&game, line, &out);
-    }
+    ASSERT_EQ(1, run_cmd_out(&game, "3", &out));
     ASSERT_EQ(GAME_MODE_COMBAT, game.mode);
+    ASSERT_EQ(2, out.count);
+    ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
+    ASSERT_EQ(GAME_ENCOUNTER_ACTION_INTIMIDATE, out.events[0].arg1);
+    ASSERT_EQ(GAME_ENCOUNTER_OUTCOME_FAIL, out.events[0].arg2);
+    ASSERT_EQ(GAME_EVENT_COMBAT, out.events[1].kind);
+    ASSERT_EQ(GAME_COMBAT_PHASE_START, out.events[1].arg0);
     PASS();
 }
 
 TEST game_bandit_handover_pick(void)
 {
     struct GameState game;
-    char line[] = "2";
+    GameEventQueue out;
 
     unit_game_fresh(&game, 12u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game_inv_bag_add(&game, ITEM_STICK);
-    {
-        GameEventQueue out;
-
-        game_event_queue_reset(&out);
-        enemy_begin_encounter(&game, &out);
-        game_event_queue_reset(&out);
-        game_process_input(&game, line, &out);
-    }
+    game_event_queue_reset(&out);
+    enemy_begin_encounter(&game, &out);
+    ASSERT_EQ(1, run_cmd_out(&game, "2", &out));
     ASSERT_EQ(1, game.enemy_handover_pick);
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
+    ASSERT_EQ(GAME_ENCOUNTER_ACTION_HANDOVER_PROMPT, out.events[0].arg1);
     PASS();
 }
 
@@ -312,15 +317,23 @@ TEST game_combat_blocks_inventory_cmds(void)
 TEST game_inspect_none_and_wrong(void)
 {
     struct GameState game;
+    GameEventQueue out;
 
     unit_game_fresh(&game, 16u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
-    ASSERT_EQ(1, run_cmd(&game, "inspect"));
+    ASSERT_EQ(1, run_cmd_out(&game, "inspect", &out));
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_OBSERVATION, out.events[0].kind);
+    ASSERT_EQ(GAME_OBS_OUTCOME_NOTHING, out.events[0].arg0);
     game.env_focus_active = 1;
     game.env_focus_room = WORLD_ROOM_CAMP;
     game.env_focus_kind = GAME_ENV_RUSTLE;
     game.env_focus_expires_tick = game.tick + 10;
-    ASSERT_EQ(1, run_cmd(&game, "inspect water"));
+    ASSERT_EQ(1, run_cmd_out(&game, "inspect water", &out));
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_OBSERVATION, out.events[0].kind);
+    ASSERT_EQ(GAME_OBS_OUTCOME_WRONG_FOCUS, out.events[0].arg0);
+    ASSERT_EQ(1, game.env_focus_active);
     PASS();
 }
 
@@ -336,23 +349,35 @@ TEST game_unknown_command(void)
 TEST game_give_after_handover_fixture(void)
 {
     struct GameState game;
+    GameEventQueue out;
 
     unit_game_fresh(&game, 19u);
     testharn_apply(&game, "@fixture bandit_handover_pick");
-    ASSERT_EQ(1, run_cmd(&game, "give stick"));
+    ASSERT_EQ(1, run_cmd_out(&game, "give stick", &out));
     ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
+    ASSERT_EQ(GAME_ENCOUNTER_ACTION_GIVE, out.events[0].arg1);
+    ASSERT_EQ(GAME_ENCOUNTER_OUTCOME_OK, out.events[0].arg2);
+    ASSERT_EQ(ITEM_STICK, out.events[0].arg3);
     PASS();
 }
 
 TEST game_wanderer_reply_fixture(void)
 {
     struct GameState game;
+    GameEventQueue out;
 
     unit_game_fresh(&game, 20u);
     testharn_apply(&game, "@fixture wanderer_dialogue");
-    ASSERT_EQ(1, run_cmd(&game, "reply 2"));
+    ASSERT_EQ(1, run_cmd_out(&game, "reply 2", &out));
     ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
     ASSERT_EQ(0, game.wanderer_active);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_DIALOGUE, out.events[0].kind);
+    ASSERT_EQ(GAME_DIALOGUE_ACTOR_WANDERER, out.events[0].arg0);
+    ASSERT_EQ(GAME_DIALOGUE_PHASE_REPLY, out.events[0].arg1);
+    ASSERT_EQ(2, out.events[0].arg2);
     PASS();
 }
 
