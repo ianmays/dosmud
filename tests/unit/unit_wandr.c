@@ -5,6 +5,7 @@
 #include "wanderer.h"
 #include "unit_util.h"
 
+/* out-taking helpers assert #160 encounter/dialogue events from wanderer.c. */
 static void begin_wanderer(struct GameState *game, struct GameOutput *out)
 {
     gout_reset(out);

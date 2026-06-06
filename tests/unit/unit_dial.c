@@ -6,6 +6,10 @@
 #include "world.h"
 #include "unit_util.h"
 
+/*
+ * out-taking helpers assert #160 GameEvent payloads; *_state wraps a local
+ * GameOutput for mode-only tests that do not inspect the queue.
+ */
 static int talk_out(struct GameState *game, struct GameOutput *out)
 {
     gout_reset(out);

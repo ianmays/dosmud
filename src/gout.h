@@ -189,8 +189,9 @@ enum GameEventDialogueGuardReason {
  * Legacy presentation kinds (GAME_EVENT_LEGACY + legacy_kind). Command/nav
  * MAP, HELP, WAIT, CANNOT_MOVE, UNKNOWN_COMMAND, and MOVED also have
  * GAME_EVENT_* kinds after #157; invent after #158; combat/progression after
- * #159. Keep GAME_OUT_COMBAT_*, GAME_OUT_XP_GAINED, GAME_OUT_LEVEL_UP, and
- * GAME_OUT_INV_* here until #162 removes legacy queue paths.
+ * #159; dialogue/encounter after #160. Keep GAME_OUT_COMBAT_*,
+ * GAME_OUT_XP_GAINED, GAME_OUT_LEVEL_UP, GAME_OUT_INV_*, and dialogue/encounter
+ * GAME_OUT_* mirrors here until #162 removes legacy queue paths.
  */
 enum GameOutKind {
     GAME_OUT_NONE = 0,

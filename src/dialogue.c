@@ -8,6 +8,10 @@
  * #160: queues GAME_EVENT_DIALOGUE / DIALOGUE_GUARD; grendr maps to text.
  */
 
+/*
+ * #160: typed dialogue payloads (layout in gout.h). actor/phase/choice ->
+ * DIALOGUE arg0/1/2; guard reasons -> DIALOGUE_GUARD arg0.
+ */
 static void push_dialogue(struct GameOutput *out, int actor, int phase,
                           int choice)
 {

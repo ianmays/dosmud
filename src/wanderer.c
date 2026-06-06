@@ -9,6 +9,10 @@
  * #160: queues GAME_EVENT_ENCOUNTER / DIALOGUE / DIALOGUE_GUARD; grendr maps.
  */
 
+/*
+ * #160: module-local push helpers (same payload layout as dialogue.c/genc.c;
+ * see gout.h). Not shared across slices to keep ownership explicit.
+ */
 static void push_encounter_open(struct GameOutput *out, int kind)
 {
     game_event_push(out, GAME_EVENT_ENCOUNTER, kind,

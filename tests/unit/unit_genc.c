@@ -7,6 +7,10 @@
 #include "items.h"
 #include "unit_util.h"
 
+/*
+ * out-taking helpers assert #160 encounter events; *_state wraps a local
+ * GameOutput for mode-only tests that do not inspect the queue.
+ */
 static void begin_enemy(struct GameState *game, struct GameOutput *out)
 {
     gout_reset(out);

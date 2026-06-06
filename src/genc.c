@@ -11,6 +11,10 @@
  * #160: queues GAME_EVENT_ENCOUNTER / DIALOGUE_GUARD; grendr maps to text.
  */
 
+/*
+ * #160: typed encounter payloads (layout in gout.h). kind/action/outcome ->
+ * ENCOUNTER arg0/1/2; item id -> arg3; text for GIVE/OK item names.
+ */
 static void push_encounter(struct GameOutput *out, int kind, int action,
                            int outcome, int item_id, const char *text)
 {

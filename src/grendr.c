@@ -1073,6 +1073,7 @@ static void render_encounter_event(const GameEvent *ev)
         }
         return;
     }
+    /* Wanderer OPEN only; bandit owns handover/give/intimidate replies. */
     if (ev->arg0 != GAME_ENCOUNTER_BANDIT) {
         return;
     }
