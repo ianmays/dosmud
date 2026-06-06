@@ -189,6 +189,7 @@ TEST combat_player_death(void)
     game_roll_inject_begin(&game, rolls, 2);
     resolve_reply_out(&game, 1, &out);
     ASSERT_EQ(0, game.running);
+    ASSERT_EQ(GAME_EVENT_COMBAT, out.events[out.count - 1].kind);
     ASSERT_EQ(GAME_COMBAT_PHASE_PLAYER_DOWN, out.events[out.count - 1].arg0);
     PASS();
 }
