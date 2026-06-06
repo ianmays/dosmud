@@ -1,0 +1,11 @@
+@fixture at_pond
+talk
+1
+@fixture at_tower
+talk
+1
+@fixture at_camp
+talk
+@fixture bandit_dialogue
+1
+quit

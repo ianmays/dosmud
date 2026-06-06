@@ -534,6 +534,39 @@ TEST game_quit_ends_run(void)
     PASS();
 }
 
+TEST game_bandit_waiting_reply_guard_event(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    char line[] = "wait";
+
+    unit_game_fresh(&game, 40u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game_set_mode_dialogue(&game, DIALOGUE_ENEMY);
+    gout_reset(&out);
+    ASSERT_EQ(0, game_process_input(&game, line, &out));
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[0].kind);
+    ASSERT_EQ(GAME_DIALOGUE_GUARD_BANDIT_WAITING_REPLY, out.events[0].arg0);
+    PASS();
+}
+
+TEST game_nobody_waiting_reply_guard_event(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    char line[] = "1";
+
+    unit_game_fresh(&game, 41u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    gout_reset(&out);
+    ASSERT_EQ(1, game_process_input(&game, line, &out));
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[0].kind);
+    ASSERT_EQ(GAME_DIALOGUE_GUARD_NOBODY_WAITING_REPLY, out.events[0].arg0);
+    PASS();
+}
+
 SUITE(game) {
     RUN_TEST(game_heal_player_applies);
     RUN_TEST(game_heal_player_at_max);
@@ -569,4 +602,6 @@ SUITE(game) {
     RUN_TEST(game_move_emits_move_then_look);
     RUN_TEST(game_roll_spread_zero);
     RUN_TEST(game_quit_ends_run);
+    RUN_TEST(game_bandit_waiting_reply_guard_event);
+    RUN_TEST(game_nobody_waiting_reply_guard_event);
 }

@@ -500,6 +500,10 @@ static void render_legacy_output_event(const struct GameState *game,
     case GAME_OUT_HELP:
         game_print_help(ev->arg0);
         break;
+    /*
+     * #160: dialogue/encounter/wanderer emit GAME_EVENT_*; legacy mirrors below
+     * until #162. Same render_* helpers as generic adapters.
+     */
     case GAME_OUT_BANDIT_ENCOUNTER_OPEN:
         render_bandit_encounter_open();
         break;
@@ -1006,6 +1010,133 @@ static void render_equip_result_event(const GameEvent *ev)
 }
 
 /*
+ * #160: GAME_EVENT_DIALOGUE adapter; arg0=actor, arg1=phase, arg2=choice.
+ * Same render_* helpers as legacy GAME_OUT_* dialogue path.
+ */
+static void render_dialogue_event(const GameEvent *ev)
+{
+    switch (ev->arg0) {
+    case GAME_DIALOGUE_ACTOR_FROG:
+        if (ev->arg1 == GAME_DIALOGUE_PHASE_INTRO) {
+            render_frog_dialogue_intro();
+        } else if (ev->arg1 == GAME_DIALOGUE_PHASE_BRANCH) {
+            render_frog_dialogue_branch(ev->arg2);
+        }
+        break;
+    case GAME_DIALOGUE_ACTOR_WATCHMAN:
+        if (ev->arg1 == GAME_DIALOGUE_PHASE_TALK) {
+            render_msg_watchman_talk();
+        } else if (ev->arg1 == GAME_DIALOGUE_PHASE_REPLY) {
+            render_msg_watchman_reply(ev->arg2);
+        }
+        break;
+    case GAME_DIALOGUE_ACTOR_HERBALIST:
+        if (ev->arg1 == GAME_DIALOGUE_PHASE_TALK) {
+            render_msg_herbalist_talk();
+        } else if (ev->arg1 == GAME_DIALOGUE_PHASE_REPLY) {
+            render_msg_herbalist_reply(ev->arg2);
+        }
+        break;
+    case GAME_DIALOGUE_ACTOR_ARCHIVIST:
+        if (ev->arg1 == GAME_DIALOGUE_PHASE_TALK) {
+            render_msg_archivist_talk();
+        } else if (ev->arg1 == GAME_DIALOGUE_PHASE_REPLY) {
+            render_msg_archivist_reply(ev->arg2);
+        }
+        break;
+    case GAME_DIALOGUE_ACTOR_WANDERER:
+        if (ev->arg1 == GAME_DIALOGUE_PHASE_REPLY) {
+            render_wanderer_reply(ev->arg2);
+        }
+        break;
+    case GAME_DIALOGUE_ACTOR_NOBODY:
+        if (ev->arg1 == GAME_DIALOGUE_PHASE_TALK) {
+            render_msg_nobody_talk();
+        }
+        break;
+    default:
+        break;
+    }
+}
+
+/*
+ * #160: GAME_EVENT_ENCOUNTER adapter; arg0=kind, arg1=action, arg2=outcome.
+ * Same render_* helpers as legacy encounter path.
+ */
+static void render_encounter_event(const GameEvent *ev)
+{
+    if (ev->arg1 == GAME_ENCOUNTER_ACTION_OPEN) {
+        if (ev->arg0 == GAME_ENCOUNTER_BANDIT) {
+            render_bandit_encounter_open();
+        } else if (ev->arg0 == GAME_ENCOUNTER_WANDERER) {
+            render_wanderer_scene();
+        }
+        return;
+    }
+    /* Wanderer OPEN only; bandit owns handover/give/intimidate replies. */
+    if (ev->arg0 != GAME_ENCOUNTER_BANDIT) {
+        return;
+    }
+    switch (ev->arg1) {
+    case GAME_ENCOUNTER_ACTION_HANDOVER_PROMPT:
+        render_bandit_handover_pick_prompt();
+        break;
+    case GAME_ENCOUNTER_ACTION_HANDOVER:
+        if (ev->arg2 == GAME_ENCOUNTER_OUTCOME_BAG_EMPTY) {
+            render_msg_bag_empty_bandit();
+        }
+        break;
+    case GAME_ENCOUNTER_ACTION_GIVE:
+        if (ev->arg2 == GAME_ENCOUNTER_OUTCOME_OK) {
+            render_msg_hand_over_item(ev->text);
+        } else if (ev->arg2 == GAME_ENCOUNTER_OUTCOME_NOT_CARRYING) {
+            render_msg_bandit_give_not_carrying();
+        } else if (ev->arg2 == GAME_ENCOUNTER_OUTCOME_WRONG_CONTEXT) {
+            render_msg_give_wrong_context();
+        }
+        break;
+    case GAME_ENCOUNTER_ACTION_INTIMIDATE:
+        if (ev->arg2 == GAME_ENCOUNTER_OUTCOME_SUCCESS) {
+            render_msg_intimidate_success();
+        } else if (ev->arg2 == GAME_ENCOUNTER_OUTCOME_FAIL) {
+            render_msg_intimidate_fail();
+        }
+        break;
+    default:
+        break;
+    }
+}
+
+/*
+ * #160: GAME_EVENT_DIALOGUE_GUARD adapter; arg0=GameEventDialogueGuardReason.
+ */
+static void render_dialogue_guard_event(const GameEvent *ev)
+{
+    switch (ev->arg0) {
+    case GAME_DIALOGUE_GUARD_BANDIT_WAITING_REPLY:
+        render_msg_bandit_waiting_reply();
+        break;
+    case GAME_DIALOGUE_GUARD_BANDIT_WAITING_HANDOVER_PICK:
+        render_msg_bandit_waiting_handover_pick();
+        break;
+    case GAME_DIALOGUE_GUARD_BANDIT_BLOCKS_TALK:
+        render_msg_bandit_blocks_talk();
+        break;
+    case GAME_DIALOGUE_GUARD_TRAVELER_WAITING:
+        render_msg_traveler_waiting();
+        break;
+    case GAME_DIALOGUE_GUARD_NOBODY_WAITING_REPLY:
+        render_msg_nobody_waiting_reply();
+        break;
+    case GAME_DIALOGUE_GUARD_PICK_123:
+        render_msg_pick_123();
+        break;
+    default:
+        break;
+    }
+}
+
+/*
  * #159: GAME_EVENT_COMBAT adapter; arg0=phase, arg1/arg2 match combat.c
  * push_combat_phase (see gout.h). Same render_combat_* helpers as legacy path.
  */
@@ -1110,6 +1241,16 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
             break;
         case GAME_EVENT_STAT_CHANGE:
             render_level_up(ev->arg0, ev->arg1, ev->arg2, ev->arg3);
+            break;
+        /* #160 dialogue/encounter: direct dispatch (slice no longer LEGACY). */
+        case GAME_EVENT_DIALOGUE:
+            render_dialogue_event(ev);
+            break;
+        case GAME_EVENT_ENCOUNTER:
+            render_encounter_event(ev);
+            break;
+        case GAME_EVENT_DIALOGUE_GUARD:
+            render_dialogue_guard_event(ev);
             break;
         case GAME_EVENT_LEGACY:
             render_legacy_output_event(game, ev);

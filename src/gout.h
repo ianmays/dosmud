@@ -10,9 +10,9 @@
  */
 
 /*
- * Generic kinds (#47 room/move look; #157 command/nav; #158 invent). Slice
- * producers use game_event_push; everything else still wraps GameOutKind as
- * GAME_EVENT_LEGACY.
+ * Generic kinds (#47 room/move look; #157 command/nav; #158 invent; #159 combat;
+ * #160 dialogue/encounter). Slice producers use game_event_push; everything
+ * else still wraps GameOutKind as GAME_EVENT_LEGACY.
  */
 enum GameEventKind {
     GAME_EVENT_NONE = 0,
@@ -33,7 +33,11 @@ enum GameEventKind {
     /* #159: combat.c and gprog.c emit generic combat/progression payloads. */
     GAME_EVENT_COMBAT,
     GAME_EVENT_XP_GAIN,
-    GAME_EVENT_STAT_CHANGE
+    GAME_EVENT_STAT_CHANGE,
+    /* #160: dialogue, wanderer, and encounter slice emit actor/dialogue payloads. */
+    GAME_EVENT_DIALOGUE,
+    GAME_EVENT_ENCOUNTER,
+    GAME_EVENT_DIALOGUE_GUARD
 };
 
 /*
@@ -120,11 +124,74 @@ enum GameEventCombatPhase {
 };
 
 /*
+ * Dialogue/encounter payload contract (#160):
+ * DIALOGUE       arg0=GameEventDialogueActor arg1=GameEventDialoguePhase
+ *                arg2=choice (1-3) for REPLY/BRANCH
+ * ENCOUNTER      arg0=GameEventEncounterKind arg1=GameEventEncounterAction
+ *                arg2=GameEventEncounterOutcome arg3=item id (GIVE/OK only)
+ *                text=item_name for GIVE/OK; zero otherwise
+ * DIALOGUE_GUARD arg0=GameEventDialogueGuardReason
+ */
+enum GameEventDialogueActor {
+    GAME_DIALOGUE_ACTOR_NONE = 0,
+    GAME_DIALOGUE_ACTOR_FROG = 1,
+    GAME_DIALOGUE_ACTOR_WATCHMAN = 2,
+    GAME_DIALOGUE_ACTOR_HERBALIST = 3,
+    GAME_DIALOGUE_ACTOR_ARCHIVIST = 4,
+    GAME_DIALOGUE_ACTOR_WANDERER = 5,
+    GAME_DIALOGUE_ACTOR_NOBODY = 6
+};
+
+enum GameEventDialoguePhase {
+    GAME_DIALOGUE_PHASE_NONE = 0,
+    GAME_DIALOGUE_PHASE_INTRO,
+    GAME_DIALOGUE_PHASE_TALK,
+    GAME_DIALOGUE_PHASE_REPLY,
+    GAME_DIALOGUE_PHASE_BRANCH
+};
+
+enum GameEventEncounterKind {
+    GAME_ENCOUNTER_NONE = 0,
+    GAME_ENCOUNTER_BANDIT,
+    GAME_ENCOUNTER_WANDERER
+};
+
+enum GameEventEncounterAction {
+    GAME_ENCOUNTER_ACTION_NONE = 0,
+    GAME_ENCOUNTER_ACTION_OPEN,
+    GAME_ENCOUNTER_ACTION_HANDOVER_PROMPT,
+    GAME_ENCOUNTER_ACTION_HANDOVER,
+    GAME_ENCOUNTER_ACTION_GIVE,
+    GAME_ENCOUNTER_ACTION_INTIMIDATE
+};
+
+enum GameEventEncounterOutcome {
+    GAME_ENCOUNTER_OUTCOME_NONE = 0,
+    GAME_ENCOUNTER_OUTCOME_OK,
+    GAME_ENCOUNTER_OUTCOME_NOT_CARRYING,
+    GAME_ENCOUNTER_OUTCOME_WRONG_CONTEXT,
+    GAME_ENCOUNTER_OUTCOME_BAG_EMPTY,
+    GAME_ENCOUNTER_OUTCOME_SUCCESS,
+    GAME_ENCOUNTER_OUTCOME_FAIL
+};
+
+enum GameEventDialogueGuardReason {
+    GAME_DIALOGUE_GUARD_NONE = 0,
+    GAME_DIALOGUE_GUARD_BANDIT_WAITING_REPLY,
+    GAME_DIALOGUE_GUARD_BANDIT_WAITING_HANDOVER_PICK,
+    GAME_DIALOGUE_GUARD_BANDIT_BLOCKS_TALK,
+    GAME_DIALOGUE_GUARD_TRAVELER_WAITING,
+    GAME_DIALOGUE_GUARD_NOBODY_WAITING_REPLY,
+    GAME_DIALOGUE_GUARD_PICK_123
+};
+
+/*
  * Legacy presentation kinds (GAME_EVENT_LEGACY + legacy_kind). Command/nav
  * MAP, HELP, WAIT, CANNOT_MOVE, UNKNOWN_COMMAND, and MOVED also have
  * GAME_EVENT_* kinds after #157; invent after #158; combat/progression after
- * #159. Keep GAME_OUT_COMBAT_*, GAME_OUT_XP_GAINED, GAME_OUT_LEVEL_UP, and
- * GAME_OUT_INV_* here until #162 removes legacy queue paths.
+ * #159; dialogue/encounter after #160. Keep GAME_OUT_COMBAT_*,
+ * GAME_OUT_XP_GAINED, GAME_OUT_LEVEL_UP, GAME_OUT_INV_*, and dialogue/encounter
+ * GAME_OUT_* mirrors here until #162 removes legacy queue paths.
  */
 enum GameOutKind {
     GAME_OUT_NONE = 0,
