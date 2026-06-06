@@ -27,3 +27,6 @@ tests/soak/build/
 *.gcov
 *.gcno
 *.gcda
+
+# Quota ledger
+dosmud_quota_ledger.csv
