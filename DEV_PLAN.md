@@ -91,7 +91,7 @@ Workflow (milestone 4) can run in parallel with architecture once unblocked. In 
 | XS | single trivial change | *(none currently)* |
 | S | narrow feature or tooling slice | #4, #72 |
 | M | one subsystem feature or refactor | #5, #7, #9, #31, #49, #51, #54, #100, #101, #102, #129, #130, #131, #132, #145, #161, #162, #163 |
-| L | major mechanism or platform path | #8, #15, #16, #50, #52, #104, #107, #156, #158, #159, #160 |
+| L | major mechanism or platform path | #8, #15, #16, #50, #52, #104, #107, #156 |
 | XL | foundational or multi-area epic | #48, #55, #76, #92 |
 
 [#71](https://github.com/ianmays/dosmud/issues/71) **XL** and [#47](https://github.com/ianmays/dosmud/issues/47) **L** established the engine boundary and event-queue seam ([#164](https://github.com/ianmays/dosmud/pull/164)). Remaining gates: [#104](https://github.com/ianmays/dosmud/issues/104), [#48](https://github.com/ianmays/dosmud/issues/48), and [#92](https://github.com/ianmays/dosmud/issues/92) still build on that work.
