@@ -39,6 +39,29 @@ TEST game_event_push_marks_overflow_at_capacity(void)
     PASS();
 }
 
+TEST game_event_queue_reset_clears_overflow_and_reuse_state(void)
+{
+    GameEventQueue out;
+    GameEvent *ev;
+    int i;
+
+    game_event_queue_reset(&out);
+    for (i = 0; i < CFG_GAME_EVENT_MAX; ++i) {
+        ASSERT(0 != game_event_push(&out, GAME_EVENT_WAIT, i, 0, 0, 0, 0));
+    }
+    ASSERT(0 == game_event_push(&out, GAME_EVENT_WAIT, 99, 0, 0, 0, 0));
+    ASSERT_EQ(1, out.overflowed);
+
+    game_event_queue_reset(&out);
+    ev = game_event_push(&out, GAME_EVENT_HELP, CMD_HELP_TOPIC_TALK, 0, 0, 0, 0);
+    ASSERT(0 != ev);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(0, out.overflowed);
+    ASSERT_EQ(GAME_EVENT_HELP, out.events[0].kind);
+    ASSERT_EQ(CMD_HELP_TOPIC_TALK, out.events[0].arg0);
+    PASS();
+}
+
 TEST game_event_push_records_generic_move(void)
 {
     GameEventQueue out;
@@ -50,6 +73,37 @@ TEST game_event_push_records_generic_move(void)
     ASSERT_EQ(1, out.count);
     ASSERT_EQ(GAME_EVENT_MOVE, out.events[0].kind);
     ASSERT_STR_EQ("north", out.events[0].text);
+    PASS();
+}
+
+TEST game_event_push_preserves_enqueue_order_and_payload_slots(void)
+{
+    GameEventQueue out;
+
+    game_event_queue_reset(&out);
+    ASSERT(0 != game_event_push(&out, GAME_EVENT_MOVE, 0, 0, 0, 0, "north"));
+    ASSERT(0 != game_event_push(&out, GAME_EVENT_ITEM_RESULT,
+        GAME_ITEM_ACTION_USE, GAME_ITEM_OUTCOME_OK, ITEM_SALVE, 10, 0));
+    ASSERT(0 != game_event_push(&out, GAME_EVENT_DIALOGUE,
+        GAME_DIALOGUE_ACTOR_WANDERER, GAME_DIALOGUE_PHASE_REPLY, 2, 0, 0));
+
+    ASSERT_EQ(3, out.count);
+    ASSERT_EQ(GAME_EVENT_MOVE, out.events[0].kind);
+    ASSERT_STR_EQ("north", out.events[0].text);
+    ASSERT_EQ(-1, out.events[0].room_id);
+    ASSERT_EQ(0, out.events[0].room_item[0]);
+
+    ASSERT_EQ(GAME_EVENT_ITEM_RESULT, out.events[1].kind);
+    ASSERT_EQ(GAME_ITEM_ACTION_USE, out.events[1].arg0);
+    ASSERT_EQ(GAME_ITEM_OUTCOME_OK, out.events[1].arg1);
+    ASSERT_EQ(ITEM_SALVE, out.events[1].arg2);
+    ASSERT_EQ(10, out.events[1].arg3);
+    ASSERT(0 == out.events[1].text);
+
+    ASSERT_EQ(GAME_EVENT_DIALOGUE, out.events[2].kind);
+    ASSERT_EQ(GAME_DIALOGUE_ACTOR_WANDERER, out.events[2].arg0);
+    ASSERT_EQ(GAME_DIALOGUE_PHASE_REPLY, out.events[2].arg1);
+    ASSERT_EQ(2, out.events[2].arg2);
     PASS();
 }
 
@@ -178,7 +232,9 @@ SUITE(gout) {
     RUN_TEST(game_event_queue_reset_clears_state);
     RUN_TEST(game_event_push_ignores_null_output);
     RUN_TEST(game_event_push_marks_overflow_at_capacity);
+    RUN_TEST(game_event_queue_reset_clears_overflow_and_reuse_state);
     RUN_TEST(game_event_push_records_generic_move);
+    RUN_TEST(game_event_push_preserves_enqueue_order_and_payload_slots);
     RUN_TEST(game_event_push_records_command_nav_kinds);
     RUN_TEST(game_event_push_records_inventory_kinds);
     RUN_TEST(game_event_push_records_combat_progression_kinds);

@@ -559,6 +559,8 @@ Done ✅ ([#177](https://github.com/ianmays/dosmud/pull/177)).
 
 Direct `#47` follow-up. Expand unit and snapshot coverage for the stabilized generic event schema.
 
+Done ✅.
+
 ### Testing
 - Unit: cover queue semantics plus representative payload assertions for each migrated event family
 - Snapshots: add/update representative end-to-end coverage only where needed

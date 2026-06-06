@@ -2,6 +2,7 @@
 #include "config.h"
 #include "game.h"
 #include "genc.h"
+#include "invent.h"
 #include "items.h"
 #include "testharn.h"
 #include "unit_util.h"
@@ -106,6 +107,50 @@ TEST harness_apply_quiet_camp_dual_ground_full_bag(void)
     PASS();
 }
 
+TEST harness_apply_bandit_handover_pick(void)
+{
+    struct GameState game;
+    int rc;
+
+    unit_game_fresh(&game, 5u);
+    rc = testharn_apply(&game, "@fixture bandit_handover_pick");
+    ASSERT_EQ(1, rc);
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(DIALOGUE_ENEMY, game.dialogue);
+    ASSERT_EQ(1, game.enemy_handover_pick);
+    ASSERT_EQ(1, game_inv_player_has_item(&game, ITEM_STICK));
+    PASS();
+}
+
+TEST harness_apply_wanderer_dialogue(void)
+{
+    struct GameState game;
+    int rc;
+
+    unit_game_fresh(&game, 6u);
+    rc = testharn_apply(&game, "@fixture wanderer_dialogue");
+    ASSERT_EQ(1, rc);
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(DIALOGUE_WANDERER, game.dialogue);
+    ASSERT_EQ(1, game.wanderer_active);
+    ASSERT_EQ(game.player.room_id, game.wanderer_room);
+    PASS();
+}
+
+TEST harness_apply_env_focus_water(void)
+{
+    struct GameState game;
+    int rc;
+
+    unit_game_fresh(&game, 7u);
+    rc = testharn_apply(&game, "@fixture env_focus_water");
+    ASSERT_EQ(1, rc);
+    ASSERT_EQ(1, game.env_focus_active);
+    ASSERT_EQ(game.player.room_id, game.env_focus_room);
+    ASSERT_EQ(GAME_ENV_WATER, game.env_focus_kind);
+    PASS();
+}
+
 TEST harness_seed_repeatable_rolls(void)
 {
     struct GameState game;
@@ -130,5 +175,8 @@ SUITE(harness) {
     RUN_TEST(harness_apply_ambient_camp);
     RUN_TEST(harness_apply_quiet_camp_dual_ground);
     RUN_TEST(harness_apply_quiet_camp_dual_ground_full_bag);
+    RUN_TEST(harness_apply_bandit_handover_pick);
+    RUN_TEST(harness_apply_wanderer_dialogue);
+    RUN_TEST(harness_apply_env_focus_water);
     RUN_TEST(harness_seed_repeatable_rolls);
 }
