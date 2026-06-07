@@ -164,6 +164,13 @@ Conventions:
 - optional replay log capture via `--replay-log`
 - `TEST_MODE`: delegates `@fixture` and `@seed` lines to `testharn`
 
+### `replay`
+
+- shell-edge serialization in [`replay.c`](../src/replay.c); opened and driven from `main.c`
+- writes a deterministic sidecar text log (`dosmud-replay-v1`) of startup, input, and idle steps
+- captures each step's `GameEventQueue` after simulation and before the next queue reset; does not mutate gameplay or render state
+- I/O failure surfaces through `main.c` stderr and exits non-zero
+
 ### `game`
 
 - top-level gameplay orchestration

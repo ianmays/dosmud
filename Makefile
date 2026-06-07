@@ -92,26 +92,28 @@ SNAPSHOT_TESTS = \
 	loot_spear loot_stick loot_berry loot_herb loot_fish loot_empty loot_stripped loot_bag_full \
 	bandit_fight bandit_intimidate_ok bandit_intimidate_fail bandit_bag_empty \
 	unknown_cmd cannot_move give_wrong_context reply_nobody post_combat_reply_guard reply_invalid \
-	craft_salve craft_unknown take_nothing take_wrong_item take_all take_all_bag_full
+	craft_salve craft_unknown take_nothing take_wrong_item take_all take_all_bag_full \
+	replay_log
 
 snapshot-run:
 	@set -e; \
 	n=0; \
-	total=$$(($$(echo $(SNAPSHOT_TESTS) | wc -w) + 2)); \
+	total=$$(($$(echo $(SNAPSHOT_TESTS) | wc -w) + 1)); \
 	for t in $(SNAPSHOT_TESTS); do \
 		echo "snapshot: $$t"; \
-		./$(BIN) < $(REGRESSION_DIR)/$$t.input > $(REGRESSION_DIR)/$$t.output; \
-		diff -u $(REGRESSION_DIR)/$$t.expect $(REGRESSION_DIR)/$$t.output; \
+		if [ "$$t" = "replay_log" ]; then \
+			./$(BIN) --seed 1234 --replay-log $(REGRESSION_DIR)/replay_log_log.output < $(REGRESSION_DIR)/replay_log.input > $(REGRESSION_DIR)/replay_log.output; \
+			diff -u $(REGRESSION_DIR)/replay_log.expect $(REGRESSION_DIR)/replay_log.output; \
+			diff -u $(REGRESSION_DIR)/replay_log_log.expect $(REGRESSION_DIR)/replay_log_log.output; \
+		else \
+			./$(BIN) < $(REGRESSION_DIR)/$$t.input > $(REGRESSION_DIR)/$$t.output; \
+			diff -u $(REGRESSION_DIR)/$$t.expect $(REGRESSION_DIR)/$$t.output; \
+		fi; \
 		n=$$((n + 1)); \
 	done; \
 	echo "snapshot: seed_cli"; \
 	./$(BIN) --seed 1234 < $(REGRESSION_DIR)/smoke.input > $(REGRESSION_DIR)/seed_cli.output; \
 	diff -u $(REGRESSION_DIR)/seed_cli.expect $(REGRESSION_DIR)/seed_cli.output; \
-	n=$$((n + 1)); \
-	echo "snapshot: replay_log"; \
-	./$(BIN) --seed 1234 --replay-log $(REGRESSION_DIR)/replay_log_log.output < $(REGRESSION_DIR)/replay_log.input > $(REGRESSION_DIR)/replay_log.output; \
-	diff -u $(REGRESSION_DIR)/replay_log.expect $(REGRESSION_DIR)/replay_log.output; \
-	diff -u $(REGRESSION_DIR)/replay_log_log.expect $(REGRESSION_DIR)/replay_log_log.output; \
 	n=$$((n + 1)); \
 	echo "snapshot tests passed: $$n/$$total"
 

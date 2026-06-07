@@ -6,6 +6,11 @@
 #include "gout.h"
 #include "replay.h"
 
+/*
+ * Unit tests for replay.c serialization. Exercises replay_log_* directly with
+ * synthetic GameEventQueue fixtures rather than the main loop or grendr.
+ */
+
 static void read_file_text(FILE *fp, char *buf, size_t size)
 {
     size_t n;

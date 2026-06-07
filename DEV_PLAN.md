@@ -138,7 +138,7 @@ Large-scale gameplay/content expansion should remain secondary until the core ar
 
 ### [#42](https://github.com/ianmays/dosmud/issues/42) - Split `game.c`
 
-Done ✅.
+Done ✅ ([#183](https://github.com/ianmays/dosmud/pull/183)).
 
 Highest-priority architecture task.
 
@@ -572,8 +572,8 @@ Adjacent track to `#47` follow-ups, but not part of the direct migration chain. 
 Done ✅.
 
 ### Testing
-- Unit: add replay/log append/reset/overflow tests if new replay module/API is introduced
-- Snapshots: add a deterministic replay/logging regression only if visible output changes
+- Unit: [`unit_rplog.c`](../tests/unit/unit_rplog.c) (`replay_log_reset`, capture serialization, open/header/step increment)
+- Snapshots: `replay_log` (stdout unchanged; sidecar golden [`replay_log_log.expect`](../tests/regression/replay_log_log.expect))
 
 ### [#16](https://github.com/ianmays/dosmud/issues/16) - Save/load system
 

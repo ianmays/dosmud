@@ -24,6 +24,7 @@
  * main-loop frames.
  */
 static GameEventQueue g_main_out;
+/* Optional sidecar log; static like g_main_out so the shell loop stays stack-light. */
 static ReplayLog g_replay_log;
 
 static void print_prompt(void)
@@ -200,6 +201,7 @@ static int main_dispatch_line(struct GameState *game, char *line)
             return 1;
         }
     } else {
+        /* Harness @fixture/@seed lines adjust state only; they are not replay steps. */
         plat_seed_rng(game->seed);
     }
 #else

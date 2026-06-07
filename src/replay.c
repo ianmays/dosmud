@@ -7,6 +7,7 @@
 /*
  * replay.c owns the optional shell-level event log path. It serializes the
  * existing per-step GameEventQueue without changing engine or renderer state.
+ * Text fields use C-style escapes; non-printable bytes become \xHH literals.
  */
 
 static const char *replay_step_name(int step_kind)
@@ -37,6 +38,7 @@ static const char *replay_mode_name(int mode)
     }
 }
 
+/* Keep in sync with GameEventKind in gout.h; unknown kinds log as GAME_EVENT_UNKNOWN. */
 static const char *replay_event_name(int kind)
 {
     switch (kind) {
@@ -294,6 +296,7 @@ int replay_log_open(ReplayLog *log, const char *path, u32 seed)
         char *dst;
 
         dst = buf;
+        /* dosmud-replay-v1 is the on-disk format tag; bump when fields change. */
         dst = replay_append_literal(dst, "dosmud-replay-v1 seed=");
         dst = replay_append_ulong(dst, (unsigned long)seed);
         *dst = '\n';
@@ -331,7 +334,7 @@ int replay_log_capture(ReplayLog *log, int step_kind, const char *input,
     int i;
 
     if (!replay_log_is_enabled(log)) {
-        return 1;
+        return 1; /* no-op when --replay-log was not requested */
     }
     if (game == 0 || out == 0) {
         return 0;

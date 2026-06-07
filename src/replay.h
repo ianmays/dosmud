@@ -4,6 +4,14 @@
 #include <stdio.h>
 #include "base.h"
 
+/*
+ * Optional shell-level replay log. Serializes per-step GameEventQueue snapshots
+ * without mutating gameplay or render state. main.c opens the file and calls
+ * replay_log_capture after each step and before the next queue reset.
+ * replay_log_capture returns 1 when logging is disabled or on success, 0 on I/O
+ * failure.
+ */
+
 struct GameState;
 struct GameEventQueue;
 
