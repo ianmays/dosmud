@@ -30,6 +30,7 @@ if exist invent.obj del invent.obj
 if exist command.obj del command.obj
 if exist world.obj del world.obj
 if exist items.obj del items.obj
+if exist replay.obj del replay.obj
 if exist txtres.obj del txtres.obj
 if exist platdos.obj del platdos.obj
 if exist tharn.obj del tharn.obj
@@ -117,6 +118,11 @@ echo Compiling items.c ...
 wcl %WFL% -c -fo=items.obj src\items.c >> %LOG%
 if errorlevel 1 goto wcl_bad
 
+echo Compiling replay.c ... >> %LOG%
+echo Compiling replay.c ...
+wcl %WFL% -c -fo=replay.obj src\replay.c >> %LOG%
+if errorlevel 1 goto wcl_bad
+
 echo Compiling txtres.c ... >> %LOG%
 echo Compiling txtres.c ...
 wcl %WFL% -c -fo=txtres.obj src\txtres.c >> %LOG%
@@ -140,7 +146,7 @@ wlib -n gameplay.lib +game.obj +gout.obj +gprog.obj +combat.obj >> %LOG%
 if errorlevel 1 goto wcl_bad
 wlib gameplay.lib +genc.obj +wanderer.obj +dialogue.obj +gatmos.obj >> %LOG%
 if errorlevel 1 goto wcl_bad
-wlib gameplay.lib +fmt.obj >> %LOG%
+wlib gameplay.lib +fmt.obj +replay.obj >> %LOG%
 if errorlevel 1 goto wcl_bad
 if not "%1"=="TEST_MODE" goto wlib_done
 wlib gameplay.lib +thwld.obj +tharn.obj >> %LOG%
