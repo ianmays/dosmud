@@ -360,7 +360,7 @@ Delivered in [PR 123](https://github.com/ianmays/dosmud/pull/123).
 - [`docs/testing.md`](docs/testing.md) - fixture tables, determinism model, snapshot file list, adding-a-snapshot checklist.
 - [`docs/architecture.md`](docs/architecture.md) - harness and RNG split updated.
 
-**Unit scope:** `command`, `invent`, `combat`, `game`, `genc`, `wanderer`, `dialogue`, `gatmos`, `world` (fixed graph), `gprog`, `items`, `fmt`, `testharn`. Out of scope: `grendr`, `txtres`, `main`, platform glue.
+**Unit scope:** `command`, `invent`, `combat`, `game`, `genc`, `wanderer`, `dialogue`, `gatmos`, `world` (fixed graph), `gprog`, `items`, `fmt`, `gout`, `replay`, `testharn`. Out of scope: `grendr`, `txtres`, `main`, platform glue.
 
 ### [#95](https://github.com/ianmays/dosmud/issues/95) - Unit tests (Done ✅)
 

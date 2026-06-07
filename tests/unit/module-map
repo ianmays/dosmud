@@ -19,4 +19,5 @@ gprog: unit_gprog.c
 items: unit_item.c
 fmt: unit_fmt.c
 gout: unit_gout.c
+replay: unit_rplog.c
 testharn: unit_tharn.c unit_harn.c
