@@ -592,6 +592,42 @@ TEST game_nobody_waiting_reply_guard_event(void)
     PASS();
 }
 
+TEST game_post_combat_reply_guard_keeps_loot_available(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    u32 tick_before_reply;
+
+    unit_game_fresh(&game, 42u);
+    ASSERT_EQ(1, testharn_apply(&game, "@fixture bandit_victory_herb"));
+
+    ASSERT_EQ(GAME_MODE_COMBAT, game.mode);
+    ASSERT_EQ(1, run_cmd(&game, "1"));
+    ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
+    ASSERT_EQ(ITEM_HERB, game.corpse_loot[WORLD_ROOM_CAMP]);
+    ASSERT_EQ(1, game.corpse_present[WORLD_ROOM_CAMP]);
+
+    tick_before_reply = game.tick;
+    ASSERT_EQ(1, run_cmd_out(&game, "1", &out));
+    ASSERT_EQ(tick_before_reply, game.tick);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[0].kind);
+    ASSERT_EQ(GAME_DIALOGUE_GUARD_NOBODY_WAITING_REPLY, out.events[0].arg0);
+    ASSERT_EQ(ITEM_HERB, game.corpse_loot[WORLD_ROOM_CAMP]);
+    ASSERT_EQ(1, game.corpse_present[WORLD_ROOM_CAMP]);
+
+    ASSERT_EQ(1, run_cmd_out(&game, "loot", &out));
+    ASSERT_EQ(tick_before_reply + 1, game.tick);
+    ASSERT(out.count >= 1);
+    ASSERT_EQ(GAME_EVENT_ITEM_RESULT, out.events[0].kind);
+    ASSERT_EQ(GAME_ITEM_ACTION_LOOT, out.events[0].arg0);
+    ASSERT_EQ(GAME_ITEM_OUTCOME_OK, out.events[0].arg1);
+    ASSERT_EQ(ITEM_HERB, out.events[0].arg2);
+    ASSERT_EQ(ITEM_NONE, game.corpse_loot[WORLD_ROOM_CAMP]);
+    ASSERT_EQ(0, game.corpse_present[WORLD_ROOM_CAMP]);
+    PASS();
+}
+
 SUITE(game) {
     RUN_TEST(game_heal_player_applies);
     RUN_TEST(game_heal_player_at_max);
@@ -629,4 +665,5 @@ SUITE(game) {
     RUN_TEST(game_quit_ends_run);
     RUN_TEST(game_bandit_waiting_reply_guard_event);
     RUN_TEST(game_nobody_waiting_reply_guard_event);
+    RUN_TEST(game_post_combat_reply_guard_keeps_loot_available);
 }

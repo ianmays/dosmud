@@ -279,7 +279,8 @@ const char *const TXT_MSG_HAND_OVER_ITEM_FMT = "You hand over your %s. The bandi
 const char *const TXT_MSG_BAG_EMPTY_BANDIT = "Your bag is empty. The bandit laughs and attacks.\n";
 const char *const TXT_MSG_INTIMIDATE_SUCCESS = "You keep your voice steady. The bandit grunts and withdraws.\n";
 const char *const TXT_MSG_INTIMIDATE_FAIL = "Your pitch fails. The bandit lunges.\n";
-const char *const TXT_MSG_NOBODY_WAITING = "Nobody is waiting for an answer.\n";
+const char *const TXT_MSG_NOBODY_WAITING =
+    "No numbered choice is open. Use normal commands like look, move, loot, or talk.\n";
 
 const char *const TXT_MSG_WATCHMAN_TALK_LINE1 = "A one-eyed watchman leans on the parapet.\n";
 const char *const TXT_MSG_WATCHMAN_TALK_LINE2 = "\"Storms come from the canyon. You carry a torch?\"\n";
