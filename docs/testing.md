@@ -39,6 +39,8 @@ Use these when you want to launch a playable or interactive binary rather than r
 
 For the WSL -> Windows path, build `dosmud.exe` with `make build-win` or `make test-win`, then launch it with `make win-run` or directly from Windows PowerShell, `cmd.exe`, or Windows Terminal. `win-run` launches whatever repo-root `dosmud.exe` was produced by the most recent Windows cross-build, opens a new Windows console window, and forwards `SEED=<n>` when set. This issue adds a console app path only; a GUI or alternate renderer remains separate work.
 
+Native runs may also pass `--replay-log <path>` directly to `./dosmud` or `./dosmud --seed <n>`. The replay log is a sidecar text file, so it does not change snapshot stdout output by itself.
+
 ## Test layers
 
 | Layer | Command | What it proves |

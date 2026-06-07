@@ -11,7 +11,7 @@ PLAT_SRC = src/platpos.c
 ifeq ($(TARGET),win)
 PLAT_SRC = src/platwin.c
 endif
-SRC = src/main.c $(PLAT_SRC) src/game.c src/gout.c src/gprog.c src/combat.c src/genc.c src/wanderer.c src/dialogue.c src/gatmos.c src/grendr.c src/fmt.c src/invent.c src/command.c src/world.c src/items.c src/txtres.c
+SRC = src/main.c $(PLAT_SRC) src/game.c src/gout.c src/gprog.c src/combat.c src/genc.c src/wanderer.c src/dialogue.c src/gatmos.c src/grendr.c src/fmt.c src/invent.c src/command.c src/world.c src/items.c src/replay.c src/txtres.c
 HARNESS_SRC = $(HARNESS_DIR)/testharn.c $(HARNESS_DIR)/th_world.c
 TEST_SRC = $(SRC) $(HARNESS_SRC)
 REGRESSION_DIR = tests/regression
@@ -97,7 +97,7 @@ SNAPSHOT_TESTS = \
 snapshot-run:
 	@set -e; \
 	n=0; \
-	total=$$(($$(echo $(SNAPSHOT_TESTS) | wc -w) + 1)); \
+	total=$$(($$(echo $(SNAPSHOT_TESTS) | wc -w) + 2)); \
 	for t in $(SNAPSHOT_TESTS); do \
 		echo "snapshot: $$t"; \
 		./$(BIN) < $(REGRESSION_DIR)/$$t.input > $(REGRESSION_DIR)/$$t.output; \
@@ -107,6 +107,11 @@ snapshot-run:
 	echo "snapshot: seed_cli"; \
 	./$(BIN) --seed 1234 < $(REGRESSION_DIR)/smoke.input > $(REGRESSION_DIR)/seed_cli.output; \
 	diff -u $(REGRESSION_DIR)/seed_cli.expect $(REGRESSION_DIR)/seed_cli.output; \
+	n=$$((n + 1)); \
+	echo "snapshot: replay_log"; \
+	./$(BIN) --seed 1234 --replay-log $(REGRESSION_DIR)/replay_log_log.output < $(REGRESSION_DIR)/replay_log.input > $(REGRESSION_DIR)/replay_log.output; \
+	diff -u $(REGRESSION_DIR)/replay_log.expect $(REGRESSION_DIR)/replay_log.output; \
+	diff -u $(REGRESSION_DIR)/replay_log_log.expect $(REGRESSION_DIR)/replay_log_log.output; \
 	n=$$((n + 1)); \
 	echo "snapshot tests passed: $$n/$$total"
 
@@ -129,10 +134,11 @@ UNIT_BIN = $(UNIT_BUILD_DIR)/dosmud_unit
 UNIT_CFLAGS = $(TEST_CFLAGS) -I$(UNIT_DIR) -fprofile-arcs -ftest-coverage
 UNIT_GAMEPLAY_SRC = $(PLAT_SRC) src/game.c src/gout.c src/gprog.c src/combat.c src/genc.c \
 	src/wanderer.c src/dialogue.c src/gatmos.c src/grendr.c src/fmt.c src/invent.c \
-	src/command.c src/world.c src/items.c src/txtres.c
+	src/command.c src/world.c src/items.c src/replay.c src/txtres.c
 UNIT_CORE_SRC = $(UNIT_GAMEPLAY_SRC) $(HARNESS_SRC)
 UNIT_TEST_SRC = $(UNIT_DIR)/unit_main.c $(UNIT_DIR)/unit_util.c $(UNIT_DIR)/unit_item.c \
 	$(UNIT_DIR)/unit_gout.c \
+	$(UNIT_DIR)/unit_rplog.c \
 	$(UNIT_DIR)/unit_cmd.c $(UNIT_DIR)/unit_harn.c $(UNIT_DIR)/unit_inv.c $(UNIT_DIR)/unit_cbt.c \
 	$(UNIT_DIR)/unit_gprog.c $(UNIT_DIR)/unit_genc.c $(UNIT_DIR)/unit_dial.c $(UNIT_DIR)/unit_wandr.c \
 	$(UNIT_DIR)/unit_gatmos.c $(UNIT_DIR)/unit_fmt.c $(UNIT_DIR)/unit_wrld.c $(UNIT_DIR)/unit_game.c $(UNIT_DIR)/unit_tharn.c

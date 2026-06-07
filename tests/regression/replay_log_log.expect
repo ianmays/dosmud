@@ -1,0 +1,6 @@
+dosmud-replay-v1 seed=1234
+step=0 kind=startup tick=0 running=1 mode=explore events=1 overflow=0 input=null
+event=0 kind=GAME_EVENT_ROOM_LOOK arg0=0 arg1=0 arg2=0 arg3=0 room=0 room_items=[2,0,0,0] text=null
+step=1 kind=input tick=0 running=1 mode=explore events=1 overflow=0 input="look"
+event=0 kind=GAME_EVENT_ROOM_LOOK arg0=0 arg1=0 arg2=0 arg3=0 room=0 room_items=[2,0,0,0] text=null
+step=2 kind=input tick=0 running=0 mode=explore events=0 overflow=0 input="quit"

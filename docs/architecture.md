@@ -68,6 +68,8 @@ Presentation only: room art, HUD, combat text, inventory messages, and explorati
 
 Platform or frontend code runs simulation first, then hands the resulting `GameEvent` records to render; render never changes simulation state.
 
+The optional replay log path stays outside render. `main.c` may mirror each per-step `GameEventQueue` into [`src/replay.c`](../src/replay.c) before the next queue reset, but `grendr` remains the only text renderer and the replay log remains a separate persistent record.
+
 ### Newline and spacing
 
 Player-facing copy lives in `txtres`; `grendr` owns when a blank line appears before output.
@@ -95,6 +97,8 @@ Implementations are split by toolchain (FAT 8.3 basenames):
 - [`src/platwin.c`](../src/platwin.c) - Windows console path for WSL cross-builds (`make build-win` / `make test-win`)
 
 [`src/main.c`](../src/main.c) orchestrates the main loop and may use `printf` for shell-level prompts and banners. It must not include `conio.h`, `dos.h`, or other platform headers directly.
+
+When `--replay-log <path>` is enabled, `main.c` opens a deterministic text log and records each startup, input, and idle step after simulation produces the queue and before the next reset clears it. The log includes the seed, step index, tick, input text when present, queue overflow state, and serialized `GameEvent` payloads in queue order.
 
 Run `make check-layers` before opening a PR (or use `make test-all`, which runs it first). That target fails if `printf` appears in any `src/*.c` other than `main.c`, `grendr.c`, `platdos.c`, `platpos.c`, or `platwin.c`. `make test` compiles only and does not run the guard.
 
@@ -157,6 +161,7 @@ Conventions:
 - startup
 - main loop orchestration
 - input/timing integration
+- optional replay log capture via `--replay-log`
 - `TEST_MODE`: delegates `@fixture` and `@seed` lines to `testharn`
 
 ### `game`

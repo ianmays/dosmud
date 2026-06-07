@@ -47,7 +47,10 @@ Native development build:
 make build
 ./dosmud
 ./dosmud --seed 1234
+./dosmud --seed 1234 --replay-log run.log
 ```
+
+`--replay-log <path>` writes a deterministic text log of each startup, input, and idle step plus the emitted `GameEvent` records for that step. It does not change normal gameplay stdout output.
 
 WSL cross-compile for a native Windows console executable:
 

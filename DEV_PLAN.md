@@ -569,6 +569,8 @@ Done ✅ ([#181](https://github.com/ianmays/dosmud/pull/181)).
 
 Adjacent track to `#47` follow-ups, but not part of the direct migration chain. Keep scoped to deterministic replay/log capture without coupling completion of migration slices.
 
+Done ✅.
+
 ### Testing
 - Unit: add replay/log append/reset/overflow tests if new replay module/API is introduced
 - Snapshots: add a deterministic replay/logging regression only if visible output changes
