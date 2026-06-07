@@ -138,7 +138,7 @@ Large-scale gameplay/content expansion should remain secondary until the core ar
 
 ### [#42](https://github.com/ianmays/dosmud/issues/42) - Split `game.c`
 
-Done ✅ ([#183](https://github.com/ianmays/dosmud/pull/183)).
+Done ✅ ([#88](https://github.com/ianmays/dosmud/pull/88)).
 
 Highest-priority architecture task.
 
@@ -261,7 +261,7 @@ Compiler discipline and warning cleanliness should remain early priorities throu
 
 ### [#43](https://github.com/ianmays/dosmud/issues/43) - State machine for game modes
 
-Done ✅.
+Done ✅ ([#183](https://github.com/ianmays/dosmud/pull/183)).
 
 [`src/game.h`](src/game.h) defines `GameMode` (`GAME_MODE_EXPLORE`, `GAME_MODE_DIALOGUE`, `GAME_MODE_COMBAT`), `DialogueKind` (room NPCs including frog, wanderer, enemy), and `CombatState` (`enemy_hp`, `defending`). `GameState` holds `mode`, `dialogue`, and `combat` instead of overlapping `pond_dialogue`, `wanderer_dialogue`, `enemy_dialogue`, `npc_dialogue`, and `combat_active` flags. Transitions go through `game_set_mode_explore`, `game_set_mode_dialogue`, and `game_set_mode_combat` in [`src/game.c`](src/game.c).
 
