@@ -59,6 +59,8 @@
 #define CFG_TEST_SOAK_LIMIT_BACKGROUND_TICKS 50000
 #define CFG_TEST_SOAK_LIMIT_COMMAND_TICKS 50000
 #define CFG_TEST_SOAK_LIMIT_COMBAT_ROUNDS 200000
+/* Default sidecar path when TEST_MODE replay logging is enabled without a path. */
+#define CFG_TEST_REPLAY_LOG_DEFAULT "replay.log"
 #endif
 
 /* --- Gameplay tuning --- */

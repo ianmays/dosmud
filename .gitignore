@@ -8,6 +8,7 @@ dos-prepare.local.ps1
 
 # Snapshot regression (make test-run)
 *.output
+/replay.log
 
 # Interactive play-tester sessions (see .cursor/skills/play-tester/SKILL.md)
 playtest/sessions/*

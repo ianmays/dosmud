@@ -11,9 +11,9 @@ PLAT_SRC = src/platpos.c
 ifeq ($(TARGET),win)
 PLAT_SRC = src/platwin.c
 endif
-SRC = src/main.c $(PLAT_SRC) src/game.c src/gout.c src/gprog.c src/combat.c src/genc.c src/wanderer.c src/dialogue.c src/gatmos.c src/grendr.c src/fmt.c src/invent.c src/command.c src/world.c src/items.c src/replay.c src/txtres.c
+SRC = src/main.c $(PLAT_SRC) src/game.c src/gout.c src/gprog.c src/combat.c src/genc.c src/wanderer.c src/dialogue.c src/gatmos.c src/grendr.c src/fmt.c src/invent.c src/command.c src/world.c src/items.c src/txtres.c
 HARNESS_SRC = $(HARNESS_DIR)/testharn.c $(HARNESS_DIR)/th_world.c
-TEST_SRC = $(SRC) $(HARNESS_SRC)
+TEST_SRC = $(SRC) src/replay.c $(HARNESS_SRC)
 REGRESSION_DIR = tests/regression
 UNIT_DIR = tests/unit
 RUN_ARGS = $(if $(SEED),--seed $(SEED))

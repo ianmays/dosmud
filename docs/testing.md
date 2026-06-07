@@ -39,7 +39,7 @@ Use these when you want to launch a playable or interactive binary rather than r
 
 For the WSL -> Windows path, build `dosmud.exe` with `make build-win` or `make test-win`, then launch it with `make win-run` or directly from Windows PowerShell, `cmd.exe`, or Windows Terminal. `win-run` launches whatever repo-root `dosmud.exe` was produced by the most recent Windows cross-build, opens a new Windows console window, and forwards `SEED=<n>` when set. This issue adds a console app path only; a GUI or alternate renderer remains separate work.
 
-Native runs may also pass `--replay-log <path>` directly to `./dosmud` or `./dosmud --seed <n>`. The replay log is a sidecar text file, so it does not change snapshot stdout output by itself.
+`TEST_MODE` runs may also pass `--replay-log [path]` to `./dosmud` or `./dosmud --seed <n>`. If the path is omitted, logging defaults to `replay.log` in the current working directory. The replay log is a sidecar text file, so it does not change snapshot stdout output by itself. Release builds do not accept the flag.
 
 ## Test layers
 
@@ -298,7 +298,7 @@ Add new fixtures in [`tests/harness/testharn.c`](../tests/harness/testharn.c) an
 
 Each process run uses one `.input` file until `quit`. `make snapshot-run` runs `SNAPSHOT_TESTS` (includes `smoke`), then `seed_cli`. `make test-run` is the compile-plus-run wrapper.
 
-**Replay sidecar (`replay_log`):** the only snapshot that also golden-checks a `--replay-log` file. `make snapshot-run` runs `./dosmud --seed 1234 --replay-log tests/regression/replay_log_log.output < tests/regression/replay_log.input` and diffs both stdout (`replay_log.expect`) and the sidecar log (`replay_log_log.expect`). Player-visible stdout stays unchanged; the log records `dosmud-replay-v1` header lines plus per-step metadata and serialized `GameEvent` rows.
+**Replay sidecar (`replay_log`):** the only snapshot that also golden-checks a `TEST_MODE` `--replay-log` file. `make snapshot-run` runs `./dosmud --seed 1234 --replay-log tests/regression/replay_log_log.output < tests/regression/replay_log.input` and diffs both stdout (`replay_log.expect`) and the sidecar log (`replay_log_log.expect`). Player-visible stdout stays unchanged; the log records `dosmud-replay-v1` header lines plus per-step metadata and serialized `GameEvent` rows.
 
 **Core / inventory (also in `SNAPSHOT_TESTS`):** `smoke`, `bandit_handover`, `bandit_wielded_give`, `area_items`, `map`, `equipment`, `craft_wielded`, `take_all`, `take_all_bag_full`, `bag_view`, `bag_stacks`.
 

@@ -68,7 +68,7 @@ Presentation only: room art, HUD, combat text, inventory messages, and explorati
 
 Platform or frontend code runs simulation first, then hands the resulting `GameEvent` records to render; render never changes simulation state.
 
-The optional replay log path stays outside render. `main.c` may mirror each per-step `GameEventQueue` into [`src/replay.c`](../src/replay.c) before the next queue reset, but `grendr` remains the only text renderer and the replay log remains a separate persistent record.
+The optional replay log path stays outside render. In `TEST_MODE`, `main.c` may mirror each per-step `GameEventQueue` into [`src/replay.c`](../src/replay.c) before the next queue reset, but `grendr` remains the only text renderer and the replay log remains a separate persistent record.
 
 ### Newline and spacing
 
@@ -98,7 +98,7 @@ Implementations are split by toolchain (FAT 8.3 basenames):
 
 [`src/main.c`](../src/main.c) orchestrates the main loop and may use `printf` for shell-level prompts and banners. It must not include `conio.h`, `dos.h`, or other platform headers directly.
 
-When `--replay-log <path>` is enabled, `main.c` opens a deterministic text log and records each startup, input, and idle step after simulation produces the queue and before the next reset clears it. The log includes the seed, step index, tick, input text when present, queue overflow state, and serialized `GameEvent` payloads in queue order.
+In `TEST_MODE`, `main.c` accepts `--replay-log [path]`, opens a deterministic text log, and records each startup, input, and idle step after simulation produces the queue and before the next reset clears it. The log includes the seed, step index, tick, input text when present, queue overflow state, and serialized `GameEvent` payloads in queue order. If the flag omits a path, logging defaults to `replay.log`.
 
 Run `make check-layers` before opening a PR (or use `make test-all`, which runs it first). That target fails if `printf` appears in any `src/*.c` other than `main.c`, `grendr.c`, `platdos.c`, `platpos.c`, or `platwin.c`. `make test` compiles only and does not run the guard.
 
@@ -161,12 +161,12 @@ Conventions:
 - startup
 - main loop orchestration
 - input/timing integration
-- optional replay log capture via `--replay-log`
+- `TEST_MODE` only: optional replay log capture via `--replay-log [path]`
 - `TEST_MODE`: delegates `@fixture` and `@seed` lines to `testharn`
 
 ### `replay`
 
-- shell-edge serialization in [`replay.c`](../src/replay.c); opened and driven from `main.c`
+- `TEST_MODE` only shell-edge serialization in [`replay.c`](../src/replay.c); opened and driven from `main.c`
 - writes a deterministic sidecar text log (`dosmud-replay-v1`) of startup, input, and idle steps
 - captures each step's `GameEventQueue` after simulation and before the next queue reset; does not mutate gameplay or render state
 - I/O failure surfaces through `main.c` stderr and exits non-zero
