@@ -123,6 +123,11 @@ wcl %WFL% -c -fo=txtres.obj src\txtres.c >> %LOG%
 if errorlevel 1 goto wcl_bad
 
 if not "%1"=="TEST_MODE" goto skip_testharn
+if exist replay.obj del replay.obj
+echo Compiling replay.c ... >> %LOG%
+echo Compiling replay.c ...
+wcl %WFL% -c -fo=replay.obj src\replay.c >> %LOG%
+if errorlevel 1 goto wcl_bad
 echo Compiling th_world.c ... >> %LOG%
 echo Compiling th_world.c ...
 wcl %WFL% -c -fo=thwld.obj harness\th_world.c >> %LOG%
@@ -143,7 +148,7 @@ if errorlevel 1 goto wcl_bad
 wlib gameplay.lib +fmt.obj >> %LOG%
 if errorlevel 1 goto wcl_bad
 if not "%1"=="TEST_MODE" goto wlib_done
-wlib gameplay.lib +thwld.obj +tharn.obj >> %LOG%
+wlib gameplay.lib +replay.obj +thwld.obj +tharn.obj >> %LOG%
 :wlib_done
 if errorlevel 1 goto wcl_bad
 

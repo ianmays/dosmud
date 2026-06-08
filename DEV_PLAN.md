@@ -138,7 +138,7 @@ Large-scale gameplay/content expansion should remain secondary until the core ar
 
 ### [#42](https://github.com/ianmays/dosmud/issues/42) - Split `game.c`
 
-Done ✅.
+Done ✅ ([#88](https://github.com/ianmays/dosmud/pull/88)).
 
 Highest-priority architecture task.
 
@@ -261,7 +261,7 @@ Compiler discipline and warning cleanliness should remain early priorities throu
 
 ### [#43](https://github.com/ianmays/dosmud/issues/43) - State machine for game modes
 
-Done ✅.
+Done ✅ ([#183](https://github.com/ianmays/dosmud/pull/183)).
 
 [`src/game.h`](src/game.h) defines `GameMode` (`GAME_MODE_EXPLORE`, `GAME_MODE_DIALOGUE`, `GAME_MODE_COMBAT`), `DialogueKind` (room NPCs including frog, wanderer, enemy), and `CombatState` (`enemy_hp`, `defending`). `GameState` holds `mode`, `dialogue`, and `combat` instead of overlapping `pond_dialogue`, `wanderer_dialogue`, `enemy_dialogue`, `npc_dialogue`, and `combat_active` flags. Transitions go through `game_set_mode_explore`, `game_set_mode_dialogue`, and `game_set_mode_combat` in [`src/game.c`](src/game.c).
 
@@ -360,7 +360,7 @@ Delivered in [PR 123](https://github.com/ianmays/dosmud/pull/123).
 - [`docs/testing.md`](docs/testing.md) - fixture tables, determinism model, snapshot file list, adding-a-snapshot checklist.
 - [`docs/architecture.md`](docs/architecture.md) - harness and RNG split updated.
 
-**Unit scope:** `command`, `invent`, `combat`, `game`, `genc`, `wanderer`, `dialogue`, `gatmos`, `world` (fixed graph), `gprog`, `items`, `fmt`, `testharn`. Out of scope: `grendr`, `txtres`, `main`, platform glue.
+**Unit scope:** `command`, `invent`, `combat`, `game`, `genc`, `wanderer`, `dialogue`, `gatmos`, `world` (fixed graph), `gprog`, `items`, `fmt`, `gout`, `replay`, `testharn`. Out of scope: `grendr`, `txtres`, `main`, platform glue.
 
 ### [#95](https://github.com/ianmays/dosmud/issues/95) - Unit tests (Done ✅)
 
@@ -569,9 +569,11 @@ Done ✅ ([#181](https://github.com/ianmays/dosmud/pull/181)).
 
 Adjacent track to `#47` follow-ups, but not part of the direct migration chain. Keep scoped to deterministic replay/log capture without coupling completion of migration slices.
 
+Done ✅.
+
 ### Testing
-- Unit: add replay/log append/reset/overflow tests if new replay module/API is introduced
-- Snapshots: add a deterministic replay/logging regression only if visible output changes
+- Unit: [`unit_rplog.c`](../tests/unit/unit_rplog.c) (`replay_log_reset`, capture serialization, open/header/step increment)
+- Snapshots: `replay_log` (stdout unchanged; sidecar golden [`replay_log_log.expect`](../tests/regression/replay_log_log.expect))
 
 ### [#16](https://github.com/ianmays/dosmud/issues/16) - Save/load system
 

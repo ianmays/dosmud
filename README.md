@@ -49,6 +49,16 @@ make build
 ./dosmud --seed 1234
 ```
 
+Replay logging is a `TEST_MODE` debugging path, not a release-build feature. Use it from a test build:
+
+```sh
+make test
+./dosmud --seed 1234 --replay-log
+./dosmud --seed 1234 --replay-log run.log
+```
+
+`--replay-log` writes a deterministic text log of each startup, input, and idle step plus the emitted `GameEvent` records for that step. With no path argument it defaults to `replay.log` in the current working directory. It does not change normal gameplay stdout output.
+
 WSL cross-compile for a native Windows console executable:
 
 ```sh

@@ -7,6 +7,7 @@
 #include "game.h"
 #include "grendr.h"
 #include "platform.h"
+#include "replay.h"
 #include "txtres.h"
 #ifdef TEST_MODE
 #include "testharn.h"
@@ -23,6 +24,10 @@
  * main-loop frames.
  */
 static GameEventQueue g_main_out;
+#ifdef TEST_MODE
+/* Optional sidecar log; static like g_main_out so the shell loop stays stack-light. */
+static ReplayLog g_replay_log;
+#endif
 
 static void print_prompt(void)
 {
@@ -40,15 +45,25 @@ static u32 default_rng_seed(void)
 }
 
 /*
- * Parse optional --seed <value>. Updates *out_seed when --seed is present and valid.
+ * Parse optional CLI args. Updates *out_seed and *out_replay_path when present.
  * Returns 0 on success, -1 on invalid or unknown arguments.
  */
-static int parse_cli_seed(int argc, char **argv, u32 *out_seed)
+static int parse_cli_args(int argc, char **argv, u32 *out_seed,
+                          const char **out_replay_path)
 {
     int i;
     int have_seed;
+#ifdef TEST_MODE
+    int have_replay_path;
+#endif
 
     have_seed = 0;
+#ifdef TEST_MODE
+    have_replay_path = 0;
+#endif
+    if (out_replay_path != 0) {
+        *out_replay_path = 0;
+    }
     for (i = 1; i < argc; ++i) {
         if (strcmp(argv[i], "--seed") == 0) {
             const char *arg;
@@ -78,6 +93,26 @@ static int parse_cli_seed(int argc, char **argv, u32 *out_seed)
             *out_seed = (u32)val;
             have_seed = 1;
             ++i;
+        } else if (strcmp(argv[i], "--replay-log") == 0) {
+#ifdef TEST_MODE
+            if (have_replay_path) {
+                return -1;
+            }
+            if (out_replay_path == 0) {
+                return -1;
+            }
+            *out_replay_path = CFG_TEST_REPLAY_LOG_DEFAULT;
+            if (i + 1 < argc && argv[i + 1][0] != '-') {
+                *out_replay_path = argv[i + 1];
+                if ((*out_replay_path)[0] == '\0') {
+                    return -1;
+                }
+                ++i;
+            }
+            have_replay_path = 1;
+#else
+            return -1;
+#endif
         } else {
             return -1;
         }
@@ -85,26 +120,49 @@ static int parse_cli_seed(int argc, char **argv, u32 *out_seed)
     return 0;
 }
 
-static int main_parse_args(int argc, char **argv, u32 *out_seed)
+static int main_parse_args(int argc, char **argv, u32 *out_seed,
+                           const char **out_replay_path)
 {
     *out_seed = default_rng_seed();
-    if (parse_cli_seed(argc, argv, out_seed) != 0) {
+    if (parse_cli_args(argc, argv, out_seed, out_replay_path) != 0) {
         fprintf(stderr, "%s\n", TXT_MAIN_USAGE);
         return 1;
     }
     return 0;
 }
 
-static void main_startup(struct GameState *game, u32 rng_seed)
+static int main_capture_replay(int step_kind, const char *input,
+                               struct GameState *game)
+{
+#ifdef TEST_MODE
+    /* Capture at the shell boundary before the next queue reset drops the step. */
+    if (!replay_log_capture(&g_replay_log, step_kind, input, game, &g_main_out)) {
+        fprintf(stderr, "replay log write failed: %s\n",
+            g_replay_log.path != 0 ? g_replay_log.path : "(unknown)");
+        return 1;
+    }
+#else
+    (void)step_kind;
+    (void)input;
+    (void)game;
+#endif
+    return 0;
+}
+
+static int main_startup(struct GameState *game, u32 rng_seed)
 {
     game_init(game, rng_seed);
     game_event_queue_reset(&g_main_out);
     printf(TXT_MAIN_TITLE_SEED_FMT, TXT_MAIN_TITLE, (unsigned long)rng_seed);
     printf("%s\n", TXT_MAIN_HELP_HINT);
     game_describe_current_room(game, &g_main_out);
+    if (main_capture_replay(REPLAY_STEP_STARTUP, 0, game) != 0) {
+        return 1;
+    }
     game_render_output(game, &g_main_out);
     game_render(game);
     print_prompt();
+    return 0;
 }
 
 static void main_render_and_prompt(struct GameState *game)
@@ -156,15 +214,22 @@ static int main_dispatch_line(struct GameState *game, char *line)
     }
     if (th_rc == 0) {
         game_process_input(game, line, &g_main_out);
+        if (main_capture_replay(REPLAY_STEP_INPUT, line, game) != 0) {
+            return 1;
+        }
         game_render_output(game, &g_main_out);
         if (main_check_output_overflow() != 0) {
             return 1;
         }
     } else {
+        /* Harness @fixture/@seed lines adjust state only; they are not replay steps. */
         plat_seed_rng(game->seed);
     }
 #else
     game_process_input(game, line, &g_main_out);
+    if (main_capture_replay(REPLAY_STEP_INPUT, line, game) != 0) {
+        return 1;
+    }
     game_render_output(game, &g_main_out);
 #endif
     return 0;
@@ -212,6 +277,9 @@ static int main_run_idle_ticks(struct GameState *game, time_t *last_tick_time,
         }
         game_event_queue_reset(&g_main_out);
         game_background_step(game, &g_main_out);
+        if (main_capture_replay(REPLAY_STEP_IDLE, 0, game) != 0) {
+            return -1;
+        }
         game_render_output(game, &g_main_out);
 #ifdef TEST_MODE
         if (main_check_output_overflow() != 0) {
@@ -231,17 +299,35 @@ int main(int argc, char **argv)
     time_t last_tick_time;
     u32 rng_seed;
     int poll_rc;
-
-    if (main_parse_args(argc, argv, &rng_seed) != 0) {
+#ifdef TEST_MODE
+    const char *replay_path;
+    replay_log_reset(&g_replay_log);
+#endif
+#ifdef TEST_MODE
+    if (main_parse_args(argc, argv, &rng_seed, &replay_path) != 0) {
+#else
+    if (main_parse_args(argc, argv, &rng_seed, 0) != 0) {
+#endif
         return 1;
     }
+#ifdef TEST_MODE
+    if (replay_path != 0 && !replay_log_open(&g_replay_log, replay_path, rng_seed)) {
+        fprintf(stderr, "cannot open replay log: %s\n", replay_path);
+        return 1;
+    }
+#endif
     plat_seed_rng(rng_seed);
 
 #ifdef TEST_MODE
     printf("%s\n", TXT_MAIN_TEST_MODE);
 #endif
 
-    main_startup(&game, rng_seed);
+    if (main_startup(&game, rng_seed) != 0) {
+#ifdef TEST_MODE
+        replay_log_close(&g_replay_log);
+#endif
+        return 1;
+    }
     last_tick_time = plat_time_now();
 
     while (game.running) {
@@ -251,6 +337,9 @@ int main(int argc, char **argv)
         }
         if (poll_rc > 0) {
             if (main_handle_polled_line(&game, line, &last_tick_time) != 0) {
+#ifdef TEST_MODE
+                replay_log_close(&g_replay_log);
+#endif
                 return 1;
             }
             continue;
@@ -258,6 +347,9 @@ int main(int argc, char **argv)
         poll_rc = main_run_idle_ticks(&game, &last_tick_time,
                                       (time_t)CFG_MAIN_IDLE_TICK_SECONDS);
         if (poll_rc < 0) {
+#ifdef TEST_MODE
+            replay_log_close(&g_replay_log);
+#endif
             return 1;
         }
         if (poll_rc > 0) {
@@ -265,6 +357,9 @@ int main(int argc, char **argv)
         }
     }
 
+#ifdef TEST_MODE
+    replay_log_close(&g_replay_log);
+#endif
     printf("%s\n", TXT_MAIN_BYE);
     return 0;
 }
