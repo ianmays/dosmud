@@ -7,9 +7,9 @@
 #include "game.h"
 #include "grendr.h"
 #include "platform.h"
+#include "replay.h"
 #include "txtres.h"
 #ifdef TEST_MODE
-#include "replay.h"
 #include "testharn.h"
 #endif
 
@@ -156,7 +156,7 @@ static int main_startup(struct GameState *game, u32 rng_seed)
     printf(TXT_MAIN_TITLE_SEED_FMT, TXT_MAIN_TITLE, (unsigned long)rng_seed);
     printf("%s\n", TXT_MAIN_HELP_HINT);
     game_describe_current_room(game, &g_main_out);
-    if (main_capture_replay(0, 0, game) != 0) {
+    if (main_capture_replay(REPLAY_STEP_STARTUP, 0, game) != 0) {
         return 1;
     }
     game_render_output(game, &g_main_out);
@@ -214,7 +214,7 @@ static int main_dispatch_line(struct GameState *game, char *line)
     }
     if (th_rc == 0) {
         game_process_input(game, line, &g_main_out);
-        if (main_capture_replay(1, line, game) != 0) {
+        if (main_capture_replay(REPLAY_STEP_INPUT, line, game) != 0) {
             return 1;
         }
         game_render_output(game, &g_main_out);
@@ -227,7 +227,7 @@ static int main_dispatch_line(struct GameState *game, char *line)
     }
 #else
     game_process_input(game, line, &g_main_out);
-    if (main_capture_replay(1, line, game) != 0) {
+    if (main_capture_replay(REPLAY_STEP_INPUT, line, game) != 0) {
         return 1;
     }
     game_render_output(game, &g_main_out);
@@ -277,7 +277,7 @@ static int main_run_idle_ticks(struct GameState *game, time_t *last_tick_time,
         }
         game_event_queue_reset(&g_main_out);
         game_background_step(game, &g_main_out);
-        if (main_capture_replay(2, 0, game) != 0) {
+        if (main_capture_replay(REPLAY_STEP_IDLE, 0, game) != 0) {
             return -1;
         }
         game_render_output(game, &g_main_out);
