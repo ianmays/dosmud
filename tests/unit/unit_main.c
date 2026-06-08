@@ -8,6 +8,7 @@ GREATEST_MAIN_DEFS();
 SUITE_EXTERN(items);
 SUITE_EXTERN(gout);
 SUITE_EXTERN(rplog);
+SUITE_EXTERN(save);
 SUITE_EXTERN(command);
 SUITE_EXTERN(harness);
 SUITE_EXTERN(invent);
@@ -88,6 +89,7 @@ int main(int argc, char **argv)
     RUN_SUITE(items);
     RUN_SUITE(gout);
     RUN_SUITE(rplog);
+    RUN_SUITE(save);
     RUN_SUITE(command);
     RUN_SUITE(harness);
     RUN_SUITE(invent);

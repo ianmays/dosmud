@@ -41,6 +41,8 @@ For the WSL -> Windows path, build `dosmud.exe` with `make build-win` or `make t
 
 `TEST_MODE` runs may also pass `--replay-log [path]` to `./dosmud` or `./dosmud --seed <n>`. If the path is omitted, logging defaults to `replay.log` in the current working directory. The replay log is a sidecar text file, so it does not change snapshot stdout output by itself. Release builds do not accept the flag.
 
+All builds also support in-session `save` and `load` commands. The first pass uses a single-slot `save.dat` in the current working directory; snapshots that exercise save/load must clean up that sidecar in the `Makefile`.
+
 ## Test layers
 
 | Layer | Command | What it proves |
@@ -63,7 +65,7 @@ Use this section when deciding what to write, not only what to run. Agents and c
 | `game.c` static router only | No | Add or extend `unit_game.c` / `game_process_input` tests **when** router or tick semantics change; otherwise no new unit file |
 | `world_init` or fixed graph layout | If travel or map output changes | Update [`tests/harness/th_world.c`](../tests/harness/th_world.c) (and fixtures if needed) |
 
-**Unit file convention:** add or extend `tests/unit/unit_<basename>.c` for the gameplay module you changed (see `UNIT_TEST_SRC` in the `Makefile`). Suites use abbreviated basenames, not full module names - for example `command.c` → `unit_cmd.c`, `invent.c` → `unit_inv.c`, `combat.c` → `unit_cbt.c`, `replay.c` → `unit_rplog.c`. FAT 8.3 truncations also apply (`dialogue.c` → `unit_dial.c`, `world.c` → `unit_wrld.c`). Which modules need coverage is listed under [In-scope modules](#unit-tests-greatest) below - do not maintain a second module table here.
+**Unit file convention:** add or extend `tests/unit/unit_<basename>.c` for the gameplay module you changed (see `UNIT_TEST_SRC` in the `Makefile`). Suites use abbreviated basenames, not full module names - for example `command.c` → `unit_cmd.c`, `invent.c` → `unit_inv.c`, `combat.c` → `unit_cbt.c`, `replay.c` → `unit_rplog.c`, `save.c` → `unit_save.c`. FAT 8.3 truncations also apply (`dialogue.c` → `unit_dial.c`, `world.c` → `unit_wrld.c`). Which modules need coverage is listed under [In-scope modules](#unit-tests-greatest) below - do not maintain a second module table here.
 
 **Lesson from [#90](https://github.com/ianmays/dosmud/issues/90):** when command handling moves from `game.c` into a slice module, add tests in that slice's `unit_*.c` file. Green `unit_game.c` tests that only call `game_process_input` do not document slice ownership or catch regressions in new entry points.
 
@@ -134,7 +136,7 @@ make test-unit-coverage-verbose     # same tests, full gcov block per module
 - Determinism: call `plat_seed_rng(fixed_seed)` in setup; use `game_roll_inject_*` and `CFG_TEST_*` for asserted combat/intimidate outcomes
 - Snapshots assert player-visible output; unit tests assert `GameState` and parse results
 
-**In-scope modules (branch coverage target ~90%+):** `command`, `invent`, `combat`, `game`, `genc`, `wanderer`, `dialogue`, `gatmos`, `world`, `gprog`, `items`, `fmt`, `gout`, `replay`, `testharn`
+**In-scope modules (branch coverage target ~90%+):** `command`, `invent`, `combat`, `game`, `genc`, `wanderer`, `dialogue`, `gatmos`, `world`, `gprog`, `items`, `fmt`, `gout`, `replay`, `save`, `testharn`
 
 **Out of scope for the unit coverage bar:** `grendr`, `txtres`, `main`, `platpos` / `platwin` / `platdos` (presentation or shell-edge glue; `fmt` holds testable format logic; snapshots cover printed output and ASCII art)
 
@@ -291,7 +293,7 @@ Add new fixtures in [`tests/harness/testharn.c`](../tests/harness/testharn.c) an
 2. Use `@fixture` for setup; add inject in the fixture or via a `*_ready` fixture when outcomes must be fixed.
 3. Use `quiet_explore` when the test calls `wait` or `move`.
 4. Run `make test && make snapshot-run` (or `./dosmud < tests/regression/<name>.input > tests/regression/<name>.output`) and copy or diff against `tests/regression/<name>.expect`.
-5. Add `<name>` to `SNAPSHOT_TESTS` in the [Makefile](../Makefile) (`seed_cli` stays separate: it uses `--seed` with `smoke.input`). When a snapshot also asserts a sidecar file (see `replay_log` below), add a Makefile branch beside the default `./dosmud < input > output` path.
+5. Add `<name>` to `SNAPSHOT_TESTS` in the [Makefile](../Makefile) (`seed_cli` stays separate: it uses `--seed` with `smoke.input`). When a snapshot also asserts or creates a sidecar file (see `replay_log` and `save_load` below), add a Makefile branch beside the default `./dosmud < input > output` path.
 6. Document new fixtures in this file.
 
 ### Snapshot test files
@@ -299,6 +301,8 @@ Add new fixtures in [`tests/harness/testharn.c`](../tests/harness/testharn.c) an
 Each process run uses one `.input` file until `quit`. `make snapshot-run` runs `SNAPSHOT_TESTS` (includes `smoke`), then `seed_cli`. `make test-run` is the compile-plus-run wrapper.
 
 **Replay sidecar (`replay_log`):** the only snapshot that also golden-checks a `TEST_MODE` `--replay-log` file. `make snapshot-run` runs `./dosmud --seed 1234 --replay-log tests/regression/replay_log_log.output < tests/regression/replay_log.input` and diffs both stdout (`replay_log.expect`) and the sidecar log (`replay_log_log.expect`). Player-visible stdout stays unchanged; the log records `dosmud-replay-v1` header lines plus per-step metadata and serialized `GameEvent` rows.
+
+**Save sidecar (`save_load`):** exercises the in-session `save` / `load` shell commands. `make snapshot-run` removes `save.dat`, runs the snapshot, diffs stdout against `save_load.expect`, then removes `save.dat` again so the single-slot file does not leak across tests.
 
 **Core / inventory (also in `SNAPSHOT_TESTS`):** `smoke`, `bandit_handover`, `bandit_wielded_give`, `area_items`, `map`, `equipment`, `craft_wielded`, `take_all`, `take_all_bag_full`, `bag_view`, `bag_stacks`.
 
@@ -319,6 +323,8 @@ Each process run uses one `.input` file until `quit`. `make snapshot-run` runs `
 **Bandit dialogue:** `bandit_fight`, `bandit_intimidate_ok`, `bandit_intimidate_fail`, `bandit_bag_empty`.
 
 **Meta / inventory:** `unknown_cmd`, `cannot_move`, `give_wrong_context`, `reply_nobody`, `post_combat_reply_guard`, `reply_invalid`, `craft_salve`, `craft_unknown`, `take_nothing`, `take_wrong_item`.
+
+**Save/load:** `save_load` (single-slot `save.dat` round-trip with a deterministic post-load move).
 
 **Replay:** `replay_log` (stdout plus sidecar log golden files; [#156](https://github.com/ianmays/dosmud/issues/156)).
 

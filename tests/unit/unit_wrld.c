@@ -1,5 +1,7 @@
+#include <string.h>
 #include "greatest.h"
 #include "config.h"
+#include "platform.h"
 #include "world.h"
 #include "unit_util.h"
 
@@ -46,6 +48,28 @@ TEST world_step_no_crash(void)
     PASS();
 }
 
+TEST world_init_tracks_rng_draw_count(void)
+{
+    struct World a;
+    struct World b;
+    u32 first_draws;
+    u32 second_draws;
+
+    plat_seed_rng(55u);
+    ASSERT_EQ(0U, plat_rand_draw_count());
+    world_init(&a);
+    first_draws = plat_rand_draw_count();
+
+    plat_seed_rng(55u);
+    world_init(&b);
+    second_draws = plat_rand_draw_count();
+
+    ASSERT(first_draws > 0U);
+    ASSERT_EQ(first_draws, second_draws);
+    ASSERT(memcmp(&a, &b, sizeof(a)) == 0);
+    PASS();
+}
+
 TEST world_animal_noise_fallback(void)
 {
     struct GameState game;
@@ -60,5 +84,6 @@ SUITE(world) {
     RUN_TEST(world_invalid_room_and_dir);
     RUN_TEST(world_dir_and_animal_fallback);
     RUN_TEST(world_step_no_crash);
+    RUN_TEST(world_init_tracks_rng_draw_count);
     RUN_TEST(world_animal_noise_fallback);
 }

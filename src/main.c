@@ -8,6 +8,7 @@
 #include "grendr.h"
 #include "platform.h"
 #include "replay.h"
+#include "save.h"
 #include "txtres.h"
 #ifdef TEST_MODE
 #include "testharn.h"
@@ -27,6 +28,7 @@ static GameEventQueue g_main_out;
 #ifdef TEST_MODE
 /* Optional sidecar log; static like g_main_out so the shell loop stays stack-light. */
 static ReplayLog g_replay_log;
+static int main_check_output_overflow(void);
 #endif
 
 static void print_prompt(void)
@@ -173,6 +175,66 @@ static void main_render_and_prompt(struct GameState *game)
     }
 }
 
+static int main_render_loaded_game(struct GameState *game)
+{
+    game_event_queue_reset(&g_main_out);
+    game_describe_current_room(game, &g_main_out);
+    game_render_output(game, &g_main_out);
+#ifdef TEST_MODE
+    if (main_check_output_overflow() != 0) {
+        return 1;
+    }
+#endif
+    if (game->running) {
+        game_render(game);
+    }
+    return 0;
+}
+
+static int main_handle_save_load(struct GameState *game, struct Command *cmd,
+                                 int *out_rendered)
+{
+    int rc;
+
+    *out_rendered = 0;
+    if (cmd->type == CMD_SAVE) {
+        rc = save_write_game(SAVE_PATH_DEFAULT, game, plat_rand_draw_count());
+        if (rc == SAVE_RESULT_OK) {
+            printf(TXT_SAVE_OK_FMT, SAVE_PATH_DEFAULT);
+        } else {
+            printf(TXT_SAVE_IO_FMT, SAVE_PATH_DEFAULT);
+        }
+        return 0;
+    }
+    if (cmd->type != CMD_LOAD) {
+        return 0;
+    }
+
+    {
+        struct GameState loaded;
+        u32 rng_draw_count;
+
+        rc = save_read_game(SAVE_PATH_DEFAULT, &loaded, &rng_draw_count);
+        if (rc == SAVE_RESULT_OK) {
+            *game = loaded;
+            plat_seed_rng(game->seed);
+            plat_rand_advance(rng_draw_count);
+            printf(TXT_LOAD_OK_FMT, SAVE_PATH_DEFAULT);
+            if (main_render_loaded_game(game) != 0) {
+                return 1;
+            }
+            *out_rendered = 1;
+        } else if (rc == SAVE_RESULT_IO) {
+            printf(TXT_LOAD_IO_FMT, SAVE_PATH_DEFAULT);
+        } else if (rc == SAVE_RESULT_RANGE) {
+            printf("%s", TXT_LOAD_BAD_RANGE);
+        } else {
+            printf("%s", TXT_LOAD_BAD_FORMAT);
+        }
+    }
+    return 0;
+}
+
 #ifdef TEST_MODE
 static void main_report_testharn_error(int th_rc)
 {
@@ -198,11 +260,16 @@ static int main_check_output_overflow(void)
 /*
  * Process a non-empty input line. Returns 0 on success, 1 on fatal harness error.
  */
-static int main_dispatch_line(struct GameState *game, char *line)
+static int main_dispatch_line(struct GameState *game, char *line,
+                              int *out_rendered)
 {
 #ifdef TEST_MODE
     int th_rc;
 #endif
+    struct Command cmd;
+    int parsed;
+
+    *out_rendered = 0;
 
     game_event_queue_reset(&g_main_out);
 
@@ -213,6 +280,10 @@ static int main_dispatch_line(struct GameState *game, char *line)
         return 1;
     }
     if (th_rc == 0) {
+        parsed = command_parse(line, &cmd);
+        if (parsed && (cmd.type == CMD_SAVE || cmd.type == CMD_LOAD)) {
+            return main_handle_save_load(game, &cmd, out_rendered);
+        }
         game_process_input(game, line, &g_main_out);
         if (main_capture_replay(REPLAY_STEP_INPUT, line, game) != 0) {
             return 1;
@@ -226,6 +297,10 @@ static int main_dispatch_line(struct GameState *game, char *line)
         plat_seed_rng(game->seed);
     }
 #else
+    parsed = command_parse(line, &cmd);
+    if (parsed && (cmd.type == CMD_SAVE || cmd.type == CMD_LOAD)) {
+        return main_handle_save_load(game, &cmd, out_rendered);
+    }
     game_process_input(game, line, &g_main_out);
     if (main_capture_replay(REPLAY_STEP_INPUT, line, game) != 0) {
         return 1;
@@ -242,13 +317,15 @@ static int main_dispatch_line(struct GameState *game, char *line)
  */
 static int main_handle_polled_line(struct GameState *game, char *line, time_t *last_tick_time)
 {
+    int rendered;
+
     line[strcspn(line, "\r\n")] = '\0';
     if (line[0] != '\0') {
-        if (main_dispatch_line(game, line) != 0) {
+        if (main_dispatch_line(game, line, &rendered) != 0) {
             return 1;
         }
         *last_tick_time = plat_time_now();
-        if (game->running) {
+        if (game->running && !rendered) {
             game_render(game);
         }
     }

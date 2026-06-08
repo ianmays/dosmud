@@ -16,5 +16,8 @@ time_t plat_time_now(void);
 
 /* Applies seed to libc rand(); may use fewer bits than u32 on some targets. */
 void plat_seed_rng(u32 seed);
+int plat_rand(void);
+u32 plat_rand_draw_count(void);
+void plat_rand_advance(u32 draws);
 
 #endif /* PLATFORM_H */

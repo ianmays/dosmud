@@ -4,6 +4,7 @@
 #include "gout.h"
 #include "invent.h"
 #include "items.h"
+#include "platform.h"
 #include "world.h"
 
 /*
@@ -71,10 +72,10 @@ static void maybe_spawn_room_item(struct GameState *game, GameEventQueue *out)
     if (!game_room_ground_has_space(game, room_id)) {
         return;
     }
-    if ((rand() % CFG_ROLL_PERCENT_RANGE) >= CFG_ROOM_ITEM_SPAWN_GATE) {
+    if ((plat_rand() % CFG_ROLL_PERCENT_RANGE) >= CFG_ROOM_ITEM_SPAWN_GATE) {
         return;
     }
-    roll = rand() % CFG_ROLL_PERCENT_RANGE;
+    roll = plat_rand() % CFG_ROLL_PERCENT_RANGE;
     if (roll < CFG_ROOM_SPAWN_ROLL_BERRY_BELOW) spawned = ITEM_BERRY;
     else if (roll < CFG_ROOM_SPAWN_ROLL_STICK_BELOW) spawned = ITEM_STICK;
     else if (roll < CFG_ROOM_SPAWN_ROLL_REED_BELOW) spawned = ITEM_REED;
@@ -92,7 +93,7 @@ void maybe_emit_animal_noise(struct GameState *game, GameEventQueue *out)
     if ((game->tick % (u32)CFG_ANIMAL_NOISE_TICK_PERIOD) != 0UL) {
         return;
     }
-    if ((rand() % CFG_ROLL_PERCENT_RANGE) >= CFG_ANIMAL_NOISE_SKIP_ROLL_GE) {
+    if ((plat_rand() % CFG_ROLL_PERCENT_RANGE) >= CFG_ANIMAL_NOISE_SKIP_ROLL_GE) {
         return;
     }
     push_ambient_noise(out,
@@ -111,7 +112,7 @@ void maybe_emit_atmosphere(struct GameState *game, GameEventQueue *out)
         game->env_focus_expires_tick = 0;
     }
 
-    roll = rand() % CFG_ROLL_PERCENT_RANGE;
+    roll = plat_rand() % CFG_ROLL_PERCENT_RANGE;
     if (roll < CFG_ATMOSPHERE_ROLL_GUST_BELOW) {
         push_environment(out, GAME_ENV_EVENT_GUST);
         return;
@@ -123,7 +124,7 @@ void maybe_emit_atmosphere(struct GameState *game, GameEventQueue *out)
         game->env_focus_kind = GAME_ENV_RUSTLE;
         game->env_focus_expires_tick = game->tick + CFG_ENV_FOCUS_DURATION_TICKS;
         if (game_room_ground_has_space(game, game->player.room_id) &&
-                (rand() % CFG_ROLL_PERCENT_RANGE) < CFG_ATMOSPHERE_FOCUS_EXTRA_ITEM_BELOW) {
+                (plat_rand() % CFG_ROLL_PERCENT_RANGE) < CFG_ATMOSPHERE_FOCUS_EXTRA_ITEM_BELOW) {
             if (game_room_ground_try_add(game, game->player.room_id, ITEM_BERRY)) {
                 push_environment(out, GAME_ENV_EVENT_BERRY_DROP);
             }
@@ -145,7 +146,7 @@ void maybe_emit_atmosphere(struct GameState *game, GameEventQueue *out)
         game->env_focus_kind = GAME_ENV_WATER;
         game->env_focus_expires_tick = game->tick + CFG_ENV_FOCUS_DURATION_TICKS;
         if (game_room_ground_has_space(game, game->player.room_id) &&
-                (rand() % CFG_ROLL_PERCENT_RANGE) < CFG_ATMOSPHERE_FOCUS_EXTRA_ITEM_BELOW) {
+                (plat_rand() % CFG_ROLL_PERCENT_RANGE) < CFG_ATMOSPHERE_FOCUS_EXTRA_ITEM_BELOW) {
             if (game_room_ground_try_add(game, game->player.room_id, ITEM_REED)) {
                 push_environment(out, GAME_ENV_EVENT_REED_DROP);
             }

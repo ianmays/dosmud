@@ -100,7 +100,7 @@ const char *const TXT_MAIN_PROMPT = "\n> ";
 const char *const TXT_MAIN_BYE = "bye";
 
 const char *const TXT_COMMAND_HELP =
-    "Commands: look, map, inspect [rustle|creak|water|grit], take/get/pickup <item> or take all, drop/give <item>, bag, wield <weapon>, unwield, eat/use <item>, craft <item>, loot, move <dir>, wait, talk, 1/2/3 or reply <1-3>, help [topic], quit";
+    "Commands: look, map, inspect [rustle|creak|water|grit], take/get/pickup <item> or take all, drop/give <item>, bag, wield <weapon>, unwield, eat/use <item>, craft <item>, loot, move <dir>, wait, talk, 1/2/3 or reply <1-3>, save, load, help [topic], quit";
 
 const char *const TXT_HELP_TOPIC_UNKNOWN =
     "No help for that topic. Type 'help' for the full command list.";
@@ -158,6 +158,12 @@ const char *const TXT_HELP_MAP =
 
 const char *const TXT_HELP_WIELD =
     "wield <stick|spear> - ready a carried weapon for combat attacks (bonus damage). unwield - put it away.";
+
+const char *const TXT_HELP_SAVE =
+    "save - write the current run to save.dat without advancing time.";
+
+const char *const TXT_HELP_LOAD =
+    "load - restore the current run from save.dat without advancing time.";
 
 const char *const TXT_MAP_HEADER = "Explored locations:\n";
 
@@ -373,3 +379,10 @@ const char *const TXT_INV_UNWIELD_CANNOT =
 const char *const TXT_INV_ALREADY_WIELDING_FMT = "You are already wielding the %s.\n";
 const char *const TXT_INV_WIELD_STOW_FAIL =
     "You cannot switch weapons; there is no room to stow what you were holding.\n";
+
+const char *const TXT_SAVE_OK_FMT = "Saved to %s.\n";
+const char *const TXT_SAVE_IO_FMT = "Could not save to %s.\n";
+const char *const TXT_LOAD_OK_FMT = "Loaded from %s.\n";
+const char *const TXT_LOAD_IO_FMT = "Could not load from %s.\n";
+const char *const TXT_LOAD_BAD_FORMAT = "Save file is not a supported dosmud save.\n";
+const char *const TXT_LOAD_BAD_RANGE = "Save file contents are out of range.\n";

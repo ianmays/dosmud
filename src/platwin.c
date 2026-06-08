@@ -14,6 +14,8 @@
 #include "config.h"
 #include "platform.h"
 
+static u32 g_rand_draw_count = 0;
+
 int plat_poll_line(char *out_line, int out_size)
 {
     static char buf[CFG_INPUT_MAX];
@@ -65,4 +67,25 @@ time_t plat_time_now(void)
 void plat_seed_rng(u32 seed)
 {
     srand((unsigned int)seed);
+    g_rand_draw_count = 0;
+}
+
+int plat_rand(void)
+{
+    ++g_rand_draw_count;
+    return rand();
+}
+
+u32 plat_rand_draw_count(void)
+{
+    return g_rand_draw_count;
+}
+
+void plat_rand_advance(u32 draws)
+{
+    u32 i;
+
+    for (i = 0; i < draws; ++i) {
+        (void)plat_rand();
+    }
 }
