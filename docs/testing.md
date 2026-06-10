@@ -55,7 +55,7 @@ All builds also support in-session `save` and `load` commands. The first pass us
 
 ## When to add or update tests
 
-Use this section when deciding what to write, not only what to run. Agents and contributors should follow it before opening a PR. Pre-PR runs: [`.cursor/rules/testing-discipline.mdc`](../.cursor/rules/testing-discipline.mdc) and [AGENTS.md](../AGENTS.md#testing-expectations).
+Use this section when deciding what to write, not only what to run. Agents and contributors should follow it before opening a PR. Pre-PR runs: [`.cursor/rules/testing-discipline.mdc`](../.cursor/rules/testing-discipline.mdc) and [AGENTS.md](https://github.com/ianmays/dosmud/blob/main/AGENTS.md#testing-expectations).
 
 | Change | Snapshots | Unit (`tests/unit/unit_*.c`) |
 |--------|-----------|------------------------------|

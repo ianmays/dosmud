@@ -13,12 +13,62 @@
 
 #define SAVE_MAGIC "DMSV"
 #define SAVE_VERSION 1
+#define SAVE_PATH_BUF_MAX 260
 
 /*
  * DOS uses a small default stack. Keep the load-validation scratch snapshot in
  * static storage so reading a save does not duplicate GameState on the stack.
  */
 static struct GameState g_save_loaded;
+
+static int save_path_has_dir_sep(char c)
+{
+    return c == '/' || c == '\\';
+}
+
+static int save_make_sidecar_path(const char *path, const char *ext3,
+                                  char *out, unsigned int out_size)
+{
+    unsigned int len;
+    const char *last_dot;
+    const char *last_sep;
+    unsigned int base_len;
+    unsigned int i;
+
+    if (path == 0 || ext3 == 0 || out == 0 || out_size < 5U) {
+        return 0;
+    }
+    len = (unsigned int)strlen(path);
+    if (len == 0U) {
+        return 0;
+    }
+
+    last_dot = 0;
+    last_sep = 0;
+    for (i = 0; i < len; ++i) {
+        if (path[i] == '.') {
+            last_dot = path + i;
+        } else if (save_path_has_dir_sep(path[i])) {
+            last_sep = path + i;
+            last_dot = 0;
+        }
+    }
+
+    base_len = len;
+    if (last_dot != 0 && (last_sep == 0 || last_dot > last_sep)) {
+        base_len = (unsigned int)(last_dot - path);
+    }
+    if (base_len + 4U >= out_size) {
+        return 0;
+    }
+    memcpy(out, path, base_len);
+    out[base_len] = '.';
+    out[base_len + 1U] = ext3[0];
+    out[base_len + 2U] = ext3[1];
+    out[base_len + 3U] = ext3[2];
+    out[base_len + 4U] = '\0';
+    return 1;
+}
 
 static int save_write_bytes(FILE *fp, const void *src, unsigned int size)
 {
@@ -490,8 +540,13 @@ int save_write_game(const char *path, const struct GameState *game,
                     u32 rng_draw_count)
 {
     FILE *fp;
+    FILE *existing_fp;
+    char tmp_path[SAVE_PATH_BUF_MAX];
+    char bak_path[SAVE_PATH_BUF_MAX];
+    int have_existing_file;
     int ok;
     int close_rc;
+    int rename_rc;
 
     if (path == 0 || path[0] == '\0' || game == 0) {
         return SAVE_RESULT_IO;
@@ -499,7 +554,19 @@ int save_write_game(const char *path, const struct GameState *game,
     if (!save_valid_rng_draw_count(rng_draw_count)) {
         return SAVE_RESULT_RANGE;
     }
-    fp = fopen(path, "wb");
+    if (!save_make_sidecar_path(path, "tmp", tmp_path, sizeof(tmp_path)) ||
+            !save_make_sidecar_path(path, "bak", bak_path, sizeof(bak_path))) {
+        return SAVE_RESULT_IO;
+    }
+
+    existing_fp = fopen(path, "rb");
+    have_existing_file = existing_fp != 0;
+    if (existing_fp != 0) {
+        fclose(existing_fp);
+    }
+
+    remove(tmp_path);
+    fp = fopen(tmp_path, "wb");
     if (fp == 0) {
         return SAVE_RESULT_IO;
     }
@@ -512,8 +579,30 @@ int save_write_game(const char *path, const struct GameState *game,
     }
     close_rc = fclose(fp);
     if (!ok || close_rc != 0) {
+        remove(tmp_path);
         return SAVE_RESULT_IO;
-    } 
+    }
+
+    remove(bak_path);
+    if (have_existing_file) {
+        rename_rc = rename(path, bak_path);
+        if (rename_rc != 0) {
+            remove(tmp_path);
+            return SAVE_RESULT_IO;
+        }
+    }
+
+    rename_rc = rename(tmp_path, path);
+    if (rename_rc != 0) {
+        if (have_existing_file) {
+            rename(bak_path, path);
+        }
+        remove(tmp_path);
+        return SAVE_RESULT_IO;
+    }
+    if (have_existing_file) {
+        remove(bak_path);
+    }
     return SAVE_RESULT_OK;
 }
 

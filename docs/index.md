@@ -11,17 +11,17 @@ This manual is the canonical project documentation set for architecture, testing
 
 ## Roadmap and agents
 
-- [DEV_PLAN.md](../DEV_PLAN.md) - curated roadmap log, execution order, milestone tables
-- [AGENTS.md](../AGENTS.md) - coding agent workflow, Cursor rules/skills index, DEV_PLAN policy
+- [DEV_PLAN.md](https://github.com/ianmays/dosmud/blob/main/DEV_PLAN.md) - curated roadmap log, execution order, milestone tables
+- [AGENTS.md](https://github.com/ianmays/dosmud/blob/main/AGENTS.md) - coding agent workflow, Cursor rules/skills index, DEV_PLAN policy
 - [GitHub project #1](https://github.com/users/ianmays/projects/1) - Status, Priority, Size, stack order
 
-Agents: after implementation, run **code-commenter** (when `src/`, `include/`, or `tests/` C sources changed) and **documentation** passes before a draft PR. See AGENTS.md **Comment pass** and **Documentation pass**.
+Agents: after implementation, run **code-commenter** (when `src/`, `include/`, or `tests/` C sources changed) and **documentation** passes before a draft PR. See [AGENTS.md](https://github.com/ianmays/dosmud/blob/main/AGENTS.md#comment-pass) and [AGENTS.md](https://github.com/ianmays/dosmud/blob/main/AGENTS.md#documentation-pass).
 
 ## Scope
 
 - `README.md` remains the quick-start entrypoint for repository visitors.
 - This `/docs` tree is the long-form reference used for maintenance and future expansion.
-- Documentation ownership table: [AGENTS.md](../AGENTS.md#documentation-ownership)
+- Documentation ownership table: [AGENTS.md](https://github.com/ianmays/dosmud/blob/main/AGENTS.md#documentation-ownership)
 
 ## Build/runtime note
 

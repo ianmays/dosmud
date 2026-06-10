@@ -303,6 +303,36 @@ TEST save_rejects_write_with_excessive_rng_draw_count(void)
     PASS();
 }
 
+TEST save_failed_write_preserves_existing_save(void)
+{
+    struct GameState original;
+    struct GameState changed;
+    struct GameState loaded;
+    u32 loaded_draws;
+
+    save_cleanup_file();
+
+    save_fill_fixture(&original);
+    ASSERT_EQ(SAVE_RESULT_OK,
+        save_write_game(save_test_path(), &original, 7U));
+
+    save_fill_fixture(&changed);
+    changed.player.room_id = WORLD_ROOM_CAVE;
+    changed.tick = 123U;
+
+    ASSERT_EQ(SAVE_RESULT_RANGE,
+        save_write_game(save_test_path(), &changed,
+            (u32)((unsigned long)CFG_SAVE_RNG_DRAW_MAX + 1UL)));
+
+    ASSERT_EQ(SAVE_RESULT_OK,
+        save_read_game(save_test_path(), &loaded, &loaded_draws));
+    ASSERT_EQ(7U, loaded_draws);
+    ASSERT(save_games_equal(&original, &loaded));
+
+    save_cleanup_file();
+    PASS();
+}
+
 SUITE(save)
 {
     RUN_TEST(save_round_trip_preserves_state_and_rng_count);
@@ -311,4 +341,5 @@ SUITE(save)
     RUN_TEST(save_rejects_out_of_range_without_mutating_target);
     RUN_TEST(save_rejects_excessive_rng_draw_count);
     RUN_TEST(save_rejects_write_with_excessive_rng_draw_count);
+    RUN_TEST(save_failed_write_preserves_existing_save);
 }
