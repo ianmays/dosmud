@@ -210,7 +210,7 @@ TEST game_event_push_records_dialogue_encounter_kinds(void)
 
     game_event_queue_reset(&out);
     ASSERT(0 != game_event_push(&out, GAME_EVENT_DIALOGUE,
-        GAME_DIALOGUE_ACTOR_FROG, GAME_DIALOGUE_PHASE_BRANCH, 2, 0, 0));
+        GAME_DIALOGUE_ACTOR_FROG, GAME_DIALOGUE_PHASE_REPLY, 2, 0, 0));
     ASSERT(0 != game_event_push(&out, GAME_EVENT_ENCOUNTER,
         GAME_ENCOUNTER_BANDIT, GAME_ENCOUNTER_ACTION_GIVE,
         GAME_ENCOUNTER_OUTCOME_OK, ITEM_STICK, "stick"));

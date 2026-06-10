@@ -23,6 +23,7 @@ if exist combat.obj del combat.obj
 if exist genc.obj del genc.obj
 if exist wanderer.obj del wanderer.obj
 if exist dialogue.obj del dialogue.obj
+if exist npc.obj del npc.obj
 if exist gatmos.obj del gatmos.obj
 if exist fmt.obj del fmt.obj
 if exist grendr.obj del grendr.obj
@@ -81,6 +82,11 @@ if errorlevel 1 goto wcl_bad
 echo Compiling dialogue.c ... >> %LOG%
 echo Compiling dialogue.c ...
 wcl %WFL% -c -fo=dialogue.obj src\dialogue.c >> %LOG%
+if errorlevel 1 goto wcl_bad
+
+echo Compiling npc.c ... >> %LOG%
+echo Compiling npc.c ...
+wcl %WFL% -c -fo=npc.obj src\npc.c >> %LOG%
 if errorlevel 1 goto wcl_bad
 
 echo Compiling gatmos.c ... >> %LOG%
@@ -149,9 +155,9 @@ echo Archiving gameplay.lib ...
 REM Keep each wlib line under COMMAND.COM ~127 chars (TEST_MODE adds +tharn.obj).
 wlib -n gameplay.lib +game.obj +gout.obj +gprog.obj +combat.obj >> %LOG%
 if errorlevel 1 goto wcl_bad
-wlib gameplay.lib +genc.obj +wanderer.obj +dialogue.obj +gatmos.obj >> %LOG%
+wlib gameplay.lib +genc.obj +wanderer.obj +dialogue.obj +npc.obj >> %LOG%
 if errorlevel 1 goto wcl_bad
-wlib gameplay.lib +fmt.obj +save.obj >> %LOG%
+wlib gameplay.lib +gatmos.obj +fmt.obj +save.obj >> %LOG%
 if errorlevel 1 goto wcl_bad
 if not "%1"=="TEST_MODE" goto wlib_done
 wlib gameplay.lib +replay.obj +thwld.obj +tharn.obj >> %LOG%

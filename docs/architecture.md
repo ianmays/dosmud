@@ -23,18 +23,18 @@ The codebase splits into three layers. Gameplay and simulation modules must stay
 
 Owns state mutation, command handling, world ticks, combat, inventory logic, and procedural systems.
 
-Modules include `game`, `command`, `world`, `invent`, `combat`, `gatmos`, `gprog`, `genc`, `wanderer`, `dialogue`, and `items`.
+Modules include `game`, `command`, `world`, `invent`, `combat`, `gatmos`, `gprog`, `genc`, `wanderer`, `dialogue`, `npc`, and `items`.
 
 Simulation steps append fixed-size `GameEvent` records through the `gout` queue while mutating `GameState`. Core does not print directly; callers may inspect those records headlessly or hand them to the DOSMUD render adapter.
 
 Within core, keep the ownership split explicit:
 
 - **Engine** - deterministic `GameState` stepping (`game_describe_current_room`, `game_process_input`, `game_background_step`) plus `GameEvent` / `gout` records. The engine mutates state and emits semantic output requests, but never performs terminal I/O.
-- **Game logic** - dosmud-specific rules and content that plug into that stepping surface: command routing in `game`, room/world rules, and the gameplay slices (`combat`, `invent`, `dialogue`, `genc`, `wanderer`, `gatmos`, `gprog`, `items`).
+- **Game logic** - dosmud-specific rules and content that plug into that stepping surface: command routing in `game`, room/world rules, and the gameplay slices (`combat`, `invent`, `dialogue`, `npc`, `genc`, `wanderer`, `gatmos`, `gprog`, `items`).
 
 [`src/game.h`](../src/game.h) defines the engine-facing stepping surface and persistent simulation state; [`src/gout.h`](../src/gout.h) defines the fixed-size event queue that carries engine results to the render edge.
 
-Command and navigation stepping in `game.c` emit generic `GameEventKind` values (handled in `grendr`): `GAME_EVENT_MOVE` and `GAME_EVENT_ROOM_LOOK` (successful move plus room look), `GAME_EVENT_MAP`, `GAME_EVENT_HELP` (`arg0` = `CMD_HELP_*` topic), `GAME_EVENT_WAIT`, `GAME_EVENT_CANNOT_MOVE` (`text` = direction name), and `GAME_EVENT_UNKNOWN_COMMAND`. Inventory and item handlers in `invent.c` emit `GAME_EVENT_ITEM_RESULT`, `GAME_EVENT_BAG_VIEW`, `GAME_EVENT_CRAFT_RESULT`, and `GAME_EVENT_EQUIP_RESULT` (payload contract in [`gout.h`](../src/gout.h)). Combat and progression in [`combat.c`](../src/combat.c) and [`gprog.c`](../src/gprog.c) emit `GAME_EVENT_COMBAT` (`GameEventCombatPhase` in `arg0`), `GAME_EVENT_XP_GAIN`, and `GAME_EVENT_STAT_CHANGE` (payload contract in [`gout.h`](../src/gout.h)). Dialogue and encounter slices in [`dialogue.c`](../src/dialogue.c), [`wanderer.c`](../src/wanderer.c), and [`genc.c`](../src/genc.c) emit `GAME_EVENT_DIALOGUE`, `GAME_EVENT_ENCOUNTER`, and `GAME_EVENT_DIALOGUE_GUARD`; modal guards in `game.c` emit `GAME_EVENT_DIALOGUE_GUARD` when reply or handover context blocks a command (payload contract in [`gout.h`](../src/gout.h)). Ambient and inspect output in [`gatmos.c`](../src/gatmos.c) emit `GAME_EVENT_ENVIRONMENT`, `GAME_EVENT_AMBIENT_NOISE`, `GAME_EVENT_ITEM_PRESENCE`, and `GAME_EVENT_OBSERVATION` on world ticks and the inspect command (payload contract in [`gout.h`](../src/gout.h)). All production slices append generic `GameEventKind` values only; `grendr` dispatches them to player-visible text.
+Command and navigation stepping in `game.c` emit generic `GameEventKind` values (handled in `grendr`): `GAME_EVENT_MOVE` and `GAME_EVENT_ROOM_LOOK` (successful move plus room look), `GAME_EVENT_MAP`, `GAME_EVENT_HELP` (`arg0` = `CMD_HELP_*` topic), `GAME_EVENT_WAIT`, `GAME_EVENT_CANNOT_MOVE` (`text` = direction name), and `GAME_EVENT_UNKNOWN_COMMAND`. Inventory and item handlers in `invent.c` emit `GAME_EVENT_ITEM_RESULT`, `GAME_EVENT_BAG_VIEW`, `GAME_EVENT_CRAFT_RESULT`, and `GAME_EVENT_EQUIP_RESULT` (payload contract in [`gout.h`](../src/gout.h)). Combat and progression in [`combat.c`](../src/combat.c) and [`gprog.c`](../src/gprog.c) emit `GAME_EVENT_COMBAT` (`GameEventCombatPhase` in `arg0`), `GAME_EVENT_XP_GAIN`, and `GAME_EVENT_STAT_CHANGE` (payload contract in [`gout.h`](../src/gout.h)). The fixed NPC seam in [`npc.c`](../src/npc.c) owns room-to-actor lookup, shared dialogue event helpers, and room talk opening for fixed NPCs such as the pond frog, watchman, herbalist, and archivist. Dialogue and encounter slices in [`dialogue.c`](../src/dialogue.c), [`wanderer.c`](../src/wanderer.c), and [`genc.c`](../src/genc.c) build on that seam and emit `GAME_EVENT_DIALOGUE`, `GAME_EVENT_ENCOUNTER`, and `GAME_EVENT_DIALOGUE_GUARD`; modal guards in `game.c` emit `GAME_EVENT_DIALOGUE_GUARD` when reply or handover context blocks a command (payload contract in [`gout.h`](../src/gout.h)). Ambient and inspect output in [`gatmos.c`](../src/gatmos.c) emit `GAME_EVENT_ENVIRONMENT`, `GAME_EVENT_AMBIENT_NOISE`, `GAME_EVENT_ITEM_PRESENCE`, and `GAME_EVENT_OBSERVATION` on world ticks and the inspect command (payload contract in [`gout.h`](../src/gout.h)). All production slices append generic `GameEventKind` values only; `grendr` dispatches them to player-visible text.
 
 Core must **not** use:
 
@@ -202,9 +202,10 @@ Gameplay slices live beside `game.c` as plain C translation units (no extra fram
 
 - [`gprog.c`](../src/gprog.c) - XP and level-up rewards (`game_xp_to_next_level`, `progression_gain_xp`); queues `GAME_EVENT_XP_GAIN` and `GAME_EVENT_STAT_CHANGE` via `gout` (FAT 8.3-safe basename)
 - [`combat.c`](../src/combat.c) - combat start, player reply resolution, enemy turn; queues `GAME_EVENT_COMBAT` phases via `gout` (randomness via `game_roll_spread` / `game_roll_percent`, not direct `plat_rand()` calls)
+- [`npc.c`](../src/npc.c) - fixed NPC identity seam for room talk lookup, shared dialogue helpers, and room look hint ownership
 - [`genc.c`](../src/genc.c) - ambient bandit encounter open state (FAT 8.3-safe basename)
 - [`wanderer.c`](../src/wanderer.c) - traveler movement and encounter flow
-- [`dialogue.c`](../src/dialogue.c) - pond frog lines and NPC id hint for room look
+- [`dialogue.c`](../src/dialogue.c) - fixed room-NPC talk and reply routing built on `npc.c`
 - [`gatmos.c`](../src/gatmos.c) - initial room items, ambient rolls, animal noise, inspect focus hooks (FAT 8.3-safe basename)
 
 When a slice exposes new command or state entry points, add tests in the matching `tests/unit/unit_*.c` file (see [When to add or update tests](testing.md#when-to-add-or-update-tests)).

@@ -7,8 +7,8 @@
 #include "unit_util.h"
 
 /*
- * out-taking helpers assert #160 GameEvent payloads; *_state wraps a local
- * GameEventQueue for mode-only tests that do not inspect the queue.
+ * Dialogue router tests: #160 GameEvent payloads and mode transitions.
+ * npc.c lookup tables and direct open/talk seams live in unit_npc.c.
  */
 static int talk_out(struct GameState *game, GameEventQueue *out)
 {
@@ -34,36 +34,6 @@ static int reply_out_state(struct GameState *game, int choice)
     GameEventQueue out;
 
     return reply_out(game, choice, &out);
-}
-
-TEST dialogue_npc_in_room(void)
-{
-    ASSERT_EQ(0, npc_in_room(WORLD_ROOM_CAMP));
-    ASSERT_EQ(1, npc_in_room(WORLD_ROOM_TOWER));
-    ASSERT_EQ(2, npc_in_room(WORLD_ROOM_ORCHARD));
-    ASSERT_EQ(3, npc_in_room(WORLD_ROOM_CATACOMBS));
-    PASS();
-}
-
-TEST dialogue_frog_render_paths(void)
-{
-    GameEventQueue out;
-
-    game_event_queue_reset(&out);
-    frog_dialogue_intro(&out);
-    ASSERT_EQ(1, out.count);
-    ASSERT_EQ(GAME_EVENT_DIALOGUE, out.events[0].kind);
-    ASSERT_EQ(GAME_DIALOGUE_ACTOR_FROG, out.events[0].arg0);
-    ASSERT_EQ(GAME_DIALOGUE_PHASE_INTRO, out.events[0].arg1);
-    frog_dialogue_branch(1, &out);
-    ASSERT_EQ(2, out.count);
-    ASSERT_EQ(GAME_DIALOGUE_PHASE_BRANCH, out.events[1].arg1);
-    ASSERT_EQ(1, out.events[1].arg2);
-    frog_dialogue_branch(2, &out);
-    frog_dialogue_branch(3, &out);
-    ASSERT_EQ(4, out.count);
-    ASSERT_EQ(3, out.events[3].arg2);
-    PASS();
 }
 
 TEST dialogue_cmd_talk_watchman(void)
@@ -234,6 +204,36 @@ TEST dialogue_cmd_talk_watchman_event(void)
     PASS();
 }
 
+TEST dialogue_cmd_talk_frog_event(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 24u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_POND, 0);
+    ASSERT_EQ(1, talk_out(&game, &out));
+    ASSERT_EQ(GAME_EVENT_DIALOGUE, out.events[0].kind);
+    ASSERT_EQ(GAME_DIALOGUE_ACTOR_FROG, out.events[0].arg0);
+    ASSERT_EQ(GAME_DIALOGUE_PHASE_TALK, out.events[0].arg1);
+    PASS();
+}
+
+TEST dialogue_cmd_reply_frog_event(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 25u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_POND, 0);
+    talk_out(&game, &out);
+    ASSERT_EQ(1, reply_out(&game, 2, &out));
+    ASSERT_EQ(GAME_EVENT_DIALOGUE, out.events[0].kind);
+    ASSERT_EQ(GAME_DIALOGUE_ACTOR_FROG, out.events[0].arg0);
+    ASSERT_EQ(GAME_DIALOGUE_PHASE_REPLY, out.events[0].arg1);
+    ASSERT_EQ(2, out.events[0].arg2);
+    PASS();
+}
+
 TEST dialogue_cmd_talk_nobody_event(void)
 {
     struct GameState game;
@@ -276,8 +276,6 @@ TEST dialogue_cmd_reply_frog_invalid_event(void)
 }
 
 SUITE(dialogue) {
-    RUN_TEST(dialogue_npc_in_room);
-    RUN_TEST(dialogue_frog_render_paths);
     RUN_TEST(dialogue_cmd_talk_watchman);
     RUN_TEST(dialogue_cmd_talk_nobody_camp);
     RUN_TEST(dialogue_cmd_reply_frog);
@@ -292,6 +290,8 @@ SUITE(dialogue) {
     RUN_TEST(dialogue_cmd_reply_herbalist);
     RUN_TEST(dialogue_cmd_reply_archivist);
     RUN_TEST(dialogue_cmd_talk_watchman_event);
+    RUN_TEST(dialogue_cmd_talk_frog_event);
+    RUN_TEST(dialogue_cmd_reply_frog_event);
     RUN_TEST(dialogue_cmd_talk_nobody_event);
     RUN_TEST(dialogue_cmd_talk_bandit_blocks_event);
     RUN_TEST(dialogue_cmd_reply_frog_invalid_event);

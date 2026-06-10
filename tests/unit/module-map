@@ -13,6 +13,7 @@ game: unit_game.c
 genc: unit_genc.c
 wanderer: unit_wandr.c
 dialogue: unit_dial.c
+npc: unit_npc.c
 gatmos: unit_gatmos.c
 world: unit_wrld.c
 gprog: unit_gprog.c

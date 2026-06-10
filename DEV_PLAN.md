@@ -261,13 +261,13 @@ Compiler discipline and warning cleanliness should remain early priorities throu
 
 ### [#43](https://github.com/ianmays/dosmud/issues/43) - State machine for game modes
 
-Done ✅ ([#183](https://github.com/ianmays/dosmud/pull/183)).
+Done ✅ ([#99](https://github.com/ianmays/dosmud/pull/99)).
 
 [`src/game.h`](src/game.h) defines `GameMode` (`GAME_MODE_EXPLORE`, `GAME_MODE_DIALOGUE`, `GAME_MODE_COMBAT`), `DialogueKind` (room NPCs including frog, wanderer, enemy), and `CombatState` (`enemy_hp`, `defending`). `GameState` holds `mode`, `dialogue`, and `combat` instead of overlapping `pond_dialogue`, `wanderer_dialogue`, `enemy_dialogue`, `npc_dialogue`, and `combat_active` flags. Transitions go through `game_set_mode_explore`, `game_set_mode_dialogue`, and `game_set_mode_combat` in [`src/game.c`](src/game.c).
 
 ### [#44](https://github.com/ianmays/dosmud/issues/44) - Formalize engine boundaries
 
-Done ✅.
+Done ✅ ([#103](https://github.com/ianmays/dosmud/pull/103)).
 
 - Documented core / render / platform layers in `docs/architecture.md`
 - Moved all `invent.c` player output to `render_inv_*` in `grendr`
@@ -275,7 +275,7 @@ Done ✅.
 
 ### [#45](https://github.com/ianmays/dosmud/issues/45) - Platform layer
 
-Done ✅.
+Done ✅ ([#106](https://github.com/ianmays/dosmud/pull/106)).
 
 - [`include/platform.h`](include/platform.h) - `plat_poll_line`, `plat_time_now`, `plat_seed_rng`
 - [`src/platdos.c`](src/platdos.c) / [`src/platpos.c`](src/platpos.c) - DOS vs POSIX implementations (FAT 8.3 names; flat `src/` layout)
@@ -302,20 +302,20 @@ Or manually: `./dosmud < tests/regression/<name>.input > tests/regression/<name>
 
 ### [#66](https://github.com/ianmays/dosmud/issues/66) / [#112](https://github.com/ianmays/dosmud/issues/112) - Improve deterministic test setup
 
-Done ✅.
+Done ✅ ([#110](https://github.com/ianmays/dosmud/pull/110), [#120](https://github.com/ianmays/dosmud/pull/120)).
 
 `TEST_MODE` builds link [`tests/harness/testharn.c`](tests/harness/testharn.c) and [`tests/harness/th_world.c`](tests/harness/th_world.c). Snapshot `.input` files use `@fixture <name>` for known state without RNG-walking setup. Canonical fixture and test lists: [`docs/testing.md`](docs/testing.md). [#66](https://github.com/ianmays/dosmud/issues/66) added the harness; [#112](https://github.com/ianmays/dosmud/issues/112) migrated brittle snapshots to fixtures and roll inject for `equipment`.
 
 Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 
-- **[#66](https://github.com/ianmays/dosmud/issues/66)** Done ✅ - `TEST_MODE` harness and fixture DSL (see combined section with [#112](https://github.com/ianmays/dosmud/issues/112) above)
-- **[#112](https://github.com/ianmays/dosmud/issues/112)** Done ✅ - migrated `equipment`, `area_items`, `craft_wielded`, `map`, `smoke` to fixtures; `seed_cli` still uses CLI `--seed` on `smoke.input`.
-- **[#115](https://github.com/ianmays/dosmud/issues/115)** Done ✅ - snapshot coverage ([PR 123](https://github.com/ianmays/dosmud/pull/123)); details in the section below.
-- **[#122](https://github.com/ianmays/dosmud/issues/122)** Done ✅ - optional `@seed <unsigned>` line in snapshot `.input` files ([PR 124](https://github.com/ianmays/dosmud/pull/124)).
-- **[#95](https://github.com/ianmays/dosmud/issues/95)** Done ✅ - unit tests ([PR 127](https://github.com/ianmays/dosmud/pull/127)); **~96%** weighted branch coverage on core modules
-- **[#116](https://github.com/ianmays/dosmud/issues/116)** Done ✅ - soak / stress harness (`make test-soak`, CI benchmarks)
-- **[#113](https://github.com/ianmays/dosmud/issues/113)** Done ✅ - wanderer snapshot fixtures (`wanderer_dialogue` fixture; `wanderer_replies`, `wanderer_talk_blocked` snapshots)
-- **[#114](https://github.com/ianmays/dosmud/issues/114)** Done ✅ - custom world boot fixture (`world_boot` / `world_linear`; `world_apply_graph` + harness tables in TEST_MODE)
+- **[#66](https://github.com/ianmays/dosmud/issues/66)** Done ✅ ([#110](https://github.com/ianmays/dosmud/pull/110)) - `TEST_MODE` harness and fixture DSL (see combined section with [#112](https://github.com/ianmays/dosmud/issues/112) above)
+- **[#112](https://github.com/ianmays/dosmud/issues/112)** Done ✅ ([#120](https://github.com/ianmays/dosmud/pull/120)) - migrated `equipment`, `area_items`, `craft_wielded`, `map`, `smoke` to fixtures; `seed_cli` still uses CLI `--seed` on `smoke.input`.
+- **[#115](https://github.com/ianmays/dosmud/issues/115)** Done ✅ ([#123](https://github.com/ianmays/dosmud/pull/123)) - snapshot coverage; details in the section below.
+- **[#122](https://github.com/ianmays/dosmud/issues/122)** Done ✅ ([#124](https://github.com/ianmays/dosmud/pull/124)) - optional `@seed <unsigned>` line in snapshot `.input` files.
+- **[#95](https://github.com/ianmays/dosmud/issues/95)** Done ✅ ([#127](https://github.com/ianmays/dosmud/pull/127)) - unit tests; **~96%** weighted branch coverage on core modules
+- **[#116](https://github.com/ianmays/dosmud/issues/116)** Done ✅ ([#133](https://github.com/ianmays/dosmud/pull/133)) - soak / stress harness (`make test-soak`, CI benchmarks)
+- **[#113](https://github.com/ianmays/dosmud/issues/113)** Done ✅ ([#125](https://github.com/ianmays/dosmud/pull/125)) - wanderer snapshot fixtures (`wanderer_dialogue` fixture; `wanderer_replies`, `wanderer_talk_blocked` snapshots)
+- **[#114](https://github.com/ianmays/dosmud/issues/114)** Done ✅ ([#126](https://github.com/ianmays/dosmud/pull/126)) - custom world boot fixture (`world_boot` / `world_linear`; `world_apply_graph` + harness tables in TEST_MODE)
 
 ### [#40](https://github.com/ianmays/dosmud/issues/40) - Gameplay test coverage (umbrella epic) — Done ✅
 
@@ -406,7 +406,7 @@ Delivered in [PR 133](https://github.com/ianmays/dosmud/pull/133).
 
 ### [#46](https://github.com/ianmays/dosmud/issues/46) - Runtime `--seed`
 
-Done ✅.
+Done ✅ ([#109](https://github.com/ianmays/dosmud/pull/109)).
 
 ```text
 dosmud --seed 1234
@@ -424,7 +424,7 @@ dosmud --seed 1234
 
 ### [#74](https://github.com/ianmays/dosmud/issues/74) - Agent skills
 
-Done ✅.
+Done ✅ ([#165](https://github.com/ianmays/dosmud/pull/165), [#166](https://github.com/ianmays/dosmud/pull/166)).
 
 Capture:
 - workflow knowledge
@@ -435,23 +435,23 @@ Capture:
 
 ### [#34](https://github.com/ianmays/dosmud/issues/34) - Modern Windows build
 
-Done ✅.
+Done ✅ ([#153](https://github.com/ianmays/dosmud/pull/153)).
 
 WSL cross-compile path emits a native Windows console `dosmud.exe` via `make build-win` / `make test-win`, keeping gameplay unchanged and leaving the DOS/Open Watcom path separate.
 
 ### [#72](https://github.com/ianmays/dosmud/issues/72) - Sub-agents
 
-Done ✅ - [PR #166](https://github.com/ianmays/dosmud/pull/166).
+Done ✅ ([#166](https://github.com/ianmays/dosmud/pull/166)).
 
 ### [#82](https://github.com/ianmays/dosmud/issues/82) - Compile performance
 
-Done ✅.
+Done ✅ ([#149](https://github.com/ianmays/dosmud/pull/149)).
 
 ### [#150](https://github.com/ianmays/dosmud/issues/150) - CI stats reporting
 
 Lightweight CI timings/stats workflow: `scripts/ci-stats.sh` (or equivalent) emits `ci-stats.json` and `ci-stats.md`, publishes Markdown to the GitHub Actions job summary, and uploads both as workflow artifacts.
 
-Done ✅.
+Done ✅ ([#151](https://github.com/ianmays/dosmud/pull/151)).
 
 ## [Advanced Architecture](https://github.com/ianmays/dosmud/milestone/5)
 
@@ -475,7 +475,7 @@ Rows [#71](https://github.com/ianmays/dosmud/issues/71) and [#47](https://github
 
 Separate deterministic gameplay/simulation from rendering, platform, and front-end so the engine can support alternative interfaces or games. Unblocked [#47](https://github.com/ianmays/dosmud/issues/47) (done); still relevant for [#104](https://github.com/ianmays/dosmud/issues/104), [#48](https://github.com/ianmays/dosmud/issues/48), and [#92](https://github.com/ianmays/dosmud/issues/92).
 
-Done ✅.
+Done ✅ ([#155](https://github.com/ianmays/dosmud/pull/155)).
 
 ### [#47](https://github.com/ianmays/dosmud/issues/47) - Event queue architecture
 
@@ -569,7 +569,7 @@ Done ✅ ([#181](https://github.com/ianmays/dosmud/pull/181)).
 
 Adjacent track to `#47` follow-ups, but not part of the direct migration chain. Keep scoped to deterministic replay/log capture without coupling completion of migration slices.
 
-Done ✅.
+Done ✅ ([#183](https://github.com/ianmays/dosmud/pull/183)).
 
 ### Testing
 - Unit: [`unit_rplog.c`](../tests/unit/unit_rplog.c) (`replay_log_reset`, capture serialization, open/header/step increment)
@@ -688,7 +688,7 @@ NOT:
 
 ### [#128](https://github.com/ianmays/dosmud/issues/128) - Pick up all items
 
-Done ✅.
+Done ✅ ([#147](https://github.com/ianmays/dosmud/pull/147)).
 
 ### [#129](https://github.com/ianmays/dosmud/issues/129) - Interactive looting
 
@@ -706,6 +706,14 @@ Follow-up to [#142](https://github.com/ianmays/dosmud/issues/142) / PR 144. Play
 | [#92](https://github.com/ianmays/dosmud/issues/92) | multiplayer | XL |
 
 ### [#104](https://github.com/ianmays/dosmud/issues/104) - NPC module
+
+Extract fixed NPC identity from `dialogue.c` into `npc.c`: room-to-actor lookup, shared `GAME_EVENT_DIALOGUE` producers, and room talk opening for pond frog, watchman, herbalist, and archivist.
+
+Done ✅ ([#185](https://github.com/ianmays/dosmud/pull/185)).
+
+### Testing
+- Unit: `unit_npc.c` (lookup, open-room dialogue, shared push helpers); frog lookup tests moved from `unit_dial.c`; wanderer invalid-reply guard in `unit_wandr.c`
+- Snapshots: `frog_hint` (`@fixture at_pond` + `look` proves generic room-NPC hint at pond)
 
 ### [#100](https://github.com/ianmays/dosmud/issues/100) - Wanderer behaviour reusable for any NPC
 
