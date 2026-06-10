@@ -14,6 +14,12 @@
 #define SAVE_MAGIC "DMSV"
 #define SAVE_VERSION 1
 
+/*
+ * DOS uses a small default stack. Keep the load-validation scratch snapshot in
+ * static storage so reading a save does not duplicate GameState on the stack.
+ */
+static struct GameState g_save_loaded;
+
 static int save_write_bytes(FILE *fp, const void *src, unsigned int size)
 {
     return fwrite(src, 1U, size, fp) == size;
@@ -502,7 +508,6 @@ int save_read_game(const char *path, struct GameState *out_game,
                    u32 *out_rng_draw_count)
 {
     FILE *fp;
-    struct GameState loaded;
     char magic[4];
     u16 version;
     int rc;
@@ -532,18 +537,18 @@ int save_read_game(const char *path, struct GameState *out_game,
     if (version != (u16)SAVE_VERSION) {
         goto done;
     }
-    if (!save_read_game_state(fp, &loaded, out_rng_draw_count)) {
+    if (!save_read_game_state(fp, &g_save_loaded, out_rng_draw_count)) {
         goto done;
     }
     trailing = fgetc(fp);
     if (trailing != EOF) {
         goto done;
     }
-    if (!save_validate_game(&loaded)) {
+    if (!save_validate_game(&g_save_loaded)) {
         rc = SAVE_RESULT_RANGE;
         goto done;
     }
-    *out_game = loaded;
+    *out_game = g_save_loaded;
     rc = SAVE_RESULT_OK;
 
 done:

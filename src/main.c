@@ -25,6 +25,8 @@
  * main-loop frames.
  */
 static GameEventQueue g_main_out;
+/* Save/load staging copy stays static so DOS load does not exhaust the stack. */
+static struct GameState g_main_loaded_game;
 #ifdef TEST_MODE
 /* Optional sidecar log; static like g_main_out so the shell loop stays stack-light. */
 static ReplayLog g_replay_log;
@@ -195,6 +197,7 @@ static int main_handle_save_load(struct GameState *game, struct Command *cmd,
                                  int *out_rendered)
 {
     int rc;
+    u32 rng_draw_count;
 
     *out_rendered = 0;
     if (cmd->type == CMD_SAVE) {
@@ -210,27 +213,23 @@ static int main_handle_save_load(struct GameState *game, struct Command *cmd,
         return 0;
     }
 
-    {
-        struct GameState loaded;
-        u32 rng_draw_count;
-
-        rc = save_read_game(SAVE_PATH_DEFAULT, &loaded, &rng_draw_count);
-        if (rc == SAVE_RESULT_OK) {
-            *game = loaded;
-            plat_seed_rng(game->seed);
-            plat_rand_advance(rng_draw_count);
-            printf(TXT_LOAD_OK_FMT, SAVE_PATH_DEFAULT);
-            if (main_render_loaded_game(game) != 0) {
-                return 1;
-            }
-            *out_rendered = 1;
-        } else if (rc == SAVE_RESULT_IO) {
-            printf(TXT_LOAD_IO_FMT, SAVE_PATH_DEFAULT);
-        } else if (rc == SAVE_RESULT_RANGE) {
-            printf("%s", TXT_LOAD_BAD_RANGE);
-        } else {
-            printf("%s", TXT_LOAD_BAD_FORMAT);
+    rc = save_read_game(SAVE_PATH_DEFAULT, &g_main_loaded_game,
+                        &rng_draw_count);
+    if (rc == SAVE_RESULT_OK) {
+        *game = g_main_loaded_game;
+        plat_seed_rng(game->seed);
+        plat_rand_advance(rng_draw_count);
+        printf(TXT_LOAD_OK_FMT, SAVE_PATH_DEFAULT);
+        if (main_render_loaded_game(game) != 0) {
+            return 1;
         }
+        *out_rendered = 1;
+    } else if (rc == SAVE_RESULT_IO) {
+        printf(TXT_LOAD_IO_FMT, SAVE_PATH_DEFAULT);
+    } else if (rc == SAVE_RESULT_RANGE) {
+        printf("%s", TXT_LOAD_BAD_RANGE);
+    } else {
+        printf("%s", TXT_LOAD_BAD_FORMAT);
     }
     return 0;
 }

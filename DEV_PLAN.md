@@ -577,7 +577,7 @@ Done ✅.
 
 ### [#16](https://github.com/ianmays/dosmud/issues/16) - Save/load system
 
-Done ✅.
+Done ✅ ([#184](https://github.com/ianmays/dosmud/pull/184)).
 
 Single-slot save/load landed through shell-edge [`save.c`](../src/save.c) / [`save.h`](../src/save.h) plus `save` / `load` commands in `main.c`. The binary format is versioned, validates ranges before mutating live state, and stores tracked libc RNG draw count so post-load randomness resumes deterministically.
 
