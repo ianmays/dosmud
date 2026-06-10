@@ -267,7 +267,7 @@ Done ✅ ([#183](https://github.com/ianmays/dosmud/pull/183)).
 
 ### [#44](https://github.com/ianmays/dosmud/issues/44) - Formalize engine boundaries
 
-Done ✅.
+Done ✅ ([#185](https://github.com/ianmays/dosmud/pull/185)).
 
 - Documented core / render / platform layers in `docs/architecture.md`
 - Moved all `invent.c` player output to `render_inv_*` in `grendr`
