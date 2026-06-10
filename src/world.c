@@ -1,11 +1,13 @@
 #include <stdlib.h>
 #include <string.h>
+#include "platform.h"
 #include "world.h"
 #include "txtres.h"
 
 /*
  * world.c owns the generated room graph and its coordinate projection for the
- * local map display. It keeps the topology deterministic for a given seed.
+ * local map display. Generation uses plat_rand so draw counts align with
+ * save/load; the saved world snapshot makes regeneration unnecessary on load.
  */
 
 static void room_set_meta(struct Room *room, const char *name, const char *desc,
@@ -122,7 +124,7 @@ static int random_slot(struct Room *room)
         }
     }
     if (n <= 0) return -1;
-    return dirs[rand() % n];
+    return dirs[plat_rand() % n];
 }
 
 void world_init(struct World *world)
@@ -164,7 +166,7 @@ void world_init(struct World *world)
 
     for (i = 0; i < CFG_WORLD_WILDS_COUNT; ++i) {
         int j;
-        j = rand() % CFG_WORLD_WILDS_COUNT;
+        j = plat_rand() % CFG_WORLD_WILDS_COUNT;
         {
             int t = wilds[i];
             wilds[i] = wilds[j];
@@ -173,7 +175,7 @@ void world_init(struct World *world)
     }
     for (i = 0; i < CFG_WORLD_RUINS_COUNT; ++i) {
         int j;
-        j = rand() % CFG_WORLD_RUINS_COUNT;
+        j = plat_rand() % CFG_WORLD_RUINS_COUNT;
         {
             int t = ruins[i];
             ruins[i] = ruins[j];
@@ -202,7 +204,7 @@ void world_init(struct World *world)
 
     for (i = CFG_WORLD_WILD_BRANCH_START_INDEX; i < CFG_WORLD_WILDS_COUNT; ++i) {
         int anchor;
-        anchor = base_path[rand() % path_len];
+        anchor = base_path[plat_rand() % path_len];
         dir = random_slot(&world->rooms[anchor]);
         if (dir >= 0) {
             world_link2(world, anchor, wilds[i], dir);
@@ -211,7 +213,7 @@ void world_init(struct World *world)
 
     for (i = CFG_WORLD_RUIN_BRANCH_START_INDEX; i < CFG_WORLD_RUINS_COUNT; ++i) {
         int anchor;
-        anchor = ruins[rand() % CFG_WORLD_RUIN_ANCHOR_POOL];
+        anchor = ruins[plat_rand() % CFG_WORLD_RUIN_ANCHOR_POOL];
         dir = random_slot(&world->rooms[anchor]);
         if (dir >= 0) {
             world_link2(world, anchor, ruins[i], dir);

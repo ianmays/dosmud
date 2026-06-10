@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include "platform.h"
 #include "game.h"
 #include "invent.h"
 #include "items.h"
@@ -98,6 +99,7 @@ void game_describe_current_room(struct GameState *game, GameEventQueue *out)
 static void reset_mutable_state(struct GameState *game, int room_id, u32 tick)
 {
     int i;
+    int j;
 
     /* Reset only per-run state here; world topology is rebuilt separately. */
     game_set_mode_explore(game);
@@ -121,6 +123,9 @@ static void reset_mutable_state(struct GameState *game, int room_id, u32 tick)
     game->combat.defending = 0;
     game->wanderer_active = 1;
     game->wanderer_return_tick = 0;
+    for (j = 0; j < CFG_BAG_MAX; ++j) {
+        game->bag[j] = ITEM_NONE;
+    }
 #ifdef TEST_MODE
     game_roll_inject_clear(game);
     game->test_quiet_ticks = 0;
@@ -152,6 +157,8 @@ void game_reset_fixture_baseline(struct GameState *game, int room_id, u32 tick)
 #ifdef TEST_MODE
 static int game_roll_draw(struct GameState *game)
 {
+    /* Injected draws bypass plat_rand so tests stay deterministic without
+     * advancing the save/load draw counter. */
     if (game->roll_inject_active) {
         if (game->roll_queue_i >= game->roll_queue_len) {
             /* Past end: count the draw so fully_consumed fails (over-consumption). */
@@ -160,7 +167,7 @@ static int game_roll_draw(struct GameState *game)
         }
         return game->roll_queue[game->roll_queue_i++];
     }
-    return rand();
+    return plat_rand();
 }
 
 void game_roll_inject_begin(struct GameState *game, const int *values, int count)
@@ -183,9 +190,14 @@ void game_roll_inject_begin(struct GameState *game, const int *values, int count
 
 void game_roll_inject_clear(struct GameState *game)
 {
+    int i;
+
     game->roll_inject_active = 0;
     game->roll_queue_len = 0;
     game->roll_queue_i = 0;
+    for (i = 0; i < CFG_ROLL_INJECT_MAX; ++i) {
+        game->roll_queue[i] = 0;
+    }
 }
 
 int game_roll_inject_fully_consumed(const struct GameState *game)
@@ -207,8 +219,9 @@ int game_roll_spread(struct GameState *game, int spread)
 #ifdef TEST_MODE
     roll = game_roll_draw(game);
 #else
+    /* Release builds draw via plat_rand so save/load can track libc usage. */
     (void)game;
-    roll = rand();
+    roll = plat_rand();
 #endif
     if (roll < 0) {
         roll = -roll;
@@ -445,7 +458,7 @@ static void advance_world_tick(struct GameState *game, int wanderer_moves_first,
 #endif
     if (!game->wanderer_active && game->tick >= game->wanderer_return_tick) {
         game->wanderer_active = 1;
-        game->wanderer_room = rand() % game->world.room_count;
+        game->wanderer_room = plat_rand() % game->world.room_count;
     }
 
     old_wanderer_room = game->wanderer_room;
@@ -470,7 +483,7 @@ static void advance_world_tick(struct GameState *game, int wanderer_moves_first,
     maybe_emit_animal_noise(game, out);
     maybe_emit_atmosphere(game, out);
     if (!game_is_busy_dialogue(game) &&
-            (rand() % CFG_ROLL_PERCENT_RANGE) < CFG_BANDIT_ENCOUNTER_CHANCE_BELOW) {
+            (plat_rand() % CFG_ROLL_PERCENT_RANGE) < CFG_BANDIT_ENCOUNTER_CHANCE_BELOW) {
         enemy_begin_encounter(game, out);
     }
 }

@@ -42,6 +42,8 @@ extern const char *const TXT_HELP_QUIT;
 extern const char *const TXT_HELP_HELP;
 extern const char *const TXT_HELP_MAP;
 extern const char *const TXT_HELP_WIELD;
+extern const char *const TXT_HELP_SAVE;
+extern const char *const TXT_HELP_LOAD;
 extern const char *const TXT_MAP_HEADER;
 extern const char *const TXT_MAP_LEGEND;
 extern const char *const TXT_MAP_NONE_EXPLORED;
@@ -207,5 +209,12 @@ extern const char *const TXT_INV_UNWIELD_GROUND_FMT;
 extern const char *const TXT_INV_UNWIELD_CANNOT;
 extern const char *const TXT_INV_ALREADY_WIELDING_FMT;
 extern const char *const TXT_INV_WIELD_STOW_FAIL;
+
+extern const char *const TXT_SAVE_OK_FMT;
+extern const char *const TXT_SAVE_IO_FMT;
+extern const char *const TXT_LOAD_OK_FMT;
+extern const char *const TXT_LOAD_IO_FMT;
+extern const char *const TXT_LOAD_BAD_FORMAT;
+extern const char *const TXT_LOAD_BAD_RANGE;
 
 #endif

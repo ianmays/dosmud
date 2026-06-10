@@ -32,6 +32,10 @@ TEST command_parse_core_verbs(void)
     ASSERT_EQ(CMD_TALK, cmd.type);
     ASSERT_EQ(1, parse_line("loot", &cmd));
     ASSERT_EQ(CMD_LOOT, cmd.type);
+    ASSERT_EQ(1, parse_line("save", &cmd));
+    ASSERT_EQ(CMD_SAVE, cmd.type);
+    ASSERT_EQ(1, parse_line("load", &cmd));
+    ASSERT_EQ(CMD_LOAD, cmd.type);
     ASSERT_EQ(1, parse_line("unwield", &cmd));
     ASSERT_EQ(CMD_UNWIELD, cmd.type);
     PASS();
@@ -132,6 +136,8 @@ TEST command_help_line_topics(void)
     ASSERT(strcmp(command_help_line(CMD_HELP_TOPIC_LOOK),
             command_help_line(CMD_HELP_TOPIC_UNKNOWN)) != 0);
     ASSERT(strstr(command_help_line(CMD_HELP_TOPIC_TAKE), "take all") != 0);
+    ASSERT(strstr(command_help_line(CMD_HELP_TOPIC_SAVE), "save.dat") != 0);
+    ASSERT(strstr(command_help_line(CMD_HELP_TOPIC_LOAD), "save.dat") != 0);
     PASS();
 }
 

@@ -30,18 +30,18 @@ Before opening a draft PR (agents and contributors with automation):
 implement → make test* → pre-draft-pr-passes (agents) or individual passes → draft PR
 ```
 
-- Pre-draft PR passes (agents, default): [`.cursor/skills/pre-draft-pr-passes/SKILL.md`](../.cursor/skills/pre-draft-pr-passes/SKILL.md) orchestrates test-gap, comment, and documentation subagents (see AGENTS.md **Pre-draft PR passes**)
-- Test-gap pass: [`.cursor/skills/testing-gap-auditor/SKILL.md`](../.cursor/skills/testing-gap-auditor/SKILL.md) (see AGENTS.md **Testing pass**); CI runs `scripts/check-test-gaps.sh` in informative mode (log gaps; fix before merge)
-- Comment pass: [`.cursor/skills/code-commenter/SKILL.md`](../.cursor/skills/code-commenter/SKILL.md) on `src/`, `include/`, and `tests/` C sources (see AGENTS.md **Comment pass**)
-- Documentation pass: [`.cursor/skills/documentation-maintainer/SKILL.md`](../.cursor/skills/documentation-maintainer/SKILL.md) (see AGENTS.md **Documentation pass**)
+- Pre-draft PR passes (agents, default): [`.cursor/skills/pre-draft-pr-passes/SKILL.md`](../.cursor/skills/pre-draft-pr-passes/SKILL.md) orchestrates test-gap, comment, and documentation subagents (see [AGENTS.md](https://github.com/ianmays/dosmud/blob/main/AGENTS.md#pre-draft-pr-passes))
+- Test-gap pass: [`.cursor/skills/testing-gap-auditor/SKILL.md`](../.cursor/skills/testing-gap-auditor/SKILL.md) (see [AGENTS.md](https://github.com/ianmays/dosmud/blob/main/AGENTS.md#testing-pass)); CI runs `scripts/check-test-gaps.sh` in informative mode (log gaps; fix before merge)
+- Comment pass: [`.cursor/skills/code-commenter/SKILL.md`](../.cursor/skills/code-commenter/SKILL.md) on `src/`, `include/`, and `tests/` C sources (see [AGENTS.md](https://github.com/ianmays/dosmud/blob/main/AGENTS.md#comment-pass))
+- Documentation pass: [`.cursor/skills/documentation-maintainer/SKILL.md`](../.cursor/skills/documentation-maintainer/SKILL.md) (see [AGENTS.md](https://github.com/ianmays/dosmud/blob/main/AGENTS.md#documentation-pass))
 
-**Qualitative playtesting (optional):** agents or contributors can run interactive play sessions with the [play-tester skill](../.cursor/skills/play-tester/SKILL.md) (`make build`, `./dosmud --seed <N>`, transcripts under `playtest/sessions/` which are gitignored). Reports number **ideas** and **improvements** for easy follow-up (e.g. file issues for `ideas 4` and `improvements 2`); seed-scripted events stay in the session log, not the backlog. See AGENTS.md **Playtesting (optional)**.
+**Qualitative playtesting (optional):** agents or contributors can run interactive play sessions with the [play-tester skill](../.cursor/skills/play-tester/SKILL.md) (`make build`, `./dosmud --seed <N>`, transcripts under `playtest/sessions/` which are gitignored). Reports number **ideas** and **improvements** for easy follow-up (e.g. file issues for `ideas 4` and `improvements 2`); seed-scripted events stay in the session log, not the backlog. See [AGENTS.md](https://github.com/ianmays/dosmud/blob/main/AGENTS.md#playtesting-optional).
 
-The repo’s GitHub project uses a **Status** field on issues: **Planning** when forming an implementation plan (add decided plan as a comment), **In progress** while you implement (before the PR exists), **Review** once the draft PR is up, **Done** after merge. Details for agents: [AGENTS.md](../AGENTS.md).
+The repo’s GitHub project uses a **Status** field on issues: **Planning** when forming an implementation plan (add decided plan as a comment), **In progress** while you implement (before the PR exists), **Review** once the draft PR is up, **Done** after merge. Details for agents: [AGENTS.md](https://github.com/ianmays/dosmud/blob/main/AGENTS.md).
 
-[`DEV_PLAN.md`](../DEV_PLAN.md) is a manually curated roadmap log tied to [GitHub milestones](https://github.com/ianmays/dosmud/milestones). When you open a draft **implementation** PR for an issue that already has a section here, mark **Done ✅** (optional PR link). Do not mark Done on hygiene or docs-only PRs. Issue **blocked-by** relationships on GitHub express sequencing. It is not a living status tracker (no updates on push or merge).
+[`DEV_PLAN.md`](https://github.com/ianmays/dosmud/blob/main/DEV_PLAN.md) is a manually curated roadmap log tied to [GitHub milestones](https://github.com/ianmays/dosmud/milestones). When you open a draft **implementation** PR for an issue that already has a section here, mark **Done ✅** (optional PR link). Do not mark Done on hygiene or docs-only PRs. Issue **blocked-by** relationships on GitHub express sequencing. It is not a living status tracker (no updates on push or merge).
 
-**New milestone issues:** set **Size** and **Priority** on [project #1](https://github.com/users/ianmays/projects/1), wire **blocked-by** on GitHub, add the DEV_PLAN table row + stub in a **docs PR** when the milestone is tracked there (agents in plan mode do GitHub steps only), and align Backlog stack order. Mark **Done ✅** in DEV_PLAN when the implementation draft PR opens, not at issue create. Agents and contributors: [`.cursor/skills/milestone-issue-hygiene/SKILL.md`](../.cursor/skills/milestone-issue-hygiene/SKILL.md). Drift audits: [`.cursor/skills/audit-github-devplan/SKILL.md`](../.cursor/skills/audit-github-devplan/SKILL.md). See [AGENTS.md](../AGENTS.md) **DEV_PLAN updates**.
+**New milestone issues:** set **Size** and **Priority** on [project #1](https://github.com/users/ianmays/projects/1), wire **blocked-by** on GitHub, add the DEV_PLAN table row + stub in a **docs PR** when the milestone is tracked there (agents in plan mode do GitHub steps only), and align Backlog stack order. Mark **Done ✅** in DEV_PLAN when the implementation draft PR opens, not at issue create. Agents and contributors: [`.cursor/skills/milestone-issue-hygiene/SKILL.md`](../.cursor/skills/milestone-issue-hygiene/SKILL.md). Drift audits: [`.cursor/skills/audit-github-devplan/SKILL.md`](../.cursor/skills/audit-github-devplan/SKILL.md). See [AGENTS.md](https://github.com/ianmays/dosmud/blob/main/AGENTS.md#dev_plan-updates).
 
 ### After you push
 
@@ -52,7 +52,7 @@ The repo’s GitHub project uses a **Status** field on issues: **Planning** when
 - When a push addresses inline review comments, resolve those PR review threads on GitHub (agents: same-turn step in [pr-after-push skill](../.cursor/skills/pr-after-push/SKILL.md)).
 - Project board **Review** can be set when the draft PR is opened; GitHub **Ready for review** (`isDraft` false) starts the review-trigger convention, not board status alone.
 
-Agents: policy in [AGENTS.md](../AGENTS.md) (**After `git push` to a PR branch**); procedure in [`.cursor/skills/pr-after-push/SKILL.md`](../.cursor/skills/pr-after-push/SKILL.md).
+Agents: policy in [AGENTS.md](https://github.com/ianmays/dosmud/blob/main/AGENTS.md#after-git-push-to-a-pr-branch-mandatory); procedure in [`.cursor/skills/pr-after-push/SKILL.md`](../.cursor/skills/pr-after-push/SKILL.md).
 
 ### CI review surfaces
 
@@ -117,6 +117,6 @@ For detailed environment and workflow information, see `testing.md`.
 
 ## Documentation
 
-Canonical ownership and the documentation-pass policy: [AGENTS.md](../AGENTS.md#documentation-ownership) and [AGENTS.md](../AGENTS.md#documentation-pass).
+Canonical ownership and the documentation-pass policy: [AGENTS.md](https://github.com/ianmays/dosmud/blob/main/AGENTS.md#documentation-ownership) and [AGENTS.md](https://github.com/ianmays/dosmud/blob/main/AGENTS.md#documentation-pass).
 
 Roadmap hygiene when filing milestone issues: [milestone-issue-hygiene](../.cursor/skills/milestone-issue-hygiene/SKILL.md). Drift audits: [audit-github-devplan](../.cursor/skills/audit-github-devplan/SKILL.md).

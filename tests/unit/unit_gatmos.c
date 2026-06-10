@@ -80,23 +80,24 @@ TEST gatmos_animal_noise_tick_gate(void)
     int r_after;
     int r_second;
 
+    /* Observe plat_rand draw ordering through the animal-noise tick gate. */
     reset_camp(&game);
     game.tick = 1;
     emit_noise(&game, &out);
-    r_skip = rand();
+    r_skip = plat_rand();
 
     reset_camp(&game);
-    r_first = rand();
+    r_first = plat_rand();
     ASSERT_EQ(r_skip, r_first);
 
     reset_camp(&game);
     game.tick = 2;
     emit_noise(&game, &out);
-    r_after = rand();
+    r_after = plat_rand();
 
     reset_camp(&game);
-    r_first = rand();
-    r_second = rand();
+    r_first = plat_rand();
+    r_second = plat_rand();
     ASSERT_EQ(r_after, r_second);
     if (r_skip == r_after) {
         FAILm("tick period gate should call rand() only when tick matches");

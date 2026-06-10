@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include "platform.h"
 #include "wanderer.h"
 #include "game.h"
 #include "gout.h"
@@ -64,7 +65,7 @@ void wanderer_step(struct GameState *game)
     if (n <= 0) {
         return;
     }
-    pick = rand() % n;
+    pick = plat_rand() % n;
     game->wanderer_room = r->exits[dirs[pick]];
 }
 
@@ -100,6 +101,6 @@ int wanderer_cmd_reply(struct GameState *game, int choice, GameEventQueue *out)
     game->wanderer_room = -1;
     /* Return timing is randomized only after the player resolves the dialogue branch. */
     game->wanderer_return_tick = game->tick + CFG_WANDERER_RETURN_DELAY_BASE +
-        (rand() % CFG_WANDERER_RETURN_DELAY_SPREAD);
+        (plat_rand() % CFG_WANDERER_RETURN_DELAY_SPREAD);
     return 1;
 }

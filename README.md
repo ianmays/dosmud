@@ -49,6 +49,8 @@ make build
 ./dosmud --seed 1234
 ```
 
+Release and `TEST_MODE` runs both support in-session `save` and `load` commands. The first pass uses a single-slot `save.dat` file in the current working directory.
+
 Replay logging is a `TEST_MODE` debugging path, not a release-build feature. Use it from a test build:
 
 ```sh

@@ -1,0 +1,13 @@
+dosmud-replay-v1 seed=1234
+step=0 kind=startup tick=0 running=1 mode=explore events=1 overflow=0 input=null
+event=0 kind=GAME_EVENT_ROOM_LOOK arg0=0 arg1=0 arg2=0 arg3=0 room=0 room_items=[2,0,0,0] text=null
+step=1 kind=input tick=0 running=1 mode=explore events=0 overflow=0 input="save"
+step=2 kind=input tick=1 running=1 mode=explore events=2 overflow=0 input="move south"
+event=0 kind=GAME_EVENT_MOVE arg0=0 arg1=0 arg2=0 arg3=0 room=-1 room_items=[0,0,0,0] text="south"
+event=1 kind=GAME_EVENT_ROOM_LOOK arg0=0 arg1=0 arg2=0 arg3=0 room=7 room_items=[3,0,0,0] text=null
+step=3 kind=input tick=0 running=1 mode=explore events=1 overflow=0 input="load"
+event=0 kind=GAME_EVENT_ROOM_LOOK arg0=0 arg1=0 arg2=0 arg3=0 room=0 room_items=[0,0,0,0] text=null
+step=4 kind=input tick=1 running=1 mode=explore events=2 overflow=0 input="move south"
+event=0 kind=GAME_EVENT_MOVE arg0=0 arg1=0 arg2=0 arg3=0 room=-1 room_items=[0,0,0,0] text="south"
+event=1 kind=GAME_EVENT_ROOM_LOOK arg0=0 arg1=0 arg2=0 arg3=0 room=7 room_items=[3,0,0,0] text=null
+step=5 kind=input tick=1 running=0 mode=explore events=0 overflow=0 input="quit"

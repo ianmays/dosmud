@@ -577,25 +577,13 @@ Done ✅.
 
 ### [#16](https://github.com/ianmays/dosmud/issues/16) - Save/load system
 
-Create:
+Done ✅ ([#184](https://github.com/ianmays/dosmud/pull/184)).
 
-```text
-save.c
-save.h
-```
+Single-slot save/load landed through shell-edge [`save.c`](../src/save.c) / [`save.h`](../src/save.h) plus `save` / `load` commands in `main.c`. The binary format is versioned, validates ranges before mutating live state, and stores tracked libc RNG draw count so post-load randomness resumes deterministically.
 
-The current fixed-array architecture is already well suited to serialization because the project favors:
-- fixed arrays
-- deterministic state
-- explicit structs
-
-Avoid:
-- pointers
-- heap ownership
-- variable-sized runtime structures
-- function pointers in persistent state
-
-Initial binary serialization is acceptable.
+### Testing
+- Unit: [`unit_save.c`](../tests/unit/unit_save.c) covers round-trip, bad magic, truncated files, and out-of-range rejection without mutating the target state; [`unit_wrld.c`](../tests/unit/unit_wrld.c) and [`unit_wandr.c`](../tests/unit/unit_wandr.c) assert tracked RNG draw behavior
+- Snapshots: [`save_load`](../tests/regression/save_load.expect) proves single-slot `save.dat` round-trip and deterministic post-load movement
 
 ## [Content Expansion](https://github.com/ianmays/dosmud/milestone/6)
 

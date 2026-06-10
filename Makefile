@@ -11,9 +11,9 @@ PLAT_SRC = src/platpos.c
 ifeq ($(TARGET),win)
 PLAT_SRC = src/platwin.c
 endif
-SRC = src/main.c $(PLAT_SRC) src/game.c src/gout.c src/gprog.c src/combat.c src/genc.c src/wanderer.c src/dialogue.c src/gatmos.c src/grendr.c src/fmt.c src/invent.c src/command.c src/world.c src/items.c src/txtres.c
+SRC = src/main.c $(PLAT_SRC) src/game.c src/gout.c src/gprog.c src/combat.c src/genc.c src/wanderer.c src/dialogue.c src/gatmos.c src/grendr.c src/fmt.c src/invent.c src/command.c src/world.c src/items.c src/replay.c src/save.c src/txtres.c
 HARNESS_SRC = $(HARNESS_DIR)/testharn.c $(HARNESS_DIR)/th_world.c
-TEST_SRC = $(SRC) src/replay.c $(HARNESS_SRC)
+TEST_SRC = $(SRC) $(HARNESS_SRC)
 REGRESSION_DIR = tests/regression
 UNIT_DIR = tests/unit
 RUN_ARGS = $(if $(SEED),--seed $(SEED))
@@ -93,7 +93,8 @@ SNAPSHOT_TESTS = \
 	bandit_fight bandit_intimidate_ok bandit_intimidate_fail bandit_bag_empty \
 	unknown_cmd cannot_move give_wrong_context reply_nobody post_combat_reply_guard reply_invalid \
 	craft_salve craft_unknown take_nothing take_wrong_item take_all take_all_bag_full \
-	replay_log
+	save_load \
+	replay_log replay_save_load
 
 snapshot-run:
 	@set -e; \
@@ -105,6 +106,17 @@ snapshot-run:
 			./$(BIN) --seed 1234 --replay-log $(REGRESSION_DIR)/replay_log_log.output < $(REGRESSION_DIR)/replay_log.input > $(REGRESSION_DIR)/replay_log.output; \
 			diff -u $(REGRESSION_DIR)/replay_log.expect $(REGRESSION_DIR)/replay_log.output; \
 			diff -u $(REGRESSION_DIR)/replay_log_log.expect $(REGRESSION_DIR)/replay_log_log.output; \
+		elif [ "$$t" = "replay_save_load" ]; then \
+			rm -f save.dat; \
+			./$(BIN) --seed 1234 --replay-log $(REGRESSION_DIR)/replay_save_load_log.output < $(REGRESSION_DIR)/replay_save_load.input > $(REGRESSION_DIR)/replay_save_load.output; \
+			diff -u $(REGRESSION_DIR)/replay_save_load.expect $(REGRESSION_DIR)/replay_save_load.output; \
+			diff -u $(REGRESSION_DIR)/replay_save_load_log.expect $(REGRESSION_DIR)/replay_save_load_log.output; \
+			rm -f save.dat; \
+		elif [ "$$t" = "save_load" ]; then \
+			rm -f save.dat; \
+			./$(BIN) < $(REGRESSION_DIR)/$$t.input > $(REGRESSION_DIR)/$$t.output; \
+			diff -u $(REGRESSION_DIR)/$$t.expect $(REGRESSION_DIR)/$$t.output; \
+			rm -f save.dat; \
 		else \
 			./$(BIN) < $(REGRESSION_DIR)/$$t.input > $(REGRESSION_DIR)/$$t.output; \
 			diff -u $(REGRESSION_DIR)/$$t.expect $(REGRESSION_DIR)/$$t.output; \
@@ -136,17 +148,18 @@ UNIT_BIN = $(UNIT_BUILD_DIR)/dosmud_unit
 UNIT_CFLAGS = $(TEST_CFLAGS) -I$(UNIT_DIR) -fprofile-arcs -ftest-coverage
 UNIT_GAMEPLAY_SRC = $(PLAT_SRC) src/game.c src/gout.c src/gprog.c src/combat.c src/genc.c \
 	src/wanderer.c src/dialogue.c src/gatmos.c src/grendr.c src/fmt.c src/invent.c \
-	src/command.c src/world.c src/items.c src/replay.c src/txtres.c
+	src/command.c src/world.c src/items.c src/replay.c src/save.c src/txtres.c
 UNIT_CORE_SRC = $(UNIT_GAMEPLAY_SRC) $(HARNESS_SRC)
 UNIT_TEST_SRC = $(UNIT_DIR)/unit_main.c $(UNIT_DIR)/unit_util.c $(UNIT_DIR)/unit_item.c \
 	$(UNIT_DIR)/unit_gout.c \
 	$(UNIT_DIR)/unit_rplog.c \
+	$(UNIT_DIR)/unit_save.c \
 	$(UNIT_DIR)/unit_cmd.c $(UNIT_DIR)/unit_harn.c $(UNIT_DIR)/unit_inv.c $(UNIT_DIR)/unit_cbt.c \
 	$(UNIT_DIR)/unit_gprog.c $(UNIT_DIR)/unit_genc.c $(UNIT_DIR)/unit_dial.c $(UNIT_DIR)/unit_wandr.c \
 	$(UNIT_DIR)/unit_gatmos.c $(UNIT_DIR)/unit_fmt.c $(UNIT_DIR)/unit_wrld.c $(UNIT_DIR)/unit_game.c $(UNIT_DIR)/unit_tharn.c
 UNIT_CORE_OBJS = $(addprefix $(UNIT_BUILD_DIR)/,$(notdir $(UNIT_CORE_SRC:.c=.o)))
 UNIT_TEST_OBJS = $(addprefix $(UNIT_BUILD_DIR)/,$(notdir $(UNIT_TEST_SRC:.c=.o)))
-COVERAGE_MODULES = command invent combat game genc wanderer dialogue gatmos world gprog items fmt gout replay testharn
+COVERAGE_MODULES = command invent combat game genc wanderer dialogue gatmos world gprog items fmt gout replay save testharn
 
 ifeq ($(UNIT_BUILD_VERBOSE),1)
 UNIT_CC_QUIET =

@@ -70,6 +70,8 @@ Platform or frontend code runs simulation first, then hands the resulting `GameE
 
 The optional replay log path stays outside render. In `TEST_MODE`, `main.c` may mirror each per-step `GameEventQueue` into [`src/replay.c`](../src/replay.c) before the next queue reset, but `grendr` remains the only text renderer and the replay log remains a separate persistent record.
 
+The save/load path also stays outside render and gameplay slices. [`src/save.c`](../src/save.c) serializes the durable `GameState` snapshot at the shell edge, while `main.c` owns the `save` / `load` commands, success/error copy, and post-load room redraw.
+
 ### Newline and spacing
 
 Player-facing copy lives in `txtres`; `grendr` owns when a blank line appears before output.
@@ -89,6 +91,7 @@ Player-facing copy lives in `txtres`; `grendr` owns when a blank line appears be
 - `plat_poll_line` - non-blocking stdin poll (DOS `kbhit`/`getch`, Windows console `_kbhit`/`_getch`, or POSIX `select`)
 - `plat_time_now` - wall-clock seconds for idle ticks
 - `plat_seed_rng` - applies `srand((unsigned int)seed)`; `main.c` chooses a `u32` seed (`CFG_TEST_RAND_SEED`, wall clock, or `--seed`). `GameState.seed` stores the full `u32`; libc may use fewer bits (for example 16-bit `unsigned int` on DOS)
+- `plat_rand` plus `plat_rand_draw_count` / `plat_rand_advance` - tracked libc RNG draws so save/load can restore the future random stream without serializing libc internals
 
 Implementations are split by toolchain (FAT 8.3 basenames):
 
@@ -99,6 +102,8 @@ Implementations are split by toolchain (FAT 8.3 basenames):
 [`src/main.c`](../src/main.c) orchestrates the main loop and may use `printf` for shell-level prompts and banners. It must not include `conio.h`, `dos.h`, or other platform headers directly.
 
 In `TEST_MODE`, `main.c` accepts `--replay-log [path]`, opens a deterministic text log, and records each startup, input, and idle step after simulation produces the queue and before the next reset clears it. The log includes the seed, step index, tick, input text when present, queue overflow state, and serialized `GameEvent` payloads in queue order. If the flag omits a path, logging defaults to `replay.log`.
+
+In all builds, `main.c` also accepts in-session `save` and `load` shell commands. They do not advance time, use the single-slot `save.dat` path in the current working directory, serialize the durable simulation state through [`src/save.c`](../src/save.c), and redraw the restored room immediately after a successful load.
 
 Run `make check-layers` before opening a PR (or use `make test-all`, which runs it first). That target fails if `printf` appears in any `src/*.c` other than `main.c`, `grendr.c`, `platdos.c`, `platpos.c`, or `platwin.c`. `make test` compiles only and does not run the guard.
 
@@ -163,6 +168,7 @@ Conventions:
 - input/timing integration
 - `TEST_MODE` only: optional replay log capture via `--replay-log [path]`
 - `TEST_MODE`: delegates `@fixture` and `@seed` lines to `testharn`
+- in-session `save` / `load` shell commands (all builds); intercepts before `game_process_input` so ticks do not advance
 
 ### `replay`
 
@@ -170,6 +176,14 @@ Conventions:
 - writes a deterministic sidecar text log (`dosmud-replay-v1`) of startup, input, and idle steps
 - captures each step's `GameEventQueue` after simulation and before the next queue reset; does not mutate gameplay or render state
 - I/O failure surfaces through `main.c` stderr and exits non-zero
+
+### `save`
+
+- shell-edge binary serialization in [`save.c`](../src/save.c); called only from `main.c`
+- versioned, field-by-field save format (`DMSV`, version 1) for `GameState`, `World`, and tracked RNG draw count
+- validates magic, version, and field ranges before replacing the live game state
+- `TEST_MODE` builds append roll-injection and quiet-tick fields to the v1 payload; release builds use a shorter record and reject the extra bytes via EOF/trailing-byte checks
+- keeps render queues and replay logs out of the save format
 
 ### `game`
 
@@ -180,14 +194,14 @@ Conventions:
 - explicit game modes in [`game.h`](../src/game.h): `GameMode` (explore, dialogue, combat), `DialogueKind` for the active dialogue when in dialogue mode (room NPCs including the pond frog, wanderer, enemy), and `CombatState` for combat-only fields
 - mode transitions via `game_set_mode_explore`, `game_set_mode_dialogue`, and `game_set_mode_combat` (only one major mode at a time)
 - `game_is_busy_dialogue` returns true whenever `mode != GAME_MODE_EXPLORE` (ambient encounters, idle background ticks)
-- `game_roll_spread` and `game_roll_percent` centralize gameplay draws used for combat, corpse loot, kill XP, and bandit intimidate (`rand()` when inject is inactive)
+- `game_roll_spread` and `game_roll_percent` centralize gameplay draws used for combat, corpse loot, kill XP, and bandit intimidate (`plat_rand()` when inject is inactive; inject bypasses the draw counter in `TEST_MODE`)
 - `TEST_MODE` only: `game_roll_inject_*` and `test_quiet_ticks` on `GameState`; when `test_quiet_ticks` is set, `advance_world_tick` skips ambient atmosphere, animal noise, bandit ambush, and wanderer movement (see [quiet ticks](testing.md#quiet-ticks-test_quiet_ticks-test_mode-only))
-- [`gatmos.c`](../src/gatmos.c) and wanderer return timing still use raw `rand()` in normal play; world generation uses `rand()` at init
+- ambient, wanderer, and world generation randomness flow through tracked `plat_rand()` so save/load can restore future deterministic draws
 
 Gameplay slices live beside `game.c` as plain C translation units (no extra framework):
 
 - [`gprog.c`](../src/gprog.c) - XP and level-up rewards (`game_xp_to_next_level`, `progression_gain_xp`); queues `GAME_EVENT_XP_GAIN` and `GAME_EVENT_STAT_CHANGE` via `gout` (FAT 8.3-safe basename)
-- [`combat.c`](../src/combat.c) - combat start, player reply resolution, enemy turn; queues `GAME_EVENT_COMBAT` phases via `gout` (randomness via `game_roll_spread` / `game_roll_percent`, not `rand()`)
+- [`combat.c`](../src/combat.c) - combat start, player reply resolution, enemy turn; queues `GAME_EVENT_COMBAT` phases via `gout` (randomness via `game_roll_spread` / `game_roll_percent`, not direct `plat_rand()` calls)
 - [`genc.c`](../src/genc.c) - ambient bandit encounter open state (FAT 8.3-safe basename)
 - [`wanderer.c`](../src/wanderer.c) - traveler movement and encounter flow
 - [`dialogue.c`](../src/dialogue.c) - pond frog lines and NPC id hint for room look
@@ -203,6 +217,7 @@ New `src/*.c` and `src/*.h` basenames must stay within **classic FAT 8+3** (at m
 
 - parse raw text into structured commands
 - keep parsing separate from execution/mutation
+- recognizes `save` and `load` tokens (`CMD_SAVE`, `CMD_LOAD`); `main.c` handles file I/O before gameplay mutation
 
 ### `world`
 
@@ -257,10 +272,10 @@ New `src/*.c` and `src/*.h` basenames must stay within **classic FAT 8+3** (at m
 
 ## Determinism rules
 
-- seed randomness once at startup (`plat_seed_rng` from `main`; combat uses `game_roll_*`, which calls `rand()` when inject is inactive)
+- seed randomness once at startup (`plat_seed_rng` from `main`; gameplay draws use tracked `plat_rand()` via `game_roll_*` or slice calls, with `TEST_MODE` inject bypassing the draw counter)
 - evolve simulation via commands and background ticks
 - never tie simulation correctness to render cadence
-- snapshot tests under `tests/regression/` combine fixtures (direct state), optional roll inject (`TEST_MODE` only), and a fixed default seed for remaining libc `rand()` paths; see [fixture design trade-offs](testing.md#fixture-design-trade-offs)
+- snapshot tests under `tests/regression/` combine fixtures (direct state), optional roll inject (`TEST_MODE` only), and a fixed default seed for remaining `plat_rand()` paths; see [fixture design trade-offs](testing.md#fixture-design-trade-offs)
 - greatest unit tests under `tests/unit/` assert `GameState` and parse results (`make test-unit`); see [unit tests](testing.md#unit-tests-greatest)
 
 ## ANSI C89/C90 compatibility rules

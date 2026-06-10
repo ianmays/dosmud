@@ -41,8 +41,10 @@ TEST wanderer_step_moves(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game.wanderer_room = WORLD_ROOM_CAMP;
     plat_seed_rng(42u);
+    ASSERT_EQ(0U, plat_rand_draw_count());
     before = game.wanderer_room;
-    wanderer_step(&game);
+    wanderer_step(&game); /* one plat_rand for exit pick */
+    ASSERT_EQ(1U, plat_rand_draw_count());
     ASSERT_NEQ(before, game.wanderer_room);
     PASS();
 }
@@ -74,7 +76,9 @@ TEST wanderer_reply_cmd_explore(void)
     unit_game_fresh(&game, 4u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game_set_mode_dialogue(&game, DIALOGUE_WANDERER);
+    plat_seed_rng(game.seed);
     ASSERT_EQ(1, wanderer_reply_out(&game, 2, &out));
+    ASSERT_EQ(1U, plat_rand_draw_count());
     ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
     ASSERT_EQ(0, game.wanderer_active);
     PASS();

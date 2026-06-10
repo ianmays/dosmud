@@ -1,0 +1,7 @@
+@fixture world_boot
+@fixture quiet_explore
+save
+move south
+load
+move south
+quit
