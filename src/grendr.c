@@ -681,6 +681,7 @@ static void render_dialogue_event(const GameEvent *ev)
 {
     switch (ev->arg0) {
     case GAME_DIALOGUE_ACTOR_FROG:
+        /* Frog uses shared TALK/REPLY phases; render_* names are legacy. */
         if (ev->arg1 == GAME_DIALOGUE_PHASE_TALK) {
             render_frog_dialogue_intro();
         } else if (ev->arg1 == GAME_DIALOGUE_PHASE_REPLY) {

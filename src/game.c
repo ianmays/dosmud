@@ -64,7 +64,10 @@ int game_heal_player(struct GameState *game, int amount)
     return 1;
 }
 
-/* Snapshot current room into a generic look event (render reads room_id/items). */
+/*
+ * Snapshot current room into a generic look event. arg0 is npc_room_actor for
+ * HUD presence; render reads room_id/items from the event body.
+ */
 static void do_look(struct GameState *game, GameEventQueue *out)
 {
     int i;

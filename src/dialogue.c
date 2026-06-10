@@ -16,6 +16,7 @@ int dialogue_cmd_reply(struct GameState *game, int choice, GameEventQueue *out)
     }
 
     actor = npc_dialogue_actor(game->dialogue);
+    /* Wanderer and enemy replies are routed in wanderer.c / genc.c, not here. */
     if (actor == GAME_DIALOGUE_ACTOR_NONE) {
         return 0;
     }
@@ -23,6 +24,7 @@ int dialogue_cmd_reply(struct GameState *game, int choice, GameEventQueue *out)
         npc_push_dialogue_guard(out, GAME_DIALOGUE_GUARD_PICK_123);
         return 1;
     }
+    /* Each fixed room NPC resolves one reply and returns to explore. */
     npc_push_dialogue(out, actor, GAME_DIALOGUE_PHASE_REPLY, choice);
     game_set_mode_explore(game);
     return 1;
@@ -48,6 +50,7 @@ int dialogue_cmd_talk(struct GameState *game, GameEventQueue *out)
         return 1;
     }
 
+    /* Nobody is a one-shot hint; player stays in explore (no dialogue mode). */
     npc_push_dialogue(out, GAME_DIALOGUE_ACTOR_NOBODY,
         GAME_DIALOGUE_PHASE_TALK, 0);
     return 1;

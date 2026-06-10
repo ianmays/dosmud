@@ -15,6 +15,7 @@ struct NpcRoomInfo {
     int talk_phase;
 };
 
+/* Stable content hooks: fixed world rooms, not generated graph membership. */
 static const struct NpcRoomInfo NPC_ROOM_INFO[] = {
     /* Frog keeps its custom rendered copy, but event phases now match other NPCs. */
     { WORLD_ROOM_POND, GAME_DIALOGUE_ACTOR_FROG,
@@ -50,6 +51,7 @@ int npc_room_actor(int room_id)
     return info->actor;
 }
 
+/* Maps DIALOGUE_NPC_* room kinds only; wanderer and enemy stay in their slices. */
 int npc_dialogue_actor(int dialogue_kind)
 {
     int i;
@@ -75,12 +77,16 @@ int npc_open_room_dialogue(struct GameState *game, struct GameEventQueue *out)
     if (info == 0) {
         return 0;
     }
-    /* Fixed room NPCs all open through this seam; only the phase varies. */
+    /* Talk opens dialogue mode and queues one TALK event; reply uses dialogue_cmd_reply. */
     npc_push_dialogue(out, info->actor, info->talk_phase, 0);
     game_set_mode_dialogue(game, info->dialogue_kind);
     return 1;
 }
 
+/*
+ * #160: shared dialogue producers (payload layout in gout.h). Slices queue
+ * actor/phase/choice here; grendr maps GAME_EVENT_DIALOGUE* to copy.
+ */
 void npc_push_dialogue(struct GameEventQueue *out, int actor, int phase, int choice)
 {
     game_event_push(out, GAME_EVENT_DIALOGUE, actor, phase, choice, 0, 0);

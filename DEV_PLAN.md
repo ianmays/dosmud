@@ -707,7 +707,13 @@ Follow-up to [#142](https://github.com/ianmays/dosmud/issues/142) / PR 144. Play
 
 ### [#104](https://github.com/ianmays/dosmud/issues/104) - NPC module
 
+Extract fixed NPC identity from `dialogue.c` into `npc.c`: room-to-actor lookup, shared `GAME_EVENT_DIALOGUE` producers, and room talk opening for pond frog, watchman, herbalist, and archivist.
+
 Done ✅.
+
+### Testing
+- Unit: `unit_npc.c` (lookup, open-room dialogue, shared push helpers); frog lookup tests moved from `unit_dial.c`; wanderer invalid-reply guard in `unit_wandr.c`
+- Snapshots: `frog_hint` (`@fixture at_pond` + `look` proves generic room-NPC hint at pond)
 
 ### [#100](https://github.com/ianmays/dosmud/issues/100) - Wanderer behaviour reusable for any NPC
 

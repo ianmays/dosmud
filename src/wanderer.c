@@ -70,6 +70,7 @@ void wanderer_begin_encounter(struct GameState *game, GameEventQueue *out)
 
 void wanderer_apply_reply(int choice, GameEventQueue *out)
 {
+    /* Wanderer actor is outside NPC_ROOM_INFO; only the push helper is shared. */
     npc_push_dialogue(out, GAME_DIALOGUE_ACTOR_WANDERER,
         GAME_DIALOGUE_PHASE_REPLY,
         choice);

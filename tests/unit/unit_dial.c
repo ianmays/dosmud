@@ -7,8 +7,8 @@
 #include "unit_util.h"
 
 /*
- * out-taking helpers assert #160 GameEvent payloads; *_state wraps a local
- * GameEventQueue for mode-only tests that do not inspect the queue.
+ * Dialogue router tests: #160 GameEvent payloads and mode transitions.
+ * npc.c lookup tables and direct open/talk seams live in unit_npc.c.
  */
 static int talk_out(struct GameState *game, GameEventQueue *out)
 {

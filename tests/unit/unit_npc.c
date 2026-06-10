@@ -5,6 +5,11 @@
 #include "world.h"
 #include "unit_util.h"
 
+/*
+ * Direct npc.c API tests: room/actor lookup and open-room dialogue without
+ * going through dialogue_cmd_talk / game_process_input.
+ */
+
 TEST npc_room_actor_lookup(void)
 {
     ASSERT_EQ(GAME_DIALOGUE_ACTOR_NONE, npc_room_actor(WORLD_ROOM_CAMP));
