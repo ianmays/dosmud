@@ -263,6 +263,10 @@ static int save_read_game_arrays(FILE *fp, struct GameState *game)
     return 1;
 }
 
+/*
+ * rng_draw_count is plat_rand_draw_count at save time; main.c replays it after
+ * load so libc rand() continues where the run left off.
+ */
 static int save_write_game_state(FILE *fp, const struct GameState *game,
                                  u32 rng_draw_count)
 {
@@ -296,6 +300,7 @@ static int save_write_game_state(FILE *fp, const struct GameState *game,
         return 0;
     }
 #ifdef TEST_MODE
+    /* Persist harness inject state so TEST_MODE saves resume mid-run. */
     if (!save_write_s16(fp, game->roll_inject_active) ||
             !save_write_s16(fp, game->roll_queue_len) ||
             !save_write_s16(fp, game->roll_queue_i) ||
@@ -540,10 +545,12 @@ int save_read_game(const char *path, struct GameState *out_game,
     if (!save_read_game_state(fp, &g_save_loaded, out_rng_draw_count)) {
         goto done;
     }
+    /* Reject padded or concatenated files; payload must end at EOF. */
     trailing = fgetc(fp);
     if (trailing != EOF) {
         goto done;
     }
+    /* Validate into g_save_loaded so a bad file does not clobber out_game. */
     if (!save_validate_game(&g_save_loaded)) {
         rc = SAVE_RESULT_RANGE;
         goto done;

@@ -1,3 +1,7 @@
+/*
+ * Unit tests for save.c round-trip and rejection paths.
+ * Verifies plat_rand_draw_count metadata survives save/load.
+ */
 #include <stdio.h>
 #include <string.h>
 #include "greatest.h"

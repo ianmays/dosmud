@@ -48,6 +48,7 @@ TEST world_step_no_crash(void)
     PASS();
 }
 
+/* world_init draw count is fixed per seed; topology is saved so load skips it. */
 TEST world_init_tracks_rng_draw_count(void)
 {
     struct World a;

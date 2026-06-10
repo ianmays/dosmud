@@ -168,6 +168,7 @@ Conventions:
 - input/timing integration
 - `TEST_MODE` only: optional replay log capture via `--replay-log [path]`
 - `TEST_MODE`: delegates `@fixture` and `@seed` lines to `testharn`
+- in-session `save` / `load` shell commands (all builds); intercepts before `game_process_input` so ticks do not advance
 
 ### `replay`
 
@@ -192,14 +193,14 @@ Conventions:
 - explicit game modes in [`game.h`](../src/game.h): `GameMode` (explore, dialogue, combat), `DialogueKind` for the active dialogue when in dialogue mode (room NPCs including the pond frog, wanderer, enemy), and `CombatState` for combat-only fields
 - mode transitions via `game_set_mode_explore`, `game_set_mode_dialogue`, and `game_set_mode_combat` (only one major mode at a time)
 - `game_is_busy_dialogue` returns true whenever `mode != GAME_MODE_EXPLORE` (ambient encounters, idle background ticks)
-- `game_roll_spread` and `game_roll_percent` centralize gameplay draws used for combat, corpse loot, kill XP, and bandit intimidate (`rand()` when inject is inactive)
+- `game_roll_spread` and `game_roll_percent` centralize gameplay draws used for combat, corpse loot, kill XP, and bandit intimidate (`plat_rand()` when inject is inactive; inject bypasses the draw counter in `TEST_MODE`)
 - `TEST_MODE` only: `game_roll_inject_*` and `test_quiet_ticks` on `GameState`; when `test_quiet_ticks` is set, `advance_world_tick` skips ambient atmosphere, animal noise, bandit ambush, and wanderer movement (see [quiet ticks](testing.md#quiet-ticks-test_quiet_ticks-test_mode-only))
 - ambient, wanderer, and world generation randomness flow through tracked `plat_rand()` so save/load can restore future deterministic draws
 
 Gameplay slices live beside `game.c` as plain C translation units (no extra framework):
 
 - [`gprog.c`](../src/gprog.c) - XP and level-up rewards (`game_xp_to_next_level`, `progression_gain_xp`); queues `GAME_EVENT_XP_GAIN` and `GAME_EVENT_STAT_CHANGE` via `gout` (FAT 8.3-safe basename)
-- [`combat.c`](../src/combat.c) - combat start, player reply resolution, enemy turn; queues `GAME_EVENT_COMBAT` phases via `gout` (randomness via `game_roll_spread` / `game_roll_percent`, not `rand()`)
+- [`combat.c`](../src/combat.c) - combat start, player reply resolution, enemy turn; queues `GAME_EVENT_COMBAT` phases via `gout` (randomness via `game_roll_spread` / `game_roll_percent`, not direct `plat_rand()` calls)
 - [`genc.c`](../src/genc.c) - ambient bandit encounter open state (FAT 8.3-safe basename)
 - [`wanderer.c`](../src/wanderer.c) - traveler movement and encounter flow
 - [`dialogue.c`](../src/dialogue.c) - pond frog lines and NPC id hint for room look
@@ -215,6 +216,7 @@ New `src/*.c` and `src/*.h` basenames must stay within **classic FAT 8+3** (at m
 
 - parse raw text into structured commands
 - keep parsing separate from execution/mutation
+- recognizes `save` and `load` tokens (`CMD_SAVE`, `CMD_LOAD`); `main.c` handles file I/O before gameplay mutation
 
 ### `world`
 
@@ -269,10 +271,10 @@ New `src/*.c` and `src/*.h` basenames must stay within **classic FAT 8+3** (at m
 
 ## Determinism rules
 
-- seed randomness once at startup (`plat_seed_rng` from `main`; combat uses `game_roll_*`, which calls `rand()` when inject is inactive)
+- seed randomness once at startup (`plat_seed_rng` from `main`; gameplay draws use tracked `plat_rand()` via `game_roll_*` or slice calls, with `TEST_MODE` inject bypassing the draw counter)
 - evolve simulation via commands and background ticks
 - never tie simulation correctness to render cadence
-- snapshot tests under `tests/regression/` combine fixtures (direct state), optional roll inject (`TEST_MODE` only), and a fixed default seed for remaining libc `rand()` paths; see [fixture design trade-offs](testing.md#fixture-design-trade-offs)
+- snapshot tests under `tests/regression/` combine fixtures (direct state), optional roll inject (`TEST_MODE` only), and a fixed default seed for remaining `plat_rand()` paths; see [fixture design trade-offs](testing.md#fixture-design-trade-offs)
 - greatest unit tests under `tests/unit/` assert `GameState` and parse results (`make test-unit`); see [unit tests](testing.md#unit-tests-greatest)
 
 ## ANSI C89/C90 compatibility rules

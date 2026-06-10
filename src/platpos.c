@@ -11,6 +11,7 @@
 #include "config.h"
 #include "platform.h"
 
+/* libc rand draws since plat_seed_rng; persisted with save files. */
 static u32 g_rand_draw_count = 0;
 
 int plat_poll_line(char *out_line, int out_size)

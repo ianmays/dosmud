@@ -43,7 +43,7 @@ TEST wanderer_step_moves(void)
     plat_seed_rng(42u);
     ASSERT_EQ(0U, plat_rand_draw_count());
     before = game.wanderer_room;
-    wanderer_step(&game);
+    wanderer_step(&game); /* one plat_rand for exit pick */
     ASSERT_EQ(1U, plat_rand_draw_count());
     ASSERT_NEQ(before, game.wanderer_room);
     PASS();

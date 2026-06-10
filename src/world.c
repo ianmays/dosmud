@@ -6,7 +6,8 @@
 
 /*
  * world.c owns the generated room graph and its coordinate projection for the
- * local map display. It keeps the topology deterministic for a given seed.
+ * local map display. Generation uses plat_rand so draw counts align with
+ * save/load; the saved world snapshot makes regeneration unnecessary on load.
  */
 
 static void room_set_meta(struct Room *room, const char *name, const char *desc,

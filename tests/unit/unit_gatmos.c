@@ -80,6 +80,7 @@ TEST gatmos_animal_noise_tick_gate(void)
     int r_after;
     int r_second;
 
+    /* Observe plat_rand draw ordering through the animal-noise tick gate. */
     reset_camp(&game);
     game.tick = 1;
     emit_noise(&game, &out);

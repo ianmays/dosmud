@@ -3,6 +3,12 @@
 
 #include "base.h"
 
+/*
+ * Binary persistence for struct GameState. Shell (main.c) supplies
+ * plat_rand_draw_count on write and replays it via plat_rand_advance after load;
+ * save.c does not seed or advance the platform RNG.
+ */
+
 struct GameState;
 
 #define SAVE_PATH_DEFAULT "save.dat"

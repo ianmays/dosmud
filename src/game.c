@@ -157,6 +157,8 @@ void game_reset_fixture_baseline(struct GameState *game, int room_id, u32 tick)
 #ifdef TEST_MODE
 static int game_roll_draw(struct GameState *game)
 {
+    /* Injected draws bypass plat_rand so tests stay deterministic without
+     * advancing the save/load draw counter. */
     if (game->roll_inject_active) {
         if (game->roll_queue_i >= game->roll_queue_len) {
             /* Past end: count the draw so fully_consumed fails (over-consumption). */
@@ -217,6 +219,7 @@ int game_roll_spread(struct GameState *game, int spread)
 #ifdef TEST_MODE
     roll = game_roll_draw(game);
 #else
+    /* Release builds draw via plat_rand so save/load can track libc usage. */
     (void)game;
     roll = plat_rand();
 #endif

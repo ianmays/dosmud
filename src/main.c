@@ -177,6 +177,7 @@ static void main_render_and_prompt(struct GameState *game)
     }
 }
 
+/* Paint the restored room without the normal post-input render pass. */
 static int main_render_loaded_game(struct GameState *game)
 {
     game_event_queue_reset(&g_main_out);
@@ -193,6 +194,10 @@ static int main_render_loaded_game(struct GameState *game)
     return 0;
 }
 
+/*
+ * save/load are handled at the shell boundary: file I/O and RNG restore live
+ * here; commands do not advance tick or route through game_process_input.
+ */
 static int main_handle_save_load(struct GameState *game, struct Command *cmd,
                                  int *out_rendered)
 {
@@ -217,6 +222,7 @@ static int main_handle_save_load(struct GameState *game, struct Command *cmd,
                         &rng_draw_count);
     if (rc == SAVE_RESULT_OK) {
         *game = g_main_loaded_game;
+        /* Restore libc stream position for the loaded seed before new rolls. */
         plat_seed_rng(game->seed);
         plat_rand_advance(rng_draw_count);
         printf(TXT_LOAD_OK_FMT, SAVE_PATH_DEFAULT);
@@ -280,6 +286,7 @@ static int main_dispatch_line(struct GameState *game, char *line,
     }
     if (th_rc == 0) {
         parsed = command_parse(line, &cmd);
+        /* Intercept before game_process_input so save/load never advance time. */
         if (parsed && (cmd.type == CMD_SAVE || cmd.type == CMD_LOAD)) {
             return main_handle_save_load(game, &cmd, out_rendered);
         }
@@ -297,6 +304,7 @@ static int main_dispatch_line(struct GameState *game, char *line,
     }
 #else
     parsed = command_parse(line, &cmd);
+    /* Intercept before game_process_input so save/load never advance time. */
     if (parsed && (cmd.type == CMD_SAVE || cmd.type == CMD_LOAD)) {
         return main_handle_save_load(game, &cmd, out_rendered);
     }
@@ -324,6 +332,7 @@ static int main_handle_polled_line(struct GameState *game, char *line, time_t *l
             return 1;
         }
         *last_tick_time = plat_time_now();
+        /* load already rendered via main_render_loaded_game. */
         if (game->running && !rendered) {
             game_render(game);
         }
