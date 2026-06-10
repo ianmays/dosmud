@@ -4,6 +4,7 @@
  */
 #include <stdio.h>
 #include <string.h>
+#include "config.h"
 #include "greatest.h"
 #include "game.h"
 #include "items.h"
@@ -129,6 +130,37 @@ static int save_write_u16_le(FILE *fp, unsigned int value)
     return fwrite(bytes, 1, 2, fp) == 2;
 }
 
+static int save_write_u32_le(FILE *fp, unsigned long value)
+{
+    unsigned char bytes[4];
+
+    bytes[0] = (unsigned char)(value & 0xFFUL);
+    bytes[1] = (unsigned char)((value >> 8) & 0xFFUL);
+    bytes[2] = (unsigned char)((value >> 16) & 0xFFUL);
+    bytes[3] = (unsigned char)((value >> 24) & 0xFFUL);
+    return fwrite(bytes, 1, 4, fp) == 4;
+}
+
+static long save_rng_draw_offset(void)
+{
+    unsigned long offset;
+    unsigned long room_size;
+
+    room_size = (unsigned long)CFG_NAME_MAX +
+        (unsigned long)CFG_DESC_MAX +
+        (unsigned long)CFG_NAME_MAX +
+        (unsigned long)CFG_DESC_MAX +
+        ((unsigned long)DIR_NONE * 2UL);
+    offset = 6UL;
+    offset += 2UL;
+    offset += room_size * (unsigned long)CFG_ROOM_MAX;
+    offset += ((2UL + 2UL + 1UL) * (unsigned long)CFG_ROOM_MAX);
+    offset += 2UL;
+    offset += 4UL;
+    offset += 4UL;
+    return (long)offset;
+}
+
 TEST save_round_trip_preserves_state_and_rng_count(void)
 {
     struct GameState game;
@@ -221,10 +253,42 @@ TEST save_rejects_out_of_range_without_mutating_target(void)
     PASS();
 }
 
+TEST save_rejects_excessive_rng_draw_count(void)
+{
+    struct GameState game;
+    struct GameState target;
+    struct GameState before;
+    FILE *fp;
+    u32 loaded_draws;
+
+    save_cleanup_file();
+    save_fill_fixture(&game);
+    ASSERT_EQ(SAVE_RESULT_OK,
+        save_write_game(save_test_path(), &game, plat_rand_draw_count()));
+
+    fp = fopen(save_test_path(), "r+b");
+    ASSERT(fp != 0);
+    ASSERT_EQ(0L, fseek(fp, save_rng_draw_offset(), SEEK_SET));
+    ASSERT(save_write_u32_le(fp, (unsigned long)CFG_SAVE_RNG_DRAW_MAX + 1UL));
+    fclose(fp);
+
+    unit_game_fresh(&target, 77U);
+    before = target;
+    loaded_draws = 777U;
+    ASSERT_EQ(SAVE_RESULT_RANGE,
+        save_read_game(save_test_path(), &target, &loaded_draws));
+    ASSERT(save_games_equal(&before, &target));
+    ASSERT_EQ(777U, loaded_draws);
+
+    save_cleanup_file();
+    PASS();
+}
+
 SUITE(save)
 {
     RUN_TEST(save_round_trip_preserves_state_and_rng_count);
     RUN_TEST(save_rejects_bad_magic);
     RUN_TEST(save_rejects_truncated_file);
     RUN_TEST(save_rejects_out_of_range_without_mutating_target);
+    RUN_TEST(save_rejects_excessive_rng_draw_count);
 }

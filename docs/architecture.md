@@ -182,6 +182,7 @@ Conventions:
 - shell-edge binary serialization in [`save.c`](../src/save.c); called only from `main.c`
 - versioned, field-by-field save format (`DMSV`, version 1) for `GameState`, `World`, and tracked RNG draw count
 - validates magic, version, and field ranges before replacing the live game state
+- `TEST_MODE` builds append roll-injection and quiet-tick fields to the v1 payload; release builds use a shorter record and reject the extra bytes via EOF/trailing-byte checks
 - keeps render queues and replay logs out of the save format
 
 ### `game`

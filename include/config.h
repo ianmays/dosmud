@@ -150,6 +150,12 @@
 #define CFG_TEST_RAND_SEED 1234UL
 /* Maximum --seed value (fits in u32 on all supported targets). */
 #define CFG_SEED_CLI_MAX 4294967295UL
+/*
+ * Persisted RNG draw count ceiling for save/load. Keeps corrupt saves from
+ * forcing a huge plat_rand_advance() replay loop on small DOS machines while
+ * leaving long normal sessions headroom.
+ */
+#define CFG_SAVE_RNG_DRAW_MAX 1000000UL
 
 /* --- World generation --- */
 

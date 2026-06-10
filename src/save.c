@@ -386,6 +386,11 @@ static int save_valid_boolish(int value)
     return value == 0 || value == 1;
 }
 
+static int save_valid_rng_draw_count(u32 rng_draw_count)
+{
+    return rng_draw_count <= (u32)CFG_SAVE_RNG_DRAW_MAX;
+}
+
 static int save_validate_world(const struct World *world)
 {
     int i;
@@ -515,6 +520,7 @@ int save_read_game(const char *path, struct GameState *out_game,
     FILE *fp;
     char magic[4];
     u16 version;
+    u32 loaded_rng_draw_count;
     int rc;
     int trailing;
 
@@ -542,7 +548,7 @@ int save_read_game(const char *path, struct GameState *out_game,
     if (version != (u16)SAVE_VERSION) {
         goto done;
     }
-    if (!save_read_game_state(fp, &g_save_loaded, out_rng_draw_count)) {
+    if (!save_read_game_state(fp, &g_save_loaded, &loaded_rng_draw_count)) {
         goto done;
     }
     /* Reject padded or concatenated files; payload must end at EOF. */
@@ -551,11 +557,13 @@ int save_read_game(const char *path, struct GameState *out_game,
         goto done;
     }
     /* Validate into g_save_loaded so a bad file does not clobber out_game. */
-    if (!save_validate_game(&g_save_loaded)) {
+    if (!save_valid_rng_draw_count(loaded_rng_draw_count) ||
+            !save_validate_game(&g_save_loaded)) {
         rc = SAVE_RESULT_RANGE;
         goto done;
     }
     *out_game = g_save_loaded;
+    *out_rng_draw_count = loaded_rng_draw_count;
     rc = SAVE_RESULT_OK;
 
 done:

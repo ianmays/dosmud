@@ -94,7 +94,7 @@ SNAPSHOT_TESTS = \
 	unknown_cmd cannot_move give_wrong_context reply_nobody post_combat_reply_guard reply_invalid \
 	craft_salve craft_unknown take_nothing take_wrong_item take_all take_all_bag_full \
 	save_load \
-	replay_log
+	replay_log replay_save_load
 
 snapshot-run:
 	@set -e; \
@@ -106,6 +106,12 @@ snapshot-run:
 			./$(BIN) --seed 1234 --replay-log $(REGRESSION_DIR)/replay_log_log.output < $(REGRESSION_DIR)/replay_log.input > $(REGRESSION_DIR)/replay_log.output; \
 			diff -u $(REGRESSION_DIR)/replay_log.expect $(REGRESSION_DIR)/replay_log.output; \
 			diff -u $(REGRESSION_DIR)/replay_log_log.expect $(REGRESSION_DIR)/replay_log_log.output; \
+		elif [ "$$t" = "replay_save_load" ]; then \
+			rm -f save.dat; \
+			./$(BIN) --seed 1234 --replay-log $(REGRESSION_DIR)/replay_save_load_log.output < $(REGRESSION_DIR)/replay_save_load.input > $(REGRESSION_DIR)/replay_save_load.output; \
+			diff -u $(REGRESSION_DIR)/replay_save_load.expect $(REGRESSION_DIR)/replay_save_load.output; \
+			diff -u $(REGRESSION_DIR)/replay_save_load_log.expect $(REGRESSION_DIR)/replay_save_load_log.output; \
+			rm -f save.dat; \
 		elif [ "$$t" = "save_load" ]; then \
 			rm -f save.dat; \
 			./$(BIN) < $(REGRESSION_DIR)/$$t.input > $(REGRESSION_DIR)/$$t.output; \

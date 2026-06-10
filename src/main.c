@@ -177,21 +177,11 @@ static void main_render_and_prompt(struct GameState *game)
     }
 }
 
-/* Paint the restored room without the normal post-input render pass. */
-static int main_render_loaded_game(struct GameState *game)
+/* Queue the restored room description so load can log before render drains it. */
+static void main_queue_loaded_game(struct GameState *game)
 {
     game_event_queue_reset(&g_main_out);
     game_describe_current_room(game, &g_main_out);
-    game_render_output(game, &g_main_out);
-#ifdef TEST_MODE
-    if (main_check_output_overflow() != 0) {
-        return 1;
-    }
-#endif
-    if (game->running) {
-        game_render(game);
-    }
-    return 0;
 }
 
 /*
@@ -226,10 +216,7 @@ static int main_handle_save_load(struct GameState *game, struct Command *cmd,
         plat_seed_rng(game->seed);
         plat_rand_advance(rng_draw_count);
         printf(TXT_LOAD_OK_FMT, SAVE_PATH_DEFAULT);
-        if (main_render_loaded_game(game) != 0) {
-            return 1;
-        }
-        *out_rendered = 1;
+        main_queue_loaded_game(game);
     } else if (rc == SAVE_RESULT_IO) {
         printf(TXT_LOAD_IO_FMT, SAVE_PATH_DEFAULT);
     } else if (rc == SAVE_RESULT_RANGE) {
@@ -288,7 +275,19 @@ static int main_dispatch_line(struct GameState *game, char *line,
         parsed = command_parse(line, &cmd);
         /* Intercept before game_process_input so save/load never advance time. */
         if (parsed && (cmd.type == CMD_SAVE || cmd.type == CMD_LOAD)) {
-            return main_handle_save_load(game, &cmd, out_rendered);
+            if (main_handle_save_load(game, &cmd, out_rendered) != 0) {
+                return 1;
+            }
+            if (main_capture_replay(REPLAY_STEP_INPUT, line, game) != 0) {
+                return 1;
+            }
+            if (cmd.type == CMD_LOAD) {
+                game_render_output(game, &g_main_out);
+                if (main_check_output_overflow() != 0) {
+                    return 1;
+                }
+            }
+            return 0;
         }
         game_process_input(game, line, &g_main_out);
         if (main_capture_replay(REPLAY_STEP_INPUT, line, game) != 0) {
@@ -306,7 +305,16 @@ static int main_dispatch_line(struct GameState *game, char *line,
     parsed = command_parse(line, &cmd);
     /* Intercept before game_process_input so save/load never advance time. */
     if (parsed && (cmd.type == CMD_SAVE || cmd.type == CMD_LOAD)) {
-        return main_handle_save_load(game, &cmd, out_rendered);
+        if (main_handle_save_load(game, &cmd, out_rendered) != 0) {
+            return 1;
+        }
+        if (main_capture_replay(REPLAY_STEP_INPUT, line, game) != 0) {
+            return 1;
+        }
+        if (cmd.type == CMD_LOAD) {
+            game_render_output(game, &g_main_out);
+        }
+        return 0;
     }
     game_process_input(game, line, &g_main_out);
     if (main_capture_replay(REPLAY_STEP_INPUT, line, game) != 0) {
