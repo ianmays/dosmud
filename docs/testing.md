@@ -136,7 +136,7 @@ make test-unit-coverage-verbose     # same tests, full gcov block per module
 - Determinism: call `plat_seed_rng(fixed_seed)` in setup; use `game_roll_inject_*` and `CFG_TEST_*` for asserted combat/intimidate outcomes
 - Snapshots assert player-visible output; unit tests assert `GameState` and parse results
 
-**In-scope modules (branch coverage target ~90%+):** `command`, `invent`, `combat`, `game`, `genc`, `wanderer`, `dialogue`, `gatmos`, `world`, `gprog`, `items`, `fmt`, `gout`, `replay`, `save`, `testharn`
+**In-scope modules (branch coverage target ~90%+):** `command`, `invent`, `combat`, `game`, `genc`, `wanderer`, `dialogue`, `npc`, `gatmos`, `world`, `gprog`, `items`, `fmt`, `gout`, `replay`, `save`, `testharn`
 
 **Out of scope for the unit coverage bar:** `grendr`, `txtres`, `main`, `platpos` / `platwin` / `platdos` (presentation or shell-edge glue; `fmt` holds testable format logic; snapshots cover printed output and ASCII art)
 
@@ -308,7 +308,7 @@ Each process run uses one `.input` file until `quit`. `make snapshot-run` runs `
 
 **Movement / time:** `walk_north`, `walk_map`, `wait_tick`.
 
-**NPC talk:** `frog_replies`, `watchman_talk`, `wanderer_replies`, `wanderer_talk_blocked`, `herbalist_talk`, `archivist_talk`, `talk_nobody`, `game_event_dialogue` (pond frog, bandit camp talk, and tower watchman through generic `GAME_EVENT_DIALOGUE` / `GAME_EVENT_ENCOUNTER` paths; [#175](https://github.com/ianmays/dosmud/pull/175)).
+**NPC talk:** `frog_hint`, `frog_replies`, `watchman_talk`, `wanderer_replies`, `wanderer_talk_blocked`, `herbalist_talk`, `archivist_talk`, `talk_nobody`, `game_event_dialogue` (`frog_hint` proves the generic room-NPC hint also applies at the pond; the others cover pond frog, bandit camp talk, and tower watchman through generic `GAME_EVENT_DIALOGUE` / `GAME_EVENT_ENCOUNTER` paths; [#175](https://github.com/ianmays/dosmud/pull/175)).
 
 **Eat / use:** `use_salve`, `use_torch`, `use_spear`, `use_stone`, `eat_berry`, `eat_fish`, `eat_berry_heal`, `eat_fish_heal`, `eat_not_edible`, `eat_missing`.
 

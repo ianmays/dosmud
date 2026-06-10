@@ -7,6 +7,7 @@
 #include "combat.h"
 #include "dialogue.h"
 #include "genc.h"
+#include "npc.h"
 #include "wanderer.h"
 
 /*
@@ -70,7 +71,7 @@ static void do_look(struct GameState *game, GameEventQueue *out)
     GameEvent *ev;
 
     ev = game_event_push(out, GAME_EVENT_ROOM_LOOK,
-        npc_in_room(game->player.room_id),
+        npc_room_actor(game->player.room_id),
         game->corpse_present[game->player.room_id],
         game->env_focus_active &&
             game->env_focus_room == game->player.room_id &&

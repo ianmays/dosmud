@@ -707,6 +707,8 @@ Follow-up to [#142](https://github.com/ianmays/dosmud/issues/142) / PR 144. Play
 
 ### [#104](https://github.com/ianmays/dosmud/issues/104) - NPC module
 
+Done ✅.
+
 ### [#100](https://github.com/ianmays/dosmud/issues/100) - Wanderer behaviour reusable for any NPC
 
 ### [#101](https://github.com/ianmays/dosmud/issues/101) - Bandit behaviour reusable for any NPC

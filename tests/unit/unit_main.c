@@ -16,6 +16,7 @@ SUITE_EXTERN(combat);
 SUITE_EXTERN(gprog);
 SUITE_EXTERN(genc);
 SUITE_EXTERN(dialogue);
+SUITE_EXTERN(npc);
 SUITE_EXTERN(wanderer);
 SUITE_EXTERN(gatmos);
 SUITE_EXTERN(fmt);
@@ -97,6 +98,7 @@ int main(int argc, char **argv)
     RUN_SUITE(gprog);
     RUN_SUITE(genc);
     RUN_SUITE(dialogue);
+    RUN_SUITE(npc);
     RUN_SUITE(wanderer);
     RUN_SUITE(gatmos);
     RUN_SUITE(fmt);

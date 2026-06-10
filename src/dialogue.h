@@ -5,14 +5,8 @@ struct GameState;
 struct GameEventQueue;
 
 /*
- * Dialogue helpers dispatch fixed NPC branches and one-off room hints.
+ * Dialogue helpers handle fixed room-NPC reply routing on top of npc.h lookup.
  */
-
-/* NPC id for look HUD in the current room; 0 if none. */
-int npc_in_room(int room_id);
-
-void frog_dialogue_intro(struct GameEventQueue *out);
-void frog_dialogue_branch(int choice, struct GameEventQueue *out);
 int dialogue_cmd_talk(struct GameState *game, struct GameEventQueue *out);
 int dialogue_cmd_reply(struct GameState *game, int choice, struct GameEventQueue *out);
 
