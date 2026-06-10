@@ -129,7 +129,7 @@ enum GameEventCombatPhase {
 /*
  * Dialogue/encounter payload contract (#160):
  * DIALOGUE       arg0=GameEventDialogueActor arg1=GameEventDialoguePhase
- *                arg2=choice (1-3) for REPLY/BRANCH
+ *                arg2=choice (1-3) for REPLY
  * ENCOUNTER      arg0=GameEventEncounterKind arg1=GameEventEncounterAction
  *                arg2=GameEventEncounterOutcome arg3=item id (GIVE/OK only)
  *                text=item_name for GIVE/OK; zero otherwise
@@ -147,10 +147,8 @@ enum GameEventDialogueActor {
 
 enum GameEventDialoguePhase {
     GAME_DIALOGUE_PHASE_NONE = 0,
-    GAME_DIALOGUE_PHASE_INTRO,
     GAME_DIALOGUE_PHASE_TALK,
-    GAME_DIALOGUE_PHASE_REPLY,
-    GAME_DIALOGUE_PHASE_BRANCH
+    GAME_DIALOGUE_PHASE_REPLY
 };
 
 enum GameEventEncounterKind {
