@@ -436,6 +436,52 @@ static int save_valid_boolish(int value)
     return value == 0 || value == 1;
 }
 
+static int save_valid_map_projection(const struct World *world)
+{
+    int i;
+    int any_ready;
+    int min_x;
+    int max_x;
+    int min_y;
+    int max_y;
+
+    any_ready = 0;
+    min_x = 0;
+    max_x = 0;
+    min_y = 0;
+    max_y = 0;
+    for (i = 0; i < world->room_count; ++i) {
+        if (!world->map_ready[i]) {
+            continue;
+        }
+        if (!any_ready) {
+            min_x = world->map_x[i];
+            max_x = world->map_x[i];
+            min_y = world->map_y[i];
+            max_y = world->map_y[i];
+            any_ready = 1;
+        } else {
+            if (world->map_x[i] < min_x) {
+                min_x = world->map_x[i];
+            }
+            if (world->map_x[i] > max_x) {
+                max_x = world->map_x[i];
+            }
+            if (world->map_y[i] < min_y) {
+                min_y = world->map_y[i];
+            }
+            if (world->map_y[i] > max_y) {
+                max_y = world->map_y[i];
+            }
+        }
+    }
+    if (!any_ready) {
+        return 1;
+    }
+    return (max_x - min_x) < CFG_FMT_MAP_MAX &&
+        (max_y - min_y) < CFG_FMT_MAP_MAX;
+}
+
 static int save_valid_rng_draw_count(u32 rng_draw_count)
 {
     return rng_draw_count <= (u32)CFG_SAVE_RNG_DRAW_MAX;
@@ -464,7 +510,7 @@ static int save_validate_world(const struct World *world)
             }
         }
     }
-    return 1;
+    return save_valid_map_projection(world);
 }
 
 static int save_validate_game(const struct GameState *game)

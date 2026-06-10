@@ -130,6 +130,11 @@ static int save_write_u16_le(FILE *fp, unsigned int value)
     return fwrite(bytes, 1, 2, fp) == 2;
 }
 
+static int save_write_s16_le(FILE *fp, int value)
+{
+    return save_write_u16_le(fp, (unsigned int)((unsigned short)(short)value));
+}
+
 static int save_write_u32_le(FILE *fp, unsigned long value)
 {
     unsigned char bytes[4];
@@ -158,6 +163,24 @@ static long save_rng_draw_offset(void)
     offset += 2UL;
     offset += 4UL;
     offset += 4UL;
+    return (long)offset;
+}
+
+static long save_world_map_offset(int room_index, int field_index)
+{
+    unsigned long offset;
+    unsigned long room_size;
+
+    room_size = (unsigned long)CFG_NAME_MAX +
+        (unsigned long)CFG_DESC_MAX +
+        (unsigned long)CFG_NAME_MAX +
+        (unsigned long)CFG_DESC_MAX +
+        ((unsigned long)DIR_NONE * 2UL);
+    offset = 6UL;
+    offset += 2UL;
+    offset += room_size * (unsigned long)CFG_ROOM_MAX;
+    offset += ((unsigned long)room_index * 5UL);
+    offset += (unsigned long)field_index * 2UL;
     return (long)offset;
 }
 
@@ -333,6 +356,39 @@ TEST save_failed_write_preserves_existing_save(void)
     PASS();
 }
 
+TEST save_rejects_excessive_map_coordinate_span(void)
+{
+    struct GameState game;
+    struct GameState target;
+    struct GameState before;
+    FILE *fp;
+    u32 loaded_draws;
+
+    save_cleanup_file();
+    save_fill_fixture(&game);
+    ASSERT_EQ(SAVE_RESULT_OK,
+        save_write_game(save_test_path(), &game, 7U));
+
+    fp = fopen(save_test_path(), "r+b");
+    ASSERT(fp != 0);
+    ASSERT_EQ(0L, fseek(fp, save_world_map_offset(0, 0), SEEK_SET));
+    ASSERT(save_write_s16_le(fp, -32768));
+    ASSERT_EQ(0L, fseek(fp, save_world_map_offset(1, 0), SEEK_SET));
+    ASSERT(save_write_s16_le(fp, 32767));
+    fclose(fp);
+
+    unit_game_fresh(&target, 77U);
+    before = target;
+    loaded_draws = 111U;
+    ASSERT_EQ(SAVE_RESULT_RANGE,
+        save_read_game(save_test_path(), &target, &loaded_draws));
+    ASSERT(save_games_equal(&before, &target));
+    ASSERT_EQ(111U, loaded_draws);
+
+    save_cleanup_file();
+    PASS();
+}
+
 SUITE(save)
 {
     RUN_TEST(save_round_trip_preserves_state_and_rng_count);
@@ -342,4 +398,5 @@ SUITE(save)
     RUN_TEST(save_rejects_excessive_rng_draw_count);
     RUN_TEST(save_rejects_write_with_excessive_rng_draw_count);
     RUN_TEST(save_failed_write_preserves_existing_save);
+    RUN_TEST(save_rejects_excessive_map_coordinate_span);
 }
