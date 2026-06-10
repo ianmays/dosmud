@@ -496,6 +496,9 @@ int save_write_game(const char *path, const struct GameState *game,
     if (path == 0 || path[0] == '\0' || game == 0) {
         return SAVE_RESULT_IO;
     }
+    if (!save_valid_rng_draw_count(rng_draw_count)) {
+        return SAVE_RESULT_RANGE;
+    }
     fp = fopen(path, "wb");
     if (fp == 0) {
         return SAVE_RESULT_IO;

@@ -284,6 +284,25 @@ TEST save_rejects_excessive_rng_draw_count(void)
     PASS();
 }
 
+TEST save_rejects_write_with_excessive_rng_draw_count(void)
+{
+    struct GameState game;
+    FILE *fp;
+
+    save_cleanup_file();
+    save_fill_fixture(&game);
+
+    ASSERT_EQ(SAVE_RESULT_RANGE,
+        save_write_game(save_test_path(), &game,
+            (u32)((unsigned long)CFG_SAVE_RNG_DRAW_MAX + 1UL)));
+
+    fp = fopen(save_test_path(), "rb");
+    ASSERT(fp == 0);
+
+    save_cleanup_file();
+    PASS();
+}
+
 SUITE(save)
 {
     RUN_TEST(save_round_trip_preserves_state_and_rng_count);
@@ -291,4 +310,5 @@ SUITE(save)
     RUN_TEST(save_rejects_truncated_file);
     RUN_TEST(save_rejects_out_of_range_without_mutating_target);
     RUN_TEST(save_rejects_excessive_rng_draw_count);
+    RUN_TEST(save_rejects_write_with_excessive_rng_draw_count);
 }
