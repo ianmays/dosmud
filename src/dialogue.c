@@ -10,7 +10,6 @@
 int dialogue_cmd_reply(struct GameState *game, int choice, GameEventQueue *out)
 {
     int actor;
-    int phase;
 
     if (game->mode != GAME_MODE_DIALOGUE) {
         return 0;
@@ -24,13 +23,7 @@ int dialogue_cmd_reply(struct GameState *game, int choice, GameEventQueue *out)
         npc_push_dialogue_guard(out, GAME_DIALOGUE_GUARD_PICK_123);
         return 1;
     }
-
-    phase = GAME_DIALOGUE_PHASE_REPLY;
-    if (actor == GAME_DIALOGUE_ACTOR_FROG) {
-        /* Frog keeps its branch payload while sharing the generic reply gate. */
-        phase = GAME_DIALOGUE_PHASE_BRANCH;
-    }
-    npc_push_dialogue(out, actor, phase, choice);
+    npc_push_dialogue(out, actor, GAME_DIALOGUE_PHASE_REPLY, choice);
     game_set_mode_explore(game);
     return 1;
 }

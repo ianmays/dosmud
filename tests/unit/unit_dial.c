@@ -214,11 +214,11 @@ TEST dialogue_cmd_talk_frog_event(void)
     ASSERT_EQ(1, talk_out(&game, &out));
     ASSERT_EQ(GAME_EVENT_DIALOGUE, out.events[0].kind);
     ASSERT_EQ(GAME_DIALOGUE_ACTOR_FROG, out.events[0].arg0);
-    ASSERT_EQ(GAME_DIALOGUE_PHASE_INTRO, out.events[0].arg1);
+    ASSERT_EQ(GAME_DIALOGUE_PHASE_TALK, out.events[0].arg1);
     PASS();
 }
 
-TEST dialogue_cmd_reply_frog_branch_event(void)
+TEST dialogue_cmd_reply_frog_event(void)
 {
     struct GameState game;
     GameEventQueue out;
@@ -229,7 +229,7 @@ TEST dialogue_cmd_reply_frog_branch_event(void)
     ASSERT_EQ(1, reply_out(&game, 2, &out));
     ASSERT_EQ(GAME_EVENT_DIALOGUE, out.events[0].kind);
     ASSERT_EQ(GAME_DIALOGUE_ACTOR_FROG, out.events[0].arg0);
-    ASSERT_EQ(GAME_DIALOGUE_PHASE_BRANCH, out.events[0].arg1);
+    ASSERT_EQ(GAME_DIALOGUE_PHASE_REPLY, out.events[0].arg1);
     ASSERT_EQ(2, out.events[0].arg2);
     PASS();
 }
@@ -291,7 +291,7 @@ SUITE(dialogue) {
     RUN_TEST(dialogue_cmd_reply_archivist);
     RUN_TEST(dialogue_cmd_talk_watchman_event);
     RUN_TEST(dialogue_cmd_talk_frog_event);
-    RUN_TEST(dialogue_cmd_reply_frog_branch_event);
+    RUN_TEST(dialogue_cmd_reply_frog_event);
     RUN_TEST(dialogue_cmd_talk_nobody_event);
     RUN_TEST(dialogue_cmd_talk_bandit_blocks_event);
     RUN_TEST(dialogue_cmd_reply_frog_invalid_event);

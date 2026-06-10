@@ -681,9 +681,9 @@ static void render_dialogue_event(const GameEvent *ev)
 {
     switch (ev->arg0) {
     case GAME_DIALOGUE_ACTOR_FROG:
-        if (ev->arg1 == GAME_DIALOGUE_PHASE_INTRO) {
+        if (ev->arg1 == GAME_DIALOGUE_PHASE_TALK) {
             render_frog_dialogue_intro();
-        } else if (ev->arg1 == GAME_DIALOGUE_PHASE_BRANCH) {
+        } else if (ev->arg1 == GAME_DIALOGUE_PHASE_REPLY) {
             render_frog_dialogue_branch(ev->arg2);
         }
         break;

@@ -16,9 +16,9 @@ struct NpcRoomInfo {
 };
 
 static const struct NpcRoomInfo NPC_ROOM_INFO[] = {
-    /* Frog keeps its custom intro copy, but room lookup is shared with other NPCs. */
+    /* Frog keeps its custom rendered copy, but event phases now match other NPCs. */
     { WORLD_ROOM_POND, GAME_DIALOGUE_ACTOR_FROG,
-        DIALOGUE_NPC_FROG, GAME_DIALOGUE_PHASE_INTRO },
+        DIALOGUE_NPC_FROG, GAME_DIALOGUE_PHASE_TALK },
     { WORLD_ROOM_TOWER, GAME_DIALOGUE_ACTOR_WATCHMAN,
         DIALOGUE_NPC_WATCHMAN, GAME_DIALOGUE_PHASE_TALK },
     { WORLD_ROOM_ORCHARD, GAME_DIALOGUE_ACTOR_HERBALIST,

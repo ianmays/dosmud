@@ -53,7 +53,7 @@ TEST npc_open_room_dialogue_frog(void)
     ASSERT_EQ(DIALOGUE_NPC_FROG, game.dialogue);
     ASSERT_EQ(1, out.count);
     ASSERT_EQ(GAME_DIALOGUE_ACTOR_FROG, out.events[0].arg0);
-    ASSERT_EQ(GAME_DIALOGUE_PHASE_INTRO, out.events[0].arg1);
+    ASSERT_EQ(GAME_DIALOGUE_PHASE_TALK, out.events[0].arg1);
     PASS();
 }
 
