@@ -444,6 +444,8 @@ static int save_valid_map_projection(const struct World *world)
     int max_x;
     int min_y;
     int max_y;
+    long span_x;
+    long span_y;
 
     any_ready = 0;
     min_x = 0;
@@ -478,8 +480,10 @@ static int save_valid_map_projection(const struct World *world)
     if (!any_ready) {
         return 1;
     }
-    return (max_x - min_x) < CFG_FMT_MAP_MAX &&
-        (max_y - min_y) < CFG_FMT_MAP_MAX;
+    span_x = (long)max_x - (long)min_x;
+    span_y = (long)max_y - (long)min_y;
+    return span_x < (long)CFG_FMT_MAP_MAX &&
+        span_y < (long)CFG_FMT_MAP_MAX;
 }
 
 static int save_valid_rng_draw_count(u32 rng_draw_count)
