@@ -275,7 +275,7 @@ static void art_room_cave(void)
     RENDER_PRINTF("                             \n");
 }
 
-static void art_wanderer(void)
+static void art_traveler(void)
 {
     RENDER_PRINTF("        .-''''-.             \n");
     RENDER_PRINTF("       / o)o)   |            \n");
@@ -284,7 +284,7 @@ static void art_wanderer(void)
     RENDER_PRINTF("       \\______/_//       \\ \n");
     RENDER_PRINTF("      /        //\\_______/  \n");
     RENDER_PRINTF("                             \n");
-    RENDER_PRINTF(" %s", TXT_WANDERER_ART_CAPTION);
+    RENDER_PRINTF(" %s", TXT_TRAVELER_ART_CAPTION);
     RENDER_PRINTF("                             \n");
 }
 
@@ -709,9 +709,9 @@ static void render_dialogue_event(const GameEvent *ev)
             render_msg_archivist_reply(ev->arg2);
         }
         break;
-    case GAME_DIALOGUE_ACTOR_WANDERER:
+    case GAME_DIALOGUE_ACTOR_TRAVELER:
         if (ev->arg1 == GAME_DIALOGUE_PHASE_REPLY) {
-            render_wanderer_reply(ev->arg2);
+            render_traveler_reply(ev->arg2);
         }
         break;
     case GAME_DIALOGUE_ACTOR_NOBODY:
@@ -733,8 +733,8 @@ static void render_encounter_event(const GameEvent *ev)
     if (ev->arg1 == GAME_ENCOUNTER_ACTION_OPEN) {
         if (ev->arg0 == GAME_ENCOUNTER_BANDIT) {
             render_bandit_encounter_open();
-        } else if (ev->arg0 == GAME_ENCOUNTER_WANDERER) {
-            render_wanderer_scene();
+        } else if (ev->arg0 == GAME_ENCOUNTER_TRAVELER) {
+            render_traveler_scene();
         }
         return;
     }
@@ -1157,22 +1157,22 @@ void render_atmosphere_grit(void)
     render_paragraph(TXT_ATMO_GRIT);
 }
 
-void render_wanderer_scene(void)
+void render_traveler_scene(void)
 {
     render_gap();
-    art_wanderer();
-    render_copy(TXT_WANDERER_INTRO);
-    RENDER_PRINTF("%s", TXT_WANDERER_QUOTE_A);
-    RENDER_PRINTF("%s", TXT_WANDERER_QUOTE_B);
-    RENDER_PRINTF("%s", TXT_WANDERER_OPT1);
-    RENDER_PRINTF("%s", TXT_WANDERER_OPT2);
-    RENDER_PRINTF("%s", TXT_WANDERER_OPT3);
+    art_traveler();
+    render_copy(TXT_TRAVELER_INTRO);
+    RENDER_PRINTF("%s", TXT_TRAVELER_QUOTE_A);
+    RENDER_PRINTF("%s", TXT_TRAVELER_QUOTE_B);
+    RENDER_PRINTF("%s", TXT_TRAVELER_OPT1);
+    RENDER_PRINTF("%s", TXT_TRAVELER_OPT2);
+    RENDER_PRINTF("%s", TXT_TRAVELER_OPT3);
     RENDER_PRINTF("%s", TXT_REPLY_PROMPT);
 }
 
-void render_wanderer_reply(int choice)
+void render_traveler_reply(int choice)
 {
-    render_paragraph(txtres_wanderer_reply(choice));
+    render_paragraph(txtres_traveler_reply(choice));
 }
 
 void render_frog_dialogue_intro(void)

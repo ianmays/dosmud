@@ -131,7 +131,7 @@ TEST harness_apply_traveler_dialogue(void)
     rc = testharn_apply(&game, "@fixture traveler_dialogue");
     ASSERT_EQ(1, rc);
     ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
-    ASSERT_EQ(DIALOGUE_WANDERER, game.dialogue);
+    ASSERT_EQ(DIALOGUE_TRAVELER, game.dialogue);
     ASSERT_EQ(1, game.roaming_npc_active);
     ASSERT_EQ(game.player.room_id, game.roaming_npc_room);
     PASS();

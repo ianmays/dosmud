@@ -94,9 +94,9 @@ int npc_open_room_dialogue(struct GameState *game, struct GameEventQueue *out)
 /* Traveler is the first roaming profile; seed sets actor/dialogue/encounter ids. */
 void npc_seed_roaming_traveler(struct GameState *game)
 {
-    game->roaming_npc_actor = GAME_DIALOGUE_ACTOR_WANDERER;
-    game->roaming_npc_dialogue = DIALOGUE_WANDERER;
-    game->roaming_npc_encounter = GAME_ENCOUNTER_WANDERER;
+    game->roaming_npc_actor = GAME_DIALOGUE_ACTOR_TRAVELER;
+    game->roaming_npc_dialogue = DIALOGUE_TRAVELER;
+    game->roaming_npc_encounter = GAME_ENCOUNTER_TRAVELER;
     game->roaming_npc_room = WORLD_ROOM_RUINS;
     game->roaming_npc_need_separation = 0;
     game->roaming_npc_active = 1;
@@ -174,8 +174,8 @@ int npc_roaming_cmd_reply(struct GameState *game, int choice, GameEventQueue *ou
     game->roaming_npc_room = -1;
     /* Return timing is randomized only after the player resolves the branch. */
     game->roaming_npc_return_tick =
-        game->tick + CFG_WANDERER_RETURN_DELAY_BASE +
-        (plat_rand() % CFG_WANDERER_RETURN_DELAY_SPREAD);
+        game->tick + CFG_TRAVELER_RETURN_DELAY_BASE +
+        (plat_rand() % CFG_TRAVELER_RETURN_DELAY_SPREAD);
     return 1;
 }
 

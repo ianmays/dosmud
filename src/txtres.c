@@ -223,16 +223,16 @@ const char *const TXT_ATMO_WATER = "You hear water moving somewhere beyond the p
 const char *const TXT_ATMO_REED_DROP = "A loose reed drifts to your feet.\n";
 const char *const TXT_ATMO_GRIT = "Loose grit skips over stone under an uncertain breeze.\n";
 
-const char *const TXT_WANDERER_INTRO =
+const char *const TXT_TRAVELER_INTRO =
     "You nearly bump into a hooded traveler. They straighten with a tired grin.\n";
-const char *const TXT_WANDERER_ART_CAPTION = "(cloak wet with road mist)";
-const char *const TXT_WANDERER_QUOTE_A = "\"Easy there, I'm an adventurer too, working odd jobs between towns. ";
-const char *const TXT_WANDERER_QUOTE_B = "What are you doing out here?\"\n";
-const char *const TXT_WANDERER_OPT1 = "  [1] Looking for trouble worth the trouble.\n";
-const char *const TXT_WANDERER_OPT2 = "  [2] Passing through, keeping my boots honest.\n";
-const char *const TXT_WANDERER_OPT3 = "  [3] That's my business.\n";
+const char *const TXT_TRAVELER_ART_CAPTION = "(cloak wet with road mist)";
+const char *const TXT_TRAVELER_QUOTE_A = "\"Easy there, I'm an adventurer too, working odd jobs between towns. ";
+const char *const TXT_TRAVELER_QUOTE_B = "What are you doing out here?\"\n";
+const char *const TXT_TRAVELER_OPT1 = "  [1] Looking for trouble worth the trouble.\n";
+const char *const TXT_TRAVELER_OPT2 = "  [2] Passing through, keeping my boots honest.\n";
+const char *const TXT_TRAVELER_OPT3 = "  [3] That's my business.\n";
 
-const char *txtres_wanderer_reply(int choice)
+const char *txtres_traveler_reply(int choice)
 {
     if (choice == 1) {
         return "They nod, amused. \"Bold. Don't trip over your own story.\"\n";

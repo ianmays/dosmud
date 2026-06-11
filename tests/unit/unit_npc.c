@@ -34,7 +34,7 @@ TEST npc_dialogue_actor_lookup(void)
     ASSERT_EQ(GAME_DIALOGUE_ACTOR_ARCHIVIST,
         npc_dialogue_actor(DIALOGUE_NPC_ARCHIVIST));
     ASSERT_EQ(GAME_DIALOGUE_ACTOR_NONE,
-        npc_dialogue_actor(DIALOGUE_WANDERER));
+        npc_dialogue_actor(DIALOGUE_TRAVELER));
     PASS();
 }
 
@@ -116,9 +116,9 @@ TEST npc_seed_roaming_traveler_sets_state(void)
     unit_game_fresh(&game, 39u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     npc_seed_roaming_traveler(&game);
-    ASSERT_EQ(GAME_DIALOGUE_ACTOR_WANDERER, game.roaming_npc_actor);
-    ASSERT_EQ(DIALOGUE_WANDERER, game.roaming_npc_dialogue);
-    ASSERT_EQ(GAME_ENCOUNTER_WANDERER, game.roaming_npc_encounter);
+    ASSERT_EQ(GAME_DIALOGUE_ACTOR_TRAVELER, game.roaming_npc_actor);
+    ASSERT_EQ(DIALOGUE_TRAVELER, game.roaming_npc_dialogue);
+    ASSERT_EQ(GAME_ENCOUNTER_TRAVELER, game.roaming_npc_encounter);
     ASSERT_EQ(WORLD_ROOM_RUINS, game.roaming_npc_room);
     ASSERT_EQ(0, game.roaming_npc_need_separation);
     ASSERT_EQ(1, game.roaming_npc_active);
@@ -171,7 +171,7 @@ TEST npc_roaming_encounter_guards(void)
     game.roaming_npc_room = game.player.room_id;
     begin_roaming_npc(&game, &out);
     ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
-    ASSERT_EQ(DIALOGUE_WANDERER, game.dialogue);
+    ASSERT_EQ(DIALOGUE_TRAVELER, game.dialogue);
     PASS();
 }
 
@@ -182,7 +182,7 @@ TEST npc_roaming_reply_cmd_explore(void)
 
     unit_game_fresh(&game, 43u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
-    game_set_mode_dialogue(&game, DIALOGUE_WANDERER);
+    game_set_mode_dialogue(&game, DIALOGUE_TRAVELER);
     plat_seed_rng(game.seed);
     ASSERT_EQ(1, roaming_npc_reply_out(&game, 2, &out));
     ASSERT_EQ(1U, plat_rand_draw_count());
@@ -198,7 +198,7 @@ TEST npc_roaming_reply_cmd_invalid_choice(void)
 
     unit_game_fresh(&game, 44u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
-    game_set_mode_dialogue(&game, DIALOGUE_WANDERER);
+    game_set_mode_dialogue(&game, DIALOGUE_TRAVELER);
     game.roaming_npc_active = 1;
     plat_seed_rng(game.seed);
     /* Guard path must not schedule return RNG or clear encounter state. */
@@ -223,7 +223,7 @@ TEST npc_roaming_encounter_event(void)
     begin_roaming_npc(&game, &out);
     ASSERT_EQ(1, out.count);
     ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
-    ASSERT_EQ(GAME_ENCOUNTER_WANDERER, out.events[0].arg0);
+    ASSERT_EQ(GAME_ENCOUNTER_TRAVELER, out.events[0].arg0);
     ASSERT_EQ(GAME_ENCOUNTER_ACTION_OPEN, out.events[0].arg1);
     PASS();
 }
@@ -235,10 +235,10 @@ TEST npc_roaming_reply_event(void)
 
     unit_game_fresh(&game, 46u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
-    game_set_mode_dialogue(&game, DIALOGUE_WANDERER);
+    game_set_mode_dialogue(&game, DIALOGUE_TRAVELER);
     ASSERT_EQ(1, roaming_npc_reply_out(&game, 2, &out));
     ASSERT_EQ(GAME_EVENT_DIALOGUE, out.events[0].kind);
-    ASSERT_EQ(GAME_DIALOGUE_ACTOR_WANDERER, out.events[0].arg0);
+    ASSERT_EQ(GAME_DIALOGUE_ACTOR_TRAVELER, out.events[0].arg0);
     ASSERT_EQ(GAME_DIALOGUE_PHASE_REPLY, out.events[0].arg1);
     ASSERT_EQ(2, out.events[0].arg2);
     PASS();

@@ -544,7 +544,7 @@ static int save_validate_game(const struct GameState *game)
             game->roaming_npc_dialogue < DIALOGUE_NONE ||
             game->roaming_npc_dialogue > DIALOGUE_ENEMY ||
             game->roaming_npc_encounter < GAME_ENCOUNTER_NONE ||
-            game->roaming_npc_encounter > GAME_ENCOUNTER_WANDERER ||
+            game->roaming_npc_encounter > GAME_ENCOUNTER_TRAVELER ||
             !save_valid_room_or_none(game->roaming_npc_room, room_count) ||
             !save_valid_boolish(game->roaming_npc_need_separation) ||
             !save_valid_boolish(game->env_focus_active) ||

@@ -29,9 +29,9 @@ static void save_fill_fixture(struct GameState *game)
     game->tick = 77U;
     game->mode = GAME_MODE_DIALOGUE;
     game->dialogue = DIALOGUE_NPC_ARCHIVIST;
-    game->roaming_npc_actor = GAME_DIALOGUE_ACTOR_WANDERER;
-    game->roaming_npc_dialogue = DIALOGUE_WANDERER;
-    game->roaming_npc_encounter = GAME_ENCOUNTER_WANDERER;
+    game->roaming_npc_actor = GAME_DIALOGUE_ACTOR_TRAVELER;
+    game->roaming_npc_dialogue = DIALOGUE_TRAVELER;
+    game->roaming_npc_encounter = GAME_ENCOUNTER_TRAVELER;
     game->roaming_npc_room = WORLD_ROOM_MEADOW;
     game->roaming_npc_need_separation = 1;
     game->env_focus_active = 1;

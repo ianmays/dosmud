@@ -375,7 +375,7 @@ TEST game_traveler_reply_fixture(void)
     ASSERT_EQ(0, game.roaming_npc_active);
     ASSERT_EQ(1, out.count);
     ASSERT_EQ(GAME_EVENT_DIALOGUE, out.events[0].kind);
-    ASSERT_EQ(GAME_DIALOGUE_ACTOR_WANDERER, out.events[0].arg0);
+    ASSERT_EQ(GAME_DIALOGUE_ACTOR_TRAVELER, out.events[0].arg0);
     ASSERT_EQ(GAME_DIALOGUE_PHASE_REPLY, out.events[0].arg1);
     ASSERT_EQ(2, out.events[0].arg2);
     PASS();

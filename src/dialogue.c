@@ -41,7 +41,7 @@ int dialogue_cmd_talk(struct GameState *game, GameEventQueue *out)
         npc_push_dialogue_guard(out, GAME_DIALOGUE_GUARD_BANDIT_BLOCKS_TALK);
         return 1;
     }
-    if (game->mode == GAME_MODE_DIALOGUE && game->dialogue == DIALOGUE_WANDERER) {
+    if (game->mode == GAME_MODE_DIALOGUE && game->dialogue == DIALOGUE_TRAVELER) {
         npc_push_dialogue_guard(out, GAME_DIALOGUE_GUARD_TRAVELER_WAITING);
         return 1;
     }

@@ -49,8 +49,8 @@ void render_atmosphere_water(void);
 void render_atmosphere_reed_drop(void);
 void render_atmosphere_grit(void);
 
-void render_wanderer_scene(void);
-void render_wanderer_reply(int choice);
+void render_traveler_scene(void);
+void render_traveler_reply(int choice);
 void render_frog_dialogue_intro(void);
 void render_frog_dialogue_branch(int choice);
 

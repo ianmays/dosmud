@@ -95,14 +95,14 @@ extern const char *const TXT_ATMO_WATER;
 extern const char *const TXT_ATMO_REED_DROP;
 extern const char *const TXT_ATMO_GRIT;
 
-extern const char *const TXT_WANDERER_INTRO;
-extern const char *const TXT_WANDERER_ART_CAPTION;
-extern const char *const TXT_WANDERER_QUOTE_A;
-extern const char *const TXT_WANDERER_QUOTE_B;
-extern const char *const TXT_WANDERER_OPT1;
-extern const char *const TXT_WANDERER_OPT2;
-extern const char *const TXT_WANDERER_OPT3;
-const char *txtres_wanderer_reply(int choice);
+extern const char *const TXT_TRAVELER_INTRO;
+extern const char *const TXT_TRAVELER_ART_CAPTION;
+extern const char *const TXT_TRAVELER_QUOTE_A;
+extern const char *const TXT_TRAVELER_QUOTE_B;
+extern const char *const TXT_TRAVELER_OPT1;
+extern const char *const TXT_TRAVELER_OPT2;
+extern const char *const TXT_TRAVELER_OPT3;
+const char *txtres_traveler_reply(int choice);
 
 extern const char *const TXT_FROG_INTRO;
 extern const char *const TXT_FROG_ART_CAPTION;
