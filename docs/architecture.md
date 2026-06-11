@@ -180,9 +180,9 @@ Conventions:
 ### `save`
 
 - shell-edge binary serialization in [`save.c`](../src/save.c); called only from `main.c`
-- versioned, field-by-field save format (`DMSV`, version 1) for `GameState`, `World`, and tracked RNG draw count
-- validates magic, version, and field ranges before replacing the live game state
-- `TEST_MODE` builds append roll-injection and quiet-tick fields to the v1 payload; release builds use a shorter record and reject the extra bytes via EOF/trailing-byte checks
+- versioned, field-by-field save format (`DMSV`, version 2) for `GameState`, `World`, and tracked RNG draw count
+- validates magic, version, and field ranges before replacing the live game state; older payload versions are rejected instead of migrated in place
+- v2 inserts roaming NPC identity fields (`roaming_npc_actor`, `roaming_npc_dialogue`, `roaming_npc_encounter`) ahead of the roaming room/active state; `TEST_MODE` builds still append roll-injection and quiet-tick fields after the shared payload, while release builds use the shorter record and reject extra trailing bytes
 - keeps render queues and replay logs out of the save format
 
 ### `game`

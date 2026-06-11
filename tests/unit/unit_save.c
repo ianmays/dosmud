@@ -253,6 +253,33 @@ TEST save_rejects_truncated_file(void)
     PASS();
 }
 
+TEST save_rejects_legacy_version_without_mutating_target(void)
+{
+    FILE *fp;
+    struct GameState loaded;
+    struct GameState before;
+    u32 loaded_draws;
+
+    save_cleanup_file();
+    unit_game_fresh(&loaded, 77U);
+    before = loaded;
+    loaded_draws = 555U;
+
+    fp = fopen(save_test_path(), "wb");
+    ASSERT(fp != 0);
+    ASSERT_EQ(4, fwrite("DMSV", 1, 4, fp));
+    ASSERT(save_write_u16_le(fp, 1U));
+    fclose(fp);
+
+    ASSERT_EQ(SAVE_RESULT_FORMAT,
+        save_read_game(save_test_path(), &loaded, &loaded_draws));
+    ASSERT(save_games_equal(&before, &loaded));
+    ASSERT_EQ(555U, loaded_draws);
+
+    save_cleanup_file();
+    PASS();
+}
+
 TEST save_rejects_out_of_range_without_mutating_target(void)
 {
     struct GameState game;
@@ -400,6 +427,7 @@ SUITE(save)
     RUN_TEST(save_round_trip_preserves_state_and_rng_count);
     RUN_TEST(save_rejects_bad_magic);
     RUN_TEST(save_rejects_truncated_file);
+    RUN_TEST(save_rejects_legacy_version_without_mutating_target);
     RUN_TEST(save_rejects_out_of_range_without_mutating_target);
     RUN_TEST(save_rejects_excessive_rng_draw_count);
     RUN_TEST(save_rejects_write_with_excessive_rng_draw_count);

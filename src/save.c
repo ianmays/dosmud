@@ -12,7 +12,7 @@
  */
 
 #define SAVE_MAGIC "DMSV"
-#define SAVE_VERSION 1
+#define SAVE_VERSION 2
 #define SAVE_PATH_BUF_MAX 260
 
 /*
@@ -699,6 +699,10 @@ int save_read_game(const char *path, struct GameState *out_game,
         rc = SAVE_RESULT_IO;
         goto done;
     }
+    /*
+     * v2 adds roaming NPC identity fields before the room/active state. Reject
+     * older payloads rather than misreading the shifted layout.
+     */
     if (version != (u16)SAVE_VERSION) {
         goto done;
     }
