@@ -21,7 +21,6 @@ if exist gout.obj del gout.obj
 if exist gprog.obj del gprog.obj
 if exist combat.obj del combat.obj
 if exist genc.obj del genc.obj
-if exist wanderer.obj del wanderer.obj
 if exist dialogue.obj del dialogue.obj
 if exist npc.obj del npc.obj
 if exist gatmos.obj del gatmos.obj
@@ -72,11 +71,6 @@ if errorlevel 1 goto wcl_bad
 echo Compiling genc.c ... >> %LOG%
 echo Compiling genc.c ...
 wcl %WFL% -c -fo=genc.obj src\genc.c >> %LOG%
-if errorlevel 1 goto wcl_bad
-
-echo Compiling wanderer.c ... >> %LOG%
-echo Compiling wanderer.c ...
-wcl %WFL% -c -fo=wanderer.obj src\wanderer.c >> %LOG%
 if errorlevel 1 goto wcl_bad
 
 echo Compiling dialogue.c ... >> %LOG%
@@ -155,7 +149,7 @@ echo Archiving gameplay.lib ...
 REM Keep each wlib line under COMMAND.COM ~127 chars (TEST_MODE adds +tharn.obj).
 wlib -n gameplay.lib +game.obj +gout.obj +gprog.obj +combat.obj >> %LOG%
 if errorlevel 1 goto wcl_bad
-wlib gameplay.lib +genc.obj +wanderer.obj +dialogue.obj +npc.obj >> %LOG%
+wlib gameplay.lib +genc.obj +dialogue.obj +npc.obj >> %LOG%
 if errorlevel 1 goto wcl_bad
 wlib gameplay.lib +gatmos.obj +fmt.obj +save.obj >> %LOG%
 if errorlevel 1 goto wcl_bad

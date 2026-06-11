@@ -721,7 +721,7 @@ Done ✅ ([#185](https://github.com/ianmays/dosmud/pull/185)).
 
 Move the traveler out of a dedicated `wanderer` module and into the shared `npc` seam by treating roaming as NPC-owned behavior rather than a unique subsystem. Keep the current single roaming slot and traveler output intact so follow-up issues can add fixed or roaming enemies on the same state model.
 
-Done ✅.
+Done ✅ ([#186](https://github.com/ianmays/dosmud/pull/186)).
 
 ### Testing
 - Unit: `unit_npc.c` (roaming NPC movement, encounter open, reply/reset), `unit_dial.c` (traveler talk guard), `unit_save.c`, `unit_game.c`, `unit_harn.c`, `unit_tharn.c`
