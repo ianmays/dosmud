@@ -394,6 +394,7 @@ static int game_cmd_reply(struct GameState *game, struct Command *cmd,
     if (game->mode == GAME_MODE_DIALOGUE && game->dialogue == DIALOGUE_ENEMY) {
         return genc_cmd_reply(game, cmd->arg, out);
     }
+    /* Traveler and future roaming actors route through npc.c after room/enemy. */
     if (npc_roaming_cmd_reply(game, cmd->arg, out)) {
         return 1;
     }
@@ -456,6 +457,7 @@ static void advance_world_tick(struct GameState *game, int roaming_moves_first,
         return;
     }
 #endif
+    /* Reactivation after reply delay picks a random room in the generated graph. */
     if (!game->roaming_npc_active && game->tick >= game->roaming_npc_return_tick) {
         game->roaming_npc_active = 1;
         game->roaming_npc_room = plat_rand() % game->world.room_count;
@@ -475,6 +477,7 @@ static void advance_world_tick(struct GameState *game, int roaming_moves_first,
             }
         } else if (old_roaming_npc_room != game->roaming_npc_room &&
                 game->player.room_id == game->roaming_npc_room) {
+            /* NPC stepped into the player's room when it moved first this tick. */
             npc_roaming_begin_encounter(game, out);
         }
     }

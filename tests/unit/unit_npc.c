@@ -8,8 +8,8 @@
 #include "unit_util.h"
 
 /*
- * Direct npc.c API tests: room/actor lookup and open-room dialogue without
- * going through dialogue_cmd_talk / game_process_input.
+ * Direct npc.c API tests: room/actor lookup, roaming movement/encounter, and
+ * open-room dialogue without going through game_process_input.
  */
 
 TEST npc_room_actor_lookup(void)
@@ -95,6 +95,7 @@ TEST npc_open_room_dialogue_none(void)
     PASS();
 }
 
+/* Out-taking helpers assert #160 encounter/dialogue events from npc.c roaming. */
 static void begin_roaming_npc(struct GameState *game, GameEventQueue *out)
 {
     game_event_queue_reset(out);
@@ -200,6 +201,7 @@ TEST npc_roaming_reply_cmd_invalid_choice(void)
     game_set_mode_dialogue(&game, DIALOGUE_WANDERER);
     game.roaming_npc_active = 1;
     plat_seed_rng(game.seed);
+    /* Guard path must not schedule return RNG or clear encounter state. */
     ASSERT_EQ(1, roaming_npc_reply_out(&game, 0, &out));
     ASSERT_EQ(0U, plat_rand_draw_count());
     ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);

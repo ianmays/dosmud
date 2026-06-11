@@ -35,6 +35,7 @@ static void harness_drop_output(GameEventQueue *out)
     game_event_queue_reset(out);
 }
 
+/* Keeps roaming NPC ticks from firing during deterministic snapshot fixtures. */
 static void fixture_wanderer_off(struct GameState *game)
 {
     game->roaming_npc_active = 0;

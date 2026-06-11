@@ -7,6 +7,7 @@
 /*
  * npc.c owns the NPC-facing seam between room identity, roaming placement, and
  * dialogue actors. Higher-level slices still own combat and authored content.
+ * Roaming encounters queue GAME_EVENT_ENCOUNTER / DIALOGUE*; grendr maps copy.
  */
 
 struct NpcRoomInfo {
@@ -90,6 +91,7 @@ int npc_open_room_dialogue(struct GameState *game, struct GameEventQueue *out)
     return 1;
 }
 
+/* Traveler is the first roaming profile; seed sets actor/dialogue/encounter ids. */
 void npc_seed_roaming_traveler(struct GameState *game)
 {
     game->roaming_npc_actor = GAME_DIALOGUE_ACTOR_WANDERER;
@@ -103,6 +105,7 @@ void npc_seed_roaming_traveler(struct GameState *game)
 
 void npc_roaming_update_separation(struct GameState *game)
 {
+    /* Once the player leaves the roaming room, the re-encounter lock can clear. */
     if (game->player.room_id != game->roaming_npc_room) {
         game->roaming_npc_need_separation = 0;
     }
@@ -116,6 +119,7 @@ void npc_roaming_step(struct GameState *game)
     int i;
     int pick;
 
+    /* Movement is bounded by the generated graph; invalid room state is a no-op. */
     if (game->world.room_count <= 0) {
         return;
     }
@@ -143,6 +147,7 @@ void npc_roaming_begin_encounter(struct GameState *game, GameEventQueue *out)
     if (game_is_busy_dialogue(game)) {
         return;
     }
+    /* Separation prevents the same room from retriggering the encounter immediately. */
     if (game->roaming_npc_need_separation) {
         return;
     }
@@ -153,6 +158,7 @@ void npc_roaming_begin_encounter(struct GameState *game, GameEventQueue *out)
 
 int npc_roaming_cmd_reply(struct GameState *game, int choice, GameEventQueue *out)
 {
+    /* Return 0 when game.c should try another reply slice or emit a guard. */
     if (game->mode != GAME_MODE_DIALOGUE ||
             game->dialogue != game->roaming_npc_dialogue) {
         return 0;
@@ -166,6 +172,7 @@ int npc_roaming_cmd_reply(struct GameState *game, int choice, GameEventQueue *ou
     game_set_mode_explore(game);
     game->roaming_npc_active = 0;
     game->roaming_npc_room = -1;
+    /* Return timing is randomized only after the player resolves the branch. */
     game->roaming_npc_return_tick =
         game->tick + CFG_WANDERER_RETURN_DELAY_BASE +
         (plat_rand() % CFG_WANDERER_RETURN_DELAY_SPREAD);

@@ -54,6 +54,7 @@ struct GameState {
     int running;
     int mode;
     int dialogue;
+    /* Roaming NPC snapshot; npc.c owns movement and encounter semantics. */
     int roaming_npc_actor;
     int roaming_npc_dialogue;
     int roaming_npc_encounter;
