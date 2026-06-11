@@ -42,6 +42,11 @@ struct CombatState {
     int defending;
 };
 
+/*
+ * Dynamic NPC roster lives in GameState; npc.c owns spawn, roaming, and flags.
+ * Vacant slots use actor GAME_DIALOGUE_ACTOR_NONE; inactive respawn profiles
+ * keep actor/dialogue/encounter in place until npc_roaming_activate_due runs.
+ */
 enum NpcFlags {
     NPC_FLAG_ACTIVE = 1,
     NPC_FLAG_ROAMING = 2,

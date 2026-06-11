@@ -28,6 +28,7 @@ static int run_cmd(struct GameState *game, const char *line)
     return run_cmd_out(game, line, &out);
 }
 
+/* Same deferral as fixture_traveler_off; keeps quiet-tick tests deterministic. */
 static void disable_traveler(struct GameState *game)
 {
     npc_deactivate_until(game, GAME_DIALOGUE_ACTOR_TRAVELER, 999999UL);

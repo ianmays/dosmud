@@ -35,7 +35,10 @@ static void harness_drop_output(GameEventQueue *out)
     game_event_queue_reset(out);
 }
 
-/* Keeps roaming NPC ticks from firing during deterministic snapshot fixtures. */
+/*
+ * Defers traveler respawn without freeing the roster slot; quiet fixtures rely
+ * on npc_deactivate_until so roaming ticks stay inert.
+ */
 static void fixture_traveler_off(struct GameState *game)
 {
     npc_deactivate_until(game, GAME_DIALOGUE_ACTOR_TRAVELER, 999999UL);

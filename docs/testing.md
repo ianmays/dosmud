@@ -157,7 +157,7 @@ Scenarios (see [`tests/soak/soak_sim.c`](../tests/soak/soak_sim.c)):
 
 | Test | Loop |
 |------|------|
-| `soak_background_ticks` | `CFG_TEST_SOAK_TICKS` (10000) × `game_background_step` with full roaming-traveler/bandit/atmosphere |
+| `soak_background_ticks` | `CFG_TEST_SOAK_TICKS` (10000) × `game_background_step` with roster-backed roaming traveler, bandit, and atmosphere |
 | `soak_command_wait_move` | 10000 × alternate `wait` / `move north` with `test_quiet_ticks` |
 | `soak_combat_loop` | `CFG_TEST_SOAK_COMBAT_ROUNDS` (200) × one-hit combat victory with roll inject |
 

@@ -443,8 +443,8 @@ static void advance_world_tick(struct GameState *game, int roaming_moves_first,
                                GameEventQueue *out)
 {
     /*
-     * Tick order is deliberate: advance the roaming NPC and world clock, then
-     * emit ambient events, then consider random encounters so one input
+     * Tick order is deliberate: advance the roaming roster and world clock,
+     * then emit ambient events, then consider random encounters so one input
      * produces the same visible sequence everywhere.
      */
     game->tick += 1;
@@ -458,6 +458,10 @@ static void advance_world_tick(struct GameState *game, int roaming_moves_first,
 #endif
     npc_roaming_activate_due(game);
 
+    /*
+     * Encounter-before-step when the player moved first catches co-location;
+     * step-before-encounter when the player waited preserves the old ordering.
+     */
     if (roaming_moves_first) {
         npc_roaming_step(game);
         npc_roaming_begin_encounter_in_room(game, game->player.room_id, out);

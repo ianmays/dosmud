@@ -153,6 +153,7 @@ static int save_read_u32(FILE *fp, u32 *value)
     return 1;
 }
 
+/* Fixed CFG_NPC_MAX slots in index order; v3 replaces the v2 roaming fields. */
 static int save_write_npcs(FILE *fp, const struct GameState *game)
 {
     int i;
@@ -464,6 +465,7 @@ static int save_valid_boolish(int value)
     return value == 0 || value == 1;
 }
 
+/* Cross-field roster invariants; inactive slots must not claim a room. */
 static int save_valid_npc(const struct NpcState *npc, int room_count)
 {
     int allowed_flags;

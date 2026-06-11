@@ -191,7 +191,7 @@ Conventions:
 - command routing
 - world update sequencing
 - headless step surface: `game_describe_current_room`, `game_process_input`, and `game_background_step` mutate `GameState` and append `GameEvent` records supplied by the caller
-- explicit game modes in [`game.h`](../src/game.h): `GameMode` (explore, dialogue, combat), `DialogueKind` for the active dialogue when in dialogue mode (room NPCs including the pond frog, traveler, enemy), and `CombatState` for combat-only fields
+- explicit game modes in [`game.h`](../src/game.h): `GameMode` (explore, dialogue, combat), `DialogueKind` for the active dialogue when in dialogue mode (room NPCs including the pond frog, traveler, enemy), `CombatState` for combat-only fields, and `NpcState` / `NpcFlags` for the fixed-size dynamic NPC roster (`GameState.npcs[CFG_NPC_MAX]`, cap in [`config.h`](../include/config.h))
 - mode transitions via `game_set_mode_explore`, `game_set_mode_dialogue`, and `game_set_mode_combat` (only one major mode at a time)
 - `game_is_busy_dialogue` returns true whenever `mode != GAME_MODE_EXPLORE` (ambient encounters, idle background ticks)
 - `game_roll_spread` and `game_roll_percent` centralize gameplay draws used for combat, corpse loot, kill XP, and bandit intimidate (`plat_rand()` when inject is inactive; inject bypasses the draw counter in `TEST_MODE`)
@@ -202,7 +202,7 @@ Gameplay slices live beside `game.c` as plain C translation units (no extra fram
 
 - [`gprog.c`](../src/gprog.c) - XP and level-up rewards (`game_xp_to_next_level`, `progression_gain_xp`); queues `GAME_EVENT_XP_GAIN` and `GAME_EVENT_STAT_CHANGE` via `gout` (FAT 8.3-safe basename)
 - [`combat.c`](../src/combat.c) - combat start, player reply resolution, enemy turn; queues `GAME_EVENT_COMBAT` phases via `gout` (randomness via `game_roll_spread` / `game_roll_percent`, not direct `plat_rand()` calls)
-- [`npc.c`](../src/npc.c) - fixed NPC identity seam, shared dialogue helpers, room look hint ownership, and the fixed-size NPC instance roster for roaming placement, encounter open/reply, and future non-roaming dynamic NPCs (`npc_spawn`, `npc_move`, `npc_find_*`, `npc_roaming_*`, `npc_seed_roaming_traveler`)
+- [`npc.c`](../src/npc.c) - fixed NPC identity seam, shared dialogue helpers, room look hint ownership, and the fixed-size NPC instance roster for roaming placement, encounter open/reply, and future non-roaming dynamic NPCs (`npc_clear_all`, `npc_spawn`, `npc_place`, `npc_move`, `npc_find_*`, `npc_deactivate_until`, `npc_roaming_*`, `npc_seed_roaming_traveler`; slot order is save/tick-stable)
 - [`genc.c`](../src/genc.c) - ambient bandit encounter open state (FAT 8.3-safe basename)
 - [`dialogue.c`](../src/dialogue.c) - fixed room-NPC talk and reply routing built on `npc.c`
 - [`gatmos.c`](../src/gatmos.c) - initial room items, ambient rolls, animal noise, inspect focus hooks (FAT 8.3-safe basename)

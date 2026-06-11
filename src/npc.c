@@ -31,6 +31,11 @@ static const struct NpcRoomInfo NPC_ROOM_INFO[] = {
         DIALOGUE_NPC_ARCHIVIST, GAME_DIALOGUE_PHASE_TALK }
 };
 
+/*
+ * Roster slots: actor==NONE means vacant; inactive respawn entries keep actor
+ * set with NPC_FLAG_ACTIVE cleared. Iteration uses ascending slot index so
+ * saves and per-tick roaming walks stay deterministic.
+ */
 static int npc_slot_is_active(const struct NpcState *npc)
 {
     return (npc->flags & NPC_FLAG_ACTIVE) != 0;
@@ -67,6 +72,7 @@ static const struct NpcState *npc_const_slot(const struct GameState *game, int s
     return &game->npcs[slot];
 }
 
+/* Only truly vacant slots qualify; deactivated travelers still occupy a slot. */
 static int npc_find_free_slot(const struct GameState *game)
 {
     int i;
@@ -247,6 +253,7 @@ int npc_is_present(const struct GameState *game, int actor, int room_id)
     return npc_slot_is_active(npc) && npc->room_id == room_id;
 }
 
+/* Clears presence but keeps the roster profile for respawn or fixture reuse. */
 int npc_deactivate_until(struct GameState *game, int actor, u32 return_tick)
 {
     int slot;
@@ -285,6 +292,7 @@ void npc_seed_roaming_traveler(struct GameState *game)
         NPC_FLAG_ACTIVE | NPC_FLAG_ROAMING | NPC_FLAG_RESPAWNS);
 }
 
+/* Reactivation after return_tick picks a random room in the generated graph. */
 void npc_roaming_activate_due(struct GameState *game)
 {
     int i;
@@ -362,6 +370,10 @@ void npc_roaming_step(struct GameState *game)
     }
 }
 
+/*
+ * Returns 1 when an encounter opened. Lowest matching slot wins when several
+ * roaming NPCs share room_id; separation prevents immediate retrigger.
+ */
 int npc_roaming_begin_encounter_in_room(struct GameState *game, int room_id,
                                         GameEventQueue *out)
 {

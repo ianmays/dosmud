@@ -7,14 +7,15 @@ struct GameState;
 struct GameEventQueue;
 
 /*
- * npc.h owns fixed NPC identity, roaming-NPC behavior, and room-talk lookup.
- * Dialogue and encounter slices build on these helpers instead of duplicating
- * room checks or traveler-only roaming state.
+ * npc.h owns the dynamic roster API, roaming behavior, and room-talk lookup.
+ * Dialogue and encounter slices call these helpers instead of duplicating slot
+ * scans or traveler-only state on GameState.
  */
 
 int npc_room_actor(int room_id);
 int npc_dialogue_actor(int dialogue_kind);
 int npc_choice_is_valid(int choice);
+/* Roster lifecycle: one actor per slot; slot index order is save/tick-stable. */
 void npc_clear_all(struct GameState *game);
 int npc_find_by_actor(const struct GameState *game, int actor);
 int npc_find_in_room(const struct GameState *game, int room_id);
