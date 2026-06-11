@@ -220,7 +220,7 @@ Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_
 | `at_pond` / `at_tower` / `at_orchard` / `at_catacombs` | Named room, explore, room explored |
 | `quiet_explore` | `at_camp` + `test_quiet_ticks` + roaming traveler off (for `wait` / `move` snapshots) |
 
-**Wanderer** (co-located dialogue without tick movement):
+**Traveler (roaming NPC)** (co-located dialogue without tick movement):
 
 | Fixture | State |
 |---------|--------|

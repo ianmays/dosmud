@@ -202,7 +202,7 @@ Gameplay slices live beside `game.c` as plain C translation units (no extra fram
 
 - [`gprog.c`](../src/gprog.c) - XP and level-up rewards (`game_xp_to_next_level`, `progression_gain_xp`); queues `GAME_EVENT_XP_GAIN` and `GAME_EVENT_STAT_CHANGE` via `gout` (FAT 8.3-safe basename)
 - [`combat.c`](../src/combat.c) - combat start, player reply resolution, enemy turn; queues `GAME_EVENT_COMBAT` phases via `gout` (randomness via `game_roll_spread` / `game_roll_percent`, not direct `plat_rand()` calls)
-- [`npc.c`](../src/npc.c) - fixed NPC identity seam, shared dialogue helpers, room look hint ownership, and the single roaming-NPC slot used by the traveler
+- [`npc.c`](../src/npc.c) - fixed NPC identity seam, shared dialogue helpers, room look hint ownership, and roaming-NPC movement/encounter/reply (`npc_roaming_*`, `npc_seed_roaming_traveler`; single slot today, traveler profile)
 - [`genc.c`](../src/genc.c) - ambient bandit encounter open state (FAT 8.3-safe basename)
 - [`dialogue.c`](../src/dialogue.c) - fixed room-NPC talk and reply routing built on `npc.c`
 - [`gatmos.c`](../src/gatmos.c) - initial room items, ambient rolls, animal noise, inspect focus hooks (FAT 8.3-safe basename)
