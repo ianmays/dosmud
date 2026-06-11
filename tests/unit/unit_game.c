@@ -363,13 +363,13 @@ TEST game_give_after_handover_fixture(void)
     PASS();
 }
 
-TEST game_wanderer_reply_fixture(void)
+TEST game_traveler_reply_fixture(void)
 {
     struct GameState game;
     GameEventQueue out;
 
     unit_game_fresh(&game, 20u);
-    testharn_apply(&game, "@fixture wanderer_dialogue");
+    testharn_apply(&game, "@fixture traveler_dialogue");
     ASSERT_EQ(1, run_cmd_out(&game, "reply 2", &out));
     ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
     ASSERT_EQ(0, game.roaming_npc_active);
@@ -650,7 +650,7 @@ SUITE(game) {
     RUN_TEST(game_inspect_none_and_wrong);
     RUN_TEST(game_unknown_command);
     RUN_TEST(game_give_after_handover_fixture);
-    RUN_TEST(game_wanderer_reply_fixture);
+    RUN_TEST(game_traveler_reply_fixture);
     RUN_TEST(game_wait_and_help);
     RUN_TEST(game_session_help_no_tick);
     RUN_TEST(game_observe_look_no_tick);

@@ -224,7 +224,7 @@ Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_
 
 | Fixture | State |
 |---------|--------|
-| `wanderer_dialogue` | Road, tick 0, player and roaming traveler co-located, traveler dialogue open (intro + options rendered) |
+| `traveler_dialogue` | Road, tick 0, player and roaming traveler co-located, traveler dialogue open (intro + options rendered) |
 
 **Bags / items** (explore, named room):
 
@@ -308,7 +308,7 @@ Each process run uses one `.input` file until `quit`. `make snapshot-run` runs `
 
 **Movement / time:** `walk_north`, `walk_map`, `wait_tick`.
 
-**NPC talk:** `frog_hint`, `frog_replies`, `watchman_talk`, `wanderer_replies`, `wanderer_talk_blocked`, `herbalist_talk`, `archivist_talk`, `talk_nobody`, `game_event_dialogue` (`frog_hint` proves the generic room-NPC hint also applies at the pond; the others cover pond frog, bandit camp talk, and tower watchman through generic `GAME_EVENT_DIALOGUE` / `GAME_EVENT_ENCOUNTER` paths; [#175](https://github.com/ianmays/dosmud/pull/175)).
+**NPC talk:** `frog_hint`, `frog_replies`, `watchman_talk`, `traveler_replies`, `traveler_talk_blocked`, `herbalist_talk`, `archivist_talk`, `talk_nobody`, `game_event_dialogue` (`frog_hint` proves the generic room-NPC hint also applies at the pond; the others cover pond frog, bandit camp talk, traveler interaction, and tower watchman through generic `GAME_EVENT_DIALOGUE` / `GAME_EVENT_ENCOUNTER` paths; [#175](https://github.com/ianmays/dosmud/pull/175)).
 
 **Eat / use:** `use_salve`, `use_torch`, `use_spear`, `use_stone`, `eat_berry`, `eat_fish`, `eat_berry_heal`, `eat_fish_heal`, `eat_not_edible`, `eat_missing`.
 

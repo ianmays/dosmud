@@ -105,7 +105,7 @@ TEST dialogue_cmd_talk_bandit_blocks(void)
     PASS();
 }
 
-TEST dialogue_cmd_talk_wanderer_waiting(void)
+TEST dialogue_cmd_talk_traveler_waiting(void)
 {
     struct GameState game;
     GameEventQueue out;
@@ -285,7 +285,7 @@ SUITE(dialogue) {
     RUN_TEST(dialogue_cmd_reply_not_dialogue);
     RUN_TEST(dialogue_cmd_talk_frog);
     RUN_TEST(dialogue_cmd_talk_bandit_blocks);
-    RUN_TEST(dialogue_cmd_talk_wanderer_waiting);
+    RUN_TEST(dialogue_cmd_talk_traveler_waiting);
     RUN_TEST(dialogue_cmd_talk_herbalist);
     RUN_TEST(dialogue_cmd_talk_archivist);
     RUN_TEST(dialogue_cmd_reply_frog_invalid);

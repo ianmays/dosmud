@@ -36,7 +36,7 @@ static void harness_drop_output(GameEventQueue *out)
 }
 
 /* Keeps roaming NPC ticks from firing during deterministic snapshot fixtures. */
-static void fixture_wanderer_off(struct GameState *game)
+static void fixture_traveler_off(struct GameState *game)
 {
     game->roaming_npc_active = 0;
     game->roaming_npc_return_tick = 999999UL;
@@ -45,7 +45,7 @@ static void fixture_wanderer_off(struct GameState *game)
 static void fixture_quiet_ticks_on(struct GameState *game)
 {
     game->test_quiet_ticks = 1;
-    fixture_wanderer_off(game);
+    fixture_traveler_off(game);
 }
 
 static void fixture_bandit_base(struct GameState *game)
@@ -269,7 +269,7 @@ static void fixture_quiet_explore(struct GameState *game)
 static void fixture_ambient_camp(struct GameState *game)
 {
     fixture_at_camp(game);
-    fixture_wanderer_off(game);
+    fixture_traveler_off(game);
 }
 
 static void fixture_quiet_camp_dual_ground(struct GameState *game)
@@ -295,7 +295,7 @@ static int fixture_quiet_camp_dual_ground_full_bag(struct GameState *game)
     return 1;
 }
 
-static void fixture_wanderer_dialogue(struct GameState *game)
+static void fixture_traveler_dialogue(struct GameState *game)
 {
     GameEventQueue out;
 
@@ -614,8 +614,8 @@ int testharn_apply(struct GameState *game, const char *line)
         }
         return 1;
     }
-    if (fixture_name_is("wanderer_dialogue", name)) {
-        fixture_wanderer_dialogue(game);
+    if (fixture_name_is("traveler_dialogue", name)) {
+        fixture_traveler_dialogue(game);
         return 1;
     }
     if (fixture_name_is("bag_berry", name)) {

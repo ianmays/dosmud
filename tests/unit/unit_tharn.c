@@ -157,7 +157,7 @@ TEST testharn_fixture_sweep(void)
     ASSERT_EQ(1, rc);
     rc = testharn_apply(&game, "@fixture quiet_camp_dual_ground_full_bag");
     ASSERT_EQ(1, rc);
-    rc = testharn_apply(&game, "@fixture wanderer_dialogue");
+    rc = testharn_apply(&game, "@fixture traveler_dialogue");
     ASSERT_EQ(1, rc);
     rc = testharn_apply(&game, "@fixture bag_berry");
     ASSERT_EQ(1, rc);

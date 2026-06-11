@@ -122,13 +122,13 @@ TEST harness_apply_bandit_handover_pick(void)
     PASS();
 }
 
-TEST harness_apply_wanderer_dialogue(void)
+TEST harness_apply_traveler_dialogue(void)
 {
     struct GameState game;
     int rc;
 
     unit_game_fresh(&game, 6u);
-    rc = testharn_apply(&game, "@fixture wanderer_dialogue");
+    rc = testharn_apply(&game, "@fixture traveler_dialogue");
     ASSERT_EQ(1, rc);
     ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
     ASSERT_EQ(DIALOGUE_WANDERER, game.dialogue);
@@ -176,7 +176,7 @@ SUITE(harness) {
     RUN_TEST(harness_apply_quiet_camp_dual_ground);
     RUN_TEST(harness_apply_quiet_camp_dual_ground_full_bag);
     RUN_TEST(harness_apply_bandit_handover_pick);
-    RUN_TEST(harness_apply_wanderer_dialogue);
+    RUN_TEST(harness_apply_traveler_dialogue);
     RUN_TEST(harness_apply_env_focus_water);
     RUN_TEST(harness_seed_repeatable_rolls);
 }

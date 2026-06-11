@@ -265,7 +265,7 @@ Compiler discipline and warning cleanliness should remain early priorities throu
 
 Done ✅ ([#99](https://github.com/ianmays/dosmud/pull/99)).
 
-[`src/game.h`](src/game.h) defines `GameMode` (`GAME_MODE_EXPLORE`, `GAME_MODE_DIALOGUE`, `GAME_MODE_COMBAT`), `DialogueKind` (room NPCs including frog, wanderer, enemy), and `CombatState` (`enemy_hp`, `defending`). `GameState` holds `mode`, `dialogue`, and `combat` instead of overlapping `pond_dialogue`, `wanderer_dialogue`, `enemy_dialogue`, `npc_dialogue`, and `combat_active` flags. Transitions go through `game_set_mode_explore`, `game_set_mode_dialogue`, and `game_set_mode_combat` in [`src/game.c`](src/game.c).
+[`src/game.h`](src/game.h) defines `GameMode` (`GAME_MODE_EXPLORE`, `GAME_MODE_DIALOGUE`, `GAME_MODE_COMBAT`), `DialogueKind` (room NPCs including frog, traveler, enemy), and `CombatState` (`enemy_hp`, `defending`). `GameState` holds `mode`, `dialogue`, and `combat` instead of overlapping `pond_dialogue`, `traveler_dialogue`, `enemy_dialogue`, `npc_dialogue`, and `combat_active` flags. Transitions go through `game_set_mode_explore`, `game_set_mode_dialogue`, and `game_set_mode_combat` in [`src/game.c`](src/game.c).
 
 ### [#44](https://github.com/ianmays/dosmud/issues/44) - Formalize engine boundaries
 
@@ -316,7 +316,7 @@ Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 - **[#122](https://github.com/ianmays/dosmud/issues/122)** Done ✅ ([#124](https://github.com/ianmays/dosmud/pull/124)) - optional `@seed <unsigned>` line in snapshot `.input` files.
 - **[#95](https://github.com/ianmays/dosmud/issues/95)** Done ✅ ([#127](https://github.com/ianmays/dosmud/pull/127)) - unit tests; **~96%** weighted branch coverage on core modules
 - **[#116](https://github.com/ianmays/dosmud/issues/116)** Done ✅ ([#133](https://github.com/ianmays/dosmud/pull/133)) - soak / stress harness (`make test-soak`, CI benchmarks)
-- **[#113](https://github.com/ianmays/dosmud/issues/113)** Done ✅ ([#125](https://github.com/ianmays/dosmud/pull/125)) - wanderer snapshot fixtures (`wanderer_dialogue` fixture; `wanderer_replies`, `wanderer_talk_blocked` snapshots)
+- **[#113](https://github.com/ianmays/dosmud/issues/113)** Done ✅ ([#125](https://github.com/ianmays/dosmud/pull/125)) - traveler snapshot fixtures (`traveler_dialogue` fixture; `traveler_replies`, `traveler_talk_blocked` snapshots)
 - **[#114](https://github.com/ianmays/dosmud/issues/114)** Done ✅ ([#126](https://github.com/ianmays/dosmud/pull/126)) - custom world boot fixture (`world_boot` / `world_linear`; `world_apply_graph` + harness tables in TEST_MODE)
 
 ### [#40](https://github.com/ianmays/dosmud/issues/40) - Gameplay test coverage (umbrella epic) — Done ✅
@@ -725,7 +725,7 @@ Done ✅ ([#186](https://github.com/ianmays/dosmud/pull/186)).
 
 ### Testing
 - Unit: `unit_npc.c` (roaming NPC movement, encounter open, reply/reset), `unit_dial.c` (traveler talk guard), `unit_save.c`, `unit_game.c`, `unit_harn.c`, `unit_tharn.c`
-- Snapshots: existing traveler snapshots unchanged (`wanderer_replies`, `wanderer_talk_blocked`)
+- Snapshots: existing traveler snapshots unchanged (`traveler_replies`, `traveler_talk_blocked`)
 
 ### [#101](https://github.com/ianmays/dosmud/issues/101) - Bandit behaviour reusable for any NPC
 
