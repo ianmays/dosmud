@@ -16,7 +16,7 @@ int dialogue_cmd_reply(struct GameState *game, int choice, GameEventQueue *out)
     }
 
     actor = npc_dialogue_actor(game->dialogue);
-    /* Wanderer and enemy replies are routed in wanderer.c / genc.c, not here. */
+    /* Enemy replies stay in genc.c; traveler replies now route through npc.c. */
     if (actor == GAME_DIALOGUE_ACTOR_NONE) {
         return 0;
     }
@@ -32,7 +32,7 @@ int dialogue_cmd_reply(struct GameState *game, int choice, GameEventQueue *out)
 
 int dialogue_cmd_talk(struct GameState *game, GameEventQueue *out)
 {
-    /* Talk is blocked while the player is already in an enemy or wanderer branch. */
+    /* Talk is blocked while the player is already in an enemy or traveler branch. */
     if (game->mode == GAME_MODE_DIALOGUE && game->dialogue == DIALOGUE_ENEMY) {
         npc_push_dialogue_guard(out, GAME_DIALOGUE_GUARD_BANDIT_BLOCKS_TALK);
         return 1;
@@ -41,7 +41,7 @@ int dialogue_cmd_talk(struct GameState *game, GameEventQueue *out)
         npc_push_dialogue_guard(out, GAME_DIALOGUE_GUARD_BANDIT_BLOCKS_TALK);
         return 1;
     }
-    if (game->mode == GAME_MODE_DIALOGUE && game->dialogue == DIALOGUE_WANDERER) {
+    if (game->mode == GAME_MODE_DIALOGUE && game->dialogue == DIALOGUE_TRAVELER) {
         npc_push_dialogue_guard(out, GAME_DIALOGUE_GUARD_TRAVELER_WAITING);
         return 1;
     }

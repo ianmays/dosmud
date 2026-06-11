@@ -26,7 +26,7 @@ enum DialogueKind {
     DIALOGUE_NPC_WATCHMAN,
     DIALOGUE_NPC_HERBALIST,
     DIALOGUE_NPC_ARCHIVIST,
-    DIALOGUE_WANDERER,
+    DIALOGUE_TRAVELER,
     DIALOGUE_ENEMY
 };
 
@@ -54,8 +54,12 @@ struct GameState {
     int running;
     int mode;
     int dialogue;
-    int wanderer_room;
-    int wanderer_need_separation;
+    /* Roaming NPC snapshot; npc.c owns movement and encounter semantics. */
+    int roaming_npc_actor;
+    int roaming_npc_dialogue;
+    int roaming_npc_encounter;
+    int roaming_npc_room;
+    int roaming_npc_need_separation;
     int env_focus_active;
     int env_focus_room;
     int env_focus_kind;
@@ -74,8 +78,8 @@ struct GameState {
     struct CombatState combat;
     int corpse_present[CFG_ROOM_MAX];
     int corpse_loot[CFG_ROOM_MAX];
-    int wanderer_active;
-    u32 wanderer_return_tick;
+    int roaming_npc_active;
+    u32 roaming_npc_return_tick;
     u8 room_explored[CFG_ROOM_MAX];
 #ifdef TEST_MODE
     int roll_inject_active;

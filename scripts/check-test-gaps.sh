@@ -278,6 +278,11 @@ file_changed_non_whitespace() {
     return 1
 }
 
+path_exists_in_worktree() {
+    path="$1"
+    [ -e "$path" ]
+}
+
 path_added_in_diff() {
     path="$1"
     if git diff "$DIFF_RANGE" --diff-filter=A -- "$path" 2>/dev/null | grep -q .; then
@@ -439,6 +444,9 @@ for path in $NAME_ONLY; do
     if ! module_in_coverage_scope "$mod"; then
         continue
     fi
+    if ! module_in_coverage "$mod" && ! path_exists_in_worktree "$path"; then
+        continue
+    fi
     units=$(unit_files_for_module "$mod")
     if [ -z "$units" ]; then
         echo "test-gap: unit gap: $path changed but module-map has no suite for $mod (add $mod: unit_*.c to $MAP)" >&2
@@ -484,6 +492,9 @@ check_coverage_source_unit_gap() {
         return 0
     fi
     if ! file_changed_non_whitespace "$src"; then
+        return 0
+    fi
+    if ! module_in_coverage "$mod" && ! path_exists_in_worktree "$src"; then
         return 0
     fi
     units=$(unit_files_for_module "$mod")

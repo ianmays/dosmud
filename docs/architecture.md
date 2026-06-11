@@ -23,18 +23,18 @@ The codebase splits into three layers. Gameplay and simulation modules must stay
 
 Owns state mutation, command handling, world ticks, combat, inventory logic, and procedural systems.
 
-Modules include `game`, `command`, `world`, `invent`, `combat`, `gatmos`, `gprog`, `genc`, `wanderer`, `dialogue`, `npc`, and `items`.
+Modules include `game`, `command`, `world`, `invent`, `combat`, `gatmos`, `gprog`, `genc`, `dialogue`, `npc`, and `items`.
 
 Simulation steps append fixed-size `GameEvent` records through the `gout` queue while mutating `GameState`. Core does not print directly; callers may inspect those records headlessly or hand them to the DOSMUD render adapter.
 
 Within core, keep the ownership split explicit:
 
 - **Engine** - deterministic `GameState` stepping (`game_describe_current_room`, `game_process_input`, `game_background_step`) plus `GameEvent` / `gout` records. The engine mutates state and emits semantic output requests, but never performs terminal I/O.
-- **Game logic** - dosmud-specific rules and content that plug into that stepping surface: command routing in `game`, room/world rules, and the gameplay slices (`combat`, `invent`, `dialogue`, `npc`, `genc`, `wanderer`, `gatmos`, `gprog`, `items`).
+- **Game logic** - dosmud-specific rules and content that plug into that stepping surface: command routing in `game`, room/world rules, and the gameplay slices (`combat`, `invent`, `dialogue`, `npc`, `genc`, `gatmos`, `gprog`, `items`).
 
 [`src/game.h`](../src/game.h) defines the engine-facing stepping surface and persistent simulation state; [`src/gout.h`](../src/gout.h) defines the fixed-size event queue that carries engine results to the render edge.
 
-Command and navigation stepping in `game.c` emit generic `GameEventKind` values (handled in `grendr`): `GAME_EVENT_MOVE` and `GAME_EVENT_ROOM_LOOK` (successful move plus room look), `GAME_EVENT_MAP`, `GAME_EVENT_HELP` (`arg0` = `CMD_HELP_*` topic), `GAME_EVENT_WAIT`, `GAME_EVENT_CANNOT_MOVE` (`text` = direction name), and `GAME_EVENT_UNKNOWN_COMMAND`. Inventory and item handlers in `invent.c` emit `GAME_EVENT_ITEM_RESULT`, `GAME_EVENT_BAG_VIEW`, `GAME_EVENT_CRAFT_RESULT`, and `GAME_EVENT_EQUIP_RESULT` (payload contract in [`gout.h`](../src/gout.h)). Combat and progression in [`combat.c`](../src/combat.c) and [`gprog.c`](../src/gprog.c) emit `GAME_EVENT_COMBAT` (`GameEventCombatPhase` in `arg0`), `GAME_EVENT_XP_GAIN`, and `GAME_EVENT_STAT_CHANGE` (payload contract in [`gout.h`](../src/gout.h)). The fixed NPC seam in [`npc.c`](../src/npc.c) owns room-to-actor lookup, shared dialogue event helpers, and room talk opening for fixed NPCs such as the pond frog, watchman, herbalist, and archivist. Dialogue and encounter slices in [`dialogue.c`](../src/dialogue.c), [`wanderer.c`](../src/wanderer.c), and [`genc.c`](../src/genc.c) build on that seam and emit `GAME_EVENT_DIALOGUE`, `GAME_EVENT_ENCOUNTER`, and `GAME_EVENT_DIALOGUE_GUARD`; modal guards in `game.c` emit `GAME_EVENT_DIALOGUE_GUARD` when reply or handover context blocks a command (payload contract in [`gout.h`](../src/gout.h)). Ambient and inspect output in [`gatmos.c`](../src/gatmos.c) emit `GAME_EVENT_ENVIRONMENT`, `GAME_EVENT_AMBIENT_NOISE`, `GAME_EVENT_ITEM_PRESENCE`, and `GAME_EVENT_OBSERVATION` on world ticks and the inspect command (payload contract in [`gout.h`](../src/gout.h)). All production slices append generic `GameEventKind` values only; `grendr` dispatches them to player-visible text.
+Command and navigation stepping in `game.c` emit generic `GameEventKind` values (handled in `grendr`): `GAME_EVENT_MOVE` and `GAME_EVENT_ROOM_LOOK` (successful move plus room look), `GAME_EVENT_MAP`, `GAME_EVENT_HELP` (`arg0` = `CMD_HELP_*` topic), `GAME_EVENT_WAIT`, `GAME_EVENT_CANNOT_MOVE` (`text` = direction name), and `GAME_EVENT_UNKNOWN_COMMAND`. Inventory and item handlers in `invent.c` emit `GAME_EVENT_ITEM_RESULT`, `GAME_EVENT_BAG_VIEW`, `GAME_EVENT_CRAFT_RESULT`, and `GAME_EVENT_EQUIP_RESULT` (payload contract in [`gout.h`](../src/gout.h)). Combat and progression in [`combat.c`](../src/combat.c) and [`gprog.c`](../src/gprog.c) emit `GAME_EVENT_COMBAT` (`GameEventCombatPhase` in `arg0`), `GAME_EVENT_XP_GAIN`, and `GAME_EVENT_STAT_CHANGE` (payload contract in [`gout.h`](../src/gout.h)). The NPC seam in [`npc.c`](../src/npc.c) owns fixed room lookup, shared dialogue event helpers, and the single roaming-NPC slot that currently powers the traveler encounter. Dialogue and encounter slices in [`dialogue.c`](../src/dialogue.c), [`npc.c`](../src/npc.c), and [`genc.c`](../src/genc.c) emit `GAME_EVENT_DIALOGUE`, `GAME_EVENT_ENCOUNTER`, and `GAME_EVENT_DIALOGUE_GUARD`; modal guards in `game.c` emit `GAME_EVENT_DIALOGUE_GUARD` when reply or handover context blocks a command (payload contract in [`gout.h`](../src/gout.h)). Ambient and inspect output in [`gatmos.c`](../src/gatmos.c) emit `GAME_EVENT_ENVIRONMENT`, `GAME_EVENT_AMBIENT_NOISE`, `GAME_EVENT_ITEM_PRESENCE`, and `GAME_EVENT_OBSERVATION` on world ticks and the inspect command (payload contract in [`gout.h`](../src/gout.h)). All production slices append generic `GameEventKind` values only; `grendr` dispatches them to player-visible text.
 
 Core must **not** use:
 
@@ -128,7 +128,7 @@ Commands mutate game state, world ticks mutate simulation state, and rendering o
 [`include/config.h`](../include/config.h) is the compile-time home for:
 
 - structural limits (`CFG_ROOM_MAX`, `CFG_BAG_MAX`, `CFG_AREA_ITEM_SLOTS` ground slots per room, buffers, etc.)
-- gameplay tuning (combat and bandit corpse loot thresholds, food/salve heal amounts, progression, ambient systems, wanderer timing)
+- gameplay tuning (combat and bandit corpse loot thresholds, food/salve heal amounts, progression, ambient systems, traveler return timing)
 - world-generation numeric policy (`world_init` counts and loop bounds)
 - `WORLD_ROOM_*` room IDs
 
@@ -143,7 +143,7 @@ Conventions:
 
 ### Test harness (`testharn`, `TEST_MODE` only)
 
-[`tests/harness/testharn.c`](../tests/harness/testharn.c) lives at the `main` edge (not core simulation). It applies `@fixture` and `@seed` lines from snapshot `.input` files by calling `game_reset_fixture_baseline` plus real gameplay APIs, usually capturing the event queue into a local buffer and either dropping it with `harness_drop_output` or rendering it through `game_render_output` when the snapshot needs the visible prompt or encounter text. A few edge prompts still use direct `render_*` calls where the harness is intentionally reproducing shell-facing output that is not part of a normal command or tick step. Shared seed-1234 world layout tables live in [`tests/harness/th_world.c`](../tests/harness/th_world.c). After a successful harness directive, `main.c` calls `plat_seed_rng(game.seed)` so libc RNG matches the stored seed. Fixtures cover bandit dialogue/combat, room placement, bag contents, inspect focus, corpse loot, combat-ready inject queues, and `quiet_explore` (`test_quiet_ticks` + wanderer off). The `bandit_combat_turn1_resolve` fixture also calls `game_roll_inject_begin` and `combat_resolve_reply` so the `equipment` snapshot exercises real combat without a scripted `1`. `@seed` sets `GameState.seed` mid-file for libc RNG stream isolation. Release builds (`make build`) do not link the harness. See [testing](testing.md#test-fixtures-test_mode-only).
+[`tests/harness/testharn.c`](../tests/harness/testharn.c) lives at the `main` edge (not core simulation). It applies `@fixture` and `@seed` lines from snapshot `.input` files by calling `game_reset_fixture_baseline` plus real gameplay APIs, usually capturing the event queue into a local buffer and either dropping it with `harness_drop_output` or rendering it through `game_render_output` when the snapshot needs the visible prompt or encounter text. A few edge prompts still use direct `render_*` calls where the harness is intentionally reproducing shell-facing output that is not part of a normal command or tick step. Shared seed-1234 world layout tables live in [`tests/harness/th_world.c`](../tests/harness/th_world.c). After a successful harness directive, `main.c` calls `plat_seed_rng(game.seed)` so libc RNG matches the stored seed. Fixtures cover bandit dialogue/combat, room placement, bag contents, inspect focus, corpse loot, combat-ready inject queues, and `quiet_explore` (`test_quiet_ticks` + roaming traveler off). The `bandit_combat_turn1_resolve` fixture also calls `game_roll_inject_begin` and `combat_resolve_reply` so the `equipment` snapshot exercises real combat without a scripted `1`. `@seed` sets `GameState.seed` mid-file for libc RNG stream isolation. Release builds (`make build`) do not link the harness. See [testing](testing.md#test-fixtures-test_mode-only).
 
 ## Base types (`base.h`)
 
@@ -180,9 +180,9 @@ Conventions:
 ### `save`
 
 - shell-edge binary serialization in [`save.c`](../src/save.c); called only from `main.c`
-- versioned, field-by-field save format (`DMSV`, version 1) for `GameState`, `World`, and tracked RNG draw count
-- validates magic, version, and field ranges before replacing the live game state
-- `TEST_MODE` builds append roll-injection and quiet-tick fields to the v1 payload; release builds use a shorter record and reject the extra bytes via EOF/trailing-byte checks
+- versioned, field-by-field save format (`DMSV`, version 2) for `GameState`, `World`, and tracked RNG draw count
+- validates magic, version, and field ranges before replacing the live game state; older payload versions are rejected instead of migrated in place
+- v2 inserts roaming NPC identity fields (`roaming_npc_actor`, `roaming_npc_dialogue`, `roaming_npc_encounter`) ahead of the roaming room/active state; `TEST_MODE` builds still append roll-injection and quiet-tick fields after the shared payload, while release builds use the shorter record and reject extra trailing bytes
 - keeps render queues and replay logs out of the save format
 
 ### `game`
@@ -191,20 +191,19 @@ Conventions:
 - command routing
 - world update sequencing
 - headless step surface: `game_describe_current_room`, `game_process_input`, and `game_background_step` mutate `GameState` and append `GameEvent` records supplied by the caller
-- explicit game modes in [`game.h`](../src/game.h): `GameMode` (explore, dialogue, combat), `DialogueKind` for the active dialogue when in dialogue mode (room NPCs including the pond frog, wanderer, enemy), and `CombatState` for combat-only fields
+- explicit game modes in [`game.h`](../src/game.h): `GameMode` (explore, dialogue, combat), `DialogueKind` for the active dialogue when in dialogue mode (room NPCs including the pond frog, traveler, enemy), and `CombatState` for combat-only fields
 - mode transitions via `game_set_mode_explore`, `game_set_mode_dialogue`, and `game_set_mode_combat` (only one major mode at a time)
 - `game_is_busy_dialogue` returns true whenever `mode != GAME_MODE_EXPLORE` (ambient encounters, idle background ticks)
 - `game_roll_spread` and `game_roll_percent` centralize gameplay draws used for combat, corpse loot, kill XP, and bandit intimidate (`plat_rand()` when inject is inactive; inject bypasses the draw counter in `TEST_MODE`)
-- `TEST_MODE` only: `game_roll_inject_*` and `test_quiet_ticks` on `GameState`; when `test_quiet_ticks` is set, `advance_world_tick` skips ambient atmosphere, animal noise, bandit ambush, and wanderer movement (see [quiet ticks](testing.md#quiet-ticks-test_quiet_ticks-test_mode-only))
-- ambient, wanderer, and world generation randomness flow through tracked `plat_rand()` so save/load can restore future deterministic draws
+- `TEST_MODE` only: `game_roll_inject_*` and `test_quiet_ticks` on `GameState`; when `test_quiet_ticks` is set, `advance_world_tick` skips ambient atmosphere, animal noise, bandit ambush, and roaming traveler movement (see [quiet ticks](testing.md#quiet-ticks-test_quiet_ticks-test_mode-only))
+- ambient, roaming traveler, and world generation randomness flow through tracked `plat_rand()` so save/load can restore future deterministic draws
 
 Gameplay slices live beside `game.c` as plain C translation units (no extra framework):
 
 - [`gprog.c`](../src/gprog.c) - XP and level-up rewards (`game_xp_to_next_level`, `progression_gain_xp`); queues `GAME_EVENT_XP_GAIN` and `GAME_EVENT_STAT_CHANGE` via `gout` (FAT 8.3-safe basename)
 - [`combat.c`](../src/combat.c) - combat start, player reply resolution, enemy turn; queues `GAME_EVENT_COMBAT` phases via `gout` (randomness via `game_roll_spread` / `game_roll_percent`, not direct `plat_rand()` calls)
-- [`npc.c`](../src/npc.c) - fixed NPC identity seam for room talk lookup, shared dialogue helpers, and room look hint ownership
+- [`npc.c`](../src/npc.c) - fixed NPC identity seam, shared dialogue helpers, room look hint ownership, and roaming-NPC movement/encounter/reply (`npc_roaming_*`, `npc_seed_roaming_traveler`; single slot today, traveler profile)
 - [`genc.c`](../src/genc.c) - ambient bandit encounter open state (FAT 8.3-safe basename)
-- [`wanderer.c`](../src/wanderer.c) - traveler movement and encounter flow
 - [`dialogue.c`](../src/dialogue.c) - fixed room-NPC talk and reply routing built on `npc.c`
 - [`gatmos.c`](../src/gatmos.c) - initial room items, ambient rolls, animal noise, inspect focus hooks (FAT 8.3-safe basename)
 

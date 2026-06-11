@@ -8,7 +8,6 @@
 #include "dialogue.h"
 #include "genc.h"
 #include "npc.h"
-#include "wanderer.h"
 
 /*
  * game.c owns top-level orchestration: it routes commands, advances ticks,
@@ -109,8 +108,7 @@ static void reset_mutable_state(struct GameState *game, int room_id, u32 tick)
     game_set_mode_explore(game);
     game->player.room_id = room_id;
     game->tick = tick;
-    game->wanderer_room = WORLD_ROOM_RUINS;
-    game->wanderer_need_separation = 0;
+    npc_seed_roaming_traveler(game);
     game->env_focus_active = 0;
     game->env_focus_room = -1;
     game->env_focus_kind = GAME_ENV_NONE;
@@ -125,8 +123,6 @@ static void reset_mutable_state(struct GameState *game, int room_id, u32 tick)
     game->player_hp = CFG_START_MAX_HP;
     game->combat.enemy_hp = 0;
     game->combat.defending = 0;
-    game->wanderer_active = 1;
-    game->wanderer_return_tick = 0;
     for (j = 0; j < CFG_BAG_MAX; ++j) {
         game->bag[j] = ITEM_NONE;
     }
@@ -398,8 +394,9 @@ static int game_cmd_reply(struct GameState *game, struct Command *cmd,
     if (game->mode == GAME_MODE_DIALOGUE && game->dialogue == DIALOGUE_ENEMY) {
         return genc_cmd_reply(game, cmd->arg, out);
     }
-    if (game->mode == GAME_MODE_DIALOGUE && game->dialogue == DIALOGUE_WANDERER) {
-        return wanderer_cmd_reply(game, cmd->arg, out);
+    /* Traveler and future roaming actors route through npc.c after room/enemy. */
+    if (npc_roaming_cmd_reply(game, cmd->arg, out)) {
+        return 1;
     }
     push_dialogue_guard(out, GAME_DIALOGUE_GUARD_NOBODY_WAITING_REPLY);
     return 1;
@@ -441,18 +438,18 @@ static int apply_command(struct GameState *game, struct Command *cmd,
     return 0;
 }
 
-static void advance_world_tick(struct GameState *game, int wanderer_moves_first,
+static void advance_world_tick(struct GameState *game, int roaming_moves_first,
                                GameEventQueue *out)
 {
-    int old_wanderer_room;
+    int old_roaming_npc_room;
 
     /*
-     * Tick order is deliberate: advance the wanderer and world clock, then
+     * Tick order is deliberate: advance the roaming NPC and world clock, then
      * emit ambient events, then consider random encounters so one input
      * produces the same visible sequence everywhere.
      */
     game->tick += 1;
-    wanderer_update_separation(game);
+    npc_roaming_update_separation(game);
 #ifdef TEST_MODE
     if (game->test_quiet_ticks) {
         /* Quiet fixtures keep time moving but suppress ambient randomness. */
@@ -460,26 +457,28 @@ static void advance_world_tick(struct GameState *game, int wanderer_moves_first,
         return;
     }
 #endif
-    if (!game->wanderer_active && game->tick >= game->wanderer_return_tick) {
-        game->wanderer_active = 1;
-        game->wanderer_room = plat_rand() % game->world.room_count;
+    /* Reactivation after reply delay picks a random room in the generated graph. */
+    if (!game->roaming_npc_active && game->tick >= game->roaming_npc_return_tick) {
+        game->roaming_npc_active = 1;
+        game->roaming_npc_room = plat_rand() % game->world.room_count;
     }
 
-    old_wanderer_room = game->wanderer_room;
-    if (game->wanderer_active) {
-        if (wanderer_moves_first) {
-            wanderer_step(game);
+    old_roaming_npc_room = game->roaming_npc_room;
+    if (game->roaming_npc_active) {
+        if (roaming_moves_first) {
+            npc_roaming_step(game);
         }
-        if (game->player.room_id == game->wanderer_room) {
-            wanderer_begin_encounter(game, out);
-        } else if (!wanderer_moves_first) {
-            wanderer_step(game);
-            if (game->player.room_id == game->wanderer_room) {
-                wanderer_begin_encounter(game, out);
+        if (game->player.room_id == game->roaming_npc_room) {
+            npc_roaming_begin_encounter(game, out);
+        } else if (!roaming_moves_first) {
+            npc_roaming_step(game);
+            if (game->player.room_id == game->roaming_npc_room) {
+                npc_roaming_begin_encounter(game, out);
             }
-        } else if (old_wanderer_room != game->wanderer_room &&
-                game->player.room_id == game->wanderer_room) {
-            wanderer_begin_encounter(game, out);
+        } else if (old_roaming_npc_room != game->roaming_npc_room &&
+                game->player.room_id == game->roaming_npc_room) {
+            /* NPC stepped into the player's room when it moved first this tick. */
+            npc_roaming_begin_encounter(game, out);
         }
     }
 

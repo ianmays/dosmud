@@ -32,7 +32,7 @@ enum GameEventKind {
     GAME_EVENT_COMBAT,
     GAME_EVENT_XP_GAIN,
     GAME_EVENT_STAT_CHANGE,
-    /* #160: dialogue, wanderer, and encounter slice emit actor/dialogue payloads. */
+    /* #160: dialogue, roaming NPC, and encounter slice emit actor/dialogue payloads. */
     GAME_EVENT_DIALOGUE,
     GAME_EVENT_ENCOUNTER,
     GAME_EVENT_DIALOGUE_GUARD,
@@ -141,7 +141,7 @@ enum GameEventDialogueActor {
     GAME_DIALOGUE_ACTOR_WATCHMAN = 2,
     GAME_DIALOGUE_ACTOR_HERBALIST = 3,
     GAME_DIALOGUE_ACTOR_ARCHIVIST = 4,
-    GAME_DIALOGUE_ACTOR_WANDERER = 5,
+    GAME_DIALOGUE_ACTOR_TRAVELER = 5,
     GAME_DIALOGUE_ACTOR_NOBODY = 6
 };
 
@@ -154,7 +154,7 @@ enum GameEventDialoguePhase {
 enum GameEventEncounterKind {
     GAME_ENCOUNTER_NONE = 0,
     GAME_ENCOUNTER_BANDIT,
-    GAME_ENCOUNTER_WANDERER
+    GAME_ENCOUNTER_TRAVELER
 };
 
 enum GameEventEncounterAction {

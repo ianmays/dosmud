@@ -105,15 +105,18 @@ TEST dialogue_cmd_talk_bandit_blocks(void)
     PASS();
 }
 
-TEST dialogue_cmd_talk_wanderer_waiting(void)
+TEST dialogue_cmd_talk_traveler_waiting(void)
 {
     struct GameState game;
+    GameEventQueue out;
 
     unit_game_fresh(&game, 10u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
-    game_set_mode_dialogue(&game, DIALOGUE_WANDERER);
-    ASSERT_EQ(1, talk_out_state(&game));
-    ASSERT_EQ(DIALOGUE_WANDERER, game.dialogue);
+    game_set_mode_dialogue(&game, DIALOGUE_TRAVELER);
+    ASSERT_EQ(1, talk_out(&game, &out));
+    ASSERT_EQ(DIALOGUE_TRAVELER, game.dialogue);
+    ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[0].kind);
+    ASSERT_EQ(GAME_DIALOGUE_GUARD_TRAVELER_WAITING, out.events[0].arg0);
     PASS();
 }
 
@@ -282,7 +285,7 @@ SUITE(dialogue) {
     RUN_TEST(dialogue_cmd_reply_not_dialogue);
     RUN_TEST(dialogue_cmd_talk_frog);
     RUN_TEST(dialogue_cmd_talk_bandit_blocks);
-    RUN_TEST(dialogue_cmd_talk_wanderer_waiting);
+    RUN_TEST(dialogue_cmd_talk_traveler_waiting);
     RUN_TEST(dialogue_cmd_talk_herbalist);
     RUN_TEST(dialogue_cmd_talk_archivist);
     RUN_TEST(dialogue_cmd_reply_frog_invalid);

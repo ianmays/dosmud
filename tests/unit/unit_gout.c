@@ -85,7 +85,7 @@ TEST game_event_push_preserves_enqueue_order_and_payload_slots(void)
     ASSERT(0 != game_event_push(&out, GAME_EVENT_ITEM_RESULT,
         GAME_ITEM_ACTION_USE, GAME_ITEM_OUTCOME_OK, ITEM_SALVE, 10, 0));
     ASSERT(0 != game_event_push(&out, GAME_EVENT_DIALOGUE,
-        GAME_DIALOGUE_ACTOR_WANDERER, GAME_DIALOGUE_PHASE_REPLY, 2, 0, 0));
+        GAME_DIALOGUE_ACTOR_TRAVELER, GAME_DIALOGUE_PHASE_REPLY, 2, 0, 0));
 
     ASSERT_EQ(3, out.count);
     ASSERT_EQ(GAME_EVENT_MOVE, out.events[0].kind);
@@ -101,7 +101,7 @@ TEST game_event_push_preserves_enqueue_order_and_payload_slots(void)
     ASSERT(0 == out.events[1].text);
 
     ASSERT_EQ(GAME_EVENT_DIALOGUE, out.events[2].kind);
-    ASSERT_EQ(GAME_DIALOGUE_ACTOR_WANDERER, out.events[2].arg0);
+    ASSERT_EQ(GAME_DIALOGUE_ACTOR_TRAVELER, out.events[2].arg0);
     ASSERT_EQ(GAME_DIALOGUE_PHASE_REPLY, out.events[2].arg1);
     ASSERT_EQ(2, out.events[2].arg2);
     PASS();
@@ -214,17 +214,23 @@ TEST game_event_push_records_dialogue_encounter_kinds(void)
     ASSERT(0 != game_event_push(&out, GAME_EVENT_ENCOUNTER,
         GAME_ENCOUNTER_BANDIT, GAME_ENCOUNTER_ACTION_GIVE,
         GAME_ENCOUNTER_OUTCOME_OK, ITEM_STICK, "stick"));
+    ASSERT(0 != game_event_push(&out, GAME_EVENT_ENCOUNTER,
+        GAME_ENCOUNTER_TRAVELER, GAME_ENCOUNTER_ACTION_OPEN,
+        GAME_ENCOUNTER_OUTCOME_NONE, 0, 0));
     ASSERT(0 != game_event_push(&out, GAME_EVENT_DIALOGUE_GUARD,
         GAME_DIALOGUE_GUARD_PICK_123, 0, 0, 0, 0));
-    ASSERT_EQ(3, out.count);
+    ASSERT_EQ(4, out.count);
     ASSERT_EQ(GAME_EVENT_DIALOGUE, out.events[0].kind);
     ASSERT_EQ(GAME_DIALOGUE_ACTOR_FROG, out.events[0].arg0);
     ASSERT_EQ(2, out.events[0].arg2);
     ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[1].kind);
     ASSERT_EQ(GAME_ENCOUNTER_BANDIT, out.events[1].arg0);
     ASSERT_EQ(ITEM_STICK, out.events[1].arg3);
-    ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[2].kind);
-    ASSERT_EQ(GAME_DIALOGUE_GUARD_PICK_123, out.events[2].arg0);
+    ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[2].kind);
+    ASSERT_EQ(GAME_ENCOUNTER_TRAVELER, out.events[2].arg0);
+    ASSERT_EQ(GAME_ENCOUNTER_ACTION_OPEN, out.events[2].arg1);
+    ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[3].kind);
+    ASSERT_EQ(GAME_DIALOGUE_GUARD_PICK_123, out.events[3].arg0);
     PASS();
 }
 

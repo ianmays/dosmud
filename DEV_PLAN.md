@@ -78,7 +78,7 @@ flowchart LR
 
 **Completed (m5):** [#71](https://github.com/ianmays/dosmud/issues/71) engine boundary, [#47](https://github.com/ianmays/dosmud/issues/47) event queue ([#164](https://github.com/ianmays/dosmud/pull/164)), [#157](https://github.com/ianmays/dosmud/issues/157) command/navigation GameEvent migration ([#167](https://github.com/ianmays/dosmud/pull/167)), [#158](https://github.com/ianmays/dosmud/issues/158) inventory/item GameEvent migration ([#173](https://github.com/ianmays/dosmud/pull/173)), [#159](https://github.com/ianmays/dosmud/issues/159) combat/progression GameEvent migration ([#174](https://github.com/ianmays/dosmud/pull/174)), [#160](https://github.com/ianmays/dosmud/issues/160) dialogue/encounter GameEvent migration ([#175](https://github.com/ianmays/dosmud/pull/175)), [#161](https://github.com/ianmays/dosmud/issues/161) ambient/inspect GameEvent migration ([#176](https://github.com/ianmays/dosmud/pull/176)), [#162](https://github.com/ianmays/dosmud/issues/162) legacy GAME_OUT removal ([#177](https://github.com/ianmays/dosmud/pull/177)), [#163](https://github.com/ianmays/dosmud/issues/163) GameEvent test coverage pass ([#181](https://github.com/ianmays/dosmud/pull/181)), adjacent [#156](https://github.com/ianmays/dosmud/issues/156) replay event log ([#183](https://github.com/ianmays/dosmud/pull/183)), and [#16](https://github.com/ianmays/dosmud/issues/16) save/load ([#184](https://github.com/ianmays/dosmud/pull/184)). **m5 GameEvent migration chain complete.**
 
-**Active pull order:** [#100](https://github.com/ianmays/dosmud/issues/100) and [#101](https://github.com/ianmays/dosmud/issues/101) (Engine Enhancements; [#104](https://github.com/ianmays/dosmud/issues/104) npc module done ([#185](https://github.com/ianmays/dosmud/pull/185))).
+**Active pull order:** [#101](https://github.com/ianmays/dosmud/issues/101) (Engine Enhancements; [#104](https://github.com/ianmays/dosmud/issues/104) npc module ([#185](https://github.com/ianmays/dosmud/pull/185)); [#100](https://github.com/ianmays/dosmud/issues/100) roaming NPC ([#186](https://github.com/ianmays/dosmud/pull/186)) done).
 
 Workflow (milestone 4) can run in parallel with architecture once unblocked. Milestone 5 **GameEvent migration** (#157 through #163) and adjacent [#156](https://github.com/ianmays/dosmud/issues/156) / [#16](https://github.com/ianmays/dosmud/issues/16) are **complete**. Content (6) and renderer (7) are not gated on all of mechanics (8).
 
@@ -265,7 +265,7 @@ Compiler discipline and warning cleanliness should remain early priorities throu
 
 Done ✅ ([#99](https://github.com/ianmays/dosmud/pull/99)).
 
-[`src/game.h`](src/game.h) defines `GameMode` (`GAME_MODE_EXPLORE`, `GAME_MODE_DIALOGUE`, `GAME_MODE_COMBAT`), `DialogueKind` (room NPCs including frog, wanderer, enemy), and `CombatState` (`enemy_hp`, `defending`). `GameState` holds `mode`, `dialogue`, and `combat` instead of overlapping `pond_dialogue`, `wanderer_dialogue`, `enemy_dialogue`, `npc_dialogue`, and `combat_active` flags. Transitions go through `game_set_mode_explore`, `game_set_mode_dialogue`, and `game_set_mode_combat` in [`src/game.c`](src/game.c).
+[`src/game.h`](src/game.h) defines `GameMode` (`GAME_MODE_EXPLORE`, `GAME_MODE_DIALOGUE`, `GAME_MODE_COMBAT`), `DialogueKind` (room NPCs including frog, traveler, enemy), and `CombatState` (`enemy_hp`, `defending`). `GameState` holds `mode`, `dialogue`, and `combat` instead of overlapping `pond_dialogue`, `traveler_dialogue`, `enemy_dialogue`, `npc_dialogue`, and `combat_active` flags. Transitions go through `game_set_mode_explore`, `game_set_mode_dialogue`, and `game_set_mode_combat` in [`src/game.c`](src/game.c).
 
 ### [#44](https://github.com/ianmays/dosmud/issues/44) - Formalize engine boundaries
 
@@ -316,7 +316,7 @@ Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 - **[#122](https://github.com/ianmays/dosmud/issues/122)** Done ✅ ([#124](https://github.com/ianmays/dosmud/pull/124)) - optional `@seed <unsigned>` line in snapshot `.input` files.
 - **[#95](https://github.com/ianmays/dosmud/issues/95)** Done ✅ ([#127](https://github.com/ianmays/dosmud/pull/127)) - unit tests; **~96%** weighted branch coverage on core modules
 - **[#116](https://github.com/ianmays/dosmud/issues/116)** Done ✅ ([#133](https://github.com/ianmays/dosmud/pull/133)) - soak / stress harness (`make test-soak`, CI benchmarks)
-- **[#113](https://github.com/ianmays/dosmud/issues/113)** Done ✅ ([#125](https://github.com/ianmays/dosmud/pull/125)) - wanderer snapshot fixtures (`wanderer_dialogue` fixture; `wanderer_replies`, `wanderer_talk_blocked` snapshots)
+- **[#113](https://github.com/ianmays/dosmud/issues/113)** Done ✅ ([#125](https://github.com/ianmays/dosmud/pull/125)) - traveler snapshot fixtures (`traveler_dialogue` fixture; `traveler_replies`, `traveler_talk_blocked` snapshots)
 - **[#114](https://github.com/ianmays/dosmud/issues/114)** Done ✅ ([#126](https://github.com/ianmays/dosmud/pull/126)) - custom world boot fixture (`world_boot` / `world_linear`; `world_apply_graph` + harness tables in TEST_MODE)
 
 ### [#40](https://github.com/ianmays/dosmud/issues/40) - Gameplay test coverage (umbrella epic) — Done ✅
@@ -718,6 +718,14 @@ Done ✅ ([#185](https://github.com/ianmays/dosmud/pull/185)).
 - Snapshots: `frog_hint` (`@fixture at_pond` + `look` proves generic room-NPC hint at pond)
 
 ### [#100](https://github.com/ianmays/dosmud/issues/100) - Wanderer behaviour reusable for any NPC
+
+Move the traveler out of a dedicated `wanderer` module and into the shared `npc` seam by treating roaming as NPC-owned behavior rather than a unique subsystem. Keep the current single roaming slot and traveler output intact so follow-up issues can add fixed or roaming enemies on the same state model.
+
+Done ✅ ([#186](https://github.com/ianmays/dosmud/pull/186)).
+
+### Testing
+- Unit: `unit_npc.c` (roaming NPC movement, encounter open, reply/reset), `unit_dial.c` (traveler talk guard), `unit_save.c`, `unit_game.c`, `unit_harn.c`, `unit_tharn.c`
+- Snapshots: existing traveler snapshots unchanged (`traveler_replies`, `traveler_talk_blocked`)
 
 ### [#101](https://github.com/ianmays/dosmud/issues/101) - Bandit behaviour reusable for any NPC
 

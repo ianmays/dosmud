@@ -136,7 +136,7 @@ make test-unit-coverage-verbose     # same tests, full gcov block per module
 - Determinism: call `plat_seed_rng(fixed_seed)` in setup; use `game_roll_inject_*` and `CFG_TEST_*` for asserted combat/intimidate outcomes
 - Snapshots assert player-visible output; unit tests assert `GameState` and parse results
 
-**In-scope modules (branch coverage target ~90%+):** `command`, `invent`, `combat`, `game`, `genc`, `wanderer`, `dialogue`, `npc`, `gatmos`, `world`, `gprog`, `items`, `fmt`, `gout`, `replay`, `save`, `testharn`
+**In-scope modules (branch coverage target ~90%+):** `command`, `invent`, `combat`, `game`, `genc`, `dialogue`, `npc`, `gatmos`, `world`, `gprog`, `items`, `fmt`, `gout`, `replay`, `save`, `testharn`
 
 **Out of scope for the unit coverage bar:** `grendr`, `txtres`, `main`, `platpos` / `platwin` / `platdos` (presentation or shell-edge glue; `fmt` holds testable format logic; snapshots cover printed output and ASCII art)
 
@@ -157,7 +157,7 @@ Scenarios (see [`tests/soak/soak_sim.c`](../tests/soak/soak_sim.c)):
 
 | Test | Loop |
 |------|------|
-| `soak_background_ticks` | `CFG_TEST_SOAK_TICKS` (10000) × `game_background_step` with full wanderer/bandit/atmosphere |
+| `soak_background_ticks` | `CFG_TEST_SOAK_TICKS` (10000) × `game_background_step` with full roaming-traveler/bandit/atmosphere |
 | `soak_command_wait_move` | 10000 × alternate `wait` / `move north` with `test_quiet_ticks` |
 | `soak_combat_loop` | `CFG_TEST_SOAK_COMBAT_ROUNDS` (200) × one-hit combat victory with roll inject |
 
@@ -186,7 +186,7 @@ are handled by `testharn` before normal command parsing. Harness lines are not e
 
 Prefer fixtures over long setup scripts when a test needs a specific mode, inventory, or encounter. After changing fixture output, regenerate the matching `.expect` with `make test-run` and review the diff.
 
-Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_init`: mode, room, tick, player stats, bag, combat, wanderer, corpses, ground items, env focus, and map exploration). That leaves the world graph and `GameState.seed` unchanged. `main.c` then calls `plat_seed_rng(game.seed)` so tracked `plat_rand()` draws match that seed and follow-up rolls do not depend on earlier commands in the same run.
+Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_init`: mode, room, tick, player stats, bag, combat, roaming NPC state, corpses, ground items, env focus, and map exploration). That leaves the world graph and `GameState.seed` unchanged. `main.c` then calls `plat_seed_rng(game.seed)` so tracked `plat_rand()` draws match that seed and follow-up rolls do not depend on earlier commands in the same run.
 
 **Bandit / combat** (camp baseline; bandit setups clear camp ground items so the stick is only in bag or wield slot):
 
@@ -218,13 +218,13 @@ Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_
 | `quiet_camp_dual_ground` | Camp, quiet ticks on, stick and reed on ground for multi-item pickup tests |
 | `quiet_camp_dual_ground_full_bag` | `quiet_camp_dual_ground` plus a full bag for take-all refusal snapshots |
 | `at_pond` / `at_tower` / `at_orchard` / `at_catacombs` | Named room, explore, room explored |
-| `quiet_explore` | `at_camp` + `test_quiet_ticks` + wanderer off (for `wait` / `move` snapshots) |
+| `quiet_explore` | `at_camp` + `test_quiet_ticks` + roaming traveler off (for `wait` / `move` snapshots) |
 
-**Wanderer** (co-located dialogue without tick movement):
+**Traveler (roaming NPC)** (co-located dialogue without tick movement):
 
 | Fixture | State |
 |---------|--------|
-| `wanderer_dialogue` | Road, tick 0, player and wanderer co-located, wanderer dialogue open (intro + options rendered) |
+| `traveler_dialogue` | Road, tick 0, player and roaming traveler co-located, traveler dialogue open (intro + options rendered) |
 
 **Bags / items** (explore, named room):
 
@@ -257,7 +257,7 @@ For marsh item/craft snapshots, prefer `at_marsh_reed` over walking camp intimid
 
 ### Quiet ticks (`test_quiet_ticks`, `TEST_MODE` only)
 
-`quiet_explore` sets `GameState.test_quiet_ticks` and disables the wanderer. While set, `advance_world_tick` only increments the tick and runs `world_step`; it skips animal noise, atmosphere, bandit ambush rolls, and wanderer movement/spawn. Use this for snapshots that call `wait` or `move` so output does not depend on ambient `plat_rand()` draws.
+`quiet_explore` sets `GameState.test_quiet_ticks` and disables the roaming traveler. While set, `advance_world_tick` only increments the tick and runs `world_step`; it skips animal noise, atmosphere, bandit ambush rolls, and roaming traveler movement/spawn. Use this for snapshots that call `wait` or `move` so output does not depend on ambient `plat_rand()` draws.
 
 ### `@seed` in `.input` files
 
@@ -308,7 +308,7 @@ Each process run uses one `.input` file until `quit`. `make snapshot-run` runs `
 
 **Movement / time:** `walk_north`, `walk_map`, `wait_tick`.
 
-**NPC talk:** `frog_hint`, `frog_replies`, `watchman_talk`, `wanderer_replies`, `wanderer_talk_blocked`, `herbalist_talk`, `archivist_talk`, `talk_nobody`, `game_event_dialogue` (`frog_hint` proves the generic room-NPC hint also applies at the pond; the others cover pond frog, bandit camp talk, and tower watchman through generic `GAME_EVENT_DIALOGUE` / `GAME_EVENT_ENCOUNTER` paths; [#175](https://github.com/ianmays/dosmud/pull/175)).
+**NPC talk:** `frog_hint`, `frog_replies`, `watchman_talk`, `traveler_replies`, `traveler_talk_blocked`, `herbalist_talk`, `archivist_talk`, `talk_nobody`, `game_event_dialogue` (`frog_hint` proves the generic room-NPC hint also applies at the pond; the others cover pond frog, bandit camp talk, traveler interaction, and tower watchman through generic `GAME_EVENT_DIALOGUE` / `GAME_EVENT_ENCOUNTER` paths; [#175](https://github.com/ianmays/dosmud/pull/175)).
 
 **Eat / use:** `use_salve`, `use_torch`, `use_spear`, `use_stone`, `eat_berry`, `eat_fish`, `eat_berry_heal`, `eat_fish_heal`, `eat_not_edible`, `eat_missing`.
 
