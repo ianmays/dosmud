@@ -108,6 +108,23 @@ static int roaming_npc_reply_out(struct GameState *game, int choice,
     return npc_roaming_cmd_reply(game, choice, out);
 }
 
+TEST npc_seed_roaming_traveler_sets_state(void)
+{
+    struct GameState game;
+
+    unit_game_fresh(&game, 39u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    npc_seed_roaming_traveler(&game);
+    ASSERT_EQ(GAME_DIALOGUE_ACTOR_WANDERER, game.roaming_npc_actor);
+    ASSERT_EQ(DIALOGUE_WANDERER, game.roaming_npc_dialogue);
+    ASSERT_EQ(GAME_ENCOUNTER_WANDERER, game.roaming_npc_encounter);
+    ASSERT_EQ(WORLD_ROOM_RUINS, game.roaming_npc_room);
+    ASSERT_EQ(0, game.roaming_npc_need_separation);
+    ASSERT_EQ(1, game.roaming_npc_active);
+    ASSERT_EQ(0, game.roaming_npc_return_tick);
+    PASS();
+}
+
 TEST npc_roaming_separation_clears(void)
 {
     struct GameState game;
@@ -232,6 +249,7 @@ SUITE(npc) {
     RUN_TEST(npc_open_room_dialogue_frog);
     RUN_TEST(npc_open_room_dialogue_watchman);
     RUN_TEST(npc_open_room_dialogue_none);
+    RUN_TEST(npc_seed_roaming_traveler_sets_state);
     RUN_TEST(npc_roaming_separation_clears);
     RUN_TEST(npc_roaming_step_moves);
     RUN_TEST(npc_roaming_encounter_guards);
