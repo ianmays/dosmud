@@ -95,7 +95,7 @@ TEST testharn_fixture_quiet_explore(void)
     rc = testharn_apply(&game, "@fixture quiet_explore");
     ASSERT_EQ(1, rc);
     ASSERT_EQ(1, game.test_quiet_ticks);
-    ASSERT_EQ(0, game.wanderer_active);
+    ASSERT_EQ(0, game.roaming_npc_active);
     PASS();
 }
 

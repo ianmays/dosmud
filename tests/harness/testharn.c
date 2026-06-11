@@ -11,7 +11,7 @@
 #include "invent.h"
 #include "items.h"
 #include "combat.h"
-#include "wanderer.h"
+#include "npc.h"
 #include "world.h"
 #include "testharn.h"
 #include "th_world.h"
@@ -37,8 +37,8 @@ static void harness_drop_output(GameEventQueue *out)
 
 static void fixture_wanderer_off(struct GameState *game)
 {
-    game->wanderer_active = 0;
-    game->wanderer_return_tick = 999999UL;
+    game->roaming_npc_active = 0;
+    game->roaming_npc_return_tick = 999999UL;
 }
 
 static void fixture_quiet_ticks_on(struct GameState *game)
@@ -300,11 +300,11 @@ static void fixture_wanderer_dialogue(struct GameState *game)
 
     game_reset_fixture_baseline(game, WORLD_ROOM_ROAD, 0);
     game->room_explored[WORLD_ROOM_ROAD] = 1;
-    game->wanderer_active = 1;
-    game->wanderer_room = WORLD_ROOM_ROAD;
-    game->wanderer_need_separation = 0;
+    game->roaming_npc_active = 1;
+    game->roaming_npc_room = WORLD_ROOM_ROAD;
+    game->roaming_npc_need_separation = 0;
     harness_drop_output(&out);
-    wanderer_begin_encounter(game, &out);
+    npc_roaming_begin_encounter(game, &out);
     game_render_output(game, &out);
 }
 

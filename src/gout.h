@@ -32,7 +32,7 @@ enum GameEventKind {
     GAME_EVENT_COMBAT,
     GAME_EVENT_XP_GAIN,
     GAME_EVENT_STAT_CHANGE,
-    /* #160: dialogue, wanderer, and encounter slice emit actor/dialogue payloads. */
+    /* #160: dialogue, roaming NPC, and encounter slice emit actor/dialogue payloads. */
     GAME_EVENT_DIALOGUE,
     GAME_EVENT_ENCOUNTER,
     GAME_EVENT_DIALOGUE_GUARD,

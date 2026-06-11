@@ -1,7 +1,9 @@
 #include "greatest.h"
+#include "config.h"
 #include "game.h"
 #include "gout.h"
 #include "npc.h"
+#include "platform.h"
 #include "world.h"
 #include "unit_util.h"
 
@@ -93,6 +95,136 @@ TEST npc_open_room_dialogue_none(void)
     PASS();
 }
 
+static void begin_roaming_npc(struct GameState *game, GameEventQueue *out)
+{
+    game_event_queue_reset(out);
+    npc_roaming_begin_encounter(game, out);
+}
+
+static int roaming_npc_reply_out(struct GameState *game, int choice,
+                                 GameEventQueue *out)
+{
+    game_event_queue_reset(out);
+    return npc_roaming_cmd_reply(game, choice, out);
+}
+
+TEST npc_roaming_separation_clears(void)
+{
+    struct GameState game;
+
+    unit_game_fresh(&game, 40u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game.roaming_npc_room = WORLD_ROOM_ROAD;
+    game.roaming_npc_need_separation = 1;
+    npc_roaming_update_separation(&game);
+    ASSERT_EQ(0, game.roaming_npc_need_separation);
+    PASS();
+}
+
+TEST npc_roaming_step_moves(void)
+{
+    struct GameState game;
+    int before;
+
+    unit_game_fresh(&game, 41u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game.roaming_npc_room = WORLD_ROOM_CAMP;
+    plat_seed_rng(42u);
+    ASSERT_EQ(0U, plat_rand_draw_count());
+    before = game.roaming_npc_room;
+    npc_roaming_step(&game);
+    ASSERT_EQ(1U, plat_rand_draw_count());
+    ASSERT_NEQ(before, game.roaming_npc_room);
+    PASS();
+}
+
+TEST npc_roaming_encounter_guards(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 42u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game.roaming_npc_need_separation = 1;
+    begin_roaming_npc(&game, &out);
+    ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
+
+    game.roaming_npc_need_separation = 0;
+    game.roaming_npc_room = game.player.room_id;
+    begin_roaming_npc(&game, &out);
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(DIALOGUE_WANDERER, game.dialogue);
+    PASS();
+}
+
+TEST npc_roaming_reply_cmd_explore(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 43u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game_set_mode_dialogue(&game, DIALOGUE_WANDERER);
+    plat_seed_rng(game.seed);
+    ASSERT_EQ(1, roaming_npc_reply_out(&game, 2, &out));
+    ASSERT_EQ(1U, plat_rand_draw_count());
+    ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
+    ASSERT_EQ(0, game.roaming_npc_active);
+    PASS();
+}
+
+TEST npc_roaming_reply_cmd_invalid_choice(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 44u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game_set_mode_dialogue(&game, DIALOGUE_WANDERER);
+    game.roaming_npc_active = 1;
+    plat_seed_rng(game.seed);
+    ASSERT_EQ(1, roaming_npc_reply_out(&game, 0, &out));
+    ASSERT_EQ(0U, plat_rand_draw_count());
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(1, game.roaming_npc_active);
+    ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[0].kind);
+    ASSERT_EQ(GAME_DIALOGUE_GUARD_PICK_123, out.events[0].arg0);
+    PASS();
+}
+
+TEST npc_roaming_encounter_event(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 45u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game.roaming_npc_need_separation = 0;
+    game.roaming_npc_room = game.player.room_id;
+    begin_roaming_npc(&game, &out);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
+    ASSERT_EQ(GAME_ENCOUNTER_WANDERER, out.events[0].arg0);
+    ASSERT_EQ(GAME_ENCOUNTER_ACTION_OPEN, out.events[0].arg1);
+    PASS();
+}
+
+TEST npc_roaming_reply_event(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 46u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game_set_mode_dialogue(&game, DIALOGUE_WANDERER);
+    ASSERT_EQ(1, roaming_npc_reply_out(&game, 2, &out));
+    ASSERT_EQ(GAME_EVENT_DIALOGUE, out.events[0].kind);
+    ASSERT_EQ(GAME_DIALOGUE_ACTOR_WANDERER, out.events[0].arg0);
+    ASSERT_EQ(GAME_DIALOGUE_PHASE_REPLY, out.events[0].arg1);
+    ASSERT_EQ(2, out.events[0].arg2);
+    PASS();
+}
+
 SUITE(npc) {
     RUN_TEST(npc_room_actor_lookup);
     RUN_TEST(npc_dialogue_actor_lookup);
@@ -100,4 +232,11 @@ SUITE(npc) {
     RUN_TEST(npc_open_room_dialogue_frog);
     RUN_TEST(npc_open_room_dialogue_watchman);
     RUN_TEST(npc_open_room_dialogue_none);
+    RUN_TEST(npc_roaming_separation_clears);
+    RUN_TEST(npc_roaming_step_moves);
+    RUN_TEST(npc_roaming_encounter_guards);
+    RUN_TEST(npc_roaming_reply_cmd_explore);
+    RUN_TEST(npc_roaming_reply_cmd_invalid_choice);
+    RUN_TEST(npc_roaming_encounter_event);
+    RUN_TEST(npc_roaming_reply_event);
 }

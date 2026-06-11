@@ -328,8 +328,11 @@ static int save_write_game_state(FILE *fp, const struct GameState *game,
             !save_write_s16(fp, game->running) ||
             !save_write_s16(fp, game->mode) ||
             !save_write_s16(fp, game->dialogue) ||
-            !save_write_s16(fp, game->wanderer_room) ||
-            !save_write_s16(fp, game->wanderer_need_separation) ||
+            !save_write_s16(fp, game->roaming_npc_actor) ||
+            !save_write_s16(fp, game->roaming_npc_dialogue) ||
+            !save_write_s16(fp, game->roaming_npc_encounter) ||
+            !save_write_s16(fp, game->roaming_npc_room) ||
+            !save_write_s16(fp, game->roaming_npc_need_separation) ||
             !save_write_s16(fp, game->env_focus_active) ||
             !save_write_s16(fp, game->env_focus_room) ||
             !save_write_s16(fp, game->env_focus_kind) ||
@@ -345,8 +348,8 @@ static int save_write_game_state(FILE *fp, const struct GameState *game,
             !save_write_s16(fp, game->enemy_handover_pick) ||
             !save_write_s16(fp, game->combat.enemy_hp) ||
             !save_write_s16(fp, game->combat.defending) ||
-            !save_write_s16(fp, game->wanderer_active) ||
-            !save_write_u32(fp, game->wanderer_return_tick)) {
+            !save_write_s16(fp, game->roaming_npc_active) ||
+            !save_write_u32(fp, game->roaming_npc_return_tick)) {
         return 0;
     }
 #ifdef TEST_MODE
@@ -372,8 +375,11 @@ static int save_read_game_state(FILE *fp, struct GameState *game,
             !save_read_s16(fp, &game->running) ||
             !save_read_s16(fp, &game->mode) ||
             !save_read_s16(fp, &game->dialogue) ||
-            !save_read_s16(fp, &game->wanderer_room) ||
-            !save_read_s16(fp, &game->wanderer_need_separation) ||
+            !save_read_s16(fp, &game->roaming_npc_actor) ||
+            !save_read_s16(fp, &game->roaming_npc_dialogue) ||
+            !save_read_s16(fp, &game->roaming_npc_encounter) ||
+            !save_read_s16(fp, &game->roaming_npc_room) ||
+            !save_read_s16(fp, &game->roaming_npc_need_separation) ||
             !save_read_s16(fp, &game->env_focus_active) ||
             !save_read_s16(fp, &game->env_focus_room) ||
             !save_read_s16(fp, &game->env_focus_kind) ||
@@ -389,8 +395,8 @@ static int save_read_game_state(FILE *fp, struct GameState *game,
             !save_read_s16(fp, &game->enemy_handover_pick) ||
             !save_read_s16(fp, &game->combat.enemy_hp) ||
             !save_read_s16(fp, &game->combat.defending) ||
-            !save_read_s16(fp, &game->wanderer_active) ||
-            !save_read_u32(fp, &game->wanderer_return_tick)) {
+            !save_read_s16(fp, &game->roaming_npc_active) ||
+            !save_read_u32(fp, &game->roaming_npc_return_tick)) {
         return 0;
     }
 #ifdef TEST_MODE
@@ -533,8 +539,14 @@ static int save_validate_game(const struct GameState *game)
             game->mode > GAME_MODE_COMBAT ||
             game->dialogue < DIALOGUE_NONE ||
             game->dialogue > DIALOGUE_ENEMY ||
-            !save_valid_room_or_none(game->wanderer_room, room_count) ||
-            !save_valid_boolish(game->wanderer_need_separation) ||
+            game->roaming_npc_actor < GAME_DIALOGUE_ACTOR_NONE ||
+            game->roaming_npc_actor > GAME_DIALOGUE_ACTOR_NOBODY ||
+            game->roaming_npc_dialogue < DIALOGUE_NONE ||
+            game->roaming_npc_dialogue > DIALOGUE_ENEMY ||
+            game->roaming_npc_encounter < GAME_ENCOUNTER_NONE ||
+            game->roaming_npc_encounter > GAME_ENCOUNTER_WANDERER ||
+            !save_valid_room_or_none(game->roaming_npc_room, room_count) ||
+            !save_valid_boolish(game->roaming_npc_need_separation) ||
             !save_valid_boolish(game->env_focus_active) ||
             !save_valid_room_or_none(game->env_focus_room, room_count) ||
             game->env_focus_kind < GAME_ENV_NONE ||
@@ -553,7 +565,7 @@ static int save_validate_game(const struct GameState *game)
             !save_valid_boolish(game->enemy_handover_pick) ||
             game->combat.enemy_hp < 0 ||
             !save_valid_boolish(game->combat.defending) ||
-            !save_valid_boolish(game->wanderer_active)) {
+            !save_valid_boolish(game->roaming_npc_active)) {
         return 0;
     }
     for (i = 0; i < CFG_ROOM_MAX; ++i) {

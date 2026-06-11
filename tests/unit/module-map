@@ -11,7 +11,7 @@ invent: unit_inv.c
 combat: unit_cbt.c
 game: unit_game.c
 genc: unit_genc.c
-wanderer: unit_wandr.c
+wanderer: unit_npc.c
 dialogue: unit_dial.c
 npc: unit_npc.c
 gatmos: unit_gatmos.c

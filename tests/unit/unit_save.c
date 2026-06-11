@@ -29,8 +29,11 @@ static void save_fill_fixture(struct GameState *game)
     game->tick = 77U;
     game->mode = GAME_MODE_DIALOGUE;
     game->dialogue = DIALOGUE_NPC_ARCHIVIST;
-    game->wanderer_room = WORLD_ROOM_MEADOW;
-    game->wanderer_need_separation = 1;
+    game->roaming_npc_actor = GAME_DIALOGUE_ACTOR_WANDERER;
+    game->roaming_npc_dialogue = DIALOGUE_WANDERER;
+    game->roaming_npc_encounter = GAME_ENCOUNTER_WANDERER;
+    game->roaming_npc_room = WORLD_ROOM_MEADOW;
+    game->roaming_npc_need_separation = 1;
     game->env_focus_active = 1;
     game->env_focus_room = WORLD_ROOM_TOWER;
     game->env_focus_kind = GAME_ENV_CREAK;
@@ -51,8 +54,8 @@ static void save_fill_fixture(struct GameState *game)
     game->combat.defending = 1;
     game->corpse_present[WORLD_ROOM_ROAD] = 1;
     game->corpse_loot[WORLD_ROOM_ROAD] = ITEM_HERB;
-    game->wanderer_active = 0;
-    game->wanderer_return_tick = 103U;
+    game->roaming_npc_active = 0;
+    game->roaming_npc_return_tick = 103U;
     game->room_explored[WORLD_ROOM_ROAD] = 1;
     game->room_explored[WORLD_ROOM_TOWER] = 1;
     game->room_item[WORLD_ROOM_TOWER][0] = ITEM_FISH;
@@ -77,8 +80,11 @@ static int save_games_equal(const struct GameState *a,
             a->running != b->running ||
             a->mode != b->mode ||
             a->dialogue != b->dialogue ||
-            a->wanderer_room != b->wanderer_room ||
-            a->wanderer_need_separation != b->wanderer_need_separation ||
+            a->roaming_npc_actor != b->roaming_npc_actor ||
+            a->roaming_npc_dialogue != b->roaming_npc_dialogue ||
+            a->roaming_npc_encounter != b->roaming_npc_encounter ||
+            a->roaming_npc_room != b->roaming_npc_room ||
+            a->roaming_npc_need_separation != b->roaming_npc_need_separation ||
             a->env_focus_active != b->env_focus_active ||
             a->env_focus_room != b->env_focus_room ||
             a->env_focus_kind != b->env_focus_kind ||
@@ -94,8 +100,8 @@ static int save_games_equal(const struct GameState *a,
             a->enemy_handover_pick != b->enemy_handover_pick ||
             a->combat.enemy_hp != b->combat.enemy_hp ||
             a->combat.defending != b->combat.defending ||
-            a->wanderer_active != b->wanderer_active ||
-            a->wanderer_return_tick != b->wanderer_return_tick) {
+            a->roaming_npc_active != b->roaming_npc_active ||
+            a->roaming_npc_return_tick != b->roaming_npc_return_tick) {
         return 0;
     }
     if (memcmp(&a->world, &b->world, sizeof(a->world)) != 0 ||

@@ -719,6 +719,14 @@ Done ✅ ([#185](https://github.com/ianmays/dosmud/pull/185)).
 
 ### [#100](https://github.com/ianmays/dosmud/issues/100) - Wanderer behaviour reusable for any NPC
 
+Move the traveler out of a dedicated `wanderer` module and into the shared `npc` seam by treating roaming as NPC-owned behavior rather than a unique subsystem. Keep the current single roaming slot and traveler output intact so follow-up issues can add fixed or roaming enemies on the same state model.
+
+Done ✅.
+
+### Testing
+- Unit: `unit_npc.c` (roaming NPC movement, encounter open, reply/reset), `unit_dial.c` (traveler talk guard), `unit_save.c`, `unit_game.c`, `unit_harn.c`, `unit_tharn.c`
+- Snapshots: existing traveler snapshots unchanged (`wanderer_replies`, `wanderer_talk_blocked`)
+
 ### [#101](https://github.com/ianmays/dosmud/issues/101) - Bandit behaviour reusable for any NPC
 
 ### [#92](https://github.com/ianmays/dosmud/issues/92) - Multiplayer

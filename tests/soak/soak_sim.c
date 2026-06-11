@@ -57,7 +57,7 @@ TEST soak_command_wait_move(void)
     unit_game_fresh(&game, 117u);
     render_set_suppress(1);
     game.test_quiet_ticks = 1;
-    game.wanderer_active = 0;
+    game.roaming_npc_active = 0;
     ASSERT(soak_assert_game_state_ok(&game));
     start = clock();
     for (i = 1; i <= CFG_TEST_SOAK_TICKS; i++) {

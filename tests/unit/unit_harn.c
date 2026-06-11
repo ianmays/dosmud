@@ -74,7 +74,7 @@ TEST harness_apply_ambient_camp(void)
     ASSERT_EQ(1, rc);
     ASSERT_EQ(WORLD_ROOM_CAMP, game.player.room_id);
     ASSERT_EQ(0, game.test_quiet_ticks);
-    ASSERT_EQ(0, game.wanderer_active);
+    ASSERT_EQ(0, game.roaming_npc_active);
     PASS();
 }
 
@@ -132,8 +132,8 @@ TEST harness_apply_wanderer_dialogue(void)
     ASSERT_EQ(1, rc);
     ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
     ASSERT_EQ(DIALOGUE_WANDERER, game.dialogue);
-    ASSERT_EQ(1, game.wanderer_active);
-    ASSERT_EQ(game.player.room_id, game.wanderer_room);
+    ASSERT_EQ(1, game.roaming_npc_active);
+    ASSERT_EQ(game.player.room_id, game.roaming_npc_room);
     PASS();
 }
 
