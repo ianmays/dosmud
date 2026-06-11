@@ -6,6 +6,7 @@
 #include "combat.h"
 #include "genc.h"
 #include "grendr.h"
+#include "npc.h"
 #include "unit_util.h"
 #include "soak_util.h"
 
@@ -57,7 +58,7 @@ TEST soak_command_wait_move(void)
     unit_game_fresh(&game, 117u);
     render_set_suppress(1);
     game.test_quiet_ticks = 1;
-    game.roaming_npc_active = 0;
+    npc_deactivate_until(&game, GAME_DIALOGUE_ACTOR_TRAVELER, 999999UL);
     ASSERT(soak_assert_game_state_ok(&game));
     start = clock();
     for (i = 1; i <= CFG_TEST_SOAK_TICKS; i++) {

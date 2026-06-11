@@ -42,6 +42,22 @@ struct CombatState {
     int defending;
 };
 
+enum NpcFlags {
+    NPC_FLAG_ACTIVE = 1,
+    NPC_FLAG_ROAMING = 2,
+    NPC_FLAG_NEEDS_SEPARATION = 4,
+    NPC_FLAG_RESPAWNS = 8
+};
+
+struct NpcState {
+    int actor;
+    int dialogue;
+    int encounter;
+    int room_id;
+    int flags;
+    u32 return_tick;
+};
+
 struct Player {
     int room_id;
 };
@@ -54,12 +70,8 @@ struct GameState {
     int running;
     int mode;
     int dialogue;
-    /* Roaming NPC snapshot; npc.c owns movement and encounter semantics. */
-    int roaming_npc_actor;
-    int roaming_npc_dialogue;
-    int roaming_npc_encounter;
-    int roaming_npc_room;
-    int roaming_npc_need_separation;
+    /* NPC roster stores active dynamic instances in deterministic slot order. */
+    struct NpcState npcs[CFG_NPC_MAX];
     int env_focus_active;
     int env_focus_room;
     int env_focus_kind;
@@ -78,8 +90,6 @@ struct GameState {
     struct CombatState combat;
     int corpse_present[CFG_ROOM_MAX];
     int corpse_loot[CFG_ROOM_MAX];
-    int roaming_npc_active;
-    u32 roaming_npc_return_tick;
     u8 room_explored[CFG_ROOM_MAX];
 #ifdef TEST_MODE
     int roll_inject_active;

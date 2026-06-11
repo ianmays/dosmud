@@ -38,8 +38,7 @@ static void harness_drop_output(GameEventQueue *out)
 /* Keeps roaming NPC ticks from firing during deterministic snapshot fixtures. */
 static void fixture_traveler_off(struct GameState *game)
 {
-    game->roaming_npc_active = 0;
-    game->roaming_npc_return_tick = 999999UL;
+    npc_deactivate_until(game, GAME_DIALOGUE_ACTOR_TRAVELER, 999999UL);
 }
 
 static void fixture_quiet_ticks_on(struct GameState *game)
@@ -298,12 +297,14 @@ static int fixture_quiet_camp_dual_ground_full_bag(struct GameState *game)
 static void fixture_traveler_dialogue(struct GameState *game)
 {
     GameEventQueue out;
+    int slot;
 
     game_reset_fixture_baseline(game, WORLD_ROOM_ROAD, 0);
     game->room_explored[WORLD_ROOM_ROAD] = 1;
-    game->roaming_npc_active = 1;
-    game->roaming_npc_room = WORLD_ROOM_ROAD;
-    game->roaming_npc_need_separation = 0;
+    slot = npc_find_by_actor(game, GAME_DIALOGUE_ACTOR_TRAVELER);
+    game->npcs[slot].flags |= NPC_FLAG_ACTIVE;
+    game->npcs[slot].flags &= ~NPC_FLAG_NEEDS_SEPARATION;
+    game->npcs[slot].room_id = WORLD_ROOM_ROAD;
     harness_drop_output(&out);
     npc_roaming_begin_encounter(game, &out);
     game_render_output(game, &out);

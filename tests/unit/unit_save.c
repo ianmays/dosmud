@@ -8,6 +8,7 @@
 #include "greatest.h"
 #include "game.h"
 #include "items.h"
+#include "npc.h"
 #include "platform.h"
 #include "save.h"
 #include "unit_util.h"
@@ -24,16 +25,18 @@ static void save_cleanup_file(void)
 
 static void save_fill_fixture(struct GameState *game)
 {
+    int slot;
+
     unit_game_fresh(game, 1234U);
     game->player.room_id = WORLD_ROOM_TOWER;
     game->tick = 77U;
     game->mode = GAME_MODE_DIALOGUE;
     game->dialogue = DIALOGUE_NPC_ARCHIVIST;
-    game->roaming_npc_actor = GAME_DIALOGUE_ACTOR_TRAVELER;
-    game->roaming_npc_dialogue = DIALOGUE_TRAVELER;
-    game->roaming_npc_encounter = GAME_ENCOUNTER_TRAVELER;
-    game->roaming_npc_room = WORLD_ROOM_MEADOW;
-    game->roaming_npc_need_separation = 1;
+    slot = npc_find_by_actor(game, GAME_DIALOGUE_ACTOR_TRAVELER);
+    game->npcs[slot].flags |= NPC_FLAG_NEEDS_SEPARATION;
+    npc_deactivate_until(game, GAME_DIALOGUE_ACTOR_TRAVELER, 103U);
+    (void)npc_spawn(game, GAME_DIALOGUE_ACTOR_NOBODY, DIALOGUE_NONE,
+        GAME_ENCOUNTER_NONE, WORLD_ROOM_ROAD, NPC_FLAG_ACTIVE);
     game->env_focus_active = 1;
     game->env_focus_room = WORLD_ROOM_TOWER;
     game->env_focus_kind = GAME_ENV_CREAK;
@@ -54,8 +57,6 @@ static void save_fill_fixture(struct GameState *game)
     game->combat.defending = 1;
     game->corpse_present[WORLD_ROOM_ROAD] = 1;
     game->corpse_loot[WORLD_ROOM_ROAD] = ITEM_HERB;
-    game->roaming_npc_active = 0;
-    game->roaming_npc_return_tick = 103U;
     game->room_explored[WORLD_ROOM_ROAD] = 1;
     game->room_explored[WORLD_ROOM_TOWER] = 1;
     game->room_item[WORLD_ROOM_TOWER][0] = ITEM_FISH;
@@ -70,6 +71,54 @@ static void save_fill_fixture(struct GameState *game)
 #endif
 }
 
+static int save_worlds_equal(const struct World *a, const struct World *b)
+{
+    int i;
+    int d;
+
+    if (a->room_count != b->room_count) {
+        return 0;
+    }
+    for (i = 0; i < CFG_ROOM_MAX; ++i) {
+        if (memcmp(a->rooms[i].name, b->rooms[i].name,
+                sizeof(a->rooms[i].name)) != 0 ||
+                memcmp(a->rooms[i].desc, b->rooms[i].desc,
+                    sizeof(a->rooms[i].desc)) != 0 ||
+                memcmp(a->rooms[i].animal, b->rooms[i].animal,
+                    sizeof(a->rooms[i].animal)) != 0 ||
+                memcmp(a->rooms[i].animal_noise, b->rooms[i].animal_noise,
+                    sizeof(a->rooms[i].animal_noise)) != 0 ||
+                a->map_x[i] != b->map_x[i] ||
+                a->map_y[i] != b->map_y[i] ||
+                a->map_ready[i] != b->map_ready[i]) {
+            return 0;
+        }
+        for (d = 0; d < CFG_DIR_MAX; ++d) {
+            if (a->rooms[i].exits[d] != b->rooms[i].exits[d]) {
+                return 0;
+            }
+        }
+    }
+    return 1;
+}
+
+static int save_npcs_equal(const struct NpcState *a, const struct NpcState *b)
+{
+    int i;
+
+    for (i = 0; i < CFG_NPC_MAX; ++i) {
+        if (a[i].actor != b[i].actor ||
+                a[i].dialogue != b[i].dialogue ||
+                a[i].encounter != b[i].encounter ||
+                a[i].room_id != b[i].room_id ||
+                a[i].flags != b[i].flags ||
+                a[i].return_tick != b[i].return_tick) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
 static int save_games_equal(const struct GameState *a,
                             const struct GameState *b)
 {
@@ -80,11 +129,6 @@ static int save_games_equal(const struct GameState *a,
             a->running != b->running ||
             a->mode != b->mode ||
             a->dialogue != b->dialogue ||
-            a->roaming_npc_actor != b->roaming_npc_actor ||
-            a->roaming_npc_dialogue != b->roaming_npc_dialogue ||
-            a->roaming_npc_encounter != b->roaming_npc_encounter ||
-            a->roaming_npc_room != b->roaming_npc_room ||
-            a->roaming_npc_need_separation != b->roaming_npc_need_separation ||
             a->env_focus_active != b->env_focus_active ||
             a->env_focus_room != b->env_focus_room ||
             a->env_focus_kind != b->env_focus_kind ||
@@ -99,12 +143,11 @@ static int save_games_equal(const struct GameState *a,
             a->player_hp != b->player_hp ||
             a->enemy_handover_pick != b->enemy_handover_pick ||
             a->combat.enemy_hp != b->combat.enemy_hp ||
-            a->combat.defending != b->combat.defending ||
-            a->roaming_npc_active != b->roaming_npc_active ||
-            a->roaming_npc_return_tick != b->roaming_npc_return_tick) {
+            a->combat.defending != b->combat.defending) {
         return 0;
     }
-    if (memcmp(&a->world, &b->world, sizeof(a->world)) != 0 ||
+    if (!save_worlds_equal(&a->world, &b->world) ||
+            !save_npcs_equal(a->npcs, b->npcs) ||
             memcmp(a->room_item, b->room_item, sizeof(a->room_item)) != 0 ||
             memcmp(a->bag, b->bag, sizeof(a->bag)) != 0 ||
             memcmp(a->corpse_present, b->corpse_present,

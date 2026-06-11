@@ -12,7 +12,7 @@
  */
 
 #define SAVE_MAGIC "DMSV"
-#define SAVE_VERSION 2
+#define SAVE_VERSION 3
 #define SAVE_PATH_BUF_MAX 260
 
 /*
@@ -150,6 +150,40 @@ static int save_read_u32(FILE *fp, u32 *value)
         ((u32)bytes[1] << 8) |
         ((u32)bytes[2] << 16) |
         ((u32)bytes[3] << 24);
+    return 1;
+}
+
+static int save_write_npcs(FILE *fp, const struct GameState *game)
+{
+    int i;
+
+    for (i = 0; i < CFG_NPC_MAX; ++i) {
+        if (!save_write_s16(fp, game->npcs[i].actor) ||
+                !save_write_s16(fp, game->npcs[i].dialogue) ||
+                !save_write_s16(fp, game->npcs[i].encounter) ||
+                !save_write_s16(fp, game->npcs[i].room_id) ||
+                !save_write_s16(fp, game->npcs[i].flags) ||
+                !save_write_u32(fp, game->npcs[i].return_tick)) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+static int save_read_npcs(FILE *fp, struct GameState *game)
+{
+    int i;
+
+    for (i = 0; i < CFG_NPC_MAX; ++i) {
+        if (!save_read_s16(fp, &game->npcs[i].actor) ||
+                !save_read_s16(fp, &game->npcs[i].dialogue) ||
+                !save_read_s16(fp, &game->npcs[i].encounter) ||
+                !save_read_s16(fp, &game->npcs[i].room_id) ||
+                !save_read_s16(fp, &game->npcs[i].flags) ||
+                !save_read_u32(fp, &game->npcs[i].return_tick)) {
+            return 0;
+        }
+    }
     return 1;
 }
 
@@ -328,11 +362,7 @@ static int save_write_game_state(FILE *fp, const struct GameState *game,
             !save_write_s16(fp, game->running) ||
             !save_write_s16(fp, game->mode) ||
             !save_write_s16(fp, game->dialogue) ||
-            !save_write_s16(fp, game->roaming_npc_actor) ||
-            !save_write_s16(fp, game->roaming_npc_dialogue) ||
-            !save_write_s16(fp, game->roaming_npc_encounter) ||
-            !save_write_s16(fp, game->roaming_npc_room) ||
-            !save_write_s16(fp, game->roaming_npc_need_separation) ||
+            !save_write_npcs(fp, game) ||
             !save_write_s16(fp, game->env_focus_active) ||
             !save_write_s16(fp, game->env_focus_room) ||
             !save_write_s16(fp, game->env_focus_kind) ||
@@ -347,9 +377,7 @@ static int save_write_game_state(FILE *fp, const struct GameState *game,
             !save_write_s16(fp, game->player_hp) ||
             !save_write_s16(fp, game->enemy_handover_pick) ||
             !save_write_s16(fp, game->combat.enemy_hp) ||
-            !save_write_s16(fp, game->combat.defending) ||
-            !save_write_s16(fp, game->roaming_npc_active) ||
-            !save_write_u32(fp, game->roaming_npc_return_tick)) {
+            !save_write_s16(fp, game->combat.defending)) {
         return 0;
     }
 #ifdef TEST_MODE
@@ -375,11 +403,7 @@ static int save_read_game_state(FILE *fp, struct GameState *game,
             !save_read_s16(fp, &game->running) ||
             !save_read_s16(fp, &game->mode) ||
             !save_read_s16(fp, &game->dialogue) ||
-            !save_read_s16(fp, &game->roaming_npc_actor) ||
-            !save_read_s16(fp, &game->roaming_npc_dialogue) ||
-            !save_read_s16(fp, &game->roaming_npc_encounter) ||
-            !save_read_s16(fp, &game->roaming_npc_room) ||
-            !save_read_s16(fp, &game->roaming_npc_need_separation) ||
+            !save_read_npcs(fp, game) ||
             !save_read_s16(fp, &game->env_focus_active) ||
             !save_read_s16(fp, &game->env_focus_room) ||
             !save_read_s16(fp, &game->env_focus_kind) ||
@@ -394,9 +418,7 @@ static int save_read_game_state(FILE *fp, struct GameState *game,
             !save_read_s16(fp, &game->player_hp) ||
             !save_read_s16(fp, &game->enemy_handover_pick) ||
             !save_read_s16(fp, &game->combat.enemy_hp) ||
-            !save_read_s16(fp, &game->combat.defending) ||
-            !save_read_s16(fp, &game->roaming_npc_active) ||
-            !save_read_u32(fp, &game->roaming_npc_return_tick)) {
+            !save_read_s16(fp, &game->combat.defending)) {
         return 0;
     }
 #ifdef TEST_MODE
@@ -440,6 +462,41 @@ static int save_valid_room_or_none(int room_id, int room_count)
 static int save_valid_boolish(int value)
 {
     return value == 0 || value == 1;
+}
+
+static int save_valid_npc(const struct NpcState *npc, int room_count)
+{
+    int allowed_flags;
+
+    allowed_flags = NPC_FLAG_ACTIVE |
+        NPC_FLAG_ROAMING |
+        NPC_FLAG_NEEDS_SEPARATION |
+        NPC_FLAG_RESPAWNS;
+    if (npc->actor == GAME_DIALOGUE_ACTOR_NONE) {
+        return npc->dialogue == DIALOGUE_NONE &&
+            npc->encounter == GAME_ENCOUNTER_NONE &&
+            npc->room_id == -1 &&
+            npc->flags == 0 &&
+            npc->return_tick == 0;
+    }
+    if (npc->actor < GAME_DIALOGUE_ACTOR_NONE ||
+            npc->actor > GAME_DIALOGUE_ACTOR_NOBODY ||
+            npc->dialogue < DIALOGUE_NONE ||
+            npc->dialogue > DIALOGUE_ENEMY ||
+            npc->encounter < GAME_ENCOUNTER_NONE ||
+            npc->encounter > GAME_ENCOUNTER_TRAVELER ||
+            !save_valid_room_or_none(npc->room_id, room_count) ||
+            (npc->flags & ~allowed_flags) != 0) {
+        return 0;
+    }
+    if ((npc->flags & NPC_FLAG_ACTIVE) == 0 && npc->room_id != -1) {
+        return 0;
+    }
+    if ((npc->flags & NPC_FLAG_NEEDS_SEPARATION) != 0 &&
+            (npc->flags & NPC_FLAG_ACTIVE) == 0) {
+        return 0;
+    }
+    return 1;
 }
 
 static int save_valid_map_projection(const struct World *world)
@@ -527,6 +584,7 @@ static int save_validate_game(const struct GameState *game)
 {
     int i;
     int j;
+    int slot;
     int room_count;
 
     if (!save_validate_world(&game->world)) {
@@ -539,14 +597,6 @@ static int save_validate_game(const struct GameState *game)
             game->mode > GAME_MODE_COMBAT ||
             game->dialogue < DIALOGUE_NONE ||
             game->dialogue > DIALOGUE_ENEMY ||
-            game->roaming_npc_actor < GAME_DIALOGUE_ACTOR_NONE ||
-            game->roaming_npc_actor > GAME_DIALOGUE_ACTOR_NOBODY ||
-            game->roaming_npc_dialogue < DIALOGUE_NONE ||
-            game->roaming_npc_dialogue > DIALOGUE_ENEMY ||
-            game->roaming_npc_encounter < GAME_ENCOUNTER_NONE ||
-            game->roaming_npc_encounter > GAME_ENCOUNTER_TRAVELER ||
-            !save_valid_room_or_none(game->roaming_npc_room, room_count) ||
-            !save_valid_boolish(game->roaming_npc_need_separation) ||
             !save_valid_boolish(game->env_focus_active) ||
             !save_valid_room_or_none(game->env_focus_room, room_count) ||
             game->env_focus_kind < GAME_ENV_NONE ||
@@ -564,9 +614,13 @@ static int save_validate_game(const struct GameState *game)
             game->player_hp > game->max_hp ||
             !save_valid_boolish(game->enemy_handover_pick) ||
             game->combat.enemy_hp < 0 ||
-            !save_valid_boolish(game->combat.defending) ||
-            !save_valid_boolish(game->roaming_npc_active)) {
+            !save_valid_boolish(game->combat.defending)) {
         return 0;
+    }
+    for (slot = 0; slot < CFG_NPC_MAX; ++slot) {
+        if (!save_valid_npc(&game->npcs[slot], room_count)) {
+            return 0;
+        }
     }
     for (i = 0; i < CFG_ROOM_MAX; ++i) {
         if (!save_valid_boolish((int)game->room_explored[i]) ||
@@ -700,8 +754,8 @@ int save_read_game(const char *path, struct GameState *out_game,
         goto done;
     }
     /*
-     * v2 adds roaming NPC identity fields before the room/active state. Reject
-     * older payloads rather than misreading the shifted layout.
+     * v3 replaces the single roaming NPC fields with a fixed-size roster.
+     * Reject older payloads rather than misreading the shifted layout.
      */
     if (version != (u16)SAVE_VERSION) {
         goto done;
