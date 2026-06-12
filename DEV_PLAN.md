@@ -746,7 +746,7 @@ Done ✅ ([#188](https://github.com/ianmays/dosmud/pull/188)).
 
 ### [#101](https://github.com/ianmays/dosmud/issues/101) - Bandit behaviour reusable for any NPC
 
-Done ✅.
+Done ✅ ([#189](https://github.com/ianmays/dosmud/pull/189)).
 
 Move the ambient bandit encounter off the one-off `GameState.enemy_handover_pick` seam and onto the shared NPC roster so enemy encounter state is owned by the active NPC slot. Keep the current bandit copy and combat outcomes unchanged while making the encounter open / reply / give flow reusable for later enemy NPCs.
 
