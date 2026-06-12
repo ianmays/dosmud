@@ -121,14 +121,17 @@
 
     .chart-wrap {
       overflow-x: auto;
+      overflow-y: visible;
       scroll-behavior: smooth;
       max-width: min(100%, calc(60px + 20px + 29 * 32px));
+      padding-bottom: 14px;
     }
 
     .chart-wrap svg {
       width: auto;
-      height: 320px;
+      height: auto;
       display: block;
+      vertical-align: top;
     }
 
     .legend {
@@ -330,8 +333,7 @@
       var CHART_PADDING_LEFT = 60;
       var CHART_PADDING_RIGHT = 20;
       var CHART_PADDING_TOP = 24;
-      var CHART_PADDING_BOTTOM = 72;
-      var CHART_HEIGHT = 320;
+      var CHART_PADDING_BOTTOM = 48;
       var TIMING_KEYS = [
         "make build",
         "make test",
@@ -385,24 +387,28 @@
         var slots = runCount > 0 ? runCount : 1;
         var chartWidth = slots > 1 ? (slots - 1) * CHART_SLOT_WIDTH : CHART_SLOT_WIDTH;
         var width = CHART_PADDING_LEFT + chartWidth + CHART_PADDING_RIGHT;
-        var chartHeight = CHART_HEIGHT - CHART_PADDING_TOP - CHART_PADDING_BOTTOM;
+        var plotHeight = 224;
+        var height = CHART_PADDING_TOP + plotHeight + CHART_PADDING_BOTTOM;
         return {
           width: width,
-          height: CHART_HEIGHT,
+          height: height,
           paddingLeft: CHART_PADDING_LEFT,
           paddingRight: CHART_PADDING_RIGHT,
           paddingTop: CHART_PADDING_TOP,
           paddingBottom: CHART_PADDING_BOTTOM,
           chartWidth: chartWidth,
-          chartHeight: chartHeight,
-          slotWidth: CHART_SLOT_WIDTH
+          chartHeight: plotHeight,
+          slotWidth: CHART_SLOT_WIDTH,
+          axisBottom: CHART_PADDING_TOP + plotHeight
         };
       }
 
       function applyChartSize(svg, layout) {
         svg.setAttribute("viewBox", "0 0 " + layout.width + " " + layout.height);
+        svg.setAttribute("height", String(layout.height));
         svg.style.width = layout.width + "px";
         svg.style.minWidth = layout.width + "px";
+        svg.style.height = layout.height + "px";
       }
 
       function scrollChartToLatest(svgId) {
@@ -412,7 +418,8 @@
         }
       }
 
-      function xLabelText(x, y, label) {
+      function xLabelText(x, layout, label) {
+        var y = layout.axisBottom + layout.paddingBottom - 6;
         return "<text x=\"" + x + "\" y=\"" + y +
           "\" transform=\"rotate(-90, " + x + ", " + y + ")" +
           "\" text-anchor=\"end\" fill=\"" + CHART_THEME.text + "\" font-size=\"11\">" +
@@ -512,7 +519,6 @@
         }
 
         var ticks = 4;
-        var labelY = layout.height - 8;
 
         parts.push("<rect x=\"0\" y=\"0\" width=\"" + layout.width + "\" height=\"" + layout.height + "\" fill=\"" + CHART_THEME.bg + "\"></rect>");
 
@@ -542,7 +548,7 @@
         runs.forEach(function (run, idx) {
           var x = layout.paddingLeft + (layout.slotWidth * idx);
           var label = run.sha ? run.sha.slice(0, 7) : String(idx + 1);
-          parts.push(xLabelText(x, labelY, label));
+          parts.push(xLabelText(x, layout, label));
         });
 
         svg.innerHTML = parts.join("");
@@ -582,8 +588,6 @@
           return;
         }
 
-        var labelY = layout.height - 8;
-
         parts.push("<rect x=\"0\" y=\"0\" width=\"" + layout.width + "\" height=\"" + layout.height + "\" fill=\"" + CHART_THEME.bg + "\"></rect>");
 
         for (i = 0; i <= 4; i += 1) {
@@ -620,7 +624,7 @@
 
           parts.push(xLabelText(
             groupX + (groupWidth / 2),
-            labelY,
+            layout,
             run.sha ? run.sha.slice(0, 7) : String(runIdx + 1)
           ));
         });
