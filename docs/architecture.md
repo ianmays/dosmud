@@ -32,9 +32,9 @@ Within core, keep the ownership split explicit:
 - **Engine** - deterministic `GameState` stepping (`game_describe_current_room`, `game_process_input`, `game_background_step`) plus `GameEvent` / `gout` records. The engine mutates state and emits semantic output requests, but never performs terminal I/O.
 - **Game logic** - dosmud-specific rules and content that plug into that stepping surface: command routing in `game`, room/world rules, and the gameplay slices (`combat`, `invent`, `dialogue`, `npc`, `genc`, `gatmos`, `gprog`, `items`).
 
-[`src/game.h`](../src/game.h) defines the engine-facing stepping surface and persistent simulation state; [`src/gout.h`](../src/gout.h) defines the fixed-size event queue that carries engine results to the render edge.
+[`src/game.h`](https://github.com/ianmays/dosmud/blob/main/src/game.h) defines the engine-facing stepping surface and persistent simulation state; [`src/gout.h`](https://github.com/ianmays/dosmud/blob/main/src/gout.h) defines the fixed-size event queue that carries engine results to the render edge.
 
-Command and navigation stepping in `game.c` emit generic `GameEventKind` values (handled in `grendr`): `GAME_EVENT_MOVE` and `GAME_EVENT_ROOM_LOOK` (successful move plus room look), `GAME_EVENT_MAP`, `GAME_EVENT_HELP` (`arg0` = `CMD_HELP_*` topic), `GAME_EVENT_WAIT`, `GAME_EVENT_CANNOT_MOVE` (`text` = direction name), and `GAME_EVENT_UNKNOWN_COMMAND`. Inventory and item handlers in `invent.c` emit `GAME_EVENT_ITEM_RESULT`, `GAME_EVENT_BAG_VIEW`, `GAME_EVENT_CRAFT_RESULT`, and `GAME_EVENT_EQUIP_RESULT` (payload contract in [`gout.h`](../src/gout.h)). Combat and progression in [`combat.c`](../src/combat.c) and [`gprog.c`](../src/gprog.c) emit `GAME_EVENT_COMBAT` (`GameEventCombatPhase` in `arg0`), `GAME_EVENT_XP_GAIN`, and `GAME_EVENT_STAT_CHANGE` (payload contract in [`gout.h`](../src/gout.h)). The NPC seam in [`npc.c`](../src/npc.c) owns fixed room lookup, shared dialogue event helpers, and the fixed-size NPC instance roster that now carries the traveler roaming encounter and future dynamic NPC placement. Dialogue and encounter slices in [`dialogue.c`](../src/dialogue.c), [`npc.c`](../src/npc.c), and [`genc.c`](../src/genc.c) emit `GAME_EVENT_DIALOGUE`, `GAME_EVENT_ENCOUNTER`, and `GAME_EVENT_DIALOGUE_GUARD`; modal guards in `game.c` emit `GAME_EVENT_DIALOGUE_GUARD` when reply or handover context blocks a command (payload contract in [`gout.h`](../src/gout.h)). Ambient and inspect output in [`gatmos.c`](../src/gatmos.c) emit `GAME_EVENT_ENVIRONMENT`, `GAME_EVENT_AMBIENT_NOISE`, `GAME_EVENT_ITEM_PRESENCE`, and `GAME_EVENT_OBSERVATION` on world ticks and the inspect command (payload contract in [`gout.h`](../src/gout.h)). All production slices append generic `GameEventKind` values only; `grendr` dispatches them to player-visible text.
+Command and navigation stepping in `game.c` emit generic `GameEventKind` values (handled in `grendr`): `GAME_EVENT_MOVE` and `GAME_EVENT_ROOM_LOOK` (successful move plus room look), `GAME_EVENT_MAP`, `GAME_EVENT_HELP` (`arg0` = `CMD_HELP_*` topic), `GAME_EVENT_WAIT`, `GAME_EVENT_CANNOT_MOVE` (`text` = direction name), and `GAME_EVENT_UNKNOWN_COMMAND`. Inventory and item handlers in `invent.c` emit `GAME_EVENT_ITEM_RESULT`, `GAME_EVENT_BAG_VIEW`, `GAME_EVENT_CRAFT_RESULT`, and `GAME_EVENT_EQUIP_RESULT` (payload contract in [`gout.h`](https://github.com/ianmays/dosmud/blob/main/src/gout.h)). Combat and progression in [`combat.c`](https://github.com/ianmays/dosmud/blob/main/src/combat.c) and [`gprog.c`](https://github.com/ianmays/dosmud/blob/main/src/gprog.c) emit `GAME_EVENT_COMBAT` (`GameEventCombatPhase` in `arg0`), `GAME_EVENT_XP_GAIN`, and `GAME_EVENT_STAT_CHANGE` (payload contract in [`gout.h`](https://github.com/ianmays/dosmud/blob/main/src/gout.h)). The NPC seam in [`npc.c`](https://github.com/ianmays/dosmud/blob/main/src/npc.c) owns fixed room lookup, shared dialogue event helpers, and the fixed-size NPC instance roster that now carries the traveler roaming encounter and future dynamic NPC placement. Dialogue and encounter slices in [`dialogue.c`](https://github.com/ianmays/dosmud/blob/main/src/dialogue.c), [`npc.c`](https://github.com/ianmays/dosmud/blob/main/src/npc.c), and [`genc.c`](https://github.com/ianmays/dosmud/blob/main/src/genc.c) emit `GAME_EVENT_DIALOGUE`, `GAME_EVENT_ENCOUNTER`, and `GAME_EVENT_DIALOGUE_GUARD`; modal guards in `game.c` emit `GAME_EVENT_DIALOGUE_GUARD` when reply or handover context blocks a command (payload contract in [`gout.h`](https://github.com/ianmays/dosmud/blob/main/src/gout.h)). Ambient and inspect output in [`gatmos.c`](https://github.com/ianmays/dosmud/blob/main/src/gatmos.c) emit `GAME_EVENT_ENVIRONMENT`, `GAME_EVENT_AMBIENT_NOISE`, `GAME_EVENT_ITEM_PRESENCE`, and `GAME_EVENT_OBSERVATION` on world ticks and the inspect command (payload contract in [`gout.h`](https://github.com/ianmays/dosmud/blob/main/src/gout.h)). All production slices append generic `GameEventKind` values only; `grendr` dispatches them to player-visible text.
 
 Core must **not** use:
 
@@ -68,16 +68,16 @@ Presentation only: room art, HUD, combat text, inventory messages, and explorati
 
 Platform or frontend code runs simulation first, then hands the resulting `GameEvent` records to render; render never changes simulation state.
 
-The optional replay log path stays outside render. In `TEST_MODE`, `main.c` may mirror each per-step `GameEventQueue` into [`src/replay.c`](../src/replay.c) before the next queue reset, but `grendr` remains the only text renderer and the replay log remains a separate persistent record.
+The optional replay log path stays outside render. In `TEST_MODE`, `main.c` may mirror each per-step `GameEventQueue` into [`src/replay.c`](https://github.com/ianmays/dosmud/blob/main/src/replay.c) before the next queue reset, but `grendr` remains the only text renderer and the replay log remains a separate persistent record.
 
-The save/load path also stays outside render and gameplay slices. [`src/save.c`](../src/save.c) serializes the durable `GameState` snapshot at the shell edge, while `main.c` owns the `save` / `load` commands, success/error copy, and post-load room redraw.
+The save/load path also stays outside render and gameplay slices. [`src/save.c`](https://github.com/ianmays/dosmud/blob/main/src/save.c) serializes the durable `GameState` snapshot at the shell edge, while `main.c` owns the `save` / `load` commands, success/error copy, and post-load room redraw.
 
 ### Newline and spacing
 
 Player-facing copy lives in `txtres`; `grendr` owns when a blank line appears before output.
 
 - **`txtres`:** each string ends with exactly one `\n`. Do not embed a leading `\n` in copy (the main prompt in `main` is the exception).
-- **`grendr`:** use the tier helpers in [`grendr.c`](../src/grendr.c):
+- **`grendr`:** use the tier helpers in [`grendr.c`](https://github.com/ianmays/dosmud/blob/main/src/grendr.c):
   - **Line** - inline messages (combat, errors): print copy only.
   - **Paragraph** - atmosphere primaries, animal noise: `render_paragraph()` (one gap, then copy).
   - **Scene** - room look art, encounters, NPC portraits: `render_gap()` once before the art block.
@@ -86,7 +86,7 @@ Player-facing copy lives in `txtres`; `grendr` owns when a blank line appears be
 
 ### Platform (`main`, `platform.h`, `platdos.c` / `platpos.c` / `platwin.c`)
 
-[`include/platform.h`](../include/platform.h) defines the portable boundary:
+[`include/platform.h`](https://github.com/ianmays/dosmud/blob/main/include/platform.h) defines the portable boundary:
 
 - `plat_poll_line` - non-blocking stdin poll (DOS `kbhit`/`getch`, Windows console `_kbhit`/`_getch`, or POSIX `select`)
 - `plat_time_now` - wall-clock seconds for idle ticks
@@ -95,15 +95,15 @@ Player-facing copy lives in `txtres`; `grendr` owns when a blank line appears be
 
 Implementations are split by toolchain (FAT 8.3 basenames):
 
-- [`src/platdos.c`](../src/platdos.c) - Open Watcom / DOS (`build.bat` links `platdos.obj`)
-- [`src/platpos.c`](../src/platpos.c) - GCC / POSIX (`Makefile` links `platpos.c`)
-- [`src/platwin.c`](../src/platwin.c) - Windows console path for WSL cross-builds (`make build-win` / `make test-win`)
+- [`src/platdos.c`](https://github.com/ianmays/dosmud/blob/main/src/platdos.c) - Open Watcom / DOS (`build.bat` links `platdos.obj`)
+- [`src/platpos.c`](https://github.com/ianmays/dosmud/blob/main/src/platpos.c) - GCC / POSIX (`Makefile` links `platpos.c`)
+- [`src/platwin.c`](https://github.com/ianmays/dosmud/blob/main/src/platwin.c) - Windows console path for WSL cross-builds (`make build-win` / `make test-win`)
 
-[`src/main.c`](../src/main.c) orchestrates the main loop and may use `printf` for shell-level prompts and banners. It must not include `conio.h`, `dos.h`, or other platform headers directly.
+[`src/main.c`](https://github.com/ianmays/dosmud/blob/main/src/main.c) orchestrates the main loop and may use `printf` for shell-level prompts and banners. It must not include `conio.h`, `dos.h`, or other platform headers directly.
 
 In `TEST_MODE`, `main.c` accepts `--replay-log [path]`, opens a deterministic text log, and records each startup, input, and idle step after simulation produces the queue and before the next reset clears it. The log includes the seed, step index, tick, input text when present, queue overflow state, and serialized `GameEvent` payloads in queue order. If the flag omits a path, logging defaults to `replay.log`.
 
-In all builds, `main.c` also accepts in-session `save` and `load` shell commands. They do not advance time, use the single-slot `save.dat` path in the current working directory, serialize the durable simulation state through [`src/save.c`](../src/save.c), and redraw the restored room immediately after a successful load.
+In all builds, `main.c` also accepts in-session `save` and `load` shell commands. They do not advance time, use the single-slot `save.dat` path in the current working directory, serialize the durable simulation state through [`src/save.c`](https://github.com/ianmays/dosmud/blob/main/src/save.c), and redraw the restored room immediately after a successful load.
 
 Run `make check-layers` before opening a PR (or use `make test-all`, which runs it first). That target fails if `printf` appears in any `src/*.c` other than `main.c`, `grendr.c`, `platdos.c`, `platpos.c`, or `platwin.c`. `make test` compiles only and does not run the guard.
 
@@ -125,7 +125,7 @@ Commands mutate game state, world ticks mutate simulation state, and rendering o
 
 ## Configuration (`config.h`)
 
-[`include/config.h`](../include/config.h) is the compile-time home for:
+[`include/config.h`](https://github.com/ianmays/dosmud/blob/main/include/config.h) is the compile-time home for:
 
 - structural limits (`CFG_ROOM_MAX`, `CFG_BAG_MAX`, `CFG_AREA_ITEM_SLOTS` ground slots per room, buffers, etc.)
 - gameplay tuning (combat and bandit corpse loot thresholds, food/salve heal amounts, progression, ambient systems, traveler return timing)
@@ -143,11 +143,11 @@ Conventions:
 
 ### Test harness (`testharn`, `TEST_MODE` only)
 
-[`tests/harness/testharn.c`](../tests/harness/testharn.c) lives at the `main` edge (not core simulation). It applies `@fixture` and `@seed` lines from snapshot `.input` files by calling `game_reset_fixture_baseline` plus real gameplay APIs, usually capturing the event queue into a local buffer and either dropping it with `harness_drop_output` or rendering it through `game_render_output` when the snapshot needs the visible prompt or encounter text. A few edge prompts still use direct `render_*` calls where the harness is intentionally reproducing shell-facing output that is not part of a normal command or tick step. Shared seed-1234 world layout tables live in [`tests/harness/th_world.c`](../tests/harness/th_world.c). After a successful harness directive, `main.c` calls `plat_seed_rng(game.seed)` so libc RNG matches the stored seed. Fixtures cover bandit dialogue/combat, room placement, bag contents, inspect focus, corpse loot, combat-ready inject queues, and `quiet_explore` (`test_quiet_ticks` + roaming traveler off). The `bandit_combat_turn1_resolve` fixture also calls `game_roll_inject_begin` and `combat_resolve_reply` so the `equipment` snapshot exercises real combat without a scripted `1`. `@seed` sets `GameState.seed` mid-file for libc RNG stream isolation. Release builds (`make build`) do not link the harness. See [testing](testing.md#test-fixtures-test_mode-only).
+[`tests/harness/testharn.c`](https://github.com/ianmays/dosmud/blob/main/tests/harness/testharn.c) lives at the `main` edge (not core simulation). It applies `@fixture` and `@seed` lines from snapshot `.input` files by calling `game_reset_fixture_baseline` plus real gameplay APIs, usually capturing the event queue into a local buffer and either dropping it with `harness_drop_output` or rendering it through `game_render_output` when the snapshot needs the visible prompt or encounter text. A few edge prompts still use direct `render_*` calls where the harness is intentionally reproducing shell-facing output that is not part of a normal command or tick step. Shared seed-1234 world layout tables live in [`tests/harness/th_world.c`](https://github.com/ianmays/dosmud/blob/main/tests/harness/th_world.c). After a successful harness directive, `main.c` calls `plat_seed_rng(game.seed)` so libc RNG matches the stored seed. Fixtures cover bandit dialogue/combat, room placement, bag contents, inspect focus, corpse loot, combat-ready inject queues, and `quiet_explore` (`test_quiet_ticks` + roaming traveler off). The `bandit_combat_turn1_resolve` fixture also calls `game_roll_inject_begin` and `combat_resolve_reply` so the `equipment` snapshot exercises real combat without a scripted `1`. `@seed` sets `GameState.seed` mid-file for libc RNG stream isolation. Release builds (`make build`) do not link the harness. See [testing](testing.md#test-fixtures-test_mode-only).
 
 ## Base types (`base.h`)
 
-[`include/base.h`](../include/base.h) defines portable unsigned aliases used in simulation state:
+[`include/base.h`](https://github.com/ianmays/dosmud/blob/main/include/base.h) defines portable unsigned aliases used in simulation state:
 
 - `u8` - byte storage (explored-map flags, `map_ready`, safe `char` casts for `ctype` calls)
 - `u16` - 16-bit values when needed (defined for future use; compile-time `sizeof` guard)
@@ -172,14 +172,14 @@ Conventions:
 
 ### `replay`
 
-- `TEST_MODE` only shell-edge serialization in [`replay.c`](../src/replay.c); opened and driven from `main.c`
+- `TEST_MODE` only shell-edge serialization in [`replay.c`](https://github.com/ianmays/dosmud/blob/main/src/replay.c); opened and driven from `main.c`
 - writes a deterministic sidecar text log (`dosmud-replay-v1`) of startup, input, and idle steps
 - captures each step's `GameEventQueue` after simulation and before the next queue reset; does not mutate gameplay or render state
 - I/O failure surfaces through `main.c` stderr and exits non-zero
 
 ### `save`
 
-- shell-edge binary serialization in [`save.c`](../src/save.c); called only from `main.c`
+- shell-edge binary serialization in [`save.c`](https://github.com/ianmays/dosmud/blob/main/src/save.c); called only from `main.c`
 - versioned, field-by-field save format (`DMSV`, version 3) for `GameState`, `World`, and tracked RNG draw count
 - validates magic, version, and field ranges before replacing the live game state; older payload versions are rejected instead of migrated in place
 - v3 replaces the single roaming NPC fields with a fixed-size NPC roster (`GameState.npcs[]` with actor, dialogue, encounter, room, flags, and return tick per slot); `TEST_MODE` builds still append roll-injection and quiet-tick fields after the shared payload, while release builds use the shorter record and reject extra trailing bytes
@@ -191,7 +191,7 @@ Conventions:
 - command routing
 - world update sequencing
 - headless step surface: `game_describe_current_room`, `game_process_input`, and `game_background_step` mutate `GameState` and append `GameEvent` records supplied by the caller
-- explicit game modes in [`game.h`](../src/game.h): `GameMode` (explore, dialogue, combat), `DialogueKind` for the active dialogue when in dialogue mode (room NPCs including the pond frog, traveler, enemy), `CombatState` for combat-only fields, and `NpcState` / `NpcFlags` for the fixed-size dynamic NPC roster (`GameState.npcs[CFG_NPC_MAX]`, cap in [`config.h`](../include/config.h))
+- explicit game modes in [`game.h`](https://github.com/ianmays/dosmud/blob/main/src/game.h): `GameMode` (explore, dialogue, combat), `DialogueKind` for the active dialogue when in dialogue mode (room NPCs including the pond frog, traveler, enemy), `CombatState` for combat-only fields, and `NpcState` / `NpcFlags` for the fixed-size dynamic NPC roster (`GameState.npcs[CFG_NPC_MAX]`, cap in [`config.h`](https://github.com/ianmays/dosmud/blob/main/include/config.h))
 - mode transitions via `game_set_mode_explore`, `game_set_mode_dialogue`, and `game_set_mode_combat` (only one major mode at a time)
 - `game_is_busy_dialogue` returns true whenever `mode != GAME_MODE_EXPLORE` (ambient encounters, idle background ticks)
 - `game_roll_spread` and `game_roll_percent` centralize gameplay draws used for combat, corpse loot, kill XP, and bandit intimidate (`plat_rand()` when inject is inactive; inject bypasses the draw counter in `TEST_MODE`)
@@ -200,18 +200,18 @@ Conventions:
 
 Gameplay slices live beside `game.c` as plain C translation units (no extra framework):
 
-- [`gprog.c`](../src/gprog.c) - XP and level-up rewards (`game_xp_to_next_level`, `progression_gain_xp`); queues `GAME_EVENT_XP_GAIN` and `GAME_EVENT_STAT_CHANGE` via `gout` (FAT 8.3-safe basename)
-- [`combat.c`](../src/combat.c) - combat start, player reply resolution, enemy turn; queues `GAME_EVENT_COMBAT` phases via `gout` (randomness via `game_roll_spread` / `game_roll_percent`, not direct `plat_rand()` calls)
-- [`npc.c`](../src/npc.c) - fixed NPC identity seam, shared dialogue helpers, room look hint ownership, and the fixed-size NPC instance roster for roaming placement, encounter open/reply, and future non-roaming dynamic NPCs (`npc_clear_all`, `npc_spawn`, `npc_place`, `npc_move`, `npc_find_*`, `npc_deactivate_until`, `npc_roaming_*`, `npc_seed_roaming_traveler`; slot order is save/tick-stable)
-- [`genc.c`](../src/genc.c) - ambient bandit encounter open state (FAT 8.3-safe basename)
-- [`dialogue.c`](../src/dialogue.c) - fixed room-NPC talk and reply routing built on `npc.c`
-- [`gatmos.c`](../src/gatmos.c) - initial room items, ambient rolls, animal noise, inspect focus hooks (FAT 8.3-safe basename)
+- [`gprog.c`](https://github.com/ianmays/dosmud/blob/main/src/gprog.c) - XP and level-up rewards (`game_xp_to_next_level`, `progression_gain_xp`); queues `GAME_EVENT_XP_GAIN` and `GAME_EVENT_STAT_CHANGE` via `gout` (FAT 8.3-safe basename)
+- [`combat.c`](https://github.com/ianmays/dosmud/blob/main/src/combat.c) - combat start, player reply resolution, enemy turn; queues `GAME_EVENT_COMBAT` phases via `gout` (randomness via `game_roll_spread` / `game_roll_percent`, not direct `plat_rand()` calls)
+- [`npc.c`](https://github.com/ianmays/dosmud/blob/main/src/npc.c) - fixed NPC identity seam, shared dialogue helpers, room look hint ownership, and the fixed-size NPC instance roster for roaming placement, encounter open/reply, and future non-roaming dynamic NPCs (`npc_clear_all`, `npc_spawn`, `npc_place`, `npc_move`, `npc_find_*`, `npc_deactivate_until`, `npc_roaming_*`, `npc_seed_roaming_traveler`; slot order is save/tick-stable)
+- [`genc.c`](https://github.com/ianmays/dosmud/blob/main/src/genc.c) - ambient bandit encounter open state (FAT 8.3-safe basename)
+- [`dialogue.c`](https://github.com/ianmays/dosmud/blob/main/src/dialogue.c) - fixed room-NPC talk and reply routing built on `npc.c`
+- [`gatmos.c`](https://github.com/ianmays/dosmud/blob/main/src/gatmos.c) - initial room items, ambient rolls, animal noise, inspect focus hooks (FAT 8.3-safe basename)
 
 When a slice exposes new command or state entry points, add tests in the matching `tests/unit/unit_*.c` file (see [When to add or update tests](testing.md#when-to-add-or-update-tests)).
 
 New `src/*.c` and `src/*.h` basenames must stay within **classic FAT 8+3** (at most eight characters before `.c` or `.h`) so MS-DOS 5.x-6.x style volumes and the Open Watcom DOS build can open them reliably. Existing examples: `grendr.*`, `invent.*`, `gprog.*`, `gatmos.*`, `genc.*`.
 
-`game` stays orchestration; new behaviour should land in the owning slice above rather than re-centralising into `game.c`. [`game_heal_player`](../src/game.c) applies capped HP heals and is used by inventory eat/salve and combat salve reply 3.
+`game` stays orchestration; new behaviour should land in the owning slice above rather than re-centralising into `game.c`. [`game_heal_player`](https://github.com/ianmays/dosmud/blob/main/src/game.c) applies capped HP heals and is used by inventory eat/salve and combat salve reply 3.
 
 ### `command`
 
@@ -231,14 +231,14 @@ New `src/*.c` and `src/*.h` basenames must stay within **classic FAT 8+3** (at m
 - text rendering only
 - art is intentionally compact to work well with 25 line displays (DOS standard)
 - no gameplay mutation
-- calls [`fmt.c`](../src/fmt.c) for logic-heavy strings, then prints; static copy from [`txtres.c`](../src/txtres.c) (`TXT_*` constants and `g_room_*` arrays), not scattered literals
+- calls [`fmt.c`](https://github.com/ianmays/dosmud/blob/main/src/fmt.c) for logic-heavy strings, then prints; static copy from [`txtres.c`](https://github.com/ianmays/dosmud/blob/main/src/txtres.c) (`TXT_*` constants and `g_room_*` arrays), not scattered literals
 - newline tiers (`render_gap`, `render_paragraph`, and related rules): [Newline and spacing](#newline-and-spacing)
 
 ### `fmt`
 
 - pure string formatting from `GameState`; writes into caller-provided buffers
 - no `printf` or gameplay mutation
-- unit-tested directly in [`tests/unit/unit_fmt.c`](../tests/unit/unit_fmt.c) (see [`docs/testing.md`](testing.md))
+- unit-tested directly in [`tests/unit/unit_fmt.c`](https://github.com/ianmays/dosmud/blob/main/tests/unit/unit_fmt.c) (see [`docs/testing.md`](testing.md))
 
 ### `txtres`
 

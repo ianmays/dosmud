@@ -55,7 +55,7 @@ All builds also support in-session `save` and `load` commands. The first pass us
 
 ## When to add or update tests
 
-Use this section when deciding what to write, not only what to run. Agents and contributors should follow it before opening a PR. Pre-PR runs: [`.cursor/rules/testing-discipline.mdc`](../.cursor/rules/testing-discipline.mdc) and [AGENTS.md](https://github.com/ianmays/dosmud/blob/main/AGENTS.md#testing-expectations).
+Use this section when deciding what to write, not only what to run. Agents and contributors should follow it before opening a PR. Pre-PR runs: [`.cursor/rules/testing-discipline.mdc`](https://github.com/ianmays/dosmud/blob/main/.cursor/rules/testing-discipline.mdc) and [AGENTS.md](https://github.com/ianmays/dosmud/blob/main/AGENTS.md#testing-expectations).
 
 | Change | Snapshots | Unit (`tests/unit/unit_*.c`) |
 |--------|-----------|------------------------------|
@@ -63,7 +63,7 @@ Use this section when deciding what to write, not only what to run. Agents and c
 | New `*_cmd_*` or other exported handler in a slice | If output changes | **Yes - call the API directly** |
 | Behavior-preserving refactor into another `.c` | Only if `.expect` files drift | Update the slice suite when APIs are new |
 | `game.c` static router only | No | Add or extend `unit_game.c` / `game_process_input` tests **when** router or tick semantics change; otherwise no new unit file |
-| `world_init` or fixed graph layout | If travel or map output changes | Update [`tests/harness/th_world.c`](../tests/harness/th_world.c) (and fixtures if needed) |
+| `world_init` or fixed graph layout | If travel or map output changes | Update [`tests/harness/th_world.c`](https://github.com/ianmays/dosmud/blob/main/tests/harness/th_world.c) (and fixtures if needed) |
 
 **Unit file convention:** add or extend `tests/unit/unit_<basename>.c` for the gameplay module you changed (see `UNIT_TEST_SRC` in the `Makefile`). Suites use abbreviated basenames, not full module names - for example `command.c` → `unit_cmd.c`, `invent.c` → `unit_inv.c`, `combat.c` → `unit_cbt.c`, `npc.c` → `unit_npc.c`, `replay.c` → `unit_rplog.c`, `save.c` → `unit_save.c`. FAT 8.3 truncations also apply (`dialogue.c` → `unit_dial.c`, `world.c` → `unit_wrld.c`). Which modules need coverage is listed under [In-scope modules](#unit-tests-greatest) below - do not maintain a second module table here.
 
@@ -73,14 +73,14 @@ Use this section when deciding what to write, not only what to run. Agents and c
 
 ## Test gap audit (agents and CI)
 
-Before a draft PR, agents run a **test-gap pass** ([`.cursor/skills/testing-gap-auditor/SKILL.md`](../.cursor/skills/testing-gap-auditor/SKILL.md), [`.cursor/rules/testing-gap-after-implement.mdc`](../.cursor/rules/testing-gap-after-implement.mdc)):
+Before a draft PR, agents run a **test-gap pass** ([`.cursor/skills/testing-gap-auditor/SKILL.md`](https://github.com/ianmays/dosmud/blob/main/.cursor/skills/testing-gap-auditor/SKILL.md), [`.cursor/rules/testing-gap-after-implement.mdc`](https://github.com/ianmays/dosmud/blob/main/.cursor/rules/testing-gap-after-implement.mdc)):
 
 ```sh
 git fetch origin main
 sh scripts/check-test-gaps.sh origin/main
 ```
 
-Pull requests to `main` run the same script in CI in **informative** mode (`TEST_GAP_INFORMATIVE=1`, `continue-on-error`): gaps are logged but do not fail the job. Treat reported gaps as merge blockers until fixed or the heuristics are tuned. The script reads `COVERAGE_MODULES`, `UNIT_GAMEPLAY_SRC`, `PLAT_SRC`, and `HARNESS_SRC` from the `Makefile`, resolves owning unit suites from [`tests/unit/module-map`](../tests/unit/module-map), and flags likely missing unit or snapshot updates. Unit gaps are not waived by unrelated snapshot-only changes on the same branch.
+Pull requests to `main` run the same script in CI in **informative** mode (`TEST_GAP_INFORMATIVE=1`, `continue-on-error`): gaps are logged but do not fail the job. Treat reported gaps as merge blockers until fixed or the heuristics are tuned. The script reads `COVERAGE_MODULES`, `UNIT_GAMEPLAY_SRC`, `PLAT_SRC`, and `HARNESS_SRC` from the `Makefile`, resolves owning unit suites from [`tests/unit/module-map`](https://github.com/ianmays/dosmud/blob/main/tests/unit/module-map), and flags likely missing unit or snapshot updates. Unit gaps are not waived by unrelated snapshot-only changes on the same branch.
 
 **Local:** run without `TEST_GAP_INFORMATIVE` before a draft PR (exit 1 on gaps). **`TEST_GAP_WAIVE=1`** skips the script locally for debugging only; CI does not set it. `make test-unit-coverage` remains the branch-coverage bar; the gap script does not replace it.
 
@@ -97,13 +97,13 @@ tests/
     build/        # generated: dosmud_soak (gitignored)
 ```
 
-Snapshot regression lives under [`tests/regression/`](../tests/regression/) (data only). Fixture code lives under [`tests/harness/`](../tests/harness/). Unit sources live under [`tests/unit/`](../tests/unit/). Soak sources live under [`tests/soak/`](../tests/soak/). The unit binary and coverage profiles are written to [`tests/unit/build/`](../tests/unit/build/) (ignored by git). Release `dosmud` and snapshot `*.output` are also ignored via [`.gitignore`](../.gitignore).
+Snapshot regression lives under [`tests/regression/`](https://github.com/ianmays/dosmud/blob/main/tests/regression/) (data only). Fixture code lives under [`tests/harness/`](https://github.com/ianmays/dosmud/blob/main/tests/harness/). Unit sources live under [`tests/unit/`](https://github.com/ianmays/dosmud/blob/main/tests/unit/). Soak sources live under [`tests/soak/`](https://github.com/ianmays/dosmud/blob/main/tests/soak/). The unit binary and coverage profiles are written to [`tests/unit/build/`](https://github.com/ianmays/dosmud/blob/main/tests/unit/build/) (ignored by git). Release `dosmud` and snapshot `*.output` are also ignored via [`.gitignore`](https://github.com/ianmays/dosmud/blob/main/.gitignore).
 
-[`tests/harness/testharn.c`](../tests/harness/testharn.c) implements the `@fixture` / `@seed` DSL used by snapshot `.input` files and by unit tests in [`tests/unit/unit_tharn.c`](../tests/unit/unit_tharn.c). It is not snapshot-only.
+[`tests/harness/testharn.c`](https://github.com/ianmays/dosmud/blob/main/tests/harness/testharn.c) implements the `@fixture` / `@seed` DSL used by snapshot `.input` files and by unit tests in [`tests/unit/unit_tharn.c`](https://github.com/ianmays/dosmud/blob/main/tests/unit/unit_tharn.c). It is not snapshot-only.
 
 ## Unit tests (greatest)
 
-Unit test coverage ([#95](https://github.com/ianmays/dosmud/issues/95)) uses [greatest](https://github.com/silentbicycle/greatest) **1.5.0** vendored as [`tests/unit/greatest.h`](../tests/unit/greatest.h). Upstream license stays in the header; a small dosmud patch adds quiet-by-default output (`greatest_set_quiet`, `GREATEST_FLAG_QUIET`) in a separate git commit from the unmodified vendor import.
+Unit test coverage ([#95](https://github.com/ianmays/dosmud/issues/95)) uses [greatest](https://github.com/silentbicycle/greatest) **1.5.0** vendored as [`tests/unit/greatest.h`](https://github.com/ianmays/dosmud/blob/main/tests/unit/greatest.h). Upstream license stays in the header; a small dosmud patch adds quiet-by-default output (`greatest_set_quiet`, `GREATEST_FLAG_QUIET`) in a separate git commit from the unmodified vendor import.
 
 ```sh
 make test-unit
@@ -153,7 +153,7 @@ make test-soak
 
 `make build-soak` prints `elapsed: <seconds>` after the soak binary build finishes.
 
-Scenarios (see [`tests/soak/soak_sim.c`](../tests/soak/soak_sim.c)):
+Scenarios (see [`tests/soak/soak_sim.c`](https://github.com/ianmays/dosmud/blob/main/tests/soak/soak_sim.c)):
 
 | Test | Loop |
 |------|------|
@@ -161,17 +161,17 @@ Scenarios (see [`tests/soak/soak_sim.c`](../tests/soak/soak_sim.c)):
 | `soak_command_wait_move` | 10000 × alternate `wait` / `move north` with `test_quiet_ticks` |
 | `soak_combat_loop` | `CFG_TEST_SOAK_COMBAT_ROUNDS` (200) × one-hit combat victory with roll inject |
 
-Each scenario prints a machine-readable benchmark line (limits come from `CFG_TEST_SOAK_LIMIT_*` in [`include/config.h`](../include/config.h)):
+Each scenario prints a machine-readable benchmark line (limits come from `CFG_TEST_SOAK_LIMIT_*` in [`include/config.h`](https://github.com/ianmays/dosmud/blob/main/include/config.h)):
 
 ```text
 SOAK_BENCH <name> ticks=<n> us_per_tick=<u> limit=<L>
 ```
 
-The test fails if `us_per_tick` exceeds `limit`. CI ([`scripts/ci-stats.sh`](../scripts/ci-stats.sh)) runs `make test-soak` as its own step and parses `limit=` from the log for the PR **Soak benchmarks** table (no separate limits file).
+The test fails if `us_per_tick` exceeds `limit`. CI ([`scripts/ci-stats.sh`](https://github.com/ianmays/dosmud/blob/main/scripts/ci-stats.sh)) runs `make test-soak` as its own step and parses `limit=` from the log for the PR **Soak benchmarks** table (no separate limits file).
 
 After intentional performance changes, run `make test-soak` locally and raise the matching `CFG_TEST_SOAK_LIMIT_*` macros only when the new baseline is expected (~2× measured on the CI runner is a reasonable starting margin). Coarse `clock()` resolution may report `us_per_tick=0` on fast runs; limits are regression guards, not micro-benchmarks.
 
-World boot uses [`tests/harness/th_world.c`](../tests/harness/th_world.c) via [`tests/unit/unit_util.c`](../tests/unit/unit_util.c) (`unit_game_fresh` / `harness_world_boot_graph`). When `world_init` changes, update **one** graph in `th_world.c`.
+World boot uses [`tests/harness/th_world.c`](https://github.com/ianmays/dosmud/blob/main/tests/harness/th_world.c) via [`tests/unit/unit_util.c`](https://github.com/ianmays/dosmud/blob/main/tests/unit/unit_util.c) (`unit_game_fresh` / `harness_world_boot_graph`). When `world_init` changes, update **one** graph in `th_world.c`.
 
 ## Test fixtures (`TEST_MODE` only)
 
@@ -271,17 +271,17 @@ Snapshots use three determinism levels:
 
 1. **Teleport state** - fixtures set `GameState` directly. Do not walk RNG-heavy setup (`take stick`, intimidate, random bandit spawn). `tests/regression/map.*` checks map **render** with explored flags set by the fixture; `tests/regression/walk_map.*` checks `room_explored` updated by a real `move` (with `quiet_explore`).
 
-2. **Inject rolls** (`TEST_MODE` only) - use `game_roll_inject_begin` for any asserted outcome that goes through `game_roll_spread` / `game_roll_percent`: combat damage, corpse loot tier, kill XP, bandit intimidate (reply `3`), and `combat_start` enemy HP. Constants live under `#ifdef TEST_MODE` in [`config.h`](../include/config.h) (`CFG_TEST_EQUIPMENT_*`, `CFG_TEST_COMBAT_*`, `CFG_TEST_INTIMIDATE_*`, `CFG_TEST_VICTORY_*`). Do not bypass combat with render-only hit lines. If combat tuning changes, update those constants and `.expect`.
+2. **Inject rolls** (`TEST_MODE` only) - use `game_roll_inject_begin` for any asserted outcome that goes through `game_roll_spread` / `game_roll_percent`: combat damage, corpse loot tier, kill XP, bandit intimidate (reply `3`), and `combat_start` enemy HP. Constants live under `#ifdef TEST_MODE` in [`config.h`](https://github.com/ianmays/dosmud/blob/main/include/config.h) (`CFG_TEST_EQUIPMENT_*`, `CFG_TEST_COMBAT_*`, `CFG_TEST_INTIMIDATE_*`, `CFG_TEST_VICTORY_*`). Do not bypass combat with render-only hit lines. If combat tuning changes, update those constants and `.expect`.
 
 3. **Seed reset** - after each `@fixture` or `@seed`, `main.c` calls `plat_seed_rng(game.seed)` for stream isolation between harness blocks. Do not rely on seed alone for asserted mechanics; use inject or teleport.
 
 4. **Quiet ticks** - for tick-advancing commands in explore mode, use `quiet_explore` (see above).
 
-5. **World graph** (`TEST_MODE` only) - `@fixture world_boot` calls `harness_world_boot_graph` in [`tests/harness/th_world.c`](../tests/harness/th_world.c) (seed-1234 layout). Unlike rolls, the graph is **not** cleared by `game_reset_fixture_baseline`; it persists until the next `world_boot` or a new process. Unit and soak tests use the same graph through `unit_world_boot_graph` in [`tests/unit/unit_util.c`](../tests/unit/unit_util.c). When `world_init` changes, refresh **only** `th_world.c`.
+5. **World graph** (`TEST_MODE` only) - `@fixture world_boot` calls `harness_world_boot_graph` in [`tests/harness/th_world.c`](https://github.com/ianmays/dosmud/blob/main/tests/harness/th_world.c) (seed-1234 layout). Unlike rolls, the graph is **not** cleared by `game_reset_fixture_baseline`; it persists until the next `world_boot` or a new process. Unit and soak tests use the same graph through `unit_world_boot_graph` in [`tests/unit/unit_util.c`](https://github.com/ianmays/dosmud/blob/main/tests/unit/unit_util.c). When `world_init` changes, refresh **only** `th_world.c`.
 
 Bandit intimidate in gameplay uses `game_roll_percent` (not direct `plat_rand()`), so intimidate snapshots stay on the inject path.
 
-Add new fixtures in [`tests/harness/testharn.c`](../tests/harness/testharn.c) and document them here. `testharn` + `th_world` are linked for `make test` / `dos-prepare MODE=TEST_MODE` and `make test-unit`, not for `make build` or `make test-soak` (soak links `th_world` only).
+Add new fixtures in [`tests/harness/testharn.c`](https://github.com/ianmays/dosmud/blob/main/tests/harness/testharn.c) and document them here. `testharn` + `th_world` are linked for `make test` / `dos-prepare MODE=TEST_MODE` and `make test-unit`, not for `make build` or `make test-soak` (soak links `th_world` only).
 
 | Fixture | Notes |
 |---------|--------|
@@ -293,7 +293,7 @@ Add new fixtures in [`tests/harness/testharn.c`](../tests/harness/testharn.c) an
 2. Use `@fixture` for setup; add inject in the fixture or via a `*_ready` fixture when outcomes must be fixed.
 3. Use `quiet_explore` when the test calls `wait` or `move`.
 4. Run `make test && make snapshot-run` (or `./dosmud < tests/regression/<name>.input > tests/regression/<name>.output`) and copy or diff against `tests/regression/<name>.expect`.
-5. Add `<name>` to `SNAPSHOT_TESTS` in the [Makefile](../Makefile) (`seed_cli` stays separate: it uses `--seed` with `smoke.input`). When a snapshot also asserts or creates a sidecar file (see `replay_log` and `save_load` below), add a Makefile branch beside the default `./dosmud < input > output` path.
+5. Add `<name>` to `SNAPSHOT_TESTS` in the [Makefile](https://github.com/ianmays/dosmud/blob/main/Makefile) (`seed_cli` stays separate: it uses `--seed` with `smoke.input`). When a snapshot also asserts or creates a sidecar file (see `replay_log` and `save_load` below), add a Makefile branch beside the default `./dosmud < input > output` path.
 6. Document new fixtures in this file.
 
 ### Snapshot test files
@@ -369,7 +369,7 @@ make test-dos-prepare-norun SEED=1234
 make dos-run SEED=1234
 ```
 
-When you add or remove `src\*.c` files, update `Makefile` (`SRC` or `TEST_SRC`) and `build.bat`. For the Open Watcom path, keep every `wcl` and `wlib` line under the COMMAND.COM length limit (about 127 characters): gameplay sources are packed into `gameplay.lib` via several short `wlib` calls; the final `wcl` link lists `main.obj`, `platdos.obj`, `gameplay.lib`, plus the other `.obj` files. `TEST_MODE` copies [`tests/harness/`](../tests/harness/) to `harness\` via `dos-prepare.ps1`, compiles `th_world.c` / `testharn.c` to `thwld.obj` / `tharn.obj`, and archives both into `gameplay.lib`. Use `goto` labels in `build.bat` for conditionals; parenthesized `if (...)` blocks break under COMMAND.COM.
+When you add or remove `src\*.c` files, update `Makefile` (`SRC` or `TEST_SRC`) and `build.bat`. For the Open Watcom path, keep every `wcl` and `wlib` line under the COMMAND.COM length limit (about 127 characters): gameplay sources are packed into `gameplay.lib` via several short `wlib` calls; the final `wcl` link lists `main.obj`, `platdos.obj`, `gameplay.lib`, plus the other `.obj` files. `TEST_MODE` copies [`tests/harness/`](https://github.com/ianmays/dosmud/blob/main/tests/harness/) to `harness\` via `dos-prepare.ps1`, compiles `th_world.c` / `testharn.c` to `thwld.obj` / `tharn.obj`, and archives both into `gameplay.lib`. Use `goto` labels in `build.bat` for conditionals; parenthesized `if (...)` blocks break under COMMAND.COM.
 
 Deterministic DOS validation:
 
@@ -416,11 +416,11 @@ The Open Watcom build (`build.bat`) only needs `src/`, `include/`, and `build.ba
 
 ## CI (GitHub Actions)
 
-On `main` and pull requests, CI runs `scripts/ci-stats.sh` (layer check, `make test`, `make test-run`, `make test-unit`, `make test-unit-coverage`, `make test-soak`; see [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)). On pull requests, results are posted or updated in a single PR comment by finding the prior hidden `ci-test-results` marker comment and replacing it, the stats summary is appended to the GitHub Actions job summary, and `ci-stats.json` is uploaded as the sole metrics artifact. CI starts from a clean checkout; for comparable local timings, run `make clean` before the timing-sensitive targets. DOS prep is not run in CI.
+On `main` and pull requests, CI runs `scripts/ci-stats.sh` (layer check, `make test`, `make test-run`, `make test-unit`, `make test-unit-coverage`, `make test-soak`; see [`.github/workflows/ci.yml`](https://github.com/ianmays/dosmud/blob/main/.github/workflows/ci.yml)). On pull requests, results are posted or updated in a single PR comment by finding the prior hidden `ci-test-results` marker comment and replacing it, the stats summary is appended to the GitHub Actions job summary, and `ci-stats.json` is uploaded as the sole metrics artifact. CI starts from a clean checkout; for comparable local timings, run `make clean` before the timing-sensitive targets. DOS prep is not run in CI.
 
-Successful `main` CI runs trigger [`.github/workflows/ci-metrics.yml`](../.github/workflows/ci-metrics.yml), which downloads `ci-stats.json`, appends one normalized record into `history.json` on the dedicated `ci-metrics` branch, and pushes that branch back to GitHub. The metrics dashboard at [CI Metrics](ci-metrics.html) reads that branch directly via raw GitHub content, so persistent history is kept out of both PR branches and `main`. The dashboard trends build/test timings, soak benchmark values, per-suite snapshot/unit/soak pass-fail-skip counts, and overall unit branch/line coverage.
+Successful `main` CI runs trigger [`.github/workflows/ci-metrics.yml`](https://github.com/ianmays/dosmud/blob/main/.github/workflows/ci-metrics.yml), which downloads `ci-stats.json`, appends one normalized record into `history.json` on the dedicated `ci-metrics` branch, and pushes that branch back to GitHub. The metrics dashboard at [CI Metrics](ci-metrics.html) reads that branch directly via raw GitHub content, so persistent history is kept out of both PR branches and `main`. The dashboard trends build/test timings, soak benchmark values, per-suite snapshot/unit/soak pass-fail-skip counts, and overall unit branch/line coverage.
 
-When the metrics schema grows, use [`scripts/backfill-ci-history.py`](../scripts/backfill-ci-history.py) to enrich older `ci-metrics/history.json` entries from an archived CI log. It takes the target history file, the target run SHA, and the source log file, then patches only the matching history record.
+When the metrics schema grows, use [`scripts/backfill-ci-history.py`](https://github.com/ianmays/dosmud/blob/main/scripts/backfill-ci-history.py) to enrich older `ci-metrics/history.json` entries from an archived CI log. It takes the target history file, the target run SHA, and the source log file, then patches only the matching history record.
 
 ## Build artifacts
 
