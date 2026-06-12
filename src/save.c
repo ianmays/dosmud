@@ -484,7 +484,7 @@ static int save_valid_npc(const struct NpcState *npc, int room_count)
             npc->return_tick == 0;
     }
     if (npc->actor < GAME_DIALOGUE_ACTOR_NONE ||
-            npc->actor > GAME_DIALOGUE_ACTOR_NOBODY ||
+            npc->actor > GAME_DIALOGUE_ACTOR_BANDIT ||
             npc->dialogue < DIALOGUE_NONE ||
             npc->dialogue > DIALOGUE_ENEMY ||
             npc->encounter < GAME_ENCOUNTER_NONE ||
