@@ -6,6 +6,7 @@
 #include "grendr.h"
 #include "invent.h"
 #include "items.h"
+#include "npc.h"
 #include "testharn.h"
 #include "unit_util.h"
 
@@ -25,6 +26,23 @@ static int run_cmd(struct GameState *game, const char *line)
     GameEventQueue out;
 
     return run_cmd_out(game, line, &out);
+}
+
+/* Same deferral as fixture_traveler_off; keeps quiet-tick tests deterministic. */
+static void disable_traveler(struct GameState *game)
+{
+    npc_deactivate_until(game, GAME_DIALOGUE_ACTOR_TRAVELER, 999999UL);
+}
+
+static struct NpcState *traveler_npc(struct GameState *game)
+{
+    int slot;
+
+    slot = npc_find_by_actor(game, GAME_DIALOGUE_ACTOR_TRAVELER);
+    if (slot < 0) {
+        return 0;
+    }
+    return &game->npcs[slot];
 }
 
 TEST game_heal_player_applies(void)
@@ -149,7 +167,7 @@ TEST game_quiet_ticks(void)
 
     unit_game_fresh(&game, 4u);
     game.test_quiet_ticks = 1;
-    game.roaming_npc_active = 0;
+    disable_traveler(&game);
     tick_before = game.tick;
     {
         GameEventQueue out;
@@ -372,7 +390,7 @@ TEST game_traveler_reply_fixture(void)
     testharn_apply(&game, "@fixture traveler_dialogue");
     ASSERT_EQ(1, run_cmd_out(&game, "reply 2", &out));
     ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
-    ASSERT_EQ(0, game.roaming_npc_active);
+    ASSERT_EQ(0, traveler_npc(&game)->flags & NPC_FLAG_ACTIVE);
     ASSERT_EQ(1, out.count);
     ASSERT_EQ(GAME_EVENT_DIALOGUE, out.events[0].kind);
     ASSERT_EQ(GAME_DIALOGUE_ACTOR_TRAVELER, out.events[0].arg0);
@@ -388,7 +406,7 @@ TEST game_wait_and_help(void)
     unit_game_fresh(&game, 21u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game.test_quiet_ticks = 1;
-    game.roaming_npc_active = 0;
+    disable_traveler(&game);
     ASSERT_EQ(1, run_cmd(&game, "wait"));
     ASSERT_EQ(1, run_cmd(&game, "help move"));
     PASS();
@@ -401,7 +419,7 @@ TEST game_session_help_no_tick(void)
     unit_game_fresh(&game, 23u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game.test_quiet_ticks = 1;
-    game.roaming_npc_active = 0;
+    disable_traveler(&game);
     ASSERT_EQ(0, game.tick);
     ASSERT_EQ(1, run_cmd(&game, "help move"));
     ASSERT_EQ(0, game.tick);
@@ -415,7 +433,7 @@ TEST game_observe_look_no_tick(void)
     unit_game_fresh(&game, 24u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game.test_quiet_ticks = 1;
-    game.roaming_npc_active = 0;
+    disable_traveler(&game);
     ASSERT_EQ(0, game.tick);
     ASSERT_EQ(1, run_cmd(&game, "look"));
     ASSERT_EQ(0, game.tick);
@@ -429,7 +447,7 @@ TEST game_pass_time_wait_ticks(void)
     unit_game_fresh(&game, 25u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game.test_quiet_ticks = 1;
-    game.roaming_npc_active = 0;
+    disable_traveler(&game);
     ASSERT_EQ(0, game.tick);
     ASSERT_EQ(1, run_cmd(&game, "wait"));
     ASSERT_EQ(1, game.tick);
@@ -445,7 +463,7 @@ TEST game_wait_emits_output_record(void)
     unit_game_fresh(&game, 34u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game.test_quiet_ticks = 1;
-    game.roaming_npc_active = 0;
+    disable_traveler(&game);
     game_event_queue_reset(&out);
     ASSERT_EQ(1, game_process_input(&game, line, &out));
     ASSERT_EQ(1, out.count);
@@ -462,7 +480,7 @@ TEST game_help_emits_help_event(void)
     unit_game_fresh(&game, 37u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game.test_quiet_ticks = 1;
-    game.roaming_npc_active = 0;
+    disable_traveler(&game);
     game_event_queue_reset(&out);
     ASSERT_EQ(1, game_process_input(&game, line, &out));
     ASSERT_EQ(1, out.count);
@@ -480,7 +498,7 @@ TEST game_map_emits_map_event(void)
     unit_game_fresh(&game, 38u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game.test_quiet_ticks = 1;
-    game.roaming_npc_active = 0;
+    disable_traveler(&game);
     game_event_queue_reset(&out);
     ASSERT_EQ(1, game_process_input(&game, line, &out));
     ASSERT_EQ(1, out.count);
@@ -512,7 +530,7 @@ TEST game_cannot_move_emits_event(void)
     unit_game_fresh(&game, 40u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game.test_quiet_ticks = 1;
-    game.roaming_npc_active = 0;
+    disable_traveler(&game);
     game_event_queue_reset(&out);
     ASSERT_EQ(0, game_process_input(&game, line, &out));
     ASSERT_EQ(1, out.count);
@@ -530,7 +548,7 @@ TEST game_move_emits_move_then_look(void)
     unit_game_fresh(&game, 35u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game.test_quiet_ticks = 1;
-    game.roaming_npc_active = 0;
+    disable_traveler(&game);
     game_event_queue_reset(&out);
     ASSERT_EQ(1, game_process_input(&game, line, &out));
     ASSERT_EQ(2, out.count);

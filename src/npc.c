@@ -5,9 +5,10 @@
 #include "world.h"
 
 /*
- * npc.c owns the NPC-facing seam between room identity, roaming placement, and
- * dialogue actors. Higher-level slices still own combat and authored content.
- * Roaming encounters queue GAME_EVENT_ENCOUNTER / DIALOGUE*; grendr maps copy.
+ * npc.c owns the NPC-facing seam between room identity, dynamic roster
+ * placement, and dialogue actors. Higher-level slices still own combat and
+ * authored content. Roaming encounters queue GAME_EVENT_ENCOUNTER / DIALOGUE*;
+ * grendr maps copy.
  */
 
 struct NpcRoomInfo {
@@ -29,6 +30,75 @@ static const struct NpcRoomInfo NPC_ROOM_INFO[] = {
     { WORLD_ROOM_CATACOMBS, GAME_DIALOGUE_ACTOR_ARCHIVIST,
         DIALOGUE_NPC_ARCHIVIST, GAME_DIALOGUE_PHASE_TALK }
 };
+
+/*
+ * Roster slots: actor==NONE means vacant; inactive respawn entries keep actor
+ * set with NPC_FLAG_ACTIVE cleared. Iteration uses ascending slot index so
+ * saves and per-tick roaming walks stay deterministic.
+ */
+static int npc_slot_is_active(const struct NpcState *npc)
+{
+    return (npc->flags & NPC_FLAG_ACTIVE) != 0;
+}
+
+static int npc_slot_is_roaming(const struct NpcState *npc)
+{
+    return (npc->flags & NPC_FLAG_ROAMING) != 0;
+}
+
+static int npc_slot_needs_separation(const struct NpcState *npc)
+{
+    return (npc->flags & NPC_FLAG_NEEDS_SEPARATION) != 0;
+}
+
+static int npc_slot_respawns(const struct NpcState *npc)
+{
+    return (npc->flags & NPC_FLAG_RESPAWNS) != 0;
+}
+
+static struct NpcState *npc_slot(struct GameState *game, int slot)
+{
+    if (slot < 0 || slot >= CFG_NPC_MAX) {
+        return 0;
+    }
+    return &game->npcs[slot];
+}
+
+static const struct NpcState *npc_const_slot(const struct GameState *game, int slot)
+{
+    if (slot < 0 || slot >= CFG_NPC_MAX) {
+        return 0;
+    }
+    return &game->npcs[slot];
+}
+
+/* Only truly vacant slots qualify; deactivated travelers still occupy a slot. */
+static int npc_find_free_slot(const struct GameState *game)
+{
+    int i;
+
+    for (i = 0; i < CFG_NPC_MAX; ++i) {
+        if (game->npcs[i].actor == GAME_DIALOGUE_ACTOR_NONE) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+static struct NpcState *npc_find_dialogue_slot(struct GameState *game, int dialogue_kind)
+{
+    int i;
+
+    for (i = 0; i < CFG_NPC_MAX; ++i) {
+        if (!npc_slot_is_active(&game->npcs[i])) {
+            continue;
+        }
+        if (game->npcs[i].dialogue == dialogue_kind) {
+            return &game->npcs[i];
+        }
+    }
+    return 0;
+}
 
 static const struct NpcRoomInfo *npc_room_info(int room_id)
 {
@@ -77,6 +147,129 @@ int npc_choice_is_valid(int choice)
     return choice >= 1 && choice <= 3;
 }
 
+void npc_clear_all(struct GameState *game)
+{
+    int i;
+
+    for (i = 0; i < CFG_NPC_MAX; ++i) {
+        game->npcs[i].actor = GAME_DIALOGUE_ACTOR_NONE;
+        game->npcs[i].dialogue = DIALOGUE_NONE;
+        game->npcs[i].encounter = GAME_ENCOUNTER_NONE;
+        game->npcs[i].room_id = -1;
+        game->npcs[i].flags = 0;
+        game->npcs[i].return_tick = 0;
+    }
+}
+
+int npc_find_by_actor(const struct GameState *game, int actor)
+{
+    int i;
+
+    for (i = 0; i < CFG_NPC_MAX; ++i) {
+        if (game->npcs[i].actor == actor) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+int npc_find_in_room(const struct GameState *game, int room_id)
+{
+    int i;
+
+    for (i = 0; i < CFG_NPC_MAX; ++i) {
+        if (!npc_slot_is_active(&game->npcs[i])) {
+            continue;
+        }
+        if (game->npcs[i].room_id == room_id) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+int npc_spawn(struct GameState *game, int actor, int dialogue, int encounter,
+              int room_id, int flags)
+{
+    int slot;
+    struct NpcState *npc;
+
+    slot = npc_find_by_actor(game, actor);
+    if (slot < 0) {
+        slot = npc_find_free_slot(game);
+        if (slot < 0) {
+            return -1;
+        }
+    }
+    npc = npc_slot(game, slot);
+    npc->actor = actor;
+    npc->dialogue = dialogue;
+    npc->encounter = encounter;
+    npc->room_id = room_id;
+    npc->flags = flags;
+    npc->return_tick = 0;
+    return slot;
+}
+
+int npc_place(struct GameState *game, int actor, int room_id, int flags)
+{
+    int slot;
+    struct NpcState *npc;
+
+    slot = npc_find_by_actor(game, actor);
+    if (slot < 0) {
+        return -1;
+    }
+    npc = npc_slot(game, slot);
+    npc->room_id = room_id;
+    npc->flags = flags;
+    return slot;
+}
+
+int npc_move(struct GameState *game, int actor, int room_id)
+{
+    int slot;
+    struct NpcState *npc;
+
+    slot = npc_find_by_actor(game, actor);
+    if (slot < 0) {
+        return -1;
+    }
+    npc = npc_slot(game, slot);
+    npc->room_id = room_id;
+    return slot;
+}
+
+int npc_is_present(const struct GameState *game, int actor, int room_id)
+{
+    int slot;
+    const struct NpcState *npc;
+
+    slot = npc_find_by_actor(game, actor);
+    if (slot < 0) {
+        return 0;
+    }
+    npc = npc_const_slot(game, slot);
+    return npc_slot_is_active(npc) && npc->room_id == room_id;
+}
+
+/* Clears presence but keeps the roster profile for respawn or fixture reuse. */
+int npc_deactivate_until(struct GameState *game, int actor, u32 return_tick)
+{
+    int slot;
+    struct NpcState *npc;
+
+    slot = npc_find_by_actor(game, actor);
+    if (slot < 0) {
+        return -1;
+    }
+    npc = npc_slot(game, slot);
+    npc->flags &= ~(NPC_FLAG_ACTIVE | NPC_FLAG_NEEDS_SEPARATION);
+    npc->room_id = -1;
+    npc->return_tick = return_tick;
+    return slot;
+}
+
 int npc_open_room_dialogue(struct GameState *game, struct GameEventQueue *out)
 {
     const struct NpcRoomInfo *info;
@@ -94,20 +287,48 @@ int npc_open_room_dialogue(struct GameState *game, struct GameEventQueue *out)
 /* Traveler is the first roaming profile; seed sets actor/dialogue/encounter ids. */
 void npc_seed_roaming_traveler(struct GameState *game)
 {
-    game->roaming_npc_actor = GAME_DIALOGUE_ACTOR_TRAVELER;
-    game->roaming_npc_dialogue = DIALOGUE_TRAVELER;
-    game->roaming_npc_encounter = GAME_ENCOUNTER_TRAVELER;
-    game->roaming_npc_room = WORLD_ROOM_RUINS;
-    game->roaming_npc_need_separation = 0;
-    game->roaming_npc_active = 1;
-    game->roaming_npc_return_tick = 0;
+    npc_spawn(game, GAME_DIALOGUE_ACTOR_TRAVELER, DIALOGUE_TRAVELER,
+        GAME_ENCOUNTER_TRAVELER, WORLD_ROOM_RUINS,
+        NPC_FLAG_ACTIVE | NPC_FLAG_ROAMING | NPC_FLAG_RESPAWNS);
+}
+
+/* Reactivation after return_tick picks a random room in the generated graph. */
+void npc_roaming_activate_due(struct GameState *game)
+{
+    int i;
+
+    if (game->world.room_count <= 0) {
+        return;
+    }
+    for (i = 0; i < CFG_NPC_MAX; ++i) {
+        if (npc_slot_is_active(&game->npcs[i])) {
+            continue;
+        }
+        if (!npc_slot_is_roaming(&game->npcs[i]) ||
+                !npc_slot_respawns(&game->npcs[i])) {
+            continue;
+        }
+        if (game->tick < game->npcs[i].return_tick) {
+            continue;
+        }
+        game->npcs[i].flags |= NPC_FLAG_ACTIVE;
+        game->npcs[i].room_id = plat_rand() % game->world.room_count;
+    }
 }
 
 void npc_roaming_update_separation(struct GameState *game)
 {
+    int i;
+
     /* Once the player leaves the roaming room, the re-encounter lock can clear. */
-    if (game->player.room_id != game->roaming_npc_room) {
-        game->roaming_npc_need_separation = 0;
+    for (i = 0; i < CFG_NPC_MAX; ++i) {
+        if (!npc_slot_is_active(&game->npcs[i]) ||
+                !npc_slot_is_roaming(&game->npcs[i])) {
+            continue;
+        }
+        if (game->player.room_id != game->npcs[i].room_id) {
+            game->npcs[i].flags &= ~NPC_FLAG_NEEDS_SEPARATION;
+        }
     }
 }
 
@@ -118,64 +339,94 @@ void npc_roaming_step(struct GameState *game)
     int n;
     int i;
     int pick;
+    int slot;
 
     /* Movement is bounded by the generated graph; invalid room state is a no-op. */
     if (game->world.room_count <= 0) {
         return;
     }
-    if (game->roaming_npc_room < 0 ||
-            game->roaming_npc_room >= game->world.room_count) {
-        return;
-    }
-    r = &game->world.rooms[game->roaming_npc_room];
-    n = 0;
-    for (i = 0; i < DIR_NONE; ++i) {
-        if (r->exits[i] >= 0) {
-            dirs[n] = i;
-            ++n;
+    for (slot = 0; slot < CFG_NPC_MAX; ++slot) {
+        if (!npc_slot_is_active(&game->npcs[slot]) ||
+                !npc_slot_is_roaming(&game->npcs[slot])) {
+            continue;
         }
+        if (game->npcs[slot].room_id < 0 ||
+                game->npcs[slot].room_id >= game->world.room_count) {
+            continue;
+        }
+        r = &game->world.rooms[game->npcs[slot].room_id];
+        n = 0;
+        for (i = 0; i < DIR_NONE; ++i) {
+            if (r->exits[i] >= 0) {
+                dirs[n] = i;
+                ++n;
+            }
+        }
+        if (n <= 0) {
+            continue;
+        }
+        pick = plat_rand() % n;
+        game->npcs[slot].room_id = r->exits[dirs[pick]];
     }
-    if (n <= 0) {
-        return;
+}
+
+/*
+ * Returns 1 when an encounter opened. Lowest matching slot wins when several
+ * roaming NPCs share room_id; separation prevents immediate retrigger.
+ */
+int npc_roaming_begin_encounter_in_room(struct GameState *game, int room_id,
+                                        GameEventQueue *out)
+{
+    int slot;
+    struct NpcState *npc;
+
+    if (game_is_busy_dialogue(game)) {
+        return 0;
     }
-    pick = plat_rand() % n;
-    game->roaming_npc_room = r->exits[dirs[pick]];
+    for (slot = 0; slot < CFG_NPC_MAX; ++slot) {
+        npc = npc_slot(game, slot);
+        if (!npc_slot_is_active(npc) ||
+                !npc_slot_is_roaming(npc) ||
+                npc->room_id != room_id ||
+                npc_slot_needs_separation(npc)) {
+            continue;
+        }
+        npc_push_encounter_open(out, npc->encounter);
+        game_set_mode_dialogue(game, npc->dialogue);
+        npc->flags |= NPC_FLAG_NEEDS_SEPARATION;
+        return 1;
+    }
+    return 0;
 }
 
 void npc_roaming_begin_encounter(struct GameState *game, GameEventQueue *out)
 {
-    if (game_is_busy_dialogue(game)) {
-        return;
-    }
-    /* Separation prevents the same room from retriggering the encounter immediately. */
-    if (game->roaming_npc_need_separation) {
-        return;
-    }
-    npc_push_encounter_open(out, game->roaming_npc_encounter);
-    game_set_mode_dialogue(game, game->roaming_npc_dialogue);
-    game->roaming_npc_need_separation = 1;
+    (void)npc_roaming_begin_encounter_in_room(game, game->player.room_id, out);
 }
 
 int npc_roaming_cmd_reply(struct GameState *game, int choice, GameEventQueue *out)
 {
+    struct NpcState *npc;
+
     /* Return 0 when game.c should try another reply slice or emit a guard. */
     if (game->mode != GAME_MODE_DIALOGUE ||
-            game->dialogue != game->roaming_npc_dialogue) {
+            game->dialogue != DIALOGUE_TRAVELER) {
+        return 0;
+    }
+    npc = npc_find_dialogue_slot(game, game->dialogue);
+    if (npc == 0) {
         return 0;
     }
     if (!npc_choice_is_valid(choice)) {
         npc_push_dialogue_guard(out, GAME_DIALOGUE_GUARD_PICK_123);
         return 1;
     }
-    npc_push_dialogue(out, game->roaming_npc_actor,
-        GAME_DIALOGUE_PHASE_REPLY, choice);
+    npc_push_dialogue(out, npc->actor, GAME_DIALOGUE_PHASE_REPLY, choice);
     game_set_mode_explore(game);
-    game->roaming_npc_active = 0;
-    game->roaming_npc_room = -1;
     /* Return timing is randomized only after the player resolves the branch. */
-    game->roaming_npc_return_tick =
+    npc_deactivate_until(game, npc->actor,
         game->tick + CFG_TRAVELER_RETURN_DELAY_BASE +
-        (plat_rand() % CFG_TRAVELER_RETURN_DELAY_SPREAD);
+        (plat_rand() % CFG_TRAVELER_RETURN_DELAY_SPREAD));
     return 1;
 }
 

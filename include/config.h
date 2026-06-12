@@ -135,6 +135,8 @@
 #define CFG_ENV_FOCUS_DURATION_TICKS 3
 #define CFG_ATMOSPHERE_FOCUS_EXTRA_ITEM_BELOW 50
 
+/* Dynamic NPC roster cap (save payload and per-tick roaming walks). */
+#define CFG_NPC_MAX 4
 /* Traveler roaming */
 #define CFG_TRAVELER_RETURN_DELAY_BASE 8
 #define CFG_TRAVELER_RETURN_DELAY_SPREAD 16

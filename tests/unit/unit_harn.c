@@ -4,6 +4,7 @@
 #include "genc.h"
 #include "invent.h"
 #include "items.h"
+#include "npc.h"
 #include "testharn.h"
 #include "unit_util.h"
 
@@ -68,13 +69,15 @@ TEST harness_apply_ambient_camp(void)
 {
     struct GameState game;
     int rc;
+    int slot;
 
     unit_game_fresh(&game, 4u);
     rc = testharn_apply(&game, "@fixture ambient_camp");
     ASSERT_EQ(1, rc);
+    slot = npc_find_by_actor(&game, GAME_DIALOGUE_ACTOR_TRAVELER);
     ASSERT_EQ(WORLD_ROOM_CAMP, game.player.room_id);
     ASSERT_EQ(0, game.test_quiet_ticks);
-    ASSERT_EQ(0, game.roaming_npc_active);
+    ASSERT_EQ(0, game.npcs[slot].flags & NPC_FLAG_ACTIVE);
     PASS();
 }
 
@@ -126,14 +129,16 @@ TEST harness_apply_traveler_dialogue(void)
 {
     struct GameState game;
     int rc;
+    int slot;
 
     unit_game_fresh(&game, 6u);
     rc = testharn_apply(&game, "@fixture traveler_dialogue");
     ASSERT_EQ(1, rc);
+    slot = npc_find_by_actor(&game, GAME_DIALOGUE_ACTOR_TRAVELER);
     ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
     ASSERT_EQ(DIALOGUE_TRAVELER, game.dialogue);
-    ASSERT_EQ(1, game.roaming_npc_active);
-    ASSERT_EQ(game.player.room_id, game.roaming_npc_room);
+    ASSERT_EQ(NPC_FLAG_ACTIVE, game.npcs[slot].flags & NPC_FLAG_ACTIVE);
+    ASSERT_EQ(game.player.room_id, game.npcs[slot].room_id);
     PASS();
 }
 

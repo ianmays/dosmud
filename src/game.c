@@ -108,6 +108,7 @@ static void reset_mutable_state(struct GameState *game, int room_id, u32 tick)
     game_set_mode_explore(game);
     game->player.room_id = room_id;
     game->tick = tick;
+    npc_clear_all(game);
     npc_seed_roaming_traveler(game);
     game->env_focus_active = 0;
     game->env_focus_room = -1;
@@ -441,11 +442,9 @@ static int apply_command(struct GameState *game, struct Command *cmd,
 static void advance_world_tick(struct GameState *game, int roaming_moves_first,
                                GameEventQueue *out)
 {
-    int old_roaming_npc_room;
-
     /*
-     * Tick order is deliberate: advance the roaming NPC and world clock, then
-     * emit ambient events, then consider random encounters so one input
+     * Tick order is deliberate: advance the roaming roster and world clock,
+     * then emit ambient events, then consider random encounters so one input
      * produces the same visible sequence everywhere.
      */
     game->tick += 1;
@@ -457,29 +456,19 @@ static void advance_world_tick(struct GameState *game, int roaming_moves_first,
         return;
     }
 #endif
-    /* Reactivation after reply delay picks a random room in the generated graph. */
-    if (!game->roaming_npc_active && game->tick >= game->roaming_npc_return_tick) {
-        game->roaming_npc_active = 1;
-        game->roaming_npc_room = plat_rand() % game->world.room_count;
-    }
+    npc_roaming_activate_due(game);
 
-    old_roaming_npc_room = game->roaming_npc_room;
-    if (game->roaming_npc_active) {
-        if (roaming_moves_first) {
-            npc_roaming_step(game);
-        }
-        if (game->player.room_id == game->roaming_npc_room) {
-            npc_roaming_begin_encounter(game, out);
-        } else if (!roaming_moves_first) {
-            npc_roaming_step(game);
-            if (game->player.room_id == game->roaming_npc_room) {
-                npc_roaming_begin_encounter(game, out);
-            }
-        } else if (old_roaming_npc_room != game->roaming_npc_room &&
-                game->player.room_id == game->roaming_npc_room) {
-            /* NPC stepped into the player's room when it moved first this tick. */
-            npc_roaming_begin_encounter(game, out);
-        }
+    /*
+     * Encounter-before-step when the player moved first catches co-location;
+     * step-before-encounter when the player waited preserves the old ordering.
+     */
+    if (roaming_moves_first) {
+        npc_roaming_step(game);
+        npc_roaming_begin_encounter_in_room(game, game->player.room_id, out);
+    } else if (!npc_roaming_begin_encounter_in_room(game, game->player.room_id, out) &&
+            !game_is_busy_dialogue(game)) {
+        npc_roaming_step(game);
+        npc_roaming_begin_encounter_in_room(game, game->player.room_id, out);
     }
 
     world_step(&game->world, game->tick);
