@@ -237,6 +237,38 @@ static long save_world_map_offset(int room_index, int field_index)
     return (long)offset;
 }
 
+static long save_npc_offset(int slot_index, int field_index)
+{
+    unsigned long offset;
+    unsigned long room_size;
+    unsigned long npc_bytes_before;
+
+    room_size = (unsigned long)CFG_NAME_MAX +
+        (unsigned long)CFG_DESC_MAX +
+        (unsigned long)CFG_NAME_MAX +
+        (unsigned long)CFG_DESC_MAX +
+        ((unsigned long)DIR_NONE * 2UL);
+    offset = 6UL;
+    offset += 2UL;
+    offset += room_size * (unsigned long)CFG_ROOM_MAX;
+    offset += ((2UL + 2UL + 1UL) * (unsigned long)CFG_ROOM_MAX);
+    offset += 2UL;
+    offset += 4UL;
+    offset += 4UL;
+    offset += 4UL;
+    offset += 2UL;
+    offset += 2UL;
+    offset += 2UL;
+    npc_bytes_before = (unsigned long)slot_index * 14UL;
+    offset += npc_bytes_before;
+    if (field_index < 5) {
+        offset += (unsigned long)field_index * 2UL;
+    } else {
+        offset += 10UL;
+    }
+    return (long)offset;
+}
+
 TEST save_round_trip_preserves_state_and_rng_count(void)
 {
     struct GameState game;
@@ -469,6 +501,53 @@ TEST save_rejects_excessive_map_coordinate_span(void)
     PASS();
 }
 
+TEST save_reconciles_legacy_enemy_handover_slot(void)
+{
+    struct GameState game;
+    struct GameState loaded;
+    FILE *fp;
+    int bandit_slot;
+    int loaded_slot;
+    u32 loaded_draws;
+
+    save_cleanup_file();
+    save_fill_fixture(&game);
+    bandit_slot = npc_find_by_actor(&game, GAME_DIALOGUE_ACTOR_BANDIT);
+    ASSERT(bandit_slot >= 0);
+    ASSERT_EQ(SAVE_RESULT_OK,
+        save_write_game(save_test_path(), &game, 7U));
+
+    fp = fopen(save_test_path(), "r+b");
+    ASSERT(fp != 0);
+    ASSERT_EQ(0L, fseek(fp, save_npc_offset(bandit_slot, 0), SEEK_SET));
+    ASSERT(save_write_s16_le(fp, GAME_DIALOGUE_ACTOR_NONE));
+    ASSERT_EQ(0L, fseek(fp, save_npc_offset(bandit_slot, 1), SEEK_SET));
+    ASSERT(save_write_s16_le(fp, DIALOGUE_NONE));
+    ASSERT_EQ(0L, fseek(fp, save_npc_offset(bandit_slot, 2), SEEK_SET));
+    ASSERT(save_write_s16_le(fp, GAME_ENCOUNTER_NONE));
+    ASSERT_EQ(0L, fseek(fp, save_npc_offset(bandit_slot, 3), SEEK_SET));
+    ASSERT(save_write_s16_le(fp, -1));
+    ASSERT_EQ(0L, fseek(fp, save_npc_offset(bandit_slot, 4), SEEK_SET));
+    ASSERT(save_write_s16_le(fp, 0));
+    ASSERT_EQ(0L, fseek(fp, save_npc_offset(bandit_slot, 5), SEEK_SET));
+    ASSERT(save_write_u32_le(fp, 0UL));
+    fclose(fp);
+
+    ASSERT_EQ(SAVE_RESULT_OK,
+        save_read_game(save_test_path(), &loaded, &loaded_draws));
+    loaded_slot = npc_find_by_dialogue(&loaded, DIALOGUE_ENEMY);
+    ASSERT(loaded_slot >= 0);
+    ASSERT_EQ(GAME_DIALOGUE_ACTOR_BANDIT, loaded.npcs[loaded_slot].actor);
+    ASSERT_EQ(WORLD_ROOM_TOWER, loaded.npcs[loaded_slot].room_id);
+    ASSERT_EQ(NPC_FLAG_HANDOVER_PICK,
+        loaded.npcs[loaded_slot].flags & NPC_FLAG_HANDOVER_PICK);
+    ASSERT_EQ(1, loaded.enemy_handover_pick);
+    ASSERT_EQ(7U, loaded_draws);
+
+    save_cleanup_file();
+    PASS();
+}
+
 SUITE(save)
 {
     RUN_TEST(save_round_trip_preserves_state_and_rng_count);
@@ -480,4 +559,5 @@ SUITE(save)
     RUN_TEST(save_rejects_write_with_excessive_rng_draw_count);
     RUN_TEST(save_failed_write_preserves_existing_save);
     RUN_TEST(save_rejects_excessive_map_coordinate_span);
+    RUN_TEST(save_reconciles_legacy_enemy_handover_slot);
 }

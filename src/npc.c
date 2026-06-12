@@ -295,12 +295,12 @@ int npc_begin_encounter(struct GameState *game, int actor, int dialogue,
 
     /* Dynamic encounter owners claim a roster slot before dialogue mode opens. */
     if (game_is_busy_dialogue(game)) {
-        return 0;
+        return -1;
     }
     slot = npc_spawn(game, actor, dialogue, encounter, room_id,
         flags | NPC_FLAG_ACTIVE);
     if (slot < 0) {
-        return 0;
+        return -1;
     }
     npc_push_encounter_open(out, encounter);
     game_set_mode_dialogue(game, dialogue);

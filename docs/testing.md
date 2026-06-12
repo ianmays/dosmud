@@ -112,7 +112,7 @@ make build-unit                      # build only; useful when timing compile co
 make test-unit-verbose              # greatest suite/test progress only
 make test-unit-verbose-gameplay     # greatest progress + gameplay render text
 make test-unit-coverage             # builds coverage-build/dosmud_unit_cov, runs it, then compact branch/line % table
-make test-unit-coverage-verbose     # verbose test-unit, then full gcov block per module
+make test-unit-coverage-verbose     # verbose coverage build, then full gcov block per module
 ```
 
 - Binary: `tests/unit/build/dosmud_unit` (all gameplay modules except `main.c`, plus `tests/unit/unit_*.c`)
@@ -130,7 +130,7 @@ make test-unit-coverage-verbose     # verbose test-unit, then full gcov block pe
 | Target | Output |
 |--------|--------|
 | `make test-unit-coverage` | Builds and runs `tests/unit/build/coverage-build/dosmud_unit_cov` (instrumented objects stay separate from `dosmud_unit`), then one line per module (`branch % / line %`), a `-------` separator, weighted `overall` row, and `below 90% branch: ...` if any module misses the bar |
-| `make test-unit-coverage-verbose` | `test-unit` with compile lines echoed, then `=== module ===` blocks with full `gcov` lines (for debugging gaps) |
+| `make test-unit-coverage-verbose` | Builds and runs the instrumented coverage binary with compile lines echoed, then `=== module ===` blocks with full `gcov` lines (for debugging gaps) |
 
 `make test-all` uses quiet `test-unit-coverage`. Coverage clears stale `.gcda` under `coverage-build/` before each run; run `make clean` if libgcov checksum warnings persist from older artifacts.
 
@@ -429,8 +429,8 @@ When the metrics schema grows, use [`scripts/backfill-ci-history.py`](https://gi
 |--------|--------|
 | `make build` | `./dosmud` (repo root) |
 | `make test` | `./dosmud` with `TEST_MODE` (same path; overwrites release binary) |
-| `make build-unit` / `make test-unit` / `make test-unit-coverage-verbose` | `tests/unit/build/dosmud_unit`, `*.o` (gitignored) |
-| `make test-unit-coverage` | `tests/unit/build/coverage-build/dosmud_unit_cov`, instrumented `*.o`, `*.gcno`, `*.gcda`; `.gcov` under `tests/unit/build/coverage/` (gitignored) |
+| `make build-unit` / `make test-unit` | `tests/unit/build/dosmud_unit`, `*.o` (gitignored) |
+| `make test-unit-coverage` / `make test-unit-coverage-verbose` | `tests/unit/build/coverage-build/dosmud_unit_cov`, instrumented `*.o`, `*.gcno`, `*.gcda`; `.gcov` under `tests/unit/build/coverage/` (gitignored) |
 | `make test-run` | `tests/regression/<name>.output` (gitignored) |
 | `make build-soak` / `make test-soak` | `tests/soak/build/dosmud_soak`, `*.o` (gitignored) |
 | `make dos-prepare` | `dosmud.exe` and `build.log` in the prepared DOS tree (`$destination` in `dos-prepare.local.ps1`; not mirrored from Linux) |

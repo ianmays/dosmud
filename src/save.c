@@ -3,6 +3,7 @@
 #include "config.h"
 #include "game.h"
 #include "items.h"
+#include "npc.h"
 #include "save.h"
 
 /*
@@ -660,6 +661,28 @@ static int save_validate_game(const struct GameState *game)
     return 1;
 }
 
+static void save_reconcile_enemy_handover(struct GameState *game)
+{
+    int slot;
+
+    slot = npc_find_by_dialogue(game, DIALOGUE_ENEMY);
+    if (!game->enemy_handover_pick) {
+        if (slot >= 0) {
+            game->npcs[slot].flags &= ~NPC_FLAG_HANDOVER_PICK;
+        }
+        return;
+    }
+    if (slot < 0 &&
+            game->mode == GAME_MODE_DIALOGUE &&
+            game->dialogue == DIALOGUE_ENEMY) {
+        slot = npc_spawn(game, GAME_DIALOGUE_ACTOR_BANDIT, DIALOGUE_ENEMY,
+            GAME_ENCOUNTER_BANDIT, game->player.room_id, NPC_FLAG_ACTIVE);
+    }
+    if (slot >= 0) {
+        game->npcs[slot].flags |= NPC_FLAG_HANDOVER_PICK;
+    }
+}
+
 int save_write_game(const char *path, const struct GameState *game,
                     u32 rng_draw_count)
 {
@@ -771,6 +794,7 @@ int save_read_game(const char *path, struct GameState *out_game,
     if (!save_read_game_state(fp, &g_save_loaded, &loaded_rng_draw_count)) {
         goto done;
     }
+    save_reconcile_enemy_handover(&g_save_loaded);
     /* Reject padded or concatenated files; payload must end at EOF. */
     trailing = fgetc(fp);
     if (trailing != EOF) {

@@ -251,7 +251,9 @@ test-unit-coverage: $(UNIT_COV_BIN)
 	if [ -n "$$below" ]; then echo "below 90% branch:$$below"; fi
 
 test-unit-coverage-verbose:
-	$(MAKE) UNIT_BUILD_VERBOSE=1 test-unit
+	$(MAKE) UNIT_BUILD_VERBOSE=1 $(UNIT_COV_BIN)
+	@rm -f $(UNIT_COV_BUILD_DIR)/*.gcda
+	./$(UNIT_COV_BIN)
 	@mkdir -p $(UNIT_COVERAGE_DIR)
 	@for f in $(COVERAGE_MODULES); do \
 		echo "=== $$f ==="; \
@@ -260,7 +262,7 @@ test-unit-coverage-verbose:
 		else \
 			covsrc=$(CURDIR)/src/$$f.c; \
 		fi; \
-		(cd $(UNIT_COVERAGE_DIR) && gcov -b -o $(CURDIR)/$(UNIT_BUILD_DIR) $$covsrc 2>/dev/null | grep -E '^File|^Lines|^Branches') || true; \
+		(cd $(UNIT_COVERAGE_DIR) && gcov -b -o $(CURDIR)/$(UNIT_COV_BUILD_DIR) $$covsrc 2>/dev/null | grep -E '^File|^Lines|^Branches') || true; \
 	done
 
 # Soak / stress tests (separate binary; keep UNIT_GAMEPLAY_SRC in sync with gameplay objects above)
