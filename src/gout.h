@@ -142,7 +142,9 @@ enum GameEventDialogueActor {
     GAME_DIALOGUE_ACTOR_HERBALIST = 3,
     GAME_DIALOGUE_ACTOR_ARCHIVIST = 4,
     GAME_DIALOGUE_ACTOR_TRAVELER = 5,
-    GAME_DIALOGUE_ACTOR_NOBODY = 6
+    GAME_DIALOGUE_ACTOR_NOBODY = 6,
+    /* dynamic bandit roster actor; appended to keep prior save actor ids stable */
+    GAME_DIALOGUE_ACTOR_BANDIT = 7
 };
 
 enum GameEventDialoguePhase {

@@ -195,6 +195,31 @@ TEST npc_spawn_and_presence_support_multiple_instances(void)
     PASS();
 }
 
+TEST npc_begin_and_end_dynamic_encounter_reuses_roster(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    int slot;
+
+    unit_game_fresh(&game, 47u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game_event_queue_reset(&out);
+    slot = npc_begin_encounter(&game, GAME_DIALOGUE_ACTOR_BANDIT,
+        DIALOGUE_ENEMY, GAME_ENCOUNTER_BANDIT, WORLD_ROOM_CAMP, 0, &out);
+    ASSERT(slot >= 0);
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(DIALOGUE_ENEMY, game.dialogue);
+    ASSERT_EQ(slot, npc_find_by_dialogue(&game, DIALOGUE_ENEMY));
+    ASSERT_EQ(1, npc_is_present(&game, GAME_DIALOGUE_ACTOR_BANDIT,
+        WORLD_ROOM_CAMP));
+    ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
+    ASSERT_EQ(GAME_ENCOUNTER_BANDIT, out.events[0].arg0);
+    ASSERT_EQ(slot, npc_end_encounter(&game, GAME_DIALOGUE_ACTOR_BANDIT));
+    ASSERT_EQ(-1, game.npcs[slot].room_id);
+    ASSERT_EQ(0, game.npcs[slot].flags & NPC_FLAG_ACTIVE);
+    PASS();
+}
+
 TEST npc_roaming_encounter_guards(void)
 {
     struct GameState game;
@@ -306,6 +331,7 @@ SUITE(npc) {
     RUN_TEST(npc_roaming_separation_clears);
     RUN_TEST(npc_roaming_step_moves);
     RUN_TEST(npc_spawn_and_presence_support_multiple_instances);
+    RUN_TEST(npc_begin_and_end_dynamic_encounter_reuses_roster);
     RUN_TEST(npc_roaming_encounter_guards);
     RUN_TEST(npc_roaming_reply_cmd_explore);
     RUN_TEST(npc_roaming_reply_cmd_invalid_choice);

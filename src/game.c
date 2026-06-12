@@ -21,6 +21,18 @@ static void push_dialogue_guard(GameEventQueue *out, int reason)
     game_event_push(out, GAME_EVENT_DIALOGUE_GUARD, reason, 0, 0, 0, 0);
 }
 
+/* Handover gating reads the active enemy slot; enemy_handover_pick is save-only mirror. */
+static int game_enemy_handover_pick_active(const struct GameState *game)
+{
+    int slot;
+
+    slot = npc_find_by_dialogue(game, DIALOGUE_ENEMY);
+    if (slot < 0) {
+        return 0;
+    }
+    return (game->npcs[slot].flags & NPC_FLAG_HANDOVER_PICK) != 0;
+}
+
 void game_set_mode_explore(struct GameState *game)
 {
     game->mode = GAME_MODE_EXPLORE;
@@ -266,8 +278,8 @@ static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd,
             cmd->type != CMD_UNWIELD &&
             cmd->type != CMD_HELP &&
             cmd->type != CMD_QUIT &&
-            !(game->enemy_handover_pick == 1 && cmd->type == CMD_GIVE)) {
-        if (game->enemy_handover_pick == 1) {
+            !(game_enemy_handover_pick_active(game) && cmd->type == CMD_GIVE)) {
+        if (game_enemy_handover_pick_active(game)) {
             push_dialogue_guard(out,
                 GAME_DIALOGUE_GUARD_BANDIT_WAITING_HANDOVER_PICK);
         } else {

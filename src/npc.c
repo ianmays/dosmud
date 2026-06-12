@@ -173,6 +173,22 @@ int npc_find_by_actor(const struct GameState *game, int actor)
     return -1;
 }
 
+/* Active slot for a dialogue kind; inactive respawn profiles are skipped. */
+int npc_find_by_dialogue(const struct GameState *game, int dialogue)
+{
+    int i;
+
+    for (i = 0; i < CFG_NPC_MAX; ++i) {
+        if (!npc_slot_is_active(&game->npcs[i])) {
+            continue;
+        }
+        if (game->npcs[i].dialogue == dialogue) {
+            return i;
+        }
+    }
+    return -1;
+}
+
 int npc_find_in_room(const struct GameState *game, int room_id)
 {
     int i;
@@ -264,10 +280,37 @@ int npc_deactivate_until(struct GameState *game, int actor, u32 return_tick)
         return -1;
     }
     npc = npc_slot(game, slot);
-    npc->flags &= ~(NPC_FLAG_ACTIVE | NPC_FLAG_NEEDS_SEPARATION);
+    npc->flags &= ~(NPC_FLAG_ACTIVE | NPC_FLAG_NEEDS_SEPARATION |
+        NPC_FLAG_HANDOVER_PICK);
     npc->room_id = -1;
     npc->return_tick = return_tick;
     return slot;
+}
+
+int npc_begin_encounter(struct GameState *game, int actor, int dialogue,
+                        int encounter, int room_id, int flags,
+                        struct GameEventQueue *out)
+{
+    int slot;
+
+    /* Dynamic encounter owners claim a roster slot before dialogue mode opens. */
+    if (game_is_busy_dialogue(game)) {
+        return -1;
+    }
+    slot = npc_spawn(game, actor, dialogue, encounter, room_id,
+        flags | NPC_FLAG_ACTIVE);
+    if (slot < 0) {
+        return -1;
+    }
+    npc_push_encounter_open(out, encounter);
+    game_set_mode_dialogue(game, dialogue);
+    return slot;
+}
+
+/* Immediate encounter teardown; return_tick 0 means no scheduled respawn. */
+int npc_end_encounter(struct GameState *game, int actor)
+{
+    return npc_deactivate_until(game, actor, 0);
 }
 
 int npc_open_room_dialogue(struct GameState *game, struct GameEventQueue *out)

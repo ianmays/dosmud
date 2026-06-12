@@ -45,6 +45,17 @@ static struct NpcState *traveler_npc(struct GameState *game)
     return &game->npcs[slot];
 }
 
+static struct NpcState *bandit_npc(struct GameState *game)
+{
+    int slot;
+
+    slot = npc_find_by_actor(game, GAME_DIALOGUE_ACTOR_BANDIT);
+    if (slot < 0) {
+        return 0;
+    }
+    return &game->npcs[slot];
+}
+
 TEST game_heal_player_applies(void)
 {
     struct GameState game;
@@ -280,6 +291,7 @@ TEST game_bandit_handover_pick(void)
 {
     struct GameState game;
     GameEventQueue out;
+    struct NpcState *bandit;
 
     unit_game_fresh(&game, 12u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
@@ -287,7 +299,10 @@ TEST game_bandit_handover_pick(void)
     game_event_queue_reset(&out);
     enemy_begin_encounter(&game, &out);
     ASSERT_EQ(1, run_cmd_out(&game, "2", &out));
-    ASSERT_EQ(1, game.enemy_handover_pick);
+    bandit = bandit_npc(&game);
+    ASSERT(bandit != 0);
+    ASSERT_EQ(NPC_FLAG_HANDOVER_PICK,
+        bandit->flags & NPC_FLAG_HANDOVER_PICK);
     ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
     ASSERT_EQ(1, out.count);
     ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
@@ -585,7 +600,8 @@ TEST game_bandit_waiting_reply_guard_event(void)
 
     unit_game_fresh(&game, 40u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
-    game_set_mode_dialogue(&game, DIALOGUE_ENEMY);
+    game_event_queue_reset(&out);
+    enemy_begin_encounter(&game, &out);
     game_event_queue_reset(&out);
     ASSERT_EQ(0, game_process_input(&game, line, &out));
     ASSERT_EQ(1, out.count);

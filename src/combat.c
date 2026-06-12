@@ -5,6 +5,7 @@
 #include "invent.h"
 #include "items.h"
 #include "gprog.h"
+#include "npc.h"
 
 /*
  * combat.c resolves the short battle loop only: it applies a reply, advances
@@ -20,6 +21,17 @@ static void push_combat_phase(GameEventQueue *out, int phase,
                               int val0, int val1)
 {
     game_event_push(out, GAME_EVENT_COMBAT, phase, val0, val1, 0, 0);
+}
+
+static void combat_end_active_enemy_encounter(struct GameState *game)
+{
+    int slot;
+
+    slot = npc_find_by_dialogue(game, DIALOGUE_ENEMY);
+    if (slot < 0) {
+        return;
+    }
+    npc_end_encounter(game, game->npcs[slot].actor);
 }
 
 int combat_player_attack_bonus(const struct GameState *game)
@@ -98,6 +110,8 @@ void combat_resolve_reply(struct GameState *game, int choice, GameEventQueue *ou
     if (game->combat.enemy_hp <= 0) {
         /* Defeat is resolved immediately so corpse state is fixed on the same turn. */
         game->combat.enemy_hp = 0;
+        /* Enemy teardown follows the active DIALOGUE_ENEMY slot, not a fixed actor id. */
+        combat_end_active_enemy_encounter(game);
         game_set_mode_explore(game);
         push_combat_phase(out, GAME_COMBAT_PHASE_ENEMY_DEFEATED, 0, 0);
         game->corpse_present[game->player.room_id] = 1;
