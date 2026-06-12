@@ -600,6 +600,7 @@ TEST game_bandit_waiting_reply_guard_event(void)
 
     unit_game_fresh(&game, 40u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game_event_queue_reset(&out);
     enemy_begin_encounter(&game, &out);
     game_event_queue_reset(&out);
     ASSERT_EQ(0, game_process_input(&game, line, &out));
