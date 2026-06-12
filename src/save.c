@@ -499,6 +499,7 @@ static int save_valid_npc(const struct NpcState *npc, int room_count)
             (npc->flags & NPC_FLAG_ACTIVE) == 0) {
         return 0;
     }
+    /* handover pick only valid on an active encounter slot */
     if ((npc->flags & NPC_FLAG_HANDOVER_PICK) != 0 &&
             (npc->flags & NPC_FLAG_ACTIVE) == 0) {
         return 0;

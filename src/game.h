@@ -46,6 +46,7 @@ struct CombatState {
  * Dynamic NPC roster lives in GameState; npc.c owns spawn, roaming, and flags.
  * Vacant slots use actor GAME_DIALOGUE_ACTOR_NONE; inactive respawn profiles
  * keep actor/dialogue/encounter in place until npc_roaming_activate_due runs.
+ * HANDOVER_PICK gates bandit give-during-dialogue; mirrored on enemy_handover_pick for save.
  */
 enum NpcFlags {
     NPC_FLAG_ACTIVE = 1,

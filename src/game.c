@@ -21,6 +21,7 @@ static void push_dialogue_guard(GameEventQueue *out, int reason)
     game_event_push(out, GAME_EVENT_DIALOGUE_GUARD, reason, 0, 0, 0, 0);
 }
 
+/* Handover gating reads the active enemy slot; enemy_handover_pick is save-only mirror. */
 static int game_enemy_handover_pick_active(const struct GameState *game)
 {
     int slot;

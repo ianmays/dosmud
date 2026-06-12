@@ -173,6 +173,7 @@ int npc_find_by_actor(const struct GameState *game, int actor)
     return -1;
 }
 
+/* Active slot for a dialogue kind; inactive respawn profiles are skipped. */
 int npc_find_by_dialogue(const struct GameState *game, int dialogue)
 {
     int i;
@@ -306,6 +307,7 @@ int npc_begin_encounter(struct GameState *game, int actor, int dialogue,
     return slot;
 }
 
+/* Immediate encounter teardown; return_tick 0 means no scheduled respawn. */
 int npc_end_encounter(struct GameState *game, int actor)
 {
     return npc_deactivate_until(game, actor, 0);

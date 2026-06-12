@@ -99,6 +99,7 @@ void combat_resolve_reply(struct GameState *game, int choice, GameEventQueue *ou
     if (game->combat.enemy_hp <= 0) {
         /* Defeat is resolved immediately so corpse state is fixed on the same turn. */
         game->combat.enemy_hp = 0;
+        /* Bandit roster teardown: npc owns encounter lifetime; combat only triggers end. */
         npc_end_encounter(game, GAME_DIALOGUE_ACTOR_BANDIT);
         game_set_mode_explore(game);
         push_combat_phase(out, GAME_COMBAT_PHASE_ENEMY_DEFEATED, 0, 0);

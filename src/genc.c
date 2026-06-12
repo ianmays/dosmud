@@ -40,6 +40,7 @@ static struct NpcState *active_enemy_npc(struct GameState *game)
     return &game->npcs[slot];
 }
 
+/* Bandit open path: npc claims roster slot and queues ENCOUNTER open; genc owns reply/give. */
 void enemy_begin_encounter(struct GameState *game, GameEventQueue *out)
 {
     if (npc_begin_encounter(game, GAME_DIALOGUE_ACTOR_BANDIT, DIALOGUE_ENEMY,
@@ -102,6 +103,7 @@ int genc_cmd_reply(struct GameState *game, int choice, GameEventQueue *out)
             return 1;
         }
         enemy->flags |= NPC_FLAG_HANDOVER_PICK;
+        /* save mirror; mode guards and genc read the slot flag */
         game->enemy_handover_pick = 1;
         push_encounter(out, GAME_ENCOUNTER_BANDIT,
             GAME_ENCOUNTER_ACTION_HANDOVER_PROMPT,
