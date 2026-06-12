@@ -5,6 +5,7 @@
 #include "gout.h"
 #include "invent.h"
 #include "items.h"
+#include "npc.h"
 #include "unit_util.h"
 
 static void start_combat_out(struct GameState *game, GameEventQueue *out)
@@ -147,6 +148,7 @@ TEST combat_victory_loot_and_xp(void)
     game_roll_inject_begin(&game, rolls, 3);
     resolve_reply_out(&game, 1, &out);
     ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
+    ASSERT_EQ(-1, npc_find_by_dialogue(&game, DIALOGUE_ENEMY));
     ASSERT_EQ(1, game.corpse_present[WORLD_ROOM_CAMP]);
     ASSERT_EQ(ITEM_STICK, game.corpse_loot[WORLD_ROOM_CAMP]);
     ASSERT_EQ(CFG_COMBAT_KILL_XP_BASE + CFG_TEST_VICTORY_XP_SPREAD, game.xp);
@@ -154,6 +156,29 @@ TEST combat_victory_loot_and_xp(void)
     ASSERT_EQ(GAME_COMBAT_PHASE_PLAYER_DAMAGE, out.events[0].arg0);
     ASSERT_EQ(GAME_COMBAT_PHASE_ENEMY_DEFEATED, out.events[1].arg0);
     ASSERT_EQ(GAME_EVENT_XP_GAIN, out.events[2].kind);
+    PASS();
+}
+
+TEST combat_victory_clears_active_bandit_slot(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    int rolls[3];
+
+    unit_game_fresh(&game, 12u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    ASSERT(npc_begin_encounter(&game, GAME_DIALOGUE_ACTOR_BANDIT,
+        DIALOGUE_ENEMY, GAME_ENCOUNTER_BANDIT, WORLD_ROOM_CAMP, 0, &out) >= 0);
+    game_set_mode_combat(&game);
+    game.combat.enemy_hp = 1;
+    rolls[0] = 0;
+    rolls[1] = CFG_TEST_VICTORY_LOOT_STICK;
+    rolls[2] = 0;
+    game_roll_inject_begin(&game, rolls, 3);
+    resolve_reply_out(&game, 1, &out);
+    ASSERT_EQ(-1, npc_find_by_dialogue(&game, DIALOGUE_ENEMY));
+    ASSERT_EQ(0, npc_is_present(&game, GAME_DIALOGUE_ACTOR_BANDIT,
+        WORLD_ROOM_CAMP));
     PASS();
 }
 
@@ -228,6 +253,7 @@ SUITE(combat) {
     RUN_TEST(combat_reply_salve_in_combat);
     RUN_TEST(combat_reply_salve_at_full_hp);
     RUN_TEST(combat_victory_loot_and_xp);
+    RUN_TEST(combat_victory_clears_active_bandit_slot);
     RUN_TEST(combat_invalid_choice);
     RUN_TEST(combat_player_death);
     RUN_TEST(combat_loot_tiers);

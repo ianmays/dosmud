@@ -201,9 +201,9 @@ Conventions:
 Gameplay slices live beside `game.c` as plain C translation units (no extra framework):
 
 - [`gprog.c`](https://github.com/ianmays/dosmud/blob/main/src/gprog.c) - XP and level-up rewards (`game_xp_to_next_level`, `progression_gain_xp`); queues `GAME_EVENT_XP_GAIN` and `GAME_EVENT_STAT_CHANGE` via `gout` (FAT 8.3-safe basename)
-- [`combat.c`](https://github.com/ianmays/dosmud/blob/main/src/combat.c) - combat start, player reply resolution, enemy turn; queues `GAME_EVENT_COMBAT` phases via `gout` (randomness via `game_roll_spread` / `game_roll_percent`, not direct `plat_rand()` calls)
-- [`npc.c`](https://github.com/ianmays/dosmud/blob/main/src/npc.c) - fixed NPC identity seam, shared dialogue helpers, room look hint ownership, and the fixed-size NPC instance roster for roaming placement, encounter open/reply, and future non-roaming dynamic NPCs (`npc_clear_all`, `npc_spawn`, `npc_place`, `npc_move`, `npc_find_*`, `npc_deactivate_until`, `npc_roaming_*`, `npc_seed_roaming_traveler`; slot order is save/tick-stable)
-- [`genc.c`](https://github.com/ianmays/dosmud/blob/main/src/genc.c) - ambient bandit encounter open state (FAT 8.3-safe basename)
+- [`combat.c`](https://github.com/ianmays/dosmud/blob/main/src/combat.c) - combat start, player reply resolution, enemy turn, and enemy cleanup after victory; queues `GAME_EVENT_COMBAT` phases via `gout` (randomness via `game_roll_spread` / `game_roll_percent`, not direct `plat_rand()` calls)
+- [`npc.c`](https://github.com/ianmays/dosmud/blob/main/src/npc.c) - fixed NPC identity seam, shared dialogue helpers, room look hint ownership, and the fixed-size NPC instance roster for roaming placement plus reusable dynamic encounter ownership (`npc_clear_all`, `npc_spawn`, `npc_place`, `npc_move`, `npc_find_*`, `npc_begin_encounter`, `npc_end_encounter`, `npc_deactivate_until`, `npc_roaming_*`, `npc_seed_roaming_traveler`; slot order is save/tick-stable)
+- [`genc.c`](https://github.com/ianmays/dosmud/blob/main/src/genc.c) - enemy encounter rules and bandit-specific outcomes on top of roster-backed enemy slots instead of a one-off `GameState` dialogue flag (FAT 8.3-safe basename)
 - [`dialogue.c`](https://github.com/ianmays/dosmud/blob/main/src/dialogue.c) - fixed room-NPC talk and reply routing built on `npc.c`
 - [`gatmos.c`](https://github.com/ianmays/dosmud/blob/main/src/gatmos.c) - initial room items, ambient rolls, animal noise, inspect focus hooks (FAT 8.3-safe basename)
 

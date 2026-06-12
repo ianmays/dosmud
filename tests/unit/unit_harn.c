@@ -114,13 +114,17 @@ TEST harness_apply_bandit_handover_pick(void)
 {
     struct GameState game;
     int rc;
+    int slot;
 
     unit_game_fresh(&game, 5u);
     rc = testharn_apply(&game, "@fixture bandit_handover_pick");
     ASSERT_EQ(1, rc);
+    slot = npc_find_by_actor(&game, GAME_DIALOGUE_ACTOR_BANDIT);
     ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
     ASSERT_EQ(DIALOGUE_ENEMY, game.dialogue);
-    ASSERT_EQ(1, game.enemy_handover_pick);
+    ASSERT(slot >= 0);
+    ASSERT_EQ(NPC_FLAG_HANDOVER_PICK,
+        game.npcs[slot].flags & NPC_FLAG_HANDOVER_PICK);
     ASSERT_EQ(1, game_inv_player_has_item(&game, ITEM_STICK));
     PASS();
 }

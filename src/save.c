@@ -473,7 +473,8 @@ static int save_valid_npc(const struct NpcState *npc, int room_count)
     allowed_flags = NPC_FLAG_ACTIVE |
         NPC_FLAG_ROAMING |
         NPC_FLAG_NEEDS_SEPARATION |
-        NPC_FLAG_RESPAWNS;
+        NPC_FLAG_RESPAWNS |
+        NPC_FLAG_HANDOVER_PICK;
     if (npc->actor == GAME_DIALOGUE_ACTOR_NONE) {
         return npc->dialogue == DIALOGUE_NONE &&
             npc->encounter == GAME_ENCOUNTER_NONE &&
@@ -495,6 +496,10 @@ static int save_valid_npc(const struct NpcState *npc, int room_count)
         return 0;
     }
     if ((npc->flags & NPC_FLAG_NEEDS_SEPARATION) != 0 &&
+            (npc->flags & NPC_FLAG_ACTIVE) == 0) {
+        return 0;
+    }
+    if ((npc->flags & NPC_FLAG_HANDOVER_PICK) != 0 &&
             (npc->flags & NPC_FLAG_ACTIVE) == 0) {
         return 0;
     }

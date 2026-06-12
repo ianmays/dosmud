@@ -52,6 +52,10 @@ static void save_fill_fixture(struct GameState *game)
     game->damage_bonus = 2;
     game->weapon_equipped = ITEM_SPEAR;
     game->player_hp = 19;
+    (void)npc_spawn(game, GAME_DIALOGUE_ACTOR_BANDIT, DIALOGUE_ENEMY,
+        GAME_ENCOUNTER_BANDIT, WORLD_ROOM_TOWER,
+        NPC_FLAG_ACTIVE | NPC_FLAG_HANDOVER_PICK);
+    game->dialogue = DIALOGUE_ENEMY;
     game->enemy_handover_pick = 1;
     game->combat.enemy_hp = 5;
     game->combat.defending = 1;

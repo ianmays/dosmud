@@ -193,8 +193,8 @@ Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_
 | Fixture | State |
 |---------|--------|
 | `bandit_dialogue` | Base reset, stick in bag, bandit dialogue open |
-| `bandit_handover_pick` | Base reset, stick in bag, bandit dialogue open, handover pick prompt (reply 2 already chosen) |
-| `bandit_wielded_pick` | Base reset, stick wielded (`Atk:1`), bandit dialogue open, handover pick prompt |
+| `bandit_handover_pick` | Base reset, stick in bag, bandit dialogue open, handover pick prompt (reply 2 already chosen on the active bandit NPC slot) |
+| `bandit_wielded_pick` | Base reset, stick wielded (`Atk:1`), bandit dialogue open, handover pick prompt from the active bandit NPC slot |
 | `bandit_combat_turn1` | Base reset, stick wielded, combat mode, player HP 20, bandit HP at `CFG_COMBAT_ENEMY_HP_BASE` (combat start only) |
 | `bandit_combat_turn1_resolve` | Same as `bandit_combat_turn1`, then injected roll queue + `combat_resolve_reply(1)` for `equipment` (see trade-offs below) |
 | `bandit_dialogue_empty` | Bandit dialogue, empty bag, no wielded weapon |

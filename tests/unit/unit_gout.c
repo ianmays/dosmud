@@ -234,6 +234,18 @@ TEST game_event_push_records_dialogue_encounter_kinds(void)
     PASS();
 }
 
+TEST game_event_push_records_bandit_actor_value(void)
+{
+    GameEventQueue out;
+
+    game_event_queue_reset(&out);
+    ASSERT(0 != game_event_push(&out, GAME_EVENT_DIALOGUE,
+        GAME_DIALOGUE_ACTOR_BANDIT, GAME_DIALOGUE_PHASE_TALK, 0, 0, 0));
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_DIALOGUE_ACTOR_BANDIT, out.events[0].arg0);
+    PASS();
+}
+
 SUITE(gout) {
     RUN_TEST(game_event_queue_reset_clears_state);
     RUN_TEST(game_event_push_ignores_null_output);
@@ -246,4 +258,5 @@ SUITE(gout) {
     RUN_TEST(game_event_push_records_combat_progression_kinds);
     RUN_TEST(game_event_push_records_ambient_observation_kinds);
     RUN_TEST(game_event_push_records_dialogue_encounter_kinds);
+    RUN_TEST(game_event_push_records_bandit_actor_value);
 }

@@ -51,7 +51,8 @@ enum NpcFlags {
     NPC_FLAG_ACTIVE = 1,
     NPC_FLAG_ROAMING = 2,
     NPC_FLAG_NEEDS_SEPARATION = 4,
-    NPC_FLAG_RESPAWNS = 8
+    NPC_FLAG_RESPAWNS = 8,
+    NPC_FLAG_HANDOVER_PICK = 16
 };
 
 struct NpcState {
@@ -91,6 +92,7 @@ struct GameState {
     int damage_bonus;
     int weapon_equipped;
     int player_hp;
+    /* Compatibility mirror; active handover state now lives on the enemy NPC slot. */
     int enemy_handover_pick;
     struct CombatState combat;
     int corpse_present[CFG_ROOM_MAX];

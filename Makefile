@@ -76,7 +76,7 @@ test-run-bin: test
 	./$(BIN) $(RUN_ARGS)
 
 # deterministic tests (see docs/testing.md for snapshot list)
-# SNAPSHOT_TESTS: combat_* and level_up exercise generic combat/progression events (#159)
+# SNAPSHOT_TESTS: combat_* and level_up exercise generic combat/progression events (#159); bandit_* keeps the roster-backed enemy path visible
 SNAPSHOT_TESTS = \
 	smoke \
 	bandit_handover bandit_wielded_give area_items map equipment craft_wielded \

@@ -5,6 +5,7 @@
 #include "invent.h"
 #include "items.h"
 #include "gprog.h"
+#include "npc.h"
 
 /*
  * combat.c resolves the short battle loop only: it applies a reply, advances
@@ -98,6 +99,7 @@ void combat_resolve_reply(struct GameState *game, int choice, GameEventQueue *ou
     if (game->combat.enemy_hp <= 0) {
         /* Defeat is resolved immediately so corpse state is fixed on the same turn. */
         game->combat.enemy_hp = 0;
+        npc_end_encounter(game, GAME_DIALOGUE_ACTOR_BANDIT);
         game_set_mode_explore(game);
         push_combat_phase(out, GAME_COMBAT_PHASE_ENEMY_DEFEATED, 0, 0);
         game->corpse_present[game->player.room_id] = 1;

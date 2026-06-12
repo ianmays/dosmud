@@ -5,6 +5,7 @@
 #include "gout.h"
 #include "invent.h"
 #include "items.h"
+#include "npc.h"
 #include "unit_util.h"
 
 /*
@@ -27,6 +28,17 @@ static int enemy_give(struct GameState *game, int item_id, GameEventQueue *out)
 {
     game_event_queue_reset(out);
     return genc_cmd_give(game, item_id, out);
+}
+
+static struct NpcState *bandit_npc(struct GameState *game)
+{
+    int slot;
+
+    slot = npc_find_by_actor(game, GAME_DIALOGUE_ACTOR_BANDIT);
+    if (slot < 0) {
+        return 0;
+    }
+    return &game->npcs[slot];
 }
 
 static void begin_enemy_state(struct GameState *game)
@@ -118,12 +130,15 @@ TEST genc_cmd_give_handover(void)
 {
     struct GameState game;
     GameEventQueue out;
+    struct NpcState *bandit;
 
     unit_game_fresh(&game, 6u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     begin_enemy_state(&game);
     game_inv_bag_add(&game, ITEM_STICK);
-    game.enemy_handover_pick = 1;
+    bandit = bandit_npc(&game);
+    ASSERT(bandit != 0);
+    bandit->flags |= NPC_FLAG_HANDOVER_PICK;
     ASSERT_EQ(1, enemy_give(&game, ITEM_STICK, &out));
     ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
     ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
@@ -137,13 +152,17 @@ TEST genc_cmd_reply_handover_pick(void)
 {
     struct GameState game;
     GameEventQueue out;
+    struct NpcState *bandit;
 
     unit_game_fresh(&game, 7u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     begin_enemy_state(&game);
     game_inv_bag_add(&game, ITEM_STICK);
     ASSERT_EQ(1, enemy_reply(&game, 2, &out));
-    ASSERT_EQ(1, game.enemy_handover_pick);
+    bandit = bandit_npc(&game);
+    ASSERT(bandit != 0);
+    ASSERT_EQ(NPC_FLAG_HANDOVER_PICK,
+        bandit->flags & NPC_FLAG_HANDOVER_PICK);
     ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
     ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
     ASSERT_EQ(GAME_ENCOUNTER_ACTION_HANDOVER_PROMPT, out.events[0].arg1);

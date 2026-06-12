@@ -83,9 +83,16 @@ static void fixture_bandit_dialogue_empty(struct GameState *game)
 
 static int fixture_bandit_handover_pick(struct GameState *game)
 {
+    int slot;
+
     if (!fixture_bandit_dialogue(game)) {
         return 0;
     }
+    slot = npc_find_by_actor(game, GAME_DIALOGUE_ACTOR_BANDIT);
+    if (slot < 0) {
+        return 0;
+    }
+    game->npcs[slot].flags |= NPC_FLAG_HANDOVER_PICK;
     game->enemy_handover_pick = 1;
     render_bandit_handover_pick_prompt();
     return 1;
@@ -94,12 +101,17 @@ static int fixture_bandit_handover_pick(struct GameState *game)
 static void fixture_bandit_wielded_pick(struct GameState *game)
 {
     GameEventQueue out;
+    int slot;
 
     fixture_bandit_base(game);
     game->weapon_equipped = ITEM_STICK;
     harness_drop_output(&out);
     enemy_begin_encounter(game, &out);
     game_render_output(game, &out);
+    slot = npc_find_by_actor(game, GAME_DIALOGUE_ACTOR_BANDIT);
+    if (slot >= 0) {
+        game->npcs[slot].flags |= NPC_FLAG_HANDOVER_PICK;
+    }
     game->enemy_handover_pick = 1;
     render_bandit_handover_pick_prompt();
 }
