@@ -666,12 +666,6 @@ static void save_reconcile_enemy_handover(struct GameState *game)
     int slot;
 
     slot = npc_find_by_dialogue(game, DIALOGUE_ENEMY);
-    if (!game->enemy_handover_pick) {
-        if (slot >= 0) {
-            game->npcs[slot].flags &= ~NPC_FLAG_HANDOVER_PICK;
-        }
-        return;
-    }
     if (slot < 0 &&
             game->mode == GAME_MODE_DIALOGUE &&
             game->dialogue == DIALOGUE_ENEMY) {
@@ -679,7 +673,11 @@ static void save_reconcile_enemy_handover(struct GameState *game)
             GAME_ENCOUNTER_BANDIT, game->player.room_id, NPC_FLAG_ACTIVE);
     }
     if (slot >= 0) {
-        game->npcs[slot].flags |= NPC_FLAG_HANDOVER_PICK;
+        if (game->enemy_handover_pick) {
+            game->npcs[slot].flags |= NPC_FLAG_HANDOVER_PICK;
+        } else {
+            game->npcs[slot].flags &= ~NPC_FLAG_HANDOVER_PICK;
+        }
     }
 }
 
