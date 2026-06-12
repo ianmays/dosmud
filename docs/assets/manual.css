@@ -1,0 +1,138 @@
+:root {
+  color-scheme: dark;
+  --bg: #12100e;
+  --panel: #1c1916;
+  --ink: #e8e0d6;
+  --muted: #a89a8c;
+  --line: #3d3832;
+  --accent: #d4724f;
+  --accent-2: #5a9bc4;
+  --accent-3: #7cb86a;
+  --accent-4: #a67fd4;
+  --accent-5: #d49a45;
+  --danger: #c45a5a;
+  --success: #7cb86a;
+  --skip: #9a9288;
+  --code-bg: #252220;
+  --pre-bg: #1a1816;
+  --table-head-bg: rgba(61, 56, 50, 0.55);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at top right, rgba(212, 114, 79, 0.08), transparent 28%),
+    radial-gradient(circle at bottom left, rgba(90, 155, 196, 0.08), transparent 30%),
+    var(--bg);
+}
+
+a {
+  color: var(--accent);
+}
+
+a:hover {
+  color: var(--accent-5);
+}
+
+code,
+pre,
+tt {
+  font-family: "Consolas", "Liberation Mono", monospace;
+  font-size: 0.92em;
+}
+
+code {
+  padding: 0.15em 0.35em;
+  border-radius: 4px;
+  background: var(--code-bg);
+  color: var(--ink);
+}
+
+pre {
+  padding: 14px 16px;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--pre-bg);
+  color: var(--ink);
+}
+
+pre code {
+  padding: 0;
+  background: transparent;
+}
+
+blockquote {
+  margin: 0 0 16px;
+  padding: 0 0 0 16px;
+  border-left: 4px solid var(--line);
+  color: var(--muted);
+}
+
+table {
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+}
+
+th {
+  background: var(--table-head-bg);
+  color: var(--muted);
+}
+
+.markdown-body,
+.main-content,
+article,
+.page-content {
+  color: var(--ink);
+  background: transparent;
+}
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6,
+.main-content h1,
+.main-content h2,
+.main-content h3 {
+  color: var(--ink);
+  border-bottom-color: var(--line);
+}
+
+.markdown-body a,
+.main-content a {
+  color: var(--accent);
+}
+
+.markdown-body hr {
+  border-color: var(--line);
+  background-color: var(--line);
+}
+
+header,
+footer,
+.site-header,
+.site-footer {
+  background: var(--panel);
+  border-color: var(--line);
+  color: var(--muted);
+}
+
+header a,
+footer a,
+.site-header a,
+.site-footer a {
+  color: var(--accent);
+}
