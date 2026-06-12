@@ -1,8 +1,7 @@
 :root {
   color-scheme: dark;
-  --font-serif: Georgia, "Times New Roman", serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   --font-mono: "Consolas", "Liberation Mono", monospace;
-  --bg: #12100e;
   --panel: #1c1916;
   --ink: #e8e0d6;
   --muted: #a89a8c;
@@ -15,7 +14,6 @@
   --danger: #c45a5a;
   --success: #7cb86a;
   --skip: #9a9288;
-  --code-bg: #252220;
   --pre-bg: #1a1816;
   --table-head-bg: rgba(61, 56, 50, 0.55);
 }
@@ -26,12 +24,9 @@
 
 body {
   margin: 0;
-  font-family: var(--font-serif);
+  font-family: var(--font-sans);
   color: var(--ink);
-  background:
-    radial-gradient(circle at top right, rgba(212, 114, 79, 0.08), transparent 28%),
-    radial-gradient(circle at bottom left, rgba(90, 155, 196, 0.08), transparent 30%),
-    var(--bg);
+  background: transparent;
 }
 
 a {
@@ -54,9 +49,8 @@ code,
 .main-content code,
 .highlighter-rouge {
   padding: 0.15em 0.35em;
-  border-radius: 4px;
-  background: var(--code-bg) !important;
-  color: var(--ink) !important;
+  background: transparent;
+  color: inherit;
 }
 
 pre,
@@ -143,9 +137,32 @@ td {
   border: 1px solid var(--line);
 }
 
+html body .markdown-body table,
+html body .markdown-body table tr,
+html body .markdown-body table td {
+  background-color: transparent !important;
+  color: var(--ink) !important;
+  border-color: var(--line) !important;
+}
+
+html body .markdown-body table tr:nth-child(2n) {
+  background-color: rgba(28, 25, 22, 0.45) !important;
+}
+
+html body .markdown-body table th {
+  background-color: var(--table-head-bg) !important;
+  color: var(--ink) !important;
+  border-color: var(--line) !important;
+  font-weight: 600;
+}
+
 th {
   background: var(--table-head-bg);
-  color: var(--muted);
+  color: var(--ink);
+}
+
+td {
+  color: var(--ink);
 }
 
 body,
@@ -157,7 +174,7 @@ article,
 .container-lg,
 .page {
   color: var(--ink);
-  background-color: var(--bg) !important;
+  background-color: transparent !important;
 }
 
 .markdown-body h1,
