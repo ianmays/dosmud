@@ -7,6 +7,14 @@
   <title>dosmud CI metrics</title>
   <link rel="stylesheet" href="assets/manual.css">
   <style>
+    body,
+    main,
+    table,
+    .legend,
+    .chart-label-cell span {
+      font-family: var(--font-serif);
+    }
+
     main {
       max-width: 1120px;
       margin: 0 auto;
@@ -120,18 +128,51 @@
     }
 
     .chart-wrap {
+      max-width: min(100%, calc(60px + 20px + 29 * 32px));
+    }
+
+    .chart-scroll {
       overflow-x: auto;
       overflow-y: visible;
       scroll-behavior: smooth;
-      max-width: min(100%, calc(60px + 20px + 29 * 32px));
-      padding-bottom: 14px;
     }
 
-    .chart-wrap svg {
+    .chart-panel {
+      display: inline-block;
+      vertical-align: top;
+    }
+
+    .chart-panel svg {
+      display: block;
       width: auto;
       height: auto;
-      display: block;
-      vertical-align: top;
+    }
+
+    .chart-labels {
+      display: flex;
+      box-sizing: border-box;
+      height: 52px;
+      border-top: 1px solid var(--line);
+      background: var(--panel);
+    }
+
+    .chart-label-cell {
+      flex: 0 0 32px;
+      width: 32px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 6px;
+      overflow: visible;
+    }
+
+    .chart-label-cell span {
+      font-size: 11px;
+      color: var(--muted);
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      line-height: 1;
+      white-space: nowrap;
     }
 
     .legend {
@@ -253,7 +294,12 @@
         </div>
         <div class="chart-card">
           <div class="chart-wrap">
-            <svg id="test-count-chart" role="img" aria-label="CI test outcome counts"></svg>
+            <div class="chart-scroll" id="test-count-scroll">
+              <div class="chart-panel" id="test-count-panel">
+                <svg id="test-count-chart" role="img" aria-label="CI test outcome counts"></svg>
+                <div class="chart-labels" id="test-count-labels" aria-hidden="true"></div>
+              </div>
+            </div>
           </div>
           <div id="test-count-legend" class="legend"></div>
           <p class="chart-note">
@@ -269,7 +315,12 @@
         </div>
         <div class="chart-card">
           <div class="chart-wrap">
-            <svg id="coverage-chart" role="img" aria-label="CI unit coverage trends"></svg>
+            <div class="chart-scroll" id="coverage-scroll">
+              <div class="chart-panel" id="coverage-panel">
+                <svg id="coverage-chart" role="img" aria-label="CI unit coverage trends"></svg>
+                <div class="chart-labels" id="coverage-labels" aria-hidden="true"></div>
+              </div>
+            </div>
           </div>
           <div id="coverage-legend" class="legend"></div>
         </div>
@@ -282,7 +333,12 @@
         </div>
         <div class="chart-card">
           <div class="chart-wrap">
-            <svg id="timing-chart" role="img" aria-label="CI timing trends"></svg>
+            <div class="chart-scroll" id="timing-scroll">
+              <div class="chart-panel" id="timing-panel">
+                <svg id="timing-chart" role="img" aria-label="CI timing trends"></svg>
+                <div class="chart-labels" id="timing-labels" aria-hidden="true"></div>
+              </div>
+            </div>
           </div>
           <div id="timing-legend" class="legend"></div>
         </div>
@@ -295,7 +351,12 @@
         </div>
         <div class="chart-card">
           <div class="chart-wrap">
-            <svg id="benchmark-chart" role="img" aria-label="CI soak benchmark trends"></svg>
+            <div class="chart-scroll" id="benchmark-scroll">
+              <div class="chart-panel" id="benchmark-panel">
+                <svg id="benchmark-chart" role="img" aria-label="CI soak benchmark trends"></svg>
+                <div class="chart-labels" id="benchmark-labels" aria-hidden="true"></div>
+              </div>
+            </div>
           </div>
           <div id="benchmark-legend" class="legend"></div>
         </div>
@@ -333,7 +394,8 @@
       var CHART_PADDING_LEFT = 60;
       var CHART_PADDING_RIGHT = 20;
       var CHART_PADDING_TOP = 24;
-      var CHART_PADDING_BOTTOM = 48;
+      var CHART_PADDING_BOTTOM = 8;
+      var CHART_FONT = "Georgia, 'Times New Roman', serif";
       var TIMING_KEYS = [
         "make build",
         "make test",
@@ -411,19 +473,36 @@
         svg.style.height = layout.height + "px";
       }
 
-      function scrollChartToLatest(svgId) {
-        var wrap = $(svgId).parentElement;
-        if (wrap && wrap.scrollWidth > wrap.clientWidth) {
-          wrap.scrollLeft = wrap.scrollWidth - wrap.clientWidth;
+      function applyPanelSize(panelId, layout) {
+        var panel = $(panelId);
+        if (panel) {
+          panel.style.width = layout.width + "px";
         }
       }
 
-      function xLabelText(x, layout, label) {
-        var y = layout.axisBottom + layout.paddingBottom - 6;
-        return "<text x=\"" + x + "\" y=\"" + y +
-          "\" transform=\"rotate(-90, " + x + ", " + y + ")" +
-          "\" text-anchor=\"end\" fill=\"" + CHART_THEME.text + "\" font-size=\"11\">" +
-          label + "</text>";
+      function renderXLabels(labelsId, runs, layout) {
+        var labels = $(labelsId);
+        var parts = [];
+        var i;
+        if (!labels) {
+          return;
+        }
+        for (i = 0; i < runs.length; i += 1) {
+          var label = runs[i].sha ? runs[i].sha.slice(0, 7) : String(i + 1);
+          parts.push("<div class=\"chart-label-cell\"><span>" + label + "</span></div>");
+        }
+        labels.innerHTML = parts.join("");
+        labels.style.width = layout.width + "px";
+        labels.style.paddingLeft = layout.paddingLeft + "px";
+        labels.style.paddingRight = layout.paddingRight + "px";
+        labels.style.boxSizing = "border-box";
+      }
+
+      function scrollChartToLatest(scrollId) {
+        var scroll = $(scrollId);
+        if (scroll && scroll.scrollWidth > scroll.clientWidth) {
+          scroll.scrollLeft = scroll.scrollWidth - scroll.clientWidth;
+        }
       }
 
       function setStatus(text, isError) {
@@ -489,7 +568,7 @@
         });
       }
 
-      function drawChart(svgId, legendId, runs, series, formatter) {
+      function drawChart(svgId, labelsId, panelId, scrollId, legendId, runs, series, formatter) {
         var svg = $(svgId);
         var layout = chartLayout(runs.length);
         var values = [];
@@ -505,11 +584,13 @@
         });
 
         applyChartSize(svg, layout);
+        applyPanelSize(panelId, layout);
+        renderXLabels(labelsId, runs, layout);
 
         if (!values.length) {
-          svg.innerHTML = "<text x=\"40\" y=\"160\" fill=\"" + CHART_THEME.text + "\" font-size=\"18\">No chartable data yet.</text>";
+          svg.innerHTML = "<text x=\"40\" y=\"160\" fill=\"" + CHART_THEME.text + "\" font-family=\"" + CHART_FONT + "\" font-size=\"18\">No chartable data yet.</text>";
           renderLegend($(legendId), []);
-          scrollChartToLatest(svgId);
+          scrollChartToLatest(scrollId);
           return;
         }
 
@@ -521,12 +602,17 @@
         var ticks = 4;
 
         parts.push("<rect x=\"0\" y=\"0\" width=\"" + layout.width + "\" height=\"" + layout.height + "\" fill=\"" + CHART_THEME.bg + "\"></rect>");
+        parts.push(
+          "<line x1=\"" + layout.paddingLeft + "\" y1=\"" + layout.axisBottom +
+          "\" x2=\"" + (layout.width - layout.paddingRight) + "\" y2=\"" + layout.axisBottom +
+          "\" stroke=\"" + CHART_THEME.grid + "\"></line>"
+        );
 
         for (i = 0; i <= ticks; i += 1) {
           var y = layout.paddingTop + (layout.chartHeight * i / ticks);
           var value = Math.round(maxValue * (ticks - i) / ticks);
           parts.push("<line x1=\"" + layout.paddingLeft + "\" y1=\"" + y + "\" x2=\"" + (layout.width - layout.paddingRight) + "\" y2=\"" + y + "\" stroke=\"" + CHART_THEME.grid + "\" stroke-dasharray=\"4 6\"></line>");
-          parts.push("<text x=\"8\" y=\"" + (y + 4) + "\" fill=\"" + CHART_THEME.text + "\" font-size=\"12\">" + formatter(value) + "</text>");
+          parts.push("<text x=\"8\" y=\"" + (y + 4) + "\" fill=\"" + CHART_THEME.text + "\" font-family=\"" + CHART_FONT + "\" font-size=\"12\">" + formatter(value) + "</text>");
         }
 
         series.forEach(function (item) {
@@ -545,18 +631,12 @@
           }
         });
 
-        runs.forEach(function (run, idx) {
-          var x = layout.paddingLeft + (layout.slotWidth * idx);
-          var label = run.sha ? run.sha.slice(0, 7) : String(idx + 1);
-          parts.push(xLabelText(x, layout, label));
-        });
-
         svg.innerHTML = parts.join("");
         renderLegend($(legendId), series);
-        scrollChartToLatest(svgId);
+        scrollChartToLatest(scrollId);
       }
 
-      function drawStackedBarChart(svgId, legendId, runs) {
+      function drawStackedBarChart(svgId, labelsId, panelId, scrollId, legendId, runs) {
         var svg = $(svgId);
         var layout = chartLayout(runs.length);
         var groupWidth = layout.slotWidth;
@@ -576,25 +656,32 @@
         });
 
         applyChartSize(svg, layout);
+        applyPanelSize(panelId, layout);
+        renderXLabels(labelsId, runs, layout);
 
         if (!maxValue) {
-          svg.innerHTML = "<text x=\"40\" y=\"160\" fill=\"" + CHART_THEME.text + "\" font-size=\"18\">No test outcome history yet.</text>";
+          svg.innerHTML = "<text x=\"40\" y=\"160\" fill=\"" + CHART_THEME.text + "\" font-family=\"" + CHART_FONT + "\" font-size=\"18\">No test outcome history yet.</text>";
           renderLegend($(legendId), [
             { color: STATUS_COLORS.pass, label: "Pass" },
             { color: STATUS_COLORS.fail, label: "Fail" },
             { color: STATUS_COLORS.skip, label: "Skip" }
           ]);
-          scrollChartToLatest(svgId);
+          scrollChartToLatest(scrollId);
           return;
         }
 
         parts.push("<rect x=\"0\" y=\"0\" width=\"" + layout.width + "\" height=\"" + layout.height + "\" fill=\"" + CHART_THEME.bg + "\"></rect>");
+        parts.push(
+          "<line x1=\"" + layout.paddingLeft + "\" y1=\"" + layout.axisBottom +
+          "\" x2=\"" + (layout.width - layout.paddingRight) + "\" y2=\"" + layout.axisBottom +
+          "\" stroke=\"" + CHART_THEME.grid + "\"></line>"
+        );
 
         for (i = 0; i <= 4; i += 1) {
           var y = layout.paddingTop + (layout.chartHeight * i / 4);
           var value = Math.round(maxValue * (4 - i) / 4);
           parts.push("<line x1=\"" + layout.paddingLeft + "\" y1=\"" + y + "\" x2=\"" + (layout.width - layout.paddingRight) + "\" y2=\"" + y + "\" stroke=\"" + CHART_THEME.grid + "\" stroke-dasharray=\"4 6\"></line>");
-          parts.push("<text x=\"14\" y=\"" + (y + 4) + "\" fill=\"" + CHART_THEME.text + "\" font-size=\"12\">" + value + "</text>");
+          parts.push("<text x=\"14\" y=\"" + (y + 4) + "\" fill=\"" + CHART_THEME.text + "\" font-family=\"" + CHART_FONT + "\" font-size=\"12\">" + value + "</text>");
         }
 
         runs.forEach(function (run, runIdx) {
@@ -622,11 +709,6 @@
             });
           });
 
-          parts.push(xLabelText(
-            groupX + (groupWidth / 2),
-            layout,
-            run.sha ? run.sha.slice(0, 7) : String(runIdx + 1)
-          ));
         });
 
         svg.innerHTML = parts.join("");
@@ -635,7 +717,7 @@
           { color: STATUS_COLORS.fail, label: "Fail" },
           { color: STATUS_COLORS.skip, label: "Skip" }
         ]);
-        scrollChartToLatest(svgId);
+        scrollChartToLatest(scrollId);
       }
 
       function renderLatestTable(run) {
@@ -673,9 +755,12 @@
         $("latest-result").textContent = latest.result;
         renderLatestTable(latest);
 
-        drawStackedBarChart("test-count-chart", "test-count-legend", runs);
+        drawStackedBarChart("test-count-chart", "test-count-labels", "test-count-panel", "test-count-scroll", "test-count-legend", runs);
         drawChart(
           "coverage-chart",
+          "coverage-labels",
+          "coverage-panel",
+          "coverage-scroll",
           "coverage-legend",
           runs,
           COVERAGE_KEYS.map(function (item) {
@@ -693,6 +778,9 @@
         );
         drawChart(
           "timing-chart",
+          "timing-labels",
+          "timing-panel",
+          "timing-scroll",
           "timing-legend",
           runs,
           buildSeries(runs, TIMING_KEYS, "steps"),
@@ -700,6 +788,9 @@
         );
         drawChart(
           "benchmark-chart",
+          "benchmark-labels",
+          "benchmark-panel",
+          "benchmark-scroll",
           "benchmark-legend",
           runs,
           buildSeries(runs, BENCHMARK_KEYS, "benchmarks"),

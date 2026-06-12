@@ -1,2 +1,17 @@
 <link rel="stylesheet" href="{{ '/assets/manual.css' | relative_url }}">
 <meta name="color-scheme" content="dark">
+<style>
+  /* beats jekyll-theme-primer .markdown-body pre rules loaded from the theme gem */
+  html body .markdown-body .highlight pre,
+  html body .markdown-body pre {
+    background-color: #1a1816 !important;
+    color: #e8e0d6 !important;
+    border: 1px solid #3d3832 !important;
+  }
+
+  html body .markdown-body .highlight pre code,
+  html body .markdown-body pre code {
+    background-color: transparent !important;
+    color: inherit !important;
+  }
+</style>
