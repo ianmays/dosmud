@@ -146,6 +146,27 @@ TEST harness_apply_traveler_dialogue(void)
     PASS();
 }
 
+TEST harness_apply_fixed_bandit_road(void)
+{
+    struct GameState game;
+    int rc;
+    int traveler_slot;
+    int bandit_slot;
+
+    unit_game_fresh(&game, 7u);
+    rc = testharn_apply(&game, "@fixture fixed_bandit_road");
+    ASSERT_EQ(1, rc);
+    traveler_slot = npc_find_by_actor(&game, GAME_DIALOGUE_ACTOR_TRAVELER);
+    bandit_slot = npc_find_by_actor(&game, GAME_DIALOGUE_ACTOR_BANDIT);
+    ASSERT_EQ(WORLD_ROOM_ROAD, game.player.room_id);
+    ASSERT(traveler_slot >= 0);
+    ASSERT(bandit_slot >= 0);
+    ASSERT_EQ(0, game.npcs[traveler_slot].flags & NPC_FLAG_ACTIVE);
+    ASSERT_EQ(NPC_FLAG_ACTIVE, game.npcs[bandit_slot].flags & NPC_FLAG_ACTIVE);
+    ASSERT_EQ(WORLD_ROOM_ROAD, game.npcs[bandit_slot].room_id);
+    PASS();
+}
+
 TEST harness_apply_env_focus_water(void)
 {
     struct GameState game;
@@ -186,6 +207,7 @@ SUITE(harness) {
     RUN_TEST(harness_apply_quiet_camp_dual_ground_full_bag);
     RUN_TEST(harness_apply_bandit_handover_pick);
     RUN_TEST(harness_apply_traveler_dialogue);
+    RUN_TEST(harness_apply_fixed_bandit_road);
     RUN_TEST(harness_apply_env_focus_water);
     RUN_TEST(harness_seed_repeatable_rolls);
 }

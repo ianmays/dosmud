@@ -122,6 +122,7 @@ static void reset_mutable_state(struct GameState *game, int room_id, u32 tick)
     game->tick = tick;
     npc_clear_all(game);
     npc_seed_roaming_traveler(game);
+    npc_seed_fixed_enemies(game);
     game->env_focus_active = 0;
     game->env_focus_room = -1;
     game->env_focus_kind = GAME_ENV_NONE;
@@ -486,9 +487,14 @@ static void advance_world_tick(struct GameState *game, int roaming_moves_first,
     world_step(&game->world, game->tick);
     maybe_emit_animal_noise(game, out);
     maybe_emit_atmosphere(game, out);
-    if (!game_is_busy_dialogue(game) &&
-            (plat_rand() % CFG_ROLL_PERCENT_RANGE) < CFG_BANDIT_ENCOUNTER_CHANCE_BELOW) {
-        enemy_begin_encounter(game, out);
+    if (!game_is_busy_dialogue(game)) {
+        /*
+         * Preserve the legacy per-tick gameplay RNG draw budget so ambient
+         * output, save/load replay, and existing deterministic tests keep the
+         * same stream when fixed encounters do not open.
+         */
+        (void)(plat_rand() % CFG_ROLL_PERCENT_RANGE);
+        npc_fixed_begin_encounter_in_room(game, game->player.room_id, out);
     }
 }
 

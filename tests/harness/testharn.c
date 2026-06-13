@@ -236,6 +236,12 @@ static void fixture_at_road(struct GameState *game)
     game->room_explored[WORLD_ROOM_ROAD] = 1;
 }
 
+static void fixture_fixed_bandit_road(struct GameState *game)
+{
+    fixture_at_road(game);
+    fixture_traveler_off(game);
+}
+
 static int fixture_at_marsh_reed(struct GameState *game)
 {
     game_reset_fixture_baseline(game, WORLD_ROOM_MARSH, 2);
@@ -589,6 +595,10 @@ int testharn_apply(struct GameState *game, const char *line)
     }
     if (fixture_name_is("at_road", name)) {
         fixture_at_road(game);
+        return 1;
+    }
+    if (fixture_name_is("fixed_bandit_road", name)) {
+        fixture_fixed_bandit_road(game);
         return 1;
     }
     if (fixture_name_is("at_marsh_reed", name)) {

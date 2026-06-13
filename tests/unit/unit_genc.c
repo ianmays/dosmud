@@ -77,6 +77,27 @@ TEST genc_opens_dialogue(void)
     PASS();
 }
 
+TEST genc_opens_fixed_bandit_without_moving_slot(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    struct NpcState *bandit;
+
+    unit_game_fresh(&game, 2u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ROAD, 0);
+    bandit = bandit_npc(&game);
+    ASSERT(bandit != 0);
+    begin_enemy(&game, &out);
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(DIALOGUE_ENEMY, game.dialogue);
+    ASSERT_EQ(WORLD_ROOM_ROAD, bandit->room_id);
+    ASSERT_EQ(NPC_FLAG_ACTIVE, bandit->flags & NPC_FLAG_ACTIVE);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
+    ASSERT_EQ(GAME_ENCOUNTER_ACTION_OPEN, out.events[0].arg1);
+    PASS();
+}
+
 TEST genc_cmd_reply_fight(void)
 {
     struct GameState game;
@@ -224,6 +245,7 @@ TEST genc_cmd_reply_bag_empty_then_combat(void)
 SUITE(genc) {
     RUN_TEST(genc_skips_when_busy);
     RUN_TEST(genc_opens_dialogue);
+    RUN_TEST(genc_opens_fixed_bandit_without_moving_slot);
     RUN_TEST(genc_cmd_reply_fight);
     RUN_TEST(genc_cmd_reply_intimidate_ok);
     RUN_TEST(genc_cmd_give_wrong_context);

@@ -310,6 +310,31 @@ TEST game_bandit_handover_pick(void)
     PASS();
 }
 
+TEST game_wait_on_fixed_bandit_room_opens_encounter(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    int i;
+    int saw_open;
+
+    unit_game_fresh(&game, 12u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ROAD, 0);
+    npc_deactivate_until(&game, GAME_DIALOGUE_ACTOR_TRAVELER, 999999UL);
+    ASSERT_EQ(1, run_cmd_out(&game, "wait", &out));
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(DIALOGUE_ENEMY, game.dialogue);
+    saw_open = 0;
+    for (i = 0; i < out.count; ++i) {
+        if (out.events[i].kind == GAME_EVENT_ENCOUNTER &&
+                out.events[i].arg0 == GAME_ENCOUNTER_BANDIT &&
+                out.events[i].arg1 == GAME_ENCOUNTER_ACTION_OPEN) {
+            saw_open = 1;
+        }
+    }
+    ASSERT_EQ(1, saw_open);
+    PASS();
+}
+
 TEST game_talk_npcs_and_nobody(void)
 {
     struct GameState game;
@@ -678,6 +703,7 @@ SUITE(game) {
     RUN_TEST(game_bandit_fight_reply);
     RUN_TEST(game_bandit_intimidate_fail);
     RUN_TEST(game_bandit_handover_pick);
+    RUN_TEST(game_wait_on_fixed_bandit_room_opens_encounter);
     RUN_TEST(game_talk_npcs_and_nobody);
     RUN_TEST(game_frog_reply_branch);
     RUN_TEST(game_combat_blocks_inventory_cmds);

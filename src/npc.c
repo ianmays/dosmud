@@ -18,6 +18,14 @@ struct NpcRoomInfo {
     int talk_phase;
 };
 
+struct NpcSeedInfo {
+    int actor;
+    int dialogue;
+    int encounter;
+    int room_id;
+    int flags;
+};
+
 /* Stable content hooks: fixed world rooms, not generated graph membership. */
 static const struct NpcRoomInfo NPC_ROOM_INFO[] = {
     /* Frog keeps its custom rendered copy, but event phases now match other NPCs. */
@@ -29,6 +37,12 @@ static const struct NpcRoomInfo NPC_ROOM_INFO[] = {
         DIALOGUE_NPC_HERBALIST, GAME_DIALOGUE_PHASE_TALK },
     { WORLD_ROOM_CATACOMBS, GAME_DIALOGUE_ACTOR_ARCHIVIST,
         DIALOGUE_NPC_ARCHIVIST, GAME_DIALOGUE_PHASE_TALK }
+};
+
+static const struct NpcSeedInfo NPC_FIXED_ENCOUNTERS[] = {
+    /* Fixed-location authored enemies live in the roster from reset onward. */
+    { GAME_DIALOGUE_ACTOR_BANDIT, DIALOGUE_ENEMY, GAME_ENCOUNTER_BANDIT,
+        WORLD_ROOM_ROAD, NPC_FLAG_ACTIVE }
 };
 
 /*
@@ -54,6 +68,12 @@ static int npc_slot_needs_separation(const struct NpcState *npc)
 static int npc_slot_respawns(const struct NpcState *npc)
 {
     return (npc->flags & NPC_FLAG_RESPAWNS) != 0;
+}
+
+static int npc_slot_is_fixed_encounter(const struct NpcState *npc)
+{
+    return npc->encounter != GAME_ENCOUNTER_NONE &&
+        !npc_slot_is_roaming(npc);
 }
 
 static struct NpcState *npc_slot(struct GameState *game, int slot)
@@ -335,6 +355,22 @@ void npc_seed_roaming_traveler(struct GameState *game)
         NPC_FLAG_ACTIVE | NPC_FLAG_ROAMING | NPC_FLAG_RESPAWNS);
 }
 
+void npc_seed_fixed_enemies(struct GameState *game)
+{
+    int i;
+
+    for (i = 0;
+            i < (int)(sizeof(NPC_FIXED_ENCOUNTERS) /
+                sizeof(NPC_FIXED_ENCOUNTERS[0]));
+            ++i) {
+        npc_spawn(game, NPC_FIXED_ENCOUNTERS[i].actor,
+            NPC_FIXED_ENCOUNTERS[i].dialogue,
+            NPC_FIXED_ENCOUNTERS[i].encounter,
+            NPC_FIXED_ENCOUNTERS[i].room_id,
+            NPC_FIXED_ENCOUNTERS[i].flags);
+    }
+}
+
 /* Reactivation after return_tick picks a random room in the generated graph. */
 void npc_roaming_activate_due(struct GameState *game)
 {
@@ -411,6 +447,35 @@ void npc_roaming_step(struct GameState *game)
         pick = plat_rand() % n;
         game->npcs[slot].room_id = r->exits[dirs[pick]];
     }
+}
+
+int npc_fixed_begin_encounter_in_room(struct GameState *game, int room_id,
+                                      GameEventQueue *out)
+{
+    int slot;
+    struct NpcState *npc;
+
+    if (game_is_busy_dialogue(game)) {
+        return 0;
+    }
+    for (slot = 0; slot < CFG_NPC_MAX; ++slot) {
+        npc = npc_slot(game, slot);
+        if (!npc_slot_is_active(npc) ||
+                !npc_slot_is_fixed_encounter(npc) ||
+                npc->room_id != room_id) {
+            continue;
+        }
+        /* Fixed encounters keep the authored slot; only mode/event state changes. */
+        npc_push_encounter_open(out, npc->encounter);
+        game_set_mode_dialogue(game, npc->dialogue);
+        return 1;
+    }
+    return 0;
+}
+
+void npc_fixed_begin_encounter(struct GameState *game, GameEventQueue *out)
+{
+    (void)npc_fixed_begin_encounter_in_room(game, game->player.room_id, out);
 }
 
 /*

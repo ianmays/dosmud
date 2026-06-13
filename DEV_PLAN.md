@@ -692,6 +692,8 @@ Rolled strength / vitality (etc.) at game start; may later wire into combat form
 
 ### [#102](https://github.com/ianmays/dosmud/issues/102) - Fixed location enemies (Bandits)
 
+Done ✅.
+
 ### [#107](https://github.com/ianmays/dosmud/issues/107) - Enemies (Bandits) spawn and wander
 
 ### [#128](https://github.com/ianmays/dosmud/issues/128) - Pick up all items

@@ -34,11 +34,16 @@ int npc_begin_encounter(struct GameState *game, int actor, int dialogue,
 int npc_end_encounter(struct GameState *game, int actor);
 int npc_open_room_dialogue(struct GameState *game, struct GameEventQueue *out);
 void npc_seed_roaming_traveler(struct GameState *game);
+void npc_seed_fixed_enemies(struct GameState *game);
 void npc_roaming_activate_due(struct GameState *game);
 void npc_roaming_update_separation(struct GameState *game);
 void npc_roaming_step(struct GameState *game);
+int npc_fixed_begin_encounter_in_room(struct GameState *game, int room_id,
+    struct GameEventQueue *out);
+void npc_fixed_begin_encounter(struct GameState *game,
+    struct GameEventQueue *out);
 void npc_roaming_begin_encounter(struct GameState *game,
-                                 struct GameEventQueue *out);
+    struct GameEventQueue *out);
 int npc_roaming_begin_encounter_in_room(struct GameState *game, int room_id,
                                         struct GameEventQueue *out);
 int npc_roaming_cmd_reply(struct GameState *game, int choice,
