@@ -460,8 +460,9 @@ static void advance_world_tick(struct GameState *game, int roaming_moves_first,
 
     /*
      * Tick order is deliberate: advance the roaming roster and world clock,
-     * then emit ambient events, then consider random encounters so one input
-     * produces the same visible sequence everywhere.
+     * then emit ambient events, then open fixed-location encounters before
+     * the random bandit roll so one input produces the same visible sequence
+     * everywhere.
      */
     game->tick += 1;
     npc_roaming_update_separation(game);
