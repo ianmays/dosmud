@@ -695,7 +695,7 @@ Rolled strength / vitality (etc.) at game start; may later wire into combat form
 Done ✅ ([#190](https://github.com/ianmays/dosmud/pull/190)).
 
 ### Testing
-- Unit: `unit_npc.c` (seed/open fixed bandit), `unit_genc.c`, `unit_game.c`, `unit_harn.c`
+- Unit: `unit_npc.c` (seed/open fixed bandit), `unit_genc.c`, `unit_game.c`, `unit_harn.c`, `unit_save.c` (round-trip seeded bandit placement)
 - Snapshots: `fixed_bandit_road` (`@fixture fixed_bandit_road` plus `wait` on road)
 
 ### [#107](https://github.com/ianmays/dosmud/issues/107) - Enemies (Bandits) spawn and wander
