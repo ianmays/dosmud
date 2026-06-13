@@ -338,7 +338,7 @@ Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 
 **Three layers (see [`docs/testing.md`](docs/testing.md)):** snapshots (`make test-run`), unit tests (`make test-unit`), soak/stress (`make test-soak`). `make test-all` runs check-layers, snapshots, unit coverage, and soak.
 
-**Snapshot coverage ([#115](https://github.com/ianmays/dosmud/issues/115)) delivered:** 59 snapshots in `SNAPSHOT_TESTS` at delivery plus `seed_cli` (60 total in `make test-run`); suite now 74 in `SNAPSHOT_TESTS` plus `seed_cli` (75 total). Combat defend/salve/victory/loot/level-up, all room NPC talk branches, eat/use/inspect variants, `quiet_explore` for wait/move/map, bandit fight/intimidate/bag-empty, loot tiers, meta commands. RNG: `game_roll_percent` for intimidate; `test_quiet_ticks`; `CFG_TEST_*` inject constants.
+**Snapshot coverage ([#115](https://github.com/ianmays/dosmud/issues/115)) delivered:** 59 snapshots in `SNAPSHOT_TESTS` at delivery plus `seed_cli` (60 total in `make test-run`); suite now 75 in `SNAPSHOT_TESTS` plus `seed_cli` (76 total). Combat defend/salve/victory/loot/level-up, all room NPC talk branches, eat/use/inspect variants, `quiet_explore` for wait/move/map, bandit fight/intimidate/bag-empty/fixed-road, loot tiers, meta commands. RNG: `game_roll_percent` for intimidate; `test_quiet_ticks`; `CFG_TEST_*` inject constants.
 
 **Harness layout (final):** fixture DSL and `@seed` in [`tests/harness/testharn.c`](tests/harness/testharn.c); seed-1234 world graph in [`tests/harness/th_world.c`](tests/harness/th_world.c) (shared by snapshots, unit, soak).
 
@@ -555,7 +555,7 @@ Done ✅ ([#177](https://github.com/ianmays/dosmud/pull/177)).
 
 ### Testing
 - Unit: `unit_gout.c` asserts `game_event_queue_reset` and `game_event_push` only (no legacy kinds); mechanical `game_event_queue_reset` sweep in harness and slice tests
-- Snapshots: all regression snapshots unchanged at delivery (70 in `SNAPSHOT_TESTS` plus `seed_cli`; suite now 75 total in `make test-run`)
+- Snapshots: all regression snapshots unchanged at delivery (70 in `SNAPSHOT_TESTS` plus `seed_cli`; suite now 76 total in `make test-run`)
 
 ### [#163](https://github.com/ianmays/dosmud/issues/163) - Final GameEvent test coverage pass
 
@@ -693,6 +693,10 @@ Rolled strength / vitality (etc.) at game start; may later wire into combat form
 ### [#102](https://github.com/ianmays/dosmud/issues/102) - Fixed location enemies (Bandits)
 
 Done ✅.
+
+### Testing
+- Unit: `unit_npc.c` (seed/open fixed bandit), `unit_genc.c`, `unit_game.c`, `unit_harn.c`
+- Snapshots: `fixed_bandit_road` (`@fixture fixed_bandit_road` plus `wait` on road)
 
 ### [#107](https://github.com/ianmays/dosmud/issues/107) - Enemies (Bandits) spawn and wander
 

@@ -7,8 +7,8 @@
 /*
  * npc.c owns the NPC-facing seam between room identity, dynamic roster
  * placement, and dialogue actors. Higher-level slices still own combat and
- * authored content. Roaming encounters queue GAME_EVENT_ENCOUNTER / DIALOGUE*;
- * grendr maps copy.
+ * authored content. Fixed and roaming encounters queue GAME_EVENT_ENCOUNTER /
+ * DIALOGUE*; grendr maps copy.
  */
 
 struct NpcRoomInfo {
@@ -18,6 +18,7 @@ struct NpcRoomInfo {
     int talk_phase;
 };
 
+/* Authored enemy spawn rows; stable world rooms like NPC_ROOM_INFO talk hooks. */
 struct NpcSeedInfo {
     int actor;
     int dialogue;
@@ -70,6 +71,7 @@ static int npc_slot_respawns(const struct NpcState *npc)
     return (npc->flags & NPC_FLAG_RESPAWNS) != 0;
 }
 
+/* Non-roaming roster slot with an encounter id; room stays authored, not graph-random. */
 static int npc_slot_is_fixed_encounter(const struct NpcState *npc)
 {
     return npc->encounter != GAME_ENCOUNTER_NONE &&
@@ -355,6 +357,7 @@ void npc_seed_roaming_traveler(struct GameState *game)
         NPC_FLAG_ACTIVE | NPC_FLAG_ROAMING | NPC_FLAG_RESPAWNS);
 }
 
+/* Fixed enemies seed from NPC_FIXED_ENCOUNTERS on every reset_mutable_state pass. */
 void npc_seed_fixed_enemies(struct GameState *game)
 {
     int i;
@@ -449,6 +452,10 @@ void npc_roaming_step(struct GameState *game)
     }
 }
 
+/*
+ * Returns 1 when a fixed encounter opened. Lowest matching slot wins; slot
+ * and room_id stay put (no separation flag; genc still owns reply/give).
+ */
 int npc_fixed_begin_encounter_in_room(struct GameState *game, int room_id,
                                       GameEventQueue *out)
 {

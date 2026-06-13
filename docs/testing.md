@@ -449,4 +449,4 @@ The tick HUD line includes `[Atk:n]`; `n` is the flat melee bonus used on combat
 5. Enter `wait`; tick increments by exactly 1.
 6. Enter `look`, then `move <listed-direction>`; room changes and tick increments by 1.
 7. Enter `quit`; process exits cleanly.
-8. Bandit hand-over (optional): from a room where a bandit encounter triggers, enter `2`, then `give <item>` for something you carry in the bag **or** your wielded weapon (you can `wield` before replying `2` if the bag is empty); the bandit should leave and that item or wield slot should clear.
+8. Bandit hand-over (optional): on the road, enter `wait` until the road bandit opens, reply `2`, then `give <item>` for something you carry in the bag **or** your wielded weapon (you can `wield` before replying `2` if the bag is empty); the bandit should leave and that item or wield slot should clear.

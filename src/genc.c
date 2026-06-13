@@ -43,6 +43,7 @@ static struct NpcState *active_enemy_npc(struct GameState *game)
 /* Bandit open path: npc claims roster slot and queues ENCOUNTER open; genc owns reply/give. */
 void enemy_begin_encounter(struct GameState *game, GameEventQueue *out)
 {
+    /* Fixed roster slot wins; fallback spawns a dynamic bandit for legacy callers. */
     if (npc_fixed_begin_encounter_in_room(game, game->player.room_id, out)) {
         game->enemy_handover_pick = 0;
         return;

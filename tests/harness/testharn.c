@@ -236,6 +236,7 @@ static void fixture_at_road(struct GameState *game)
     game->room_explored[WORLD_ROOM_ROAD] = 1;
 }
 
+/* Road + inactive traveler so wait ticks hit the fixed bandit, not roaming overlap. */
 static void fixture_fixed_bandit_road(struct GameState *game)
 {
     fixture_at_road(game);
