@@ -692,7 +692,7 @@ Rolled strength / vitality (etc.) at game start; may later wire into combat form
 
 ### [#102](https://github.com/ianmays/dosmud/issues/102) - Fixed location enemies (Bandits)
 
-Done ✅.
+Done ✅ ([#190](https://github.com/ianmays/dosmud/pull/190)).
 
 ### Testing
 - Unit: `unit_npc.c` (seed/open fixed bandit), `unit_genc.c`, `unit_game.c`, `unit_harn.c`
