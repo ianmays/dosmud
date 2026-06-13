@@ -41,6 +41,17 @@ static struct NpcState *bandit_npc(struct GameState *game)
     return &game->npcs[slot];
 }
 
+static struct NpcState *active_enemy_npc(struct GameState *game)
+{
+    int slot;
+
+    slot = npc_find_by_dialogue(game, DIALOGUE_ENEMY);
+    if (slot < 0) {
+        return 0;
+    }
+    return &game->npcs[slot];
+}
+
 static void begin_enemy_state(struct GameState *game)
 {
     GameEventQueue out;
@@ -74,6 +85,50 @@ TEST genc_opens_dialogue(void)
     ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
     ASSERT_EQ(GAME_ENCOUNTER_BANDIT, out.events[0].arg0);
     ASSERT_EQ(GAME_ENCOUNTER_ACTION_OPEN, out.events[0].arg1);
+    PASS();
+}
+
+TEST genc_opens_fixed_bandit_without_moving_slot(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    struct NpcState *bandit;
+
+    unit_game_fresh(&game, 2u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ROAD, 0);
+    bandit = bandit_npc(&game);
+    ASSERT(bandit != 0);
+    begin_enemy(&game, &out);
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(DIALOGUE_ENEMY, game.dialogue);
+    ASSERT_EQ(WORLD_ROOM_ROAD, bandit->room_id);
+    ASSERT_EQ(GAME_DIALOGUE_ACTOR_BANDIT, bandit->actor);
+    ASSERT_EQ(NPC_FLAG_ACTIVE, bandit->flags & NPC_FLAG_ACTIVE);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
+    ASSERT_EQ(GAME_ENCOUNTER_ACTION_OPEN, out.events[0].arg1);
+    PASS();
+}
+
+TEST genc_random_ambush_keeps_fixed_bandit_seeded(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    struct NpcState *bandit;
+    int slot;
+
+    unit_game_fresh(&game, 22u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    bandit = bandit_npc(&game);
+    ASSERT(bandit != 0);
+    ASSERT_EQ(WORLD_ROOM_ROAD, bandit->room_id);
+    begin_enemy(&game, &out);
+    slot = npc_find_by_dialogue(&game, DIALOGUE_ENEMY);
+    ASSERT(slot >= 0);
+    ASSERT_EQ(GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH, game.npcs[slot].actor);
+    ASSERT_EQ(WORLD_ROOM_CAMP, game.npcs[slot].room_id);
+    ASSERT_EQ(WORLD_ROOM_ROAD, bandit->room_id);
+    ASSERT_EQ(GAME_DIALOGUE_ACTOR_BANDIT, bandit->actor);
     PASS();
 }
 
@@ -130,15 +185,15 @@ TEST genc_cmd_give_handover(void)
 {
     struct GameState game;
     GameEventQueue out;
-    struct NpcState *bandit;
+    struct NpcState *enemy;
 
     unit_game_fresh(&game, 6u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     begin_enemy_state(&game);
     game_inv_bag_add(&game, ITEM_STICK);
-    bandit = bandit_npc(&game);
-    ASSERT(bandit != 0);
-    bandit->flags |= NPC_FLAG_HANDOVER_PICK;
+    enemy = active_enemy_npc(&game);
+    ASSERT(enemy != 0);
+    enemy->flags |= NPC_FLAG_HANDOVER_PICK;
     ASSERT_EQ(1, enemy_give(&game, ITEM_STICK, &out));
     ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
     ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
@@ -152,17 +207,17 @@ TEST genc_cmd_reply_handover_pick(void)
 {
     struct GameState game;
     GameEventQueue out;
-    struct NpcState *bandit;
+    struct NpcState *enemy;
 
     unit_game_fresh(&game, 7u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     begin_enemy_state(&game);
     game_inv_bag_add(&game, ITEM_STICK);
     ASSERT_EQ(1, enemy_reply(&game, 2, &out));
-    bandit = bandit_npc(&game);
-    ASSERT(bandit != 0);
+    enemy = active_enemy_npc(&game);
+    ASSERT(enemy != 0);
     ASSERT_EQ(NPC_FLAG_HANDOVER_PICK,
-        bandit->flags & NPC_FLAG_HANDOVER_PICK);
+        enemy->flags & NPC_FLAG_HANDOVER_PICK);
     ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
     ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
     ASSERT_EQ(GAME_ENCOUNTER_ACTION_HANDOVER_PROMPT, out.events[0].arg1);
@@ -224,6 +279,8 @@ TEST genc_cmd_reply_bag_empty_then_combat(void)
 SUITE(genc) {
     RUN_TEST(genc_skips_when_busy);
     RUN_TEST(genc_opens_dialogue);
+    RUN_TEST(genc_opens_fixed_bandit_without_moving_slot);
+    RUN_TEST(genc_random_ambush_keeps_fixed_bandit_seeded);
     RUN_TEST(genc_cmd_reply_fight);
     RUN_TEST(genc_cmd_reply_intimidate_ok);
     RUN_TEST(genc_cmd_give_wrong_context);

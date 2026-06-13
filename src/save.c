@@ -13,7 +13,8 @@
  */
 
 #define SAVE_MAGIC "DMSV"
-#define SAVE_VERSION 3
+#define SAVE_VERSION 4
+#define SAVE_VERSION_LEGACY_ROSTER 3
 #define SAVE_PATH_BUF_MAX 260
 
 /*
@@ -484,7 +485,7 @@ static int save_valid_npc(const struct NpcState *npc, int room_count)
             npc->return_tick == 0;
     }
     if (npc->actor < GAME_DIALOGUE_ACTOR_NONE ||
-            npc->actor > GAME_DIALOGUE_ACTOR_BANDIT ||
+            npc->actor > GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH ||
             npc->dialogue < DIALOGUE_NONE ||
             npc->dialogue > DIALOGUE_ENEMY ||
             npc->encounter < GAME_ENCOUNTER_NONE ||
@@ -506,6 +507,26 @@ static int save_valid_npc(const struct NpcState *npc, int room_count)
         return 0;
     }
     return 1;
+}
+
+static void save_migrate_v3_bandit_slot(struct GameState *game)
+{
+    int slot;
+    struct NpcState *npc;
+
+    slot = npc_find_by_actor(game, GAME_DIALOGUE_ACTOR_BANDIT);
+    if (slot < 0) {
+        return;
+    }
+    npc = &game->npcs[slot];
+    if (npc->dialogue == DIALOGUE_NONE &&
+            npc->encounter == GAME_ENCOUNTER_BANDIT &&
+            npc->room_id == WORLD_ROOM_ROAD &&
+            npc->flags == NPC_FLAG_ACTIVE &&
+            npc->return_tick == 0U) {
+        return;
+    }
+    npc->actor = GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH;
 }
 
 static int save_valid_map_projection(const struct World *world)
@@ -669,7 +690,8 @@ static void save_reconcile_enemy_handover(struct GameState *game)
     if (slot < 0 &&
             game->mode == GAME_MODE_DIALOGUE &&
             game->dialogue == DIALOGUE_ENEMY) {
-        slot = npc_spawn(game, GAME_DIALOGUE_ACTOR_BANDIT, DIALOGUE_ENEMY,
+        slot = npc_spawn(game, GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH,
+            DIALOGUE_ENEMY,
             GAME_ENCOUNTER_BANDIT, game->player.room_id, NPC_FLAG_ACTIVE);
     }
     if (slot >= 0) {
@@ -784,15 +806,21 @@ int save_read_game(const char *path, struct GameState *out_game,
     }
     /*
      * v3 replaces the single roaming NPC fields with a fixed-size roster.
-     * Reject older payloads rather than misreading the shifted layout.
+     * v4 keeps the same layout and reserves a distinct ambush actor so old
+     * bandit encounter slots can migrate before fixed-enemy seeding.
      */
-    if (version != (u16)SAVE_VERSION) {
+    if (version != (u16)SAVE_VERSION &&
+            version != (u16)SAVE_VERSION_LEGACY_ROSTER) {
         goto done;
     }
     if (!save_read_game_state(fp, &g_save_loaded, &loaded_rng_draw_count)) {
         goto done;
     }
+    if (version == (u16)SAVE_VERSION_LEGACY_ROSTER) {
+        save_migrate_v3_bandit_slot(&g_save_loaded);
+    }
     save_reconcile_enemy_handover(&g_save_loaded);
+    npc_seed_fixed_enemies(&g_save_loaded);
     /* Reject padded or concatenated files; payload must end at EOF. */
     trailing = fgetc(fp);
     if (trailing != EOF) {

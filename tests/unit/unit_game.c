@@ -45,17 +45,6 @@ static struct NpcState *traveler_npc(struct GameState *game)
     return &game->npcs[slot];
 }
 
-static struct NpcState *bandit_npc(struct GameState *game)
-{
-    int slot;
-
-    slot = npc_find_by_actor(game, GAME_DIALOGUE_ACTOR_BANDIT);
-    if (slot < 0) {
-        return 0;
-    }
-    return &game->npcs[slot];
-}
-
 TEST game_heal_player_applies(void)
 {
     struct GameState game;
@@ -292,6 +281,7 @@ TEST game_bandit_handover_pick(void)
     struct GameState game;
     GameEventQueue out;
     struct NpcState *bandit;
+    int slot;
 
     unit_game_fresh(&game, 12u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
@@ -299,7 +289,8 @@ TEST game_bandit_handover_pick(void)
     game_event_queue_reset(&out);
     enemy_begin_encounter(&game, &out);
     ASSERT_EQ(1, run_cmd_out(&game, "2", &out));
-    bandit = bandit_npc(&game);
+    slot = npc_find_by_dialogue(&game, DIALOGUE_ENEMY);
+    bandit = slot >= 0 ? &game.npcs[slot] : 0;
     ASSERT(bandit != 0);
     ASSERT_EQ(NPC_FLAG_HANDOVER_PICK,
         bandit->flags & NPC_FLAG_HANDOVER_PICK);
@@ -307,6 +298,31 @@ TEST game_bandit_handover_pick(void)
     ASSERT_EQ(1, out.count);
     ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
     ASSERT_EQ(GAME_ENCOUNTER_ACTION_HANDOVER_PROMPT, out.events[0].arg1);
+    PASS();
+}
+
+TEST game_wait_on_fixed_bandit_room_opens_encounter(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    int i;
+    int saw_open;
+
+    unit_game_fresh(&game, 12u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ROAD, 0);
+    npc_deactivate_until(&game, GAME_DIALOGUE_ACTOR_TRAVELER, 999999UL);
+    ASSERT_EQ(1, run_cmd_out(&game, "wait", &out));
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(DIALOGUE_ENEMY, game.dialogue);
+    saw_open = 0;
+    for (i = 0; i < out.count; ++i) {
+        if (out.events[i].kind == GAME_EVENT_ENCOUNTER &&
+                out.events[i].arg0 == GAME_ENCOUNTER_BANDIT &&
+                out.events[i].arg1 == GAME_ENCOUNTER_ACTION_OPEN) {
+            saw_open = 1;
+        }
+    }
+    ASSERT_EQ(1, saw_open);
     PASS();
 }
 
@@ -678,6 +694,7 @@ SUITE(game) {
     RUN_TEST(game_bandit_fight_reply);
     RUN_TEST(game_bandit_intimidate_fail);
     RUN_TEST(game_bandit_handover_pick);
+    RUN_TEST(game_wait_on_fixed_bandit_room_opens_encounter);
     RUN_TEST(game_talk_npcs_and_nobody);
     RUN_TEST(game_frog_reply_branch);
     RUN_TEST(game_combat_blocks_inventory_cmds);

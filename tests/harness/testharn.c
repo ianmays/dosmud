@@ -88,7 +88,7 @@ static int fixture_bandit_handover_pick(struct GameState *game)
     if (!fixture_bandit_dialogue(game)) {
         return 0;
     }
-    slot = npc_find_by_actor(game, GAME_DIALOGUE_ACTOR_BANDIT);
+    slot = npc_find_by_dialogue(game, DIALOGUE_ENEMY);
     if (slot < 0) {
         return 0;
     }
@@ -109,7 +109,7 @@ static void fixture_bandit_wielded_pick(struct GameState *game)
     harness_drop_output(&out);
     enemy_begin_encounter(game, &out);
     game_render_output(game, &out);
-    slot = npc_find_by_actor(game, GAME_DIALOGUE_ACTOR_BANDIT);
+    slot = npc_find_by_dialogue(game, DIALOGUE_ENEMY);
     if (slot >= 0) {
         game->npcs[slot].flags |= NPC_FLAG_HANDOVER_PICK;
     }
@@ -234,6 +234,13 @@ static void fixture_at_road(struct GameState *game)
     game_reset_fixture_baseline(game, WORLD_ROOM_ROAD, 1);
     game->room_explored[WORLD_ROOM_CAMP] = 1;
     game->room_explored[WORLD_ROOM_ROAD] = 1;
+}
+
+/* Road + inactive traveler so wait ticks hit the fixed bandit, not roaming overlap. */
+static void fixture_fixed_bandit_road(struct GameState *game)
+{
+    fixture_at_road(game);
+    fixture_traveler_off(game);
 }
 
 static int fixture_at_marsh_reed(struct GameState *game)
@@ -589,6 +596,10 @@ int testharn_apply(struct GameState *game, const char *line)
     }
     if (fixture_name_is("at_road", name)) {
         fixture_at_road(game);
+        return 1;
+    }
+    if (fixture_name_is("fixed_bandit_road", name)) {
+        fixture_fixed_bandit_road(game);
         return 1;
     }
     if (fixture_name_is("at_marsh_reed", name)) {

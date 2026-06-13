@@ -122,6 +122,7 @@ static void reset_mutable_state(struct GameState *game, int room_id, u32 tick)
     game->tick = tick;
     npc_clear_all(game);
     npc_seed_roaming_traveler(game);
+    npc_seed_fixed_enemies(game);
     game->env_focus_active = 0;
     game->env_focus_room = -1;
     game->env_focus_kind = GAME_ENV_NONE;
@@ -454,10 +455,14 @@ static int apply_command(struct GameState *game, struct Command *cmd,
 static void advance_world_tick(struct GameState *game, int roaming_moves_first,
                                GameEventQueue *out)
 {
+    int fixed_opened;
+    int roll;
+
     /*
      * Tick order is deliberate: advance the roaming roster and world clock,
-     * then emit ambient events, then consider random encounters so one input
-     * produces the same visible sequence everywhere.
+     * then emit ambient events, then open fixed-location encounters before
+     * the random bandit roll so one input produces the same visible sequence
+     * everywhere.
      */
     game->tick += 1;
     npc_roaming_update_separation(game);
@@ -486,9 +491,14 @@ static void advance_world_tick(struct GameState *game, int roaming_moves_first,
     world_step(&game->world, game->tick);
     maybe_emit_animal_noise(game, out);
     maybe_emit_atmosphere(game, out);
-    if (!game_is_busy_dialogue(game) &&
-            (plat_rand() % CFG_ROLL_PERCENT_RANGE) < CFG_BANDIT_ENCOUNTER_CHANCE_BELOW) {
-        enemy_begin_encounter(game, out);
+    if (!game_is_busy_dialogue(game)) {
+        fixed_opened = npc_fixed_begin_encounter_in_room(game,
+            game->player.room_id, out);
+        roll = plat_rand() % CFG_ROLL_PERCENT_RANGE;
+        if (!fixed_opened && !game_is_busy_dialogue(game) &&
+                roll < CFG_BANDIT_ENCOUNTER_CHANCE_BELOW) {
+            enemy_begin_encounter(game, out);
+        }
     }
 }
 

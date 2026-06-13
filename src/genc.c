@@ -43,7 +43,13 @@ static struct NpcState *active_enemy_npc(struct GameState *game)
 /* Bandit open path: npc claims roster slot and queues ENCOUNTER open; genc owns reply/give. */
 void enemy_begin_encounter(struct GameState *game, GameEventQueue *out)
 {
-    if (npc_begin_encounter(game, GAME_DIALOGUE_ACTOR_BANDIT, DIALOGUE_ENEMY,
+    /* Fixed roster slot wins; fallback spawns a separate ambush actor. */
+    if (npc_fixed_begin_encounter_in_room(game, game->player.room_id, out)) {
+        game->enemy_handover_pick = 0;
+        return;
+    }
+    if (npc_begin_encounter(game, GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH,
+            DIALOGUE_ENEMY,
             GAME_ENCOUNTER_BANDIT, game->player.room_id, 0, out) >= 0) {
         game->enemy_handover_pick = 0;
     }
