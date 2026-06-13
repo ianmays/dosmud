@@ -88,7 +88,7 @@ static int fixture_bandit_handover_pick(struct GameState *game)
     if (!fixture_bandit_dialogue(game)) {
         return 0;
     }
-    slot = npc_find_by_actor(game, GAME_DIALOGUE_ACTOR_BANDIT);
+    slot = npc_find_by_dialogue(game, DIALOGUE_ENEMY);
     if (slot < 0) {
         return 0;
     }
@@ -109,7 +109,7 @@ static void fixture_bandit_wielded_pick(struct GameState *game)
     harness_drop_output(&out);
     enemy_begin_encounter(game, &out);
     game_render_output(game, &out);
-    slot = npc_find_by_actor(game, GAME_DIALOGUE_ACTOR_BANDIT);
+    slot = npc_find_by_dialogue(game, DIALOGUE_ENEMY);
     if (slot >= 0) {
         game->npcs[slot].flags |= NPC_FLAG_HANDOVER_PICK;
     }

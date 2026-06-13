@@ -580,7 +580,7 @@ TEST save_reconciles_legacy_enemy_handover_slot(void)
         save_read_game(save_test_path(), &loaded, &loaded_draws));
     loaded_slot = npc_find_by_dialogue(&loaded, DIALOGUE_ENEMY);
     ASSERT(loaded_slot >= 0);
-    ASSERT_EQ(GAME_DIALOGUE_ACTOR_BANDIT, loaded.npcs[loaded_slot].actor);
+    ASSERT_EQ(GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH, loaded.npcs[loaded_slot].actor);
     ASSERT_EQ(WORLD_ROOM_TOWER, loaded.npcs[loaded_slot].room_id);
     ASSERT_EQ(NPC_FLAG_HANDOVER_PICK,
         loaded.npcs[loaded_slot].flags & NPC_FLAG_HANDOVER_PICK);
@@ -619,7 +619,7 @@ TEST save_reconciles_legacy_enemy_dialogue_slot_without_handover_pick(void)
         save_read_game(save_test_path(), &loaded, &loaded_draws));
     loaded_slot = npc_find_by_dialogue(&loaded, DIALOGUE_ENEMY);
     ASSERT(loaded_slot >= 0);
-    ASSERT_EQ(GAME_DIALOGUE_ACTOR_BANDIT, loaded.npcs[loaded_slot].actor);
+    ASSERT_EQ(GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH, loaded.npcs[loaded_slot].actor);
     ASSERT_EQ(WORLD_ROOM_TOWER, loaded.npcs[loaded_slot].room_id);
     ASSERT_EQ(0,
         loaded.npcs[loaded_slot].flags & NPC_FLAG_HANDOVER_PICK);
@@ -649,7 +649,7 @@ TEST save_round_trip_preserves_seeded_fixed_bandit_profile(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     bandit_slot = npc_find_by_actor(&game, GAME_DIALOGUE_ACTOR_BANDIT);
     ASSERT(bandit_slot >= 0);
-    ASSERT_EQ(DIALOGUE_ENEMY, game.npcs[bandit_slot].dialogue);
+    ASSERT_EQ(DIALOGUE_NONE, game.npcs[bandit_slot].dialogue);
     ASSERT_EQ(GAME_ENCOUNTER_BANDIT, game.npcs[bandit_slot].encounter);
     ASSERT_EQ(WORLD_ROOM_ROAD, game.npcs[bandit_slot].room_id);
     ASSERT_EQ(NPC_FLAG_ACTIVE, game.npcs[bandit_slot].flags);
@@ -662,11 +662,46 @@ TEST save_round_trip_preserves_seeded_fixed_bandit_profile(void)
 
     loaded_slot = npc_find_by_actor(&loaded, GAME_DIALOGUE_ACTOR_BANDIT);
     ASSERT(loaded_slot >= 0);
-    ASSERT_EQ(DIALOGUE_ENEMY, loaded.npcs[loaded_slot].dialogue);
+    ASSERT_EQ(DIALOGUE_NONE, loaded.npcs[loaded_slot].dialogue);
     ASSERT_EQ(GAME_ENCOUNTER_BANDIT, loaded.npcs[loaded_slot].encounter);
     ASSERT_EQ(WORLD_ROOM_ROAD, loaded.npcs[loaded_slot].room_id);
     ASSERT_EQ(NPC_FLAG_ACTIVE, loaded.npcs[loaded_slot].flags);
     ASSERT_EQ(0U, loaded.npcs[loaded_slot].return_tick);
+    ASSERT_EQ(0U, loaded_draws);
+
+    save_cleanup_file();
+    PASS();
+}
+
+TEST save_backfills_seeded_fixed_bandit_when_missing_from_save(void)
+{
+    struct GameState game;
+    struct GameState loaded;
+    FILE *fp;
+    int bandit_slot;
+    u32 loaded_draws;
+
+    save_cleanup_file();
+    unit_game_fresh(&game, 333U);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    bandit_slot = npc_find_by_actor(&game, GAME_DIALOGUE_ACTOR_BANDIT);
+    ASSERT(bandit_slot >= 0);
+    ASSERT_EQ(SAVE_RESULT_OK,
+        save_write_game(save_test_path(), &game, 0U));
+
+    fp = fopen(save_test_path(), "r+b");
+    ASSERT(fp != 0);
+    ASSERT(save_zero_npc_slot(fp, bandit_slot));
+    fclose(fp);
+
+    ASSERT_EQ(SAVE_RESULT_OK,
+        save_read_game(save_test_path(), &loaded, &loaded_draws));
+    bandit_slot = npc_find_by_actor(&loaded, GAME_DIALOGUE_ACTOR_BANDIT);
+    ASSERT(bandit_slot >= 0);
+    ASSERT_EQ(DIALOGUE_NONE, loaded.npcs[bandit_slot].dialogue);
+    ASSERT_EQ(GAME_ENCOUNTER_BANDIT, loaded.npcs[bandit_slot].encounter);
+    ASSERT_EQ(WORLD_ROOM_ROAD, loaded.npcs[bandit_slot].room_id);
+    ASSERT_EQ(NPC_FLAG_ACTIVE, loaded.npcs[bandit_slot].flags);
     ASSERT_EQ(0U, loaded_draws);
 
     save_cleanup_file();
@@ -687,4 +722,5 @@ SUITE(save)
     RUN_TEST(save_reconciles_legacy_enemy_handover_slot);
     RUN_TEST(save_reconciles_legacy_enemy_dialogue_slot_without_handover_pick);
     RUN_TEST(save_round_trip_preserves_seeded_fixed_bandit_profile);
+    RUN_TEST(save_backfills_seeded_fixed_bandit_when_missing_from_save);
 }

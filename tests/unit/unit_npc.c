@@ -160,7 +160,7 @@ TEST npc_seed_fixed_bandit_sets_state(void)
     bandit = bandit_npc(&game);
     ASSERT(bandit != 0);
     ASSERT_EQ(GAME_DIALOGUE_ACTOR_BANDIT, bandit->actor);
-    ASSERT_EQ(DIALOGUE_ENEMY, bandit->dialogue);
+    ASSERT_EQ(DIALOGUE_NONE, bandit->dialogue);
     ASSERT_EQ(GAME_ENCOUNTER_BANDIT, bandit->encounter);
     ASSERT_EQ(WORLD_ROOM_ROAD, bandit->room_id);
     ASSERT_EQ(NPC_FLAG_ACTIVE, bandit->flags);
@@ -260,6 +260,7 @@ TEST npc_fixed_encounter_opens_in_matching_room(void)
     ASSERT_EQ(1, npc_fixed_begin_encounter_in_room(&game, WORLD_ROOM_ROAD, &out));
     ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
     ASSERT_EQ(DIALOGUE_ENEMY, game.dialogue);
+    ASSERT_EQ(DIALOGUE_ENEMY, bandit_npc(&game)->dialogue);
     ASSERT_EQ(1, out.count);
     ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
     ASSERT_EQ(GAME_ENCOUNTER_BANDIT, out.events[0].arg0);

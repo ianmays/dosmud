@@ -42,7 +42,7 @@ static const struct NpcRoomInfo NPC_ROOM_INFO[] = {
 
 static const struct NpcSeedInfo NPC_FIXED_ENCOUNTERS[] = {
     /* Fixed-location authored enemies live in the roster from reset onward. */
-    { GAME_DIALOGUE_ACTOR_BANDIT, DIALOGUE_ENEMY, GAME_ENCOUNTER_BANDIT,
+    { GAME_DIALOGUE_ACTOR_BANDIT, DIALOGUE_NONE, GAME_ENCOUNTER_BANDIT,
         WORLD_ROOM_ROAD, NPC_FLAG_ACTIVE }
 };
 
@@ -366,6 +366,9 @@ void npc_seed_fixed_enemies(struct GameState *game)
             i < (int)(sizeof(NPC_FIXED_ENCOUNTERS) /
                 sizeof(NPC_FIXED_ENCOUNTERS[0]));
             ++i) {
+        if (npc_find_by_actor(game, NPC_FIXED_ENCOUNTERS[i].actor) >= 0) {
+            continue;
+        }
         npc_spawn(game, NPC_FIXED_ENCOUNTERS[i].actor,
             NPC_FIXED_ENCOUNTERS[i].dialogue,
             NPC_FIXED_ENCOUNTERS[i].encounter,
@@ -473,6 +476,7 @@ int npc_fixed_begin_encounter_in_room(struct GameState *game, int room_id,
             continue;
         }
         /* Fixed encounters keep the authored slot; only mode/event state changes. */
+        npc->dialogue = DIALOGUE_ENEMY;
         npc_push_encounter_open(out, npc->encounter);
         game_set_mode_dialogue(game, npc->dialogue);
         return 1;

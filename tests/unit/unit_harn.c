@@ -119,7 +119,7 @@ TEST harness_apply_bandit_handover_pick(void)
     unit_game_fresh(&game, 5u);
     rc = testharn_apply(&game, "@fixture bandit_handover_pick");
     ASSERT_EQ(1, rc);
-    slot = npc_find_by_actor(&game, GAME_DIALOGUE_ACTOR_BANDIT);
+    slot = npc_find_by_dialogue(&game, DIALOGUE_ENEMY);
     ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
     ASSERT_EQ(DIALOGUE_ENEMY, game.dialogue);
     ASSERT(slot >= 0);

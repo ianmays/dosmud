@@ -484,7 +484,7 @@ static int save_valid_npc(const struct NpcState *npc, int room_count)
             npc->return_tick == 0;
     }
     if (npc->actor < GAME_DIALOGUE_ACTOR_NONE ||
-            npc->actor > GAME_DIALOGUE_ACTOR_BANDIT ||
+            npc->actor > GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH ||
             npc->dialogue < DIALOGUE_NONE ||
             npc->dialogue > DIALOGUE_ENEMY ||
             npc->encounter < GAME_ENCOUNTER_NONE ||
@@ -669,7 +669,8 @@ static void save_reconcile_enemy_handover(struct GameState *game)
     if (slot < 0 &&
             game->mode == GAME_MODE_DIALOGUE &&
             game->dialogue == DIALOGUE_ENEMY) {
-        slot = npc_spawn(game, GAME_DIALOGUE_ACTOR_BANDIT, DIALOGUE_ENEMY,
+        slot = npc_spawn(game, GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH,
+            DIALOGUE_ENEMY,
             GAME_ENCOUNTER_BANDIT, game->player.room_id, NPC_FLAG_ACTIVE);
     }
     if (slot >= 0) {
@@ -793,6 +794,7 @@ int save_read_game(const char *path, struct GameState *out_game,
         goto done;
     }
     save_reconcile_enemy_handover(&g_save_loaded);
+    npc_seed_fixed_enemies(&g_save_loaded);
     /* Reject padded or concatenated files; payload must end at EOF. */
     trailing = fgetc(fp);
     if (trailing != EOF) {

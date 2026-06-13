@@ -143,8 +143,10 @@ enum GameEventDialogueActor {
     GAME_DIALOGUE_ACTOR_ARCHIVIST = 4,
     GAME_DIALOGUE_ACTOR_TRAVELER = 5,
     GAME_DIALOGUE_ACTOR_NOBODY = 6,
-    /* dynamic bandit roster actor; appended to keep prior save actor ids stable */
-    GAME_DIALOGUE_ACTOR_BANDIT = 7
+    /* fixed road bandit; keep id stable for existing saves */
+    GAME_DIALOGUE_ACTOR_BANDIT = 7,
+    /* dynamic random ambush bandit; shares enemy encounter logic */
+    GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH = 8
 };
 
 enum GameEventDialoguePhase {
