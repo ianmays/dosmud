@@ -195,7 +195,7 @@ Conventions:
 - mode transitions via `game_set_mode_explore`, `game_set_mode_dialogue`, and `game_set_mode_combat` (only one major mode at a time)
 - `game_is_busy_dialogue` returns true whenever `mode != GAME_MODE_EXPLORE` (ambient encounters, idle background ticks)
 - `game_roll_spread` and `game_roll_percent` centralize gameplay draws used for combat, corpse loot, kill XP, and bandit intimidate (`plat_rand()` when inject is inactive; inject bypasses the draw counter in `TEST_MODE`)
-- `TEST_MODE` only: `game_roll_inject_*` and `test_quiet_ticks` on `GameState`; when `test_quiet_ticks` is set, `advance_world_tick` skips ambient atmosphere, animal noise, fixed enemy room checks, and roster-driven roaming NPC movement (see [quiet ticks](testing.md#quiet-ticks-test_quiet_ticks-test_mode-only))
+- `TEST_MODE` only: `game_roll_inject_*` and `test_quiet_ticks` on `GameState`; when `test_quiet_ticks` is set, `advance_world_tick` skips ambient atmosphere, animal noise, fixed enemy room checks, random bandit ambush rolls, and roster-driven roaming NPC movement (see [quiet ticks](testing.md#quiet-ticks-test_quiet_ticks-test_mode-only))
 - ambient, roster-driven roaming NPCs, and world generation randomness flow through tracked `plat_rand()` so save/load can restore future deterministic draws
 
 Gameplay slices live beside `game.c` as plain C translation units (no extra framework):

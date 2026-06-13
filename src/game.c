@@ -455,6 +455,9 @@ static int apply_command(struct GameState *game, struct Command *cmd,
 static void advance_world_tick(struct GameState *game, int roaming_moves_first,
                                GameEventQueue *out)
 {
+    int fixed_opened;
+    int roll;
+
     /*
      * Tick order is deliberate: advance the roaming roster and world clock,
      * then emit ambient events, then consider random encounters so one input
@@ -488,13 +491,13 @@ static void advance_world_tick(struct GameState *game, int roaming_moves_first,
     maybe_emit_animal_noise(game, out);
     maybe_emit_atmosphere(game, out);
     if (!game_is_busy_dialogue(game)) {
-        /*
-         * Preserve the legacy per-tick gameplay RNG draw budget so ambient
-         * output, save/load replay, and existing deterministic tests keep the
-         * same stream when fixed encounters do not open.
-         */
-        (void)(plat_rand() % CFG_ROLL_PERCENT_RANGE);
-        npc_fixed_begin_encounter_in_room(game, game->player.room_id, out);
+        fixed_opened = npc_fixed_begin_encounter_in_room(game,
+            game->player.room_id, out);
+        roll = plat_rand() % CFG_ROLL_PERCENT_RANGE;
+        if (!fixed_opened && !game_is_busy_dialogue(game) &&
+                roll < CFG_BANDIT_ENCOUNTER_CHANCE_BELOW) {
+            enemy_begin_encounter(game, out);
+        }
     }
 }
 

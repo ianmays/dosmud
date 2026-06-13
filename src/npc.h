@@ -42,8 +42,6 @@ void npc_roaming_step(struct GameState *game);
 /* Open fixed encounter in room_id when an active authored slot matches; returns 1. */
 int npc_fixed_begin_encounter_in_room(struct GameState *game, int room_id,
     struct GameEventQueue *out);
-void npc_fixed_begin_encounter(struct GameState *game,
-    struct GameEventQueue *out);
 void npc_roaming_begin_encounter(struct GameState *game,
     struct GameEventQueue *out);
 int npc_roaming_begin_encounter_in_room(struct GameState *game, int room_id,

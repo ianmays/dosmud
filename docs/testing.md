@@ -259,7 +259,7 @@ For marsh item/craft snapshots, prefer `at_marsh_reed` over walking camp intimid
 
 ### Quiet ticks (`test_quiet_ticks`, `TEST_MODE` only)
 
-`quiet_explore` sets `GameState.test_quiet_ticks` and disables the roster-backed traveler entry. While set, `advance_world_tick` only increments the tick and runs `world_step`; it skips animal noise, atmosphere, fixed enemy room checks, and roaming NPC movement/spawn. Use this for snapshots that call `wait` or `move` so output does not depend on ambient `plat_rand()` draws.
+`quiet_explore` sets `GameState.test_quiet_ticks` and disables the roster-backed traveler entry. While set, `advance_world_tick` only increments the tick and runs `world_step`; it skips animal noise, atmosphere, fixed enemy room checks, random bandit ambush rolls, and roaming NPC movement/spawn. Use this for snapshots that call `wait` or `move` so output does not depend on ambient `plat_rand()` draws.
 
 ### `@seed` in `.input` files
 

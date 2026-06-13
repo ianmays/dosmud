@@ -480,11 +480,6 @@ int npc_fixed_begin_encounter_in_room(struct GameState *game, int room_id,
     return 0;
 }
 
-void npc_fixed_begin_encounter(struct GameState *game, GameEventQueue *out)
-{
-    (void)npc_fixed_begin_encounter_in_room(game, game->player.room_id, out);
-}
-
 /*
  * Returns 1 when an encounter opened. Lowest matching slot wins when several
  * roaming NPCs share room_id; separation prevents immediate retrigger.
