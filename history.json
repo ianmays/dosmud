@@ -1637,6 +1637,48 @@
         "branch_pct": 97.61,
         "line_pct": 87.22
       }
+    },
+    {
+      "timestamp": "2026-06-14T19:56:16Z",
+      "sha": "23173a4",
+      "result": "pass",
+      "steps": {
+        "check-layers": 7,
+        "make build": 628,
+        "make test": 635,
+        "make build-unit": 2913,
+        "make build-soak": 762,
+        "snapshots": 137,
+        "unit tests": 7,
+        "unit coverage": 2449,
+        "soak tests": 6
+      },
+      "benchmarks": {
+        "background_ticks": 0,
+        "command_ticks": 0,
+        "combat_rounds": 0
+      },
+      "test_counts": {
+        "snapshots": {
+          "pass": 76,
+          "fail": 0,
+          "skip": 0
+        },
+        "unit": {
+          "pass": 222,
+          "fail": 0,
+          "skip": 0
+        },
+        "soak": {
+          "pass": 3,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "unit_coverage_overall": {
+        "branch_pct": 97.95,
+        "line_pct": 87.18
+      }
     }
   ]
 }
