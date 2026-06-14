@@ -198,6 +198,12 @@ static u32 npc_respawn_return_tick(struct GameState *game,
         (u32)(plat_rand() % profile->respawn_delay_spread);
 }
 
+static u32 npc_profile_return_tick_from_base(const struct GameState *game,
+                                             const struct NpcProfile *profile)
+{
+    return game->tick + profile->respawn_delay_base;
+}
+
 /* roam_start_tick on the profile keeps early road encounter beats seed-stable. */
 static int npc_roaming_can_step(const struct GameState *game,
                                 const struct NpcState *npc)
@@ -453,6 +459,36 @@ void npc_seed_profiles(struct GameState *game)
         }
         npc_spawn(game, profile->actor, profile->dialogue, profile->encounter,
             profile->spawn_room, profile->flags);
+    }
+}
+
+/*
+ * Save migrations keep SAVE_VERSION stable when the roster layout is unchanged
+ * and only profile semantics evolve. Older saves may carry the road bandit
+ * without roaming/respawn flags or return timing; normalize those slots here.
+ */
+void npc_upgrade_loaded_profiles(struct GameState *game)
+{
+    int slot;
+    struct NpcState *npc;
+    const struct NpcProfile *profile;
+
+    for (slot = 0; slot < CFG_NPC_MAX; ++slot) {
+        npc = &game->npcs[slot];
+        profile = npc_profile_by_actor(npc->actor);
+        if (profile == 0) {
+            continue;
+        }
+        npc->encounter = profile->encounter;
+        if (npc->dialogue != DIALOGUE_ENEMY) {
+            npc->dialogue = profile->dialogue;
+        }
+        npc->flags |= profile->flags & (NPC_FLAG_ROAMING | NPC_FLAG_RESPAWNS);
+        if ((npc->flags & NPC_FLAG_ACTIVE) == 0 &&
+                (npc->flags & NPC_FLAG_RESPAWNS) != 0 &&
+                npc->return_tick == 0) {
+            npc->return_tick = npc_profile_return_tick_from_base(game, profile);
+        }
     }
 }
 

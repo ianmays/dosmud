@@ -3,6 +3,7 @@
 #include "config.h"
 #include "game.h"
 #include "items.h"
+#include "npc.h"
 #include "save.h"
 
 /*
@@ -774,6 +775,11 @@ int save_read_game(const char *path, struct GameState *out_game,
     /* Validate into g_save_loaded so a bad file does not clobber out_game. */
     if (!save_valid_rng_draw_count(loaded_rng_draw_count) ||
             !save_validate_game(&g_save_loaded)) {
+        rc = SAVE_RESULT_RANGE;
+        goto done;
+    }
+    npc_upgrade_loaded_profiles(&g_save_loaded);
+    if (!save_validate_game(&g_save_loaded)) {
         rc = SAVE_RESULT_RANGE;
         goto done;
     }

@@ -448,8 +448,7 @@ static int apply_command(struct GameState *game, struct Command *cmd,
     return 0;
 }
 
-static void advance_world_tick(struct GameState *game, int roaming_moves_first,
-                               GameEventQueue *out)
+static void advance_world_tick(struct GameState *game, GameEventQueue *out)
 {
     int fixed_opened;
     int roll;
@@ -476,11 +475,6 @@ static void advance_world_tick(struct GameState *game, int roaming_moves_first,
      * co-located; otherwise the roster gets one movement step, then a second
      * encounter check in the new room layout.
      */
-    /*
-     * roaming_moves_first is ignored: move and wait share one
-     * encounter-before-step order now that bandit ambushes no longer roll here.
-     */
-    (void)roaming_moves_first;
     if (!npc_roaming_begin_encounter_in_room(game, game->player.room_id, out) &&
             !game_is_busy_dialogue(game)) {
         npc_roaming_step(game);
@@ -522,11 +516,7 @@ int game_process_input(struct GameState *game, char *line, GameEventQueue *out)
     }
 
     if (command_advances_time(cmd.type)) {
-        if (cmd.type == CMD_MOVE) {
-            advance_world_tick(game, 0, out);
-        } else {
-            advance_world_tick(game, 1, out);
-        }
+        advance_world_tick(game, out);
     }
 
     return 1;
@@ -534,5 +524,5 @@ int game_process_input(struct GameState *game, char *line, GameEventQueue *out)
 
 void game_background_step(struct GameState *game, GameEventQueue *out)
 {
-    advance_world_tick(game, 1, out);
+    advance_world_tick(game, out);
 }
