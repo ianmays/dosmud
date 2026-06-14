@@ -199,6 +199,7 @@ TEST npc_roaming_step_moves(void)
     ASSERT(traveler != 0);
     ASSERT(bandit != 0);
     traveler->room_id = WORLD_ROOM_CAMP;
+    /* Bandit stays inactive so roaming_step RNG applies only to the traveler. */
     bandit->flags &= ~NPC_FLAG_ACTIVE;
     plat_seed_rng(42u);
     ASSERT_EQ(0U, plat_rand_draw_count());

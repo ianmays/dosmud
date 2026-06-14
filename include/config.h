@@ -137,7 +137,10 @@
 
 /* Dynamic NPC roster cap (save payload and per-tick roaming walks). */
 #define CFG_NPC_MAX 4
-/* Bandit roaming */
+/*
+ * Bandit roaming profile (seeded on WORLD_ROOM_ROAD): no movement steps until
+ * roam start tick; respawn delay draws one plat_rand() at encounter teardown.
+ */
 #define CFG_BANDIT_ROAM_START_TICK 8
 #define CFG_BANDIT_RETURN_DELAY_BASE 6
 #define CFG_BANDIT_RETURN_DELAY_SPREAD 10

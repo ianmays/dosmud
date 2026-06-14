@@ -43,7 +43,10 @@ static struct NpcState *active_enemy_npc(struct GameState *game)
 /* Bandit open path: npc claims roster slot and queues ENCOUNTER open; genc owns reply/give. */
 void enemy_begin_encounter(struct GameState *game, GameEventQueue *out)
 {
-    /* Existing roster slot in the room wins; fallback keeps explicit ambush tests working. */
+    /*
+     * Roaming slot in-room wins, then any fixed slot, then dynamic ambush spawn
+     * for explicit genc callers and tests that expect a fresh roster actor.
+     */
     if (npc_roaming_begin_encounter_in_room(game, game->player.room_id, out) ||
             npc_fixed_begin_encounter_in_room(game, game->player.room_id, out)) {
         return;

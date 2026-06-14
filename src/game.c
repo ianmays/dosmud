@@ -477,6 +477,10 @@ static void advance_world_tick(struct GameState *game, int roaming_moves_first,
      * co-located; otherwise the roster gets one movement step, then a second
      * encounter check in the new room layout.
      */
+    /*
+     * roaming_moves_first is ignored: move and wait share one
+     * encounter-before-step order now that bandit ambushes no longer roll here.
+     */
     (void)roaming_moves_first;
     if (!npc_roaming_begin_encounter_in_room(game, game->player.room_id, out) &&
             !game_is_busy_dialogue(game)) {

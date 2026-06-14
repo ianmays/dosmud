@@ -716,7 +716,9 @@ Done ✅ ([#190](https://github.com/ianmays/dosmud/pull/190)).
 
 ### [#107](https://github.com/ianmays/dosmud/issues/107) - Enemies (Bandits) spawn and wander
 
-**Execution order vs GitHub milestone:** the flowchart pulls #107 into m9a (Engine Enhancements) before proposed m10; GitHub still labels milestone 8 (Advanced Mechanics). Treat m9 as the execution lane for NPC engine work; the m8 table row here is thematic grouping only. In progress ([#192](https://github.com/ianmays/dosmud/pull/192)).
+**Execution order vs GitHub milestone:** the flowchart pulls #107 into m9a (Engine Enhancements) before proposed m10; GitHub still labels milestone 8 (Advanced Mechanics). Treat m9 as the execution lane for NPC engine work; the m8 table row here is thematic grouping only.
+
+Done ✅ ([#192](https://github.com/ianmays/dosmud/pull/192)).
 
 ### Testing
 - Unit: `unit_npc.c` (seed/roam/respawn), `unit_genc.c` (roster encounter open), `unit_save.c` (seeded roaming bandit round-trip)

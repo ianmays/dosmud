@@ -140,6 +140,10 @@ static void npc_push_encounter_open(GameEventQueue *out, int kind)
         GAME_ENCOUNTER_ACTION_OPEN, GAME_ENCOUNTER_OUTCOME_NONE, 0, 0);
 }
 
+/*
+ * Bandit seed rows keep dialogue NONE; genc and combat still gate on
+ * DIALOGUE_ENEMY once a roaming encounter opens in the player's room.
+ */
 static int npc_encounter_dialogue_kind(const struct NpcState *npc)
 {
     if (npc->encounter == GAME_ENCOUNTER_BANDIT) {
@@ -148,6 +152,7 @@ static int npc_encounter_dialogue_kind(const struct NpcState *npc)
     return npc->dialogue;
 }
 
+/* Bandit respawn timing; traveler delay stays in npc_roaming_cmd_reply instead. */
 static u32 npc_respawn_return_tick(struct GameState *game,
                                    const struct NpcState *npc)
 {
@@ -158,6 +163,7 @@ static u32 npc_respawn_return_tick(struct GameState *game,
     return 0;
 }
 
+/* Warmup ticks keep the road-start bandit still so early encounter beats stay seed-stable. */
 static int npc_roaming_can_step(const struct GameState *game,
                                 const struct NpcState *npc)
 {
@@ -331,6 +337,7 @@ int npc_deactivate_until(struct GameState *game, int actor, u32 return_tick)
     }
     npc = npc_slot(game, slot);
     if (npc->encounter == GAME_ENCOUNTER_BANDIT) {
+        /* Restore idle roaming profile; dialogue is set again on next co-location open. */
         npc->dialogue = DIALOGUE_NONE;
     }
     npc->flags &= ~(NPC_FLAG_ACTIVE | NPC_FLAG_NEEDS_SEPARATION |
@@ -360,7 +367,10 @@ int npc_begin_encounter(struct GameState *game, int actor, int dialogue,
     return slot;
 }
 
-/* Immediate encounter teardown; return_tick 0 means no scheduled respawn. */
+/*
+ * Immediate encounter teardown. Respawning roster profiles schedule
+ * return_tick here; 0 keeps the slot inactive with no due reactivation.
+ */
 int npc_end_encounter(struct GameState *game, int actor)
 {
     int slot;
