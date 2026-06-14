@@ -35,7 +35,7 @@ When a draft **implementation** PR is opened for an issue that **already has a s
 
 **Agents:** search for the issue (`#N` or section heading) before editing. For a new milestone-tracked issue whose milestone is **already represented** in this file: add the table row and `### [#N](...)` stub via [milestone-issue-hygiene](.cursor/skills/milestone-issue-hygiene/SKILL.md) in a **docs PR** (GitHub-only hygiene in plan mode; no `DEV_PLAN.md` commits until a branch is allowed). Mark **Done ✅** only when a draft **implementation** PR opens. Do not add sections for BAU issues without a Milestone, or for Milestones not tracked here. See [`AGENTS.md`](AGENTS.md) **DEV_PLAN updates**. To reconcile this file with GitHub, use [audit-github-devplan](.cursor/skills/audit-github-devplan/SKILL.md).
 
-**Milestones:** [Structural Cleanup + ANSI C89 Enforcement](https://github.com/ianmays/dosmud/milestone/1) · [State Ownership and Boundary Isolation](https://github.com/ianmays/dosmud/milestone/2) · [Deterministic Test Harness Evolution](https://github.com/ianmays/dosmud/milestone/3) · [Workflow and Tooling Maturity](https://github.com/ianmays/dosmud/milestone/4) · [Advanced Architecture](https://github.com/ianmays/dosmud/milestone/5) · [Content Expansion](https://github.com/ianmays/dosmud/milestone/6) · [Renderer](https://github.com/ianmays/dosmud/milestone/7) · [Advanced Mechanics](https://github.com/ianmays/dosmud/milestone/8) · [Engine Enhancements](https://github.com/ianmays/dosmud/milestone/9)
+**Milestones:** [Structural Cleanup + ANSI C89 Enforcement](https://github.com/ianmays/dosmud/milestone/1) · [State Ownership and Boundary Isolation](https://github.com/ianmays/dosmud/milestone/2) · [Deterministic Test Harness Evolution](https://github.com/ianmays/dosmud/milestone/3) · [Workflow and Tooling Maturity](https://github.com/ianmays/dosmud/milestone/4) · [Advanced Architecture](https://github.com/ianmays/dosmud/milestone/5) · [Content Expansion](https://github.com/ianmays/dosmud/milestone/6) · [Renderer](https://github.com/ianmays/dosmud/milestone/7) · [Advanced Mechanics](https://github.com/ianmays/dosmud/milestone/8) · [Engine Enhancements](https://github.com/ianmays/dosmud/milestone/9) · **Authored content and engine IoC (proposed milestone 10)**
 
 ### Execution order (open work)
 
@@ -52,10 +52,13 @@ flowchart LR
     M5late["16"]
   end
   subgraph m9a [Engine_NPC]
-    M9a["104,100,187,101"]
+    M9a["104,100,187,101,107"]
+  end
+  subgraph m10 [Authored_content_IoC]
+    M10["TBD profiles, handlers, narrative"]
   end
   subgraph m8 [Advanced_Mechanics]
-    M8["129,4,5,15,50,132,102,107,9,31,52,49,145"]
+    M8["129,4,5,15,50,132,102,9,31,52,49,145"]
   end
   subgraph m6 [Content_Expansion]
     M6["55,7,8,51,54,76,130,131"]
@@ -70,7 +73,8 @@ flowchart LR
   M5chain --> M5adj
   M5chain --> M5late
   M5chain --> m9a
-  m9a --> m8
+  m9a --> m10
+  m10 --> m8
   m8 --> m6
   M5chain --> m7
   M5chain --> m9b
@@ -589,7 +593,7 @@ Single-slot save/load landed through shell-edge [`save.c`](../src/save.c) / [`sa
 
 ## [Content Expansion](https://github.com/ianmays/dosmud/milestone/6)
 
-Gameplay and world content after core architecture stabilizes. Related mechanics (economy, quests, schedules, reputation) live under [Advanced Mechanics](https://github.com/ianmays/dosmud/milestone/8).
+Gameplay and world content after core architecture stabilizes. Related mechanics (economy, quests, schedules, reputation) live under [Advanced Mechanics](https://github.com/ianmays/dosmud/milestone/8). Authored cast, encounters, and narrative pathway issues (#8, #54, #76) depend on [Authored content and engine IoC](#authored-content-and-engine-ioc-proposed-milestone-10) (proposed milestone 10) for table-driven placement and narrative hooks.
 
 | Issue | Title | Size |
 |-------|-------|------|
@@ -610,9 +614,15 @@ Gameplay and world content after core architecture stabilizes. Related mechanics
 
 ### [#54](https://github.com/ianmays/dosmud/issues/54) - Procedural encounters
 
+After [#107](https://github.com/ianmays/dosmud/issues/107), procedural encounter work means **rules over roster profiles** (roam, respawn, co-location), not player-site ambush spawn. Blocked-by proposed m10 profile table (#TBD-1; first slice in progress in [#192](https://github.com/ianmays/dosmud/pull/192)).
+
 ### [#55](https://github.com/ianmays/dosmud/issues/55) - Larger worlds
 
 ### [#76](https://github.com/ianmays/dosmud/issues/76) - Concrete narrative
+
+North-star **consumer** of proposed m10 placement and narrative layers (and m8 [#49](https://github.com/ianmays/dosmud/issues/49) / [#52](https://github.com/ianmays/dosmud/issues/52)), not a substitute for them. GitHub intent: author-defined narrative pathway rather than seed-planted randomness alone; may leverage TEST_MODE fixtures and replay for deterministic beat tests.
+
+Author-defined structure does **not** abandon project determinism: same seed, inputs, and pathway state should replay identically. Keep #76 in m6 backlog until m10 profile and narrative indirection work is underway. When grooming, consider splitting into (a) pathway / beat engine hooks and (b) authored story data packs. Blocked-by (GitHub, when m10 issues exist): at minimum #TBD-1 and #TBD-3; likely #TBD-2, #52, and #49 before full delivery.
 
 ### [#130](https://github.com/ianmays/dosmud/issues/130) - Night time
 
@@ -684,7 +694,11 @@ Rolled strength / vitality (etc.) at game start; may later wire into combat form
 
 ### [#52](https://github.com/ianmays/dosmud/issues/52) - NPC schedules
 
+Blocked-by proposed m10 placement profile table (#TBD-1).
+
 ### [#49](https://github.com/ianmays/dosmud/issues/49) - Quests
+
+Blocked-by [#52](https://github.com/ianmays/dosmud/issues/52).
 
 ### [#50](https://github.com/ianmays/dosmud/issues/50) - Economy
 
@@ -761,6 +775,40 @@ Move the ambient bandit encounter off the one-off `GameState.enemy_handover_pick
 - Snapshots: existing bandit snapshots unchanged (`bandit_handover`, `bandit_wielded_give`, `bandit_fight`, `bandit_intimidate_ok`, `bandit_intimidate_fail`, `bandit_bag_empty`)
 
 ### [#92](https://github.com/ianmays/dosmud/issues/92) - Multiplayer
+
+## Authored content and engine IoC (proposed milestone 10)
+
+**Goal:** Move authored placement, lifecycle, gameplay, and narrative toward **static C89 tables** the engine interprets (inversion of control). No runtime JSON loader, no ECS, no framework. Instance state stays on `GameState`; authored data stays in const tables keyed by stable ids (`actor`, `encounter`).
+
+**m10 vs [Content Expansion](https://github.com/ianmays/dosmud/milestone/6):** m10 is the **platform** (how the engine reads tables). m6 is the **product** (worlds, weather, dialogue breadth, story beats). They complement; do not merge milestones.
+
+**Layers:**
+
+| Layer | Artifact | Owner | Status |
+|-------|----------|-------|--------|
+| Instance | `NpcState[]` | `game.h`, `npc.c` | Done ([#187](https://github.com/ianmays/dosmud/pull/188)) |
+| Placement profile | `NpcProfile[]` / `NPC_PROFILES[]` | `npc.c` | In progress ([#192](https://github.com/ianmays/dosmud/pull/192); closes #TBD-1 slice) |
+| Encounter gameplay | handler registry | `genc.c` | Planned (#TBD-2) |
+| Narrative | txtres indirection | `grendr.c`, `txtres.c` | Planned (#TBD-3) |
+| Room talk | profile or parallel table | `npc.c`, `dialogue.c` | Planned (#TBD-4) |
+| Schedule / quest | rules over profile ids | #52, #49 | Future (m8) |
+
+**Non-goals:** external config files, DOS runtime parsing, quest DSL, multiplayer ([#92](https://github.com/ianmays/dosmud/issues/92)).
+
+**Consumers:** m8 [#52](https://github.com/ianmays/dosmud/issues/52), [#49](https://github.com/ianmays/dosmud/issues/49); m6 [#76](https://github.com/ianmays/dosmud/issues/76) (XL), [#8](https://github.com/ianmays/dosmud/issues/8), [#54](https://github.com/ianmays/dosmud/issues/54).
+
+**Stub issue table** (create GitHub milestone 10 and issues when grooming; replace #TBD-n with real `#N`):
+
+| Stub | Title | Size | Blocked by | Notes |
+|------|-------|------|------------|-------|
+| #TBD-1 | npc placement profile table v1 | M | #107 | First slice in [#192](https://github.com/ianmays/dosmud/pull/192) |
+| #TBD-2 | encounter handler registry | M | #TBD-1 | Thin indirection in `genc.c` |
+| #TBD-3 | narrative event indirection | M | #TBD-2 | Reduce `grendr.c` encounter switches |
+| #TBD-4 | room NPC profile table | S | #TBD-1 | Optional merge of `NPC_ROOM_INFO` |
+| (existing) | [#52](https://github.com/ianmays/dosmud/issues/52) npc schedules | L | #TBD-1 | m8 |
+| (existing) | [#49](https://github.com/ianmays/dosmud/issues/49) quests | M | #52 | m8 |
+
+**Pull order:** after m9 NPC roster ([#104](https://github.com/ianmays/dosmud/issues/104), [#100](https://github.com/ianmays/dosmud/issues/100), [#187](https://github.com/ianmays/dosmud/issues/187), [#101](https://github.com/ianmays/dosmud/issues/101), [#107](https://github.com/ianmays/dosmud/issues/107)) and before m8/m6 content that depends on authored tables.
 
 # Important Final Guidance
 
