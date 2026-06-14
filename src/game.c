@@ -21,7 +21,7 @@ static void push_dialogue_guard(GameEventQueue *out, int reason)
     game_event_push(out, GAME_EVENT_DIALOGUE_GUARD, reason, 0, 0, 0, 0);
 }
 
-/* Handover gating reads the active enemy slot; enemy_handover_pick is save-only mirror. */
+/* Handover gating reads NPC_FLAG_HANDOVER_PICK on the active enemy slot. */
 static int game_enemy_handover_pick_active(const struct GameState *game)
 {
     int slot;
@@ -37,21 +37,18 @@ void game_set_mode_explore(struct GameState *game)
 {
     game->mode = GAME_MODE_EXPLORE;
     game->dialogue = DIALOGUE_NONE;
-    game->enemy_handover_pick = 0;
 }
 
 void game_set_mode_dialogue(struct GameState *game, enum DialogueKind kind)
 {
     game->mode = GAME_MODE_DIALOGUE;
     game->dialogue = kind;
-    game->enemy_handover_pick = 0;
 }
 
 void game_set_mode_combat(struct GameState *game)
 {
     game->mode = GAME_MODE_COMBAT;
     game->dialogue = DIALOGUE_NONE;
-    game->enemy_handover_pick = 0;
 }
 
 int game_is_busy_dialogue(struct GameState *game)

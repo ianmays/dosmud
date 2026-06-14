@@ -292,6 +292,7 @@ TEST game_bandit_handover_pick(void)
     slot = npc_find_by_dialogue(&game, DIALOGUE_ENEMY);
     bandit = slot >= 0 ? &game.npcs[slot] : 0;
     ASSERT(bandit != 0);
+    /* handover gating reads NPC_FLAG_HANDOVER_PICK on the active enemy slot */
     ASSERT_EQ(NPC_FLAG_HANDOVER_PICK,
         bandit->flags & NPC_FLAG_HANDOVER_PICK);
     ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);

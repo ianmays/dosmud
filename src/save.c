@@ -3,18 +3,17 @@
 #include "config.h"
 #include "game.h"
 #include "items.h"
-#include "npc.h"
 #include "save.h"
 
 /*
  * save.c owns explicit binary serialization of the durable simulation state.
  * The format is versioned and field-by-field so compiler padding and TEST_MODE
  * conditionals do not silently corrupt save files.
+ * Load accepts only SAVE_VERSION; no migrators or roster repair on read.
  */
 
 #define SAVE_MAGIC "DMSV"
-#define SAVE_VERSION 4
-#define SAVE_VERSION_LEGACY_ROSTER 3
+#define SAVE_VERSION 5
 #define SAVE_PATH_BUF_MAX 260
 
 /*
@@ -155,7 +154,7 @@ static int save_read_u32(FILE *fp, u32 *value)
     return 1;
 }
 
-/* Fixed CFG_NPC_MAX slots in index order; v3 replaces the v2 roaming fields. */
+/* Full NPC roster in slot index order; layout matches save_valid_npc invariants. */
 static int save_write_npcs(FILE *fp, const struct GameState *game)
 {
     int i;
@@ -378,7 +377,6 @@ static int save_write_game_state(FILE *fp, const struct GameState *game,
             !save_write_s16(fp, game->damage_bonus) ||
             !save_write_s16(fp, game->weapon_equipped) ||
             !save_write_s16(fp, game->player_hp) ||
-            !save_write_s16(fp, game->enemy_handover_pick) ||
             !save_write_s16(fp, game->combat.enemy_hp) ||
             !save_write_s16(fp, game->combat.defending)) {
         return 0;
@@ -419,7 +417,6 @@ static int save_read_game_state(FILE *fp, struct GameState *game,
             !save_read_s16(fp, &game->damage_bonus) ||
             !save_read_s16(fp, &game->weapon_equipped) ||
             !save_read_s16(fp, &game->player_hp) ||
-            !save_read_s16(fp, &game->enemy_handover_pick) ||
             !save_read_s16(fp, &game->combat.enemy_hp) ||
             !save_read_s16(fp, &game->combat.defending)) {
         return 0;
@@ -507,26 +504,6 @@ static int save_valid_npc(const struct NpcState *npc, int room_count)
         return 0;
     }
     return 1;
-}
-
-static void save_migrate_v3_bandit_slot(struct GameState *game)
-{
-    int slot;
-    struct NpcState *npc;
-
-    slot = npc_find_by_actor(game, GAME_DIALOGUE_ACTOR_BANDIT);
-    if (slot < 0) {
-        return;
-    }
-    npc = &game->npcs[slot];
-    if (npc->dialogue == DIALOGUE_NONE &&
-            npc->encounter == GAME_ENCOUNTER_BANDIT &&
-            npc->room_id == WORLD_ROOM_ROAD &&
-            npc->flags == NPC_FLAG_ACTIVE &&
-            npc->return_tick == 0U) {
-        return;
-    }
-    npc->actor = GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH;
 }
 
 static int save_valid_map_projection(const struct World *world)
@@ -642,7 +619,6 @@ static int save_validate_game(const struct GameState *game)
             !save_valid_item(game->weapon_equipped) ||
             game->player_hp < 0 ||
             game->player_hp > game->max_hp ||
-            !save_valid_boolish(game->enemy_handover_pick) ||
             game->combat.enemy_hp < 0 ||
             !save_valid_boolish(game->combat.defending)) {
         return 0;
@@ -680,27 +656,6 @@ static int save_validate_game(const struct GameState *game)
     }
 #endif
     return 1;
-}
-
-static void save_reconcile_enemy_handover(struct GameState *game)
-{
-    int slot;
-
-    slot = npc_find_by_dialogue(game, DIALOGUE_ENEMY);
-    if (slot < 0 &&
-            game->mode == GAME_MODE_DIALOGUE &&
-            game->dialogue == DIALOGUE_ENEMY) {
-        slot = npc_spawn(game, GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH,
-            DIALOGUE_ENEMY,
-            GAME_ENCOUNTER_BANDIT, game->player.room_id, NPC_FLAG_ACTIVE);
-    }
-    if (slot >= 0) {
-        if (game->enemy_handover_pick) {
-            game->npcs[slot].flags |= NPC_FLAG_HANDOVER_PICK;
-        } else {
-            game->npcs[slot].flags &= ~NPC_FLAG_HANDOVER_PICK;
-        }
-    }
 }
 
 int save_write_game(const char *path, const struct GameState *game,
@@ -804,23 +759,13 @@ int save_read_game(const char *path, struct GameState *out_game,
         rc = SAVE_RESULT_IO;
         goto done;
     }
-    /*
-     * v3 replaces the single roaming NPC fields with a fixed-size roster.
-     * v4 keeps the same layout and reserves a distinct ambush actor so old
-     * bandit encounter slots can migrate before fixed-enemy seeding.
-     */
-    if (version != (u16)SAVE_VERSION &&
-            version != (u16)SAVE_VERSION_LEGACY_ROSTER) {
+    /* Strict version gate; add per-version readers here if SAVE_VERSION bumps again. */
+    if (version != (u16)SAVE_VERSION) {
         goto done;
     }
     if (!save_read_game_state(fp, &g_save_loaded, &loaded_rng_draw_count)) {
         goto done;
     }
-    if (version == (u16)SAVE_VERSION_LEGACY_ROSTER) {
-        save_migrate_v3_bandit_slot(&g_save_loaded);
-    }
-    save_reconcile_enemy_handover(&g_save_loaded);
-    npc_seed_fixed_enemies(&g_save_loaded);
     /* Reject padded or concatenated files; payload must end at EOF. */
     trailing = fgetc(fp);
     if (trailing != EOF) {

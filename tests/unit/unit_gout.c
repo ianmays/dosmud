@@ -258,6 +258,14 @@ TEST game_event_push_records_bandit_ambush_actor_value(void)
     PASS();
 }
 
+TEST game_dialogue_actor_bandit_ids_are_distinct(void)
+{
+    ASSERT(GAME_DIALOGUE_ACTOR_BANDIT != GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH);
+    ASSERT_EQ(7, GAME_DIALOGUE_ACTOR_BANDIT);
+    ASSERT_EQ(8, GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH);
+    PASS();
+}
+
 SUITE(gout) {
     RUN_TEST(game_event_queue_reset_clears_state);
     RUN_TEST(game_event_push_ignores_null_output);
@@ -272,4 +280,5 @@ SUITE(gout) {
     RUN_TEST(game_event_push_records_dialogue_encounter_kinds);
     RUN_TEST(game_event_push_records_bandit_actor_value);
     RUN_TEST(game_event_push_records_bandit_ambush_actor_value);
+    RUN_TEST(game_dialogue_actor_bandit_ids_are_distinct);
 }

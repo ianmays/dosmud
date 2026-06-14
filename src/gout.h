@@ -143,7 +143,7 @@ enum GameEventDialogueActor {
     GAME_DIALOGUE_ACTOR_ARCHIVIST = 4,
     GAME_DIALOGUE_ACTOR_TRAVELER = 5,
     GAME_DIALOGUE_ACTOR_NOBODY = 6,
-    /* fixed road bandit; keep id stable for existing saves */
+    /* fixed road bandit; distinct from BANDIT_AMBUSH random encounters */
     GAME_DIALOGUE_ACTOR_BANDIT = 7,
     /* dynamic random ambush bandit; shares enemy encounter logic */
     GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH = 8

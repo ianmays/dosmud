@@ -92,9 +92,8 @@ static int fixture_bandit_handover_pick(struct GameState *game)
     if (slot < 0) {
         return 0;
     }
-    /* slot flag is authoritative; mirror matches legacy save field for snapshots */
+    /* handover gating reads NPC_FLAG_HANDOVER_PICK on the enemy slot */
     game->npcs[slot].flags |= NPC_FLAG_HANDOVER_PICK;
-    game->enemy_handover_pick = 1;
     render_bandit_handover_pick_prompt();
     return 1;
 }
@@ -113,7 +112,6 @@ static void fixture_bandit_wielded_pick(struct GameState *game)
     if (slot >= 0) {
         game->npcs[slot].flags |= NPC_FLAG_HANDOVER_PICK;
     }
-    game->enemy_handover_pick = 1;
     render_bandit_handover_pick_prompt();
 }
 
