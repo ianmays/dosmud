@@ -163,7 +163,8 @@ TEST npc_seed_fixed_bandit_sets_state(void)
     ASSERT_EQ(DIALOGUE_NONE, bandit->dialogue);
     ASSERT_EQ(GAME_ENCOUNTER_BANDIT, bandit->encounter);
     ASSERT_EQ(WORLD_ROOM_ROAD, bandit->room_id);
-    ASSERT_EQ(NPC_FLAG_ACTIVE, bandit->flags);
+    ASSERT_EQ(NPC_FLAG_ACTIVE | NPC_FLAG_ROAMING | NPC_FLAG_RESPAWNS,
+        bandit->flags);
     ASSERT_EQ(0, bandit->return_tick);
     PASS();
 }
@@ -188,13 +189,17 @@ TEST npc_roaming_step_moves(void)
 {
     struct GameState game;
     struct NpcState *traveler;
+    struct NpcState *bandit;
     int before;
 
     unit_game_fresh(&game, 41u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     traveler = traveler_npc(&game);
+    bandit = bandit_npc(&game);
     ASSERT(traveler != 0);
+    ASSERT(bandit != 0);
     traveler->room_id = WORLD_ROOM_CAMP;
+    bandit->flags &= ~NPC_FLAG_ACTIVE;
     plat_seed_rng(42u);
     ASSERT_EQ(0U, plat_rand_draw_count());
     before = traveler->room_id;
@@ -249,18 +254,23 @@ TEST npc_begin_and_end_dynamic_encounter_reuses_roster(void)
     PASS();
 }
 
-TEST npc_fixed_encounter_opens_in_matching_room(void)
+TEST npc_bandit_roaming_encounter_opens_in_matching_room(void)
 {
     struct GameState game;
     GameEventQueue out;
+    struct NpcState *bandit;
 
     unit_game_fresh(&game, 47u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_ROAD, 0);
+    bandit = bandit_npc(&game);
+    ASSERT(bandit != 0);
     game_event_queue_reset(&out);
-    ASSERT_EQ(1, npc_fixed_begin_encounter_in_room(&game, WORLD_ROOM_ROAD, &out));
+    ASSERT_EQ(1, npc_roaming_begin_encounter_in_room(&game, WORLD_ROOM_ROAD, &out));
     ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
     ASSERT_EQ(DIALOGUE_ENEMY, game.dialogue);
-    ASSERT_EQ(DIALOGUE_ENEMY, bandit_npc(&game)->dialogue);
+    ASSERT_EQ(DIALOGUE_ENEMY, bandit->dialogue);
+    ASSERT_EQ(NPC_FLAG_NEEDS_SEPARATION,
+        bandit->flags & NPC_FLAG_NEEDS_SEPARATION);
     ASSERT_EQ(1, out.count);
     ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
     ASSERT_EQ(GAME_ENCOUNTER_BANDIT, out.events[0].arg0);
@@ -268,7 +278,7 @@ TEST npc_fixed_encounter_opens_in_matching_room(void)
     PASS();
 }
 
-TEST npc_fixed_encounter_skips_other_rooms(void)
+TEST npc_bandit_roaming_encounter_skips_other_rooms(void)
 {
     struct GameState game;
     GameEventQueue out;
@@ -276,9 +286,75 @@ TEST npc_fixed_encounter_skips_other_rooms(void)
     unit_game_fresh(&game, 48u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game_event_queue_reset(&out);
-    ASSERT_EQ(0, npc_fixed_begin_encounter_in_room(&game, WORLD_ROOM_CAMP, &out));
+    ASSERT_EQ(0, npc_roaming_begin_encounter_in_room(&game, WORLD_ROOM_CAMP, &out));
     ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
     ASSERT_EQ(0, out.count);
+    PASS();
+}
+
+TEST npc_bandit_end_encounter_schedules_respawn(void)
+{
+    struct GameState game;
+    struct NpcState *bandit;
+
+    unit_game_fresh(&game, 49u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ROAD, 12U);
+    bandit = bandit_npc(&game);
+    ASSERT(bandit != 0);
+    bandit->dialogue = DIALOGUE_ENEMY;
+    bandit->flags |= NPC_FLAG_HANDOVER_PICK;
+    plat_seed_rng(game.seed);
+    ASSERT_EQ(npc_find_by_actor(&game, GAME_DIALOGUE_ACTOR_BANDIT),
+        npc_end_encounter(&game, GAME_DIALOGUE_ACTOR_BANDIT));
+    ASSERT_EQ(1U, plat_rand_draw_count());
+    ASSERT_EQ(DIALOGUE_NONE, bandit->dialogue);
+    ASSERT_EQ(0, bandit->flags & NPC_FLAG_ACTIVE);
+    ASSERT_EQ(-1, bandit->room_id);
+    ASSERT(bandit->return_tick >= 12U + CFG_BANDIT_RETURN_DELAY_BASE);
+    ASSERT(bandit->return_tick <
+        12U + CFG_BANDIT_RETURN_DELAY_BASE + CFG_BANDIT_RETURN_DELAY_SPREAD);
+    PASS();
+}
+
+TEST npc_bandit_activate_due_reuses_roaming_profile(void)
+{
+    struct GameState game;
+    struct NpcState *bandit;
+
+    unit_game_fresh(&game, 50u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 20U);
+    bandit = bandit_npc(&game);
+    ASSERT(bandit != 0);
+    bandit->flags &= ~NPC_FLAG_ACTIVE;
+    bandit->room_id = -1;
+    bandit->return_tick = 20U;
+    plat_seed_rng(game.seed);
+    npc_roaming_activate_due(&game);
+    ASSERT_EQ(1U, plat_rand_draw_count());
+    ASSERT_EQ(DIALOGUE_NONE, bandit->dialogue);
+    ASSERT_EQ(NPC_FLAG_ACTIVE, bandit->flags & NPC_FLAG_ACTIVE);
+    ASSERT_EQ(NPC_FLAG_ROAMING, bandit->flags & NPC_FLAG_ROAMING);
+    ASSERT_EQ(NPC_FLAG_RESPAWNS, bandit->flags & NPC_FLAG_RESPAWNS);
+    ASSERT(bandit->room_id >= 0);
+    ASSERT(bandit->room_id < game.world.room_count);
+    PASS();
+}
+
+TEST npc_bandit_roaming_waits_for_warmup_tick(void)
+{
+    struct GameState game;
+    struct NpcState *bandit;
+    int before;
+
+    unit_game_fresh(&game, 51u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, CFG_BANDIT_ROAM_START_TICK - 1);
+    bandit = bandit_npc(&game);
+    ASSERT(bandit != 0);
+    before = bandit->room_id;
+    plat_seed_rng(game.seed);
+    npc_roaming_step(&game);
+    ASSERT_EQ(1U, plat_rand_draw_count());
+    ASSERT_EQ(before, bandit->room_id);
     PASS();
 }
 
@@ -395,8 +471,11 @@ SUITE(npc) {
     RUN_TEST(npc_roaming_step_moves);
     RUN_TEST(npc_spawn_and_presence_support_multiple_instances);
     RUN_TEST(npc_begin_and_end_dynamic_encounter_reuses_roster);
-    RUN_TEST(npc_fixed_encounter_opens_in_matching_room);
-    RUN_TEST(npc_fixed_encounter_skips_other_rooms);
+    RUN_TEST(npc_bandit_roaming_encounter_opens_in_matching_room);
+    RUN_TEST(npc_bandit_roaming_encounter_skips_other_rooms);
+    RUN_TEST(npc_bandit_end_encounter_schedules_respawn);
+    RUN_TEST(npc_bandit_activate_due_reuses_roaming_profile);
+    RUN_TEST(npc_bandit_roaming_waits_for_warmup_tick);
     RUN_TEST(npc_roaming_encounter_guards);
     RUN_TEST(npc_roaming_reply_cmd_explore);
     RUN_TEST(npc_roaming_reply_cmd_invalid_choice);

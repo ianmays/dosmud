@@ -493,7 +493,8 @@ TEST save_round_trip_preserves_seeded_fixed_bandit_profile(void)
     ASSERT_EQ(DIALOGUE_NONE, game.npcs[bandit_slot].dialogue);
     ASSERT_EQ(GAME_ENCOUNTER_BANDIT, game.npcs[bandit_slot].encounter);
     ASSERT_EQ(WORLD_ROOM_ROAD, game.npcs[bandit_slot].room_id);
-    ASSERT_EQ(NPC_FLAG_ACTIVE, game.npcs[bandit_slot].flags);
+    ASSERT_EQ(NPC_FLAG_ACTIVE | NPC_FLAG_ROAMING | NPC_FLAG_RESPAWNS,
+        game.npcs[bandit_slot].flags);
     ASSERT_EQ(0U, game.npcs[bandit_slot].return_tick);
 
     ASSERT_EQ(SAVE_RESULT_OK,
@@ -506,7 +507,8 @@ TEST save_round_trip_preserves_seeded_fixed_bandit_profile(void)
     ASSERT_EQ(DIALOGUE_NONE, loaded.npcs[loaded_slot].dialogue);
     ASSERT_EQ(GAME_ENCOUNTER_BANDIT, loaded.npcs[loaded_slot].encounter);
     ASSERT_EQ(WORLD_ROOM_ROAD, loaded.npcs[loaded_slot].room_id);
-    ASSERT_EQ(NPC_FLAG_ACTIVE, loaded.npcs[loaded_slot].flags);
+    ASSERT_EQ(NPC_FLAG_ACTIVE | NPC_FLAG_ROAMING | NPC_FLAG_RESPAWNS,
+        loaded.npcs[loaded_slot].flags);
     ASSERT_EQ(0U, loaded.npcs[loaded_slot].return_tick);
     ASSERT_EQ(0U, loaded_draws);
 

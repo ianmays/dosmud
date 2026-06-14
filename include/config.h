@@ -137,6 +137,10 @@
 
 /* Dynamic NPC roster cap (save payload and per-tick roaming walks). */
 #define CFG_NPC_MAX 4
+/* Bandit roaming */
+#define CFG_BANDIT_ROAM_START_TICK 8
+#define CFG_BANDIT_RETURN_DELAY_BASE 6
+#define CFG_BANDIT_RETURN_DELAY_SPREAD 10
 /* Traveler roaming */
 #define CFG_TRAVELER_RETURN_DELAY_BASE 8
 #define CFG_TRAVELER_RETURN_DELAY_SPREAD 16

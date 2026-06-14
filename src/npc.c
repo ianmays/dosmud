@@ -41,9 +41,9 @@ static const struct NpcRoomInfo NPC_ROOM_INFO[] = {
 };
 
 static const struct NpcSeedInfo NPC_FIXED_ENCOUNTERS[] = {
-    /* Fixed-location authored enemies live in the roster from reset onward. */
+    /* Bandit starts on the road, then roams and respawns through the roster. */
     { GAME_DIALOGUE_ACTOR_BANDIT, DIALOGUE_NONE, GAME_ENCOUNTER_BANDIT,
-        WORLD_ROOM_ROAD, NPC_FLAG_ACTIVE }
+        WORLD_ROOM_ROAD, NPC_FLAG_ACTIVE | NPC_FLAG_ROAMING | NPC_FLAG_RESPAWNS }
 };
 
 /*
@@ -138,6 +138,34 @@ static void npc_push_encounter_open(GameEventQueue *out, int kind)
 {
     game_event_push(out, GAME_EVENT_ENCOUNTER, kind,
         GAME_ENCOUNTER_ACTION_OPEN, GAME_ENCOUNTER_OUTCOME_NONE, 0, 0);
+}
+
+static int npc_encounter_dialogue_kind(const struct NpcState *npc)
+{
+    if (npc->encounter == GAME_ENCOUNTER_BANDIT) {
+        return DIALOGUE_ENEMY;
+    }
+    return npc->dialogue;
+}
+
+static u32 npc_respawn_return_tick(struct GameState *game,
+                                   const struct NpcState *npc)
+{
+    if (npc->encounter == GAME_ENCOUNTER_BANDIT) {
+        return game->tick + CFG_BANDIT_RETURN_DELAY_BASE +
+            (u32)(plat_rand() % CFG_BANDIT_RETURN_DELAY_SPREAD);
+    }
+    return 0;
+}
+
+static int npc_roaming_can_step(const struct GameState *game,
+                                const struct NpcState *npc)
+{
+    if (npc->encounter == GAME_ENCOUNTER_BANDIT &&
+            game->tick < CFG_BANDIT_ROAM_START_TICK) {
+        return 0;
+    }
+    return 1;
 }
 
 int npc_room_actor(int room_id)
@@ -302,6 +330,9 @@ int npc_deactivate_until(struct GameState *game, int actor, u32 return_tick)
         return -1;
     }
     npc = npc_slot(game, slot);
+    if (npc->encounter == GAME_ENCOUNTER_BANDIT) {
+        npc->dialogue = DIALOGUE_NONE;
+    }
     npc->flags &= ~(NPC_FLAG_ACTIVE | NPC_FLAG_NEEDS_SEPARATION |
         NPC_FLAG_HANDOVER_PICK);
     npc->room_id = -1;
@@ -332,7 +363,20 @@ int npc_begin_encounter(struct GameState *game, int actor, int dialogue,
 /* Immediate encounter teardown; return_tick 0 means no scheduled respawn. */
 int npc_end_encounter(struct GameState *game, int actor)
 {
-    return npc_deactivate_until(game, actor, 0);
+    int slot;
+    struct NpcState *npc;
+    u32 return_tick;
+
+    slot = npc_find_by_actor(game, actor);
+    if (slot < 0) {
+        return -1;
+    }
+    npc = npc_slot(game, slot);
+    return_tick = 0;
+    if (npc_slot_respawns(npc)) {
+        return_tick = npc_respawn_return_tick(game, npc);
+    }
+    return npc_deactivate_until(game, actor, return_tick);
 }
 
 int npc_open_room_dialogue(struct GameState *game, struct GameEventQueue *out)
@@ -357,7 +401,7 @@ void npc_seed_roaming_traveler(struct GameState *game)
         NPC_FLAG_ACTIVE | NPC_FLAG_ROAMING | NPC_FLAG_RESPAWNS);
 }
 
-/* Fixed enemies seed from NPC_FIXED_ENCOUNTERS on every reset_mutable_state pass. */
+/* Authored enemy profiles seed from NPC_FIXED_ENCOUNTERS on reset. */
 void npc_seed_fixed_enemies(struct GameState *game)
 {
     int i;
@@ -397,6 +441,9 @@ void npc_roaming_activate_due(struct GameState *game)
             continue;
         }
         game->npcs[i].flags |= NPC_FLAG_ACTIVE;
+        if (game->npcs[i].encounter == GAME_ENCOUNTER_BANDIT) {
+            game->npcs[i].dialogue = DIALOGUE_NONE;
+        }
         game->npcs[i].room_id = plat_rand() % game->world.room_count;
     }
 }
@@ -433,6 +480,9 @@ void npc_roaming_step(struct GameState *game)
     for (slot = 0; slot < CFG_NPC_MAX; ++slot) {
         if (!npc_slot_is_active(&game->npcs[slot]) ||
                 !npc_slot_is_roaming(&game->npcs[slot])) {
+            continue;
+        }
+        if (!npc_roaming_can_step(game, &game->npcs[slot])) {
             continue;
         }
         if (game->npcs[slot].room_id < 0 ||
@@ -506,6 +556,7 @@ int npc_roaming_begin_encounter_in_room(struct GameState *game, int room_id,
             continue;
         }
         npc_push_encounter_open(out, npc->encounter);
+        npc->dialogue = npc_encounter_dialogue_kind(npc);
         game_set_mode_dialogue(game, npc->dialogue);
         npc->flags |= NPC_FLAG_NEEDS_SEPARATION;
         return 1;

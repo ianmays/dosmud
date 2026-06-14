@@ -456,10 +456,10 @@ static void advance_world_tick(struct GameState *game, int roaming_moves_first,
     int roll;
 
     /*
-     * Tick order is deliberate: advance the roaming roster and world clock,
-     * then emit ambient events, then open fixed-location encounters before
-     * the random bandit roll so one input produces the same visible sequence
-     * everywhere.
+     * Tick order is deliberate: resolve any roaming co-location first, then
+     * move roaming actors when no encounter opened, then emit ambient events,
+     * then open authored fixed encounters. This keeps room-based enemies
+     * world-owned instead of spawning at the player site.
      */
     game->tick += 1;
     npc_roaming_update_separation(game);
@@ -473,13 +473,12 @@ static void advance_world_tick(struct GameState *game, int roaming_moves_first,
     npc_roaming_activate_due(game);
 
     /*
-     * Encounter-before-step when the player moved first catches co-location;
-     * step-before-encounter when the player waited preserves the old ordering.
+     * Roaming encounters claim the room before movement when already
+     * co-located; otherwise the roster gets one movement step, then a second
+     * encounter check in the new room layout.
      */
-    if (roaming_moves_first) {
-        npc_roaming_step(game);
-        npc_roaming_begin_encounter_in_room(game, game->player.room_id, out);
-    } else if (!npc_roaming_begin_encounter_in_room(game, game->player.room_id, out) &&
+    (void)roaming_moves_first;
+    if (!npc_roaming_begin_encounter_in_room(game, game->player.room_id, out) &&
             !game_is_busy_dialogue(game)) {
         npc_roaming_step(game);
         npc_roaming_begin_encounter_in_room(game, game->player.room_id, out);
@@ -491,11 +490,13 @@ static void advance_world_tick(struct GameState *game, int roaming_moves_first,
     if (!game_is_busy_dialogue(game)) {
         fixed_opened = npc_fixed_begin_encounter_in_room(game,
             game->player.room_id, out);
+        /*
+         * Preserve the old ambient RNG cadence after removing the player-site
+         * ambush spawn so unchanged seeds keep their non-encounter outputs.
+         */
         roll = plat_rand() % CFG_ROLL_PERCENT_RANGE;
-        if (!fixed_opened && !game_is_busy_dialogue(game) &&
-                roll < CFG_BANDIT_ENCOUNTER_CHANCE_BELOW) {
-            enemy_begin_encounter(game, out);
-        }
+        (void)fixed_opened;
+        (void)roll;
     }
 }
 

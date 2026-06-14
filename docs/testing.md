@@ -158,7 +158,7 @@ Scenarios (see [`tests/soak/soak_sim.c`](https://github.com/ianmays/dosmud/blob/
 
 | Test | Loop |
 |------|------|
-| `soak_background_ticks` | `CFG_TEST_SOAK_TICKS` (10000) × `game_background_step` with the fixed road bandit, roster-backed roaming traveler, and atmosphere |
+| `soak_background_ticks` | `CFG_TEST_SOAK_TICKS` (10000) × `game_background_step` with the roster-backed roaming bandit, roaming traveler, and atmosphere |
 | `soak_command_wait_move` | 10000 × alternate `wait` / `move north` with `test_quiet_ticks` |
 | `soak_combat_loop` | `CFG_TEST_SOAK_COMBAT_ROUNDS` (200) × one-hit combat victory with roll inject |
 
@@ -215,7 +215,7 @@ Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_
 | `world_linear` | Same graph as `world_boot` (alias until a slimmer preset exists) |
 | `at_camp` | Camp, tick 0, explore, camp explored on map |
 | `at_road` | Road, tick 1, explore, camp and road explored on map |
-| `fixed_bandit_road` | `at_road` plus roster-backed traveler off so the authored road bandit can open on `wait` |
+| `fixed_bandit_road` | `at_road` plus roster-backed traveler off so the seeded road bandit can open on `wait` before its roaming warm-up expires |
 | `at_marsh_reed` | Marsh, tick 2, stick in bag, reed on ground, camp and marsh explored |
 | `quiet_camp_dual_ground` | Camp, quiet ticks on, stick and reed on ground for multi-item pickup tests |
 | `quiet_camp_dual_ground_full_bag` | `quiet_camp_dual_ground` plus a full bag for take-all refusal snapshots |
@@ -259,7 +259,7 @@ For marsh item/craft snapshots, prefer `at_marsh_reed` over walking camp intimid
 
 ### Quiet ticks (`test_quiet_ticks`, `TEST_MODE` only)
 
-`quiet_explore` sets `GameState.test_quiet_ticks` and disables the roster-backed traveler entry. While set, `advance_world_tick` only increments the tick and runs `world_step`; it skips animal noise, atmosphere, fixed enemy room checks, random bandit ambush rolls, and roaming NPC movement/spawn. Use this for snapshots that call `wait` or `move` so output does not depend on ambient `plat_rand()` draws.
+`quiet_explore` sets `GameState.test_quiet_ticks` and disables the roster-backed traveler entry. While set, `advance_world_tick` only increments the tick and runs `world_step`; it skips animal noise, atmosphere, enemy encounter checks, and roaming NPC movement/spawn. Use this for snapshots that call `wait` or `move` so output does not depend on ambient `plat_rand()` draws.
 
 ### `@seed` in `.input` files
 
@@ -271,7 +271,7 @@ Use `@seed` when a snapshot block needs a different libc RNG stream without star
 
 Snapshots use three determinism levels:
 
-1. **Teleport state** - fixtures set `GameState` directly. Do not walk RNG-heavy setup (`take stick`, intimidate, waiting for the fixed road bandit to open). `tests/regression/map.*` checks map **render** with explored flags set by the fixture; `tests/regression/walk_map.*` checks `room_explored` updated by a real `move` (with `quiet_explore`).
+1. **Teleport state** - fixtures set `GameState` directly. Do not walk RNG-heavy setup (`take stick`, intimidate, waiting for the road bandit to open). `tests/regression/map.*` checks map **render** with explored flags set by the fixture; `tests/regression/walk_map.*` checks `room_explored` updated by a real `move` (with `quiet_explore`).
 
 2. **Inject rolls** (`TEST_MODE` only) - use `game_roll_inject_begin` for any asserted outcome that goes through `game_roll_spread` / `game_roll_percent`: combat damage, corpse loot tier, kill XP, bandit intimidate (reply `3`), and `combat_start` enemy HP. Constants live under `#ifdef TEST_MODE` in [`config.h`](https://github.com/ianmays/dosmud/blob/main/include/config.h) (`CFG_TEST_EQUIPMENT_*`, `CFG_TEST_COMBAT_*`, `CFG_TEST_INTIMIDATE_*`, `CFG_TEST_VICTORY_*`). Do not bypass combat with render-only hit lines. If combat tuning changes, update those constants and `.expect`.
 
