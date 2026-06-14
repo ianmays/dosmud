@@ -18,14 +18,51 @@ struct NpcRoomInfo {
     int talk_phase;
 };
 
-/* Authored enemy spawn rows; stable world rooms like NPC_ROOM_INFO talk hooks. */
-struct NpcSeedInfo {
+/* Authored roster placement rows; stable world rooms like NPC_ROOM_INFO talk hooks. */
+enum NpcRespawnTrigger {
+    NPC_RESPAWN_NEVER = 0,
+    NPC_RESPAWN_ON_ENCOUNTER_END,
+    NPC_RESPAWN_ON_DIALOGUE_RESOLVE
+};
+
+struct NpcProfile {
     int actor;
     int dialogue;
     int encounter;
-    int room_id;
+    int spawn_room;
     int flags;
+    u32 roam_start_tick;
+    u32 respawn_delay_base;
+    u32 respawn_delay_spread;
+    int respawn_trigger;
 };
+
+/*
+ * Table order is roster slot order (traveler before bandit) so co-location
+ * encounter scans stay deterministic and match the pre-profile seed sequence.
+ */
+static const struct NpcProfile NPC_PROFILES[] = {
+    { GAME_DIALOGUE_ACTOR_TRAVELER, DIALOGUE_TRAVELER, GAME_ENCOUNTER_TRAVELER,
+        WORLD_ROOM_RUINS,
+        NPC_FLAG_ACTIVE | NPC_FLAG_ROAMING | NPC_FLAG_RESPAWNS,
+        0, 8, 16, NPC_RESPAWN_ON_DIALOGUE_RESOLVE },
+    { GAME_DIALOGUE_ACTOR_BANDIT, DIALOGUE_NONE, GAME_ENCOUNTER_BANDIT,
+        WORLD_ROOM_ROAD,
+        NPC_FLAG_ACTIVE | NPC_FLAG_ROAMING | NPC_FLAG_RESPAWNS,
+        8, 6, 10, NPC_RESPAWN_ON_ENCOUNTER_END }
+};
+
+static const struct NpcProfile *npc_profile_by_actor(int actor)
+{
+    int i;
+
+    for (i = 0; i < (int)(sizeof(NPC_PROFILES) / sizeof(NPC_PROFILES[0])); ++i) {
+        if (NPC_PROFILES[i].actor == actor) {
+            return &NPC_PROFILES[i];
+        }
+    }
+    return 0;
+}
 
 /* Stable content hooks: fixed world rooms, not generated graph membership. */
 static const struct NpcRoomInfo NPC_ROOM_INFO[] = {
@@ -38,12 +75,6 @@ static const struct NpcRoomInfo NPC_ROOM_INFO[] = {
         DIALOGUE_NPC_HERBALIST, GAME_DIALOGUE_PHASE_TALK },
     { WORLD_ROOM_CATACOMBS, GAME_DIALOGUE_ACTOR_ARCHIVIST,
         DIALOGUE_NPC_ARCHIVIST, GAME_DIALOGUE_PHASE_TALK }
-};
-
-static const struct NpcSeedInfo NPC_FIXED_ENCOUNTERS[] = {
-    /* Bandit starts on the road, then roams and respawns through the roster. */
-    { GAME_DIALOGUE_ACTOR_BANDIT, DIALOGUE_NONE, GAME_ENCOUNTER_BANDIT,
-        WORLD_ROOM_ROAD, NPC_FLAG_ACTIVE | NPC_FLAG_ROAMING | NPC_FLAG_RESPAWNS }
 };
 
 /*
@@ -152,23 +183,29 @@ static int npc_encounter_dialogue_kind(const struct NpcState *npc)
     return npc->dialogue;
 }
 
-/* Bandit respawn timing; traveler delay stays in npc_roaming_cmd_reply instead. */
+/* Respawn delay from the authored profile row when encounter teardown schedules it. */
 static u32 npc_respawn_return_tick(struct GameState *game,
                                    const struct NpcState *npc)
 {
-    if (npc->encounter == GAME_ENCOUNTER_BANDIT) {
-        return game->tick + CFG_BANDIT_RETURN_DELAY_BASE +
-            (u32)(plat_rand() % CFG_BANDIT_RETURN_DELAY_SPREAD);
+    const struct NpcProfile *profile;
+
+    profile = npc_profile_by_actor(npc->actor);
+    if (profile == 0 ||
+            profile->respawn_trigger != NPC_RESPAWN_ON_ENCOUNTER_END) {
+        return 0;
     }
-    return 0;
+    return game->tick + profile->respawn_delay_base +
+        (u32)(plat_rand() % profile->respawn_delay_spread);
 }
 
-/* Warmup ticks keep the road-start bandit still so early encounter beats stay seed-stable. */
+/* roam_start_tick on the profile keeps early road encounter beats seed-stable. */
 static int npc_roaming_can_step(const struct GameState *game,
                                 const struct NpcState *npc)
 {
-    if (npc->encounter == GAME_ENCOUNTER_BANDIT &&
-            game->tick < CFG_BANDIT_ROAM_START_TICK) {
+    const struct NpcProfile *profile;
+
+    profile = npc_profile_by_actor(npc->actor);
+    if (profile != 0 && game->tick < profile->roam_start_tick) {
         return 0;
     }
     return 1;
@@ -403,31 +440,19 @@ int npc_open_room_dialogue(struct GameState *game, struct GameEventQueue *out)
     return 1;
 }
 
-/* Traveler is the first roaming profile; seed sets actor/dialogue/encounter ids. */
-void npc_seed_roaming_traveler(struct GameState *game)
-{
-    npc_spawn(game, GAME_DIALOGUE_ACTOR_TRAVELER, DIALOGUE_TRAVELER,
-        GAME_ENCOUNTER_TRAVELER, WORLD_ROOM_RUINS,
-        NPC_FLAG_ACTIVE | NPC_FLAG_ROAMING | NPC_FLAG_RESPAWNS);
-}
-
-/* Authored enemy profiles seed from NPC_FIXED_ENCOUNTERS on reset. */
-void npc_seed_fixed_enemies(struct GameState *game)
+/* Seed authored roster profiles after npc_clear_all (reset_mutable_state). */
+void npc_seed_profiles(struct GameState *game)
 {
     int i;
+    const struct NpcProfile *profile;
 
-    for (i = 0;
-            i < (int)(sizeof(NPC_FIXED_ENCOUNTERS) /
-                sizeof(NPC_FIXED_ENCOUNTERS[0]));
-            ++i) {
-        if (npc_find_by_actor(game, NPC_FIXED_ENCOUNTERS[i].actor) >= 0) {
+    for (i = 0; i < (int)(sizeof(NPC_PROFILES) / sizeof(NPC_PROFILES[0])); ++i) {
+        profile = &NPC_PROFILES[i];
+        if (npc_find_by_actor(game, profile->actor) >= 0) {
             continue;
         }
-        npc_spawn(game, NPC_FIXED_ENCOUNTERS[i].actor,
-            NPC_FIXED_ENCOUNTERS[i].dialogue,
-            NPC_FIXED_ENCOUNTERS[i].encounter,
-            NPC_FIXED_ENCOUNTERS[i].room_id,
-            NPC_FIXED_ENCOUNTERS[i].flags);
+        npc_spawn(game, profile->actor, profile->dialogue, profile->encounter,
+            profile->spawn_room, profile->flags);
     }
 }
 
@@ -599,9 +624,17 @@ int npc_roaming_cmd_reply(struct GameState *game, int choice, GameEventQueue *ou
     npc_push_dialogue(out, npc->actor, GAME_DIALOGUE_PHASE_REPLY, choice);
     game_set_mode_explore(game);
     /* Return timing is randomized only after the player resolves the branch. */
-    npc_deactivate_until(game, npc->actor,
-        game->tick + CFG_TRAVELER_RETURN_DELAY_BASE +
-        (plat_rand() % CFG_TRAVELER_RETURN_DELAY_SPREAD));
+    {
+        const struct NpcProfile *profile;
+
+        profile = npc_profile_by_actor(npc->actor);
+        if (profile != 0 &&
+                profile->respawn_trigger == NPC_RESPAWN_ON_DIALOGUE_RESOLVE) {
+            npc_deactivate_until(game, npc->actor,
+                game->tick + profile->respawn_delay_base +
+                (u32)(plat_rand() % profile->respawn_delay_spread));
+        }
+    }
     return 1;
 }
 

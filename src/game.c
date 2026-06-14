@@ -118,8 +118,7 @@ static void reset_mutable_state(struct GameState *game, int room_id, u32 tick)
     game->player.room_id = room_id;
     game->tick = tick;
     npc_clear_all(game);
-    npc_seed_roaming_traveler(game);
-    npc_seed_fixed_enemies(game);
+    npc_seed_profiles(game);
     game->env_focus_active = 0;
     game->env_focus_room = -1;
     game->env_focus_kind = GAME_ENV_NONE;

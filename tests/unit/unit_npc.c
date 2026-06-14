@@ -7,6 +7,11 @@
 #include "world.h"
 #include "unit_util.h"
 
+/* Match bandit row in NPC_PROFILES (npc.c) for unit assertions. */
+#define PROFILE_BANDIT_ROAM_START 8U
+#define PROFILE_BANDIT_RETURN_BASE 6U
+#define PROFILE_BANDIT_RETURN_SPREAD 10U
+
 /*
  * Direct npc.c API tests: room/actor lookup, roaming movement/encounter, and
  * open-room dialogue without going through game_process_input.
@@ -131,7 +136,7 @@ static int roaming_npc_reply_out(struct GameState *game, int choice,
     return npc_roaming_cmd_reply(game, choice, out);
 }
 
-TEST npc_seed_roaming_traveler_sets_state(void)
+TEST npc_seed_profiles_traveler_state(void)
 {
     struct GameState game;
     struct NpcState *traveler;
@@ -150,7 +155,7 @@ TEST npc_seed_roaming_traveler_sets_state(void)
     PASS();
 }
 
-TEST npc_seed_fixed_bandit_sets_state(void)
+TEST npc_seed_roaming_bandit_sets_state(void)
 {
     struct GameState game;
     struct NpcState *bandit;
@@ -311,9 +316,9 @@ TEST npc_bandit_end_encounter_schedules_respawn(void)
     ASSERT_EQ(DIALOGUE_NONE, bandit->dialogue);
     ASSERT_EQ(0, bandit->flags & NPC_FLAG_ACTIVE);
     ASSERT_EQ(-1, bandit->room_id);
-    ASSERT(bandit->return_tick >= 12U + CFG_BANDIT_RETURN_DELAY_BASE);
+    ASSERT(bandit->return_tick >= 12U + PROFILE_BANDIT_RETURN_BASE);
     ASSERT(bandit->return_tick <
-        12U + CFG_BANDIT_RETURN_DELAY_BASE + CFG_BANDIT_RETURN_DELAY_SPREAD);
+        12U + PROFILE_BANDIT_RETURN_BASE + PROFILE_BANDIT_RETURN_SPREAD);
     PASS();
 }
 
@@ -348,7 +353,7 @@ TEST npc_bandit_roaming_waits_for_warmup_tick(void)
     int before;
 
     unit_game_fresh(&game, 51u);
-    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, CFG_BANDIT_ROAM_START_TICK - 1);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, PROFILE_BANDIT_ROAM_START - 1);
     bandit = bandit_npc(&game);
     ASSERT(bandit != 0);
     before = bandit->room_id;
@@ -466,8 +471,8 @@ SUITE(npc) {
     RUN_TEST(npc_open_room_dialogue_frog);
     RUN_TEST(npc_open_room_dialogue_watchman);
     RUN_TEST(npc_open_room_dialogue_none);
-    RUN_TEST(npc_seed_roaming_traveler_sets_state);
-    RUN_TEST(npc_seed_fixed_bandit_sets_state);
+    RUN_TEST(npc_seed_profiles_traveler_state);
+    RUN_TEST(npc_seed_roaming_bandit_sets_state);
     RUN_TEST(npc_roaming_separation_clears);
     RUN_TEST(npc_roaming_step_moves);
     RUN_TEST(npc_spawn_and_presence_support_multiple_instances);

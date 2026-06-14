@@ -712,7 +712,7 @@ Done ✅ ([#190](https://github.com/ianmays/dosmud/pull/190)).
 
 ### Testing
 - Unit: `unit_npc.c` (seed/open fixed bandit), `unit_genc.c`, `unit_game.c`, `unit_harn.c`, `unit_save.c` (round-trip seeded bandit placement)
-- Snapshots: `fixed_bandit_road` (`@fixture fixed_bandit_road` plus `wait` on road)
+- Snapshots: `bandit_road` (`@fixture bandit_road` plus `wait` on road)
 
 ### [#107](https://github.com/ianmays/dosmud/issues/107) - Enemies (Bandits) spawn and wander
 
@@ -722,7 +722,7 @@ Done ✅ ([#192](https://github.com/ianmays/dosmud/pull/192)).
 
 ### Testing
 - Unit: `unit_npc.c` (seed/roam/respawn), `unit_genc.c` (roster encounter open), `unit_save.c` (seeded roaming bandit round-trip)
-- Snapshots: `fixed_bandit_road` (`wait` opens the co-located road bandit before ambient follow-ups)
+- Snapshots: `bandit_road` (`wait` opens the co-located road bandit before ambient follow-ups)
 
 ### [#128](https://github.com/ianmays/dosmud/issues/128) - Pick up all items
 

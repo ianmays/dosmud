@@ -112,7 +112,7 @@ TEST genc_opens_seeded_roaming_bandit_without_spawning_ambush(void)
     PASS();
 }
 
-TEST genc_random_ambush_keeps_fixed_bandit_seeded(void)
+TEST genc_random_ambush_keeps_roster_bandit_seeded(void)
 {
     struct GameState game;
     GameEventQueue out;
@@ -307,7 +307,7 @@ SUITE(genc) {
     RUN_TEST(genc_skips_when_busy);
     RUN_TEST(genc_opens_dialogue);
     RUN_TEST(genc_opens_seeded_roaming_bandit_without_spawning_ambush);
-    RUN_TEST(genc_random_ambush_keeps_fixed_bandit_seeded);
+    RUN_TEST(genc_random_ambush_keeps_roster_bandit_seeded);
     RUN_TEST(genc_cmd_reply_fight);
     RUN_TEST(genc_cmd_reply_intimidate_ok);
     RUN_TEST(genc_cmd_give_wrong_context);

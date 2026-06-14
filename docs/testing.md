@@ -215,7 +215,7 @@ Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_
 | `world_linear` | Same graph as `world_boot` (alias until a slimmer preset exists) |
 | `at_camp` | Camp, tick 0, explore, camp explored on map |
 | `at_road` | Road, tick 1, explore, camp and road explored on map |
-| `fixed_bandit_road` | `at_road` plus roster-backed traveler off so the seeded road bandit can open on `wait` before its roaming warm-up expires |
+| `bandit_road` | `at_road` plus roster-backed traveler off so the seeded road bandit can open on `wait` before its roaming warm-up expires |
 | `at_marsh_reed` | Marsh, tick 2, stick in bag, reed on ground, camp and marsh explored |
 | `quiet_camp_dual_ground` | Camp, quiet ticks on, stick and reed on ground for multi-item pickup tests |
 | `quiet_camp_dual_ground_full_bag` | `quiet_camp_dual_ground` plus a full bag for take-all refusal snapshots |
@@ -322,7 +322,7 @@ Each process run uses one `.input` file until `quit`. `make snapshot-run` runs `
 
 **Loot:** `loot_spear`, `loot_stick`, `loot_berry`, `loot_herb`, `loot_fish`, `loot_empty`, `loot_stripped`, `loot_bag_full`.
 
-**Bandit dialogue:** `bandit_fight`, `bandit_intimidate_ok`, `bandit_intimidate_fail`, `bandit_bag_empty`, `fixed_bandit_road`.
+**Bandit dialogue:** `bandit_fight`, `bandit_intimidate_ok`, `bandit_intimidate_fail`, `bandit_bag_empty`, `bandit_road`.
 
 **Meta / inventory:** `unknown_cmd`, `cannot_move`, `give_wrong_context`, `reply_nobody`, `post_combat_reply_guard`, `reply_invalid`, `craft_salve`, `craft_unknown`, `take_nothing`, `take_wrong_item`.
 

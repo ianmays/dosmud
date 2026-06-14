@@ -477,7 +477,7 @@ TEST save_rejects_excessive_map_coordinate_span(void)
     PASS();
 }
 
-TEST save_round_trip_preserves_seeded_fixed_bandit_profile(void)
+TEST save_round_trip_preserves_seeded_roaming_bandit(void)
 {
     struct GameState game;
     struct GameState loaded;
@@ -527,5 +527,5 @@ SUITE(save)
     RUN_TEST(save_rejects_write_with_excessive_rng_draw_count);
     RUN_TEST(save_failed_write_preserves_existing_save);
     RUN_TEST(save_rejects_excessive_map_coordinate_span);
-    RUN_TEST(save_round_trip_preserves_seeded_fixed_bandit_profile);
+    RUN_TEST(save_round_trip_preserves_seeded_roaming_bandit);
 }

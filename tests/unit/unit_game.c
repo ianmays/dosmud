@@ -302,7 +302,7 @@ TEST game_bandit_handover_pick(void)
     PASS();
 }
 
-TEST game_wait_on_fixed_bandit_room_opens_encounter(void)
+TEST game_wait_on_road_bandit_room_opens_encounter(void)
 {
     struct GameState game;
     GameEventQueue out;
@@ -695,7 +695,7 @@ SUITE(game) {
     RUN_TEST(game_bandit_fight_reply);
     RUN_TEST(game_bandit_intimidate_fail);
     RUN_TEST(game_bandit_handover_pick);
-    RUN_TEST(game_wait_on_fixed_bandit_room_opens_encounter);
+    RUN_TEST(game_wait_on_road_bandit_room_opens_encounter);
     RUN_TEST(game_talk_npcs_and_nobody);
     RUN_TEST(game_frog_reply_branch);
     RUN_TEST(game_combat_blocks_inventory_cmds);
