@@ -216,11 +216,36 @@ TEST genc_cmd_reply_handover_pick(void)
     ASSERT_EQ(1, enemy_reply(&game, 2, &out));
     enemy = active_enemy_npc(&game);
     ASSERT(enemy != 0);
+    /* handover gating reads NPC_FLAG_HANDOVER_PICK on the enemy slot */
     ASSERT_EQ(NPC_FLAG_HANDOVER_PICK,
         enemy->flags & NPC_FLAG_HANDOVER_PICK);
     ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
     ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
     ASSERT_EQ(GAME_ENCOUNTER_ACTION_HANDOVER_PROMPT, out.events[0].arg1);
+    PASS();
+}
+
+TEST genc_cmd_reply_intimidate_clears_handover_pick(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    struct NpcState *enemy;
+    int rolls[1];
+
+    unit_game_fresh(&game, 9u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    begin_enemy_state(&game);
+    game_inv_bag_add(&game, ITEM_STICK);
+    ASSERT_EQ(1, enemy_reply(&game, 2, &out));
+    enemy = active_enemy_npc(&game);
+    ASSERT(enemy != 0);
+    ASSERT_EQ(NPC_FLAG_HANDOVER_PICK,
+        enemy->flags & NPC_FLAG_HANDOVER_PICK);
+    rolls[0] = CFG_TEST_INTIMIDATE_FAIL;
+    game_roll_inject_begin(&game, rolls, 1);
+    ASSERT_EQ(1, enemy_reply(&game, 3, &out));
+    ASSERT_EQ(0, enemy->flags & NPC_FLAG_HANDOVER_PICK);
+    ASSERT_EQ(GAME_MODE_COMBAT, game.mode);
     PASS();
 }
 
@@ -286,6 +311,7 @@ SUITE(genc) {
     RUN_TEST(genc_cmd_give_wrong_context);
     RUN_TEST(genc_cmd_give_handover);
     RUN_TEST(genc_cmd_reply_handover_pick);
+    RUN_TEST(genc_cmd_reply_intimidate_clears_handover_pick);
     RUN_TEST(genc_cmd_reply_intimidate_fail);
     RUN_TEST(genc_cmd_reply_invalid_choice);
     RUN_TEST(genc_cmd_reply_bag_empty_then_combat);

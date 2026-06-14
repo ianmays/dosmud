@@ -123,8 +123,11 @@ TEST harness_apply_bandit_handover_pick(void)
     ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
     ASSERT_EQ(DIALOGUE_ENEMY, game.dialogue);
     ASSERT(slot >= 0);
+    /* fixture sets slot flag only; handover gating does not use a GameState mirror */
     ASSERT_EQ(NPC_FLAG_HANDOVER_PICK,
         game.npcs[slot].flags & NPC_FLAG_HANDOVER_PICK);
+    ASSERT(game.npcs[slot].actor == GAME_DIALOGUE_ACTOR_BANDIT ||
+        game.npcs[slot].actor == GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH);
     ASSERT_EQ(1, game_inv_player_has_item(&game, ITEM_STICK));
     PASS();
 }

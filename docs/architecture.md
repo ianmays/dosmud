@@ -180,9 +180,10 @@ Conventions:
 ### `save`
 
 - shell-edge binary serialization in [`save.c`](https://github.com/ianmays/dosmud/blob/main/src/save.c); called only from `main.c`
-- versioned, field-by-field save format (`DMSV`, version 3) for `GameState`, `World`, and tracked RNG draw count
-- validates magic, version, and field ranges before replacing the live game state; older payload versions are rejected instead of migrated in place
-- v3 replaces the single roaming NPC fields with a fixed-size NPC roster (`GameState.npcs[]` with actor, dialogue, encounter, room, flags, and return tick per slot); enemy handover-pick state lives on `NPC_FLAG_HANDOVER_PICK` with `GameState.enemy_handover_pick` kept as a save-format mirror synced on load/save; `TEST_MODE` builds still append roll-injection and quiet-tick fields after the shared payload, while release builds use the shorter record and reject extra trailing bytes
+- versioned, field-by-field save format (`DMSV`, version 5) for `GameState`, `World`, and tracked RNG draw count
+- loads only the current `SAVE_VERSION`; older files return `SAVE_RESULT_FORMAT` (per-version readers or migrators are reserved for a future hook before validate)
+- validates magic, version, and field ranges into a staging buffer before replacing the live game state; failed loads leave the caller's `GameState` untouched
+- fixed-size NPC roster (`GameState.npcs[]` with actor, dialogue, encounter, room, flags, and return tick per slot); enemy handover-pick state lives on `NPC_FLAG_HANDOVER_PICK` on the active enemy slot; `TEST_MODE` builds append roll-injection and quiet-tick fields after the shared payload, while release builds use the shorter record and reject extra trailing bytes
 - keeps render queues and replay logs out of the save format
 
 ### `game`

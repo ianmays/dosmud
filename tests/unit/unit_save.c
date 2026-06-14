@@ -7,7 +7,6 @@
 #include "config.h"
 #include "greatest.h"
 #include "game.h"
-#include "genc.h"
 #include "items.h"
 #include "npc.h"
 #include "platform.h"
@@ -57,7 +56,6 @@ static void save_fill_fixture(struct GameState *game)
         GAME_ENCOUNTER_BANDIT, WORLD_ROOM_TOWER,
         NPC_FLAG_ACTIVE | NPC_FLAG_HANDOVER_PICK);
     game->dialogue = DIALOGUE_ENEMY;
-    game->enemy_handover_pick = 1;
     game->combat.enemy_hp = 5;
     game->combat.defending = 1;
     game->corpse_present[WORLD_ROOM_ROAD] = 1;
@@ -146,7 +144,6 @@ static int save_games_equal(const struct GameState *a,
             a->damage_bonus != b->damage_bonus ||
             a->weapon_equipped != b->weapon_equipped ||
             a->player_hp != b->player_hp ||
-            a->enemy_handover_pick != b->enemy_handover_pick ||
             a->combat.enemy_hp != b->combat.enemy_hp ||
             a->combat.defending != b->combat.defending) {
         return 0;
@@ -244,109 +241,6 @@ static long save_world_map_offset(int room_index, int field_index)
     return (long)offset;
 }
 
-static long save_npc_offset(int slot_index, int field_index)
-{
-    unsigned long offset;
-    unsigned long room_size;
-    unsigned long npc_bytes_before;
-
-    room_size = (unsigned long)CFG_NAME_MAX +
-        (unsigned long)CFG_DESC_MAX +
-        (unsigned long)CFG_NAME_MAX +
-        (unsigned long)CFG_DESC_MAX +
-        ((unsigned long)DIR_NONE * 2UL);
-    offset = 6UL;
-    offset += 2UL;
-    offset += room_size * (unsigned long)CFG_ROOM_MAX;
-    offset += ((2UL + 2UL + 1UL) * (unsigned long)CFG_ROOM_MAX);
-    offset += 2UL;
-    offset += 4UL;
-    offset += 4UL;
-    offset += 4UL;
-    offset += 2UL;
-    offset += 2UL;
-    offset += 2UL;
-    npc_bytes_before = (unsigned long)slot_index * 14UL;
-    offset += npc_bytes_before;
-    if (field_index < 5) {
-        offset += (unsigned long)field_index * 2UL;
-    } else {
-        offset += 10UL;
-    }
-    return (long)offset;
-}
-
-static long save_enemy_handover_pick_offset(void)
-{
-    unsigned long offset;
-    unsigned long room_size;
-
-    room_size = (unsigned long)CFG_NAME_MAX +
-        (unsigned long)CFG_DESC_MAX +
-        (unsigned long)CFG_NAME_MAX +
-        (unsigned long)CFG_DESC_MAX +
-        ((unsigned long)DIR_NONE * 2UL);
-    offset = 6UL;
-    offset += 2UL;
-    offset += room_size * (unsigned long)CFG_ROOM_MAX;
-    offset += ((2UL + 2UL + 1UL) * (unsigned long)CFG_ROOM_MAX);
-    offset += 2UL;
-    offset += 4UL;
-    offset += 4UL;
-    offset += 4UL;
-    offset += 2UL;
-    offset += 2UL;
-    offset += 2UL;
-    offset += 14UL * (unsigned long)CFG_NPC_MAX;
-    offset += 2UL;
-    offset += 2UL;
-    offset += 2UL;
-    offset += 4UL;
-    offset += 2UL;
-    offset += 2UL;
-    offset += 2UL;
-    offset += 2UL;
-    offset += 2UL;
-    offset += 2UL;
-    offset += 2UL;
-    offset += 2UL;
-    return (long)offset;
-}
-
-static int save_zero_npc_slot(FILE *fp, int slot_index)
-{
-    return fseek(fp, save_npc_offset(slot_index, 0), SEEK_SET) == 0L &&
-        save_write_s16_le(fp, GAME_DIALOGUE_ACTOR_NONE) &&
-        fseek(fp, save_npc_offset(slot_index, 1), SEEK_SET) == 0L &&
-        save_write_s16_le(fp, DIALOGUE_NONE) &&
-        fseek(fp, save_npc_offset(slot_index, 2), SEEK_SET) == 0L &&
-        save_write_s16_le(fp, GAME_ENCOUNTER_NONE) &&
-        fseek(fp, save_npc_offset(slot_index, 3), SEEK_SET) == 0L &&
-        save_write_s16_le(fp, -1) &&
-        fseek(fp, save_npc_offset(slot_index, 4), SEEK_SET) == 0L &&
-        save_write_s16_le(fp, 0) &&
-        fseek(fp, save_npc_offset(slot_index, 5), SEEK_SET) == 0L &&
-        save_write_u32_le(fp, 0UL);
-}
-
-static int save_write_npc_slot(FILE *fp, int slot_index, int actor,
-                               int dialogue, int encounter, int room_id,
-                               int flags, unsigned long return_tick)
-{
-    return fseek(fp, save_npc_offset(slot_index, 0), SEEK_SET) == 0L &&
-        save_write_s16_le(fp, actor) &&
-        fseek(fp, save_npc_offset(slot_index, 1), SEEK_SET) == 0L &&
-        save_write_s16_le(fp, dialogue) &&
-        fseek(fp, save_npc_offset(slot_index, 2), SEEK_SET) == 0L &&
-        save_write_s16_le(fp, encounter) &&
-        fseek(fp, save_npc_offset(slot_index, 3), SEEK_SET) == 0L &&
-        save_write_s16_le(fp, room_id) &&
-        fseek(fp, save_npc_offset(slot_index, 4), SEEK_SET) == 0L &&
-        save_write_s16_le(fp, flags) &&
-        fseek(fp, save_npc_offset(slot_index, 5), SEEK_SET) == 0L &&
-        save_write_u32_le(fp, return_tick);
-}
-
 TEST save_round_trip_preserves_state_and_rng_count(void)
 {
     struct GameState game;
@@ -410,24 +304,28 @@ TEST save_rejects_truncated_file(void)
     PASS();
 }
 
-TEST save_rejects_legacy_version_without_mutating_target(void)
+/* prior SAVE_VERSION values fail with SAVE_RESULT_FORMAT and leave out_game untouched */
+TEST save_rejects_prior_version_without_mutating_target(void)
 {
-    FILE *fp;
+    struct GameState game;
     struct GameState loaded;
     struct GameState before;
+    FILE *fp;
     u32 loaded_draws;
 
     save_cleanup_file();
+    save_fill_fixture(&game);
+    ASSERT_EQ(SAVE_RESULT_OK,
+        save_write_game(save_test_path(), &game, 7U));
+
+    fp = fopen(save_test_path(), "r+b");
+    ASSERT(fp != 0);
+    ASSERT(save_write_version(fp, 4U));
+    fclose(fp);
+
     unit_game_fresh(&loaded, 77U);
     before = loaded;
     loaded_draws = 555U;
-
-    fp = fopen(save_test_path(), "wb");
-    ASSERT(fp != 0);
-    ASSERT_EQ(4, fwrite("DMSV", 1, 4, fp));
-    ASSERT(save_write_u16_le(fp, 1U));
-    fclose(fp);
-
     ASSERT_EQ(SAVE_RESULT_FORMAT,
         save_read_game(save_test_path(), &loaded, &loaded_draws));
     ASSERT(save_games_equal(&before, &loaded));
@@ -579,88 +477,6 @@ TEST save_rejects_excessive_map_coordinate_span(void)
     PASS();
 }
 
-TEST save_reconciles_legacy_enemy_handover_slot(void)
-{
-    struct GameState game;
-    struct GameState loaded;
-    FILE *fp;
-    int bandit_slot;
-    int loaded_slot;
-    u32 loaded_draws;
-
-    save_cleanup_file();
-    save_fill_fixture(&game);
-    bandit_slot = npc_find_by_actor(&game, GAME_DIALOGUE_ACTOR_BANDIT);
-    ASSERT(bandit_slot >= 0);
-    ASSERT_EQ(SAVE_RESULT_OK,
-        save_write_game(save_test_path(), &game, 7U));
-
-    fp = fopen(save_test_path(), "r+b");
-    ASSERT(fp != 0);
-    ASSERT(save_zero_npc_slot(fp, bandit_slot));
-    ASSERT(save_write_version(fp, 3U));
-    fclose(fp);
-
-    ASSERT_EQ(SAVE_RESULT_OK,
-        save_read_game(save_test_path(), &loaded, &loaded_draws));
-    loaded_slot = npc_find_by_dialogue(&loaded, DIALOGUE_ENEMY);
-    ASSERT(loaded_slot >= 0);
-    ASSERT_EQ(GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH, loaded.npcs[loaded_slot].actor);
-    ASSERT_EQ(WORLD_ROOM_TOWER, loaded.npcs[loaded_slot].room_id);
-    ASSERT_EQ(NPC_FLAG_HANDOVER_PICK,
-        loaded.npcs[loaded_slot].flags & NPC_FLAG_HANDOVER_PICK);
-    ASSERT_EQ(1, loaded.enemy_handover_pick);
-    ASSERT_EQ(7U, loaded_draws);
-
-    save_cleanup_file();
-    PASS();
-}
-
-TEST save_reconciles_legacy_enemy_dialogue_slot_without_handover_pick(void)
-{
-    struct GameState game;
-    struct GameState loaded;
-    GameEventQueue out;
-    FILE *fp;
-    int bandit_slot;
-    int loaded_slot;
-    u32 loaded_draws;
-
-    save_cleanup_file();
-    save_fill_fixture(&game);
-    bandit_slot = npc_find_by_actor(&game, GAME_DIALOGUE_ACTOR_BANDIT);
-    ASSERT(bandit_slot >= 0);
-    ASSERT_EQ(SAVE_RESULT_OK,
-        save_write_game(save_test_path(), &game, 7U));
-
-    fp = fopen(save_test_path(), "r+b");
-    ASSERT(fp != 0);
-    ASSERT(save_zero_npc_slot(fp, bandit_slot));
-    ASSERT_EQ(0L, fseek(fp, save_enemy_handover_pick_offset(), SEEK_SET));
-    ASSERT(save_write_s16_le(fp, 0));
-    fclose(fp);
-
-    ASSERT_EQ(SAVE_RESULT_OK,
-        save_read_game(save_test_path(), &loaded, &loaded_draws));
-    loaded_slot = npc_find_by_dialogue(&loaded, DIALOGUE_ENEMY);
-    ASSERT(loaded_slot >= 0);
-    ASSERT_EQ(GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH, loaded.npcs[loaded_slot].actor);
-    ASSERT_EQ(WORLD_ROOM_TOWER, loaded.npcs[loaded_slot].room_id);
-    ASSERT_EQ(0,
-        loaded.npcs[loaded_slot].flags & NPC_FLAG_HANDOVER_PICK);
-    ASSERT_EQ(0, loaded.enemy_handover_pick);
-    ASSERT_EQ(7U, loaded_draws);
-
-    game_event_queue_reset(&out);
-    ASSERT_EQ(1, genc_cmd_reply(&loaded, 1, &out));
-    ASSERT_EQ(GAME_MODE_COMBAT, loaded.mode);
-    ASSERT_EQ(1, out.count);
-    ASSERT_EQ(GAME_EVENT_COMBAT, out.events[0].kind);
-
-    save_cleanup_file();
-    PASS();
-}
-
 TEST save_round_trip_preserves_seeded_fixed_bandit_profile(void)
 {
     struct GameState game;
@@ -698,93 +514,16 @@ TEST save_round_trip_preserves_seeded_fixed_bandit_profile(void)
     PASS();
 }
 
-TEST save_backfills_seeded_fixed_bandit_when_missing_from_save(void)
-{
-    struct GameState game;
-    struct GameState loaded;
-    FILE *fp;
-    int bandit_slot;
-    u32 loaded_draws;
-
-    save_cleanup_file();
-    unit_game_fresh(&game, 333U);
-    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
-    bandit_slot = npc_find_by_actor(&game, GAME_DIALOGUE_ACTOR_BANDIT);
-    ASSERT(bandit_slot >= 0);
-    ASSERT_EQ(SAVE_RESULT_OK,
-        save_write_game(save_test_path(), &game, 0U));
-
-    fp = fopen(save_test_path(), "r+b");
-    ASSERT(fp != 0);
-    ASSERT(save_zero_npc_slot(fp, bandit_slot));
-    fclose(fp);
-
-    ASSERT_EQ(SAVE_RESULT_OK,
-        save_read_game(save_test_path(), &loaded, &loaded_draws));
-    bandit_slot = npc_find_by_actor(&loaded, GAME_DIALOGUE_ACTOR_BANDIT);
-    ASSERT(bandit_slot >= 0);
-    ASSERT_EQ(DIALOGUE_NONE, loaded.npcs[bandit_slot].dialogue);
-    ASSERT_EQ(GAME_ENCOUNTER_BANDIT, loaded.npcs[bandit_slot].encounter);
-    ASSERT_EQ(WORLD_ROOM_ROAD, loaded.npcs[bandit_slot].room_id);
-    ASSERT_EQ(NPC_FLAG_ACTIVE, loaded.npcs[bandit_slot].flags);
-    ASSERT_EQ(0U, loaded_draws);
-
-    save_cleanup_file();
-    PASS();
-}
-
-TEST save_reprofiles_legacy_bandit_slot_before_fixed_seed(void)
-{
-    struct GameState game;
-    struct GameState loaded;
-    FILE *fp;
-    int bandit_slot;
-    u32 loaded_draws;
-
-    save_cleanup_file();
-    unit_game_fresh(&game, 444U);
-    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
-    bandit_slot = npc_find_by_actor(&game, GAME_DIALOGUE_ACTOR_BANDIT);
-    ASSERT(bandit_slot >= 0);
-    ASSERT_EQ(SAVE_RESULT_OK,
-        save_write_game(save_test_path(), &game, 0U));
-
-    fp = fopen(save_test_path(), "r+b");
-    ASSERT(fp != 0);
-    ASSERT(save_write_npc_slot(fp, bandit_slot, GAME_DIALOGUE_ACTOR_BANDIT,
-        DIALOGUE_ENEMY, GAME_ENCOUNTER_BANDIT, -1, 0, 19UL));
-    ASSERT(save_write_version(fp, 3U));
-    fclose(fp);
-
-    ASSERT_EQ(SAVE_RESULT_OK,
-        save_read_game(save_test_path(), &loaded, &loaded_draws));
-    bandit_slot = npc_find_by_actor(&loaded, GAME_DIALOGUE_ACTOR_BANDIT);
-    ASSERT(bandit_slot >= 0);
-    ASSERT_EQ(DIALOGUE_NONE, loaded.npcs[bandit_slot].dialogue);
-    ASSERT_EQ(GAME_ENCOUNTER_BANDIT, loaded.npcs[bandit_slot].encounter);
-    ASSERT_EQ(WORLD_ROOM_ROAD, loaded.npcs[bandit_slot].room_id);
-    ASSERT_EQ(NPC_FLAG_ACTIVE, loaded.npcs[bandit_slot].flags);
-    ASSERT_EQ(0U, loaded.npcs[bandit_slot].return_tick);
-    ASSERT_EQ(0U, loaded_draws);
-
-    save_cleanup_file();
-    PASS();
-}
-
 SUITE(save)
 {
     RUN_TEST(save_round_trip_preserves_state_and_rng_count);
     RUN_TEST(save_rejects_bad_magic);
     RUN_TEST(save_rejects_truncated_file);
-    RUN_TEST(save_rejects_legacy_version_without_mutating_target);
+    RUN_TEST(save_rejects_prior_version_without_mutating_target);
     RUN_TEST(save_rejects_out_of_range_without_mutating_target);
     RUN_TEST(save_rejects_excessive_rng_draw_count);
     RUN_TEST(save_rejects_write_with_excessive_rng_draw_count);
     RUN_TEST(save_failed_write_preserves_existing_save);
     RUN_TEST(save_rejects_excessive_map_coordinate_span);
-    RUN_TEST(save_reconciles_legacy_enemy_handover_slot);
-    RUN_TEST(save_reconciles_legacy_enemy_dialogue_slot_without_handover_pick);
     RUN_TEST(save_round_trip_preserves_seeded_fixed_bandit_profile);
-    RUN_TEST(save_backfills_seeded_fixed_bandit_when_missing_from_save);
-    RUN_TEST(save_reprofiles_legacy_bandit_slot_before_fixed_seed);
 }

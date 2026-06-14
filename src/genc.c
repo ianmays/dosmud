@@ -45,14 +45,11 @@ void enemy_begin_encounter(struct GameState *game, GameEventQueue *out)
 {
     /* Fixed roster slot wins; fallback spawns a separate ambush actor. */
     if (npc_fixed_begin_encounter_in_room(game, game->player.room_id, out)) {
-        game->enemy_handover_pick = 0;
         return;
     }
-    if (npc_begin_encounter(game, GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH,
-            DIALOGUE_ENEMY,
-            GAME_ENCOUNTER_BANDIT, game->player.room_id, 0, out) >= 0) {
-        game->enemy_handover_pick = 0;
-    }
+    (void)npc_begin_encounter(game, GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH,
+        DIALOGUE_ENEMY,
+        GAME_ENCOUNTER_BANDIT, game->player.room_id, 0, out);
 }
 
 int genc_cmd_give(struct GameState *game, int item_arg, GameEventQueue *out)
@@ -109,8 +106,6 @@ int genc_cmd_reply(struct GameState *game, int choice, GameEventQueue *out)
             return 1;
         }
         enemy->flags |= NPC_FLAG_HANDOVER_PICK;
-        /* save mirror; mode guards and genc read the slot flag */
-        game->enemy_handover_pick = 1;
         push_encounter(out, GAME_ENCOUNTER_BANDIT,
             GAME_ENCOUNTER_ACTION_HANDOVER_PROMPT,
             GAME_ENCOUNTER_OUTCOME_NONE, 0, 0);
@@ -118,7 +113,6 @@ int genc_cmd_reply(struct GameState *game, int choice, GameEventQueue *out)
     }
     if (choice == 3) {
         enemy->flags &= ~NPC_FLAG_HANDOVER_PICK;
-        game->enemy_handover_pick = 0;
         if (game_roll_percent(game) < CFG_BANDIT_INTIMIDATE_SUCCESS_BELOW) {
             push_encounter(out, GAME_ENCOUNTER_BANDIT,
                 GAME_ENCOUNTER_ACTION_INTIMIDATE,
