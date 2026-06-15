@@ -624,7 +624,7 @@ After [#107](https://github.com/ianmays/dosmud/issues/107), procedural encounter
 
 ### [#76](https://github.com/ianmays/dosmud/issues/76) - Concrete narrative
 
-North-star **consumer** of proposed m10 placement and narrative layers (and m8 [#49](https://github.com/ianmays/dosmud/issues/49) / [#52](https://github.com/ianmays/dosmud/issues/52)), not a substitute for them. GitHub intent: author-defined narrative pathway rather than seed-planted randomness alone; may leverage TEST_MODE fixtures and replay for deterministic beat tests.
+North-star **consumer** of [m10](#authored-content-and-engine-ioc) placement and narrative layers (and m8 [#49](https://github.com/ianmays/dosmud/issues/49) / [#52](https://github.com/ianmays/dosmud/issues/52)), not a substitute for them. GitHub intent: author-defined narrative pathway rather than seed-planted randomness alone; may leverage TEST_MODE fixtures and replay for deterministic beat tests.
 
 Author-defined structure does **not** abandon project determinism: same seed, inputs, and pathway state should replay identically. Keep #76 in m6 backlog until m10 narrative indirection is underway. When grooming, consider splitting into (a) pathway / beat engine hooks and (b) authored story data packs. Blocked-by (GitHub): [#196](https://github.com/ianmays/dosmud/issues/196) and [#195](https://github.com/ianmays/dosmud/issues/195); likely [#52](https://github.com/ianmays/dosmud/issues/52) and [#49](https://github.com/ianmays/dosmud/issues/49) before full delivery.
 
@@ -715,7 +715,7 @@ Done ✅ ([#190](https://github.com/ianmays/dosmud/pull/190)).
 
 ### [#107](https://github.com/ianmays/dosmud/issues/107) - Enemies (Bandits) spawn and wander
 
-**Execution order vs GitHub milestone:** the flowchart pulls #107 into m9a (Engine Enhancements) before proposed m10; GitHub still labels milestone 8 (Advanced Mechanics). Treat m9 as the execution lane for NPC engine work; the m8 table row here is thematic grouping only.
+**Execution order vs GitHub milestone:** the flowchart pulls #107 into m9a (Engine Enhancements) before [m10](#authored-content-and-engine-ioc); GitHub still labels milestone 8 (Advanced Mechanics). Treat m9 as the execution lane for NPC engine work; the m8 table row here is thematic grouping only.
 
 Done ✅ ([#192](https://github.com/ianmays/dosmud/pull/192)).
 
@@ -800,10 +800,10 @@ Move the ambient bandit encounter off the one-off `GameState.enemy_handover_pick
 
 | Issue | Title | Size | Blocked by | Notes |
 |-------|-------|------|------------|-------|
-| [#195](https://github.com/ianmays/dosmud/issues/195) | encounter handler registry | M | — | Thin indirection in `genc.c`; active pull order |
+| [#195](https://github.com/ianmays/dosmud/issues/195) | encounter handler registry | M | - | Thin indirection in `genc.c`; active pull order |
 | [#196](https://github.com/ianmays/dosmud/issues/196) | narrative event indirection | M | #195 | Reduce `grendr.c` encounter switches |
-| [#197](https://github.com/ianmays/dosmud/issues/197) | room NPC talk table cleanup | S | — | Keep `NPC_ROOM_INFO` parallel; do not fold into `NpcProfile` |
-| (existing) | [#52](https://github.com/ianmays/dosmud/issues/52) npc schedules | L | — | m8; profile v1 done |
+| [#197](https://github.com/ianmays/dosmud/issues/197) | room NPC talk table cleanup | S | - | Keep `NPC_ROOM_INFO` parallel; do not fold into `NpcProfile` |
+| (existing) | [#52](https://github.com/ianmays/dosmud/issues/52) npc schedules | L | - | m8; profile v1 done |
 | (existing) | [#49](https://github.com/ianmays/dosmud/issues/49) quests | M | #52 | m8 |
 
 **Pull order:** m9 NPC chain **complete** ([#104](https://github.com/ianmays/dosmud/issues/104) through [#107](https://github.com/ianmays/dosmud/issues/107)). Open m10: [#195](https://github.com/ianmays/dosmud/issues/195) before [#196](https://github.com/ianmays/dosmud/issues/196); [#197](https://github.com/ianmays/dosmud/issues/197) may run in parallel. Then m8/m6 content that depends on authored tables.
