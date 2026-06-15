@@ -43,17 +43,16 @@ When a draft **implementation** PR is opened for an issue that **already has a s
 
 Milestone numbers are **themes**, not strict schedule. Suggested pull order for open issues (execution diagram below; distinct from GitHub **blocked-by**, which marks technical prerequisites only):
 
+Dashed edges mark **completed** prerequisite chains (m5, m9); solid edges are the open pull order from m10 onward.
+
 ```mermaid
 flowchart LR
-  subgraph m4 [Workflow_and_Tooling]
-    M4["72"]
-  end
-  subgraph m5 [Advanced_Architecture]
-    M5chain["157,158,159,160,161,162,163"]
+  subgraph m5_done [Advanced_Architecture done]
+    M5chain["157-163"]
     M5adj["156"]
     M5late["16"]
   end
-  subgraph m9a [Engine_NPC_done]
+  subgraph m9_done [Engine_NPC done]
     M9a["104,100,187,101,102,107"]
   end
   subgraph m10 [Authored_content_IoC]
@@ -71,15 +70,14 @@ flowchart LR
   subgraph m11 [Multiplayer]
     M11["92"]
   end
-  m4 --> M5chain
-  M5chain --> M5adj
-  M5chain --> M5late
-  M5chain --> m9a
-  m9a --> m10
+  M5chain -.-> M5adj
+  M5chain -.-> M5late
+  M5chain -.-> m9_done
+  m9_done -.-> m10
   m10 --> m8
   m8 --> m6
-  M5chain --> m7
-  M5chain --> m11
+  M5chain -.-> m7
+  M5chain -.-> m11
 ```
 
 **Completed (m5):** [#71](https://github.com/ianmays/dosmud/issues/71) engine boundary, [#47](https://github.com/ianmays/dosmud/issues/47) event queue ([#164](https://github.com/ianmays/dosmud/pull/164)), [#157](https://github.com/ianmays/dosmud/issues/157) command/navigation GameEvent migration ([#167](https://github.com/ianmays/dosmud/pull/167)), [#158](https://github.com/ianmays/dosmud/issues/158) inventory/item GameEvent migration ([#173](https://github.com/ianmays/dosmud/pull/173)), [#159](https://github.com/ianmays/dosmud/issues/159) combat/progression GameEvent migration ([#174](https://github.com/ianmays/dosmud/pull/174)), [#160](https://github.com/ianmays/dosmud/issues/160) dialogue/encounter GameEvent migration ([#175](https://github.com/ianmays/dosmud/pull/175)), [#161](https://github.com/ianmays/dosmud/issues/161) ambient/inspect GameEvent migration ([#176](https://github.com/ianmays/dosmud/pull/176)), [#162](https://github.com/ianmays/dosmud/issues/162) legacy GAME_OUT removal ([#177](https://github.com/ianmays/dosmud/pull/177)), [#163](https://github.com/ianmays/dosmud/issues/163) GameEvent test coverage pass ([#181](https://github.com/ianmays/dosmud/pull/181)), adjacent [#156](https://github.com/ianmays/dosmud/issues/156) replay event log ([#183](https://github.com/ianmays/dosmud/pull/183)), and [#16](https://github.com/ianmays/dosmud/issues/16) save/load ([#184](https://github.com/ianmays/dosmud/pull/184)). **m5 GameEvent migration chain complete.**
@@ -695,7 +693,7 @@ Rolled strength / vitality (etc.) at game start; may later wire into combat form
 
 ### [#52](https://github.com/ianmays/dosmud/issues/52) - NPC schedules
 
-Placement profile v1 delivered in [#192](https://github.com/ianmays/dosmud/pull/192); schedule **rules over profile ids** remain future m8 work after m10 platform slices land.
+Placement profile v1 delivered in [#192](https://github.com/ianmays/dosmud/pull/192); schedule **rules over profile ids** remain future m8 work after m10 platform slices land. GitHub blocked-by [#104](https://github.com/ianmays/dosmud/issues/104) (npc module, closed); prerequisite satisfied.
 
 ### [#49](https://github.com/ianmays/dosmud/issues/49) - Quests
 
