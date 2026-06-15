@@ -31,7 +31,9 @@ The project should avoid:
 - platform/render leakage into gameplay
 - premature complexity
 
-When a draft **implementation** PR is opened for an issue that **already has a section** here, mark that section **Done ✅** under its heading (optional PR link in the body). Do not mark Done at issue-create time or on hygiene/docs-only PRs. That line is not updated on later pushes or after merge - use the GitHub project board and PR for workflow status.
+When a draft **implementation** PR is opened for an issue that **already has a section** here, mark that section **Done ✅** under its heading (optional PR link in the body). Do not mark Done at issue-create time or on hygiene/docs-only PRs. That line is not updated on later pushes or after merge.
+
+**Board vs this file:** [Project 1](https://github.com/users/ianmays/projects/1) is the source of truth for **Status** (Backlog, Agent-ready, Planning, In progress, Review, Done) and **Agent-ready** stack order ([find-next-agent-ready-task](.codex/skills/find-next-agent-ready-task/SKILL.md)). This file records milestone themes, GitHub **blocked-by** chains, and **Done ✅** when a draft implementation PR opens. Do not mirror board Status, column placement, or which issues are Agent-ready here - that drifts quickly.
 
 **Agents:** search for the issue (`#N` or section heading) before editing. For a new milestone-tracked issue whose milestone is **already represented** in this file: add the table row and `### [#N](...)` stub via [milestone-issue-hygiene](.cursor/skills/milestone-issue-hygiene/SKILL.md) in a **docs PR** (GitHub-only hygiene in plan mode; no `DEV_PLAN.md` commits until a branch is allowed). Mark **Done ✅** only when a draft **implementation** PR opens. Do not add sections for BAU issues without a Milestone, or for Milestones not tracked here. See [`AGENTS.md`](AGENTS.md) **DEV_PLAN updates**. To reconcile this file with GitHub, use [audit-github-devplan](.cursor/skills/audit-github-devplan/SKILL.md).
 
@@ -84,15 +86,13 @@ flowchart LR
 
 **Completed (m9 NPC chain):** [#104](https://github.com/ianmays/dosmud/issues/104) npc module ([#185](https://github.com/ianmays/dosmud/pull/185)), [#100](https://github.com/ianmays/dosmud/issues/100) roaming NPC ([#186](https://github.com/ianmays/dosmud/pull/186)), [#187](https://github.com/ianmays/dosmud/issues/187) fixed-size roster ([#188](https://github.com/ianmays/dosmud/pull/188)), [#101](https://github.com/ianmays/dosmud/issues/101) reusable enemy NPC ([#189](https://github.com/ianmays/dosmud/pull/189)), [#102](https://github.com/ianmays/dosmud/issues/102) fixed road bandit ([#190](https://github.com/ianmays/dosmud/pull/190)), [#107](https://github.com/ianmays/dosmud/issues/107) roaming bandit encounter ([#192](https://github.com/ianmays/dosmud/pull/192)). **m9 NPC roster + roaming encounter chain complete.**
 
-**Active pull order:** [#195](https://github.com/ianmays/dosmud/issues/195) encounter handler registry (m10; first open platform slice after placement profile v1 in [#192](https://github.com/ianmays/dosmud/pull/192)), then [#196](https://github.com/ianmays/dosmud/issues/196) narrative indirection and [#197](https://github.com/ianmays/dosmud/issues/197) room talk cleanup. See [Authored content and engine IoC](#authored-content-and-engine-ioc).
-
-Workflow (milestone 4) can run in parallel with architecture once unblocked. Milestone 5 **GameEvent migration** (#157 through #163) and adjacent [#156](https://github.com/ianmays/dosmud/issues/156) / [#16](https://github.com/ianmays/dosmud/issues/16) are **complete**. Content (6) and renderer (7) are not gated on all of mechanics (8).
+Workflow (milestone 4) can run in parallel with architecture once unblocked. Milestone 5 **GameEvent migration** (#157 through #163) and adjacent [#156](https://github.com/ianmays/dosmud/issues/156) / [#16](https://github.com/ianmays/dosmud/issues/16) are **complete**. Content (6) and renderer (7) are not gated on all of mechanics (8). Open m10 platform slices: [Authored content and engine IoC](#authored-content-and-engine-ioc).
 
 **Dependencies:** native GitHub **blocked-by** links on issues (Relationships sidebar). [#71](https://github.com/ianmays/dosmud/issues/71) and [#47](https://github.com/ianmays/dosmud/issues/47) are **closed**; downstream issues may still list them as blockers in GitHub Relationships. Key chains: [#71](https://github.com/ianmays/dosmud/issues/71) before [#47](https://github.com/ianmays/dosmud/issues/47) / [#104](https://github.com/ianmays/dosmud/issues/104); [#47](https://github.com/ianmays/dosmud/issues/47) before [#157](https://github.com/ianmays/dosmud/issues/157), [#158](https://github.com/ianmays/dosmud/issues/158), [#159](https://github.com/ianmays/dosmud/issues/159), [#160](https://github.com/ianmays/dosmud/issues/160), [#161](https://github.com/ianmays/dosmud/issues/161), [#162](https://github.com/ianmays/dosmud/issues/162), [#163](https://github.com/ianmays/dosmud/issues/163), and separate lane [#156](https://github.com/ianmays/dosmud/issues/156); direct migration chain order: [#157](https://github.com/ianmays/dosmud/issues/157) before [#158](https://github.com/ianmays/dosmud/issues/158) before [#159](https://github.com/ianmays/dosmud/issues/159) before [#160](https://github.com/ianmays/dosmud/issues/160) before [#161](https://github.com/ianmays/dosmud/issues/161) before [#162](https://github.com/ianmays/dosmud/issues/162) before [#163](https://github.com/ianmays/dosmud/issues/163); [#71](https://github.com/ianmays/dosmud/issues/71) and [#47](https://github.com/ianmays/dosmud/issues/47) before [#48](https://github.com/ianmays/dosmud/issues/48); m9 NPC chain [#104](https://github.com/ianmays/dosmud/issues/104) before [#100](https://github.com/ianmays/dosmud/issues/100) before [#187](https://github.com/ianmays/dosmud/issues/187) before [#101](https://github.com/ianmays/dosmud/issues/101) / [#102](https://github.com/ianmays/dosmud/issues/102) / [#107](https://github.com/ianmays/dosmud/issues/107) (**complete**); m10 chain: [#195](https://github.com/ianmays/dosmud/issues/195) before [#196](https://github.com/ianmays/dosmud/issues/196); placement profile v1 delivered in [#192](https://github.com/ianmays/dosmud/pull/192) / [#107](https://github.com/ianmays/dosmud/issues/107) (no separate issue); [#195](https://github.com/ianmays/dosmud/issues/195) before m6 [#54](https://github.com/ianmays/dosmud/issues/54); [#196](https://github.com/ianmays/dosmud/issues/196) before m6 [#8](https://github.com/ianmays/dosmud/issues/8) and [#76](https://github.com/ianmays/dosmud/issues/76); [#104](https://github.com/ianmays/dosmud/issues/104) before [#8](https://github.com/ianmays/dosmud/issues/8); [#4](https://github.com/ianmays/dosmud/issues/4) and [#5](https://github.com/ianmays/dosmud/issues/5) are **not** blocked by [#15](https://github.com/ianmays/dosmud/issues/15) (combat slices ship first; [#15](https://github.com/ianmays/dosmud/issues/15) may enhance formulas later); [#50](https://github.com/ianmays/dosmud/issues/50) before [#132](https://github.com/ianmays/dosmud/issues/132); [#52](https://github.com/ianmays/dosmud/issues/52) before [#49](https://github.com/ianmays/dosmud/issues/49); [#142](https://github.com/ianmays/dosmud/issues/142) (fmt render migration) before [#145](https://github.com/ianmays/dosmud/issues/145) (local map viewport); m11 [#92](https://github.com/ianmays/dosmud/issues/92) multiplayer after [#16](https://github.com/ianmays/dosmud/issues/16), [#71](https://github.com/ianmays/dosmud/issues/71), [#47](https://github.com/ianmays/dosmud/issues/47).
 
 ### Relative size (GitHub project)
 
-**Size** (XS-XL on [project 1](https://github.com/users/ianmays/projects/1)) is relative effort / blast radius, not schedule. It is independent of **Priority** (P0/P1/P2) and column **stack order** (execution order above). Board **Status** may differ from pull order (e.g. [#100](https://github.com/ianmays/dosmud/issues/100) Agent-ready while [#48](https://github.com/ianmays/dosmud/issues/48) stays in Backlog).
+**Size** (XS-XL on [project 1](https://github.com/users/ianmays/projects/1)) is relative effort / blast radius, not schedule. It is independent of **Priority** (P0/P1/P2) and **Agent-ready** stack order on the board.
 
 | Size | Meaning | Examples / calibration |
 |------|---------|------------------------|
@@ -612,7 +612,7 @@ Gameplay and world content after core architecture stabilizes. Related mechanics
 
 ### [#8](https://github.com/ianmays/dosmud/issues/8) - Complex dialogue
 
-Blocked-by [#196](https://github.com/ianmays/dosmud/issues/196) (narrative indirection); placement profile v1 delivered in [#192](https://github.com/ianmays/dosmud/pull/192). Keep in m6 backlog until narrative hooks can drive dialogue breadth without hard-coded room switches.
+Blocked-by [#196](https://github.com/ianmays/dosmud/issues/196) (narrative indirection); placement profile v1 delivered in [#192](https://github.com/ianmays/dosmud/pull/192). Deferred until narrative hooks can drive dialogue breadth without hard-coded room switches.
 
 ### [#51](https://github.com/ianmays/dosmud/issues/51) - Weather
 
@@ -626,7 +626,7 @@ After [#107](https://github.com/ianmays/dosmud/issues/107), procedural encounter
 
 North-star **consumer** of [m10](#authored-content-and-engine-ioc) placement and narrative layers (and m8 [#49](https://github.com/ianmays/dosmud/issues/49) / [#52](https://github.com/ianmays/dosmud/issues/52)), not a substitute for them. GitHub intent: author-defined narrative pathway rather than seed-planted randomness alone; may leverage TEST_MODE fixtures and replay for deterministic beat tests.
 
-Author-defined structure does **not** abandon project determinism: same seed, inputs, and pathway state should replay identically. Keep #76 in m6 backlog until m10 narrative indirection is underway. When grooming, consider splitting into (a) pathway / beat engine hooks and (b) authored story data packs. Blocked-by (GitHub): [#196](https://github.com/ianmays/dosmud/issues/196) and [#195](https://github.com/ianmays/dosmud/issues/195); likely [#52](https://github.com/ianmays/dosmud/issues/52) and [#49](https://github.com/ianmays/dosmud/issues/49) before full delivery.
+Author-defined structure does **not** abandon project determinism: same seed, inputs, and pathway state should replay identically. Deferred until m10 narrative indirection is underway. When grooming, consider splitting into (a) pathway / beat engine hooks and (b) authored story data packs. Blocked-by (GitHub): [#196](https://github.com/ianmays/dosmud/issues/196) and [#195](https://github.com/ianmays/dosmud/issues/195); likely [#52](https://github.com/ianmays/dosmud/issues/52) and [#49](https://github.com/ianmays/dosmud/issues/49) before full delivery.
 
 ### [#130](https://github.com/ianmays/dosmud/issues/130) - Night time
 
@@ -800,19 +800,19 @@ Move the ambient bandit encounter off the one-off `GameState.enemy_handover_pick
 
 | Issue | Title | Size | Blocked by | Notes |
 |-------|-------|------|------------|-------|
-| [#195](https://github.com/ianmays/dosmud/issues/195) | encounter handler registry | M | - | Thin indirection in `genc.c`; active pull order |
+| [#195](https://github.com/ianmays/dosmud/issues/195) | encounter handler registry | M | - | Thin indirection in `genc.c` |
 | [#196](https://github.com/ianmays/dosmud/issues/196) | narrative event indirection | M | #195 | Reduce `grendr.c` encounter switches |
 | [#197](https://github.com/ianmays/dosmud/issues/197) | room NPC talk table cleanup | S | - | Keep `NPC_ROOM_INFO` parallel; do not fold into `NpcProfile` |
 | (existing) | [#52](https://github.com/ianmays/dosmud/issues/52) npc schedules | L | - | m8; profile v1 done |
 | (existing) | [#49](https://github.com/ianmays/dosmud/issues/49) quests | M | #52 | m8 |
 
-**Pull order:** m9 NPC chain **complete** ([#104](https://github.com/ianmays/dosmud/issues/104) through [#107](https://github.com/ianmays/dosmud/issues/107)). Open m10: [#195](https://github.com/ianmays/dosmud/issues/195) before [#196](https://github.com/ianmays/dosmud/issues/196); [#197](https://github.com/ianmays/dosmud/issues/197) may run in parallel. Then m8/m6 content that depends on authored tables.
+**Dependency order (blocked-by):** m9 NPC chain **complete** ([#104](https://github.com/ianmays/dosmud/issues/104) through [#107](https://github.com/ianmays/dosmud/issues/107)). Open m10: [#195](https://github.com/ianmays/dosmud/issues/195) before [#196](https://github.com/ianmays/dosmud/issues/196); [#197](https://github.com/ianmays/dosmud/issues/197) may run in parallel with #195 when unblocked. Then m8/m6 content that depends on authored tables.
 
 ### [#195](https://github.com/ianmays/dosmud/issues/195) - Encounter handler registry
 
 ### [#196](https://github.com/ianmays/dosmud/issues/196) - Narrative event indirection
 
-GitHub blocked-by [#195](https://github.com/ianmays/dosmud/issues/195) (open). Project **Backlog** until #195 closes; not Agent-ready.
+GitHub blocked-by [#195](https://github.com/ianmays/dosmud/issues/195) (open).
 ### [#197](https://github.com/ianmays/dosmud/issues/197) - Room NPC talk table cleanup
 
 ## [Multiplayer](https://github.com/ianmays/dosmud/milestone/11)
