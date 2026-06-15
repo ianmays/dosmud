@@ -816,7 +816,7 @@ Move the ambient bandit encounter off the one-off `GameState.enemy_handover_pick
 
 ## [Multiplayer](https://github.com/ianmays/dosmud/milestone/11)
 
-Multi-session connectivity (local TCP/IP server and clients, or serial host-guest) deferred until [#71](https://github.com/ianmays/dosmud/issues/71) engine boundary, [#16](https://github.com/ianmays/dosmud/issues/16) save/load, and m10 platform slices stabilize. XL epic; parallel to renderer (m7) in the execution diagram, not on the m9→m10→m8→m6 content path.
+Multi-session connectivity (local TCP/IP server and clients, or serial host-guest) deferred until [#71](https://github.com/ianmays/dosmud/issues/71) engine boundary, [#16](https://github.com/ianmays/dosmud/issues/16) save/load, and m10 platform slices stabilize. XL epic; parallel to renderer (m7) in the execution diagram, not on the m9 -> m10 -> m8 -> m6 content path.
 
 | Issue | Title | Size |
 |-------|-------|------|
@@ -824,7 +824,7 @@ Multi-session connectivity (local TCP/IP server and clients, or serial host-gues
 
 ### [#92](https://github.com/ianmays/dosmud/issues/92) - Multiplayer
 
-Blocked-by [#16](https://github.com/ianmays/dosmud/issues/16), [#71](https://github.com/ianmays/dosmud/issues/71), [#47](https://github.com/ianmays/dosmud/issues/47) (GitHub Relationships). Groom into narrower child issues before agent implementation.
+GitHub blocked-by [#16](https://github.com/ianmays/dosmud/issues/16), [#71](https://github.com/ianmays/dosmud/issues/71), and [#47](https://github.com/ianmays/dosmud/issues/47) (all closed). Groom into narrower child issues before agent implementation.
 
 # Important Final Guidance
 
