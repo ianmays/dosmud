@@ -812,6 +812,7 @@ Move the ambient bandit encounter off the one-off `GameState.enemy_handover_pick
 
 ### [#196](https://github.com/ianmays/dosmud/issues/196) - Narrative event indirection
 
+GitHub blocked-by [#195](https://github.com/ianmays/dosmud/issues/195) (open). Project **Backlog** until #195 closes; not Agent-ready.
 ### [#197](https://github.com/ianmays/dosmud/issues/197) - Room NPC talk table cleanup
 
 ## [Multiplayer](https://github.com/ianmays/dosmud/milestone/11)
