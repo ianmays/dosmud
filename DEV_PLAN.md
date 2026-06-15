@@ -92,7 +92,7 @@ Workflow (milestone 4) can run in parallel with architecture once unblocked. Mil
 
 ### Relative size (GitHub project)
 
-**Size** (XS–XL on [project 1](https://github.com/users/ianmays/projects/1)) is relative effort / blast radius, not schedule. It is independent of **Priority** (P0/P1/P2) and column **stack order** (execution order above). Board **Status** may differ from pull order (e.g. [#100](https://github.com/ianmays/dosmud/issues/100) Agent-ready while [#48](https://github.com/ianmays/dosmud/issues/48) stays in Backlog).
+**Size** (XS-XL on [project 1](https://github.com/users/ianmays/projects/1)) is relative effort / blast radius, not schedule. It is independent of **Priority** (P0/P1/P2) and column **stack order** (execution order above). Board **Status** may differ from pull order (e.g. [#100](https://github.com/ianmays/dosmud/issues/100) Agent-ready while [#48](https://github.com/ianmays/dosmud/issues/48) stays in Backlog).
 
 | Size | Meaning | Examples / calibration |
 |------|---------|------------------------|
@@ -325,7 +325,7 @@ Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 - **[#113](https://github.com/ianmays/dosmud/issues/113)** Done ✅ ([#125](https://github.com/ianmays/dosmud/pull/125)) - traveler snapshot fixtures (`traveler_dialogue` fixture; `traveler_replies`, `traveler_talk_blocked` snapshots)
 - **[#114](https://github.com/ianmays/dosmud/issues/114)** Done ✅ ([#126](https://github.com/ianmays/dosmud/pull/126)) - custom world boot fixture (`world_boot` / `world_linear`; `world_apply_graph` + harness tables in TEST_MODE)
 
-### [#40](https://github.com/ianmays/dosmud/issues/40) - Gameplay test coverage (umbrella epic) — Done ✅
+### [#40](https://github.com/ianmays/dosmud/issues/40) - Gameplay test coverage (umbrella epic) - Done ✅
 
 **[#40](https://github.com/ianmays/dosmud/issues/40)** tracked overall coverage; work landed via child issues (no mega-PR on [#40](https://github.com/ianmays/dosmud/issues/40)). **Epic complete** as of merge of [#116](https://github.com/ianmays/dosmud/issues/116) ([PR 133](https://github.com/ianmays/dosmud/pull/133)).
 
