@@ -88,7 +88,7 @@ TEST genc_opens_dialogue(void)
     PASS();
 }
 
-TEST genc_opens_fixed_bandit_without_moving_slot(void)
+TEST genc_opens_seeded_roaming_bandit_without_spawning_ambush(void)
 {
     struct GameState game;
     GameEventQueue out;
@@ -104,13 +104,15 @@ TEST genc_opens_fixed_bandit_without_moving_slot(void)
     ASSERT_EQ(WORLD_ROOM_ROAD, bandit->room_id);
     ASSERT_EQ(GAME_DIALOGUE_ACTOR_BANDIT, bandit->actor);
     ASSERT_EQ(NPC_FLAG_ACTIVE, bandit->flags & NPC_FLAG_ACTIVE);
+    ASSERT_EQ(NPC_FLAG_ROAMING, bandit->flags & NPC_FLAG_ROAMING);
+    ASSERT_EQ(NPC_FLAG_RESPAWNS, bandit->flags & NPC_FLAG_RESPAWNS);
     ASSERT_EQ(1, out.count);
     ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
     ASSERT_EQ(GAME_ENCOUNTER_ACTION_OPEN, out.events[0].arg1);
     PASS();
 }
 
-TEST genc_random_ambush_keeps_fixed_bandit_seeded(void)
+TEST genc_random_ambush_keeps_roster_bandit_seeded(void)
 {
     struct GameState game;
     GameEventQueue out;
@@ -304,8 +306,8 @@ TEST genc_cmd_reply_bag_empty_then_combat(void)
 SUITE(genc) {
     RUN_TEST(genc_skips_when_busy);
     RUN_TEST(genc_opens_dialogue);
-    RUN_TEST(genc_opens_fixed_bandit_without_moving_slot);
-    RUN_TEST(genc_random_ambush_keeps_fixed_bandit_seeded);
+    RUN_TEST(genc_opens_seeded_roaming_bandit_without_spawning_ambush);
+    RUN_TEST(genc_random_ambush_keeps_roster_bandit_seeded);
     RUN_TEST(genc_cmd_reply_fight);
     RUN_TEST(genc_cmd_reply_intimidate_ok);
     RUN_TEST(genc_cmd_give_wrong_context);

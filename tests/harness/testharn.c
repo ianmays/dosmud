@@ -234,8 +234,8 @@ static void fixture_at_road(struct GameState *game)
     game->room_explored[WORLD_ROOM_ROAD] = 1;
 }
 
-/* Road + inactive traveler so wait ticks hit the fixed bandit, not roaming overlap. */
-static void fixture_fixed_bandit_road(struct GameState *game)
+/* Road + inactive traveler so wait ticks hit the roster bandit, not roaming overlap. */
+static void fixture_bandit_road(struct GameState *game)
 {
     fixture_at_road(game);
     fixture_traveler_off(game);
@@ -596,8 +596,8 @@ int testharn_apply(struct GameState *game, const char *line)
         fixture_at_road(game);
         return 1;
     }
-    if (fixture_name_is("fixed_bandit_road", name)) {
-        fixture_fixed_bandit_road(game);
+    if (fixture_name_is("bandit_road", name)) {
+        fixture_bandit_road(game);
         return 1;
     }
     if (fixture_name_is("at_marsh_reed", name)) {

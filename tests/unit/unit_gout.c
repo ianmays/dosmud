@@ -260,6 +260,7 @@ TEST game_event_push_records_bandit_ambush_actor_value(void)
 
 TEST game_dialogue_actor_bandit_ids_are_distinct(void)
 {
+    /* GAME_DIALOGUE_ACTOR_BANDIT is the roster road bandit; AMBUSH is dynamic spawn. */
     ASSERT(GAME_DIALOGUE_ACTOR_BANDIT != GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH);
     ASSERT_EQ(7, GAME_DIALOGUE_ACTOR_BANDIT);
     ASSERT_EQ(8, GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH);

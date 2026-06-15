@@ -149,7 +149,7 @@ TEST harness_apply_traveler_dialogue(void)
     PASS();
 }
 
-TEST harness_apply_fixed_bandit_road(void)
+TEST harness_apply_bandit_road(void)
 {
     struct GameState game;
     int rc;
@@ -157,7 +157,7 @@ TEST harness_apply_fixed_bandit_road(void)
     int bandit_slot;
 
     unit_game_fresh(&game, 7u);
-    rc = testharn_apply(&game, "@fixture fixed_bandit_road");
+    rc = testharn_apply(&game, "@fixture bandit_road");
     ASSERT_EQ(1, rc);
     traveler_slot = npc_find_by_actor(&game, GAME_DIALOGUE_ACTOR_TRAVELER);
     bandit_slot = npc_find_by_actor(&game, GAME_DIALOGUE_ACTOR_BANDIT);
@@ -210,7 +210,7 @@ SUITE(harness) {
     RUN_TEST(harness_apply_quiet_camp_dual_ground_full_bag);
     RUN_TEST(harness_apply_bandit_handover_pick);
     RUN_TEST(harness_apply_traveler_dialogue);
-    RUN_TEST(harness_apply_fixed_bandit_road);
+    RUN_TEST(harness_apply_bandit_road);
     RUN_TEST(harness_apply_env_focus_water);
     RUN_TEST(harness_seed_repeatable_rolls);
 }

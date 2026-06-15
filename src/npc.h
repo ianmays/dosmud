@@ -33,9 +33,8 @@ int npc_begin_encounter(struct GameState *game, int actor, int dialogue,
                         struct GameEventQueue *out);
 int npc_end_encounter(struct GameState *game, int actor);
 int npc_open_room_dialogue(struct GameState *game, struct GameEventQueue *out);
-void npc_seed_roaming_traveler(struct GameState *game);
-/* Reseed authored fixed enemies after npc_clear_all (reset_mutable_state). */
-void npc_seed_fixed_enemies(struct GameState *game);
+void npc_seed_profiles(struct GameState *game);
+void npc_upgrade_loaded_profiles(struct GameState *game);
 void npc_roaming_activate_due(struct GameState *game);
 void npc_roaming_update_separation(struct GameState *game);
 void npc_roaming_step(struct GameState *game);

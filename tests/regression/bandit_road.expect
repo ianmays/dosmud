@@ -23,10 +23,6 @@ On the ground: stick. (take stick)
 
 > You wait.
 
-A crow caws from a leaning signpost.
-
-Something small rustles just out of sight.
-
   /\     .-'''''''-.        
   ||    / (.)..(.)  |        
   ||    |  (::::)   |        
@@ -41,6 +37,10 @@ A road bandit steps from cover with a hand on a rusted blade.
   [2] Hand over one item from your bag or what you are wielding (choose reply 2, then give <item>).
   [3] Talk it down and part ways.
 (Answer with 1, 2, 3, or reply <n>.)
+
+A crow caws from a leaning signpost.
+
+Something small rustles just out of sight.
 
 [T:2] Road [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 

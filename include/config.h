@@ -108,9 +108,8 @@
 #define CFG_COMBAT_CORPSE_LOOT_BERRY_BELOW 66
 #define CFG_COMBAT_CORPSE_LOOT_HERB_BELOW 86
 
-/* Bandit / ambient encounters */
+/* Bandit dialogue / intimidate */
 #define CFG_BANDIT_INTIMIDATE_SUCCESS_BELOW 60
-#define CFG_BANDIT_ENCOUNTER_CHANCE_BELOW 14
 
 /* Room item spawn (tick hook) */
 #define CFG_ROOM_ITEM_SPAWN_GATE 20
@@ -137,9 +136,6 @@
 
 /* Dynamic NPC roster cap (save payload and per-tick roaming walks). */
 #define CFG_NPC_MAX 4
-/* Traveler roaming */
-#define CFG_TRAVELER_RETURN_DELAY_BASE 8
-#define CFG_TRAVELER_RETURN_DELAY_SPREAD 16
 
 /* --- Main loop and test harness --- */
 
