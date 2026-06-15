@@ -427,6 +427,7 @@ dosmud --seed 1234
 | [#150](https://github.com/ianmays/dosmud/issues/150) | CI stats reporting | S |
 | [#34](https://github.com/ianmays/dosmud/issues/34) | modern windows build | L |
 | [#72](https://github.com/ianmays/dosmud/issues/72) | sub-agents | S |
+| [#180](https://github.com/ianmays/dosmud/issues/180) | asciinema recording and Pages playback for agent playtests | M |
 
 ### [#74](https://github.com/ianmays/dosmud/issues/74) - Agent skills
 
@@ -458,6 +459,8 @@ Done ✅ ([#149](https://github.com/ianmays/dosmud/pull/149)).
 Lightweight CI timings/stats workflow: `scripts/ci-stats.sh` (or equivalent) emits `ci-stats.json` and `ci-stats.md`, publishes Markdown to the GitHub Actions job summary, and uploads both as workflow artifacts.
 
 Done ✅ ([#151](https://github.com/ianmays/dosmud/pull/151)).
+
+### [#180](https://github.com/ianmays/dosmud/issues/180) - asciinema recording and Pages playback for agent playtests
 
 ## [Advanced Architecture](https://github.com/ianmays/dosmud/milestone/5)
 
