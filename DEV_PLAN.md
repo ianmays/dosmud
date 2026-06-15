@@ -31,11 +31,13 @@ The project should avoid:
 - platform/render leakage into gameplay
 - premature complexity
 
-When a draft **implementation** PR is opened for an issue that **already has a section** here, mark that section **Done ✅** under its heading (optional PR link in the body). Do not mark Done at issue-create time or on hygiene/docs-only PRs. That line is not updated on later pushes or after merge - use the GitHub project board and PR for workflow status.
+When a draft **implementation** PR is opened for an issue that **already has a section** here, mark that section **Done ✅** under its heading (optional PR link in the body). Do not mark Done at issue-create time or on hygiene/docs-only PRs. That line is not updated on later pushes or after merge.
+
+**Board vs this file:** [Project 1](https://github.com/users/ianmays/projects/1) is the source of truth for **Status** (Backlog, Agent-ready, Planning, In progress, Review, Done) and **Agent-ready** stack order ([find-next-agent-ready-task](.codex/skills/find-next-agent-ready-task/SKILL.md)). This file records milestone themes, GitHub **blocked-by** chains, and **Done ✅** when a draft implementation PR opens. Do not mirror board Status, column placement, or which issues are Agent-ready here - that drifts quickly.
 
 **Agents:** search for the issue (`#N` or section heading) before editing. For a new milestone-tracked issue whose milestone is **already represented** in this file: add the table row and `### [#N](...)` stub via [milestone-issue-hygiene](.cursor/skills/milestone-issue-hygiene/SKILL.md) in a **docs PR** (GitHub-only hygiene in plan mode; no `DEV_PLAN.md` commits until a branch is allowed). Mark **Done ✅** only when a draft **implementation** PR opens. Do not add sections for BAU issues without a Milestone, or for Milestones not tracked here. See [`AGENTS.md`](AGENTS.md) **DEV_PLAN updates**. To reconcile this file with GitHub, use [audit-github-devplan](.cursor/skills/audit-github-devplan/SKILL.md).
 
-**Milestones:** [Structural Cleanup + ANSI C89 Enforcement](https://github.com/ianmays/dosmud/milestone/1) · [State Ownership and Boundary Isolation](https://github.com/ianmays/dosmud/milestone/2) · [Deterministic Test Harness Evolution](https://github.com/ianmays/dosmud/milestone/3) · [Workflow and Tooling Maturity](https://github.com/ianmays/dosmud/milestone/4) · [Advanced Architecture](https://github.com/ianmays/dosmud/milestone/5) · [Content Expansion](https://github.com/ianmays/dosmud/milestone/6) · [Renderer](https://github.com/ianmays/dosmud/milestone/7) · [Advanced Mechanics](https://github.com/ianmays/dosmud/milestone/8) · [Engine Enhancements](https://github.com/ianmays/dosmud/milestone/9) · **Authored content and engine IoC (proposed milestone 10)**
+**Milestones:** [Structural Cleanup + ANSI C89 Enforcement](https://github.com/ianmays/dosmud/milestone/1) · [State Ownership and Boundary Isolation](https://github.com/ianmays/dosmud/milestone/2) · [Deterministic Test Harness Evolution](https://github.com/ianmays/dosmud/milestone/3) · [Workflow and Tooling Maturity](https://github.com/ianmays/dosmud/milestone/4) · [Advanced Architecture](https://github.com/ianmays/dosmud/milestone/5) · [Content Expansion](https://github.com/ianmays/dosmud/milestone/6) · [Renderer](https://github.com/ianmays/dosmud/milestone/7) · [Advanced Mechanics](https://github.com/ianmays/dosmud/milestone/8) · [Engine Enhancements](https://github.com/ianmays/dosmud/milestone/9) · [Authored content and engine IoC](https://github.com/ianmays/dosmud/milestone/10) · [Multiplayer](https://github.com/ianmays/dosmud/milestone/11)
 
 ### Execution order (open work)
 
@@ -51,14 +53,14 @@ flowchart LR
     M5adj["156"]
     M5late["16"]
   end
-  subgraph m9a [Engine_NPC]
-    M9a["104,100,187,101,107"]
+  subgraph m9a [Engine_NPC_done]
+    M9a["104,100,187,101,102,107"]
   end
   subgraph m10 [Authored_content_IoC]
-    M10["TBD profiles, handlers, narrative"]
+    M10["195,196,197"]
   end
   subgraph m8 [Advanced_Mechanics]
-    M8["129,4,5,15,50,132,102,9,31,52,49,145"]
+    M8["129,4,5,15,50,132,9,31,52,49,145"]
   end
   subgraph m6 [Content_Expansion]
     M6["55,7,8,51,54,76,130,131"]
@@ -66,8 +68,8 @@ flowchart LR
   subgraph m7 [Renderer]
     M7["48"]
   end
-  subgraph m9b [Engine_late]
-    M9b["92"]
+  subgraph m11 [Multiplayer]
+    M11["92"]
   end
   m4 --> M5chain
   M5chain --> M5adj
@@ -77,30 +79,30 @@ flowchart LR
   m10 --> m8
   m8 --> m6
   M5chain --> m7
-  M5chain --> m9b
+  M5chain --> m11
 ```
 
 **Completed (m5):** [#71](https://github.com/ianmays/dosmud/issues/71) engine boundary, [#47](https://github.com/ianmays/dosmud/issues/47) event queue ([#164](https://github.com/ianmays/dosmud/pull/164)), [#157](https://github.com/ianmays/dosmud/issues/157) command/navigation GameEvent migration ([#167](https://github.com/ianmays/dosmud/pull/167)), [#158](https://github.com/ianmays/dosmud/issues/158) inventory/item GameEvent migration ([#173](https://github.com/ianmays/dosmud/pull/173)), [#159](https://github.com/ianmays/dosmud/issues/159) combat/progression GameEvent migration ([#174](https://github.com/ianmays/dosmud/pull/174)), [#160](https://github.com/ianmays/dosmud/issues/160) dialogue/encounter GameEvent migration ([#175](https://github.com/ianmays/dosmud/pull/175)), [#161](https://github.com/ianmays/dosmud/issues/161) ambient/inspect GameEvent migration ([#176](https://github.com/ianmays/dosmud/pull/176)), [#162](https://github.com/ianmays/dosmud/issues/162) legacy GAME_OUT removal ([#177](https://github.com/ianmays/dosmud/pull/177)), [#163](https://github.com/ianmays/dosmud/issues/163) GameEvent test coverage pass ([#181](https://github.com/ianmays/dosmud/pull/181)), adjacent [#156](https://github.com/ianmays/dosmud/issues/156) replay event log ([#183](https://github.com/ianmays/dosmud/pull/183)), and [#16](https://github.com/ianmays/dosmud/issues/16) save/load ([#184](https://github.com/ianmays/dosmud/pull/184)). **m5 GameEvent migration chain complete.**
 
-**Active pull order:** [#107](https://github.com/ianmays/dosmud/issues/107) roaming bandit encounter ([#192](https://github.com/ianmays/dosmud/pull/192); closes m9 NPC chain after [#101](https://github.com/ianmays/dosmud/issues/101) ([#189](https://github.com/ianmays/dosmud/pull/189)), [#104](https://github.com/ianmays/dosmud/issues/104), [#100](https://github.com/ianmays/dosmud/issues/100), [#187](https://github.com/ianmays/dosmud/issues/187)). Next platform gate: [Authored content and engine IoC](#authored-content-and-engine-ioc-proposed-milestone-10) (proposed m10; stub issues #TBD-1 through #TBD-4 after #107 lands).
+**Completed (m9 NPC chain):** [#104](https://github.com/ianmays/dosmud/issues/104) npc module ([#185](https://github.com/ianmays/dosmud/pull/185)), [#100](https://github.com/ianmays/dosmud/issues/100) roaming NPC ([#186](https://github.com/ianmays/dosmud/pull/186)), [#187](https://github.com/ianmays/dosmud/issues/187) fixed-size roster ([#188](https://github.com/ianmays/dosmud/pull/188)), [#101](https://github.com/ianmays/dosmud/issues/101) reusable enemy NPC ([#189](https://github.com/ianmays/dosmud/pull/189)), [#102](https://github.com/ianmays/dosmud/issues/102) fixed road bandit ([#190](https://github.com/ianmays/dosmud/pull/190)), [#107](https://github.com/ianmays/dosmud/issues/107) roaming bandit encounter ([#192](https://github.com/ianmays/dosmud/pull/192)). **m9 NPC roster + roaming encounter chain complete.**
 
-Workflow (milestone 4) can run in parallel with architecture once unblocked. Milestone 5 **GameEvent migration** (#157 through #163) and adjacent [#156](https://github.com/ianmays/dosmud/issues/156) / [#16](https://github.com/ianmays/dosmud/issues/16) are **complete**. Content (6) and renderer (7) are not gated on all of mechanics (8).
+Workflow (milestone 4) can run in parallel with architecture once unblocked. Milestone 5 **GameEvent migration** (#157 through #163) and adjacent [#156](https://github.com/ianmays/dosmud/issues/156) / [#16](https://github.com/ianmays/dosmud/issues/16) are **complete**. Content (6) and renderer (7) are not gated on all of mechanics (8). Open m10 platform slices: [Authored content and engine IoC](#authored-content-and-engine-ioc).
 
-**Dependencies:** native GitHub **blocked-by** links on issues (Relationships sidebar). [#71](https://github.com/ianmays/dosmud/issues/71) and [#47](https://github.com/ianmays/dosmud/issues/47) are **closed**; downstream issues may still list them as blockers in GitHub Relationships. Key chains: [#71](https://github.com/ianmays/dosmud/issues/71) before [#47](https://github.com/ianmays/dosmud/issues/47) / [#104](https://github.com/ianmays/dosmud/issues/104); [#47](https://github.com/ianmays/dosmud/issues/47) before [#157](https://github.com/ianmays/dosmud/issues/157), [#158](https://github.com/ianmays/dosmud/issues/158), [#159](https://github.com/ianmays/dosmud/issues/159), [#160](https://github.com/ianmays/dosmud/issues/160), [#161](https://github.com/ianmays/dosmud/issues/161), [#162](https://github.com/ianmays/dosmud/issues/162), [#163](https://github.com/ianmays/dosmud/issues/163), and separate lane [#156](https://github.com/ianmays/dosmud/issues/156); direct migration chain order: [#157](https://github.com/ianmays/dosmud/issues/157) before [#158](https://github.com/ianmays/dosmud/issues/158) before [#159](https://github.com/ianmays/dosmud/issues/159) before [#160](https://github.com/ianmays/dosmud/issues/160) before [#161](https://github.com/ianmays/dosmud/issues/161) before [#162](https://github.com/ianmays/dosmud/issues/162) before [#163](https://github.com/ianmays/dosmud/issues/163); [#71](https://github.com/ianmays/dosmud/issues/71) and [#47](https://github.com/ianmays/dosmud/issues/47) before [#48](https://github.com/ianmays/dosmud/issues/48); [#104](https://github.com/ianmays/dosmud/issues/104) before [#100](https://github.com/ianmays/dosmud/issues/100); [#100](https://github.com/ianmays/dosmud/issues/100) before [#187](https://github.com/ianmays/dosmud/issues/187); [#187](https://github.com/ianmays/dosmud/issues/187) before [#101](https://github.com/ianmays/dosmud/issues/101) / [#102](https://github.com/ianmays/dosmud/issues/102) / [#107](https://github.com/ianmays/dosmud/issues/107); proposed m10 chain after m9 NPC work: [#107](https://github.com/ianmays/dosmud/issues/107) before #TBD-1 (placement profile; first slice in [#192](https://github.com/ianmays/dosmud/pull/192)) before #TBD-2 (encounter handlers) and #TBD-3 (narrative indirection); #TBD-1 before m8 [#52](https://github.com/ianmays/dosmud/issues/52) and m6 [#54](https://github.com/ianmays/dosmud/issues/54), [#76](https://github.com/ianmays/dosmud/issues/76), and [#8](https://github.com/ianmays/dosmud/issues/8) (see [m10 stub table](#authored-content-and-engine-ioc-proposed-milestone-10)); [#104](https://github.com/ianmays/dosmud/issues/104) before [#8](https://github.com/ianmays/dosmud/issues/8); [#4](https://github.com/ianmays/dosmud/issues/4) and [#5](https://github.com/ianmays/dosmud/issues/5) are **not** blocked by [#15](https://github.com/ianmays/dosmud/issues/15) (combat slices ship first; [#15](https://github.com/ianmays/dosmud/issues/15) may enhance formulas later); [#50](https://github.com/ianmays/dosmud/issues/50) before [#132](https://github.com/ianmays/dosmud/issues/132); [#52](https://github.com/ianmays/dosmud/issues/52) before [#49](https://github.com/ianmays/dosmud/issues/49); [#142](https://github.com/ianmays/dosmud/issues/142) (fmt render migration) before [#145](https://github.com/ianmays/dosmud/issues/145) (local map viewport); [#92](https://github.com/ianmays/dosmud/issues/92) after [#16](https://github.com/ianmays/dosmud/issues/16), [#71](https://github.com/ianmays/dosmud/issues/71), [#47](https://github.com/ianmays/dosmud/issues/47).
+**Dependencies:** GitHub **blocked-by** on each issue (Relationships sidebar) is authoritative; milestone chains below are an index (wire via [milestone-issue-hygiene](.cursor/skills/milestone-issue-hygiene/SKILL.md) when adding issues). [#71](https://github.com/ianmays/dosmud/issues/71) and [#47](https://github.com/ianmays/dosmud/issues/47) are **closed**; downstream issues may still list them as blockers in GitHub Relationships. Key chains: [#71](https://github.com/ianmays/dosmud/issues/71) before [#47](https://github.com/ianmays/dosmud/issues/47) / [#104](https://github.com/ianmays/dosmud/issues/104); [#47](https://github.com/ianmays/dosmud/issues/47) before [#157](https://github.com/ianmays/dosmud/issues/157), [#158](https://github.com/ianmays/dosmud/issues/158), [#159](https://github.com/ianmays/dosmud/issues/159), [#160](https://github.com/ianmays/dosmud/issues/160), [#161](https://github.com/ianmays/dosmud/issues/161), [#162](https://github.com/ianmays/dosmud/issues/162), [#163](https://github.com/ianmays/dosmud/issues/163), and separate lane [#156](https://github.com/ianmays/dosmud/issues/156); direct migration chain order: [#157](https://github.com/ianmays/dosmud/issues/157) before [#158](https://github.com/ianmays/dosmud/issues/158) before [#159](https://github.com/ianmays/dosmud/issues/159) before [#160](https://github.com/ianmays/dosmud/issues/160) before [#161](https://github.com/ianmays/dosmud/issues/161) before [#162](https://github.com/ianmays/dosmud/issues/162) before [#163](https://github.com/ianmays/dosmud/issues/163); [#71](https://github.com/ianmays/dosmud/issues/71) and [#47](https://github.com/ianmays/dosmud/issues/47) before [#48](https://github.com/ianmays/dosmud/issues/48); m9 NPC chain [#104](https://github.com/ianmays/dosmud/issues/104) before [#100](https://github.com/ianmays/dosmud/issues/100) before [#187](https://github.com/ianmays/dosmud/issues/187) before [#101](https://github.com/ianmays/dosmud/issues/101) / [#102](https://github.com/ianmays/dosmud/issues/102) / [#107](https://github.com/ianmays/dosmud/issues/107) (**complete**); m10 chain: [#195](https://github.com/ianmays/dosmud/issues/195) before [#196](https://github.com/ianmays/dosmud/issues/196); placement profile v1 delivered in [#192](https://github.com/ianmays/dosmud/pull/192) / [#107](https://github.com/ianmays/dosmud/issues/107) (no separate issue); [#195](https://github.com/ianmays/dosmud/issues/195) before m6 [#54](https://github.com/ianmays/dosmud/issues/54); [#196](https://github.com/ianmays/dosmud/issues/196) before m6 [#8](https://github.com/ianmays/dosmud/issues/8) and [#76](https://github.com/ianmays/dosmud/issues/76); [#104](https://github.com/ianmays/dosmud/issues/104) before [#8](https://github.com/ianmays/dosmud/issues/8); [#4](https://github.com/ianmays/dosmud/issues/4) and [#5](https://github.com/ianmays/dosmud/issues/5) are **not** blocked by [#15](https://github.com/ianmays/dosmud/issues/15) (combat slices ship first; [#15](https://github.com/ianmays/dosmud/issues/15) may enhance formulas later); [#50](https://github.com/ianmays/dosmud/issues/50) before [#132](https://github.com/ianmays/dosmud/issues/132); [#52](https://github.com/ianmays/dosmud/issues/52) before [#49](https://github.com/ianmays/dosmud/issues/49); [#142](https://github.com/ianmays/dosmud/issues/142) (fmt render migration) before [#145](https://github.com/ianmays/dosmud/issues/145) (local map viewport); m11 [#92](https://github.com/ianmays/dosmud/issues/92) multiplayer after [#16](https://github.com/ianmays/dosmud/issues/16), [#71](https://github.com/ianmays/dosmud/issues/71), [#47](https://github.com/ianmays/dosmud/issues/47).
 
 ### Relative size (GitHub project)
 
-**Size** (XS–XL on [project 1](https://github.com/users/ianmays/projects/1)) is relative effort / blast radius, not schedule. It is independent of **Priority** (P0/P1/P2) and column **stack order** (execution order above). Board **Status** may differ from pull order (e.g. [#100](https://github.com/ianmays/dosmud/issues/100) Agent-ready while [#48](https://github.com/ianmays/dosmud/issues/48) stays in Backlog).
+**Size** (XS-XL on [project 1](https://github.com/users/ianmays/projects/1)) is relative effort / blast radius, not schedule. It is independent of **Priority** (P0/P1/P2) and **Agent-ready** stack order on the board.
 
-| Size | Meaning | Examples (open roadmap) |
-|------|---------|-------------------------|
+| Size | Meaning | Examples / calibration |
+|------|---------|------------------------|
 | XS | single trivial change | *(none currently)* |
-| S | narrow feature or tooling slice | #4 |
-| M | one subsystem feature or refactor | #5, #7, #9, #31, #49, #51, #54, #100, #101, #102, #129, #130, #131, #132, #145, #187 |
+| S | narrow feature or tooling slice | #4, #197 |
+| M | one subsystem feature or refactor | #5, #7, #9, #31, #49, #51, #54, #100, #101, #102, #129, #130, #131, #132, #145, #187, #195, #196 |
 | L | major mechanism or platform path | #8, #15, #50, #52, #107 |
 | XL | foundational or multi-area epic | #48, #55, #76, #92 |
 
-[#71](https://github.com/ianmays/dosmud/issues/71) **XL** and [#47](https://github.com/ianmays/dosmud/issues/47) **L** established the engine boundary and event-queue seam ([#164](https://github.com/ianmays/dosmud/pull/164)). [#104](https://github.com/ianmays/dosmud/issues/104) npc module landed ([#185](https://github.com/ianmays/dosmud/pull/185)). Remaining gates: [#48](https://github.com/ianmays/dosmud/issues/48) and [#92](https://github.com/ianmays/dosmud/issues/92) still build on that work.
+[#71](https://github.com/ianmays/dosmud/issues/71) **XL** and [#47](https://github.com/ianmays/dosmud/issues/47) **L** established the engine boundary and event-queue seam ([#164](https://github.com/ianmays/dosmud/pull/164)). [#104](https://github.com/ianmays/dosmud/issues/104) npc module landed ([#185](https://github.com/ianmays/dosmud/pull/185)). Remaining XL gates: [#48](https://github.com/ianmays/dosmud/issues/48) (renderer) and m11 [#92](https://github.com/ianmays/dosmud/issues/92) (multiplayer).
 
 ### Current Project Priority
 
@@ -323,7 +325,7 @@ Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 - **[#113](https://github.com/ianmays/dosmud/issues/113)** Done ✅ ([#125](https://github.com/ianmays/dosmud/pull/125)) - traveler snapshot fixtures (`traveler_dialogue` fixture; `traveler_replies`, `traveler_talk_blocked` snapshots)
 - **[#114](https://github.com/ianmays/dosmud/issues/114)** Done ✅ ([#126](https://github.com/ianmays/dosmud/pull/126)) - custom world boot fixture (`world_boot` / `world_linear`; `world_apply_graph` + harness tables in TEST_MODE)
 
-### [#40](https://github.com/ianmays/dosmud/issues/40) - Gameplay test coverage (umbrella epic) — Done ✅
+### [#40](https://github.com/ianmays/dosmud/issues/40) - Gameplay test coverage (umbrella epic) - Done ✅
 
 **[#40](https://github.com/ianmays/dosmud/issues/40)** tracked overall coverage; work landed via child issues (no mega-PR on [#40](https://github.com/ianmays/dosmud/issues/40)). **Epic complete** as of merge of [#116](https://github.com/ianmays/dosmud/issues/116) ([PR 133](https://github.com/ianmays/dosmud/pull/133)).
 
@@ -479,7 +481,7 @@ Rows [#71](https://github.com/ianmays/dosmud/issues/71) and [#47](https://github
 
 ### [#71](https://github.com/ianmays/dosmud/issues/71) - Separate core game engine from game logic
 
-Separate deterministic gameplay/simulation from rendering, platform, and front-end so the engine can support alternative interfaces or games. Unblocked [#47](https://github.com/ianmays/dosmud/issues/47) (done); still relevant for [#104](https://github.com/ianmays/dosmud/issues/104), [#48](https://github.com/ianmays/dosmud/issues/48), and [#92](https://github.com/ianmays/dosmud/issues/92).
+Separate deterministic gameplay/simulation from rendering, platform, and front-end so the engine can support alternative interfaces or games. Unblocked [#47](https://github.com/ianmays/dosmud/issues/47) (done); still relevant for [#104](https://github.com/ianmays/dosmud/issues/104), [#48](https://github.com/ianmays/dosmud/issues/48), and m11 [#92](https://github.com/ianmays/dosmud/issues/92).
 
 Done ✅ ([#155](https://github.com/ianmays/dosmud/pull/155)).
 
@@ -593,7 +595,7 @@ Single-slot save/load landed through shell-edge [`save.c`](../src/save.c) / [`sa
 
 ## [Content Expansion](https://github.com/ianmays/dosmud/milestone/6)
 
-Gameplay and world content after core architecture stabilizes. Related mechanics (economy, quests, schedules, reputation) live under [Advanced Mechanics](https://github.com/ianmays/dosmud/milestone/8). Authored cast, encounters, and narrative pathway issues (#8, #54, #76) depend on [Authored content and engine IoC](#authored-content-and-engine-ioc-proposed-milestone-10) (proposed milestone 10) for table-driven placement and narrative hooks.
+Gameplay and world content after core architecture stabilizes. Related mechanics (economy, quests, schedules, reputation) live under [Advanced Mechanics](https://github.com/ianmays/dosmud/milestone/8). Authored cast, encounters, and narrative pathway issues (#8, #54, #76) depend on [Authored content and engine IoC](#authored-content-and-engine-ioc) (milestone 10) for table-driven placement and narrative hooks.
 
 | Issue | Title | Size |
 |-------|-------|------|
@@ -610,21 +612,21 @@ Gameplay and world content after core architecture stabilizes. Related mechanics
 
 ### [#8](https://github.com/ianmays/dosmud/issues/8) - Complex dialogue
 
-Blocked-by proposed m10 profile and narrative indirection (#TBD-1, #TBD-3; first profile slice in progress in [#192](https://github.com/ianmays/dosmud/pull/192)). Keep in m6 backlog until placement tables and narrative hooks can drive dialogue breadth without hard-coded room switches.
+Blocked-by [#196](https://github.com/ianmays/dosmud/issues/196) (narrative indirection); placement profile v1 delivered in [#192](https://github.com/ianmays/dosmud/pull/192). Deferred until narrative hooks can drive dialogue breadth without hard-coded room switches.
 
 ### [#51](https://github.com/ianmays/dosmud/issues/51) - Weather
 
 ### [#54](https://github.com/ianmays/dosmud/issues/54) - Procedural encounters
 
-After [#107](https://github.com/ianmays/dosmud/issues/107), procedural encounter work means **rules over roster profiles** (roam, respawn, co-location), not player-site ambush spawn. Blocked-by proposed m10 profile table (#TBD-1; first slice in progress in [#192](https://github.com/ianmays/dosmud/pull/192)).
+After [#107](https://github.com/ianmays/dosmud/issues/107), procedural encounter work means **rules over roster profiles** (roam, respawn, co-location), not player-site ambush spawn. Blocked-by [#195](https://github.com/ianmays/dosmud/issues/195) (encounter handler registry); placement profile v1 delivered in [#192](https://github.com/ianmays/dosmud/pull/192).
 
 ### [#55](https://github.com/ianmays/dosmud/issues/55) - Larger worlds
 
 ### [#76](https://github.com/ianmays/dosmud/issues/76) - Concrete narrative
 
-North-star **consumer** of proposed m10 placement and narrative layers (and m8 [#49](https://github.com/ianmays/dosmud/issues/49) / [#52](https://github.com/ianmays/dosmud/issues/52)), not a substitute for them. GitHub intent: author-defined narrative pathway rather than seed-planted randomness alone; may leverage TEST_MODE fixtures and replay for deterministic beat tests.
+North-star **consumer** of [m10](#authored-content-and-engine-ioc) placement and narrative layers (and m8 [#49](https://github.com/ianmays/dosmud/issues/49) / [#52](https://github.com/ianmays/dosmud/issues/52)), not a substitute for them. GitHub intent: author-defined narrative pathway rather than seed-planted randomness alone; may leverage TEST_MODE fixtures and replay for deterministic beat tests.
 
-Author-defined structure does **not** abandon project determinism: same seed, inputs, and pathway state should replay identically. Keep #76 in m6 backlog until m10 profile and narrative indirection work is underway. When grooming, consider splitting into (a) pathway / beat engine hooks and (b) authored story data packs. Blocked-by (GitHub, when m10 issues exist): at minimum #TBD-1 and #TBD-3; likely #TBD-2, #52, and #49 before full delivery.
+Author-defined structure does **not** abandon project determinism: same seed, inputs, and pathway state should replay identically. Deferred until m10 narrative indirection is underway. When grooming, consider splitting into (a) pathway / beat engine hooks and (b) authored story data packs. Blocked-by (GitHub): [#196](https://github.com/ianmays/dosmud/issues/196) and [#195](https://github.com/ianmays/dosmud/issues/195); likely [#52](https://github.com/ianmays/dosmud/issues/52) and [#49](https://github.com/ianmays/dosmud/issues/49) before full delivery.
 
 ### [#130](https://github.com/ianmays/dosmud/issues/130) - Night time
 
@@ -663,20 +665,17 @@ NOT:
 
 | Issue | Title | Size |
 |-------|-------|------|
-| [#128](https://github.com/ianmays/dosmud/issues/128) | pick up all items | S |
 | [#129](https://github.com/ianmays/dosmud/issues/129) | interactive looting | M |
 | [#4](https://github.com/ianmays/dosmud/issues/4) | combat initiative | S |
 | [#5](https://github.com/ianmays/dosmud/issues/5) | enemy difficulty (level) | M |
 | [#15](https://github.com/ianmays/dosmud/issues/15) | character stats and rolls | L |
 | [#50](https://github.com/ianmays/dosmud/issues/50) | economy | L |
 | [#132](https://github.com/ianmays/dosmud/issues/132) | NPC trade | M |
-| [#102](https://github.com/ianmays/dosmud/issues/102) | fixed location enemies (Bandits) | M |
-| [#107](https://github.com/ianmays/dosmud/issues/107) | enemies (Bandits) spawn and wander, rather than spawn randomly at player site | L |
 | [#9](https://github.com/ianmays/dosmud/issues/9) | reputation system | M |
 | [#31](https://github.com/ianmays/dosmud/issues/31) | easy / hard mode | M |
 | [#52](https://github.com/ianmays/dosmud/issues/52) | npc schedules | L |
 | [#49](https://github.com/ianmays/dosmud/issues/49) | quests | M |
-| [#145](https://github.com/ianmays/dosmud/issues/145) | local map viewport (region/world deferred) | M |
+| [#145](https://github.com/ianmays/dosmud/issues/145) | local map viewport (region/world maps deferred) | M |
 
 ### [#4](https://github.com/ianmays/dosmud/issues/4) - Combat initiative
 
@@ -696,7 +695,7 @@ Rolled strength / vitality (etc.) at game start; may later wire into combat form
 
 ### [#52](https://github.com/ianmays/dosmud/issues/52) - NPC schedules
 
-Blocked-by proposed m10 placement profile table (#TBD-1).
+Placement profile v1 delivered in [#192](https://github.com/ianmays/dosmud/pull/192); schedule **rules over profile ids** remain future m8 work after m10 platform slices land.
 
 ### [#49](https://github.com/ianmays/dosmud/issues/49) - Quests
 
@@ -716,7 +715,7 @@ Done ✅ ([#190](https://github.com/ianmays/dosmud/pull/190)).
 
 ### [#107](https://github.com/ianmays/dosmud/issues/107) - Enemies (Bandits) spawn and wander
 
-**Execution order vs GitHub milestone:** the flowchart pulls #107 into m9a (Engine Enhancements) before proposed m10; GitHub still labels milestone 8 (Advanced Mechanics). Treat m9 as the execution lane for NPC engine work; the m8 table row here is thematic grouping only.
+**Execution order vs GitHub milestone:** the flowchart pulls #107 into m9a (Engine Enhancements) before [m10](#authored-content-and-engine-ioc); GitHub still labels milestone 8 (Advanced Mechanics). Treat m9 as the execution lane for NPC engine work; the m8 table row here is thematic grouping only.
 
 Done ✅ ([#192](https://github.com/ianmays/dosmud/pull/192)).
 
@@ -736,13 +735,7 @@ Follow-up to [#142](https://github.com/ianmays/dosmud/issues/142) / PR 144. Play
 
 ## [Engine Enhancements](https://github.com/ianmays/dosmud/milestone/9)
 
-| Issue | Title | Size |
-|-------|-------|------|
-| [#104](https://github.com/ianmays/dosmud/issues/104) | npc module | L |
-| [#100](https://github.com/ianmays/dosmud/issues/100) | wanderer behaviour is re-usable for any NPC (wandering NPC) | M |
-| [#187](https://github.com/ianmays/dosmud/issues/187) | add fixed-size NPC instance roster | M |
-| [#101](https://github.com/ianmays/dosmud/issues/101) | bandit behaviour is re-usable for any NPC (enemy NPC) | M |
-| [#92](https://github.com/ianmays/dosmud/issues/92) | multiplayer | XL |
+m9 NPC engine chain **complete**; no open issues. Done sections below. Multiplayer moved to [Multiplayer](https://github.com/ianmays/dosmud/milestone/11) ([#92](https://github.com/ianmays/dosmud/issues/92)).
 
 ### [#104](https://github.com/ianmays/dosmud/issues/104) - NPC module
 
@@ -784,9 +777,7 @@ Move the ambient bandit encounter off the one-off `GameState.enemy_handover_pick
 - Unit: `unit_genc.c`, `unit_game.c`, `unit_npc.c`, `unit_cbt.c`, `unit_gout.c`, `unit_save.c`, `unit_harn.c`, `unit_tharn.c`
 - Snapshots: existing bandit snapshots unchanged (`bandit_handover`, `bandit_wielded_give`, `bandit_fight`, `bandit_intimidate_ok`, `bandit_intimidate_fail`, `bandit_bag_empty`)
 
-### [#92](https://github.com/ianmays/dosmud/issues/92) - Multiplayer
-
-## Authored content and engine IoC (proposed milestone 10)
+## [Authored content and engine IoC](https://github.com/ianmays/dosmud/milestone/10)
 
 **Goal:** Move authored placement, lifecycle, gameplay, and narrative toward **static C89 tables** the engine interprets (inversion of control). No runtime JSON loader, no ECS, no framework. Instance state stays on `GameState`; authored data stays in const tables keyed by stable ids (`actor`, `encounter`).
 
@@ -797,28 +788,44 @@ Move the ambient bandit encounter off the one-off `GameState.enemy_handover_pick
 | Layer | Artifact | Owner | Status |
 |-------|----------|-------|--------|
 | Instance | `NpcState[]` | `game.h`, `npc.c` | Done ([#187](https://github.com/ianmays/dosmud/pull/188)) |
-| Placement profile | `NpcProfile[]` / `NPC_PROFILES[]` | `npc.c` | In progress ([#192](https://github.com/ianmays/dosmud/pull/192); closes #TBD-1 slice) |
-| Encounter gameplay | handler registry | `genc.c` | Planned (#TBD-2) |
-| Narrative | txtres indirection | `grendr.c`, `txtres.c` | Planned (#TBD-3) |
-| Room talk | `NPC_ROOM_INFO` (parallel table) | `npc.c`, `dialogue.c` | Planned (#TBD-4) |
+| Placement profile | `NpcProfile[]` / `NPC_PROFILES[]` | `npc.c` | Done ([#192](https://github.com/ianmays/dosmud/pull/192); [#107](https://github.com/ianmays/dosmud/issues/107)) |
+| Encounter gameplay | handler registry | `genc.c` | Open ([#195](https://github.com/ianmays/dosmud/issues/195)) |
+| Narrative | txtres indirection | `grendr.c`, `txtres.c` | Open ([#196](https://github.com/ianmays/dosmud/issues/196)) |
+| Room talk | `NPC_ROOM_INFO` (parallel table) | `npc.c`, `dialogue.c` | Open ([#197](https://github.com/ianmays/dosmud/issues/197)) |
 | Schedule / quest | rules over profile ids | #52, #49 | Future (m8) |
 
-**Non-goals:** external config files, DOS runtime parsing, quest DSL, multiplayer ([#92](https://github.com/ianmays/dosmud/issues/92)).
+**Non-goals:** external config files, DOS runtime parsing, quest DSL, multiplayer (m11 [#92](https://github.com/ianmays/dosmud/issues/92)).
 
 **Consumers:** m8 [#52](https://github.com/ianmays/dosmud/issues/52), [#49](https://github.com/ianmays/dosmud/issues/49); m6 [#76](https://github.com/ianmays/dosmud/issues/76) (XL), [#8](https://github.com/ianmays/dosmud/issues/8), [#54](https://github.com/ianmays/dosmud/issues/54).
 
-**Stub issue table** (create GitHub milestone 10 and issues when grooming; replace #TBD-n with real `#N`):
-
-| Stub | Title | Size | Blocked by | Notes |
-|------|-------|------|------------|-------|
-| #TBD-1 | npc placement profile table v1 | M | #107 | First slice in [#192](https://github.com/ianmays/dosmud/pull/192) |
-| #TBD-2 | encounter handler registry | M | #TBD-1 | Thin indirection in `genc.c` |
-| #TBD-3 | narrative event indirection | M | #TBD-2 | Reduce `grendr.c` encounter switches |
-| #TBD-4 | room NPC talk table cleanup | S | #TBD-1 | Keep `NPC_ROOM_INFO` parallel in `npc.c`; do not fold into `NpcProfile` (room talk vs roam/placement stay separate tables) |
-| (existing) | [#52](https://github.com/ianmays/dosmud/issues/52) npc schedules | L | #TBD-1 | m8 |
+| Issue | Title | Size | Blocked by | Notes |
+|-------|-------|------|------------|-------|
+| [#195](https://github.com/ianmays/dosmud/issues/195) | encounter handler registry | M | - | Thin indirection in `genc.c` |
+| [#196](https://github.com/ianmays/dosmud/issues/196) | narrative event indirection | M | #195 | Reduce `grendr.c` encounter switches |
+| [#197](https://github.com/ianmays/dosmud/issues/197) | room NPC talk table cleanup | S | - | Keep `NPC_ROOM_INFO` parallel; do not fold into `NpcProfile` |
+| (existing) | [#52](https://github.com/ianmays/dosmud/issues/52) npc schedules | L | - | m8; profile v1 done |
 | (existing) | [#49](https://github.com/ianmays/dosmud/issues/49) quests | M | #52 | m8 |
 
-**Pull order:** after m9 NPC roster ([#104](https://github.com/ianmays/dosmud/issues/104), [#100](https://github.com/ianmays/dosmud/issues/100), [#187](https://github.com/ianmays/dosmud/issues/187), [#101](https://github.com/ianmays/dosmud/issues/101), [#107](https://github.com/ianmays/dosmud/issues/107)) and before m8/m6 content that depends on authored tables.
+**Dependency order (blocked-by):** m9 NPC chain **complete** ([#104](https://github.com/ianmays/dosmud/issues/104) through [#107](https://github.com/ianmays/dosmud/issues/107)). Open m10: [#195](https://github.com/ianmays/dosmud/issues/195) before [#196](https://github.com/ianmays/dosmud/issues/196); [#197](https://github.com/ianmays/dosmud/issues/197) may run in parallel with #195 when unblocked. Then m8/m6 content that depends on authored tables.
+
+### [#195](https://github.com/ianmays/dosmud/issues/195) - Encounter handler registry
+
+### [#196](https://github.com/ianmays/dosmud/issues/196) - Narrative event indirection
+
+GitHub blocked-by [#195](https://github.com/ianmays/dosmud/issues/195) (open).
+### [#197](https://github.com/ianmays/dosmud/issues/197) - Room NPC talk table cleanup
+
+## [Multiplayer](https://github.com/ianmays/dosmud/milestone/11)
+
+Multi-session connectivity (local TCP/IP server and clients, or serial host-guest) deferred until [#71](https://github.com/ianmays/dosmud/issues/71) engine boundary, [#16](https://github.com/ianmays/dosmud/issues/16) save/load, and m10 platform slices stabilize. XL epic; parallel to renderer (m7) in the execution diagram, not on the m9 -> m10 -> m8 -> m6 content path.
+
+| Issue | Title | Size |
+|-------|-------|------|
+| [#92](https://github.com/ianmays/dosmud/issues/92) | multiplayer | XL |
+
+### [#92](https://github.com/ianmays/dosmud/issues/92) - Multiplayer
+
+GitHub blocked-by [#16](https://github.com/ianmays/dosmud/issues/16), [#71](https://github.com/ianmays/dosmud/issues/71), and [#47](https://github.com/ianmays/dosmud/issues/47) (all closed). Groom into narrower child issues before agent implementation.
 
 # Important Final Guidance
 
