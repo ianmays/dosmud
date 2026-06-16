@@ -203,7 +203,8 @@ TEST fmt_map_camp_only(void)
     static const char expect[] =
         "Explored locations:\n"
         "@\n"
-        "(@ = you, letter = first initial of a visited place.)\n";
+        "(@ = you, letter = first initial of a visited place.)\n"
+        "Exits: north south west\n";
 
     unit_game_fresh(&game, 21u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
@@ -223,7 +224,8 @@ TEST fmt_map_camp_and_road(void)
         "Explored locations:\n"
         "@\n"
         "C\n"
-        "(@ = you, letter = first initial of a visited place.)\n";
+        "(@ = you, letter = first initial of a visited place.)\n"
+        "Exits: south west\n";
 
     unit_game_fresh(&game, 22u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_ROAD, 0);
