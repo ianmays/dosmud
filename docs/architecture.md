@@ -239,6 +239,7 @@ New `src/*.c` and `src/*.h` basenames must stay within **classic FAT 8+3** (at m
 
 - pure string formatting from `GameState`; writes into caller-provided buffers
 - no `printf` or gameplay mutation
+- exploration map (`fmt_exploration_map`): header, visited grid (or none-explored line), legend, then open exits for the player's current room (label and direction order match `look` in `grendr`)
 - unit-tested directly in [`tests/unit/unit_fmt.c`](https://github.com/ianmays/dosmud/blob/main/tests/unit/unit_fmt.c) (see [`docs/testing.md`](testing.md))
 
 ### `txtres`
