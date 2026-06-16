@@ -119,6 +119,7 @@ static int fmt_buf_append_two_s_fmt(char *buf, int bufsize, int pos,
     return pos;
 }
 
+/* open exit dirs for room; label and dir order match look output in grendr */
 static int fmt_buf_append_room_exits(char *buf, int bufsize, int pos,
     const struct Room *room)
 {
@@ -278,6 +279,7 @@ int fmt_exploration_map(const struct GameState *game, char *buf, int bufsize)
                 if (game->world.map_x[k] != px || game->world.map_y[k] != py) {
                     continue;
                 }
+                /* shared map cell: lowest room id wins for the initial letter */
                 if (rid < 0 || k < rid) {
                     rid = k;
                 }
@@ -310,6 +312,7 @@ int fmt_exploration_map(const struct GameState *game, char *buf, int bufsize)
     if (pos < 0) {
         return -1;
     }
+    /* footer exits follow player standing room, not each grid cell */
     room = &game->world.rooms[game->player.room_id];
     pos = fmt_buf_append_room_exits(buf, bufsize, pos, room);
     if (pos < 0) {
