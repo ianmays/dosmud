@@ -317,7 +317,7 @@ int game_inv_cmd_loot_reply(struct GameState *game, int choice, GameEventQueue *
     }
     if (choice < 1 || choice > item_count) {
         game_event_push(out, GAME_EVENT_DIALOGUE_GUARD,
-            GAME_DIALOGUE_GUARD_PICK_123, 0, 0, 0, 0);
+            GAME_DIALOGUE_GUARD_PICK_123, item_count + 1, 0, 0, 0);
         return 1;
     }
 

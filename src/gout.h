@@ -193,6 +193,7 @@ enum GameEventDialogueGuardReason {
     GAME_DIALOGUE_GUARD_LOOT_WAITING_REPLY,
     GAME_DIALOGUE_GUARD_TRAVELER_WAITING,
     GAME_DIALOGUE_GUARD_NOBODY_WAITING_REPLY,
+    /* arg1 may widen the visible valid range for menu-specific reply guards. */
     GAME_DIALOGUE_GUARD_PICK_123
 };
 

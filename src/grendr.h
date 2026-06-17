@@ -83,7 +83,7 @@ void render_msg_hand_over_item(const char *item_name);
 void render_msg_bag_empty_bandit(void);
 void render_msg_intimidate_success(void);
 void render_msg_intimidate_fail(void);
-void render_msg_pick_123(void);
+void render_msg_pick_123(int max_choice);
 void render_msg_nobody_waiting_reply(void);
 
 void render_inv_no_body_loot(void);

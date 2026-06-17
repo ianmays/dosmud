@@ -264,9 +264,14 @@ int command_parse(char *line, struct Command *out_cmd)
             out_cmd->arg = 3;
             return 1;
         }
+        if (strcmp(word2, "4") == 0) {
+            out_cmd->type = CMD_REPLY;
+            out_cmd->arg = 4;
+            return 1;
+        }
         return 0;
     }
-    if (strlen(word1) == 1 && word1[0] >= '1' && word1[0] <= '3') {
+    if (strlen(word1) == 1 && word1[0] >= '1' && word1[0] <= '4') {
         out_cmd->type = CMD_REPLY;
         out_cmd->arg = (int)(word1[0] - '0');
         return 1;

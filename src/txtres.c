@@ -194,6 +194,7 @@ const char *const TXT_BANDIT_OPEN_OPT2 =
     "  [2] Hand over one item from your bag or what you are wielding (choose reply 2, then give <item>).\n";
 const char *const TXT_BANDIT_OPEN_OPT3 = "  [3] Talk it down and part ways.\n";
 const char *const TXT_REPLY_PROMPT = "(Answer with 1, 2, 3, or reply <n>.)\n";
+const char *const TXT_REPLY_PROMPT_FMT = "(Answer with 1-%d or reply <n>.)\n";
 
 const char *const TXT_COMBAT_START_FMT = "Combat starts. You HP: %d, Bandit HP: %d.\n";
 const char *const TXT_COMBAT_MENU = "Choose: [1] Attack  [2] Defend  [3] Use salve\n";
@@ -207,6 +208,7 @@ const char *const TXT_COMBAT_SALVE_FMT = "You apply salve and recover. HP now %d
 const char *const TXT_COMBAT_SALVE_FULL = "You apply salve.\n";
 const char *const TXT_ALREADY_FULL_HEALTH = "You're already at full health.\n";
 const char *const TXT_PICK_123 = "Pick 1, 2, or 3.\n";
+const char *const TXT_PICK_RANGE_FMT = "Pick 1 through %d.\n";
 const char *const TXT_COMBAT_BANDIT_DEFEATED = "The bandit falls. The body slumps into the dust.\n";
 
 const char *const TXT_XP_GAIN_FMT = "You gain %d XP.\n";

@@ -878,7 +878,7 @@ static void render_dialogue_guard_event(const GameEvent *ev)
         render_msg_nobody_waiting_reply();
         break;
     case GAME_DIALOGUE_GUARD_PICK_123:
-        render_msg_pick_123();
+        render_msg_pick_123(ev->arg1);
         break;
     default:
         break;
@@ -1381,8 +1381,12 @@ void render_msg_intimidate_fail(void)
     RENDER_PRINTF("%s", TXT_MSG_INTIMIDATE_FAIL);
 }
 
-void render_msg_pick_123(void)
+void render_msg_pick_123(int max_choice)
 {
+    if (max_choice > 3) {
+        RENDER_PRINTF(TXT_PICK_RANGE_FMT, max_choice);
+        return;
+    }
     RENDER_PRINTF("%s", TXT_PICK_123);
 }
 
@@ -1422,7 +1426,7 @@ void render_inv_corpse_menu(const GameEvent *ev)
             item_name(ev->room_item[slot]));
     }
     RENDER_PRINTF(TXT_INV_CORPSE_LEAVE_FMT, ev->arg1);
-    RENDER_PRINTF("%s", TXT_REPLY_PROMPT);
+    RENDER_PRINTF(TXT_REPLY_PROMPT_FMT, ev->arg1);
 }
 
 void render_inv_loot(const char *item_name)

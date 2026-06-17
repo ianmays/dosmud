@@ -180,8 +180,8 @@ Conventions:
 ### `save`
 
 - shell-edge binary serialization in [`save.c`](https://github.com/ianmays/dosmud/blob/main/src/save.c); called only from `main.c`
-- versioned, field-by-field save format (`DMSV`, version 6) for `GameState`, `World`, and tracked RNG draw count
-- loads the current `SAVE_VERSION` plus the prior version-5 single-slot corpse-loot payload; older files still return `SAVE_RESULT_FORMAT`
+- versioned, field-by-field save format (`DMSV`, version 7) for `GameState`, `World`, and tracked RNG draw count
+- loads the current `SAVE_VERSION` plus version-6 two-slot corpse payloads and version-5 single-slot corpse-loot payloads; older files still return `SAVE_RESULT_FORMAT`
 - validates magic, version, and field ranges into a staging buffer before replacing the live game state; failed loads leave the caller's `GameState` untouched
 - fixed-size NPC roster (`GameState.npcs[]` with actor, dialogue, encounter, room, flags, and return tick per slot); enemy handover-pick state lives on `NPC_FLAG_HANDOVER_PICK` on the active enemy slot; `TEST_MODE` builds append roll-injection and quiet-tick fields after the shared payload, while release builds use the shorter record and reject extra trailing bytes
 - keeps render queues and replay logs out of the save format

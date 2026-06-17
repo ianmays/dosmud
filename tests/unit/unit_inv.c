@@ -435,6 +435,25 @@ TEST invent_loot_bag_full(void)
     PASS();
 }
 
+TEST invent_loot_invalid_choice_uses_visible_max(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 12u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game.corpse_present[WORLD_ROOM_CAMP] = 1;
+    game.corpse_item[WORLD_ROOM_CAMP][0] = ITEM_BERRY;
+    game.corpse_item[WORLD_ROOM_CAMP][1] = ITEM_STICK;
+    game.corpse_item[WORLD_ROOM_CAMP][2] = ITEM_HERB;
+    ASSERT_EQ(1, inv_loot(&game, &out));
+    ASSERT_EQ(1, inv_loot_reply(&game, 5, &out));
+    ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[0].kind);
+    ASSERT_EQ(GAME_DIALOGUE_GUARD_PICK_123, out.events[0].arg0);
+    ASSERT_EQ(4, out.events[0].arg1);
+    PASS();
+}
+
 TEST invent_craft_from_wielded_ingredient(void)
 {
     struct GameState game;
@@ -514,6 +533,7 @@ SUITE(invent) {
     RUN_TEST(invent_loot_corpse);
     RUN_TEST(invent_wield_already_and_not_weapon);
     RUN_TEST(invent_loot_bag_full);
+    RUN_TEST(invent_loot_invalid_choice_uses_visible_max);
     RUN_TEST(invent_craft_from_wielded_ingredient);
     RUN_TEST(invent_drop_not_carrying);
     RUN_TEST(invent_wield_swap_weapons);
