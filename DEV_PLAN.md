@@ -730,6 +730,8 @@ Done ✅ ([#147](https://github.com/ianmays/dosmud/pull/147)).
 
 ### [#129](https://github.com/ianmays/dosmud/issues/129) - Interactive looting
 
+Done ✅ ([#200](https://github.com/ianmays/dosmud/pull/200)).
+
 Bandit corpses open a small interactive loot menu instead of auto-transferring one item immediately. Corpse storage stays fixed-size and deterministic in core state, `reply` takes the numbered item or leaves the rest, and save/load upgrades older single-slot corpse saves into the new layout.
 
 ### Testing
