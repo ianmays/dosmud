@@ -9,6 +9,7 @@
 #include "unit_util.h"
 
 #define UNIT_FMT_BUF 128
+/* map strings use grendr/fmt stack limit, not the small bag/ground buffers */
 #define UNIT_FMT_MAP_BUF CFG_FMT_MAP_MAX
 
 TEST fmt_bag_single(void)
@@ -186,6 +187,7 @@ TEST fmt_map_none_explored(void)
     int i;
 
     unit_game_fresh(&game, 20u);
+    /* game_init marks camp explored; clear all for TXT_MAP_NONE_EXPLORED */
     for (i = 0; i < CFG_ROOM_MAX; ++i) {
         game.room_explored[i] = 0;
     }
@@ -203,7 +205,8 @@ TEST fmt_map_camp_only(void)
     static const char expect[] =
         "Explored locations:\n"
         "@\n"
-        "(@ = you, letter = first initial of a visited place.)\n";
+        "(@ = you, letter = first initial of a visited place.)\n"
+        "Exits: north south west\n";
 
     unit_game_fresh(&game, 21u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
@@ -223,9 +226,11 @@ TEST fmt_map_camp_and_road(void)
         "Explored locations:\n"
         "@\n"
         "C\n"
-        "(@ = you, letter = first initial of a visited place.)\n";
+        "(@ = you, letter = first initial of a visited place.)\n"
+        "Exits: south west\n";
 
     unit_game_fresh(&game, 22u);
+    /* player on road: footer exits are road's, not camp's */
     game_reset_fixture_baseline(&game, WORLD_ROOM_ROAD, 0);
     game.room_explored[WORLD_ROOM_CAMP] = 1;
     game.room_explored[WORLD_ROOM_ROAD] = 1;
@@ -259,6 +264,7 @@ TEST fmt_map_buf_too_small(void)
     PASS();
 }
 
+/* worst-case explored map must fit CFG_FMT_MAP_MAX (grendr mapbuf) */
 TEST fmt_map_all_explored_fits(void)
 {
     struct GameState game;
