@@ -27,7 +27,8 @@ enum DialogueKind {
     DIALOGUE_NPC_HERBALIST,
     DIALOGUE_NPC_ARCHIVIST,
     DIALOGUE_TRAVELER,
-    DIALOGUE_ENEMY
+    DIALOGUE_ENEMY,
+    DIALOGUE_LOOT
 };
 
 /* Stored in GameState.env_focus_kind; render consumes the same values. */
@@ -95,7 +96,8 @@ struct GameState {
     int player_hp;
     struct CombatState combat;
     int corpse_present[CFG_ROOM_MAX];
-    int corpse_loot[CFG_ROOM_MAX];
+    /* Per-room corpse loot; invent owns slot layout and compact-on-take (#129). */
+    int corpse_item[CFG_ROOM_MAX][CFG_CORPSE_ITEM_SLOTS];
     u8 room_explored[CFG_ROOM_MAX];
 #ifdef TEST_MODE
     int roll_inject_active;

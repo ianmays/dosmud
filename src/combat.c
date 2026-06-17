@@ -34,6 +34,48 @@ static void combat_end_active_enemy_encounter(struct GameState *game)
     npc_end_encounter(game, game->npcs[slot].actor);
 }
 
+/*
+ * Defeat loot RNG (combat-owned): one count roll (0-3 drops), then one item-tier
+ * roll per drop into invent corpse slots via game_corpse_try_add. Zero drops
+ * still leave corpse_present set for the stripped-body loot path.
+ */
+static int combat_roll_corpse_item(struct GameState *game)
+{
+    int roll;
+
+    roll = game_roll_percent(game);
+    if (roll < CFG_COMBAT_CORPSE_LOOT_SPEAR_BELOW) {
+        return ITEM_SPEAR;
+    }
+    if (roll < CFG_COMBAT_CORPSE_LOOT_STICK_BELOW) {
+        return ITEM_STICK;
+    }
+    if (roll < CFG_COMBAT_CORPSE_LOOT_BERRY_BELOW) {
+        return ITEM_BERRY;
+    }
+    if (roll < CFG_COMBAT_CORPSE_LOOT_HERB_BELOW) {
+        return ITEM_HERB;
+    }
+    return ITEM_FISH;
+}
+
+static int combat_roll_corpse_item_count(struct GameState *game)
+{
+    int roll;
+
+    roll = game_roll_percent(game);
+    if (roll < CFG_COMBAT_CORPSE_LOOT_NONE_BELOW) {
+        return 0;
+    }
+    if (roll < CFG_COMBAT_CORPSE_LOOT_ONE_BELOW) {
+        return 1;
+    }
+    if (roll < CFG_COMBAT_CORPSE_LOOT_TWO_BELOW) {
+        return 2;
+    }
+    return 3;
+}
+
 int combat_player_attack_bonus(const struct GameState *game)
 {
     int bonus;
@@ -114,24 +156,19 @@ void combat_resolve_reply(struct GameState *game, int choice, GameEventQueue *ou
         combat_end_active_enemy_encounter(game);
         game_set_mode_explore(game);
         push_combat_phase(out, GAME_COMBAT_PHASE_ENEMY_DEFEATED, 0, 0);
+        /* Clear stale corpse slots before seeding the new defeat loot table. */
+        game_corpse_clear(game, game->player.room_id);
         game->corpse_present[game->player.room_id] = 1;
         {
-            int roll;
-            int loot_item;
+            int drop_count;
+            int slot;
 
-            roll = game_roll_percent(game);
-            if (roll < CFG_COMBAT_CORPSE_LOOT_SPEAR_BELOW) {
-                loot_item = ITEM_SPEAR;
-            } else if (roll < CFG_COMBAT_CORPSE_LOOT_STICK_BELOW) {
-                loot_item = ITEM_STICK;
-            } else if (roll < CFG_COMBAT_CORPSE_LOOT_BERRY_BELOW) {
-                loot_item = ITEM_BERRY;
-            } else if (roll < CFG_COMBAT_CORPSE_LOOT_HERB_BELOW) {
-                loot_item = ITEM_HERB;
-            } else {
-                loot_item = ITEM_FISH;
+            drop_count = combat_roll_corpse_item_count(game);
+            /* One item-tier draw per slot before the kill XP spread roll. */
+            for (slot = 0; slot < drop_count; ++slot) {
+                (void)game_corpse_try_add(game, game->player.room_id,
+                    combat_roll_corpse_item(game));
             }
-            game->corpse_loot[game->player.room_id] = loot_item;
         }
         progression_gain_xp(game, CFG_COMBAT_KILL_XP_BASE +
             game_roll_spread(game, CFG_COMBAT_KILL_XP_SPREAD), out);

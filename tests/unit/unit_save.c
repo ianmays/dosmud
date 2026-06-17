@@ -60,7 +60,9 @@ static void save_fill_fixture(struct GameState *game)
     game->combat.enemy_hp = 5;
     game->combat.defending = 1;
     game->corpse_present[WORLD_ROOM_ROAD] = 1;
-    game->corpse_loot[WORLD_ROOM_ROAD] = ITEM_HERB;
+    game->corpse_item[WORLD_ROOM_ROAD][0] = ITEM_HERB;
+    game->corpse_item[WORLD_ROOM_ROAD][1] = ITEM_FISH;
+    game->corpse_item[WORLD_ROOM_ROAD][2] = ITEM_NONE;
     game->room_explored[WORLD_ROOM_ROAD] = 1;
     game->room_explored[WORLD_ROOM_TOWER] = 1;
     game->room_item[WORLD_ROOM_TOWER][0] = ITEM_FISH;
@@ -155,8 +157,8 @@ static int save_games_equal(const struct GameState *a,
             memcmp(a->bag, b->bag, sizeof(a->bag)) != 0 ||
             memcmp(a->corpse_present, b->corpse_present,
                 sizeof(a->corpse_present)) != 0 ||
-            memcmp(a->corpse_loot, b->corpse_loot,
-                sizeof(a->corpse_loot)) != 0 ||
+            memcmp(a->corpse_item, b->corpse_item,
+                sizeof(a->corpse_item)) != 0 ||
             memcmp(a->room_explored, b->room_explored,
                 sizeof(a->room_explored)) != 0) {
         return 0;
@@ -193,6 +195,24 @@ static int save_write_version(FILE *fp, unsigned int version)
         save_write_u16_le(fp, version);
 }
 
+static int save_write_room_fixture(FILE *fp, const struct Room *room)
+{
+    int i;
+
+    if (fwrite(room->name, 1, CFG_NAME_MAX, fp) != CFG_NAME_MAX ||
+            fwrite(room->desc, 1, CFG_DESC_MAX, fp) != CFG_DESC_MAX ||
+            fwrite(room->animal, 1, CFG_NAME_MAX, fp) != CFG_NAME_MAX ||
+            fwrite(room->animal_noise, 1, CFG_DESC_MAX, fp) != CFG_DESC_MAX) {
+        return 0;
+    }
+    for (i = 0; i < DIR_NONE; ++i) {
+        if (!save_write_s16_le(fp, room->exits[i])) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
 static int save_write_u32_le(FILE *fp, unsigned long value)
 {
     unsigned char bytes[4];
@@ -222,6 +242,162 @@ static long save_rng_draw_offset(void)
     offset += 4UL;
     offset += 4UL;
     return (long)offset;
+}
+
+static int save_write_legacy_game_file(const struct GameState *game,
+                                       unsigned int version,
+                                       u32 rng_draw_count)
+{
+    FILE *fp;
+    int i;
+    int j;
+
+    save_cleanup_file();
+    fp = fopen(save_test_path(), "wb");
+    if (fp == 0) {
+        return 0;
+    }
+    if (fwrite("DMSV", 1, 4, fp) != 4 ||
+            !save_write_u16_le(fp, version) ||
+            !save_write_s16_le(fp, game->world.room_count)) {
+        fclose(fp);
+        return 0;
+    }
+    for (i = 0; i < CFG_ROOM_MAX; ++i) {
+        if (!save_write_room_fixture(fp, &game->world.rooms[i])) {
+            fclose(fp);
+            return 0;
+        }
+    }
+    for (i = 0; i < CFG_ROOM_MAX; ++i) {
+        if (!save_write_s16_le(fp, game->world.map_x[i]) ||
+                !save_write_s16_le(fp, game->world.map_y[i]) ||
+                fputc(game->world.map_ready[i], fp) == EOF) {
+            fclose(fp);
+            return 0;
+        }
+    }
+    if (!save_write_s16_le(fp, game->player.room_id) ||
+            !save_write_u32_le(fp, game->tick) ||
+            !save_write_u32_le(fp, (unsigned long)game->seed) ||
+            !save_write_u32_le(fp, (unsigned long)rng_draw_count) ||
+            !save_write_s16_le(fp, game->running) ||
+            !save_write_s16_le(fp, game->mode) ||
+            !save_write_s16_le(fp, game->dialogue)) {
+        fclose(fp);
+        return 0;
+    }
+    for (i = 0; i < CFG_NPC_MAX; ++i) {
+        if (!save_write_s16_le(fp, game->npcs[i].actor) ||
+                !save_write_s16_le(fp, game->npcs[i].dialogue) ||
+                !save_write_s16_le(fp, game->npcs[i].encounter) ||
+                !save_write_s16_le(fp, game->npcs[i].room_id) ||
+                !save_write_s16_le(fp, game->npcs[i].flags) ||
+                !save_write_u32_le(fp, (unsigned long)game->npcs[i].return_tick)) {
+            fclose(fp);
+            return 0;
+        }
+    }
+    if (!save_write_s16_le(fp, game->env_focus_active) ||
+            !save_write_s16_le(fp, game->env_focus_room) ||
+            !save_write_s16_le(fp, game->env_focus_kind) ||
+            !save_write_u32_le(fp, (unsigned long)game->env_focus_expires_tick) ||
+            !save_write_s16_le(fp, game->bag_count) ||
+            !save_write_s16_le(fp, game->bag_capacity) ||
+            !save_write_s16_le(fp, game->level) ||
+            !save_write_s16_le(fp, game->xp) ||
+            !save_write_s16_le(fp, game->max_hp) ||
+            !save_write_s16_le(fp, game->damage_bonus) ||
+            !save_write_s16_le(fp, game->weapon_equipped) ||
+            !save_write_s16_le(fp, game->player_hp) ||
+            !save_write_s16_le(fp, game->combat.enemy_hp) ||
+            !save_write_s16_le(fp, game->combat.defending)) {
+        fclose(fp);
+        return 0;
+    }
+#ifdef TEST_MODE
+    if (!save_write_s16_le(fp, game->roll_inject_active) ||
+            !save_write_s16_le(fp, game->roll_queue_len) ||
+            !save_write_s16_le(fp, game->roll_queue_i) ||
+            !save_write_s16_le(fp, game->test_quiet_ticks)) {
+        fclose(fp);
+        return 0;
+    }
+#endif
+    for (i = 0; i < CFG_ROOM_MAX; ++i) {
+        for (j = 0; j < CFG_AREA_ITEM_SLOTS; ++j) {
+            if (!save_write_s16_le(fp, game->room_item[i][j])) {
+                fclose(fp);
+                return 0;
+            }
+        }
+    }
+    for (i = 0; i < CFG_BAG_MAX; ++i) {
+        if (!save_write_s16_le(fp, game->bag[i])) {
+            fclose(fp);
+            return 0;
+        }
+    }
+    for (i = 0; i < CFG_ROOM_MAX; ++i) {
+        if (!save_write_s16_le(fp, game->corpse_present[i])) {
+            fclose(fp);
+            return 0;
+        }
+        if (version >= 6U) {
+            for (j = 0; j < 2; ++j) {
+                if (!save_write_s16_le(fp, game->corpse_item[i][j])) {
+                    fclose(fp);
+                    return 0;
+                }
+            }
+        } else {
+            if (!save_write_s16_le(fp, game->corpse_item[i][0])) {
+                fclose(fp);
+                return 0;
+            }
+        }
+        if (fputc(game->room_explored[i], fp) == EOF) {
+            fclose(fp);
+            return 0;
+        }
+    }
+#ifdef TEST_MODE
+    for (i = 0; i < CFG_ROLL_INJECT_MAX; ++i) {
+        if (!save_write_s16_le(fp, game->roll_queue[i])) {
+            fclose(fp);
+            return 0;
+        }
+    }
+#endif
+    fclose(fp);
+    return 1;
+}
+
+static void save_prepare_legacy_corpse_fixture(struct GameState *game)
+{
+    save_fill_fixture(game);
+    game->corpse_present[WORLD_ROOM_ROAD] = 1;
+    game->corpse_item[WORLD_ROOM_ROAD][0] = ITEM_HERB;
+    game->corpse_item[WORLD_ROOM_ROAD][1] = ITEM_FISH;
+    game->corpse_item[WORLD_ROOM_ROAD][2] = ITEM_NONE;
+}
+
+static int save_write_minimal_legacy_file(unsigned int version,
+                                          int corpse_present,
+                                          int corpse0,
+                                          int corpse1)
+{
+    struct GameState game;
+
+    save_prepare_legacy_corpse_fixture(&game);
+    game.corpse_present[WORLD_ROOM_ROAD] = corpse_present;
+    game.corpse_item[WORLD_ROOM_ROAD][0] = corpse0;
+    game.corpse_item[WORLD_ROOM_ROAD][1] = corpse1;
+    game.corpse_item[WORLD_ROOM_ROAD][2] = ITEM_NONE;
+    if (!save_write_legacy_game_file(&game, version, 0U)) {
+        return 0;
+    }
+    return 1;
 }
 
 static long save_world_map_offset(int room_index, int field_index)
@@ -583,6 +759,42 @@ TEST save_read_schedules_legacy_bandit_respawn(void)
     PASS();
 }
 
+TEST save_read_maps_v5_single_corpse_loot_into_slot_zero(void)
+{
+    struct GameState loaded;
+    u32 loaded_draws;
+
+    ASSERT(save_write_minimal_legacy_file(5U, 1, ITEM_HERB, ITEM_NONE));
+    ASSERT_EQ(SAVE_RESULT_OK,
+        save_read_game(save_test_path(), &loaded, &loaded_draws));
+    ASSERT_EQ(1, loaded.corpse_present[WORLD_ROOM_ROAD]);
+    ASSERT_EQ(ITEM_HERB, loaded.corpse_item[WORLD_ROOM_ROAD][0]);
+    ASSERT_EQ(ITEM_NONE, loaded.corpse_item[WORLD_ROOM_ROAD][1]);
+    ASSERT_EQ(ITEM_NONE, loaded.corpse_item[WORLD_ROOM_ROAD][2]);
+    ASSERT_EQ(0U, loaded_draws);
+
+    save_cleanup_file();
+    PASS();
+}
+
+TEST save_read_maps_v6_two_corpse_slots_into_dense_layout(void)
+{
+    struct GameState loaded;
+    u32 loaded_draws;
+
+    ASSERT(save_write_minimal_legacy_file(6U, 1, ITEM_HERB, ITEM_FISH));
+    ASSERT_EQ(SAVE_RESULT_OK,
+        save_read_game(save_test_path(), &loaded, &loaded_draws));
+    ASSERT_EQ(1, loaded.corpse_present[WORLD_ROOM_ROAD]);
+    ASSERT_EQ(ITEM_HERB, loaded.corpse_item[WORLD_ROOM_ROAD][0]);
+    ASSERT_EQ(ITEM_FISH, loaded.corpse_item[WORLD_ROOM_ROAD][1]);
+    ASSERT_EQ(ITEM_NONE, loaded.corpse_item[WORLD_ROOM_ROAD][2]);
+    ASSERT_EQ(0U, loaded_draws);
+
+    save_cleanup_file();
+    PASS();
+}
+
 SUITE(save)
 {
     RUN_TEST(save_round_trip_preserves_state_and_rng_count);
@@ -597,4 +809,6 @@ SUITE(save)
     RUN_TEST(save_round_trip_preserves_seeded_roaming_bandit);
     RUN_TEST(save_read_upgrades_legacy_bandit_profile);
     RUN_TEST(save_read_schedules_legacy_bandit_respawn);
+    RUN_TEST(save_read_maps_v5_single_corpse_loot_into_slot_zero);
+    RUN_TEST(save_read_maps_v6_two_corpse_slots_into_dense_layout);
 }

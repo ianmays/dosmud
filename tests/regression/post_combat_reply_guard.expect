@@ -33,11 +33,18 @@ You gain 12 XP.
 
 [T:1] Camp [HP:20/20] [Atk:1] [Lv:1 XP:12/20]
 
-> You loot a herb from the body.
+> On the body:
+  [1] herb
+  [2] Leave the rest.
+(Answer with 1-2 or reply <n>.)
 
 A cricket chirps from beside the coals.
 
-A distant creak rolls across the landscape.
+Something small rustles just out of sight.
+
+[T:2] Camp [HP:20/20] [Atk:1] [Lv:1 XP:12/20]
+
+> You loot a herb from the body.
 
 [T:2] Camp [HP:20/20] [Atk:1] [Lv:1 XP:12/20]
 

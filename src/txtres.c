@@ -136,7 +136,7 @@ const char *const TXT_HELP_CRAFT =
     "craft <item> or build <item> - torch needs stick+reed, salve needs herb+berry, spear needs stick+stone (ingredients in bag or wielded where applicable). Not while fighting.";
 
 const char *const TXT_HELP_LOOT =
-    "loot - take gear from a bandit corpse.";
+    "loot - inspect a bandit corpse, then use the numbered corpse menu to take an item or leave the rest.";
 
 const char *const TXT_HELP_TALK =
     "talk (speak) - speak with an NPC in the room or advance certain encounters.";
@@ -194,6 +194,7 @@ const char *const TXT_BANDIT_OPEN_OPT2 =
     "  [2] Hand over one item from your bag or what you are wielding (choose reply 2, then give <item>).\n";
 const char *const TXT_BANDIT_OPEN_OPT3 = "  [3] Talk it down and part ways.\n";
 const char *const TXT_REPLY_PROMPT = "(Answer with 1, 2, 3, or reply <n>.)\n";
+const char *const TXT_REPLY_PROMPT_FMT = "(Answer with 1-%d or reply <n>.)\n";
 
 const char *const TXT_COMBAT_START_FMT = "Combat starts. You HP: %d, Bandit HP: %d.\n";
 const char *const TXT_COMBAT_MENU = "Choose: [1] Attack  [2] Defend  [3] Use salve\n";
@@ -207,6 +208,7 @@ const char *const TXT_COMBAT_SALVE_FMT = "You apply salve and recover. HP now %d
 const char *const TXT_COMBAT_SALVE_FULL = "You apply salve.\n";
 const char *const TXT_ALREADY_FULL_HEALTH = "You're already at full health.\n";
 const char *const TXT_PICK_123 = "Pick 1, 2, or 3.\n";
+const char *const TXT_PICK_RANGE_FMT = "Pick 1 through %d.\n";
 const char *const TXT_COMBAT_BANDIT_DEFEATED = "The bandit falls. The body slumps into the dust.\n";
 
 const char *const TXT_XP_GAIN_FMT = "You gain %d XP.\n";
@@ -284,6 +286,8 @@ const char *const TXT_MSG_INSPECT_CREAK = "An old branch rocks against another, 
 const char *const TXT_MSG_INSPECT_WATER = "You find a thin runnel cutting fresh lines through mud.\n";
 const char *const TXT_MSG_INSPECT_GRIT = "New tracks cross the grit: light, quick, and already fading.\n";
 const char *const TXT_MSG_BANDIT_BLOCK_TALK = "The bandit has your full attention right now.\n";
+const char *const TXT_MSG_LOOT_WAITING =
+    "Finish looting with the numbered corpse menu, or type loot to leave the body alone.\n";
 const char *const TXT_MSG_TRAVELER_WAITING = "The traveler is waiting for an answer (1/2/3).\n";
 const char *const TXT_MSG_NOBODY_TALK = "Nobody here wants to talk.\n";
 const char *const TXT_MSG_HAND_OVER_ITEM_FMT = "You hand over your %s. The bandit backs off and leaves.\n";
@@ -330,6 +334,10 @@ const char *txtres_msg_archivist_reply(int arg)
 const char *const TXT_INV_NO_BODY_LOOT = "There is no body here to loot.\n";
 const char *const TXT_INV_BODY_STRIPPED = "The body has already been stripped clean.\n";
 const char *const TXT_INV_BAG_FULL_DROP = "Your bag is full. Drop something first.\n";
+const char *const TXT_INV_LEAVE_BODY = "You leave the rest on the body.\n";
+const char *const TXT_INV_CORPSE_HEADER = "On the body:\n";
+const char *const TXT_INV_CORPSE_LINE_FMT = "  [%d] %s\n";
+const char *const TXT_INV_CORPSE_LEAVE_FMT = "  [%d] Leave the rest.\n";
 const char *const TXT_INV_LOOT_FMT = "You loot a %s from the body.\n";
 const char *const TXT_INV_NO_RUMMAGE_COMBAT = "You cannot rummage through gear mid-fight.\n";
 const char *const TXT_INV_TAKE_NOTHING = "There is nothing here to take.\n";

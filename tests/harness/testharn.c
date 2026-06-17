@@ -174,20 +174,37 @@ static int fixture_bandit_combat_salve_ready(struct GameState *game)
     return 1;
 }
 
-static void fixture_bandit_victory_inject(struct GameState *game, int loot_percent)
+/*
+ * Roll queue mirrors combat_resolve_reply on kill: hit spread, drop count, then
+ * 0-3 item-tier rolls gated like combat_roll_corpse_item_count, then XP spread.
+ */
+static void fixture_bandit_victory_inject(struct GameState *game, int count_roll,
+                                          int loot0, int loot1, int loot2)
 {
-    int rolls[3];
+    int rolls[6];
+    int roll_count;
 
     rolls[0] = CFG_TEST_VICTORY_HIT_SPREAD;
-    rolls[1] = loot_percent;
-    rolls[2] = CFG_TEST_VICTORY_XP_SPREAD;
+    rolls[1] = count_roll;
+    roll_count = 2;
+    if (count_roll >= CFG_COMBAT_CORPSE_LOOT_NONE_BELOW) {
+        rolls[roll_count++] = loot0;
+        if (count_roll >= CFG_COMBAT_CORPSE_LOOT_ONE_BELOW) {
+            rolls[roll_count++] = loot1;
+            if (count_roll >= CFG_COMBAT_CORPSE_LOOT_TWO_BELOW) {
+                rolls[roll_count++] = loot2;
+            }
+        }
+    }
+    rolls[roll_count++] = CFG_TEST_VICTORY_XP_SPREAD;
     fixture_bandit_combat_near_kill(game);
-    game_roll_inject_begin(game, rolls, 3);
+    game_roll_inject_begin(game, rolls, roll_count);
 }
 
 static void fixture_bandit_combat_level_ready(struct GameState *game)
 {
-    fixture_bandit_victory_inject(game, CFG_TEST_VICTORY_LOOT_STICK);
+    fixture_bandit_victory_inject(game, CFG_TEST_VICTORY_LOOT_COUNT_ONE,
+        CFG_TEST_VICTORY_LOOT_STICK, 0, 0);
     game->xp = 19;
 }
 
@@ -384,13 +401,17 @@ static void fixture_env_focus(struct GameState *game, int kind)
     game->env_focus_expires_tick = game->tick + CFG_ENV_FOCUS_DURATION_TICKS;
 }
 
+/* Corpse flag set with no loot slots (#129 stripped-body path). */
 static void fixture_corpse_stripped(struct GameState *game)
 {
     fixture_at_camp(game);
     game->corpse_present[WORLD_ROOM_CAMP] = 1;
-    game->corpse_loot[WORLD_ROOM_CAMP] = ITEM_NONE;
+    game->corpse_item[WORLD_ROOM_CAMP][0] = ITEM_NONE;
+    game->corpse_item[WORLD_ROOM_CAMP][1] = ITEM_NONE;
+    game->corpse_item[WORLD_ROOM_CAMP][2] = ITEM_NONE;
 }
 
+/* Full bag plus one corpse item for bag-full-drop during loot reply. */
 static int fixture_corpse_loot_full_bag(struct GameState *game, int loot_item)
 {
     int i;
@@ -402,7 +423,9 @@ static int fixture_corpse_loot_full_bag(struct GameState *game, int loot_item)
         }
     }
     game->corpse_present[WORLD_ROOM_CAMP] = 1;
-    game->corpse_loot[WORLD_ROOM_CAMP] = loot_item;
+    game->corpse_item[WORLD_ROOM_CAMP][0] = loot_item;
+    game->corpse_item[WORLD_ROOM_CAMP][1] = ITEM_NONE;
+    game->corpse_item[WORLD_ROOM_CAMP][2] = ITEM_NONE;
     return 1;
 }
 
@@ -561,23 +584,41 @@ int testharn_apply(struct GameState *game, const char *line)
         return 1;
     }
     if (fixture_name_is("bandit_victory_spear", name)) {
-        fixture_bandit_victory_inject(game, CFG_TEST_VICTORY_LOOT_SPEAR);
+        fixture_bandit_victory_inject(game, CFG_TEST_VICTORY_LOOT_COUNT_ONE,
+            CFG_TEST_VICTORY_LOOT_SPEAR, 0, 0);
         return 1;
     }
     if (fixture_name_is("bandit_victory_stick", name)) {
-        fixture_bandit_victory_inject(game, CFG_TEST_VICTORY_LOOT_STICK);
+        fixture_bandit_victory_inject(game, CFG_TEST_VICTORY_LOOT_COUNT_ONE,
+            CFG_TEST_VICTORY_LOOT_STICK, 0, 0);
         return 1;
     }
     if (fixture_name_is("bandit_victory_berry", name)) {
-        fixture_bandit_victory_inject(game, CFG_TEST_VICTORY_LOOT_BERRY);
+        fixture_bandit_victory_inject(game, CFG_TEST_VICTORY_LOOT_COUNT_ONE,
+            CFG_TEST_VICTORY_LOOT_BERRY, 0, 0);
         return 1;
     }
     if (fixture_name_is("bandit_victory_herb", name)) {
-        fixture_bandit_victory_inject(game, CFG_TEST_VICTORY_LOOT_HERB);
+        fixture_bandit_victory_inject(game, CFG_TEST_VICTORY_LOOT_COUNT_ONE,
+            CFG_TEST_VICTORY_LOOT_HERB, 0, 0);
         return 1;
     }
     if (fixture_name_is("bandit_victory_fish", name)) {
-        fixture_bandit_victory_inject(game, CFG_TEST_VICTORY_LOOT_FISH);
+        fixture_bandit_victory_inject(game, CFG_TEST_VICTORY_LOOT_COUNT_ONE,
+            CFG_TEST_VICTORY_LOOT_FISH, 0, 0);
+        return 1;
+    }
+    /* Three defeat drops for multi-slot corpse loot snapshots. */
+    if (fixture_name_is("bandit_victory_multi", name)) {
+        fixture_bandit_victory_inject(game, CFG_TEST_VICTORY_LOOT_COUNT_THREE,
+            CFG_TEST_VICTORY_LOOT_STICK, CFG_TEST_VICTORY_LOOT_BERRY,
+            CFG_TEST_VICTORY_LOOT_HERB);
+        return 1;
+    }
+    /* Defeat with zero item rolls; corpse_present without loot slots. */
+    if (fixture_name_is("bandit_victory_none", name)) {
+        fixture_bandit_victory_inject(game, CFG_TEST_VICTORY_LOOT_COUNT_NONE,
+            0, 0, 0);
         return 1;
     }
     if (fixture_name_is("world_boot", name)) {

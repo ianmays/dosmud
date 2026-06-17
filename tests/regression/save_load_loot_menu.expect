@@ -40,6 +40,18 @@ Something small rustles just out of sight.
 
 [T:2] Camp [HP:20/20] [Atk:1] [Lv:1 XP:12/20]
 
+> Saved to save.dat.
+
+[T:2] Camp [HP:20/20] [Atk:1] [Lv:1 XP:12/20]
+
+> Loaded from save.dat.
+On the body:
+  [1] herb
+  [2] Leave the rest.
+(Answer with 1-2 or reply <n>.)
+
+[T:2] Camp [HP:20/20] [Atk:1] [Lv:1 XP:12/20]
+
 > You loot a herb from the body.
 
 [T:2] Camp [HP:20/20] [Atk:1] [Lv:1 XP:12/20]

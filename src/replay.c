@@ -60,6 +60,8 @@ static const char *replay_event_name(int kind)
         return "GAME_EVENT_UNKNOWN_COMMAND";
     case GAME_EVENT_ITEM_RESULT:
         return "GAME_EVENT_ITEM_RESULT";
+    case GAME_EVENT_CORPSE_VIEW:
+        return "GAME_EVENT_CORPSE_VIEW";
     case GAME_EVENT_BAG_VIEW:
         return "GAME_EVENT_BAG_VIEW";
     case GAME_EVENT_CRAFT_RESULT:

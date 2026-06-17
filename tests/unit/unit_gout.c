@@ -135,24 +135,28 @@ TEST game_event_push_records_inventory_kinds(void)
     game_event_queue_reset(&out);
     ASSERT(0 != game_event_push(&out, GAME_EVENT_ITEM_RESULT,
         GAME_ITEM_ACTION_TAKE, GAME_ITEM_OUTCOME_OK, 42, 5, 0));
+    ASSERT(0 != game_event_push(&out, GAME_EVENT_CORPSE_VIEW, 1, 2, 0, 0, 0));
     ASSERT(0 != game_event_push(&out, GAME_EVENT_BAG_VIEW, 0, 0, 0, 0, 0));
     ASSERT(0 != game_event_push(&out, GAME_EVENT_CRAFT_RESULT,
         ITEM_TORCH, GAME_CRAFT_OUTCOME_OK, 0, 0, 0));
     ASSERT(0 != game_event_push(&out, GAME_EVENT_EQUIP_RESULT,
         ITEM_STICK, GAME_EQUIP_OUTCOME_WIELDED, 0, 0, 0));
-    ASSERT_EQ(4, out.count);
+    ASSERT_EQ(5, out.count);
     ASSERT_EQ(GAME_EVENT_ITEM_RESULT, out.events[0].kind);
     ASSERT_EQ(GAME_ITEM_ACTION_TAKE, out.events[0].arg0);
     ASSERT_EQ(GAME_ITEM_OUTCOME_OK, out.events[0].arg1);
     ASSERT_EQ(42, out.events[0].arg2);
     ASSERT_EQ(5, out.events[0].arg3);
-    ASSERT_EQ(GAME_EVENT_BAG_VIEW, out.events[1].kind);
-    ASSERT_EQ(GAME_EVENT_CRAFT_RESULT, out.events[2].kind);
-    ASSERT_EQ(ITEM_TORCH, out.events[2].arg0);
-    ASSERT_EQ(GAME_CRAFT_OUTCOME_OK, out.events[2].arg1);
-    ASSERT_EQ(GAME_EVENT_EQUIP_RESULT, out.events[3].kind);
-    ASSERT_EQ(ITEM_STICK, out.events[3].arg0);
-    ASSERT_EQ(GAME_EQUIP_OUTCOME_WIELDED, out.events[3].arg1);
+    ASSERT_EQ(GAME_EVENT_CORPSE_VIEW, out.events[1].kind);
+    ASSERT_EQ(1, out.events[1].arg0);
+    ASSERT_EQ(2, out.events[1].arg1);
+    ASSERT_EQ(GAME_EVENT_BAG_VIEW, out.events[2].kind);
+    ASSERT_EQ(GAME_EVENT_CRAFT_RESULT, out.events[3].kind);
+    ASSERT_EQ(ITEM_TORCH, out.events[3].arg0);
+    ASSERT_EQ(GAME_CRAFT_OUTCOME_OK, out.events[3].arg1);
+    ASSERT_EQ(GAME_EVENT_EQUIP_RESULT, out.events[4].kind);
+    ASSERT_EQ(ITEM_STICK, out.events[4].arg0);
+    ASSERT_EQ(GAME_EQUIP_OUTCOME_WIELDED, out.events[4].arg1);
     PASS();
 }
 
@@ -219,7 +223,9 @@ TEST game_event_push_records_dialogue_encounter_kinds(void)
         GAME_ENCOUNTER_OUTCOME_NONE, 0, 0));
     ASSERT(0 != game_event_push(&out, GAME_EVENT_DIALOGUE_GUARD,
         GAME_DIALOGUE_GUARD_PICK_123, 0, 0, 0, 0));
-    ASSERT_EQ(4, out.count);
+    ASSERT(0 != game_event_push(&out, GAME_EVENT_DIALOGUE_GUARD,
+        GAME_DIALOGUE_GUARD_LOOT_WAITING_REPLY, 0, 0, 0, 0));
+    ASSERT_EQ(5, out.count);
     ASSERT_EQ(GAME_EVENT_DIALOGUE, out.events[0].kind);
     ASSERT_EQ(GAME_DIALOGUE_ACTOR_FROG, out.events[0].arg0);
     ASSERT_EQ(2, out.events[0].arg2);
@@ -231,6 +237,8 @@ TEST game_event_push_records_dialogue_encounter_kinds(void)
     ASSERT_EQ(GAME_ENCOUNTER_ACTION_OPEN, out.events[2].arg1);
     ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[3].kind);
     ASSERT_EQ(GAME_DIALOGUE_GUARD_PICK_123, out.events[3].arg0);
+    ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[4].kind);
+    ASSERT_EQ(GAME_DIALOGUE_GUARD_LOOT_WAITING_REPLY, out.events[4].arg0);
     PASS();
 }
 

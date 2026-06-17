@@ -502,6 +502,9 @@ static void render_item_result_event(const GameEvent *ev)
         case GAME_ITEM_OUTCOME_BAG_FULL_DROP:
             render_inv_bag_full_drop();
             break;
+        case GAME_ITEM_OUTCOME_LEFT_BEHIND:
+            render_inv_leave_body();
+            break;
         default:
             break;
         }
@@ -865,6 +868,9 @@ static void render_dialogue_guard_event(const GameEvent *ev)
     case GAME_DIALOGUE_GUARD_BANDIT_BLOCKS_TALK:
         render_msg_bandit_blocks_talk();
         break;
+    case GAME_DIALOGUE_GUARD_LOOT_WAITING_REPLY:
+        render_msg_loot_waiting();
+        break;
     case GAME_DIALOGUE_GUARD_TRAVELER_WAITING:
         render_msg_traveler_waiting();
         break;
@@ -872,7 +878,7 @@ static void render_dialogue_guard_event(const GameEvent *ev)
         render_msg_nobody_waiting_reply();
         break;
     case GAME_DIALOGUE_GUARD_PICK_123:
-        render_msg_pick_123();
+        render_msg_pick_123(ev->arg1);
         break;
     default:
         break;
@@ -964,6 +970,9 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
         /* #158 inventory: direct dispatch (invent no longer wraps LEGACY). */
         case GAME_EVENT_ITEM_RESULT:
             render_item_result_event(ev);
+            break;
+        case GAME_EVENT_CORPSE_VIEW:
+            render_inv_corpse_menu(ev);
             break;
         case GAME_EVENT_BAG_VIEW:
             render_inv_bag(game);
@@ -1286,6 +1295,11 @@ void render_msg_bandit_blocks_talk(void)
     RENDER_PRINTF("%s", TXT_MSG_BANDIT_BLOCK_TALK);
 }
 
+void render_msg_loot_waiting(void)
+{
+    RENDER_PRINTF("%s", TXT_MSG_LOOT_WAITING);
+}
+
 void render_msg_traveler_waiting(void)
 {
     RENDER_PRINTF("%s", TXT_MSG_TRAVELER_WAITING);
@@ -1367,8 +1381,12 @@ void render_msg_intimidate_fail(void)
     RENDER_PRINTF("%s", TXT_MSG_INTIMIDATE_FAIL);
 }
 
-void render_msg_pick_123(void)
+void render_msg_pick_123(int max_choice)
 {
+    if (max_choice != 3 && max_choice > 0) {
+        RENDER_PRINTF(TXT_PICK_RANGE_FMT, max_choice);
+        return;
+    }
     RENDER_PRINTF("%s", TXT_PICK_123);
 }
 
@@ -1390,6 +1408,25 @@ void render_inv_body_stripped(void)
 void render_inv_bag_full_drop(void)
 {
     RENDER_PRINTF("%s", TXT_INV_BAG_FULL_DROP);
+}
+
+void render_inv_leave_body(void)
+{
+    RENDER_PRINTF("%s", TXT_INV_LEAVE_BODY);
+}
+
+/* arg0 is non-empty item count; room_item[] is the invent snapshot from push_corpse_view. */
+void render_inv_corpse_menu(const GameEvent *ev)
+{
+    int slot;
+
+    RENDER_PRINTF("%s", TXT_INV_CORPSE_HEADER);
+    for (slot = 0; slot < ev->arg0; ++slot) {
+        RENDER_PRINTF(TXT_INV_CORPSE_LINE_FMT, slot + 1,
+            item_name(ev->room_item[slot]));
+    }
+    RENDER_PRINTF(TXT_INV_CORPSE_LEAVE_FMT, ev->arg1);
+    RENDER_PRINTF(TXT_REPLY_PROMPT_FMT, ev->arg1);
 }
 
 void render_inv_loot(const char *item_name)

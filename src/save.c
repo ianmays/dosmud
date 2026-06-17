@@ -10,11 +10,12 @@
  * save.c owns explicit binary serialization of the durable simulation state.
  * The format is versioned and field-by-field so compiler padding and TEST_MODE
  * conditionals do not silently corrupt save files.
- * Load accepts only SAVE_VERSION; no migrators or roster repair on read.
+ * Load accepts SAVE_VERSION plus prior corpse-loot layouts so older files
+ * still restore into the expanded fixed-slot corpse inventory.
  */
 
 #define SAVE_MAGIC "DMSV"
-#define SAVE_VERSION 5
+#define SAVE_VERSION 7
 #define SAVE_PATH_BUF_MAX 260
 
 /*
@@ -300,9 +301,15 @@ static int save_write_game_arrays(FILE *fp, const struct GameState *game)
         }
     }
     for (i = 0; i < CFG_ROOM_MAX; ++i) {
-        if (!save_write_s16(fp, game->corpse_present[i]) ||
-                !save_write_s16(fp, game->corpse_loot[i]) ||
-                !save_write_u8(fp, game->room_explored[i])) {
+        if (!save_write_s16(fp, game->corpse_present[i])) {
+            return 0;
+        }
+        for (j = 0; j < CFG_CORPSE_ITEM_SLOTS; ++j) {
+            if (!save_write_s16(fp, game->corpse_item[i][j])) {
+                return 0;
+            }
+        }
+        if (!save_write_u8(fp, game->room_explored[i])) {
             return 0;
         }
     }
@@ -316,10 +323,11 @@ static int save_write_game_arrays(FILE *fp, const struct GameState *game)
     return 1;
 }
 
-static int save_read_game_arrays(FILE *fp, struct GameState *game)
+static int save_read_game_arrays(FILE *fp, struct GameState *game, u16 version)
 {
     int i;
     int j;
+    int legacy_loot;
 
     for (i = 0; i < CFG_ROOM_MAX; ++i) {
         for (j = 0; j < CFG_AREA_ITEM_SLOTS; ++j) {
@@ -334,9 +342,36 @@ static int save_read_game_arrays(FILE *fp, struct GameState *game)
         }
     }
     for (i = 0; i < CFG_ROOM_MAX; ++i) {
-        if (!save_read_s16(fp, &game->corpse_present[i]) ||
-                !save_read_s16(fp, &game->corpse_loot[i]) ||
-                !save_read_u8(fp, &game->room_explored[i])) {
+        if (!save_read_s16(fp, &game->corpse_present[i])) {
+            return 0;
+        }
+        if (version >= 7U) {
+            for (j = 0; j < CFG_CORPSE_ITEM_SLOTS; ++j) {
+                if (!save_read_s16(fp, &game->corpse_item[i][j])) {
+                    return 0;
+                }
+            }
+        } else if (version >= 6U) {
+            /* v6: two corpse_item slots per room; pad to CFG_CORPSE_ITEM_SLOTS. */
+            for (j = 0; j < 2; ++j) {
+                if (!save_read_s16(fp, &game->corpse_item[i][j])) {
+                    return 0;
+                }
+            }
+            for (; j < CFG_CORPSE_ITEM_SLOTS; ++j) {
+                game->corpse_item[i][j] = ITEM_NONE;
+            }
+        } else {
+            /* v5 and earlier: single corpse_loot field maps to slot 0. */
+            if (!save_read_s16(fp, &legacy_loot)) {
+                return 0;
+            }
+            game->corpse_item[i][0] = legacy_loot;
+            for (j = 1; j < CFG_CORPSE_ITEM_SLOTS; ++j) {
+                game->corpse_item[i][j] = ITEM_NONE;
+            }
+        }
+        if (!save_read_u8(fp, &game->room_explored[i])) {
             return 0;
         }
     }
@@ -395,7 +430,7 @@ static int save_write_game_state(FILE *fp, const struct GameState *game,
 }
 
 static int save_read_game_state(FILE *fp, struct GameState *game,
-                                u32 *out_rng_draw_count)
+                                u32 *out_rng_draw_count, u16 version)
 {
     if (!save_read_world(fp, &game->world) ||
             !save_read_s16(fp, &game->player.room_id) ||
@@ -430,7 +465,7 @@ static int save_read_game_state(FILE *fp, struct GameState *game,
         return 0;
     }
 #endif
-    return save_read_game_arrays(fp, game);
+    return save_read_game_arrays(fp, game, version);
 }
 
 static int save_string_has_nul(const char *text, unsigned int size)
@@ -485,7 +520,7 @@ static int save_valid_npc(const struct NpcState *npc, int room_count)
     if (npc->actor < GAME_DIALOGUE_ACTOR_NONE ||
             npc->actor > GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH ||
             npc->dialogue < DIALOGUE_NONE ||
-            npc->dialogue > DIALOGUE_ENEMY ||
+            npc->dialogue > DIALOGUE_LOOT ||
             npc->encounter < GAME_ENCOUNTER_NONE ||
             npc->encounter > GAME_ENCOUNTER_TRAVELER ||
             !save_valid_room_or_none(npc->room_id, room_count) ||
@@ -604,7 +639,7 @@ static int save_validate_game(const struct GameState *game)
             game->mode < GAME_MODE_EXPLORE ||
             game->mode > GAME_MODE_COMBAT ||
             game->dialogue < DIALOGUE_NONE ||
-            game->dialogue > DIALOGUE_ENEMY ||
+            game->dialogue > DIALOGUE_LOOT ||
             !save_valid_boolish(game->env_focus_active) ||
             !save_valid_room_or_none(game->env_focus_room, room_count) ||
             game->env_focus_kind < GAME_ENV_NONE ||
@@ -631,9 +666,13 @@ static int save_validate_game(const struct GameState *game)
     }
     for (i = 0; i < CFG_ROOM_MAX; ++i) {
         if (!save_valid_boolish((int)game->room_explored[i]) ||
-                !save_valid_boolish(game->corpse_present[i]) ||
-                !save_valid_item(game->corpse_loot[i])) {
+                !save_valid_boolish(game->corpse_present[i])) {
             return 0;
+        }
+        for (j = 0; j < CFG_CORPSE_ITEM_SLOTS; ++j) {
+            if (!save_valid_item(game->corpse_item[i][j])) {
+                return 0;
+            }
         }
         for (j = 0; j < CFG_AREA_ITEM_SLOTS; ++j) {
             if (!save_valid_item(game->room_item[i][j])) {
@@ -760,11 +799,11 @@ int save_read_game(const char *path, struct GameState *out_game,
         rc = SAVE_RESULT_IO;
         goto done;
     }
-    /* Strict version gate; add per-version readers here if SAVE_VERSION bumps again. */
-    if (version != (u16)SAVE_VERSION) {
+    if (version != 5U && version != 6U && version != (u16)SAVE_VERSION) {
         goto done;
     }
-    if (!save_read_game_state(fp, &g_save_loaded, &loaded_rng_draw_count)) {
+    if (!save_read_game_state(fp, &g_save_loaded, &loaded_rng_draw_count,
+            version)) {
         goto done;
     }
     /* Reject padded or concatenated files; payload must end at EOF. */

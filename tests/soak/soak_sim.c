@@ -82,7 +82,7 @@ TEST soak_combat_loop(void)
 {
     struct GameState game;
     GameEventQueue out;
-    int rolls[3];
+    int rolls[4];
     unsigned long i;
     clock_t start;
     clock_t end;
@@ -97,9 +97,10 @@ TEST soak_combat_loop(void)
         game.combat.enemy_hp = 1;
         game.combat.defending = 0;
         rolls[0] = 0;
-        rolls[1] = CFG_TEST_VICTORY_LOOT_BERRY;
-        rolls[2] = CFG_TEST_VICTORY_XP_SPREAD;
-        game_roll_inject_begin(&game, rolls, 3);
+        rolls[1] = CFG_TEST_VICTORY_LOOT_COUNT_ONE;
+        rolls[2] = CFG_TEST_VICTORY_LOOT_BERRY;
+        rolls[3] = CFG_TEST_VICTORY_XP_SPREAD;
+        game_roll_inject_begin(&game, rolls, 4);
         game_event_queue_reset(&out);
         combat_resolve_reply(&game, 1, &out);
         ASSERT_EQ(0, out.overflowed);
@@ -108,7 +109,9 @@ TEST soak_combat_loop(void)
         }
         if (game.mode == GAME_MODE_EXPLORE && game.running) {
             game.corpse_present[WORLD_ROOM_CAMP] = 0;
-            game.corpse_loot[WORLD_ROOM_CAMP] = 0;
+            game.corpse_item[WORLD_ROOM_CAMP][0] = 0;
+            game.corpse_item[WORLD_ROOM_CAMP][1] = 0;
+            game.corpse_item[WORLD_ROOM_CAMP][2] = 0;
         }
     }
     end = clock();

@@ -86,7 +86,12 @@ TEST command_parse_items_and_reply(void)
     ASSERT_EQ(1, parse_line("2", &cmd));
     ASSERT_EQ(CMD_REPLY, cmd.type);
     ASSERT_EQ(2, cmd.arg);
-    ASSERT_EQ(0, parse_line("reply 4", &cmd));
+    ASSERT_EQ(1, parse_line("reply 4", &cmd));
+    ASSERT_EQ(CMD_REPLY, cmd.type);
+    ASSERT_EQ(4, cmd.arg);
+    ASSERT_EQ(1, parse_line("4", &cmd));
+    ASSERT_EQ(CMD_REPLY, cmd.type);
+    ASSERT_EQ(4, cmd.arg);
     PASS();
 }
 

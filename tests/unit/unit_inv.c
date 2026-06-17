@@ -66,6 +66,12 @@ static int inv_unwield(struct GameState *game, GameEventQueue *out)
     return game_inv_cmd_unwield(game, out);
 }
 
+static int inv_loot_reply(struct GameState *game, int choice, GameEventQueue *out)
+{
+    game_event_queue_reset(out);
+    return game_inv_cmd_loot_reply(game, choice, out);
+}
+
 TEST invent_ground_slots(void)
 {
     struct GameState game;
@@ -366,13 +372,25 @@ TEST invent_loot_corpse(void)
     unit_game_fresh(&game, 9u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game.corpse_present[WORLD_ROOM_CAMP] = 1;
-    game.corpse_loot[WORLD_ROOM_CAMP] = ITEM_BERRY;
+    game.corpse_item[WORLD_ROOM_CAMP][0] = ITEM_BERRY;
+    game.corpse_item[WORLD_ROOM_CAMP][1] = ITEM_STICK;
+    game.corpse_item[WORLD_ROOM_CAMP][2] = ITEM_NONE;
     ASSERT_EQ(1, inv_loot(&game, &out));
+    ASSERT_EQ(GAME_EVENT_CORPSE_VIEW, out.events[0].kind);
+    ASSERT_EQ(2, out.events[0].arg0);
+    ASSERT_EQ(3, out.events[0].arg1);
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(DIALOGUE_LOOT, game.dialogue);
+    ASSERT_EQ(1, inv_loot_reply(&game, 1, &out));
     ASSERT_EQ(GAME_EVENT_ITEM_RESULT, out.events[0].kind);
     ASSERT_EQ(GAME_ITEM_ACTION_LOOT, out.events[0].arg0);
     ASSERT_EQ(GAME_ITEM_OUTCOME_OK, out.events[0].arg1);
     ASSERT_EQ(ITEM_BERRY, out.events[0].arg2);
     ASSERT_EQ(1, game_inv_player_has_item(&game, ITEM_BERRY));
+    ASSERT_EQ(1, game.corpse_present[WORLD_ROOM_CAMP]);
+    ASSERT_EQ(ITEM_STICK, game.corpse_item[WORLD_ROOM_CAMP][0]);
+    ASSERT_EQ(ITEM_NONE, game.corpse_item[WORLD_ROOM_CAMP][1]);
+    ASSERT_EQ(1, inv_loot_reply(&game, 1, &out));
     ASSERT_EQ(0, game.corpse_present[WORLD_ROOM_CAMP]);
     ASSERT_EQ(1, inv_loot(&game, &out));
     ASSERT_EQ(GAME_ITEM_OUTCOME_NO_BODY, out.events[0].arg1);
@@ -403,12 +421,80 @@ TEST invent_loot_bag_full(void)
     unit_game_fresh(&game, 11u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game.corpse_present[WORLD_ROOM_CAMP] = 1;
-    game.corpse_loot[WORLD_ROOM_CAMP] = ITEM_BERRY;
+    game.corpse_item[WORLD_ROOM_CAMP][0] = ITEM_BERRY;
+    game.corpse_item[WORLD_ROOM_CAMP][1] = ITEM_NONE;
+    game.corpse_item[WORLD_ROOM_CAMP][2] = ITEM_NONE;
     game.bag_count = game.bag_capacity;
     ASSERT_EQ(1, inv_loot(&game, &out));
+    ASSERT_EQ(GAME_EVENT_CORPSE_VIEW, out.events[0].kind);
+    ASSERT_EQ(1, inv_loot_reply(&game, 1, &out));
     ASSERT_EQ(GAME_ITEM_OUTCOME_BAG_FULL_DROP, out.events[0].arg1);
     ASSERT_EQ(ITEM_BERRY, out.events[0].arg2);
+    ASSERT_EQ(GAME_EVENT_CORPSE_VIEW, out.events[1].kind);
     ASSERT_EQ(1, game.corpse_present[WORLD_ROOM_CAMP]);
+    PASS();
+}
+
+TEST invent_loot_invalid_choice_uses_visible_max(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 12u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game.corpse_present[WORLD_ROOM_CAMP] = 1;
+    game.corpse_item[WORLD_ROOM_CAMP][0] = ITEM_BERRY;
+    game.corpse_item[WORLD_ROOM_CAMP][1] = ITEM_STICK;
+    game.corpse_item[WORLD_ROOM_CAMP][2] = ITEM_HERB;
+    ASSERT_EQ(1, inv_loot(&game, &out));
+    ASSERT_EQ(1, inv_loot_reply(&game, 5, &out));
+    ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[0].kind);
+    ASSERT_EQ(GAME_DIALOGUE_GUARD_PICK_123, out.events[0].arg0);
+    ASSERT_EQ(4, out.events[0].arg1);
+    PASS();
+}
+
+TEST invent_loot_invalid_choice_single_item_uses_two_choice_max(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 13u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game.corpse_present[WORLD_ROOM_CAMP] = 1;
+    game.corpse_item[WORLD_ROOM_CAMP][0] = ITEM_BERRY;
+    game.corpse_item[WORLD_ROOM_CAMP][1] = ITEM_NONE;
+    game.corpse_item[WORLD_ROOM_CAMP][2] = ITEM_NONE;
+    ASSERT_EQ(1, inv_loot(&game, &out));
+    ASSERT_EQ(1, inv_loot_reply(&game, 3, &out));
+    ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[0].kind);
+    ASSERT_EQ(GAME_DIALOGUE_GUARD_PICK_123, out.events[0].arg0);
+    ASSERT_EQ(2, out.events[0].arg1);
+    PASS();
+}
+
+TEST invent_corpse_queue_view_uses_dense_live_slots(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 22u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game.corpse_present[WORLD_ROOM_CAMP] = 1;
+    game.corpse_item[WORLD_ROOM_CAMP][0] = ITEM_BERRY;
+    game.corpse_item[WORLD_ROOM_CAMP][1] = ITEM_NONE;
+    game.corpse_item[WORLD_ROOM_CAMP][2] = ITEM_HERB;
+
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, game_corpse_queue_view(&game, WORLD_ROOM_CAMP, &out));
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_CORPSE_VIEW, out.events[0].kind);
+    ASSERT_EQ(WORLD_ROOM_CAMP, out.events[0].room_id);
+    ASSERT_EQ(2, out.events[0].arg0);
+    ASSERT_EQ(3, out.events[0].arg1);
+    ASSERT_EQ(ITEM_BERRY, out.events[0].room_item[0]);
+    ASSERT_EQ(ITEM_NONE, out.events[0].room_item[1]);
+    ASSERT_EQ(ITEM_HERB, out.events[0].room_item[2]);
     PASS();
 }
 
@@ -491,6 +577,9 @@ SUITE(invent) {
     RUN_TEST(invent_loot_corpse);
     RUN_TEST(invent_wield_already_and_not_weapon);
     RUN_TEST(invent_loot_bag_full);
+    RUN_TEST(invent_loot_invalid_choice_uses_visible_max);
+    RUN_TEST(invent_loot_invalid_choice_single_item_uses_two_choice_max);
+    RUN_TEST(invent_corpse_queue_view_uses_dense_live_slots);
     RUN_TEST(invent_craft_from_wielded_ingredient);
     RUN_TEST(invent_drop_not_carrying);
     RUN_TEST(invent_wield_swap_weapons);

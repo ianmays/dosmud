@@ -25,6 +25,7 @@ enum GameEventKind {
     GAME_EVENT_UNKNOWN_COMMAND,
     /* #158: inventory/item slice emits generic action + outcome payloads. */
     GAME_EVENT_ITEM_RESULT,
+    GAME_EVENT_CORPSE_VIEW,
     GAME_EVENT_BAG_VIEW,
     GAME_EVENT_CRAFT_RESULT,
     GAME_EVENT_EQUIP_RESULT,
@@ -44,9 +45,12 @@ enum GameEventKind {
 };
 
 /*
- * Inventory/item payload contract (#158):
+ * Inventory/item payload contract (#158, #129):
  * ITEM_RESULT  arg0=GameEventItemAction arg1=GameEventItemOutcome
  *              arg2=item id or ITEM_NONE arg3=value/capacity/slots when needed
+ * CORPSE_VIEW  arg0=non-empty corpse item count arg1=leave-menu choice number
+ *              room_id=corpse room; room_item[]=dense corpse slot snapshot
+ *              (grendr prints 1..arg0; arg1 is the "leave body" reply index)
  * CRAFT_RESULT arg0=crafted/attempted item id arg1=GameEventCraftOutcome
  * EQUIP_RESULT arg0=item id or ITEM_NONE arg1=GameEventEquipOutcome
  */
@@ -67,6 +71,7 @@ enum GameEventItemOutcome {
     GAME_ITEM_OUTCOME_NO_BODY,
     GAME_ITEM_OUTCOME_BODY_STRIPPED,
     GAME_ITEM_OUTCOME_BAG_FULL_DROP,
+    GAME_ITEM_OUTCOME_LEFT_BEHIND,
     GAME_ITEM_OUTCOME_NOTHING_HERE,
     GAME_ITEM_OUTCOME_NOT_HERE,
     GAME_ITEM_OUTCOME_BAG_FULL,
@@ -185,8 +190,10 @@ enum GameEventDialogueGuardReason {
     GAME_DIALOGUE_GUARD_BANDIT_WAITING_REPLY,
     GAME_DIALOGUE_GUARD_BANDIT_WAITING_HANDOVER_PICK,
     GAME_DIALOGUE_GUARD_BANDIT_BLOCKS_TALK,
+    GAME_DIALOGUE_GUARD_LOOT_WAITING_REPLY,
     GAME_DIALOGUE_GUARD_TRAVELER_WAITING,
     GAME_DIALOGUE_GUARD_NOBODY_WAITING_REPLY,
+    /* arg1 may widen the visible valid range for menu-specific reply guards. */
     GAME_DIALOGUE_GUARD_PICK_123
 };
 
