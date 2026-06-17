@@ -267,6 +267,7 @@ static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd,
         return 0;
     }
 
+    /* Corpse menu is modal like combat; loot again while open acts as "leave". */
     if (game->mode == GAME_MODE_DIALOGUE &&
             game->dialogue == DIALOGUE_LOOT &&
             cmd->type != CMD_REPLY &&
@@ -413,6 +414,7 @@ static int game_cmd_reply(struct GameState *game, struct Command *cmd,
         combat_resolve_reply(game, cmd->arg, out);
         return 1;
     }
+    /* Corpse take/leave replies are invent-owned, not dialogue.c actors. */
     if (game->mode == GAME_MODE_DIALOGUE && game->dialogue == DIALOGUE_LOOT) {
         return game_inv_cmd_loot_reply(game, cmd->arg, out);
     }
@@ -537,6 +539,10 @@ int game_process_input(struct GameState *game, char *line, GameEventQueue *out)
         return 0;
     }
 
+    /*
+     * Loot replies during DIALOGUE_LOOT are menu picks, not world time; skip
+     * the tick that CMD_LOOT would otherwise advance after apply_command.
+     */
     if (command_advances_time(cmd.type) &&
             !(cmd.type == CMD_LOOT &&
                 prior_mode == GAME_MODE_DIALOGUE &&

@@ -1411,6 +1411,7 @@ void render_inv_leave_body(void)
     RENDER_PRINTF("%s", TXT_INV_LEAVE_BODY);
 }
 
+/* arg0 is non-empty item count; room_item[] is the invent snapshot from push_corpse_view. */
 void render_inv_corpse_menu(const GameEvent *ev)
 {
     int slot;

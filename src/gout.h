@@ -45,9 +45,12 @@ enum GameEventKind {
 };
 
 /*
- * Inventory/item payload contract (#158):
+ * Inventory/item payload contract (#158, #129):
  * ITEM_RESULT  arg0=GameEventItemAction arg1=GameEventItemOutcome
  *              arg2=item id or ITEM_NONE arg3=value/capacity/slots when needed
+ * CORPSE_VIEW  arg0=non-empty corpse item count arg1=leave-menu choice number
+ *              room_id=corpse room; room_item[]=dense corpse slot snapshot
+ *              (grendr prints 1..arg0; arg1 is the "leave body" reply index)
  * CRAFT_RESULT arg0=crafted/attempted item id arg1=GameEventCraftOutcome
  * EQUIP_RESULT arg0=item id or ITEM_NONE arg1=GameEventEquipOutcome
  */

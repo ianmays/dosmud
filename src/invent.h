@@ -13,6 +13,7 @@ struct GameEventQueue;
 int game_room_ground_try_add(struct GameState *game, int room_id, int item_id);
 /* Returns 1 when at least one ground slot is empty in this room. */
 int game_room_ground_has_space(struct GameState *game, int room_id);
+/* Corpse loot slots (CFG_CORPSE_ITEM_SLOTS); owned by invent, mutated on defeat/loot. */
 int game_corpse_try_add(struct GameState *game, int room_id, int item_id);
 int game_corpse_has_loot(struct GameState *game, int room_id);
 void game_corpse_clear(struct GameState *game, int room_id);
@@ -25,6 +26,7 @@ int game_inv_bag_remove_index(struct GameState *game, int index);
 int game_inv_bag_remove_item(struct GameState *game, int item_id);
 
 int game_inv_cmd_loot(struct GameState *game, struct GameEventQueue *out);
+/* CMD_REPLY handler while DIALOGUE_LOOT is active; choice is 1-based menu index. */
 int game_inv_cmd_loot_reply(struct GameState *game, int choice,
                             struct GameEventQueue *out);
 int game_inv_cmd_take_all(struct GameState *game, struct GameEventQueue *out);

@@ -114,6 +114,7 @@ void combat_resolve_reply(struct GameState *game, int choice, GameEventQueue *ou
         combat_end_active_enemy_encounter(game);
         game_set_mode_explore(game);
         push_combat_phase(out, GAME_COMBAT_PHASE_ENEMY_DEFEATED, 0, 0);
+        /* Clear stale corpse slots before seeding the new defeat loot item. */
         game_corpse_clear(game, game->player.room_id);
         game->corpse_present[game->player.room_id] = 1;
         {

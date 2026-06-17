@@ -96,6 +96,7 @@ struct GameState {
     int player_hp;
     struct CombatState combat;
     int corpse_present[CFG_ROOM_MAX];
+    /* Per-room corpse loot; invent owns slot layout and compact-on-take (#129). */
     int corpse_item[CFG_ROOM_MAX][CFG_CORPSE_ITEM_SLOTS];
     u8 room_explored[CFG_ROOM_MAX];
 #ifdef TEST_MODE

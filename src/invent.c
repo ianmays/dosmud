@@ -21,6 +21,10 @@ static void push_item_result(GameEventQueue *out, int action, int outcome,
         value, 0);
 }
 
+/*
+ * Snapshot corpse slots into a CORPSE_VIEW event; invent owns corpse_item[].
+ * arg0/arg1 drive menu numbering in grendr; pad room_item[] to CFG_AREA_ITEM_SLOTS.
+ */
 static void push_corpse_view(GameEventQueue *out, struct GameState *game,
                              int room_id)
 {
@@ -169,6 +173,7 @@ static void corpse_remove_slot_compact(struct GameState *game, int room_id, int 
 {
     int s;
 
+    /* Compact after take so corpse slots stay dense and menu indices stay stable. */
     for (s = slot; s < CFG_CORPSE_ITEM_SLOTS - 1; ++s) {
         game->corpse_item[room_id][s] = game->corpse_item[room_id][s + 1];
     }
@@ -252,6 +257,10 @@ int game_inv_bag_remove_item(struct GameState *game, int item_id)
     return game_inv_bag_remove_index(game, idx);
 }
 
+/*
+ * Opens the interactive corpse menu (DIALOGUE_LOOT); replies go to
+ * game_inv_cmd_loot_reply via CMD_REPLY in game.c.
+ */
 int game_inv_cmd_loot(struct GameState *game, GameEventQueue *out)
 {
     int room_id;
@@ -278,6 +287,10 @@ int game_inv_cmd_loot(struct GameState *game, GameEventQueue *out)
     return 1;
 }
 
+/*
+ * choice 1..item_count takes a corpse slot; item_count+1 leaves the body.
+ * Stays in DIALOGUE_LOOT while items remain after a successful take.
+ */
 int game_inv_cmd_loot_reply(struct GameState *game, int choice, GameEventQueue *out)
 {
     int room_id;

@@ -384,6 +384,7 @@ static void fixture_env_focus(struct GameState *game, int kind)
     game->env_focus_expires_tick = game->tick + CFG_ENV_FOCUS_DURATION_TICKS;
 }
 
+/* Corpse flag set with no loot slots (#129 stripped-body path). */
 static void fixture_corpse_stripped(struct GameState *game)
 {
     fixture_at_camp(game);
@@ -392,6 +393,7 @@ static void fixture_corpse_stripped(struct GameState *game)
     game->corpse_item[WORLD_ROOM_CAMP][1] = ITEM_NONE;
 }
 
+/* Full bag plus one corpse item for bag-full-drop during loot reply. */
 static int fixture_corpse_loot_full_bag(struct GameState *game, int loot_item)
 {
     int i;

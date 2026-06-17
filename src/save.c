@@ -352,6 +352,7 @@ static int save_read_game_arrays(FILE *fp, struct GameState *game, u16 version)
                 }
             }
         } else {
+            /* v5 and earlier: single corpse_loot field maps to slot 0. */
             if (!save_read_s16(fp, &legacy_loot)) {
                 return 0;
             }
