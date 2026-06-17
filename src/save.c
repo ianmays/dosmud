@@ -352,6 +352,7 @@ static int save_read_game_arrays(FILE *fp, struct GameState *game, u16 version)
                 }
             }
         } else if (version >= 6U) {
+            /* v6: two corpse_item slots per room; pad to CFG_CORPSE_ITEM_SLOTS. */
             for (j = 0; j < 2; ++j) {
                 if (!save_read_s16(fp, &game->corpse_item[i][j])) {
                     return 0;

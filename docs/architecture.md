@@ -137,7 +137,7 @@ Conventions:
 - add new gameplay/procedural tuning knobs here as `CFG_*` macros
 - keep related values grouped and commented
 - separate gameplay tuning from main-loop/test-harness settings
-- distinguish tuning for NPC corpse loot (`CFG_COMBAT_CORPSE_LOOT_*`, portable items) from ambient room finds (`CFG_ROOM_SPAWN_*`, terrain-driven junk like stone)
+- distinguish bandit corpse loot count (`CFG_COMBAT_CORPSE_LOOT_NONE_BELOW` through `TWO_BELOW`, 0-3 drops) and portable item rolls (`CFG_COMBAT_CORPSE_LOOT_SPEAR_BELOW` and siblings) from ambient room finds (`CFG_ROOM_SPAWN_*`, terrain-driven junk like stone)
 - `TEST_MODE` defaults libc RNG to `CFG_TEST_RAND_SEED` for deterministic snapshot output; override with `dosmud --seed <unsigned>`
 - roll-inject limits and snapshot roll constants (`CFG_ROLL_INJECT_*`, `CFG_TEST_*`) are defined only under `#ifdef TEST_MODE` in `config.h`
 
@@ -202,7 +202,7 @@ Conventions:
 Gameplay slices live beside `game.c` as plain C translation units (no extra framework):
 
 - [`gprog.c`](https://github.com/ianmays/dosmud/blob/main/src/gprog.c) - XP and level-up rewards (`game_xp_to_next_level`, `progression_gain_xp`); queues `GAME_EVENT_XP_GAIN` and `GAME_EVENT_STAT_CHANGE` via `gout` (FAT 8.3-safe basename)
-- [`combat.c`](https://github.com/ianmays/dosmud/blob/main/src/combat.c) - combat start, player reply resolution, enemy turn, and enemy cleanup after victory; queues `GAME_EVENT_COMBAT` phases via `gout` and seeds corpse item slots for post-fight looting (randomness via `game_roll_spread` / `game_roll_percent`, not direct `plat_rand()` calls)
+- [`combat.c`](https://github.com/ianmays/dosmud/blob/main/src/combat.c) - combat start, player reply resolution, enemy turn, and enemy cleanup after victory; queues `GAME_EVENT_COMBAT` phases via `gout` and rolls a weighted 0-3 corpse drop count plus per-item portable loot into corpse slots on victory (randomness via `game_roll_spread` / `game_roll_percent`, not direct `plat_rand()` calls)
 - [`invent.c`](https://github.com/ianmays/dosmud/blob/main/src/invent.c) - bag, ground, and corpse inventory ownership; `loot` opens a narrow corpse menu through `GAME_EVENT_CORPSE_VIEW`, and numbered replies take or leave corpse items without a generic UI framework
 - [`npc.c`](https://github.com/ianmays/dosmud/blob/main/src/npc.c) - fixed NPC identity seam, shared dialogue helpers, room look hint ownership, and the fixed-size NPC instance roster for authored enemy profiles plus traveler roaming (`npc_clear_all`, `npc_spawn`, `npc_place`, `npc_move`, `npc_find_*`, `npc_begin_encounter`, `npc_end_encounter`, `npc_deactivate_until`, `npc_seed_profiles`, `npc_fixed_begin_encounter_in_room`, `npc_roaming_*`; `NPC_PROFILES[]` holds bandit and traveler placement, roam warmup, and respawn timing; the road bandit opens through `npc_roaming_begin_encounter_in_room` and respawns via `npc_end_encounter`; `npc_fixed_begin_encounter_in_room` remains for future non-roaming authored slots; slot order is save/tick-stable)
 - [`genc.c`](https://github.com/ianmays/dosmud/blob/main/src/genc.c) - enemy encounter rules and bandit-specific outcomes on top of roster-backed enemy slots instead of a one-off `GameState` dialogue flag; `enemy_begin_encounter` prefers roster co-location (`npc_roaming_begin_encounter_in_room`, then `npc_fixed_begin_encounter_in_room`) before dynamic ambush spawn for explicit callers and tests (FAT 8.3-safe basename)

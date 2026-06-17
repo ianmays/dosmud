@@ -34,6 +34,11 @@ static void combat_end_active_enemy_encounter(struct GameState *game)
     npc_end_encounter(game, game->npcs[slot].actor);
 }
 
+/*
+ * Defeat loot RNG (combat-owned): one count roll (0-3 drops), then one item-tier
+ * roll per drop into invent corpse slots via game_corpse_try_add. Zero drops
+ * still leave corpse_present set for the stripped-body loot path.
+ */
 static int combat_roll_corpse_item(struct GameState *game)
 {
     int roll;
@@ -159,6 +164,7 @@ void combat_resolve_reply(struct GameState *game, int choice, GameEventQueue *ou
             int slot;
 
             drop_count = combat_roll_corpse_item_count(game);
+            /* One item-tier draw per slot before the kill XP spread roll. */
             for (slot = 0; slot < drop_count; ++slot) {
                 (void)game_corpse_try_add(game, game->player.room_id,
                     combat_roll_corpse_item(game));

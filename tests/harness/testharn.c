@@ -174,6 +174,10 @@ static int fixture_bandit_combat_salve_ready(struct GameState *game)
     return 1;
 }
 
+/*
+ * Roll queue mirrors combat_resolve_reply on kill: hit spread, drop count, then
+ * 0-3 item-tier rolls gated like combat_roll_corpse_item_count, then XP spread.
+ */
 static void fixture_bandit_victory_inject(struct GameState *game, int count_roll,
                                           int loot0, int loot1, int loot2)
 {
@@ -604,12 +608,14 @@ int testharn_apply(struct GameState *game, const char *line)
             CFG_TEST_VICTORY_LOOT_FISH, 0, 0);
         return 1;
     }
+    /* Three defeat drops for multi-slot corpse loot snapshots. */
     if (fixture_name_is("bandit_victory_multi", name)) {
         fixture_bandit_victory_inject(game, CFG_TEST_VICTORY_LOOT_COUNT_THREE,
             CFG_TEST_VICTORY_LOOT_STICK, CFG_TEST_VICTORY_LOOT_BERRY,
             CFG_TEST_VICTORY_LOOT_HERB);
         return 1;
     }
+    /* Defeat with zero item rolls; corpse_present without loot slots. */
     if (fixture_name_is("bandit_victory_none", name)) {
         fixture_bandit_victory_inject(game, CFG_TEST_VICTORY_LOOT_COUNT_NONE,
             0, 0, 0);

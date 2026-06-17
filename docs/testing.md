@@ -23,7 +23,7 @@ Purpose:
 - `make check-layers`: core/render boundary guard (no `printf` in `src/*.c` except `main.c`, `grendr.c`, and the platform files `platpos.c`, `platwin.c`, and `platdos.c`)
 - `make test`: strict deterministic compile (`-Werror`, `-DTEST_MODE`, `-g -O0`); does not run `check-layers`; prints `elapsed: <seconds>` after the compile/link step
 - `make test-win`: WSL cross-compile of the native Windows console `TEST_MODE` executable (`dosmud.exe`); compile-only, no snapshot run from Linux
-- `make snapshot-run`: runs every name in `SNAPSHOT_TESTS` plus `seed_cli` against the existing native `TEST_MODE` binary (`./dosmud`; see [Snapshot test files](#snapshot-test-files)). Each step prints `snapshot: <name>`. Finishes with `snapshot tests passed: N/M` (for example `71/71` snapshots plus `seed_cli`, 72 steps total).
+- `make snapshot-run`: runs every name in `SNAPSHOT_TESTS` plus `seed_cli` against the existing native `TEST_MODE` binary (`./dosmud`; see [Snapshot test files](#snapshot-test-files)). Each step prints `snapshot: <name>`. Finishes with `snapshot tests passed: N/M` (for example `76/76` snapshots plus `seed_cli`, 77 steps total).
 - `make test-run`: builds the test binary (`make test`), then runs `make snapshot-run`.
 - `make test-unit`: builds and runs the greatest unit suite (`tests/unit/build/dosmud_unit`, `TEST_MODE` only; not linked into release `dosmud`)
 - `make test-soak`: builds and runs long-run soak/stress checks (`tests/soak/build/dosmud_soak`; separate from unit tests)
@@ -205,7 +205,9 @@ Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_
 | `bandit_fight_ready` | Bandit dialogue + inject for `combat_start` enemy HP spread |
 | `bandit_intimidate_ok` | Bandit dialogue + inject (`CFG_TEST_INTIMIDATE_OK`) for reply `3` success |
 | `bandit_intimidate_fail` | Bandit dialogue + inject (`CFG_TEST_INTIMIDATE_FAIL`) for reply `3` failure |
-| `bandit_victory_spear` / `stick` / `berry` / `herb` / `fish` | Near-kill + inject hit, corpse loot percent, kill XP; leaves one corpse-menu item ready for `loot` |
+| `bandit_victory_spear` / `stick` / `berry` / `herb` / `fish` | Near-kill + inject hit, corpse loot count (one item), item roll, kill XP; leaves one corpse-menu item ready for `loot` |
+| `bandit_victory_multi` | Near-kill + inject for three corpse items (stick, berry, herb) via `CFG_TEST_VICTORY_LOOT_COUNT_THREE` |
+| `bandit_victory_none` | Near-kill + inject for stripped corpse (`CFG_TEST_VICTORY_LOOT_COUNT_NONE`) |
 
 **Exploration / world** (room and map state without bandit dialogue):
 
@@ -273,7 +275,7 @@ Snapshots use three determinism levels:
 
 1. **Teleport state** - fixtures set `GameState` directly. Do not walk RNG-heavy setup (`take stick`, intimidate, waiting for the road bandit to open). `tests/regression/map.*` checks map **render** with explored flags set by the fixture; `tests/regression/walk_map.*` checks `room_explored` updated by a real `move` (with `quiet_explore`).
 
-2. **Inject rolls** (`TEST_MODE` only) - use `game_roll_inject_begin` for any asserted outcome that goes through `game_roll_spread` / `game_roll_percent`: combat damage, corpse loot tier, kill XP, bandit intimidate (reply `3`), and `combat_start` enemy HP. Constants live under `#ifdef TEST_MODE` in [`config.h`](https://github.com/ianmays/dosmud/blob/main/include/config.h) (`CFG_TEST_EQUIPMENT_*`, `CFG_TEST_COMBAT_*`, `CFG_TEST_INTIMIDATE_*`, `CFG_TEST_VICTORY_*`). Do not bypass combat with render-only hit lines. If combat tuning changes, update those constants and `.expect`.
+2. **Inject rolls** (`TEST_MODE` only) - use `game_roll_inject_begin` for any asserted outcome that goes through `game_roll_spread` / `game_roll_percent`: combat damage, corpse loot count and per-item rolls, kill XP, bandit intimidate (reply `3`), and `combat_start` enemy HP. Constants live under `#ifdef TEST_MODE` in [`config.h`](https://github.com/ianmays/dosmud/blob/main/include/config.h) (`CFG_TEST_EQUIPMENT_*`, `CFG_TEST_COMBAT_*`, `CFG_TEST_INTIMIDATE_*`, `CFG_TEST_VICTORY_*` including `CFG_TEST_VICTORY_LOOT_COUNT_*`). Do not bypass combat with render-only hit lines. If combat tuning changes, update those constants and `.expect`.
 
 3. **Seed reset** - after each `@fixture` or `@seed`, `main.c` calls `plat_seed_rng(game.seed)` for stream isolation between harness blocks. Do not rely on seed alone for asserted mechanics; use inject or teleport.
 
@@ -320,7 +322,7 @@ Each process run uses one `.input` file until `quit`. `make snapshot-run` runs `
 
 **Combat:** `combat_defend`, `combat_salve`, `combat_no_salve`, `combat_invalid`, `combat_take_blocked`, `combat_victory_xp`, `level_up`.
 
-**Loot:** `loot_spear`, `loot_stick`, `loot_berry`, `loot_herb`, `loot_fish`, `loot_empty`, `loot_stripped`, `loot_bag_full` (interactive corpse menu open, take, and full-bag retry paths).
+**Loot:** `loot_spear`, `loot_stick`, `loot_berry`, `loot_herb`, `loot_fish`, `loot_empty`, `loot_stripped`, `loot_bag_full`, `loot_multi` (interactive corpse menu open, take, multi-slot menu, and full-bag retry paths).
 
 **Bandit dialogue:** `bandit_fight`, `bandit_intimidate_ok`, `bandit_intimidate_fail`, `bandit_bag_empty`, `bandit_road`.
 
