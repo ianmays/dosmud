@@ -275,6 +275,7 @@ static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd,
             cmd->type != CMD_LOOK &&
             cmd->type != CMD_MAP &&
             cmd->type != CMD_BAG &&
+            cmd->type != CMD_DROP &&
             cmd->type != CMD_HELP &&
             cmd->type != CMD_QUIT) {
         push_dialogue_guard(out, GAME_DIALOGUE_GUARD_LOOT_WAITING_REPLY);

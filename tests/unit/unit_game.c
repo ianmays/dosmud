@@ -743,6 +743,39 @@ TEST game_loot_reply_four_leaves_three_item_corpse(void)
     PASS();
 }
 
+TEST game_drop_allowed_while_loot_menu_open_after_bag_full(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    u32 tick_before_drop;
+
+    unit_game_fresh(&game, 45u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game.corpse_present[WORLD_ROOM_CAMP] = 1;
+    game.corpse_item[WORLD_ROOM_CAMP][0] = ITEM_BERRY;
+    game.corpse_item[WORLD_ROOM_CAMP][1] = ITEM_NONE;
+    game.corpse_item[WORLD_ROOM_CAMP][2] = ITEM_NONE;
+    game.bag[0] = ITEM_STICK;
+    game.bag_count = 1;
+    game.bag_capacity = 1;
+
+    ASSERT_EQ(1, run_cmd_out(&game, "loot", &out));
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(1, run_cmd_out(&game, "1", &out));
+    ASSERT_EQ(GAME_ITEM_OUTCOME_BAG_FULL_DROP, out.events[0].arg1);
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+
+    tick_before_drop = game.tick;
+    ASSERT_EQ(1, run_cmd_out(&game, "drop stick", &out));
+    ASSERT_EQ(tick_before_drop + 1U, game.tick);
+    ASSERT_EQ(GAME_EVENT_ITEM_RESULT, out.events[0].kind);
+    ASSERT_EQ(GAME_ITEM_ACTION_DROP, out.events[0].arg0);
+    ASSERT_EQ(GAME_ITEM_OUTCOME_OK, out.events[0].arg1);
+    ASSERT_EQ(0, game.bag_count);
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    PASS();
+}
+
 SUITE(game) {
     RUN_TEST(game_heal_player_applies);
     RUN_TEST(game_heal_player_at_max);
@@ -784,4 +817,5 @@ SUITE(game) {
     RUN_TEST(game_post_combat_reply_guard_keeps_loot_available);
     RUN_TEST(game_loot_leave_keeps_corpse_without_advancing_time);
     RUN_TEST(game_loot_reply_four_leaves_three_item_corpse);
+    RUN_TEST(game_drop_allowed_while_loot_menu_open_after_bag_full);
 }

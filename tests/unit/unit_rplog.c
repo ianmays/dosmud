@@ -170,6 +170,7 @@ TEST replay_log_capture_step_modes_kinds_and_escapes(void)
         GAME_EVENT_CANNOT_MOVE,
         GAME_EVENT_UNKNOWN_COMMAND,
         GAME_EVENT_ITEM_RESULT,
+        GAME_EVENT_CORPSE_VIEW,
         GAME_EVENT_BAG_VIEW,
         GAME_EVENT_CRAFT_RESULT,
         GAME_EVENT_EQUIP_RESULT,
@@ -226,6 +227,7 @@ TEST replay_log_capture_step_modes_kinds_and_escapes(void)
     ASSERT(0 != strstr(text, "kind=GAME_EVENT_MAP"));
     ASSERT(0 != strstr(text, "kind=GAME_EVENT_COMBAT"));
     ASSERT(0 != strstr(text, "kind=GAME_EVENT_OBSERVATION"));
+    ASSERT(0 != strstr(text, "kind=GAME_EVENT_CORPSE_VIEW"));
     ASSERT(0 != strstr(text, "kind=GAME_EVENT_UNKNOWN"));
     ASSERT(0 != strstr(text, "a\\nb\\rc\\t"));
     ASSERT(0 != strstr(text, "\\x01"));

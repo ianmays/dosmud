@@ -136,7 +136,7 @@ const char *const TXT_HELP_CRAFT =
     "craft <item> or build <item> - torch needs stick+reed, salve needs herb+berry, spear needs stick+stone (ingredients in bag or wielded where applicable). Not while fighting.";
 
 const char *const TXT_HELP_LOOT =
-    "loot - inspect a bandit corpse, then use 1/2/3 to take an item or leave the rest.";
+    "loot - inspect a bandit corpse, then use the numbered corpse menu to take an item or leave the rest.";
 
 const char *const TXT_HELP_TALK =
     "talk (speak) - speak with an NPC in the room or advance certain encounters.";
@@ -287,7 +287,7 @@ const char *const TXT_MSG_INSPECT_WATER = "You find a thin runnel cutting fresh 
 const char *const TXT_MSG_INSPECT_GRIT = "New tracks cross the grit: light, quick, and already fading.\n";
 const char *const TXT_MSG_BANDIT_BLOCK_TALK = "The bandit has your full attention right now.\n";
 const char *const TXT_MSG_LOOT_WAITING =
-    "Finish looting with 1/2/3, or type loot to leave the body alone.\n";
+    "Finish looting with the numbered corpse menu, or type loot to leave the body alone.\n";
 const char *const TXT_MSG_TRAVELER_WAITING = "The traveler is waiting for an answer (1/2/3).\n";
 const char *const TXT_MSG_NOBODY_TALK = "Nobody here wants to talk.\n";
 const char *const TXT_MSG_HAND_OVER_ITEM_FMT = "You hand over your %s. The bandit backs off and leaves.\n";
