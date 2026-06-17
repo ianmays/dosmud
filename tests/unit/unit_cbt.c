@@ -136,16 +136,17 @@ TEST combat_victory_loot_and_xp(void)
 {
     struct GameState game;
     GameEventQueue out;
-    int rolls[3];
+    int rolls[4];
 
     unit_game_fresh(&game, 4u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game_set_mode_combat(&game);
     game.combat.enemy_hp = 1;
     rolls[0] = 0;
-    rolls[1] = CFG_TEST_VICTORY_LOOT_STICK;
-    rolls[2] = CFG_TEST_VICTORY_XP_SPREAD;
-    game_roll_inject_begin(&game, rolls, 3);
+    rolls[1] = CFG_TEST_VICTORY_LOOT_COUNT_ONE;
+    rolls[2] = CFG_TEST_VICTORY_LOOT_STICK;
+    rolls[3] = CFG_TEST_VICTORY_XP_SPREAD;
+    game_roll_inject_begin(&game, rolls, 4);
     resolve_reply_out(&game, 1, &out);
     ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
     ASSERT_EQ(-1, npc_find_by_dialogue(&game, DIALOGUE_ENEMY));
@@ -163,7 +164,7 @@ TEST combat_victory_clears_active_bandit_slot(void)
 {
     struct GameState game;
     GameEventQueue out;
-    int rolls[3];
+    int rolls[4];
 
     unit_game_fresh(&game, 12u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
@@ -172,9 +173,10 @@ TEST combat_victory_clears_active_bandit_slot(void)
     game_set_mode_combat(&game);
     game.combat.enemy_hp = 1;
     rolls[0] = 0;
-    rolls[1] = CFG_TEST_VICTORY_LOOT_STICK;
-    rolls[2] = 0;
-    game_roll_inject_begin(&game, rolls, 3);
+    rolls[1] = CFG_TEST_VICTORY_LOOT_COUNT_ONE;
+    rolls[2] = CFG_TEST_VICTORY_LOOT_STICK;
+    rolls[3] = 0;
+    game_roll_inject_begin(&game, rolls, 4);
     resolve_reply_out(&game, 1, &out);
     ASSERT_EQ(-1, npc_find_by_dialogue(&game, DIALOGUE_ENEMY));
     ASSERT_EQ(0, npc_is_present(&game, GAME_DIALOGUE_ACTOR_BANDIT,
@@ -223,26 +225,74 @@ TEST combat_loot_tiers(void)
 {
     struct GameState game;
     GameEventQueue out;
-    int rolls[3];
+    int rolls[4];
 
     unit_game_fresh(&game, 10u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game_set_mode_combat(&game);
     game.combat.enemy_hp = 1;
     rolls[0] = 0;
-    rolls[1] = CFG_TEST_VICTORY_LOOT_SPEAR;
-    rolls[2] = 0;
-    game_roll_inject_begin(&game, rolls, 3);
+    rolls[1] = CFG_TEST_VICTORY_LOOT_COUNT_ONE;
+    rolls[2] = CFG_TEST_VICTORY_LOOT_SPEAR;
+    rolls[3] = 0;
+    game_roll_inject_begin(&game, rolls, 4);
     resolve_reply_out(&game, 1, &out);
     ASSERT_EQ(ITEM_SPEAR, game.corpse_item[WORLD_ROOM_CAMP][0]);
 
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game_set_mode_combat(&game);
     game.combat.enemy_hp = 1;
-    rolls[1] = CFG_TEST_VICTORY_LOOT_FISH;
-    game_roll_inject_begin(&game, rolls, 3);
+    rolls[2] = CFG_TEST_VICTORY_LOOT_FISH;
+    game_roll_inject_begin(&game, rolls, 4);
     resolve_reply_out(&game, 1, &out);
     ASSERT_EQ(ITEM_FISH, game.corpse_item[WORLD_ROOM_CAMP][0]);
+    PASS();
+}
+
+TEST combat_victory_can_leave_stripped_body(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    int rolls[3];
+
+    unit_game_fresh(&game, 13u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game_set_mode_combat(&game);
+    game.combat.enemy_hp = 1;
+    rolls[0] = 0;
+    rolls[1] = CFG_TEST_VICTORY_LOOT_COUNT_NONE;
+    rolls[2] = 0;
+    game_roll_inject_begin(&game, rolls, 3);
+    resolve_reply_out(&game, 1, &out);
+    ASSERT_EQ(1, game.corpse_present[WORLD_ROOM_CAMP]);
+    ASSERT_EQ(ITEM_NONE, game.corpse_item[WORLD_ROOM_CAMP][0]);
+    ASSERT_EQ(ITEM_NONE, game.corpse_item[WORLD_ROOM_CAMP][1]);
+    ASSERT_EQ(ITEM_NONE, game.corpse_item[WORLD_ROOM_CAMP][2]);
+    PASS();
+}
+
+TEST combat_victory_can_drop_three_items(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    int rolls[6];
+
+    unit_game_fresh(&game, 14u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game_set_mode_combat(&game);
+    game.combat.enemy_hp = 1;
+    rolls[0] = 0;
+    rolls[1] = CFG_TEST_VICTORY_LOOT_COUNT_THREE;
+    rolls[2] = CFG_TEST_VICTORY_LOOT_STICK;
+    rolls[3] = CFG_TEST_VICTORY_LOOT_BERRY;
+    rolls[4] = CFG_TEST_VICTORY_LOOT_HERB;
+    rolls[5] = 0;
+    game_roll_inject_begin(&game, rolls, 6);
+    resolve_reply_out(&game, 1, &out);
+    ASSERT_EQ(1, game.corpse_present[WORLD_ROOM_CAMP]);
+    ASSERT_EQ(ITEM_STICK, game.corpse_item[WORLD_ROOM_CAMP][0]);
+    ASSERT_EQ(ITEM_BERRY, game.corpse_item[WORLD_ROOM_CAMP][1]);
+    ASSERT_EQ(ITEM_HERB, game.corpse_item[WORLD_ROOM_CAMP][2]);
     PASS();
 }
 
@@ -257,4 +307,6 @@ SUITE(combat) {
     RUN_TEST(combat_invalid_choice);
     RUN_TEST(combat_player_death);
     RUN_TEST(combat_loot_tiers);
+    RUN_TEST(combat_victory_can_leave_stripped_body);
+    RUN_TEST(combat_victory_can_drop_three_items);
 }

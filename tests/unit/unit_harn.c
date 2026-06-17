@@ -195,6 +195,7 @@ TEST harness_apply_corpse_loot_full_bag_sets_corpse_slot(void)
     ASSERT_EQ(1, game.corpse_present[WORLD_ROOM_CAMP]);
     ASSERT_EQ(ITEM_STICK, game.corpse_item[WORLD_ROOM_CAMP][0]);
     ASSERT_EQ(ITEM_NONE, game.corpse_item[WORLD_ROOM_CAMP][1]);
+    ASSERT_EQ(ITEM_NONE, game.corpse_item[WORLD_ROOM_CAMP][2]);
     PASS();
 }
 

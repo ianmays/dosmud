@@ -61,7 +61,8 @@ static void save_fill_fixture(struct GameState *game)
     game->combat.defending = 1;
     game->corpse_present[WORLD_ROOM_ROAD] = 1;
     game->corpse_item[WORLD_ROOM_ROAD][0] = ITEM_HERB;
-    game->corpse_item[WORLD_ROOM_ROAD][1] = ITEM_NONE;
+    game->corpse_item[WORLD_ROOM_ROAD][1] = ITEM_FISH;
+    game->corpse_item[WORLD_ROOM_ROAD][2] = ITEM_NONE;
     game->room_explored[WORLD_ROOM_ROAD] = 1;
     game->room_explored[WORLD_ROOM_TOWER] = 1;
     game->room_item[WORLD_ROOM_TOWER][0] = ITEM_FISH;

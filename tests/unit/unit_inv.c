@@ -373,11 +373,12 @@ TEST invent_loot_corpse(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game.corpse_present[WORLD_ROOM_CAMP] = 1;
     game.corpse_item[WORLD_ROOM_CAMP][0] = ITEM_BERRY;
-    game.corpse_item[WORLD_ROOM_CAMP][1] = ITEM_NONE;
+    game.corpse_item[WORLD_ROOM_CAMP][1] = ITEM_STICK;
+    game.corpse_item[WORLD_ROOM_CAMP][2] = ITEM_NONE;
     ASSERT_EQ(1, inv_loot(&game, &out));
     ASSERT_EQ(GAME_EVENT_CORPSE_VIEW, out.events[0].kind);
-    ASSERT_EQ(1, out.events[0].arg0);
-    ASSERT_EQ(2, out.events[0].arg1);
+    ASSERT_EQ(2, out.events[0].arg0);
+    ASSERT_EQ(3, out.events[0].arg1);
     ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
     ASSERT_EQ(DIALOGUE_LOOT, game.dialogue);
     ASSERT_EQ(1, inv_loot_reply(&game, 1, &out));
@@ -386,6 +387,10 @@ TEST invent_loot_corpse(void)
     ASSERT_EQ(GAME_ITEM_OUTCOME_OK, out.events[0].arg1);
     ASSERT_EQ(ITEM_BERRY, out.events[0].arg2);
     ASSERT_EQ(1, game_inv_player_has_item(&game, ITEM_BERRY));
+    ASSERT_EQ(1, game.corpse_present[WORLD_ROOM_CAMP]);
+    ASSERT_EQ(ITEM_STICK, game.corpse_item[WORLD_ROOM_CAMP][0]);
+    ASSERT_EQ(ITEM_NONE, game.corpse_item[WORLD_ROOM_CAMP][1]);
+    ASSERT_EQ(1, inv_loot_reply(&game, 1, &out));
     ASSERT_EQ(0, game.corpse_present[WORLD_ROOM_CAMP]);
     ASSERT_EQ(1, inv_loot(&game, &out));
     ASSERT_EQ(GAME_ITEM_OUTCOME_NO_BODY, out.events[0].arg1);
@@ -418,6 +423,7 @@ TEST invent_loot_bag_full(void)
     game.corpse_present[WORLD_ROOM_CAMP] = 1;
     game.corpse_item[WORLD_ROOM_CAMP][0] = ITEM_BERRY;
     game.corpse_item[WORLD_ROOM_CAMP][1] = ITEM_NONE;
+    game.corpse_item[WORLD_ROOM_CAMP][2] = ITEM_NONE;
     game.bag_count = game.bag_capacity;
     ASSERT_EQ(1, inv_loot(&game, &out));
     ASSERT_EQ(GAME_EVENT_CORPSE_VIEW, out.events[0].kind);

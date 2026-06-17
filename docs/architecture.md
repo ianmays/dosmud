@@ -253,7 +253,7 @@ New `src/*.c` and `src/*.h` basenames must stay within **classic FAT 8+3** (at m
 ### `invent`
 
 - bag/inventory state mutation; command outcomes queue generic `GameEvent` records (`gout`) for `grendr` to render
-- per-room corpse loot (`corpse_present[]`, dense `corpse_item[][]` capped by `CFG_CORPSE_ITEM_SLOTS`); `loot` opens `DIALOGUE_LOOT` and numbered replies take or leave items via `game_inv_cmd_loot_reply` (menu picks do not advance world time)
+- per-room corpse loot (`corpse_present[]`, dense `corpse_item[][]` capped by `CFG_CORPSE_ITEM_SLOTS`); bandit defeats can leave a stripped body or up to three loot items, and `loot` opens `DIALOGUE_LOOT` so numbered replies take or leave items without advancing world time
 - item use and crafting behavior
 - `eat` and inventory `use salve` restore HP via `game_heal_player`; at max HP the item is still consumed but no heal is applied (player sees an already-full message)
 - wield/unwield commands track `weapon_equipped` on `GameState`; a wielded weapon is not stored in `bag[]` (it occupies the hand slot only until unwield, drop, or bandit handover moves it)

@@ -24,8 +24,8 @@
 #define CFG_FMT_MAP_MAX 384
 /* How many objects can sit on the ground in one room (drops, forage, ambient). */
 #define CFG_AREA_ITEM_SLOTS 4
-/* Corpse loot keeps a compact fixed menu so reply 1/2/3 covers items plus leave. */
-#define CFG_CORPSE_ITEM_SLOTS 2
+/* Corpse loot keeps a compact fixed menu so reply 1/2/3/4 covers items plus leave. */
+#define CFG_CORPSE_ITEM_SLOTS 3
 
 /* Uniform roll range for d100-style probability checks (0 .. RANGE-1). */
 #define CFG_ROLL_PERCENT_RANGE 100
@@ -44,8 +44,12 @@
 #define CFG_TEST_FIGHT_ENEMY_HP_SPREAD 0
 #define CFG_TEST_COMBAT_DEFEND_ENEMY_DMG 0
 #define CFG_TEST_COMBAT_SALVE_ENEMY_DMG 0
-/* victory: player hit spread, corpse loot percent, kill XP spread */
+/* victory: player hit spread, corpse loot count, corpse item rolls, kill XP spread */
 #define CFG_TEST_VICTORY_HIT_SPREAD 0
+#define CFG_TEST_VICTORY_LOOT_COUNT_NONE 5
+#define CFG_TEST_VICTORY_LOOT_COUNT_ONE 20
+#define CFG_TEST_VICTORY_LOOT_COUNT_TWO 55
+#define CFG_TEST_VICTORY_LOOT_COUNT_THREE 90
 #define CFG_TEST_VICTORY_LOOT_SPEAR 10
 #define CFG_TEST_VICTORY_LOOT_STICK 30
 #define CFG_TEST_VICTORY_LOOT_BERRY 50
@@ -101,9 +105,19 @@
 #define CFG_WEAPON_SPEAR_DAMAGE_BONUS 3
 
 /*
- * Bandit corpse loot: portable items an ambusher might carry (weapon, rations,
- * small forage). Same d100 cumulative threshold scheme as room spawns; fish is
- * the remainder bucket. Heavy ambient junk like loose stone is not rolled here.
+ * Bandit corpse loot count: weighted toward 2-3 items so interactive looting
+ * usually offers a choice, while still allowing stripped bodies and lean drops.
+ * The roll is cumulative; 3 items is the remainder bucket.
+ */
+#define CFG_COMBAT_CORPSE_LOOT_NONE_BELOW 15
+#define CFG_COMBAT_CORPSE_LOOT_ONE_BELOW 40
+#define CFG_COMBAT_CORPSE_LOOT_TWO_BELOW 75
+
+/*
+ * Bandit corpse loot items: portable items an ambusher might carry (weapon,
+ * rations, small forage). Same d100 cumulative threshold scheme as room
+ * spawns; fish is the remainder bucket. Heavy ambient junk like loose stone is
+ * not rolled here.
  */
 #define CFG_COMBAT_CORPSE_LOOT_SPEAR_BELOW 26
 #define CFG_COMBAT_CORPSE_LOOT_STICK_BELOW 46

@@ -1,0 +1,66 @@
+TEST MODE
+dosmud (seed 1234)
+Type 'help' for commands.
+
+       *      *        $   * 
+   *               *   $     
+      _________        $     
+     /       /|\       $    
+    /       / | \     \|/  
+___/_______/__|__\ ___XXX___
+                             
+ (campfire at first watch)                             
+
+Camp
+A small campfire burns quietly.
+Exits: north south west
+On the ground: stick. (take stick)
+
+[T:0] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
+
+> Combat starts. You HP: 20, Bandit HP: 8.
+Choose: [1] Attack  [2] Defend  [3] Use salve
+
+[T:1] Camp [HP:20/20] [Atk:1] [Lv:1 XP:0/20]
+
+> You hit the bandit for 3 damage.
+The bandit falls. The body slumps into the dust.
+You gain 12 XP.
+
+[T:1] Camp [HP:20/20] [Atk:1] [Lv:1 XP:12/20]
+
+> On the body:
+  [1] stick
+  [2] berry
+  [3] herb
+  [4] Leave the rest.
+(Answer with 1, 2, 3, or reply <n>.)
+
+A cricket chirps from beside the coals.
+
+Something small rustles just out of sight.
+
+[T:2] Camp [HP:20/20] [Atk:1] [Lv:1 XP:12/20]
+
+> You loot a berry from the body.
+On the body:
+  [1] stick
+  [2] herb
+  [3] Leave the rest.
+(Answer with 1, 2, 3, or reply <n>.)
+
+[T:2] Camp [HP:20/20] [Atk:1] [Lv:1 XP:12/20]
+
+> You loot a stick from the body.
+On the body:
+  [1] herb
+  [2] Leave the rest.
+(Answer with 1, 2, 3, or reply <n>.)
+
+[T:2] Camp [HP:20/20] [Atk:1] [Lv:1 XP:12/20]
+
+> You leave the rest on the body.
+
+[T:2] Camp [HP:20/20] [Atk:1] [Lv:1 XP:12/20]
+
+> bye

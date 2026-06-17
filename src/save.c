@@ -10,12 +10,12 @@
  * save.c owns explicit binary serialization of the durable simulation state.
  * The format is versioned and field-by-field so compiler padding and TEST_MODE
  * conditionals do not silently corrupt save files.
- * Load accepts SAVE_VERSION and the prior corpse-loot layout so older files
+ * Load accepts SAVE_VERSION plus prior corpse-loot layouts so older files
  * still restore into the expanded fixed-slot corpse inventory.
  */
 
 #define SAVE_MAGIC "DMSV"
-#define SAVE_VERSION 6
+#define SAVE_VERSION 7
 #define SAVE_PATH_BUF_MAX 260
 
 /*
@@ -345,11 +345,20 @@ static int save_read_game_arrays(FILE *fp, struct GameState *game, u16 version)
         if (!save_read_s16(fp, &game->corpse_present[i])) {
             return 0;
         }
-        if (version >= 6U) {
+        if (version >= 7U) {
             for (j = 0; j < CFG_CORPSE_ITEM_SLOTS; ++j) {
                 if (!save_read_s16(fp, &game->corpse_item[i][j])) {
                     return 0;
                 }
+            }
+        } else if (version >= 6U) {
+            for (j = 0; j < 2; ++j) {
+                if (!save_read_s16(fp, &game->corpse_item[i][j])) {
+                    return 0;
+                }
+            }
+            for (; j < CFG_CORPSE_ITEM_SLOTS; ++j) {
+                game->corpse_item[i][j] = ITEM_NONE;
             }
         } else {
             /* v5 and earlier: single corpse_loot field maps to slot 0. */
@@ -789,7 +798,7 @@ int save_read_game(const char *path, struct GameState *out_game,
         rc = SAVE_RESULT_IO;
         goto done;
     }
-    if (version != 5U && version != (u16)SAVE_VERSION) {
+    if (version != 5U && version != 6U && version != (u16)SAVE_VERSION) {
         goto done;
     }
     if (!save_read_game_state(fp, &g_save_loaded, &loaded_rng_draw_count,

@@ -694,6 +694,7 @@ TEST game_loot_leave_keeps_corpse_without_advancing_time(void)
     game.corpse_present[WORLD_ROOM_CAMP] = 1;
     game.corpse_item[WORLD_ROOM_CAMP][0] = ITEM_HERB;
     game.corpse_item[WORLD_ROOM_CAMP][1] = ITEM_NONE;
+    game.corpse_item[WORLD_ROOM_CAMP][2] = ITEM_NONE;
 
     ASSERT_EQ(1, run_cmd_out(&game, "loot", &out));
     ASSERT_EQ(1, game.tick);
