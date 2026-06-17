@@ -142,7 +142,9 @@ static void reset_mutable_state(struct GameState *game, int room_id, u32 tick)
 #endif
     for (i = 0; i < CFG_ROOM_MAX; ++i) {
         game->corpse_present[i] = 0;
-        game->corpse_loot[i] = ITEM_NONE;
+        for (j = 0; j < CFG_CORPSE_ITEM_SLOTS; ++j) {
+            game->corpse_item[i][j] = ITEM_NONE;
+        }
         game->room_explored[i] = 0;
     }
     seed_world_items(game);
@@ -262,6 +264,19 @@ static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd,
             cmd->type != CMD_HELP &&
             cmd->type != CMD_QUIT) {
         push_dialogue_guard(out, GAME_DIALOGUE_GUARD_BANDIT_WAITING_REPLY);
+        return 0;
+    }
+
+    if (game->mode == GAME_MODE_DIALOGUE &&
+            game->dialogue == DIALOGUE_LOOT &&
+            cmd->type != CMD_REPLY &&
+            cmd->type != CMD_LOOT &&
+            cmd->type != CMD_LOOK &&
+            cmd->type != CMD_MAP &&
+            cmd->type != CMD_BAG &&
+            cmd->type != CMD_HELP &&
+            cmd->type != CMD_QUIT) {
+        push_dialogue_guard(out, GAME_DIALOGUE_GUARD_LOOT_WAITING_REPLY);
         return 0;
     }
 
@@ -398,6 +413,9 @@ static int game_cmd_reply(struct GameState *game, struct Command *cmd,
         combat_resolve_reply(game, cmd->arg, out);
         return 1;
     }
+    if (game->mode == GAME_MODE_DIALOGUE && game->dialogue == DIALOGUE_LOOT) {
+        return game_inv_cmd_loot_reply(game, cmd->arg, out);
+    }
     if (dialogue_cmd_reply(game, cmd->arg, out)) {
         return 1;
     }
@@ -502,6 +520,8 @@ int game_process_input(struct GameState *game, char *line, GameEventQueue *out)
     struct Command cmd;
     int parsed;
     int applied;
+    int prior_mode;
+    int prior_dialogue;
 
     parsed = command_parse(line, &cmd);
     if (!parsed) {
@@ -510,12 +530,17 @@ int game_process_input(struct GameState *game, char *line, GameEventQueue *out)
         return 0;
     }
 
+    prior_mode = game->mode;
+    prior_dialogue = game->dialogue;
     applied = apply_command(game, &cmd, out);
     if (!applied) {
         return 0;
     }
 
-    if (command_advances_time(cmd.type)) {
+    if (command_advances_time(cmd.type) &&
+            !(cmd.type == CMD_LOOT &&
+                prior_mode == GAME_MODE_DIALOGUE &&
+                prior_dialogue == DIALOGUE_LOOT)) {
         advance_world_tick(game, out);
     }
 

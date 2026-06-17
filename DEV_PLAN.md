@@ -730,6 +730,12 @@ Done ✅ ([#147](https://github.com/ianmays/dosmud/pull/147)).
 
 ### [#129](https://github.com/ianmays/dosmud/issues/129) - Interactive looting
 
+Bandit corpses open a small interactive loot menu instead of auto-transferring one item immediately. Corpse storage stays fixed-size and deterministic in core state, `reply` takes the numbered item or leaves the rest, and save/load upgrades older single-slot corpse saves into the new layout.
+
+### Testing
+- Unit: `unit_inv.c`, `unit_game.c`, `unit_gout.c`, `unit_harn.c`, `unit_tharn.c`, `unit_save.c`
+- Snapshots: `loot_spear`, `loot_stick`, `loot_berry`, `loot_herb`, `loot_fish`, `loot_bag_full`, `post_combat_reply_guard`
+
 ### [#145](https://github.com/ianmays/dosmud/issues/145) - Local map viewport (region/world map deferred)
 
 Follow-up to [#142](https://github.com/ianmays/dosmud/issues/142) / PR 144. Player-centered viewport for `map`. Region/world tiers are future issues, not this issue's M scope.

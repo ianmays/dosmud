@@ -60,7 +60,8 @@ static void save_fill_fixture(struct GameState *game)
     game->combat.enemy_hp = 5;
     game->combat.defending = 1;
     game->corpse_present[WORLD_ROOM_ROAD] = 1;
-    game->corpse_loot[WORLD_ROOM_ROAD] = ITEM_HERB;
+    game->corpse_item[WORLD_ROOM_ROAD][0] = ITEM_HERB;
+    game->corpse_item[WORLD_ROOM_ROAD][1] = ITEM_NONE;
     game->room_explored[WORLD_ROOM_ROAD] = 1;
     game->room_explored[WORLD_ROOM_TOWER] = 1;
     game->room_item[WORLD_ROOM_TOWER][0] = ITEM_FISH;
@@ -155,8 +156,8 @@ static int save_games_equal(const struct GameState *a,
             memcmp(a->bag, b->bag, sizeof(a->bag)) != 0 ||
             memcmp(a->corpse_present, b->corpse_present,
                 sizeof(a->corpse_present)) != 0 ||
-            memcmp(a->corpse_loot, b->corpse_loot,
-                sizeof(a->corpse_loot)) != 0 ||
+            memcmp(a->corpse_item, b->corpse_item,
+                sizeof(a->corpse_item)) != 0 ||
             memcmp(a->room_explored, b->room_explored,
                 sizeof(a->room_explored)) != 0) {
         return 0;

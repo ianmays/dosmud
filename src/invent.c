@@ -21,6 +21,32 @@ static void push_item_result(GameEventQueue *out, int action, int outcome,
         value, 0);
 }
 
+static void push_corpse_view(GameEventQueue *out, struct GameState *game,
+                             int room_id)
+{
+    int slot;
+    int item_count;
+    GameEvent *ev;
+
+    item_count = 0;
+    ev = game_event_push(out, GAME_EVENT_CORPSE_VIEW, 0, 0, 0, 0, 0);
+    if (ev == 0) {
+        return;
+    }
+    ev->room_id = room_id;
+    for (slot = 0; slot < CFG_CORPSE_ITEM_SLOTS; ++slot) {
+        ev->room_item[slot] = game->corpse_item[room_id][slot];
+        if (game->corpse_item[room_id][slot] != ITEM_NONE) {
+            item_count++;
+        }
+    }
+    for (; slot < CFG_AREA_ITEM_SLOTS; ++slot) {
+        ev->room_item[slot] = ITEM_NONE;
+    }
+    ev->arg0 = item_count;
+    ev->arg1 = item_count + 1;
+}
+
 static void push_craft_result(GameEventQueue *out, int item_id, int outcome)
 {
     game_event_push(out, GAME_EVENT_CRAFT_RESULT, item_id, outcome, 0, 0, 0);
@@ -95,6 +121,58 @@ static void room_remove_slot_compact(struct GameState *game, int room_id, int sl
         game->room_item[room_id][s] = game->room_item[room_id][s + 1];
     }
     game->room_item[room_id][CFG_AREA_ITEM_SLOTS - 1] = ITEM_NONE;
+}
+
+static int corpse_item_count(struct GameState *game, int room_id)
+{
+    int slot;
+    int count;
+
+    count = 0;
+    for (slot = 0; slot < CFG_CORPSE_ITEM_SLOTS; ++slot) {
+        if (game->corpse_item[room_id][slot] != ITEM_NONE) {
+            count++;
+        }
+    }
+    return count;
+}
+
+int game_corpse_has_loot(struct GameState *game, int room_id)
+{
+    return corpse_item_count(game, room_id) > 0;
+}
+
+int game_corpse_try_add(struct GameState *game, int room_id, int item_id)
+{
+    int slot;
+
+    for (slot = 0; slot < CFG_CORPSE_ITEM_SLOTS; ++slot) {
+        if (game->corpse_item[room_id][slot] == ITEM_NONE) {
+            game->corpse_item[room_id][slot] = item_id;
+            return 1;
+        }
+    }
+    return 0;
+}
+
+void game_corpse_clear(struct GameState *game, int room_id)
+{
+    int slot;
+
+    game->corpse_present[room_id] = 0;
+    for (slot = 0; slot < CFG_CORPSE_ITEM_SLOTS; ++slot) {
+        game->corpse_item[room_id][slot] = ITEM_NONE;
+    }
+}
+
+static void corpse_remove_slot_compact(struct GameState *game, int room_id, int slot)
+{
+    int s;
+
+    for (s = slot; s < CFG_CORPSE_ITEM_SLOTS - 1; ++s) {
+        game->corpse_item[room_id][s] = game->corpse_item[room_id][s + 1];
+    }
+    game->corpse_item[room_id][CFG_CORPSE_ITEM_SLOTS - 1] = ITEM_NONE;
 }
 
 int game_inv_bag_find_index(struct GameState *game, int item_id)
@@ -177,29 +255,76 @@ int game_inv_bag_remove_item(struct GameState *game, int item_id)
 int game_inv_cmd_loot(struct GameState *game, GameEventQueue *out)
 {
     int room_id;
-    int ground_item;
 
     room_id = game->player.room_id;
+    if (game->mode == GAME_MODE_DIALOGUE && game->dialogue == DIALOGUE_LOOT) {
+        push_item_result(out, GAME_ITEM_ACTION_LOOT,
+            GAME_ITEM_OUTCOME_LEFT_BEHIND, ITEM_NONE, 0);
+        game_set_mode_explore(game);
+        return 1;
+    }
     if (!game->corpse_present[room_id]) {
         push_item_result(out, GAME_ITEM_ACTION_LOOT, GAME_ITEM_OUTCOME_NO_BODY,
             ITEM_NONE, 0);
         return 1;
     }
-    ground_item = game->corpse_loot[room_id];
-    if (ground_item == ITEM_NONE) {
+    if (!game_corpse_has_loot(game, room_id)) {
         push_item_result(out, GAME_ITEM_ACTION_LOOT,
             GAME_ITEM_OUTCOME_BODY_STRIPPED, ITEM_NONE, 0);
         return 1;
     }
-    if (!game_inv_bag_add(game, ground_item)) {
+    game_set_mode_dialogue(game, DIALOGUE_LOOT);
+    push_corpse_view(out, game, room_id);
+    return 1;
+}
+
+int game_inv_cmd_loot_reply(struct GameState *game, int choice, GameEventQueue *out)
+{
+    int room_id;
+    int item_count;
+    int item_id;
+
+    if (game->mode != GAME_MODE_DIALOGUE || game->dialogue != DIALOGUE_LOOT) {
+        return 0;
+    }
+
+    room_id = game->player.room_id;
+    item_count = corpse_item_count(game, room_id);
+    if (item_count <= 0) {
+        game_set_mode_explore(game);
         push_item_result(out, GAME_ITEM_ACTION_LOOT,
-            GAME_ITEM_OUTCOME_BAG_FULL_DROP, ground_item, 0);
+            GAME_ITEM_OUTCOME_BODY_STRIPPED, ITEM_NONE, 0);
         return 1;
     }
-    push_item_result(out, GAME_ITEM_ACTION_LOOT, GAME_ITEM_OUTCOME_OK,
-        ground_item, 0);
-    game->corpse_loot[room_id] = ITEM_NONE;
-    game->corpse_present[room_id] = 0;
+    if (choice == item_count + 1) {
+        push_item_result(out, GAME_ITEM_ACTION_LOOT,
+            GAME_ITEM_OUTCOME_LEFT_BEHIND, ITEM_NONE, 0);
+        game_set_mode_explore(game);
+        return 1;
+    }
+    if (choice < 1 || choice > item_count) {
+        game_event_push(out, GAME_EVENT_DIALOGUE_GUARD,
+            GAME_DIALOGUE_GUARD_PICK_123, 0, 0, 0, 0);
+        return 1;
+    }
+
+    item_id = game->corpse_item[room_id][choice - 1];
+    if (!game_inv_bag_add(game, item_id)) {
+        push_item_result(out, GAME_ITEM_ACTION_LOOT,
+            GAME_ITEM_OUTCOME_BAG_FULL_DROP, item_id, 0);
+        push_corpse_view(out, game, room_id);
+        return 1;
+    }
+
+    corpse_remove_slot_compact(game, room_id, choice - 1);
+    push_item_result(out, GAME_ITEM_ACTION_LOOT, GAME_ITEM_OUTCOME_OK, item_id,
+        0);
+    if (!game_corpse_has_loot(game, room_id)) {
+        game_corpse_clear(game, room_id);
+        game_set_mode_explore(game);
+        return 1;
+    }
+    push_corpse_view(out, game, room_id);
     return 1;
 }
 

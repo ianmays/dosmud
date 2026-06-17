@@ -150,7 +150,7 @@ TEST combat_victory_loot_and_xp(void)
     ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
     ASSERT_EQ(-1, npc_find_by_dialogue(&game, DIALOGUE_ENEMY));
     ASSERT_EQ(1, game.corpse_present[WORLD_ROOM_CAMP]);
-    ASSERT_EQ(ITEM_STICK, game.corpse_loot[WORLD_ROOM_CAMP]);
+    ASSERT_EQ(ITEM_STICK, game.corpse_item[WORLD_ROOM_CAMP][0]);
     ASSERT_EQ(CFG_COMBAT_KILL_XP_BASE + CFG_TEST_VICTORY_XP_SPREAD, game.xp);
     ASSERT_EQ(3, out.count);
     ASSERT_EQ(GAME_COMBAT_PHASE_PLAYER_DAMAGE, out.events[0].arg0);
@@ -234,7 +234,7 @@ TEST combat_loot_tiers(void)
     rolls[2] = 0;
     game_roll_inject_begin(&game, rolls, 3);
     resolve_reply_out(&game, 1, &out);
-    ASSERT_EQ(ITEM_SPEAR, game.corpse_loot[WORLD_ROOM_CAMP]);
+    ASSERT_EQ(ITEM_SPEAR, game.corpse_item[WORLD_ROOM_CAMP][0]);
 
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game_set_mode_combat(&game);
@@ -242,7 +242,7 @@ TEST combat_loot_tiers(void)
     rolls[1] = CFG_TEST_VICTORY_LOOT_FISH;
     game_roll_inject_begin(&game, rolls, 3);
     resolve_reply_out(&game, 1, &out);
-    ASSERT_EQ(ITEM_FISH, game.corpse_loot[WORLD_ROOM_CAMP]);
+    ASSERT_EQ(ITEM_FISH, game.corpse_item[WORLD_ROOM_CAMP][0]);
     PASS();
 }
 

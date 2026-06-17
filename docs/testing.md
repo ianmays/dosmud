@@ -205,7 +205,7 @@ Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_
 | `bandit_fight_ready` | Bandit dialogue + inject for `combat_start` enemy HP spread |
 | `bandit_intimidate_ok` | Bandit dialogue + inject (`CFG_TEST_INTIMIDATE_OK`) for reply `3` success |
 | `bandit_intimidate_fail` | Bandit dialogue + inject (`CFG_TEST_INTIMIDATE_FAIL`) for reply `3` failure |
-| `bandit_victory_spear` / `stick` / `berry` / `herb` / `fish` | Near-kill + inject hit, corpse loot percent, kill XP |
+| `bandit_victory_spear` / `stick` / `berry` / `herb` / `fish` | Near-kill + inject hit, corpse loot percent, kill XP; leaves one corpse-menu item ready for `loot` |
 
 **Exploration / world** (room and map state without bandit dialogue):
 
@@ -247,8 +247,8 @@ Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_
 
 | Fixture | State |
 |---------|--------|
-| `corpse_stripped` | Corpse present, no loot item |
-| `corpse_loot_full_bag` | Full bag + corpse with stick loot |
+| `corpse_stripped` | Corpse present, no corpse-menu items |
+| `corpse_loot_full_bag` | Full bag + corpse with one stick in corpse slot 1 |
 
 For marsh item/craft snapshots, prefer `at_marsh_reed` over walking camp intimidate plus `south` (avoids tick RNG on travel). For movement that depends on exit layout (`north` from marsh, `move north` from camp), chain `@fixture world_boot` before room fixtures so the graph stays stable if `world_init` changes.
 
@@ -320,7 +320,7 @@ Each process run uses one `.input` file until `quit`. `make snapshot-run` runs `
 
 **Combat:** `combat_defend`, `combat_salve`, `combat_no_salve`, `combat_invalid`, `combat_take_blocked`, `combat_victory_xp`, `level_up`.
 
-**Loot:** `loot_spear`, `loot_stick`, `loot_berry`, `loot_herb`, `loot_fish`, `loot_empty`, `loot_stripped`, `loot_bag_full`.
+**Loot:** `loot_spear`, `loot_stick`, `loot_berry`, `loot_herb`, `loot_fish`, `loot_empty`, `loot_stripped`, `loot_bag_full` (interactive corpse menu open, take, and full-bag retry paths).
 
 **Bandit dialogue:** `bandit_fight`, `bandit_intimidate_ok`, `bandit_intimidate_fail`, `bandit_bag_empty`, `bandit_road`.
 

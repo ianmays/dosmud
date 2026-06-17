@@ -108,7 +108,8 @@ TEST soak_combat_loop(void)
         }
         if (game.mode == GAME_MODE_EXPLORE && game.running) {
             game.corpse_present[WORLD_ROOM_CAMP] = 0;
-            game.corpse_loot[WORLD_ROOM_CAMP] = 0;
+            game.corpse_item[WORLD_ROOM_CAMP][0] = 0;
+            game.corpse_item[WORLD_ROOM_CAMP][1] = 0;
         }
     }
     end = clock();

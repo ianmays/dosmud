@@ -184,6 +184,20 @@ TEST harness_apply_env_focus_water(void)
     PASS();
 }
 
+TEST harness_apply_corpse_loot_full_bag_sets_corpse_slot(void)
+{
+    struct GameState game;
+    int rc;
+
+    unit_game_fresh(&game, 8u);
+    rc = testharn_apply(&game, "@fixture corpse_loot_full_bag");
+    ASSERT_EQ(1, rc);
+    ASSERT_EQ(1, game.corpse_present[WORLD_ROOM_CAMP]);
+    ASSERT_EQ(ITEM_STICK, game.corpse_item[WORLD_ROOM_CAMP][0]);
+    ASSERT_EQ(ITEM_NONE, game.corpse_item[WORLD_ROOM_CAMP][1]);
+    PASS();
+}
+
 TEST harness_seed_repeatable_rolls(void)
 {
     struct GameState game;
@@ -212,5 +226,6 @@ SUITE(harness) {
     RUN_TEST(harness_apply_traveler_dialogue);
     RUN_TEST(harness_apply_bandit_road);
     RUN_TEST(harness_apply_env_focus_water);
+    RUN_TEST(harness_apply_corpse_loot_full_bag_sets_corpse_slot);
     RUN_TEST(harness_seed_repeatable_rolls);
 }

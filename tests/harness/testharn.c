@@ -388,7 +388,8 @@ static void fixture_corpse_stripped(struct GameState *game)
 {
     fixture_at_camp(game);
     game->corpse_present[WORLD_ROOM_CAMP] = 1;
-    game->corpse_loot[WORLD_ROOM_CAMP] = ITEM_NONE;
+    game->corpse_item[WORLD_ROOM_CAMP][0] = ITEM_NONE;
+    game->corpse_item[WORLD_ROOM_CAMP][1] = ITEM_NONE;
 }
 
 static int fixture_corpse_loot_full_bag(struct GameState *game, int loot_item)
@@ -402,7 +403,8 @@ static int fixture_corpse_loot_full_bag(struct GameState *game, int loot_item)
         }
     }
     game->corpse_present[WORLD_ROOM_CAMP] = 1;
-    game->corpse_loot[WORLD_ROOM_CAMP] = loot_item;
+    game->corpse_item[WORLD_ROOM_CAMP][0] = loot_item;
+    game->corpse_item[WORLD_ROOM_CAMP][1] = ITEM_NONE;
     return 1;
 }
 

@@ -114,6 +114,7 @@ void combat_resolve_reply(struct GameState *game, int choice, GameEventQueue *ou
         combat_end_active_enemy_encounter(game);
         game_set_mode_explore(game);
         push_combat_phase(out, GAME_COMBAT_PHASE_ENEMY_DEFEATED, 0, 0);
+        game_corpse_clear(game, game->player.room_id);
         game->corpse_present[game->player.room_id] = 1;
         {
             int roll;
@@ -131,7 +132,7 @@ void combat_resolve_reply(struct GameState *game, int choice, GameEventQueue *ou
             } else {
                 loot_item = ITEM_FISH;
             }
-            game->corpse_loot[game->player.room_id] = loot_item;
+            (void)game_corpse_try_add(game, game->player.room_id, loot_item);
         }
         progression_gain_xp(game, CFG_COMBAT_KILL_XP_BASE +
             game_roll_spread(game, CFG_COMBAT_KILL_XP_SPREAD), out);

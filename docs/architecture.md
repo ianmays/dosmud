@@ -180,8 +180,8 @@ Conventions:
 ### `save`
 
 - shell-edge binary serialization in [`save.c`](https://github.com/ianmays/dosmud/blob/main/src/save.c); called only from `main.c`
-- versioned, field-by-field save format (`DMSV`, version 5) for `GameState`, `World`, and tracked RNG draw count
-- loads only the current `SAVE_VERSION`; older files return `SAVE_RESULT_FORMAT` (per-version readers or migrators are reserved for a future hook before validate)
+- versioned, field-by-field save format (`DMSV`, version 6) for `GameState`, `World`, and tracked RNG draw count
+- loads the current `SAVE_VERSION` plus the prior version-5 single-slot corpse-loot payload; older files still return `SAVE_RESULT_FORMAT`
 - validates magic, version, and field ranges into a staging buffer before replacing the live game state; failed loads leave the caller's `GameState` untouched
 - fixed-size NPC roster (`GameState.npcs[]` with actor, dialogue, encounter, room, flags, and return tick per slot); enemy handover-pick state lives on `NPC_FLAG_HANDOVER_PICK` on the active enemy slot; `TEST_MODE` builds append roll-injection and quiet-tick fields after the shared payload, while release builds use the shorter record and reject extra trailing bytes
 - keeps render queues and replay logs out of the save format
@@ -192,7 +192,7 @@ Conventions:
 - command routing
 - world update sequencing in `advance_world_tick`: roster co-location encounter before roaming steps, ambient events, then non-roaming fixed slots; move and wait share the same order; no player-site random bandit roll on tick
 - headless step surface: `game_describe_current_room`, `game_process_input`, and `game_background_step` mutate `GameState` and append `GameEvent` records supplied by the caller
-- explicit game modes in [`game.h`](https://github.com/ianmays/dosmud/blob/main/src/game.h): `GameMode` (explore, dialogue, combat), `DialogueKind` for the active dialogue when in dialogue mode (room NPCs including the pond frog, traveler, enemy), `CombatState` for combat-only fields, and `NpcState` / `NpcFlags` for the fixed-size dynamic NPC roster (`GameState.npcs[CFG_NPC_MAX]`, cap in [`config.h`](https://github.com/ianmays/dosmud/blob/main/include/config.h); `NPC_FLAG_HANDOVER_PICK` gates enemy give-during-dialogue on the active slot)
+- explicit game modes in [`game.h`](https://github.com/ianmays/dosmud/blob/main/src/game.h): `GameMode` (explore, dialogue, combat), `DialogueKind` for the active dialogue when in dialogue mode (room NPCs including the pond frog, traveler, enemy, and the corpse-loot menu), `CombatState` for combat-only fields, and `NpcState` / `NpcFlags` for the fixed-size dynamic NPC roster (`GameState.npcs[CFG_NPC_MAX]`, cap in [`config.h`](https://github.com/ianmays/dosmud/blob/main/include/config.h); `NPC_FLAG_HANDOVER_PICK` gates enemy give-during-dialogue on the active slot)
 - mode transitions via `game_set_mode_explore`, `game_set_mode_dialogue`, and `game_set_mode_combat` (only one major mode at a time)
 - `game_is_busy_dialogue` returns true whenever `mode != GAME_MODE_EXPLORE` (ambient encounters, idle background ticks)
 - `game_roll_spread` and `game_roll_percent` centralize gameplay draws used for combat, corpse loot, kill XP, and bandit intimidate (`plat_rand()` when inject is inactive; inject bypasses the draw counter in `TEST_MODE`)
@@ -202,10 +202,11 @@ Conventions:
 Gameplay slices live beside `game.c` as plain C translation units (no extra framework):
 
 - [`gprog.c`](https://github.com/ianmays/dosmud/blob/main/src/gprog.c) - XP and level-up rewards (`game_xp_to_next_level`, `progression_gain_xp`); queues `GAME_EVENT_XP_GAIN` and `GAME_EVENT_STAT_CHANGE` via `gout` (FAT 8.3-safe basename)
-- [`combat.c`](https://github.com/ianmays/dosmud/blob/main/src/combat.c) - combat start, player reply resolution, enemy turn, and enemy cleanup after victory; queues `GAME_EVENT_COMBAT` phases via `gout` (randomness via `game_roll_spread` / `game_roll_percent`, not direct `plat_rand()` calls)
+- [`combat.c`](https://github.com/ianmays/dosmud/blob/main/src/combat.c) - combat start, player reply resolution, enemy turn, and enemy cleanup after victory; queues `GAME_EVENT_COMBAT` phases via `gout` and seeds corpse item slots for post-fight looting (randomness via `game_roll_spread` / `game_roll_percent`, not direct `plat_rand()` calls)
+- [`invent.c`](https://github.com/ianmays/dosmud/blob/main/src/invent.c) - bag, ground, and corpse inventory ownership; `loot` opens a narrow corpse menu through `GAME_EVENT_CORPSE_VIEW`, and numbered replies take or leave corpse items without a generic UI framework
 - [`npc.c`](https://github.com/ianmays/dosmud/blob/main/src/npc.c) - fixed NPC identity seam, shared dialogue helpers, room look hint ownership, and the fixed-size NPC instance roster for authored enemy profiles plus traveler roaming (`npc_clear_all`, `npc_spawn`, `npc_place`, `npc_move`, `npc_find_*`, `npc_begin_encounter`, `npc_end_encounter`, `npc_deactivate_until`, `npc_seed_profiles`, `npc_fixed_begin_encounter_in_room`, `npc_roaming_*`; `NPC_PROFILES[]` holds bandit and traveler placement, roam warmup, and respawn timing; the road bandit opens through `npc_roaming_begin_encounter_in_room` and respawns via `npc_end_encounter`; `npc_fixed_begin_encounter_in_room` remains for future non-roaming authored slots; slot order is save/tick-stable)
 - [`genc.c`](https://github.com/ianmays/dosmud/blob/main/src/genc.c) - enemy encounter rules and bandit-specific outcomes on top of roster-backed enemy slots instead of a one-off `GameState` dialogue flag; `enemy_begin_encounter` prefers roster co-location (`npc_roaming_begin_encounter_in_room`, then `npc_fixed_begin_encounter_in_room`) before dynamic ambush spawn for explicit callers and tests (FAT 8.3-safe basename)
-- [`dialogue.c`](https://github.com/ianmays/dosmud/blob/main/src/dialogue.c) - fixed room-NPC talk and reply routing built on `npc.c`
+- [`dialogue.c`](https://github.com/ianmays/dosmud/blob/main/src/dialogue.c) - fixed room-NPC talk and reply routing built on `npc.c` (enemy and corpse-loot reply handling stay in `genc.c` / `invent.c`)
 - [`gatmos.c`](https://github.com/ianmays/dosmud/blob/main/src/gatmos.c) - initial room items, ambient rolls, animal noise, inspect focus hooks (FAT 8.3-safe basename)
 
 When a slice exposes new command or state entry points, add tests in the matching `tests/unit/unit_*.c` file (see [When to add or update tests](testing.md#when-to-add-or-update-tests)).

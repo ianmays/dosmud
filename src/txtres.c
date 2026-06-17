@@ -136,7 +136,7 @@ const char *const TXT_HELP_CRAFT =
     "craft <item> or build <item> - torch needs stick+reed, salve needs herb+berry, spear needs stick+stone (ingredients in bag or wielded where applicable). Not while fighting.";
 
 const char *const TXT_HELP_LOOT =
-    "loot - take gear from a bandit corpse.";
+    "loot - inspect a bandit corpse, then use 1/2/3 to take an item or leave the rest.";
 
 const char *const TXT_HELP_TALK =
     "talk (speak) - speak with an NPC in the room or advance certain encounters.";
@@ -284,6 +284,8 @@ const char *const TXT_MSG_INSPECT_CREAK = "An old branch rocks against another, 
 const char *const TXT_MSG_INSPECT_WATER = "You find a thin runnel cutting fresh lines through mud.\n";
 const char *const TXT_MSG_INSPECT_GRIT = "New tracks cross the grit: light, quick, and already fading.\n";
 const char *const TXT_MSG_BANDIT_BLOCK_TALK = "The bandit has your full attention right now.\n";
+const char *const TXT_MSG_LOOT_WAITING =
+    "Finish looting with 1/2/3, or type loot to leave the body alone.\n";
 const char *const TXT_MSG_TRAVELER_WAITING = "The traveler is waiting for an answer (1/2/3).\n";
 const char *const TXT_MSG_NOBODY_TALK = "Nobody here wants to talk.\n";
 const char *const TXT_MSG_HAND_OVER_ITEM_FMT = "You hand over your %s. The bandit backs off and leaves.\n";
@@ -330,6 +332,10 @@ const char *txtres_msg_archivist_reply(int arg)
 const char *const TXT_INV_NO_BODY_LOOT = "There is no body here to loot.\n";
 const char *const TXT_INV_BODY_STRIPPED = "The body has already been stripped clean.\n";
 const char *const TXT_INV_BAG_FULL_DROP = "Your bag is full. Drop something first.\n";
+const char *const TXT_INV_LEAVE_BODY = "You leave the rest on the body.\n";
+const char *const TXT_INV_CORPSE_HEADER = "On the body:\n";
+const char *const TXT_INV_CORPSE_LINE_FMT = "  [%d] %s\n";
+const char *const TXT_INV_CORPSE_LEAVE_FMT = "  [%d] Leave the rest.\n";
 const char *const TXT_INV_LOOT_FMT = "You loot a %s from the body.\n";
 const char *const TXT_INV_NO_RUMMAGE_COMBAT = "You cannot rummage through gear mid-fight.\n";
 const char *const TXT_INV_TAKE_NOTHING = "There is nothing here to take.\n";
