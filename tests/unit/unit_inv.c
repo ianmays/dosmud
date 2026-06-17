@@ -473,6 +473,31 @@ TEST invent_loot_invalid_choice_single_item_uses_two_choice_max(void)
     PASS();
 }
 
+TEST invent_corpse_queue_view_uses_dense_live_slots(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 22u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game.corpse_present[WORLD_ROOM_CAMP] = 1;
+    game.corpse_item[WORLD_ROOM_CAMP][0] = ITEM_BERRY;
+    game.corpse_item[WORLD_ROOM_CAMP][1] = ITEM_NONE;
+    game.corpse_item[WORLD_ROOM_CAMP][2] = ITEM_HERB;
+
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, game_corpse_queue_view(&game, WORLD_ROOM_CAMP, &out));
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_CORPSE_VIEW, out.events[0].kind);
+    ASSERT_EQ(WORLD_ROOM_CAMP, out.events[0].room_id);
+    ASSERT_EQ(2, out.events[0].arg0);
+    ASSERT_EQ(3, out.events[0].arg1);
+    ASSERT_EQ(ITEM_BERRY, out.events[0].room_item[0]);
+    ASSERT_EQ(ITEM_NONE, out.events[0].room_item[1]);
+    ASSERT_EQ(ITEM_HERB, out.events[0].room_item[2]);
+    PASS();
+}
+
 TEST invent_craft_from_wielded_ingredient(void)
 {
     struct GameState game;
@@ -554,6 +579,7 @@ SUITE(invent) {
     RUN_TEST(invent_loot_bag_full);
     RUN_TEST(invent_loot_invalid_choice_uses_visible_max);
     RUN_TEST(invent_loot_invalid_choice_single_item_uses_two_choice_max);
+    RUN_TEST(invent_corpse_queue_view_uses_dense_live_slots);
     RUN_TEST(invent_craft_from_wielded_ingredient);
     RUN_TEST(invent_drop_not_carrying);
     RUN_TEST(invent_wield_swap_weapons);

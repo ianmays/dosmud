@@ -6,6 +6,7 @@
 #include "config.h"
 #include "game.h"
 #include "grendr.h"
+#include "invent.h"
 #include "platform.h"
 #include "replay.h"
 #include "save.h"
@@ -177,9 +178,13 @@ static void main_render_and_prompt(struct GameState *game)
     }
 }
 
-/* Queue the restored room description so load can log before render drains it. */
+/* Queue the restored view so load can log before render drains it. */
 static void main_queue_loaded_game(struct GameState *game)
 {
+    if (game->mode == GAME_MODE_DIALOGUE && game->dialogue == DIALOGUE_LOOT &&
+            game_corpse_queue_view(game, game->player.room_id, &g_main_out)) {
+        return;
+    }
     game_event_queue_reset(&g_main_out);
     game_describe_current_room(game, &g_main_out);
 }

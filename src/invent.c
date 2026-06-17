@@ -141,6 +141,16 @@ static int corpse_item_count(struct GameState *game, int room_id)
     return count;
 }
 
+int game_corpse_queue_view(struct GameState *game, int room_id,
+                           GameEventQueue *out)
+{
+    if (!game->corpse_present[room_id] || !game_corpse_has_loot(game, room_id)) {
+        return 0;
+    }
+    push_corpse_view(out, game, room_id);
+    return 1;
+}
+
 int game_corpse_has_loot(struct GameState *game, int room_id)
 {
     return corpse_item_count(game, room_id) > 0;
@@ -283,7 +293,7 @@ int game_inv_cmd_loot(struct GameState *game, GameEventQueue *out)
         return 1;
     }
     game_set_mode_dialogue(game, DIALOGUE_LOOT);
-    push_corpse_view(out, game, room_id);
+    game_corpse_queue_view(game, room_id, out);
     return 1;
 }
 
