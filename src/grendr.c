@@ -1383,7 +1383,7 @@ void render_msg_intimidate_fail(void)
 
 void render_msg_pick_123(int max_choice)
 {
-    if (max_choice > 3) {
+    if (max_choice != 3 && max_choice > 0) {
         RENDER_PRINTF(TXT_PICK_RANGE_FMT, max_choice);
         return;
     }
