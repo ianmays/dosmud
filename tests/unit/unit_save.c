@@ -14,6 +14,7 @@
 #include "unit_util.h"
 
 #define SAVE_NPC_MAX_V8 4
+/* Mirror save.c and NPC_PROFILES bandit level roll for legacy upgrade tests. */
 #define PROFILE_BANDIT_LEVEL_MIN 1
 #define PROFILE_BANDIT_LEVEL_MAX 3
 

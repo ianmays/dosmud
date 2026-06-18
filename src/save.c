@@ -17,6 +17,7 @@
 #define SAVE_MAGIC "DMSV"
 #define SAVE_VERSION 9
 #define SAVE_PATH_BUF_MAX 260
+/* v5-v8 saves wrote four NPC slots; v9 matches CFG_NPC_MAX. */
 #define SAVE_NPC_MAX_V8 4
 
 /*
@@ -158,6 +159,7 @@ static int save_read_u32(FILE *fp, u32 *value)
 }
 
 /* Full NPC roster in slot index order; layout matches save_valid_npc invariants. */
+/* v9 expands roster slots; v8 adds per-slot level after encounter. */
 static int save_npc_slot_count_for_version(u16 version)
 {
     if (version >= 9U) {
@@ -863,6 +865,7 @@ int save_read_game(const char *path, struct GameState *out_game,
         goto done;
     }
     npc_upgrade_loaded_profiles(&g_save_loaded);
+    /* v7 saves lack combat.enemy_level; backfill from the active DIALOGUE_ENEMY slot. */
     if (g_save_loaded.mode == GAME_MODE_COMBAT &&
             g_save_loaded.combat.enemy_hp > 0 &&
             g_save_loaded.combat.enemy_level == 0) {

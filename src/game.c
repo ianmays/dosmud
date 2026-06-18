@@ -37,6 +37,7 @@ void game_set_mode_explore(struct GameState *game)
 {
     game->mode = GAME_MODE_EXPLORE;
     game->dialogue = DIALOGUE_NONE;
+    /* Drop combat snapshot so explore ticks do not reuse stale enemy scaling. */
     game->combat.enemy_hp = 0;
     game->combat.enemy_level = 0;
     game->combat.defending = 0;

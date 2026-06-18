@@ -59,6 +59,7 @@ TEST combat_start_mode(void)
 
 TEST combat_start_uses_enemy_level_scaling(void)
 {
+    /* Direct combat_start: level comes from DIALOGUE_ENEMY slot, not combat_enemy_level default. */
     struct GameState game;
     GameEventQueue out;
     int rolls[1];

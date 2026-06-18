@@ -146,6 +146,7 @@ static struct NpcState *bandit_npc_by_actor(struct GameState *game, int actor)
 
 static int profile_bandit_level(u32 seed, int actor, int room_id)
 {
+    /* Mirror npc_roll_profile_level salt: seed + actor + room_id. */
     return PROFILE_BANDIT_LEVEL_MIN +
         (int)((seed + (u32)actor + (u32)room_id) %
             (PROFILE_BANDIT_LEVEL_MAX - PROFILE_BANDIT_LEVEL_MIN + 1));

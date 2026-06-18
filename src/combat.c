@@ -14,8 +14,8 @@
  */
 
 /*
- * #159: typed combat phases (payload layout in gout.h). phase -> event arg0;
- * payload slots -> arg1/arg2; grendr render_combat_event mirrors this layout.
+ * #159: typed combat phases (payload layout in gout.h). phase -> arg0;
+ * val0/val1/val2 -> arg1/arg2/arg3; grendr render_combat_event mirrors this.
  */
 static void push_combat_phase(GameEventQueue *out, int phase,
                               int val0, int val1, int val2)
@@ -23,6 +23,7 @@ static void push_combat_phase(GameEventQueue *out, int phase,
     game_event_push(out, GAME_EVENT_COMBAT, phase, val0, val1, val2, 0);
 }
 
+/* combat.enemy_level snapshot from combat_start; 1 when unset (v7 saves, fixtures). */
 int combat_enemy_level(const struct GameState *game)
 {
     if (game->combat.enemy_level > 0) {
@@ -128,6 +129,7 @@ void combat_start(struct GameState *game, GameEventQueue *out)
     int slot;
     int level;
 
+    /* npc.c owns roster level; combat snapshots it for scaling and save/load. */
     slot = npc_find_by_dialogue(game, DIALOGUE_ENEMY);
     level = 1;
     if (slot >= 0 && game->npcs[slot].level > 0) {

@@ -121,7 +121,8 @@ enum GameEventEquipOutcome {
  *   STATUS           arg1=player_hp arg2=enemy_hp arg3=enemy_level
  *   PLAYER_DAMAGE    arg1=damage
  *   SALVE_HEAL       arg1=player_hp after heal
- *   (other phases leave arg1/arg2 zero)
+ *   ENEMY_DEFEATED   arg3=enemy_level (for render copy consistency)
+ *   (other phases leave arg1/arg2/arg3 zero unless noted)
  * XP_GAIN     arg0=amount
  * STAT_CHANGE arg0=level arg1=max_hp arg2=damage_bonus arg3=bag_capacity
  */
@@ -142,13 +143,8 @@ enum GameEventCombatPhase {
 };
 
 /*
- * Dialogue/encounter payload contract (#160):
- * DIALOGUE       arg0=GameEventDialogueActor arg1=GameEventDialoguePhase
- *                arg2=choice (1-3) for REPLY
- * ENCOUNTER      arg0=GameEventEncounterKind arg1=GameEventEncounterAction
- *                arg2=GameEventEncounterOutcome arg3=item id (GIVE/OK only)
- *                text=item_name for GIVE/OK; zero otherwise
- * DIALOGUE_GUARD arg0=GameEventDialogueGuardReason
+ * DIALOGUE_GUARD payload (#160): arg0=GameEventDialogueGuardReason.
+ * DIALOGUE / ENCOUNTER arg layout is documented with the event kinds above.
  */
 enum GameEventDialogueActor {
     GAME_DIALOGUE_ACTOR_NONE = 0,

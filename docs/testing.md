@@ -442,7 +442,7 @@ When the metrics schema grows, use [`scripts/backfill-ci-history.py`](https://gi
 
 ## Manual gameplay verification checklist
 
-The tick HUD line includes `[Atk:n]`; `n` is the flat melee bonus used on combat attacks (level damage bonus plus wielded weapon). Expect the same value when editing snapshot `.expect` files after wield, unwield, or level-up.
+The tick HUD line includes `[Atk:n]`; `n` is the flat melee bonus used on combat attacks (level damage bonus plus wielded weapon). Bandit encounter and combat status lines include `Bandit Lv: n`; fixture `bandit_combat_turn1` pins enemy level 1 for deterministic HP. Expect the same values when editing snapshot `.expect` files after wield, unwield, level-up, or combat tuning changes.
 
 1. Start program, confirm initial tick `[T:0]`.
 2. Enter `help`; tick remains unchanged. Enter `help craft` (or another topic); tick remains unchanged and a single-topic line prints.

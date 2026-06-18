@@ -1024,6 +1024,7 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
 
 void render_bandit_encounter_open(int enemy_level)
 {
+    /* enemy_level is ENCOUNTER OPEN arg3 from npc_push_encounter_open. */
     render_gap();
     RENDER_PRINTF("  /\\     .-'''''''-.        \n");
     RENDER_PRINTF("  ||    / (.)..(.)  |        \n");

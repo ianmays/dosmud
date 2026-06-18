@@ -29,6 +29,7 @@ struct NpcProfile {
     int actor;
     int dialogue;
     int encounter;
+    /* Authored difficulty band; zero min/max means no combat scaling. */
     int level_min;
     int level_max;
     int spawn_room;
@@ -214,6 +215,7 @@ static int npc_default_level_for_encounter(const struct GameState *game,
         return npc_roll_profile_level(game, profile, salt);
     }
     if (encounter == GAME_ENCOUNTER_BANDIT) {
+        /* Actors without a profile row (e.g. BANDIT_AMBUSH) reuse road bandit scaling. */
         profile = npc_bandit_profile();
         if (profile != 0) {
             return npc_roll_profile_level(game, profile, salt);
@@ -225,6 +227,7 @@ static int npc_default_level_for_encounter(const struct GameState *game,
 
 static void npc_push_encounter_open(GameEventQueue *out, int kind, int level)
 {
+    /* OPEN arg3 carries bandit level for grendr; zero for non-scaling encounters. */
     game_event_push(out, GAME_EVENT_ENCOUNTER, kind,
         GAME_ENCOUNTER_ACTION_OPEN, GAME_ENCOUNTER_OUTCOME_NONE, level, 0);
 }
@@ -434,6 +437,7 @@ int npc_enemy_level(const struct GameState *game, int actor, int encounter)
     int slot;
     const struct NpcState *npc;
 
+    /* Prefer roster slot level; salt-zero roll matches spawn when slot is vacant. */
     slot = npc_find_by_actor(game, actor);
     if (slot >= 0) {
         npc = npc_const_slot(game, slot);
@@ -557,6 +561,7 @@ void npc_upgrade_loaded_profiles(struct GameState *game)
         }
         npc->encounter = profile->encounter;
         if (npc->level <= 0) {
+            /* Pre-v8 saves and empty slots derive level from seed + room salt. */
             npc->level = npc_roll_profile_level(game, profile,
                 (u32)(npc->room_id >= 0 ? npc->room_id : 0));
         }
@@ -597,6 +602,7 @@ void npc_roaming_activate_due(struct GameState *game)
             game->npcs[i].dialogue = DIALOGUE_NONE;
         }
         game->npcs[i].room_id = plat_rand() % game->world.room_count;
+        /* Re-roll level from return_tick + room so respawns stay seed-stable. */
         game->npcs[i].level = npc_default_level_for_encounter(game,
             game->npcs[i].actor, game->npcs[i].encounter,
             game->npcs[i].return_tick + (u32)game->npcs[i].room_id);
