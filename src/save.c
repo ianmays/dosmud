@@ -485,6 +485,11 @@ static int save_valid_boolish(int value)
     return value == 0 || value == 1;
 }
 
+static int save_valid_bandit_level(int level)
+{
+    return level >= CFG_BANDIT_LEVEL_MIN && level <= CFG_BANDIT_LEVEL_MAX;
+}
+
 /* Cross-field roster invariants; inactive slots must not claim a room. */
 static int save_valid_npc(const struct NpcState *npc, int room_count)
 {
@@ -526,9 +531,8 @@ static int save_valid_npc(const struct NpcState *npc, int room_count)
             (npc->flags & NPC_FLAG_ACTIVE) == 0) {
         return 0;
     }
-    if ((npc->flags & NPC_FLAG_ACTIVE) != 0 &&
-            npc->encounter == GAME_ENCOUNTER_BANDIT &&
-            npc->level < 1) {
+    if (npc->encounter == GAME_ENCOUNTER_BANDIT &&
+            !save_valid_bandit_level(npc->level)) {
         return 0;
     }
     return 1;
@@ -648,11 +652,12 @@ static int save_validate_game(const struct GameState *game)
             game->player_hp < 0 ||
             game->player_hp > game->max_hp ||
             game->combat.enemy_hp < 0 ||
-            game->combat.enemy_level < 0 ||
+            (game->combat.enemy_level > 0 &&
+                !save_valid_bandit_level(game->combat.enemy_level)) ||
             !save_valid_boolish(game->combat.defending) ||
             (game->mode == GAME_MODE_COMBAT &&
                 game->combat.enemy_hp > 0 &&
-                game->combat.enemy_level < 1)) {
+                !save_valid_bandit_level(game->combat.enemy_level))) {
         return 0;
     }
     for (slot = 0; slot < CFG_NPC_MAX; ++slot) {

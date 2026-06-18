@@ -129,6 +129,8 @@
 
 /* Bandit dialogue / intimidate */
 #define CFG_BANDIT_INTIMIDATE_SUCCESS_BELOW 60
+#define CFG_BANDIT_LEVEL_MIN 1
+#define CFG_BANDIT_LEVEL_MAX 3
 
 /* Room item spawn (tick hook) */
 #define CFG_ROOM_ITEM_SPAWN_GATE 20
