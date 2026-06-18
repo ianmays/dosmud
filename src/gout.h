@@ -63,6 +63,7 @@ enum GameEventKind {
  *             arg3=action-specific payload:
  *   OPEN             enemy level for bandits; zero otherwise
  *   GIVE             item id for GIVE replies; zero otherwise
+ *             text=item name for GIVE when outcome is OK; unused otherwise
  */
 
 enum GameEventItemAction {

@@ -630,7 +630,7 @@ int npc_fixed_begin_encounter_in_room(struct GameState *game, int room_id,
         }
         /* Fixed encounters keep the authored slot; only mode/event state changes. */
         npc->dialogue = DIALOGUE_ENEMY;
-    npc_push_encounter_open(out, npc->encounter, npc->level);
+        npc_push_encounter_open(out, npc->encounter, npc->level);
         game_set_mode_dialogue(game, npc->dialogue);
         return 1;
     }
