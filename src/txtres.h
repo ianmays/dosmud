@@ -83,7 +83,7 @@ extern const char *const TXT_COMBAT_SALVE_FULL;
 extern const char *const TXT_ALREADY_FULL_HEALTH;
 extern const char *const TXT_PICK_123;
 extern const char *const TXT_PICK_RANGE_FMT;
-extern const char *const TXT_COMBAT_BANDIT_DEFEATED;
+extern const char *const TXT_COMBAT_BANDIT_DEFEATED_FMT;
 
 extern const char *const TXT_XP_GAIN_FMT;
 extern const char *const TXT_LEVEL_UP_FMT;

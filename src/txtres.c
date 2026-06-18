@@ -212,7 +212,8 @@ const char *const TXT_COMBAT_SALVE_FULL = "You apply salve.\n";
 const char *const TXT_ALREADY_FULL_HEALTH = "You're already at full health.\n";
 const char *const TXT_PICK_123 = "Pick 1, 2, or 3.\n";
 const char *const TXT_PICK_RANGE_FMT = "Pick 1 through %d.\n";
-const char *const TXT_COMBAT_BANDIT_DEFEATED = "The bandit falls. The body slumps into the dust.\n";
+const char *const TXT_COMBAT_BANDIT_DEFEATED_FMT =
+    "The Lv %d bandit falls. The body slumps into the dust.\n";
 
 const char *const TXT_XP_GAIN_FMT = "You gain %d XP.\n";
 const char *const TXT_LEVEL_UP_FMT = "Level up! You are now level %d.\n";

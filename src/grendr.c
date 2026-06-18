@@ -923,7 +923,7 @@ static void render_combat_event(const GameEvent *ev)
         render_combat_invalid_choice();
         break;
     case GAME_COMBAT_PHASE_ENEMY_DEFEATED:
-        render_combat_bandit_defeated();
+        render_combat_bandit_defeated(ev->arg3);
         break;
     case GAME_COMBAT_PHASE_MENU:
         render_combat_menu();
@@ -1100,9 +1100,12 @@ void render_combat_invalid_choice(void)
     RENDER_PRINTF("%s", TXT_PICK_123);
 }
 
-void render_combat_bandit_defeated(void)
+void render_combat_bandit_defeated(int enemy_level)
 {
-    RENDER_PRINTF("%s", TXT_COMBAT_BANDIT_DEFEATED);
+    if (enemy_level < 1) {
+        enemy_level = 1;
+    }
+    RENDER_PRINTF(TXT_COMBAT_BANDIT_DEFEATED_FMT, enemy_level);
 }
 
 void render_combat_menu(void)

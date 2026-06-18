@@ -122,7 +122,7 @@ enum GameEventEquipOutcome {
  *   STATUS           arg1=player_hp arg2=enemy_hp arg3=enemy_level
  *   PLAYER_DAMAGE    arg1=damage
  *   SALVE_HEAL       arg1=player_hp after heal
- *   ENEMY_DEFEATED   arg3=enemy_level (for render copy consistency)
+ *   ENEMY_DEFEATED   arg3=enemy_level (defeat copy)
  *   (other phases leave arg1/arg2/arg3 zero unless noted)
  * XP_GAIN     arg0=amount
  * STAT_CHANGE arg0=level arg1=max_hp arg2=damage_bonus arg3=bag_capacity

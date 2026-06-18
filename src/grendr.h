@@ -34,7 +34,7 @@ void render_combat_salve_in_combat(int hp);
 void render_combat_salve_full(void);
 void render_already_full_health(void);
 void render_combat_invalid_choice(void);
-void render_combat_bandit_defeated(void);
+void render_combat_bandit_defeated(int enemy_level);
 void render_combat_menu(void);
 
 void render_xp_gained(int amount);
