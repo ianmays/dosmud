@@ -3,7 +3,6 @@
 #include "config.h"
 #include "game.h"
 #include "items.h"
-#include "npc.h"
 #include "save.h"
 
 /*
@@ -527,6 +526,11 @@ static int save_valid_npc(const struct NpcState *npc, int room_count)
             (npc->flags & NPC_FLAG_ACTIVE) == 0) {
         return 0;
     }
+    if ((npc->flags & NPC_FLAG_ACTIVE) != 0 &&
+            npc->encounter == GAME_ENCOUNTER_BANDIT &&
+            npc->level < 1) {
+        return 0;
+    }
     return 1;
 }
 
@@ -645,7 +649,10 @@ static int save_validate_game(const struct GameState *game)
             game->player_hp > game->max_hp ||
             game->combat.enemy_hp < 0 ||
             game->combat.enemy_level < 0 ||
-            !save_valid_boolish(game->combat.defending)) {
+            !save_valid_boolish(game->combat.defending) ||
+            (game->mode == GAME_MODE_COMBAT &&
+                game->combat.enemy_hp > 0 &&
+                game->combat.enemy_level < 1)) {
         return 0;
     }
     for (slot = 0; slot < CFG_NPC_MAX; ++slot) {
@@ -802,25 +809,6 @@ int save_read_game(const char *path, struct GameState *out_game,
     /* Validate into g_save_loaded so a bad file does not clobber out_game. */
     if (!save_valid_rng_draw_count(loaded_rng_draw_count) ||
             !save_validate_game(&g_save_loaded)) {
-        rc = SAVE_RESULT_RANGE;
-        goto done;
-    }
-    npc_upgrade_loaded_profiles(&g_save_loaded);
-    /*
-     * Only SAVE_VERSION loads (see file header). Mid-combat snapshots may still
-     * carry enemy_level 0; backfill from the active DIALOGUE_ENEMY slot.
-     */
-    if (g_save_loaded.mode == GAME_MODE_COMBAT &&
-            g_save_loaded.combat.enemy_hp > 0 &&
-            g_save_loaded.combat.enemy_level == 0) {
-        int slot;
-
-        slot = npc_find_by_dialogue(&g_save_loaded, DIALOGUE_ENEMY);
-        if (slot >= 0 && g_save_loaded.npcs[slot].level > 0) {
-            g_save_loaded.combat.enemy_level = g_save_loaded.npcs[slot].level;
-        }
-    }
-    if (!save_validate_game(&g_save_loaded)) {
         rc = SAVE_RESULT_RANGE;
         goto done;
     }

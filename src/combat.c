@@ -23,7 +23,7 @@ static void push_combat_phase(GameEventQueue *out, int phase,
     game_event_push(out, GAME_EVENT_COMBAT, phase, val0, val1, val2, 0);
 }
 
-/* combat.enemy_level snapshot from combat_start; 1 when unset (v7 saves, fixtures). */
+/* combat.enemy_level snapshot from combat_start; 1 when unset (harness fixtures). */
 int combat_enemy_level(const struct GameState *game)
 {
     if (game->combat.enemy_level > 0) {

@@ -483,6 +483,25 @@ TEST save_rejects_excessive_map_coordinate_span(void)
     PASS();
 }
 
+TEST save_rejects_combat_midfight_without_enemy_level(void)
+{
+    struct GameState game;
+    struct GameState loaded;
+    u32 loaded_draws;
+
+    save_cleanup_file();
+    save_fill_fixture(&game);
+    game.mode = GAME_MODE_COMBAT;
+    game.combat.enemy_hp = 5;
+    game.combat.enemy_level = 0;
+    ASSERT_EQ(SAVE_RESULT_OK,
+        save_write_game(save_test_path(), &game, 7U));
+    ASSERT_EQ(SAVE_RESULT_RANGE,
+        save_read_game(save_test_path(), &loaded, &loaded_draws));
+    save_cleanup_file();
+    PASS();
+}
+
 TEST save_round_trip_preserves_seeded_roaming_bandit(void)
 {
     struct GameState game;
@@ -533,5 +552,6 @@ SUITE(save)
     RUN_TEST(save_rejects_write_with_excessive_rng_draw_count);
     RUN_TEST(save_failed_write_preserves_existing_save);
     RUN_TEST(save_rejects_excessive_map_coordinate_span);
+    RUN_TEST(save_rejects_combat_midfight_without_enemy_level);
     RUN_TEST(save_round_trip_preserves_seeded_roaming_bandit);
 }
