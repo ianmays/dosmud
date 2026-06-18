@@ -29,6 +29,7 @@ struct NpcProfile {
     int actor;
     int dialogue;
     int encounter;
+    int level;
     int spawn_room;
     int flags;
     u32 roam_start_tick;
@@ -43,10 +44,12 @@ struct NpcProfile {
  */
 static const struct NpcProfile NPC_PROFILES[] = {
     { GAME_DIALOGUE_ACTOR_TRAVELER, DIALOGUE_TRAVELER, GAME_ENCOUNTER_TRAVELER,
+        0,
         WORLD_ROOM_RUINS,
         NPC_FLAG_ACTIVE | NPC_FLAG_ROAMING | NPC_FLAG_RESPAWNS,
         0, 8, 16, NPC_RESPAWN_ON_DIALOGUE_RESOLVE },
     { GAME_DIALOGUE_ACTOR_BANDIT, DIALOGUE_NONE, GAME_ENCOUNTER_BANDIT,
+        1,
         WORLD_ROOM_ROAD,
         NPC_FLAG_ACTIVE | NPC_FLAG_ROAMING | NPC_FLAG_RESPAWNS,
         8, 6, 10, NPC_RESPAWN_ON_ENCOUNTER_END }
@@ -165,6 +168,24 @@ static const struct NpcRoomInfo *npc_room_info(int room_id)
     return 0;
 }
 
+static int npc_default_level_for_encounter(int actor, int encounter)
+{
+    const struct NpcProfile *profile;
+
+    profile = npc_profile_by_actor(actor);
+    if (profile != 0) {
+        return profile->level;
+    }
+    if (encounter == GAME_ENCOUNTER_BANDIT) {
+        profile = npc_profile_by_actor(GAME_DIALOGUE_ACTOR_BANDIT);
+        if (profile != 0) {
+            return profile->level;
+        }
+        return 1;
+    }
+    return 0;
+}
+
 static void npc_push_encounter_open(GameEventQueue *out, int kind)
 {
     game_event_push(out, GAME_EVENT_ENCOUNTER, kind,
@@ -254,6 +275,7 @@ void npc_clear_all(struct GameState *game)
         game->npcs[i].actor = GAME_DIALOGUE_ACTOR_NONE;
         game->npcs[i].dialogue = DIALOGUE_NONE;
         game->npcs[i].encounter = GAME_ENCOUNTER_NONE;
+        game->npcs[i].level = 0;
         game->npcs[i].room_id = -1;
         game->npcs[i].flags = 0;
         game->npcs[i].return_tick = 0;
@@ -320,6 +342,7 @@ int npc_spawn(struct GameState *game, int actor, int dialogue, int encounter,
     npc->actor = actor;
     npc->dialogue = dialogue;
     npc->encounter = encounter;
+    npc->level = npc_default_level_for_encounter(actor, encounter);
     npc->room_id = room_id;
     npc->flags = flags;
     npc->return_tick = 0;
@@ -366,6 +389,21 @@ int npc_is_present(const struct GameState *game, int actor, int room_id)
     }
     npc = npc_const_slot(game, slot);
     return npc_slot_is_active(npc) && npc->room_id == room_id;
+}
+
+int npc_enemy_level(const struct GameState *game, int actor, int encounter)
+{
+    int slot;
+    const struct NpcState *npc;
+
+    slot = npc_find_by_actor(game, actor);
+    if (slot >= 0) {
+        npc = npc_const_slot(game, slot);
+        if (npc->level > 0) {
+            return npc->level;
+        }
+    }
+    return npc_default_level_for_encounter(actor, encounter);
 }
 
 /* Clears presence but keeps the roster profile for respawn or fixture reuse. */
@@ -480,6 +518,7 @@ void npc_upgrade_loaded_profiles(struct GameState *game)
             continue;
         }
         npc->encounter = profile->encounter;
+        npc->level = profile->level;
         if (npc->dialogue != DIALOGUE_ENEMY) {
             npc->dialogue = profile->dialogue;
         }

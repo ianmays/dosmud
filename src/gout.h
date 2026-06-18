@@ -104,11 +104,11 @@ enum GameEventEquipOutcome {
 
 /*
  * Combat/progression payload contract (#159):
- * COMBAT      arg0=GameEventCombatPhase; arg1/arg2 per phase (combat.c
+ * COMBAT      arg0=GameEventCombatPhase; arg1/arg2/arg3 per phase (combat.c
  *             push_combat_phase; grendr render_combat_event):
- *   START            arg1=player_hp arg2=enemy_hp
+ *   START            arg1=player_hp arg2=enemy_hp arg3=enemy_level
  *   ENEMY_DAMAGE     arg1=damage
- *   STATUS           arg1=player_hp arg2=enemy_hp
+ *   STATUS           arg1=player_hp arg2=enemy_hp arg3=enemy_level
  *   PLAYER_DAMAGE    arg1=damage
  *   SALVE_HEAL       arg1=player_hp after heal
  *   (other phases leave arg1/arg2 zero)

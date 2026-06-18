@@ -37,6 +37,9 @@ void game_set_mode_explore(struct GameState *game)
 {
     game->mode = GAME_MODE_EXPLORE;
     game->dialogue = DIALOGUE_NONE;
+    game->combat.enemy_hp = 0;
+    game->combat.enemy_level = 0;
+    game->combat.defending = 0;
 }
 
 void game_set_mode_dialogue(struct GameState *game, enum DialogueKind kind)
@@ -132,6 +135,7 @@ static void reset_mutable_state(struct GameState *game, int room_id, u32 tick)
     game->weapon_equipped = ITEM_NONE;
     game->player_hp = CFG_START_MAX_HP;
     game->combat.enemy_hp = 0;
+    game->combat.enemy_level = 0;
     game->combat.defending = 0;
     for (j = 0; j < CFG_BAG_MAX; ++j) {
         game->bag[j] = ITEM_NONE;

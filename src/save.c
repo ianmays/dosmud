@@ -15,7 +15,7 @@
  */
 
 #define SAVE_MAGIC "DMSV"
-#define SAVE_VERSION 7
+#define SAVE_VERSION 8
 #define SAVE_PATH_BUF_MAX 260
 
 /*
@@ -165,6 +165,7 @@ static int save_write_npcs(FILE *fp, const struct GameState *game)
         if (!save_write_s16(fp, game->npcs[i].actor) ||
                 !save_write_s16(fp, game->npcs[i].dialogue) ||
                 !save_write_s16(fp, game->npcs[i].encounter) ||
+                !save_write_s16(fp, game->npcs[i].level) ||
                 !save_write_s16(fp, game->npcs[i].room_id) ||
                 !save_write_s16(fp, game->npcs[i].flags) ||
                 !save_write_u32(fp, game->npcs[i].return_tick)) {
@@ -174,15 +175,24 @@ static int save_write_npcs(FILE *fp, const struct GameState *game)
     return 1;
 }
 
-static int save_read_npcs(FILE *fp, struct GameState *game)
+static int save_read_npcs(FILE *fp, struct GameState *game, u16 version)
 {
     int i;
 
     for (i = 0; i < CFG_NPC_MAX; ++i) {
         if (!save_read_s16(fp, &game->npcs[i].actor) ||
                 !save_read_s16(fp, &game->npcs[i].dialogue) ||
-                !save_read_s16(fp, &game->npcs[i].encounter) ||
-                !save_read_s16(fp, &game->npcs[i].room_id) ||
+                !save_read_s16(fp, &game->npcs[i].encounter)) {
+            return 0;
+        }
+        if (version >= 8U) {
+            if (!save_read_s16(fp, &game->npcs[i].level)) {
+                return 0;
+            }
+        } else {
+            game->npcs[i].level = 0;
+        }
+        if (!save_read_s16(fp, &game->npcs[i].room_id) ||
                 !save_read_s16(fp, &game->npcs[i].flags) ||
                 !save_read_u32(fp, &game->npcs[i].return_tick)) {
             return 0;
@@ -414,6 +424,7 @@ static int save_write_game_state(FILE *fp, const struct GameState *game,
             !save_write_s16(fp, game->weapon_equipped) ||
             !save_write_s16(fp, game->player_hp) ||
             !save_write_s16(fp, game->combat.enemy_hp) ||
+            !save_write_s16(fp, game->combat.enemy_level) ||
             !save_write_s16(fp, game->combat.defending)) {
         return 0;
     }
@@ -440,7 +451,7 @@ static int save_read_game_state(FILE *fp, struct GameState *game,
             !save_read_s16(fp, &game->running) ||
             !save_read_s16(fp, &game->mode) ||
             !save_read_s16(fp, &game->dialogue) ||
-            !save_read_npcs(fp, game) ||
+            !save_read_npcs(fp, game, version) ||
             !save_read_s16(fp, &game->env_focus_active) ||
             !save_read_s16(fp, &game->env_focus_room) ||
             !save_read_s16(fp, &game->env_focus_kind) ||
@@ -453,8 +464,17 @@ static int save_read_game_state(FILE *fp, struct GameState *game,
             !save_read_s16(fp, &game->damage_bonus) ||
             !save_read_s16(fp, &game->weapon_equipped) ||
             !save_read_s16(fp, &game->player_hp) ||
-            !save_read_s16(fp, &game->combat.enemy_hp) ||
-            !save_read_s16(fp, &game->combat.defending)) {
+            !save_read_s16(fp, &game->combat.enemy_hp)) {
+        return 0;
+    }
+    if (version >= 8U) {
+        if (!save_read_s16(fp, &game->combat.enemy_level)) {
+            return 0;
+        }
+    } else {
+        game->combat.enemy_level = 0;
+    }
+    if (!save_read_s16(fp, &game->combat.defending)) {
         return 0;
     }
 #ifdef TEST_MODE
@@ -513,6 +533,7 @@ static int save_valid_npc(const struct NpcState *npc, int room_count)
     if (npc->actor == GAME_DIALOGUE_ACTOR_NONE) {
         return npc->dialogue == DIALOGUE_NONE &&
             npc->encounter == GAME_ENCOUNTER_NONE &&
+            npc->level == 0 &&
             npc->room_id == -1 &&
             npc->flags == 0 &&
             npc->return_tick == 0;
@@ -523,6 +544,7 @@ static int save_valid_npc(const struct NpcState *npc, int room_count)
             npc->dialogue > DIALOGUE_LOOT ||
             npc->encounter < GAME_ENCOUNTER_NONE ||
             npc->encounter > GAME_ENCOUNTER_TRAVELER ||
+            npc->level < 0 ||
             !save_valid_room_or_none(npc->room_id, room_count) ||
             (npc->flags & ~allowed_flags) != 0) {
         return 0;
@@ -656,6 +678,7 @@ static int save_validate_game(const struct GameState *game)
             game->player_hp < 0 ||
             game->player_hp > game->max_hp ||
             game->combat.enemy_hp < 0 ||
+            game->combat.enemy_level < 0 ||
             !save_valid_boolish(game->combat.defending)) {
         return 0;
     }
@@ -799,7 +822,8 @@ int save_read_game(const char *path, struct GameState *out_game,
         rc = SAVE_RESULT_IO;
         goto done;
     }
-    if (version != 5U && version != 6U && version != (u16)SAVE_VERSION) {
+    if (version != 5U && version != 6U && version != 7U &&
+            version != (u16)SAVE_VERSION) {
         goto done;
     }
     if (!save_read_game_state(fp, &g_save_loaded, &loaded_rng_draw_count,
@@ -818,6 +842,16 @@ int save_read_game(const char *path, struct GameState *out_game,
         goto done;
     }
     npc_upgrade_loaded_profiles(&g_save_loaded);
+    if (g_save_loaded.mode == GAME_MODE_COMBAT &&
+            g_save_loaded.combat.enemy_hp > 0 &&
+            g_save_loaded.combat.enemy_level == 0) {
+        int slot;
+
+        slot = npc_find_by_dialogue(&g_save_loaded, DIALOGUE_ENEMY);
+        if (slot >= 0 && g_save_loaded.npcs[slot].level > 0) {
+            g_save_loaded.combat.enemy_level = g_save_loaded.npcs[slot].level;
+        }
+    }
     if (!save_validate_game(&g_save_loaded)) {
         rc = SAVE_RESULT_RANGE;
         goto done;

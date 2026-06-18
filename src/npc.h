@@ -26,6 +26,7 @@ int npc_spawn(struct GameState *game, int actor, int dialogue, int encounter,
 int npc_place(struct GameState *game, int actor, int room_id, int flags);
 int npc_move(struct GameState *game, int actor, int room_id);
 int npc_is_present(const struct GameState *game, int actor, int room_id);
+int npc_enemy_level(const struct GameState *game, int actor, int encounter);
 int npc_deactivate_until(struct GameState *game, int actor, u32 return_tick);
 /* Dynamic encounter lifecycle: spawn slot, open dialogue, deactivate when done. */
 int npc_begin_encounter(struct GameState *game, int actor, int dialogue,

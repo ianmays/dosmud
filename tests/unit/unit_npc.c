@@ -8,6 +8,7 @@
 #include "unit_util.h"
 
 /* Match bandit row in NPC_PROFILES (npc.c) for unit assertions. */
+#define PROFILE_BANDIT_LEVEL 1
 #define PROFILE_BANDIT_ROAM_START 8U
 #define PROFILE_BANDIT_RETURN_BASE 6U
 #define PROFILE_BANDIT_RETURN_SPREAD 10U
@@ -167,6 +168,7 @@ TEST npc_seed_roaming_bandit_sets_state(void)
     ASSERT_EQ(GAME_DIALOGUE_ACTOR_BANDIT, bandit->actor);
     ASSERT_EQ(DIALOGUE_NONE, bandit->dialogue);
     ASSERT_EQ(GAME_ENCOUNTER_BANDIT, bandit->encounter);
+    ASSERT_EQ(PROFILE_BANDIT_LEVEL, bandit->level);
     ASSERT_EQ(WORLD_ROOM_ROAD, bandit->room_id);
     ASSERT_EQ(NPC_FLAG_ACTIVE | NPC_FLAG_ROAMING | NPC_FLAG_RESPAWNS,
         bandit->flags);
@@ -255,6 +257,7 @@ TEST npc_begin_and_end_dynamic_encounter_reuses_roster(void)
     ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
     ASSERT_EQ(GAME_ENCOUNTER_BANDIT, out.events[0].arg0);
     ASSERT_EQ(slot, npc_end_encounter(&game, GAME_DIALOGUE_ACTOR_BANDIT));
+    ASSERT_EQ(PROFILE_BANDIT_LEVEL, game.npcs[slot].level);
     ASSERT_EQ(-1, game.npcs[slot].room_id);
     ASSERT_EQ(0, game.npcs[slot].flags & NPC_FLAG_ACTIVE);
     PASS();

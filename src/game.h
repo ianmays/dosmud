@@ -40,6 +40,8 @@ enum DialogueKind {
 
 struct CombatState {
     int enemy_hp;
+    /* Active combat snapshot: copied from the encounter owner for save/load stability. */
+    int enemy_level;
     int defending;
 };
 
@@ -61,6 +63,8 @@ struct NpcState {
     int actor;
     int dialogue;
     int encounter;
+    /* Authored enemy difficulty; zero for non-combatant roster entries. */
+    int level;
     int room_id;
     int flags;
     u32 return_tick;

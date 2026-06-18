@@ -53,6 +53,32 @@ TEST combat_start_mode(void)
     ASSERT_EQ(game.player_hp, out.events[0].arg1);
     ASSERT_EQ(CFG_COMBAT_ENEMY_HP_BASE + CFG_TEST_FIGHT_ENEMY_HP_SPREAD,
         out.events[0].arg2);
+    ASSERT_EQ(1, out.events[0].arg3);
+    PASS();
+}
+
+TEST combat_start_uses_enemy_level_scaling(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    int rolls[1];
+    int slot;
+
+    unit_game_fresh(&game, 15u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    slot = npc_find_by_actor(&game, GAME_DIALOGUE_ACTOR_BANDIT);
+    ASSERT(slot >= 0);
+    game.npcs[slot].dialogue = DIALOGUE_ENEMY;
+    game.npcs[slot].level = 3;
+    rolls[0] = CFG_TEST_FIGHT_ENEMY_HP_SPREAD;
+    game_roll_inject_begin(&game, rolls, 1);
+    start_combat_out(&game, &out);
+    ASSERT_EQ(3, game.combat.enemy_level);
+    ASSERT_EQ(CFG_COMBAT_ENEMY_HP_BASE +
+            (2 * CFG_COMBAT_ENEMY_HP_PER_LEVEL) +
+            CFG_TEST_FIGHT_ENEMY_HP_SPREAD,
+        game.combat.enemy_hp);
+    ASSERT_EQ(3, out.events[0].arg3);
     PASS();
 }
 
@@ -66,6 +92,7 @@ TEST combat_reply_defend_reduces_damage(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game_set_mode_combat(&game);
     game.combat.enemy_hp = 20;
+    game.combat.enemy_level = 1;
     rolls[0] = CFG_TEST_COMBAT_DEFEND_ENEMY_DMG;
     game_roll_inject_begin(&game, rolls, 1);
     resolve_reply_out(&game, 2, &out);
@@ -90,6 +117,7 @@ TEST combat_reply_salve_in_combat(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game_set_mode_combat(&game);
     game.combat.enemy_hp = 50;
+    game.combat.enemy_level = 1;
     game.player_hp = 5;
     ASSERT_EQ(1, game_inv_bag_add(&game, ITEM_SALVE));
     rolls[0] = 0;
@@ -116,6 +144,7 @@ TEST combat_reply_salve_at_full_hp(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game_set_mode_combat(&game);
     game.combat.enemy_hp = 50;
+    game.combat.enemy_level = 1;
     game.player_hp = CFG_START_MAX_HP;
     ASSERT_EQ(1, game_inv_bag_add(&game, ITEM_SALVE));
     rolls[0] = CFG_TEST_COMBAT_SALVE_ENEMY_DMG;
@@ -142,6 +171,7 @@ TEST combat_victory_loot_and_xp(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game_set_mode_combat(&game);
     game.combat.enemy_hp = 1;
+    game.combat.enemy_level = 1;
     rolls[0] = 0;
     rolls[1] = CFG_TEST_VICTORY_LOOT_COUNT_ONE;
     rolls[2] = CFG_TEST_VICTORY_LOOT_STICK;
@@ -156,7 +186,36 @@ TEST combat_victory_loot_and_xp(void)
     ASSERT_EQ(3, out.count);
     ASSERT_EQ(GAME_COMBAT_PHASE_PLAYER_DAMAGE, out.events[0].arg0);
     ASSERT_EQ(GAME_COMBAT_PHASE_ENEMY_DEFEATED, out.events[1].arg0);
+    ASSERT_EQ(1, out.events[1].arg3);
     ASSERT_EQ(GAME_EVENT_XP_GAIN, out.events[2].kind);
+    PASS();
+}
+
+TEST combat_victory_xp_scales_with_enemy_level(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    int rolls[4];
+
+    unit_game_fresh(&game, 16u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game_set_mode_combat(&game);
+    game.combat.enemy_hp = 1;
+    game.combat.enemy_level = 3;
+    rolls[0] = 0;
+    rolls[1] = CFG_TEST_VICTORY_LOOT_COUNT_ONE;
+    rolls[2] = CFG_TEST_VICTORY_LOOT_STICK;
+    rolls[3] = CFG_TEST_VICTORY_XP_SPREAD;
+    game_roll_inject_begin(&game, rolls, 4);
+    resolve_reply_out(&game, 1, &out);
+    ASSERT_EQ(2, game.level);
+    ASSERT_EQ(4, out.count);
+    ASSERT_EQ(GAME_EVENT_XP_GAIN, out.events[2].kind);
+    ASSERT_EQ(CFG_COMBAT_KILL_XP_BASE +
+            (2 * CFG_COMBAT_KILL_XP_PER_LEVEL) +
+            CFG_TEST_VICTORY_XP_SPREAD,
+        out.events[2].arg0);
+    ASSERT_EQ(GAME_EVENT_STAT_CHANGE, out.events[3].kind);
     PASS();
 }
 
@@ -172,6 +231,7 @@ TEST combat_victory_clears_active_bandit_slot(void)
         DIALOGUE_ENEMY, GAME_ENCOUNTER_BANDIT, WORLD_ROOM_CAMP, 0, &out) >= 0);
     game_set_mode_combat(&game);
     game.combat.enemy_hp = 1;
+    game.combat.enemy_level = 1;
     rolls[0] = 0;
     rolls[1] = CFG_TEST_VICTORY_LOOT_COUNT_ONE;
     rolls[2] = CFG_TEST_VICTORY_LOOT_STICK;
@@ -193,6 +253,7 @@ TEST combat_invalid_choice(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game_set_mode_combat(&game);
     game.combat.enemy_hp = 10;
+    game.combat.enemy_level = 1;
     resolve_reply_out(&game, 9, &out);
     ASSERT_EQ(GAME_MODE_COMBAT, game.mode);
     ASSERT_EQ(1, out.count);
@@ -210,6 +271,7 @@ TEST combat_player_death(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game_set_mode_combat(&game);
     game.combat.enemy_hp = 50;
+    game.combat.enemy_level = 1;
     game.player_hp = 1;
     rolls[0] = 0;
     rolls[1] = 99;
@@ -231,6 +293,7 @@ TEST combat_loot_tiers(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game_set_mode_combat(&game);
     game.combat.enemy_hp = 1;
+    game.combat.enemy_level = 1;
     rolls[0] = 0;
     rolls[1] = CFG_TEST_VICTORY_LOOT_COUNT_ONE;
     rolls[2] = CFG_TEST_VICTORY_LOOT_SPEAR;
@@ -242,6 +305,7 @@ TEST combat_loot_tiers(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game_set_mode_combat(&game);
     game.combat.enemy_hp = 1;
+    game.combat.enemy_level = 1;
     rolls[2] = CFG_TEST_VICTORY_LOOT_FISH;
     game_roll_inject_begin(&game, rolls, 4);
     resolve_reply_out(&game, 1, &out);
@@ -259,6 +323,7 @@ TEST combat_victory_can_leave_stripped_body(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game_set_mode_combat(&game);
     game.combat.enemy_hp = 1;
+    game.combat.enemy_level = 1;
     rolls[0] = 0;
     rolls[1] = CFG_TEST_VICTORY_LOOT_COUNT_NONE;
     rolls[2] = 0;
@@ -299,10 +364,12 @@ TEST combat_victory_can_drop_three_items(void)
 SUITE(combat) {
     RUN_TEST(combat_attack_bonus);
     RUN_TEST(combat_start_mode);
+    RUN_TEST(combat_start_uses_enemy_level_scaling);
     RUN_TEST(combat_reply_defend_reduces_damage);
     RUN_TEST(combat_reply_salve_in_combat);
     RUN_TEST(combat_reply_salve_at_full_hp);
     RUN_TEST(combat_victory_loot_and_xp);
+    RUN_TEST(combat_victory_xp_scales_with_enemy_level);
     RUN_TEST(combat_victory_clears_active_bandit_slot);
     RUN_TEST(combat_invalid_choice);
     RUN_TEST(combat_player_death);

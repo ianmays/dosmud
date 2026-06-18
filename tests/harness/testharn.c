@@ -123,8 +123,10 @@ static void fixture_bandit_combat_turn1(struct GameState *game)
     game_set_mode_combat(game);
     game->player_hp = CFG_START_MAX_HP;
     game->combat.enemy_hp = CFG_COMBAT_ENEMY_HP_BASE;
+    game->combat.enemy_level = 1;
     game->combat.defending = 0;
-    render_combat_start(game->player_hp, game->combat.enemy_hp);
+    render_combat_start(game->player_hp, game->combat.enemy_hp,
+        game->combat.enemy_level);
 }
 
 static int fixture_bandit_combat_turn1_resolve(struct GameState *game)

@@ -893,7 +893,7 @@ static void render_combat_event(const GameEvent *ev)
 {
     switch (ev->arg0) {
     case GAME_COMBAT_PHASE_START:
-        render_combat_start(ev->arg1, ev->arg2);
+        render_combat_start(ev->arg1, ev->arg2, ev->arg3);
         break;
     case GAME_COMBAT_PHASE_ENEMY_DAMAGE:
         render_combat_enemy_strike(ev->arg1);
@@ -902,7 +902,7 @@ static void render_combat_event(const GameEvent *ev)
         render_combat_player_fallen();
         break;
     case GAME_COMBAT_PHASE_STATUS:
-        render_combat_status_line(ev->arg1, ev->arg2);
+        render_combat_status_line(ev->arg1, ev->arg2, ev->arg3);
         break;
     case GAME_COMBAT_PHASE_PLAYER_DAMAGE:
         render_combat_player_hit(ev->arg1);
@@ -1041,9 +1041,9 @@ void render_bandit_encounter_open(void)
     RENDER_PRINTF("%s", TXT_REPLY_PROMPT);
 }
 
-void render_combat_start(int player_hp, int enemy_hp)
+void render_combat_start(int player_hp, int enemy_hp, int enemy_level)
 {
-    RENDER_PRINTF(TXT_COMBAT_START_FMT, player_hp, enemy_hp);
+    RENDER_PRINTF(TXT_COMBAT_START_FMT, player_hp, enemy_hp, enemy_level);
     RENDER_PRINTF("%s", TXT_COMBAT_MENU);
 }
 
@@ -1057,9 +1057,9 @@ void render_combat_player_fallen(void)
     RENDER_PRINTF("%s", TXT_COMBAT_PLAYER_FALLEN);
 }
 
-void render_combat_status_line(int player_hp, int enemy_hp)
+void render_combat_status_line(int player_hp, int enemy_hp, int enemy_level)
 {
-    RENDER_PRINTF(TXT_COMBAT_STATUS_FMT, player_hp, enemy_hp);
+    RENDER_PRINTF(TXT_COMBAT_STATUS_FMT, player_hp, enemy_hp, enemy_level);
 }
 
 void render_combat_player_hit(int dmg)

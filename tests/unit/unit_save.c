@@ -58,6 +58,7 @@ static void save_fill_fixture(struct GameState *game)
         NPC_FLAG_HANDOVER_PICK);
     game->dialogue = DIALOGUE_ENEMY;
     game->combat.enemy_hp = 5;
+    game->combat.enemy_level = 3;
     game->combat.defending = 1;
     game->corpse_present[WORLD_ROOM_ROAD] = 1;
     game->corpse_item[WORLD_ROOM_ROAD][0] = ITEM_HERB;
@@ -116,6 +117,7 @@ static int save_npcs_equal(const struct NpcState *a, const struct NpcState *b)
         if (a[i].actor != b[i].actor ||
                 a[i].dialogue != b[i].dialogue ||
                 a[i].encounter != b[i].encounter ||
+                a[i].level != b[i].level ||
                 a[i].room_id != b[i].room_id ||
                 a[i].flags != b[i].flags ||
                 a[i].return_tick != b[i].return_tick) {
@@ -148,6 +150,7 @@ static int save_games_equal(const struct GameState *a,
             a->weapon_equipped != b->weapon_equipped ||
             a->player_hp != b->player_hp ||
             a->combat.enemy_hp != b->combat.enemy_hp ||
+            a->combat.enemy_level != b->combat.enemy_level ||
             a->combat.defending != b->combat.defending) {
         return 0;
     }
@@ -291,6 +294,7 @@ static int save_write_legacy_game_file(const struct GameState *game,
         if (!save_write_s16_le(fp, game->npcs[i].actor) ||
                 !save_write_s16_le(fp, game->npcs[i].dialogue) ||
                 !save_write_s16_le(fp, game->npcs[i].encounter) ||
+                (version >= 8U && !save_write_s16_le(fp, game->npcs[i].level)) ||
                 !save_write_s16_le(fp, game->npcs[i].room_id) ||
                 !save_write_s16_le(fp, game->npcs[i].flags) ||
                 !save_write_u32_le(fp, (unsigned long)game->npcs[i].return_tick)) {
@@ -311,6 +315,8 @@ static int save_write_legacy_game_file(const struct GameState *game,
             !save_write_s16_le(fp, game->weapon_equipped) ||
             !save_write_s16_le(fp, game->player_hp) ||
             !save_write_s16_le(fp, game->combat.enemy_hp) ||
+            (version >= 8U &&
+                !save_write_s16_le(fp, game->combat.enemy_level)) ||
             !save_write_s16_le(fp, game->combat.defending)) {
         fclose(fp);
         return 0;
@@ -343,7 +349,14 @@ static int save_write_legacy_game_file(const struct GameState *game,
             fclose(fp);
             return 0;
         }
-        if (version >= 6U) {
+        if (version >= 7U) {
+            for (j = 0; j < CFG_CORPSE_ITEM_SLOTS; ++j) {
+                if (!save_write_s16_le(fp, game->corpse_item[i][j])) {
+                    fclose(fp);
+                    return 0;
+                }
+            }
+        } else if (version >= 6U) {
             for (j = 0; j < 2; ++j) {
                 if (!save_write_s16_le(fp, game->corpse_item[i][j])) {
                     fclose(fp);
@@ -717,6 +730,7 @@ TEST save_read_upgrades_legacy_bandit_profile(void)
     ASSERT_EQ(NPC_FLAG_ACTIVE | NPC_FLAG_ROAMING | NPC_FLAG_RESPAWNS,
         loaded.npcs[bandit_slot].flags);
     ASSERT_EQ(DIALOGUE_NONE, loaded.npcs[bandit_slot].dialogue);
+    ASSERT_EQ(1, loaded.npcs[bandit_slot].level);
     ASSERT_EQ(WORLD_ROOM_ROAD, loaded.npcs[bandit_slot].room_id);
     ASSERT_EQ(0U, loaded.npcs[bandit_slot].return_tick);
     ASSERT_EQ(0U, loaded_draws);
@@ -753,6 +767,7 @@ TEST save_read_schedules_legacy_bandit_respawn(void)
         loaded.npcs[bandit_slot].flags);
     ASSERT_EQ(-1, loaded.npcs[bandit_slot].room_id);
     ASSERT_EQ(21U + 6U, loaded.npcs[bandit_slot].return_tick);
+    ASSERT_EQ(1, loaded.npcs[bandit_slot].level);
     ASSERT_EQ(0U, loaded_draws);
 
     save_cleanup_file();
@@ -795,6 +810,26 @@ TEST save_read_maps_v6_two_corpse_slots_into_dense_layout(void)
     PASS();
 }
 
+TEST save_read_v7_combat_defaults_enemy_level_from_active_bandit(void)
+{
+    struct GameState game;
+    struct GameState loaded;
+    u32 loaded_draws;
+
+    save_cleanup_file();
+    save_fill_fixture(&game);
+    game.mode = GAME_MODE_COMBAT;
+    game.dialogue = DIALOGUE_NONE;
+    ASSERT(save_write_legacy_game_file(&game, 7U, 0U));
+    ASSERT_EQ(SAVE_RESULT_OK,
+        save_read_game(save_test_path(), &loaded, &loaded_draws));
+    ASSERT_EQ(1, loaded.combat.enemy_level);
+    ASSERT_EQ(0U, loaded_draws);
+
+    save_cleanup_file();
+    PASS();
+}
+
 SUITE(save)
 {
     RUN_TEST(save_round_trip_preserves_state_and_rng_count);
@@ -811,4 +846,5 @@ SUITE(save)
     RUN_TEST(save_read_schedules_legacy_bandit_respawn);
     RUN_TEST(save_read_maps_v5_single_corpse_loot_into_slot_zero);
     RUN_TEST(save_read_maps_v6_two_corpse_slots_into_dense_layout);
+    RUN_TEST(save_read_v7_combat_defaults_enemy_level_from_active_bandit);
 }

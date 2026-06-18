@@ -50,8 +50,19 @@ TEST gprog_level_up_once(void)
     PASS();
 }
 
+TEST gprog_enemy_xp_reward_scales_with_level(void)
+{
+    ASSERT_EQ(CFG_COMBAT_KILL_XP_BASE + CFG_TEST_VICTORY_XP_SPREAD,
+        progression_enemy_xp_reward(1, CFG_TEST_VICTORY_XP_SPREAD));
+    ASSERT_EQ(CFG_COMBAT_KILL_XP_BASE + CFG_COMBAT_KILL_XP_PER_LEVEL +
+            CFG_TEST_VICTORY_XP_SPREAD,
+        progression_enemy_xp_reward(2, CFG_TEST_VICTORY_XP_SPREAD));
+    PASS();
+}
+
 SUITE(gprog) {
     RUN_TEST(gprog_xp_to_next_level);
     RUN_TEST(gprog_gain_xp_no_level);
     RUN_TEST(gprog_level_up_once);
+    RUN_TEST(gprog_enemy_xp_reward_scales_with_level);
 }
