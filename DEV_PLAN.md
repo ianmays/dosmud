@@ -684,6 +684,8 @@ Whoever starts combat gets one immediate player strike before the normal combat 
 
 ### [#5](https://github.com/ianmays/dosmud/issues/5) - Enemy difficulty (level)
 
+Done ✅ ([#201](https://github.com/ianmays/dosmud/pull/201)).
+
 Enemy profile `level` scales HP, damage, and XP via config; difficulty compares to player progression level. Not blocked by [#15](https://github.com/ianmays/dosmud/issues/15); rolled stats may refine formulas when [#15](https://github.com/ianmays/dosmud/issues/15) lands.
 
 ### [#9](https://github.com/ianmays/dosmud/issues/9) - Reputation system
