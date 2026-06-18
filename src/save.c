@@ -10,15 +10,14 @@
  * save.c owns explicit binary serialization of the durable simulation state.
  * The format is versioned and field-by-field so compiler padding and TEST_MODE
  * conditionals do not silently corrupt save files.
- * Load accepts SAVE_VERSION plus prior corpse-loot layouts so older files
- * still restore into the expanded fixed-slot corpse inventory.
+ * During active development we only load the current SAVE_VERSION. If the
+ * roster or save layout changes, prefer bumping SAVE_VERSION over carrying
+ * migration logic for older local saves.
  */
 
 #define SAVE_MAGIC "DMSV"
 #define SAVE_VERSION 9
 #define SAVE_PATH_BUF_MAX 260
-/* v5-v8 saves wrote four NPC slots; v9 matches CFG_NPC_MAX. */
-#define SAVE_NPC_MAX_V8 4
 
 /*
  * DOS uses a small default stack. Keep the load-validation scratch snapshot in
@@ -158,16 +157,6 @@ static int save_read_u32(FILE *fp, u32 *value)
     return 1;
 }
 
-/* Full NPC roster in slot index order; layout matches save_valid_npc invariants. */
-/* v9 expands roster slots; v8 adds per-slot level after encounter. */
-static int save_npc_slot_count_for_version(u16 version)
-{
-    if (version >= 9U) {
-        return CFG_NPC_MAX;
-    }
-    return SAVE_NPC_MAX_V8;
-}
-
 static int save_write_npcs(FILE *fp, const struct GameState *game)
 {
     int i;
@@ -186,39 +175,22 @@ static int save_write_npcs(FILE *fp, const struct GameState *game)
     return 1;
 }
 
-static int save_read_npcs(FILE *fp, struct GameState *game, u16 version)
+static int save_read_npcs(FILE *fp, struct GameState *game)
 {
     int i;
-    int slot_count;
 
-    slot_count = save_npc_slot_count_for_version(version);
-    for (i = 0; i < slot_count; ++i) {
+    for (i = 0; i < CFG_NPC_MAX; ++i) {
         if (!save_read_s16(fp, &game->npcs[i].actor) ||
                 !save_read_s16(fp, &game->npcs[i].dialogue) ||
-                !save_read_s16(fp, &game->npcs[i].encounter)) {
+                !save_read_s16(fp, &game->npcs[i].encounter) ||
+                !save_read_s16(fp, &game->npcs[i].level)) {
             return 0;
-        }
-        if (version >= 8U) {
-            if (!save_read_s16(fp, &game->npcs[i].level)) {
-                return 0;
-            }
-        } else {
-            game->npcs[i].level = 0;
         }
         if (!save_read_s16(fp, &game->npcs[i].room_id) ||
                 !save_read_s16(fp, &game->npcs[i].flags) ||
                 !save_read_u32(fp, &game->npcs[i].return_tick)) {
             return 0;
         }
-    }
-    for (; i < CFG_NPC_MAX; ++i) {
-        game->npcs[i].actor = GAME_DIALOGUE_ACTOR_NONE;
-        game->npcs[i].dialogue = DIALOGUE_NONE;
-        game->npcs[i].encounter = GAME_ENCOUNTER_NONE;
-        game->npcs[i].level = 0;
-        game->npcs[i].room_id = -1;
-        game->npcs[i].flags = 0;
-        game->npcs[i].return_tick = 0;
     }
     return 1;
 }
@@ -355,11 +327,10 @@ static int save_write_game_arrays(FILE *fp, const struct GameState *game)
     return 1;
 }
 
-static int save_read_game_arrays(FILE *fp, struct GameState *game, u16 version)
+static int save_read_game_arrays(FILE *fp, struct GameState *game)
 {
     int i;
     int j;
-    int legacy_loot;
 
     for (i = 0; i < CFG_ROOM_MAX; ++i) {
         for (j = 0; j < CFG_AREA_ITEM_SLOTS; ++j) {
@@ -377,30 +348,9 @@ static int save_read_game_arrays(FILE *fp, struct GameState *game, u16 version)
         if (!save_read_s16(fp, &game->corpse_present[i])) {
             return 0;
         }
-        if (version >= 7U) {
-            for (j = 0; j < CFG_CORPSE_ITEM_SLOTS; ++j) {
-                if (!save_read_s16(fp, &game->corpse_item[i][j])) {
-                    return 0;
-                }
-            }
-        } else if (version >= 6U) {
-            /* v6: two corpse_item slots per room; pad to CFG_CORPSE_ITEM_SLOTS. */
-            for (j = 0; j < 2; ++j) {
-                if (!save_read_s16(fp, &game->corpse_item[i][j])) {
-                    return 0;
-                }
-            }
-            for (; j < CFG_CORPSE_ITEM_SLOTS; ++j) {
-                game->corpse_item[i][j] = ITEM_NONE;
-            }
-        } else {
-            /* v5 and earlier: single corpse_loot field maps to slot 0. */
-            if (!save_read_s16(fp, &legacy_loot)) {
+        for (j = 0; j < CFG_CORPSE_ITEM_SLOTS; ++j) {
+            if (!save_read_s16(fp, &game->corpse_item[i][j])) {
                 return 0;
-            }
-            game->corpse_item[i][0] = legacy_loot;
-            for (j = 1; j < CFG_CORPSE_ITEM_SLOTS; ++j) {
-                game->corpse_item[i][j] = ITEM_NONE;
             }
         }
         if (!save_read_u8(fp, &game->room_explored[i])) {
@@ -463,7 +413,7 @@ static int save_write_game_state(FILE *fp, const struct GameState *game,
 }
 
 static int save_read_game_state(FILE *fp, struct GameState *game,
-                                u32 *out_rng_draw_count, u16 version)
+                                u32 *out_rng_draw_count)
 {
     if (!save_read_world(fp, &game->world) ||
             !save_read_s16(fp, &game->player.room_id) ||
@@ -473,7 +423,7 @@ static int save_read_game_state(FILE *fp, struct GameState *game,
             !save_read_s16(fp, &game->running) ||
             !save_read_s16(fp, &game->mode) ||
             !save_read_s16(fp, &game->dialogue) ||
-            !save_read_npcs(fp, game, version) ||
+            !save_read_npcs(fp, game) ||
             !save_read_s16(fp, &game->env_focus_active) ||
             !save_read_s16(fp, &game->env_focus_room) ||
             !save_read_s16(fp, &game->env_focus_kind) ||
@@ -486,15 +436,9 @@ static int save_read_game_state(FILE *fp, struct GameState *game,
             !save_read_s16(fp, &game->damage_bonus) ||
             !save_read_s16(fp, &game->weapon_equipped) ||
             !save_read_s16(fp, &game->player_hp) ||
-            !save_read_s16(fp, &game->combat.enemy_hp)) {
+            !save_read_s16(fp, &game->combat.enemy_hp) ||
+            !save_read_s16(fp, &game->combat.enemy_level)) {
         return 0;
-    }
-    if (version >= 8U) {
-        if (!save_read_s16(fp, &game->combat.enemy_level)) {
-            return 0;
-        }
-    } else {
-        game->combat.enemy_level = 0;
     }
     if (!save_read_s16(fp, &game->combat.defending)) {
         return 0;
@@ -507,7 +451,7 @@ static int save_read_game_state(FILE *fp, struct GameState *game,
         return 0;
     }
 #endif
-    return save_read_game_arrays(fp, game, version);
+    return save_read_game_arrays(fp, game);
 }
 
 static int save_string_has_nul(const char *text, unsigned int size)
@@ -844,13 +788,10 @@ int save_read_game(const char *path, struct GameState *out_game,
         rc = SAVE_RESULT_IO;
         goto done;
     }
-    if (version != 5U && version != 6U && version != 7U &&
-            version != 8U &&
-            version != (u16)SAVE_VERSION) {
+    if (version != (u16)SAVE_VERSION) {
         goto done;
     }
-    if (!save_read_game_state(fp, &g_save_loaded, &loaded_rng_draw_count,
-            version)) {
+    if (!save_read_game_state(fp, &g_save_loaded, &loaded_rng_draw_count)) {
         goto done;
     }
     /* Reject padded or concatenated files; payload must end at EOF. */

@@ -432,22 +432,6 @@ int npc_is_present(const struct GameState *game, int actor, int room_id)
     return npc_slot_is_active(npc) && npc->room_id == room_id;
 }
 
-int npc_enemy_level(const struct GameState *game, int actor, int encounter)
-{
-    int slot;
-    const struct NpcState *npc;
-
-    /* Prefer roster slot level; salt-zero roll matches spawn when slot is vacant. */
-    slot = npc_find_by_actor(game, actor);
-    if (slot >= 0) {
-        npc = npc_const_slot(game, slot);
-        if (npc->level > 0) {
-            return npc->level;
-        }
-    }
-    return npc_default_level_for_encounter(game, actor, encounter, 0U);
-}
-
 /* Clears presence but keeps the roster profile for respawn or fixture reuse. */
 int npc_deactivate_until(struct GameState *game, int actor, u32 return_tick)
 {
