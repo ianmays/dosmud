@@ -15,8 +15,9 @@
  */
 
 #define SAVE_MAGIC "DMSV"
-#define SAVE_VERSION 8
+#define SAVE_VERSION 9
 #define SAVE_PATH_BUF_MAX 260
+#define SAVE_NPC_MAX_V8 4
 
 /*
  * DOS uses a small default stack. Keep the load-validation scratch snapshot in
@@ -157,6 +158,14 @@ static int save_read_u32(FILE *fp, u32 *value)
 }
 
 /* Full NPC roster in slot index order; layout matches save_valid_npc invariants. */
+static int save_npc_slot_count_for_version(u16 version)
+{
+    if (version >= 9U) {
+        return CFG_NPC_MAX;
+    }
+    return SAVE_NPC_MAX_V8;
+}
+
 static int save_write_npcs(FILE *fp, const struct GameState *game)
 {
     int i;
@@ -178,8 +187,10 @@ static int save_write_npcs(FILE *fp, const struct GameState *game)
 static int save_read_npcs(FILE *fp, struct GameState *game, u16 version)
 {
     int i;
+    int slot_count;
 
-    for (i = 0; i < CFG_NPC_MAX; ++i) {
+    slot_count = save_npc_slot_count_for_version(version);
+    for (i = 0; i < slot_count; ++i) {
         if (!save_read_s16(fp, &game->npcs[i].actor) ||
                 !save_read_s16(fp, &game->npcs[i].dialogue) ||
                 !save_read_s16(fp, &game->npcs[i].encounter)) {
@@ -197,6 +208,15 @@ static int save_read_npcs(FILE *fp, struct GameState *game, u16 version)
                 !save_read_u32(fp, &game->npcs[i].return_tick)) {
             return 0;
         }
+    }
+    for (; i < CFG_NPC_MAX; ++i) {
+        game->npcs[i].actor = GAME_DIALOGUE_ACTOR_NONE;
+        game->npcs[i].dialogue = DIALOGUE_NONE;
+        game->npcs[i].encounter = GAME_ENCOUNTER_NONE;
+        game->npcs[i].level = 0;
+        game->npcs[i].room_id = -1;
+        game->npcs[i].flags = 0;
+        game->npcs[i].return_tick = 0;
     }
     return 1;
 }
@@ -823,6 +843,7 @@ int save_read_game(const char *path, struct GameState *out_game,
         goto done;
     }
     if (version != 5U && version != 6U && version != 7U &&
+            version != 8U &&
             version != (u16)SAVE_VERSION) {
         goto done;
     }

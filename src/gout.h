@@ -148,10 +148,12 @@ enum GameEventDialogueActor {
     GAME_DIALOGUE_ACTOR_ARCHIVIST = 4,
     GAME_DIALOGUE_ACTOR_TRAVELER = 5,
     GAME_DIALOGUE_ACTOR_NOBODY = 6,
-    /* roster road bandit; distinct from BANDIT_AMBUSH dynamic spawn in tests */
+    /* roster-authored bandits; distinct from BANDIT_AMBUSH dynamic spawn in tests */
     GAME_DIALOGUE_ACTOR_BANDIT = 7,
-    /* dynamic random ambush bandit; shares enemy encounter logic */
-    GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH = 8
+    GAME_DIALOGUE_ACTOR_BANDIT_BRIDGE = 8,
+    GAME_DIALOGUE_ACTOR_BANDIT_CANYON = 9,
+    /* dynamic ambush bandit; shares enemy encounter logic */
+    GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH = 10
 };
 
 enum GameEventDialoguePhase {

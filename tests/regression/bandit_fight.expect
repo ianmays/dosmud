@@ -26,7 +26,7 @@ On the ground: stick. (take stick)
  :::: .-----\  \-----.     
   || /                |      
                              
-A road bandit steps from cover with a hand on a rusted blade.
+A bandit steps from cover with a hand on a rusted blade.
                              
 "Easy now. We can do this three ways."
   [1] Refuse and fight.
@@ -36,7 +36,7 @@ A road bandit steps from cover with a hand on a rusted blade.
 
 [T:1] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
-> Combat starts. You HP: 20, Bandit HP: 8, Bandit Lv: 1.
+> Combat starts. You HP: 20, Bandit HP: 14, Bandit Lv: 3.
 Choose: [1] Attack  [2] Defend  [3] Use salve
 
 [T:1] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]

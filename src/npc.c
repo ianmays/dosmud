@@ -29,7 +29,8 @@ struct NpcProfile {
     int actor;
     int dialogue;
     int encounter;
-    int level;
+    int level_min;
+    int level_max;
     int spawn_room;
     int flags;
     u32 roam_start_tick;
@@ -44,13 +45,25 @@ struct NpcProfile {
  */
 static const struct NpcProfile NPC_PROFILES[] = {
     { GAME_DIALOGUE_ACTOR_TRAVELER, DIALOGUE_TRAVELER, GAME_ENCOUNTER_TRAVELER,
-        0,
+        0, 0,
         WORLD_ROOM_RUINS,
         NPC_FLAG_ACTIVE | NPC_FLAG_ROAMING | NPC_FLAG_RESPAWNS,
         0, 8, 16, NPC_RESPAWN_ON_DIALOGUE_RESOLVE },
     { GAME_DIALOGUE_ACTOR_BANDIT, DIALOGUE_NONE, GAME_ENCOUNTER_BANDIT,
-        1,
+        1, 3,
         WORLD_ROOM_ROAD,
+        NPC_FLAG_ACTIVE | NPC_FLAG_ROAMING | NPC_FLAG_RESPAWNS,
+        8, 6, 10, NPC_RESPAWN_ON_ENCOUNTER_END },
+    { GAME_DIALOGUE_ACTOR_BANDIT_BRIDGE, DIALOGUE_NONE,
+        GAME_ENCOUNTER_BANDIT,
+        1, 3,
+        WORLD_ROOM_BRIDGE,
+        NPC_FLAG_ACTIVE | NPC_FLAG_ROAMING | NPC_FLAG_RESPAWNS,
+        8, 6, 10, NPC_RESPAWN_ON_ENCOUNTER_END },
+    { GAME_DIALOGUE_ACTOR_BANDIT_CANYON, DIALOGUE_NONE,
+        GAME_ENCOUNTER_BANDIT,
+        1, 3,
+        WORLD_ROOM_CANYON,
         NPC_FLAG_ACTIVE | NPC_FLAG_ROAMING | NPC_FLAG_RESPAWNS,
         8, 6, 10, NPC_RESPAWN_ON_ENCOUNTER_END }
 };
@@ -168,18 +181,42 @@ static const struct NpcRoomInfo *npc_room_info(int room_id)
     return 0;
 }
 
-static int npc_default_level_for_encounter(int actor, int encounter)
+static const struct NpcProfile *npc_bandit_profile(void)
+{
+    return npc_profile_by_actor(GAME_DIALOGUE_ACTOR_BANDIT);
+}
+
+static int npc_roll_profile_level(const struct GameState *game,
+                                  const struct NpcProfile *profile,
+                                  u32 salt)
+{
+    u32 span;
+
+    /* Seed, actor, and room/tick salt keep level rolls stable across save/load. */
+    if (profile == 0 || profile->level_max <= 0) {
+        return 0;
+    }
+    if (profile->level_max <= profile->level_min) {
+        return profile->level_min;
+    }
+    span = (u32)(profile->level_max - profile->level_min + 1);
+    return profile->level_min + (int)((game->seed + (u32)profile->actor +
+        salt) % span);
+}
+
+static int npc_default_level_for_encounter(const struct GameState *game,
+                                           int actor, int encounter, u32 salt)
 {
     const struct NpcProfile *profile;
 
     profile = npc_profile_by_actor(actor);
     if (profile != 0) {
-        return profile->level;
+        return npc_roll_profile_level(game, profile, salt);
     }
     if (encounter == GAME_ENCOUNTER_BANDIT) {
-        profile = npc_profile_by_actor(GAME_DIALOGUE_ACTOR_BANDIT);
+        profile = npc_bandit_profile();
         if (profile != 0) {
-            return profile->level;
+            return npc_roll_profile_level(game, profile, salt);
         }
         return 1;
     }
@@ -342,7 +379,8 @@ int npc_spawn(struct GameState *game, int actor, int dialogue, int encounter,
     npc->actor = actor;
     npc->dialogue = dialogue;
     npc->encounter = encounter;
-    npc->level = npc_default_level_for_encounter(actor, encounter);
+    npc->level = npc_default_level_for_encounter(game, actor, encounter,
+        (u32)(room_id >= 0 ? room_id : 0));
     npc->room_id = room_id;
     npc->flags = flags;
     npc->return_tick = 0;
@@ -403,7 +441,7 @@ int npc_enemy_level(const struct GameState *game, int actor, int encounter)
             return npc->level;
         }
     }
-    return npc_default_level_for_encounter(actor, encounter);
+    return npc_default_level_for_encounter(game, actor, encounter, 0U);
 }
 
 /* Clears presence but keeps the roster profile for respawn or fixture reuse. */
@@ -518,7 +556,10 @@ void npc_upgrade_loaded_profiles(struct GameState *game)
             continue;
         }
         npc->encounter = profile->encounter;
-        npc->level = profile->level;
+        if (npc->level <= 0) {
+            npc->level = npc_roll_profile_level(game, profile,
+                (u32)(npc->room_id >= 0 ? npc->room_id : 0));
+        }
         if (npc->dialogue != DIALOGUE_ENEMY) {
             npc->dialogue = profile->dialogue;
         }
@@ -529,6 +570,7 @@ void npc_upgrade_loaded_profiles(struct GameState *game)
             npc->return_tick = npc_profile_return_tick_from_base(game, profile);
         }
     }
+    npc_seed_profiles(game);
 }
 
 /* Reactivation after return_tick picks a random room in the generated graph. */
@@ -555,6 +597,9 @@ void npc_roaming_activate_due(struct GameState *game)
             game->npcs[i].dialogue = DIALOGUE_NONE;
         }
         game->npcs[i].room_id = plat_rand() % game->world.room_count;
+        game->npcs[i].level = npc_default_level_for_encounter(game,
+            game->npcs[i].actor, game->npcs[i].encounter,
+            game->npcs[i].return_tick + (u32)game->npcs[i].room_id);
     }
 }
 

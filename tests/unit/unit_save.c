@@ -13,6 +13,17 @@
 #include "save.h"
 #include "unit_util.h"
 
+#define SAVE_NPC_MAX_V8 4
+#define PROFILE_BANDIT_LEVEL_MIN 1
+#define PROFILE_BANDIT_LEVEL_MAX 3
+
+static int save_profile_bandit_level(u32 seed, int actor, int room_id)
+{
+    return PROFILE_BANDIT_LEVEL_MIN +
+        (int)((seed + (u32)actor + (u32)room_id) %
+            (PROFILE_BANDIT_LEVEL_MAX - PROFILE_BANDIT_LEVEL_MIN + 1));
+}
+
 static const char *save_test_path(void)
 {
     return "/tmp/dosmud_save_unit.dat";
@@ -254,6 +265,7 @@ static int save_write_legacy_game_file(const struct GameState *game,
     FILE *fp;
     int i;
     int j;
+    int npc_slots;
 
     save_cleanup_file();
     fp = fopen(save_test_path(), "wb");
@@ -290,7 +302,8 @@ static int save_write_legacy_game_file(const struct GameState *game,
         fclose(fp);
         return 0;
     }
-    for (i = 0; i < CFG_NPC_MAX; ++i) {
+    npc_slots = version >= 9U ? CFG_NPC_MAX : SAVE_NPC_MAX_V8;
+    for (i = 0; i < npc_slots; ++i) {
         if (!save_write_s16_le(fp, game->npcs[i].actor) ||
                 !save_write_s16_le(fp, game->npcs[i].dialogue) ||
                 !save_write_s16_le(fp, game->npcs[i].encounter) ||
@@ -730,8 +743,11 @@ TEST save_read_upgrades_legacy_bandit_profile(void)
     ASSERT_EQ(NPC_FLAG_ACTIVE | NPC_FLAG_ROAMING | NPC_FLAG_RESPAWNS,
         loaded.npcs[bandit_slot].flags);
     ASSERT_EQ(DIALOGUE_NONE, loaded.npcs[bandit_slot].dialogue);
-    ASSERT_EQ(1, loaded.npcs[bandit_slot].level);
+    ASSERT_EQ(save_profile_bandit_level(333U, GAME_DIALOGUE_ACTOR_BANDIT,
+            WORLD_ROOM_ROAD), loaded.npcs[bandit_slot].level);
     ASSERT_EQ(WORLD_ROOM_ROAD, loaded.npcs[bandit_slot].room_id);
+    ASSERT(npc_find_by_actor(&loaded, GAME_DIALOGUE_ACTOR_BANDIT_BRIDGE) >= 0);
+    ASSERT(npc_find_by_actor(&loaded, GAME_DIALOGUE_ACTOR_BANDIT_CANYON) >= 0);
     ASSERT_EQ(0U, loaded.npcs[bandit_slot].return_tick);
     ASSERT_EQ(0U, loaded_draws);
 
@@ -744,6 +760,7 @@ TEST save_read_schedules_legacy_bandit_respawn(void)
     struct GameState game;
     struct GameState loaded;
     int bandit_slot;
+    int expected_level;
     u32 loaded_draws;
 
     save_cleanup_file();
@@ -751,6 +768,7 @@ TEST save_read_schedules_legacy_bandit_respawn(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 21U);
     bandit_slot = npc_find_by_actor(&game, GAME_DIALOGUE_ACTOR_BANDIT);
     ASSERT(bandit_slot >= 0);
+    expected_level = game.npcs[bandit_slot].level;
     game.npcs[bandit_slot].dialogue = DIALOGUE_NONE;
     game.npcs[bandit_slot].room_id = -1;
     game.npcs[bandit_slot].flags = 0;
@@ -767,7 +785,9 @@ TEST save_read_schedules_legacy_bandit_respawn(void)
         loaded.npcs[bandit_slot].flags);
     ASSERT_EQ(-1, loaded.npcs[bandit_slot].room_id);
     ASSERT_EQ(21U + 6U, loaded.npcs[bandit_slot].return_tick);
-    ASSERT_EQ(1, loaded.npcs[bandit_slot].level);
+    ASSERT_EQ(expected_level, loaded.npcs[bandit_slot].level);
+    ASSERT(npc_find_by_actor(&loaded, GAME_DIALOGUE_ACTOR_BANDIT_BRIDGE) >= 0);
+    ASSERT(npc_find_by_actor(&loaded, GAME_DIALOGUE_ACTOR_BANDIT_CANYON) >= 0);
     ASSERT_EQ(0U, loaded_draws);
 
     save_cleanup_file();

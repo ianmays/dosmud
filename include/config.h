@@ -154,7 +154,7 @@
 #define CFG_ATMOSPHERE_FOCUS_EXTRA_ITEM_BELOW 50
 
 /* Dynamic NPC roster cap (save payload and per-tick roaming walks). */
-#define CFG_NPC_MAX 4
+#define CFG_NPC_MAX 6
 
 /* --- Main loop and test harness --- */
 
