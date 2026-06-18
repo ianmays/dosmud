@@ -735,7 +735,7 @@ static void render_encounter_event(const GameEvent *ev)
 {
     if (ev->arg1 == GAME_ENCOUNTER_ACTION_OPEN) {
         if (ev->arg0 == GAME_ENCOUNTER_BANDIT) {
-            render_bandit_encounter_open();
+            render_bandit_encounter_open(ev->arg3);
         } else if (ev->arg0 == GAME_ENCOUNTER_TRAVELER) {
             render_traveler_scene();
         }
@@ -1022,7 +1022,7 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
     }
 }
 
-void render_bandit_encounter_open(void)
+void render_bandit_encounter_open(int enemy_level)
 {
     render_gap();
     RENDER_PRINTF("  /\\     .-'''''''-.        \n");
@@ -1033,6 +1033,7 @@ void render_bandit_encounter_open(void)
     RENDER_PRINTF("  || /                |      \n");
     RENDER_PRINTF("                             \n");
     RENDER_PRINTF("%s", TXT_BANDIT_OPEN_INTRO);
+    RENDER_PRINTF(TXT_BANDIT_OPEN_LEVEL_FMT, enemy_level);
     RENDER_PRINTF("                             \n");
     RENDER_PRINTF("%s", TXT_BANDIT_OPEN_QUOTE);
     RENDER_PRINTF("%s", TXT_BANDIT_OPEN_OPT1);

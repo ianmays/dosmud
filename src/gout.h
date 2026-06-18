@@ -55,6 +55,16 @@ enum GameEventKind {
  * EQUIP_RESULT arg0=item id or ITEM_NONE arg1=GameEventEquipOutcome
  */
 
+/*
+ * Dialogue / encounter payload contract (#160):
+ * DIALOGUE    arg0=GameEventDialogueActor arg1=GameEventDialoguePhase
+ *             arg2=reply choice when PHASE_REPLY; zero otherwise
+ * ENCOUNTER   arg0=GameEventEncounterKind arg1=action arg2=outcome
+ *             arg3=action-specific payload:
+ *   OPEN             enemy level for bandits; zero otherwise
+ *   GIVE             item id for GIVE replies; zero otherwise
+ */
+
 enum GameEventItemAction {
     GAME_ITEM_ACTION_NONE = 0,
     GAME_ITEM_ACTION_LOOT,

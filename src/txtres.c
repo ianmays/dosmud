@@ -188,6 +188,7 @@ const char *const TXT_UI_FOCUS_WATER = "You can follow the moving water sound. (
 const char *const TXT_UI_FOCUS_GRIT = "Fresh grit skids nearby. (inspect grit)\n";
 
 const char *const TXT_BANDIT_OPEN_INTRO = "A bandit steps from cover with a hand on a rusted blade.\n";
+const char *const TXT_BANDIT_OPEN_LEVEL_FMT = "Bandit Lv: %d.\n";
 const char *const TXT_BANDIT_OPEN_QUOTE = "\"Easy now. We can do this three ways.\"\n";
 const char *const TXT_BANDIT_OPEN_OPT1 = "  [1] Refuse and fight.\n";
 const char *const TXT_BANDIT_OPEN_OPT2 =

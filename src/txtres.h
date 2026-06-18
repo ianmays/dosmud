@@ -62,6 +62,7 @@ extern const char *const TXT_UI_FOCUS_WATER;
 extern const char *const TXT_UI_FOCUS_GRIT;
 
 extern const char *const TXT_BANDIT_OPEN_INTRO;
+extern const char *const TXT_BANDIT_OPEN_LEVEL_FMT;
 extern const char *const TXT_BANDIT_OPEN_QUOTE;
 extern const char *const TXT_BANDIT_OPEN_OPT1;
 extern const char *const TXT_BANDIT_OPEN_OPT2;

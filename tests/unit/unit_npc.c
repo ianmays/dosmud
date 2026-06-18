@@ -319,6 +319,7 @@ TEST npc_bandit_roaming_encounter_opens_in_matching_room(void)
     ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
     ASSERT_EQ(GAME_ENCOUNTER_BANDIT, out.events[0].arg0);
     ASSERT_EQ(GAME_ENCOUNTER_ACTION_OPEN, out.events[0].arg1);
+    ASSERT_EQ(bandit->level, out.events[0].arg3);
     PASS();
 }
 
@@ -485,6 +486,7 @@ TEST npc_roaming_encounter_event(void)
     ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
     ASSERT_EQ(GAME_ENCOUNTER_TRAVELER, out.events[0].arg0);
     ASSERT_EQ(GAME_ENCOUNTER_ACTION_OPEN, out.events[0].arg1);
+    ASSERT_EQ(0, out.events[0].arg3);
     PASS();
 }
 

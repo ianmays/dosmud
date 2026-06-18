@@ -22,7 +22,7 @@ void game_render(const struct GameState *game);
 void game_render_output(const struct GameState *game, const GameEventQueue *out);
 void game_print_help(int topic);
 
-void render_bandit_encounter_open(void);
+void render_bandit_encounter_open(int enemy_level);
 void render_combat_start(int player_hp, int enemy_hp, int enemy_level);
 void render_combat_enemy_strike(int dmg);
 void render_combat_player_fallen(void);
