@@ -22,6 +22,7 @@ TEST harness_baseline_matches_start_fields(void)
     ASSERT_EQ(CFG_START_XP, game.xp);
     ASSERT_EQ(CFG_START_MAX_HP, game.max_hp);
     ASSERT_EQ(CFG_START_MAX_HP, game.player_hp);
+    ASSERT_EQ(0, game.combat.enemy_level);
     ASSERT_EQ(0, game.bag_count);
     ASSERT_EQ(1, game_roll_inject_fully_consumed(&game));
     PASS();
@@ -166,6 +167,7 @@ TEST harness_apply_bandit_road(void)
     ASSERT(bandit_slot >= 0);
     ASSERT_EQ(0, game.npcs[traveler_slot].flags & NPC_FLAG_ACTIVE);
     ASSERT_EQ(NPC_FLAG_ACTIVE, game.npcs[bandit_slot].flags & NPC_FLAG_ACTIVE);
+    ASSERT_EQ(1, game.npcs[bandit_slot].level);
     ASSERT_EQ(WORLD_ROOM_ROAD, game.npcs[bandit_slot].room_id);
     PASS();
 }

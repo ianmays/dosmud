@@ -12,6 +12,20 @@ int game_xp_to_next_level(int level)
     return CFG_XP_LEVEL_BASE + ((level - 1) * CFG_XP_LEVEL_PER_LEVEL);
 }
 
+/* Kill XP uses combat snapshot level; spread_roll is the combat defeat draw. */
+int progression_enemy_xp_reward(int enemy_level, int spread_roll)
+{
+    int bonus_levels;
+
+    bonus_levels = enemy_level - 1;
+    if (bonus_levels < 0) {
+        bonus_levels = 0;
+    }
+    return CFG_COMBAT_KILL_XP_BASE +
+        (bonus_levels * CFG_COMBAT_KILL_XP_PER_LEVEL) +
+        spread_roll;
+}
+
 void progression_gain_xp(struct GameState *game, int amount, GameEventQueue *out)
 {
     int needed;
@@ -32,4 +46,12 @@ void progression_gain_xp(struct GameState *game, int amount, GameEventQueue *out
             game->damage_bonus, game->bag_capacity, 0);
         needed = game_xp_to_next_level(game->level);
     }
+}
+
+/* combat.c calls this on defeat so level scaling stays out of combat_resolve_reply. */
+void progression_gain_enemy_xp(struct GameState *game, int enemy_level,
+                               int spread_roll, GameEventQueue *out)
+{
+    progression_gain_xp(game,
+        progression_enemy_xp_reward(enemy_level, spread_roll), out);
 }

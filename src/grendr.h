@@ -22,11 +22,11 @@ void game_render(const struct GameState *game);
 void game_render_output(const struct GameState *game, const GameEventQueue *out);
 void game_print_help(int topic);
 
-void render_bandit_encounter_open(void);
-void render_combat_start(int player_hp, int enemy_hp);
+void render_bandit_encounter_open(int enemy_level);
+void render_combat_start(int player_hp, int enemy_hp, int enemy_level);
 void render_combat_enemy_strike(int dmg);
 void render_combat_player_fallen(void);
-void render_combat_status_line(int player_hp, int enemy_hp);
+void render_combat_status_line(int player_hp, int enemy_hp, int enemy_level);
 void render_combat_player_hit(int dmg);
 void render_combat_braced(void);
 void render_combat_no_salve_bag(void);
@@ -34,7 +34,7 @@ void render_combat_salve_in_combat(int hp);
 void render_combat_salve_full(void);
 void render_already_full_health(void);
 void render_combat_invalid_choice(void);
-void render_combat_bandit_defeated(void);
+void render_combat_bandit_defeated(int enemy_level);
 void render_combat_menu(void);
 
 void render_xp_gained(int amount);

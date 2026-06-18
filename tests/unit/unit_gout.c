@@ -166,7 +166,7 @@ TEST game_event_push_records_combat_progression_kinds(void)
 
     game_event_queue_reset(&out);
     ASSERT(0 != game_event_push(&out, GAME_EVENT_COMBAT,
-        GAME_COMBAT_PHASE_START, 10, 20, 0, 0));
+        GAME_COMBAT_PHASE_START, 10, 20, 3, 0));
     ASSERT(0 != game_event_push(&out, GAME_EVENT_XP_GAIN, 7, 0, 0, 0, 0));
     ASSERT(0 != game_event_push(&out, GAME_EVENT_STAT_CHANGE,
         2, 14, 1, 6, 0));
@@ -175,6 +175,7 @@ TEST game_event_push_records_combat_progression_kinds(void)
     ASSERT_EQ(GAME_COMBAT_PHASE_START, out.events[0].arg0);
     ASSERT_EQ(10, out.events[0].arg1);
     ASSERT_EQ(20, out.events[0].arg2);
+    ASSERT_EQ(3, out.events[0].arg3);
     ASSERT_EQ(GAME_EVENT_XP_GAIN, out.events[1].kind);
     ASSERT_EQ(7, out.events[1].arg0);
     ASSERT_EQ(GAME_EVENT_STAT_CHANGE, out.events[2].kind);
@@ -268,10 +269,14 @@ TEST game_event_push_records_bandit_ambush_actor_value(void)
 
 TEST game_dialogue_actor_bandit_ids_are_distinct(void)
 {
-    /* GAME_DIALOGUE_ACTOR_BANDIT is the roster road bandit; AMBUSH is dynamic spawn. */
+    /* Authored bandit slots are distinct from the dynamic ambush helper actor. */
     ASSERT(GAME_DIALOGUE_ACTOR_BANDIT != GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH);
+    ASSERT(GAME_DIALOGUE_ACTOR_BANDIT_BRIDGE != GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH);
+    ASSERT(GAME_DIALOGUE_ACTOR_BANDIT_CANYON != GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH);
     ASSERT_EQ(7, GAME_DIALOGUE_ACTOR_BANDIT);
-    ASSERT_EQ(8, GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH);
+    ASSERT_EQ(8, GAME_DIALOGUE_ACTOR_BANDIT_BRIDGE);
+    ASSERT_EQ(9, GAME_DIALOGUE_ACTOR_BANDIT_CANYON);
+    ASSERT_EQ(10, GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH);
     PASS();
 }
 

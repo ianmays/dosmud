@@ -8,9 +8,13 @@
 #include "unit_util.h"
 
 /* Match bandit row in NPC_PROFILES (npc.c) for unit assertions. */
+#define PROFILE_BANDIT_LEVEL_MIN 1
+#define PROFILE_BANDIT_LEVEL_MAX 3
 #define PROFILE_BANDIT_ROAM_START 8U
 #define PROFILE_BANDIT_RETURN_BASE 6U
 #define PROFILE_BANDIT_RETURN_SPREAD 10U
+#define PROFILE_BANDIT_BRIDGE_SPAWN WORLD_ROOM_BRIDGE
+#define PROFILE_BANDIT_CANYON_SPAWN WORLD_ROOM_CANYON
 
 /*
  * Direct npc.c API tests: room/actor lookup, roaming movement/encounter, and
@@ -129,6 +133,25 @@ static struct NpcState *bandit_npc(struct GameState *game)
     return &game->npcs[slot];
 }
 
+static struct NpcState *bandit_npc_by_actor(struct GameState *game, int actor)
+{
+    int slot;
+
+    slot = npc_find_by_actor(game, actor);
+    if (slot < 0) {
+        return 0;
+    }
+    return &game->npcs[slot];
+}
+
+static int profile_bandit_level(u32 seed, int actor, int room_id)
+{
+    /* Mirror npc_roll_profile_level salt: seed + actor + room_id. */
+    return PROFILE_BANDIT_LEVEL_MIN +
+        (int)((seed + (u32)actor + (u32)room_id) %
+            (PROFILE_BANDIT_LEVEL_MAX - PROFILE_BANDIT_LEVEL_MIN + 1));
+}
+
 static int roaming_npc_reply_out(struct GameState *game, int choice,
                                  GameEventQueue *out)
 {
@@ -159,17 +182,31 @@ TEST npc_seed_roaming_bandit_sets_state(void)
 {
     struct GameState game;
     struct NpcState *bandit;
+    struct NpcState *bridge_bandit;
+    struct NpcState *canyon_bandit;
 
     unit_game_fresh(&game, 39u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     bandit = bandit_npc(&game);
+    bridge_bandit = bandit_npc_by_actor(&game, GAME_DIALOGUE_ACTOR_BANDIT_BRIDGE);
+    canyon_bandit = bandit_npc_by_actor(&game, GAME_DIALOGUE_ACTOR_BANDIT_CANYON);
     ASSERT(bandit != 0);
+    ASSERT(bridge_bandit != 0);
+    ASSERT(canyon_bandit != 0);
     ASSERT_EQ(GAME_DIALOGUE_ACTOR_BANDIT, bandit->actor);
     ASSERT_EQ(DIALOGUE_NONE, bandit->dialogue);
     ASSERT_EQ(GAME_ENCOUNTER_BANDIT, bandit->encounter);
+    ASSERT_EQ(profile_bandit_level(39u, GAME_DIALOGUE_ACTOR_BANDIT,
+            WORLD_ROOM_ROAD), bandit->level);
     ASSERT_EQ(WORLD_ROOM_ROAD, bandit->room_id);
     ASSERT_EQ(NPC_FLAG_ACTIVE | NPC_FLAG_ROAMING | NPC_FLAG_RESPAWNS,
         bandit->flags);
+    ASSERT_EQ(PROFILE_BANDIT_BRIDGE_SPAWN, bridge_bandit->room_id);
+    ASSERT_EQ(profile_bandit_level(39u, GAME_DIALOGUE_ACTOR_BANDIT_BRIDGE,
+            PROFILE_BANDIT_BRIDGE_SPAWN), bridge_bandit->level);
+    ASSERT_EQ(PROFILE_BANDIT_CANYON_SPAWN, canyon_bandit->room_id);
+    ASSERT_EQ(profile_bandit_level(39u, GAME_DIALOGUE_ACTOR_BANDIT_CANYON,
+            PROFILE_BANDIT_CANYON_SPAWN), canyon_bandit->level);
     ASSERT_EQ(0, bandit->return_tick);
     PASS();
 }
@@ -255,6 +292,8 @@ TEST npc_begin_and_end_dynamic_encounter_reuses_roster(void)
     ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
     ASSERT_EQ(GAME_ENCOUNTER_BANDIT, out.events[0].arg0);
     ASSERT_EQ(slot, npc_end_encounter(&game, GAME_DIALOGUE_ACTOR_BANDIT));
+    ASSERT(game.npcs[slot].level >= PROFILE_BANDIT_LEVEL_MIN);
+    ASSERT(game.npcs[slot].level <= PROFILE_BANDIT_LEVEL_MAX);
     ASSERT_EQ(-1, game.npcs[slot].room_id);
     ASSERT_EQ(0, game.npcs[slot].flags & NPC_FLAG_ACTIVE);
     PASS();
@@ -281,6 +320,7 @@ TEST npc_bandit_roaming_encounter_opens_in_matching_room(void)
     ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
     ASSERT_EQ(GAME_ENCOUNTER_BANDIT, out.events[0].arg0);
     ASSERT_EQ(GAME_ENCOUNTER_ACTION_OPEN, out.events[0].arg1);
+    ASSERT_EQ(bandit->level, out.events[0].arg3);
     PASS();
 }
 
@@ -341,6 +381,8 @@ TEST npc_bandit_activate_due_reuses_roaming_profile(void)
     ASSERT_EQ(NPC_FLAG_ACTIVE, bandit->flags & NPC_FLAG_ACTIVE);
     ASSERT_EQ(NPC_FLAG_ROAMING, bandit->flags & NPC_FLAG_ROAMING);
     ASSERT_EQ(NPC_FLAG_RESPAWNS, bandit->flags & NPC_FLAG_RESPAWNS);
+    ASSERT(bandit->level >= PROFILE_BANDIT_LEVEL_MIN);
+    ASSERT(bandit->level <= PROFILE_BANDIT_LEVEL_MAX);
     ASSERT(bandit->room_id >= 0);
     ASSERT(bandit->room_id < game.world.room_count);
     PASS();
@@ -445,6 +487,7 @@ TEST npc_roaming_encounter_event(void)
     ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
     ASSERT_EQ(GAME_ENCOUNTER_TRAVELER, out.events[0].arg0);
     ASSERT_EQ(GAME_ENCOUNTER_ACTION_OPEN, out.events[0].arg1);
+    ASSERT_EQ(0, out.events[0].arg3);
     PASS();
 }
 

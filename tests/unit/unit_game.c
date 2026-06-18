@@ -85,12 +85,18 @@ TEST game_mode_setters(void)
     struct GameState game;
 
     unit_game_fresh(&game, 1u);
+    game.combat.enemy_hp = 6;
+    game.combat.enemy_level = 2;
+    game.combat.defending = 1;
     game_set_mode_dialogue(&game, DIALOGUE_NPC_FROG);
     ASSERT_EQ(1, game_is_busy_dialogue(&game));
     game_set_mode_combat(&game);
     ASSERT_EQ(1, game_is_busy_dialogue(&game));
     game_set_mode_explore(&game);
     ASSERT_EQ(0, game_is_busy_dialogue(&game));
+    ASSERT_EQ(0, game.combat.enemy_hp);
+    ASSERT_EQ(0, game.combat.enemy_level);
+    ASSERT_EQ(0, game.combat.defending);
     PASS();
 }
 

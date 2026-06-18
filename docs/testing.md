@@ -196,7 +196,7 @@ Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_
 | `bandit_dialogue` | Base reset, stick in bag, bandit dialogue open |
 | `bandit_handover_pick` | Base reset, stick in bag, bandit dialogue open, handover pick prompt (reply 2 already chosen on the active bandit NPC slot) |
 | `bandit_wielded_pick` | Base reset, stick wielded (`Atk:1`), bandit dialogue open, handover pick prompt from the active bandit NPC slot |
-| `bandit_combat_turn1` | Base reset, stick wielded, combat mode, player HP 20, bandit HP at `CFG_COMBAT_ENEMY_HP_BASE` (combat start only) |
+| `bandit_combat_turn1` | Base reset, stick wielded, combat mode, player HP 20, enemy level 1, bandit HP at `CFG_COMBAT_ENEMY_HP_BASE` (combat start only) |
 | `bandit_combat_turn1_resolve` | Same as `bandit_combat_turn1`, then injected roll queue + `combat_resolve_reply(1)` for `equipment` (see trade-offs below) |
 | `bandit_dialogue_empty` | Bandit dialogue, empty bag, no wielded weapon |
 | `bandit_combat_defend_ready` | Combat turn 1 + inject queue for enemy damage after defend |
@@ -442,7 +442,7 @@ When the metrics schema grows, use [`scripts/backfill-ci-history.py`](https://gi
 
 ## Manual gameplay verification checklist
 
-The tick HUD line includes `[Atk:n]`; `n` is the flat melee bonus used on combat attacks (level damage bonus plus wielded weapon). Expect the same value when editing snapshot `.expect` files after wield, unwield, or level-up.
+The tick HUD line includes `[Atk:n]`; `n` is the flat melee bonus used on combat attacks (level damage bonus plus wielded weapon). Bandit encounter and combat status lines include `Bandit Lv: n`; fixture `bandit_combat_turn1` pins enemy level 1 for deterministic HP. Expect the same values when editing snapshot `.expect` files after wield, unwield, level-up, or combat tuning changes.
 
 1. Start program, confirm initial tick `[T:0]`.
 2. Enter `help`; tick remains unchanged. Enter `help craft` (or another topic); tick remains unchanged and a single-topic line prints.

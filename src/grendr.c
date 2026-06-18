@@ -735,7 +735,7 @@ static void render_encounter_event(const GameEvent *ev)
 {
     if (ev->arg1 == GAME_ENCOUNTER_ACTION_OPEN) {
         if (ev->arg0 == GAME_ENCOUNTER_BANDIT) {
-            render_bandit_encounter_open();
+            render_bandit_encounter_open(ev->arg3);
         } else if (ev->arg0 == GAME_ENCOUNTER_TRAVELER) {
             render_traveler_scene();
         }
@@ -893,7 +893,7 @@ static void render_combat_event(const GameEvent *ev)
 {
     switch (ev->arg0) {
     case GAME_COMBAT_PHASE_START:
-        render_combat_start(ev->arg1, ev->arg2);
+        render_combat_start(ev->arg1, ev->arg2, ev->arg3);
         break;
     case GAME_COMBAT_PHASE_ENEMY_DAMAGE:
         render_combat_enemy_strike(ev->arg1);
@@ -902,7 +902,7 @@ static void render_combat_event(const GameEvent *ev)
         render_combat_player_fallen();
         break;
     case GAME_COMBAT_PHASE_STATUS:
-        render_combat_status_line(ev->arg1, ev->arg2);
+        render_combat_status_line(ev->arg1, ev->arg2, ev->arg3);
         break;
     case GAME_COMBAT_PHASE_PLAYER_DAMAGE:
         render_combat_player_hit(ev->arg1);
@@ -923,7 +923,7 @@ static void render_combat_event(const GameEvent *ev)
         render_combat_invalid_choice();
         break;
     case GAME_COMBAT_PHASE_ENEMY_DEFEATED:
-        render_combat_bandit_defeated();
+        render_combat_bandit_defeated(ev->arg3);
         break;
     case GAME_COMBAT_PHASE_MENU:
         render_combat_menu();
@@ -1022,8 +1022,9 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
     }
 }
 
-void render_bandit_encounter_open(void)
+void render_bandit_encounter_open(int enemy_level)
 {
+    /* enemy_level is ENCOUNTER OPEN arg3 from npc_push_encounter_open. */
     render_gap();
     RENDER_PRINTF("  /\\     .-'''''''-.        \n");
     RENDER_PRINTF("  ||    / (.)..(.)  |        \n");
@@ -1033,6 +1034,7 @@ void render_bandit_encounter_open(void)
     RENDER_PRINTF("  || /                |      \n");
     RENDER_PRINTF("                             \n");
     RENDER_PRINTF("%s", TXT_BANDIT_OPEN_INTRO);
+    RENDER_PRINTF(TXT_BANDIT_OPEN_LEVEL_FMT, enemy_level);
     RENDER_PRINTF("                             \n");
     RENDER_PRINTF("%s", TXT_BANDIT_OPEN_QUOTE);
     RENDER_PRINTF("%s", TXT_BANDIT_OPEN_OPT1);
@@ -1041,9 +1043,9 @@ void render_bandit_encounter_open(void)
     RENDER_PRINTF("%s", TXT_REPLY_PROMPT);
 }
 
-void render_combat_start(int player_hp, int enemy_hp)
+void render_combat_start(int player_hp, int enemy_hp, int enemy_level)
 {
-    RENDER_PRINTF(TXT_COMBAT_START_FMT, player_hp, enemy_hp);
+    RENDER_PRINTF(TXT_COMBAT_START_FMT, player_hp, enemy_hp, enemy_level);
     RENDER_PRINTF("%s", TXT_COMBAT_MENU);
 }
 
@@ -1057,9 +1059,9 @@ void render_combat_player_fallen(void)
     RENDER_PRINTF("%s", TXT_COMBAT_PLAYER_FALLEN);
 }
 
-void render_combat_status_line(int player_hp, int enemy_hp)
+void render_combat_status_line(int player_hp, int enemy_hp, int enemy_level)
 {
-    RENDER_PRINTF(TXT_COMBAT_STATUS_FMT, player_hp, enemy_hp);
+    RENDER_PRINTF(TXT_COMBAT_STATUS_FMT, player_hp, enemy_hp, enemy_level);
 }
 
 void render_combat_player_hit(int dmg)
@@ -1098,9 +1100,12 @@ void render_combat_invalid_choice(void)
     RENDER_PRINTF("%s", TXT_PICK_123);
 }
 
-void render_combat_bandit_defeated(void)
+void render_combat_bandit_defeated(int enemy_level)
 {
-    RENDER_PRINTF("%s", TXT_COMBAT_BANDIT_DEFEATED);
+    if (enemy_level < 1) {
+        enemy_level = 1;
+    }
+    RENDER_PRINTF(TXT_COMBAT_BANDIT_DEFEATED_FMT, enemy_level);
 }
 
 void render_combat_menu(void)

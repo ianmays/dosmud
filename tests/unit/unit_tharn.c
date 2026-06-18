@@ -240,6 +240,19 @@ TEST testharn_fixture_corpse_stripped_clears_corpse_items(void)
     PASS();
 }
 
+TEST testharn_fixture_bandit_combat_turn1_sets_enemy_level(void)
+{
+    struct GameState game;
+    int rc;
+
+    unit_game_fresh(&game, 25u);
+    rc = testharn_apply(&game, "@fixture bandit_combat_turn1");
+    ASSERT_EQ(1, rc);
+    ASSERT_EQ(GAME_MODE_COMBAT, game.mode);
+    ASSERT_EQ(1, game.combat.enemy_level);
+    PASS();
+}
+
 SUITE(testharn) {
     RUN_TEST(testharn_seed_directive);
     RUN_TEST(testharn_seed_invalid);
@@ -252,5 +265,6 @@ SUITE(testharn) {
     RUN_TEST(testharn_bag_full_gate);
     RUN_TEST(testharn_fixture_sweep);
     RUN_TEST(testharn_fixture_corpse_stripped_clears_corpse_items);
+    RUN_TEST(testharn_fixture_bandit_combat_turn1_sets_enemy_level);
     RUN_TEST(testharn_not_harness_line);
 }

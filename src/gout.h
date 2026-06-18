@@ -55,6 +55,17 @@ enum GameEventKind {
  * EQUIP_RESULT arg0=item id or ITEM_NONE arg1=GameEventEquipOutcome
  */
 
+/*
+ * Dialogue / encounter payload contract (#160):
+ * DIALOGUE    arg0=GameEventDialogueActor arg1=GameEventDialoguePhase
+ *             arg2=reply choice when PHASE_REPLY; zero otherwise
+ * ENCOUNTER   arg0=GameEventEncounterKind arg1=action arg2=outcome
+ *             arg3=action-specific payload:
+ *   OPEN             enemy level for bandits; zero otherwise
+ *   GIVE             item id for GIVE replies; zero otherwise
+ *             text=item name for GIVE when outcome is OK; unused otherwise
+ */
+
 enum GameEventItemAction {
     GAME_ITEM_ACTION_NONE = 0,
     GAME_ITEM_ACTION_LOOT,
@@ -104,14 +115,15 @@ enum GameEventEquipOutcome {
 
 /*
  * Combat/progression payload contract (#159):
- * COMBAT      arg0=GameEventCombatPhase; arg1/arg2 per phase (combat.c
+ * COMBAT      arg0=GameEventCombatPhase; arg1/arg2/arg3 per phase (combat.c
  *             push_combat_phase; grendr render_combat_event):
- *   START            arg1=player_hp arg2=enemy_hp
+ *   START            arg1=player_hp arg2=enemy_hp arg3=enemy_level
  *   ENEMY_DAMAGE     arg1=damage
- *   STATUS           arg1=player_hp arg2=enemy_hp
+ *   STATUS           arg1=player_hp arg2=enemy_hp arg3=enemy_level
  *   PLAYER_DAMAGE    arg1=damage
  *   SALVE_HEAL       arg1=player_hp after heal
- *   (other phases leave arg1/arg2 zero)
+ *   ENEMY_DEFEATED   arg3=enemy_level (defeat copy)
+ *   (other phases leave arg1/arg2/arg3 zero unless noted)
  * XP_GAIN     arg0=amount
  * STAT_CHANGE arg0=level arg1=max_hp arg2=damage_bonus arg3=bag_capacity
  */
@@ -132,13 +144,8 @@ enum GameEventCombatPhase {
 };
 
 /*
- * Dialogue/encounter payload contract (#160):
- * DIALOGUE       arg0=GameEventDialogueActor arg1=GameEventDialoguePhase
- *                arg2=choice (1-3) for REPLY
- * ENCOUNTER      arg0=GameEventEncounterKind arg1=GameEventEncounterAction
- *                arg2=GameEventEncounterOutcome arg3=item id (GIVE/OK only)
- *                text=item_name for GIVE/OK; zero otherwise
- * DIALOGUE_GUARD arg0=GameEventDialogueGuardReason
+ * DIALOGUE_GUARD payload (#160): arg0=GameEventDialogueGuardReason.
+ * DIALOGUE / ENCOUNTER arg layout is documented with the event kinds above.
  */
 enum GameEventDialogueActor {
     GAME_DIALOGUE_ACTOR_NONE = 0,
@@ -148,10 +155,12 @@ enum GameEventDialogueActor {
     GAME_DIALOGUE_ACTOR_ARCHIVIST = 4,
     GAME_DIALOGUE_ACTOR_TRAVELER = 5,
     GAME_DIALOGUE_ACTOR_NOBODY = 6,
-    /* roster road bandit; distinct from BANDIT_AMBUSH dynamic spawn in tests */
+    /* roster-authored bandits; distinct from BANDIT_AMBUSH dynamic spawn in tests */
     GAME_DIALOGUE_ACTOR_BANDIT = 7,
-    /* dynamic random ambush bandit; shares enemy encounter logic */
-    GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH = 8
+    GAME_DIALOGUE_ACTOR_BANDIT_BRIDGE = 8,
+    GAME_DIALOGUE_ACTOR_BANDIT_CANYON = 9,
+    /* dynamic ambush bandit; shares enemy encounter logic */
+    GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH = 10
 };
 
 enum GameEventDialoguePhase {

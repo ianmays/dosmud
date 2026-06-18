@@ -3,19 +3,19 @@
 #include "config.h"
 #include "game.h"
 #include "items.h"
-#include "npc.h"
 #include "save.h"
 
 /*
  * save.c owns explicit binary serialization of the durable simulation state.
  * The format is versioned and field-by-field so compiler padding and TEST_MODE
  * conditionals do not silently corrupt save files.
- * Load accepts SAVE_VERSION plus prior corpse-loot layouts so older files
- * still restore into the expanded fixed-slot corpse inventory.
+ * During active development we only load the current SAVE_VERSION. If the
+ * roster or save layout changes, prefer bumping SAVE_VERSION over carrying
+ * migration logic for older local saves.
  */
 
 #define SAVE_MAGIC "DMSV"
-#define SAVE_VERSION 7
+#define SAVE_VERSION 9
 #define SAVE_PATH_BUF_MAX 260
 
 /*
@@ -156,7 +156,6 @@ static int save_read_u32(FILE *fp, u32 *value)
     return 1;
 }
 
-/* Full NPC roster in slot index order; layout matches save_valid_npc invariants. */
 static int save_write_npcs(FILE *fp, const struct GameState *game)
 {
     int i;
@@ -165,6 +164,7 @@ static int save_write_npcs(FILE *fp, const struct GameState *game)
         if (!save_write_s16(fp, game->npcs[i].actor) ||
                 !save_write_s16(fp, game->npcs[i].dialogue) ||
                 !save_write_s16(fp, game->npcs[i].encounter) ||
+                !save_write_s16(fp, game->npcs[i].level) ||
                 !save_write_s16(fp, game->npcs[i].room_id) ||
                 !save_write_s16(fp, game->npcs[i].flags) ||
                 !save_write_u32(fp, game->npcs[i].return_tick)) {
@@ -182,7 +182,10 @@ static int save_read_npcs(FILE *fp, struct GameState *game)
         if (!save_read_s16(fp, &game->npcs[i].actor) ||
                 !save_read_s16(fp, &game->npcs[i].dialogue) ||
                 !save_read_s16(fp, &game->npcs[i].encounter) ||
-                !save_read_s16(fp, &game->npcs[i].room_id) ||
+                !save_read_s16(fp, &game->npcs[i].level)) {
+            return 0;
+        }
+        if (!save_read_s16(fp, &game->npcs[i].room_id) ||
                 !save_read_s16(fp, &game->npcs[i].flags) ||
                 !save_read_u32(fp, &game->npcs[i].return_tick)) {
             return 0;
@@ -323,11 +326,10 @@ static int save_write_game_arrays(FILE *fp, const struct GameState *game)
     return 1;
 }
 
-static int save_read_game_arrays(FILE *fp, struct GameState *game, u16 version)
+static int save_read_game_arrays(FILE *fp, struct GameState *game)
 {
     int i;
     int j;
-    int legacy_loot;
 
     for (i = 0; i < CFG_ROOM_MAX; ++i) {
         for (j = 0; j < CFG_AREA_ITEM_SLOTS; ++j) {
@@ -345,30 +347,9 @@ static int save_read_game_arrays(FILE *fp, struct GameState *game, u16 version)
         if (!save_read_s16(fp, &game->corpse_present[i])) {
             return 0;
         }
-        if (version >= 7U) {
-            for (j = 0; j < CFG_CORPSE_ITEM_SLOTS; ++j) {
-                if (!save_read_s16(fp, &game->corpse_item[i][j])) {
-                    return 0;
-                }
-            }
-        } else if (version >= 6U) {
-            /* v6: two corpse_item slots per room; pad to CFG_CORPSE_ITEM_SLOTS. */
-            for (j = 0; j < 2; ++j) {
-                if (!save_read_s16(fp, &game->corpse_item[i][j])) {
-                    return 0;
-                }
-            }
-            for (; j < CFG_CORPSE_ITEM_SLOTS; ++j) {
-                game->corpse_item[i][j] = ITEM_NONE;
-            }
-        } else {
-            /* v5 and earlier: single corpse_loot field maps to slot 0. */
-            if (!save_read_s16(fp, &legacy_loot)) {
+        for (j = 0; j < CFG_CORPSE_ITEM_SLOTS; ++j) {
+            if (!save_read_s16(fp, &game->corpse_item[i][j])) {
                 return 0;
-            }
-            game->corpse_item[i][0] = legacy_loot;
-            for (j = 1; j < CFG_CORPSE_ITEM_SLOTS; ++j) {
-                game->corpse_item[i][j] = ITEM_NONE;
             }
         }
         if (!save_read_u8(fp, &game->room_explored[i])) {
@@ -414,6 +395,7 @@ static int save_write_game_state(FILE *fp, const struct GameState *game,
             !save_write_s16(fp, game->weapon_equipped) ||
             !save_write_s16(fp, game->player_hp) ||
             !save_write_s16(fp, game->combat.enemy_hp) ||
+            !save_write_s16(fp, game->combat.enemy_level) ||
             !save_write_s16(fp, game->combat.defending)) {
         return 0;
     }
@@ -430,7 +412,7 @@ static int save_write_game_state(FILE *fp, const struct GameState *game,
 }
 
 static int save_read_game_state(FILE *fp, struct GameState *game,
-                                u32 *out_rng_draw_count, u16 version)
+                                u32 *out_rng_draw_count)
 {
     if (!save_read_world(fp, &game->world) ||
             !save_read_s16(fp, &game->player.room_id) ||
@@ -454,7 +436,10 @@ static int save_read_game_state(FILE *fp, struct GameState *game,
             !save_read_s16(fp, &game->weapon_equipped) ||
             !save_read_s16(fp, &game->player_hp) ||
             !save_read_s16(fp, &game->combat.enemy_hp) ||
-            !save_read_s16(fp, &game->combat.defending)) {
+            !save_read_s16(fp, &game->combat.enemy_level)) {
+        return 0;
+    }
+    if (!save_read_s16(fp, &game->combat.defending)) {
         return 0;
     }
 #ifdef TEST_MODE
@@ -465,7 +450,7 @@ static int save_read_game_state(FILE *fp, struct GameState *game,
         return 0;
     }
 #endif
-    return save_read_game_arrays(fp, game, version);
+    return save_read_game_arrays(fp, game);
 }
 
 static int save_string_has_nul(const char *text, unsigned int size)
@@ -500,6 +485,11 @@ static int save_valid_boolish(int value)
     return value == 0 || value == 1;
 }
 
+static int save_valid_bandit_level(int level)
+{
+    return level >= CFG_BANDIT_LEVEL_MIN && level <= CFG_BANDIT_LEVEL_MAX;
+}
+
 /* Cross-field roster invariants; inactive slots must not claim a room. */
 static int save_valid_npc(const struct NpcState *npc, int room_count)
 {
@@ -513,6 +503,7 @@ static int save_valid_npc(const struct NpcState *npc, int room_count)
     if (npc->actor == GAME_DIALOGUE_ACTOR_NONE) {
         return npc->dialogue == DIALOGUE_NONE &&
             npc->encounter == GAME_ENCOUNTER_NONE &&
+            npc->level == 0 &&
             npc->room_id == -1 &&
             npc->flags == 0 &&
             npc->return_tick == 0;
@@ -523,6 +514,7 @@ static int save_valid_npc(const struct NpcState *npc, int room_count)
             npc->dialogue > DIALOGUE_LOOT ||
             npc->encounter < GAME_ENCOUNTER_NONE ||
             npc->encounter > GAME_ENCOUNTER_TRAVELER ||
+            npc->level < 0 ||
             !save_valid_room_or_none(npc->room_id, room_count) ||
             (npc->flags & ~allowed_flags) != 0) {
         return 0;
@@ -537,6 +529,10 @@ static int save_valid_npc(const struct NpcState *npc, int room_count)
     /* handover pick only valid on an active encounter slot */
     if ((npc->flags & NPC_FLAG_HANDOVER_PICK) != 0 &&
             (npc->flags & NPC_FLAG_ACTIVE) == 0) {
+        return 0;
+    }
+    if (npc->encounter == GAME_ENCOUNTER_BANDIT &&
+            !save_valid_bandit_level(npc->level)) {
         return 0;
     }
     return 1;
@@ -656,7 +652,12 @@ static int save_validate_game(const struct GameState *game)
             game->player_hp < 0 ||
             game->player_hp > game->max_hp ||
             game->combat.enemy_hp < 0 ||
-            !save_valid_boolish(game->combat.defending)) {
+            (game->combat.enemy_level > 0 &&
+                !save_valid_bandit_level(game->combat.enemy_level)) ||
+            !save_valid_boolish(game->combat.defending) ||
+            (game->mode == GAME_MODE_COMBAT &&
+                game->combat.enemy_hp > 0 &&
+                !save_valid_bandit_level(game->combat.enemy_level))) {
         return 0;
     }
     for (slot = 0; slot < CFG_NPC_MAX; ++slot) {
@@ -799,11 +800,10 @@ int save_read_game(const char *path, struct GameState *out_game,
         rc = SAVE_RESULT_IO;
         goto done;
     }
-    if (version != 5U && version != 6U && version != (u16)SAVE_VERSION) {
+    if (version != (u16)SAVE_VERSION) {
         goto done;
     }
-    if (!save_read_game_state(fp, &g_save_loaded, &loaded_rng_draw_count,
-            version)) {
+    if (!save_read_game_state(fp, &g_save_loaded, &loaded_rng_draw_count)) {
         goto done;
     }
     /* Reject padded or concatenated files; payload must end at EOF. */
@@ -814,11 +814,6 @@ int save_read_game(const char *path, struct GameState *out_game,
     /* Validate into g_save_loaded so a bad file does not clobber out_game. */
     if (!save_valid_rng_draw_count(loaded_rng_draw_count) ||
             !save_validate_game(&g_save_loaded)) {
-        rc = SAVE_RESULT_RANGE;
-        goto done;
-    }
-    npc_upgrade_loaded_profiles(&g_save_loaded);
-    if (!save_validate_game(&g_save_loaded)) {
         rc = SAVE_RESULT_RANGE;
         goto done;
     }

@@ -75,16 +75,20 @@ TEST genc_opens_dialogue(void)
 {
     struct GameState game;
     GameEventQueue out;
+    struct NpcState *enemy;
 
     unit_game_fresh(&game, 2u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     begin_enemy(&game, &out);
     ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
     ASSERT_EQ(DIALOGUE_ENEMY, game.dialogue);
+    enemy = active_enemy_npc(&game);
+    ASSERT(enemy != 0);
     ASSERT_EQ(1, out.count);
     ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
     ASSERT_EQ(GAME_ENCOUNTER_BANDIT, out.events[0].arg0);
     ASSERT_EQ(GAME_ENCOUNTER_ACTION_OPEN, out.events[0].arg1);
+    ASSERT_EQ(enemy->level, out.events[0].arg3);
     PASS();
 }
 
@@ -109,6 +113,7 @@ TEST genc_opens_seeded_roaming_bandit_without_spawning_ambush(void)
     ASSERT_EQ(1, out.count);
     ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
     ASSERT_EQ(GAME_ENCOUNTER_ACTION_OPEN, out.events[0].arg1);
+    ASSERT_EQ(bandit->level, out.events[0].arg3);
     PASS();
 }
 

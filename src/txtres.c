@@ -187,7 +187,8 @@ const char *const TXT_UI_FOCUS_CREAK = "You can track the source of the creaking
 const char *const TXT_UI_FOCUS_WATER = "You can follow the moving water sound. (inspect water)\n";
 const char *const TXT_UI_FOCUS_GRIT = "Fresh grit skids nearby. (inspect grit)\n";
 
-const char *const TXT_BANDIT_OPEN_INTRO = "A road bandit steps from cover with a hand on a rusted blade.\n";
+const char *const TXT_BANDIT_OPEN_INTRO = "A bandit steps from cover with a hand on a rusted blade.\n";
+const char *const TXT_BANDIT_OPEN_LEVEL_FMT = "Bandit Lv: %d.\n";
 const char *const TXT_BANDIT_OPEN_QUOTE = "\"Easy now. We can do this three ways.\"\n";
 const char *const TXT_BANDIT_OPEN_OPT1 = "  [1] Refuse and fight.\n";
 const char *const TXT_BANDIT_OPEN_OPT2 =
@@ -196,11 +197,13 @@ const char *const TXT_BANDIT_OPEN_OPT3 = "  [3] Talk it down and part ways.\n";
 const char *const TXT_REPLY_PROMPT = "(Answer with 1, 2, 3, or reply <n>.)\n";
 const char *const TXT_REPLY_PROMPT_FMT = "(Answer with 1-%d or reply <n>.)\n";
 
-const char *const TXT_COMBAT_START_FMT = "Combat starts. You HP: %d, Bandit HP: %d.\n";
+const char *const TXT_COMBAT_START_FMT =
+    "Combat starts. You HP: %d, Bandit HP: %d, Bandit Lv: %d.\n";
 const char *const TXT_COMBAT_MENU = "Choose: [1] Attack  [2] Defend  [3] Use salve\n";
 const char *const TXT_COMBAT_ENEMY_STRIKE_FMT = "The bandit strikes for %d damage.\n";
 const char *const TXT_COMBAT_PLAYER_FALLEN = "You collapse. The road takes everything.\n";
-const char *const TXT_COMBAT_STATUS_FMT = "You HP: %d, Bandit HP: %d.\n";
+const char *const TXT_COMBAT_STATUS_FMT =
+    "You HP: %d, Bandit HP: %d, Bandit Lv: %d.\n";
 const char *const TXT_COMBAT_PLAYER_HIT_FMT = "You hit the bandit for %d damage.\n";
 const char *const TXT_COMBAT_BRACED = "You brace for the incoming strike.\n";
 const char *const TXT_COMBAT_NO_SALVE = "You fumble for a salve, but you have none.\n";
@@ -209,7 +212,8 @@ const char *const TXT_COMBAT_SALVE_FULL = "You apply salve.\n";
 const char *const TXT_ALREADY_FULL_HEALTH = "You're already at full health.\n";
 const char *const TXT_PICK_123 = "Pick 1, 2, or 3.\n";
 const char *const TXT_PICK_RANGE_FMT = "Pick 1 through %d.\n";
-const char *const TXT_COMBAT_BANDIT_DEFEATED = "The bandit falls. The body slumps into the dust.\n";
+const char *const TXT_COMBAT_BANDIT_DEFEATED_FMT =
+    "The Lv %d bandit falls. The body slumps into the dust.\n";
 
 const char *const TXT_XP_GAIN_FMT = "You gain %d XP.\n";
 const char *const TXT_LEVEL_UP_FMT = "Level up! You are now level %d.\n";

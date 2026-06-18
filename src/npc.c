@@ -29,6 +29,9 @@ struct NpcProfile {
     int actor;
     int dialogue;
     int encounter;
+    /* Authored difficulty band; zero min/max means no combat scaling. */
+    int level_min;
+    int level_max;
     int spawn_room;
     int flags;
     u32 roam_start_tick;
@@ -43,11 +46,25 @@ struct NpcProfile {
  */
 static const struct NpcProfile NPC_PROFILES[] = {
     { GAME_DIALOGUE_ACTOR_TRAVELER, DIALOGUE_TRAVELER, GAME_ENCOUNTER_TRAVELER,
+        0, 0,
         WORLD_ROOM_RUINS,
         NPC_FLAG_ACTIVE | NPC_FLAG_ROAMING | NPC_FLAG_RESPAWNS,
         0, 8, 16, NPC_RESPAWN_ON_DIALOGUE_RESOLVE },
     { GAME_DIALOGUE_ACTOR_BANDIT, DIALOGUE_NONE, GAME_ENCOUNTER_BANDIT,
+        1, 3,
         WORLD_ROOM_ROAD,
+        NPC_FLAG_ACTIVE | NPC_FLAG_ROAMING | NPC_FLAG_RESPAWNS,
+        8, 6, 10, NPC_RESPAWN_ON_ENCOUNTER_END },
+    { GAME_DIALOGUE_ACTOR_BANDIT_BRIDGE, DIALOGUE_NONE,
+        GAME_ENCOUNTER_BANDIT,
+        1, 3,
+        WORLD_ROOM_BRIDGE,
+        NPC_FLAG_ACTIVE | NPC_FLAG_ROAMING | NPC_FLAG_RESPAWNS,
+        8, 6, 10, NPC_RESPAWN_ON_ENCOUNTER_END },
+    { GAME_DIALOGUE_ACTOR_BANDIT_CANYON, DIALOGUE_NONE,
+        GAME_ENCOUNTER_BANDIT,
+        1, 3,
+        WORLD_ROOM_CANYON,
         NPC_FLAG_ACTIVE | NPC_FLAG_ROAMING | NPC_FLAG_RESPAWNS,
         8, 6, 10, NPC_RESPAWN_ON_ENCOUNTER_END }
 };
@@ -165,10 +182,54 @@ static const struct NpcRoomInfo *npc_room_info(int room_id)
     return 0;
 }
 
-static void npc_push_encounter_open(GameEventQueue *out, int kind)
+static const struct NpcProfile *npc_bandit_profile(void)
 {
+    return npc_profile_by_actor(GAME_DIALOGUE_ACTOR_BANDIT);
+}
+
+static int npc_roll_profile_level(const struct GameState *game,
+                                  const struct NpcProfile *profile,
+                                  u32 salt)
+{
+    u32 span;
+
+    /* Seed, actor, and room/tick salt keep level rolls stable across save/load. */
+    if (profile == 0 || profile->level_max <= 0) {
+        return 0;
+    }
+    if (profile->level_max <= profile->level_min) {
+        return profile->level_min;
+    }
+    span = (u32)(profile->level_max - profile->level_min + 1);
+    return profile->level_min + (int)((game->seed + (u32)profile->actor +
+        salt) % span);
+}
+
+static int npc_default_level_for_encounter(const struct GameState *game,
+                                           int actor, int encounter, u32 salt)
+{
+    const struct NpcProfile *profile;
+
+    profile = npc_profile_by_actor(actor);
+    if (profile != 0) {
+        return npc_roll_profile_level(game, profile, salt);
+    }
+    if (encounter == GAME_ENCOUNTER_BANDIT) {
+        /* Actors without a profile row (e.g. BANDIT_AMBUSH) reuse road bandit scaling. */
+        profile = npc_bandit_profile();
+        if (profile != 0) {
+            return npc_roll_profile_level(game, profile, salt);
+        }
+        return 1;
+    }
+    return 0;
+}
+
+static void npc_push_encounter_open(GameEventQueue *out, int kind, int level)
+{
+    /* OPEN arg3 carries bandit level for grendr; zero for non-scaling encounters. */
     game_event_push(out, GAME_EVENT_ENCOUNTER, kind,
-        GAME_ENCOUNTER_ACTION_OPEN, GAME_ENCOUNTER_OUTCOME_NONE, 0, 0);
+        GAME_ENCOUNTER_ACTION_OPEN, GAME_ENCOUNTER_OUTCOME_NONE, level, 0);
 }
 
 /*
@@ -196,12 +257,6 @@ static u32 npc_respawn_return_tick(struct GameState *game,
     }
     return game->tick + profile->respawn_delay_base +
         (u32)(plat_rand() % profile->respawn_delay_spread);
-}
-
-static u32 npc_profile_return_tick_from_base(const struct GameState *game,
-                                             const struct NpcProfile *profile)
-{
-    return game->tick + profile->respawn_delay_base;
 }
 
 /* roam_start_tick on the profile keeps early road encounter beats seed-stable. */
@@ -254,6 +309,7 @@ void npc_clear_all(struct GameState *game)
         game->npcs[i].actor = GAME_DIALOGUE_ACTOR_NONE;
         game->npcs[i].dialogue = DIALOGUE_NONE;
         game->npcs[i].encounter = GAME_ENCOUNTER_NONE;
+        game->npcs[i].level = 0;
         game->npcs[i].room_id = -1;
         game->npcs[i].flags = 0;
         game->npcs[i].return_tick = 0;
@@ -320,6 +376,8 @@ int npc_spawn(struct GameState *game, int actor, int dialogue, int encounter,
     npc->actor = actor;
     npc->dialogue = dialogue;
     npc->encounter = encounter;
+    npc->level = npc_default_level_for_encounter(game, actor, encounter,
+        (u32)(room_id >= 0 ? room_id : 0));
     npc->room_id = room_id;
     npc->flags = flags;
     npc->return_tick = 0;
@@ -405,7 +463,7 @@ int npc_begin_encounter(struct GameState *game, int actor, int dialogue,
     if (slot < 0) {
         return -1;
     }
-    npc_push_encounter_open(out, encounter);
+    npc_push_encounter_open(out, encounter, game->npcs[slot].level);
     game_set_mode_dialogue(game, dialogue);
     return slot;
 }
@@ -462,36 +520,6 @@ void npc_seed_profiles(struct GameState *game)
     }
 }
 
-/*
- * Save migrations keep SAVE_VERSION stable when the roster layout is unchanged
- * and only profile semantics evolve. Older saves may carry the road bandit
- * without roaming/respawn flags or return timing; normalize those slots here.
- */
-void npc_upgrade_loaded_profiles(struct GameState *game)
-{
-    int slot;
-    struct NpcState *npc;
-    const struct NpcProfile *profile;
-
-    for (slot = 0; slot < CFG_NPC_MAX; ++slot) {
-        npc = &game->npcs[slot];
-        profile = npc_profile_by_actor(npc->actor);
-        if (profile == 0) {
-            continue;
-        }
-        npc->encounter = profile->encounter;
-        if (npc->dialogue != DIALOGUE_ENEMY) {
-            npc->dialogue = profile->dialogue;
-        }
-        npc->flags |= profile->flags & (NPC_FLAG_ROAMING | NPC_FLAG_RESPAWNS);
-        if ((npc->flags & NPC_FLAG_ACTIVE) == 0 &&
-                (npc->flags & NPC_FLAG_RESPAWNS) != 0 &&
-                npc->return_tick == 0) {
-            npc->return_tick = npc_profile_return_tick_from_base(game, profile);
-        }
-    }
-}
-
 /* Reactivation after return_tick picks a random room in the generated graph. */
 void npc_roaming_activate_due(struct GameState *game)
 {
@@ -516,6 +544,10 @@ void npc_roaming_activate_due(struct GameState *game)
             game->npcs[i].dialogue = DIALOGUE_NONE;
         }
         game->npcs[i].room_id = plat_rand() % game->world.room_count;
+        /* Re-roll level from return_tick + room so respawns stay seed-stable. */
+        game->npcs[i].level = npc_default_level_for_encounter(game,
+            game->npcs[i].actor, game->npcs[i].encounter,
+            game->npcs[i].return_tick + (u32)game->npcs[i].room_id);
     }
 }
 
@@ -598,7 +630,7 @@ int npc_fixed_begin_encounter_in_room(struct GameState *game, int room_id,
         }
         /* Fixed encounters keep the authored slot; only mode/event state changes. */
         npc->dialogue = DIALOGUE_ENEMY;
-        npc_push_encounter_open(out, npc->encounter);
+        npc_push_encounter_open(out, npc->encounter, npc->level);
         game_set_mode_dialogue(game, npc->dialogue);
         return 1;
     }
@@ -626,7 +658,7 @@ int npc_roaming_begin_encounter_in_room(struct GameState *game, int room_id,
                 npc_slot_needs_separation(npc)) {
             continue;
         }
-        npc_push_encounter_open(out, npc->encounter);
+        npc_push_encounter_open(out, npc->encounter, npc->level);
         npc->dialogue = npc_encounter_dialogue_kind(npc);
         game_set_mode_dialogue(game, npc->dialogue);
         npc->flags |= NPC_FLAG_NEEDS_SEPARATION;

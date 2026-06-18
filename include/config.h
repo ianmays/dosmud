@@ -88,13 +88,16 @@
 /* Combat */
 #define CFG_COMBAT_ENEMY_HP_BASE 8
 #define CFG_COMBAT_ENEMY_HP_SPREAD 5
+#define CFG_COMBAT_ENEMY_HP_PER_LEVEL 3
 #define CFG_COMBAT_ENEMY_DMG_BASE 1
 #define CFG_COMBAT_ENEMY_DMG_SPREAD 4
+#define CFG_COMBAT_ENEMY_DMG_PER_LEVEL 1
 #define CFG_COMBAT_DEFEND_DAMAGE_REDUCTION 2
 #define CFG_COMBAT_PLAYER_HIT_BASE 2
 #define CFG_COMBAT_PLAYER_HIT_SPREAD 4
 #define CFG_COMBAT_KILL_XP_BASE 12
 #define CFG_COMBAT_KILL_XP_SPREAD 5
+#define CFG_COMBAT_KILL_XP_PER_LEVEL 4
 
 /* Item effects (used in combat and inventory) */
 #define CFG_BERRY_HEAL_AMOUNT 1
@@ -126,6 +129,8 @@
 
 /* Bandit dialogue / intimidate */
 #define CFG_BANDIT_INTIMIDATE_SUCCESS_BELOW 60
+#define CFG_BANDIT_LEVEL_MIN 1
+#define CFG_BANDIT_LEVEL_MAX 3
 
 /* Room item spawn (tick hook) */
 #define CFG_ROOM_ITEM_SPAWN_GATE 20
@@ -151,7 +156,7 @@
 #define CFG_ATMOSPHERE_FOCUS_EXTRA_ITEM_BELOW 50
 
 /* Dynamic NPC roster cap (save payload and per-tick roaming walks). */
-#define CFG_NPC_MAX 4
+#define CFG_NPC_MAX 6
 
 /* --- Main loop and test harness --- */
 
