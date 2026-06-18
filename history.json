@@ -2015,6 +2015,48 @@
         "branch_pct": 97.66,
         "line_pct": 86.9
       }
+    },
+    {
+      "timestamp": "2026-06-18T15:34:37Z",
+      "sha": "df7d0f0",
+      "result": "pass",
+      "steps": {
+        "check-layers": 6,
+        "make build": 1592,
+        "make test": 732,
+        "make build-unit": 1814,
+        "make build-soak": 816,
+        "snapshots": 147,
+        "unit tests": 8,
+        "unit coverage": 2623,
+        "soak tests": 6
+      },
+      "benchmarks": {
+        "background_ticks": 0,
+        "command_ticks": 0,
+        "combat_rounds": 0
+      },
+      "test_counts": {
+        "snapshots": {
+          "pass": 78,
+          "fail": 0,
+          "skip": 0
+        },
+        "unit": {
+          "pass": 242,
+          "fail": 0,
+          "skip": 0
+        },
+        "soak": {
+          "pass": 3,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "unit_coverage_overall": {
+        "branch_pct": 97.68,
+        "line_pct": 87.14
+      }
     }
   ]
 }
