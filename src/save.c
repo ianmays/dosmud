@@ -806,7 +806,10 @@ int save_read_game(const char *path, struct GameState *out_game,
         goto done;
     }
     npc_upgrade_loaded_profiles(&g_save_loaded);
-    /* v7 saves lack combat.enemy_level; backfill from the active DIALOGUE_ENEMY slot. */
+    /*
+     * Only SAVE_VERSION loads (see file header). Mid-combat snapshots may still
+     * carry enemy_level 0; backfill from the active DIALOGUE_ENEMY slot.
+     */
     if (g_save_loaded.mode == GAME_MODE_COMBAT &&
             g_save_loaded.combat.enemy_hp > 0 &&
             g_save_loaded.combat.enemy_level == 0) {
