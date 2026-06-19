@@ -466,6 +466,8 @@ Done ✅ ([#151](https://github.com/ianmays/dosmud/pull/151)).
 
 ### [#202](https://github.com/ianmays/dosmud/issues/202) - Add build identity and version command
 
+Done ✅ ([#208](https://github.com/ianmays/dosmud/pull/208)).
+
 ### [#203](https://github.com/ianmays/dosmud/issues/203) - Add GitHub release packaging and release notes workflow
 
 ## [Advanced Architecture](https://github.com/ianmays/dosmud/milestone/5)
