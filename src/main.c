@@ -4,6 +4,7 @@
 #include <errno.h>
 #include <limits.h>
 #include "config.h"
+#include "buildid.h"
 #include "game.h"
 #include "grendr.h"
 #include "invent.h"
@@ -54,7 +55,7 @@ static u32 default_rng_seed(void)
  * Returns 0 on success, -1 on invalid or unknown arguments.
  */
 static int parse_cli_args(int argc, char **argv, u32 *out_seed,
-                          const char **out_replay_path)
+                          const char **out_replay_path, int *out_print_version)
 {
     int i;
     int have_seed;
@@ -63,6 +64,7 @@ static int parse_cli_args(int argc, char **argv, u32 *out_seed,
 #endif
 
     have_seed = 0;
+    *out_print_version = 0;
 #ifdef TEST_MODE
     have_replay_path = 0;
 #endif
@@ -98,6 +100,8 @@ static int parse_cli_args(int argc, char **argv, u32 *out_seed,
             *out_seed = (u32)val;
             have_seed = 1;
             ++i;
+        } else if (strcmp(argv[i], "--version") == 0) {
+            *out_print_version = 1;
         } else if (strcmp(argv[i], "--replay-log") == 0) {
 #ifdef TEST_MODE
             if (have_replay_path) {
@@ -126,10 +130,11 @@ static int parse_cli_args(int argc, char **argv, u32 *out_seed,
 }
 
 static int main_parse_args(int argc, char **argv, u32 *out_seed,
-                           const char **out_replay_path)
+                           const char **out_replay_path, int *out_print_version)
 {
     *out_seed = default_rng_seed();
-    if (parse_cli_args(argc, argv, out_seed, out_replay_path) != 0) {
+    if (parse_cli_args(argc, argv, out_seed, out_replay_path,
+            out_print_version) != 0) {
         fprintf(stderr, "%s\n", TXT_MAIN_USAGE);
         return 1;
     }
@@ -396,17 +401,23 @@ int main(int argc, char **argv)
     char line[CFG_INPUT_MAX];
     time_t last_tick_time;
     u32 rng_seed;
+    int print_version;
     int poll_rc;
 #ifdef TEST_MODE
     const char *replay_path;
     replay_log_reset(&g_replay_log);
 #endif
 #ifdef TEST_MODE
-    if (main_parse_args(argc, argv, &rng_seed, &replay_path) != 0) {
+    if (main_parse_args(argc, argv, &rng_seed, &replay_path,
+            &print_version) != 0) {
 #else
-    if (main_parse_args(argc, argv, &rng_seed, 0) != 0) {
+    if (main_parse_args(argc, argv, &rng_seed, 0, &print_version) != 0) {
 #endif
         return 1;
+    }
+    if (print_version) {
+        printf("%s\n", build_version_line());
+        return 0;
     }
 #ifdef TEST_MODE
     if (replay_path != 0 && !replay_log_open(&g_replay_log, replay_path, rng_seed)) {

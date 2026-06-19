@@ -32,6 +32,7 @@
 #define CMD_HELP_TOPIC_WIELD 18
 #define CMD_HELP_TOPIC_SAVE 19
 #define CMD_HELP_TOPIC_LOAD 20
+#define CMD_HELP_TOPIC_VERSION 21
 
 /* Passed in Command.arg when type is CMD_TAKE and the user requested "all". */
 #define CMD_TAKE_ALL (-1)
@@ -58,7 +59,8 @@ enum CommandType {
     CMD_WIELD,
     CMD_UNWIELD,
     CMD_SAVE,
-    CMD_LOAD
+    CMD_LOAD,
+    CMD_VERSION
 };
 
 struct Command {

@@ -16,6 +16,7 @@ REM .c to a .obj with a short line, pack gameplay objects into gameplay.lib (wli
 REM then link with one short wcl line (same shape as before the game.c split).
 
 if exist main.obj del main.obj
+if exist buildid.obj del buildid.obj
 if exist game.obj del game.obj
 if exist gout.obj del gout.obj
 if exist gprog.obj del gprog.obj
@@ -46,6 +47,11 @@ if errorlevel 1 goto wcl_bad
 echo Compiling platdos.c ... >> %LOG%
 echo Compiling platdos.c ...
 wcl %WFL% -c -fo=platdos.obj src\platdos.c >> %LOG%
+if errorlevel 1 goto wcl_bad
+
+echo Compiling buildid.c ... >> %LOG%
+echo Compiling buildid.c ...
+wcl %WFL% -c -fo=buildid.obj src\buildid.c >> %LOG%
 if errorlevel 1 goto wcl_bad
 
 echo Compiling game.c ... >> %LOG%
@@ -147,11 +153,13 @@ if errorlevel 1 goto wcl_bad
 echo Archiving gameplay.lib ... >> %LOG%
 echo Archiving gameplay.lib ...
 REM Keep each wlib line under COMMAND.COM ~127 chars (TEST_MODE adds +tharn.obj).
-wlib -n gameplay.lib +game.obj +gout.obj +gprog.obj +combat.obj >> %LOG%
+wlib -n gameplay.lib +buildid.obj +game.obj +gout.obj >> %LOG%
 if errorlevel 1 goto wcl_bad
-wlib gameplay.lib +genc.obj +dialogue.obj +npc.obj >> %LOG%
+wlib gameplay.lib +gprog.obj +combat.obj +genc.obj >> %LOG%
 if errorlevel 1 goto wcl_bad
-wlib gameplay.lib +gatmos.obj +fmt.obj +save.obj >> %LOG%
+wlib gameplay.lib +dialogue.obj +npc.obj +gatmos.obj >> %LOG%
+if errorlevel 1 goto wcl_bad
+wlib gameplay.lib +fmt.obj +save.obj >> %LOG%
 if errorlevel 1 goto wcl_bad
 if not "%1"=="TEST_MODE" goto wlib_done
 wlib gameplay.lib +replay.obj +thwld.obj +tharn.obj >> %LOG%

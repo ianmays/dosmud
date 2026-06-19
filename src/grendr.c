@@ -481,6 +481,12 @@ void game_print_help(int topic)
     RENDER_PRINTF("%s\n", command_help_line(topic));
 }
 
+void render_msg_version(const char *line)
+{
+    render_gap();
+    RENDER_PRINTF("%s\n", line);
+}
+
 /*
  * #158: invent emits GAME_EVENT_ITEM/CRAFT/EQUIP_RESULT and BAG_VIEW; adapters
  * map arg slots to render_inv_* helpers from payload enums.
@@ -957,6 +963,9 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
             break;
         case GAME_EVENT_HELP:
             game_print_help(ev->arg0);
+            break;
+        case GAME_EVENT_VERSION:
+            render_msg_version(ev->text);
             break;
         case GAME_EVENT_WAIT:
             render_msg_wait();

@@ -86,6 +86,9 @@ static int help_topic_from_word(const char *w)
     if (strcmp(w, "load") == 0) {
         return CMD_HELP_TOPIC_LOAD;
     }
+    if (strcmp(w, "version") == 0) {
+        return CMD_HELP_TOPIC_VERSION;
+    }
     if (strcmp(w, "help") == 0 || strcmp(w, "?") == 0) {
         return CMD_HELP_TOPIC_HELP;
     }
@@ -239,6 +242,10 @@ int command_parse(char *line, struct Command *out_cmd)
         out_cmd->type = CMD_LOAD;
         return count == 1;
     }
+    if (strcmp(word1, "version") == 0) {
+        out_cmd->type = CMD_VERSION;
+        return count == 1;
+    }
     if (strcmp(word1, "wield") == 0) {
         out_cmd->type = CMD_WIELD;
         if (count < 2) return 0;
@@ -366,6 +373,8 @@ const char *command_help_line(int topic)
         return TXT_HELP_SAVE;
     case CMD_HELP_TOPIC_LOAD:
         return TXT_HELP_LOAD;
+    case CMD_HELP_TOPIC_VERSION:
+        return TXT_HELP_VERSION;
     default:
         return TXT_HELP_TOPIC_UNKNOWN;
     }

@@ -15,6 +15,7 @@ playtest/sessions/*
 !playtest/sessions/.gitkeep
 
 # Compile artifacts
+build/
 *.o
 *.obj
 

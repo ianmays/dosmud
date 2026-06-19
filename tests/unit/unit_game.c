@@ -544,6 +544,26 @@ TEST game_map_emits_map_event(void)
     PASS();
 }
 
+TEST game_version_emits_version_event_without_tick(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    char line[] = "version";
+
+    unit_game_fresh(&game, 40u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game.test_quiet_ticks = 1;
+    disable_traveler(&game);
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, game_process_input(&game, line, &out));
+    ASSERT_EQ(0, game.tick);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_VERSION, out.events[0].kind);
+    ASSERT(out.events[0].text != 0);
+    ASSERT(strstr(out.events[0].text, "dosmud ") == out.events[0].text);
+    PASS();
+}
+
 TEST game_unknown_command_emits_event(void)
 {
     struct GameState game;
@@ -813,6 +833,7 @@ SUITE(game) {
     RUN_TEST(game_wait_emits_output_record);
     RUN_TEST(game_help_emits_help_event);
     RUN_TEST(game_map_emits_map_event);
+    RUN_TEST(game_version_emits_version_event_without_tick);
     RUN_TEST(game_unknown_command_emits_event);
     RUN_TEST(game_cannot_move_emits_event);
     RUN_TEST(game_move_emits_move_then_look);

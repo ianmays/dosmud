@@ -1,7 +1,9 @@
 CC ?= gcc
 WIN_CC ?= x86_64-w64-mingw32-gcc
 
-BASE_CFLAGS = -Wall -Wextra -Wshadow -Wstrict-prototypes -Wmissing-prototypes -std=c89 -pedantic -Iinclude -Isrc
+BUILD_INCLUDE_DIR = build/include
+VERSION_HDR = $(BUILD_INCLUDE_DIR)/version.h
+BASE_CFLAGS = -Wall -Wextra -Wshadow -Wstrict-prototypes -Wmissing-prototypes -std=c89 -pedantic -I$(BUILD_INCLUDE_DIR) -Iinclude -Isrc
 TEST_MODE_FLAG = TEST_MODE
 HARNESS_DIR = tests/harness
 TEST_CFLAGS = $(BASE_CFLAGS) -Werror -D$(TEST_MODE_FLAG) -g -O0 -I$(HARNESS_DIR)
@@ -11,7 +13,7 @@ PLAT_SRC = src/platpos.c
 ifeq ($(TARGET),win)
 PLAT_SRC = src/platwin.c
 endif
-SRC = src/main.c $(PLAT_SRC) src/game.c src/gout.c src/gprog.c src/combat.c src/genc.c src/dialogue.c src/npc.c src/gatmos.c src/grendr.c src/fmt.c src/invent.c src/command.c src/world.c src/items.c src/replay.c src/save.c src/txtres.c
+SRC = src/main.c $(PLAT_SRC) src/buildid.c src/game.c src/gout.c src/gprog.c src/combat.c src/genc.c src/dialogue.c src/npc.c src/gatmos.c src/grendr.c src/fmt.c src/invent.c src/command.c src/world.c src/items.c src/replay.c src/save.c src/txtres.c
 HARNESS_SRC = $(HARNESS_DIR)/testharn.c $(HARNESS_DIR)/th_world.c
 TEST_SRC = $(SRC) $(HARNESS_SRC)
 REGRESSION_DIR = tests/regression
@@ -30,12 +32,15 @@ printf 'elapsed: %s.%03ds\n' "$$elapsed_s" "$$elapsed_rem"; \
 exit $$status
 endef
 
+$(VERSION_HDR): VERSION scripts/gen-version-header.sh
+	sh scripts/gen-version-header.sh VERSION $@
+
 build-all:
 	$(MAKE) clean
 	$(MAKE) dos-prepare NORUN=1
 	$(MAKE) build
 
-build:
+build: $(VERSION_HDR)
 	$(call RUN_TIMED,$(CC) $(BASE_CFLAGS) -o $(BIN) $(SRC))
 
 build-win:
@@ -66,7 +71,7 @@ test-all:
 	$(MAKE) test-soak
 
 # deterministic
-test:
+test: $(VERSION_HDR)
 	$(call RUN_TIMED,$(CC) $(TEST_CFLAGS) -o $(BIN) $(TEST_SRC))
 
 test-win:
@@ -94,12 +99,12 @@ SNAPSHOT_TESTS = \
 	unknown_cmd cannot_move give_wrong_context reply_nobody post_combat_reply_guard reply_invalid \
 	craft_salve craft_unknown take_nothing take_wrong_item take_all take_all_bag_full \
 	save_load save_load_loot_menu \
-	replay_log replay_save_load
+	replay_log replay_save_load version
 
 snapshot-run:
 	@set -e; \
 	n=0; \
-	total=$$(($$(echo $(SNAPSHOT_TESTS) | wc -w) + 1)); \
+	total=$$(($$(echo $(SNAPSHOT_TESTS) | wc -w) + 2)); \
 	for t in $(SNAPSHOT_TESTS); do \
 		echo "snapshot: $$t"; \
 		if [ "$$t" = "replay_log" ]; then \
@@ -117,6 +122,11 @@ snapshot-run:
 			./$(BIN) < $(REGRESSION_DIR)/$$t.input > $(REGRESSION_DIR)/$$t.output; \
 			diff -u $(REGRESSION_DIR)/$$t.expect $(REGRESSION_DIR)/$$t.output; \
 			rm -f save.dat; \
+		elif [ "$$t" = "version" ]; then \
+			version_string=$$(sed -n 's/^#define BUILD_VERSION_STRING "\(.*\)"/\1/p' $(VERSION_HDR)); \
+			sed "s/@VERSION@/$$version_string/g" $(REGRESSION_DIR)/$$t.expect > $(REGRESSION_DIR)/$$t.expect.output; \
+			./$(BIN) < $(REGRESSION_DIR)/$$t.input > $(REGRESSION_DIR)/$$t.output; \
+			diff -u $(REGRESSION_DIR)/$$t.expect.output $(REGRESSION_DIR)/$$t.output; \
 		else \
 			./$(BIN) < $(REGRESSION_DIR)/$$t.input > $(REGRESSION_DIR)/$$t.output; \
 			diff -u $(REGRESSION_DIR)/$$t.expect $(REGRESSION_DIR)/$$t.output; \
@@ -126,6 +136,12 @@ snapshot-run:
 	echo "snapshot: seed_cli"; \
 	./$(BIN) --seed 1234 < $(REGRESSION_DIR)/smoke.input > $(REGRESSION_DIR)/seed_cli.output; \
 	diff -u $(REGRESSION_DIR)/seed_cli.expect $(REGRESSION_DIR)/seed_cli.output; \
+	n=$$((n + 1)); \
+	echo "snapshot: version_cli"; \
+	version_string=$$(sed -n 's/^#define BUILD_VERSION_STRING "\(.*\)"/\1/p' $(VERSION_HDR)); \
+	sed "s/@VERSION@/$$version_string/g" $(REGRESSION_DIR)/version_cli.expect > $(REGRESSION_DIR)/version_cli.expect.output; \
+	./$(BIN) --version > $(REGRESSION_DIR)/version_cli.output; \
+	diff -u $(REGRESSION_DIR)/version_cli.expect.output $(REGRESSION_DIR)/version_cli.output; \
 	n=$$((n + 1)); \
 	echo "snapshot tests passed: $$n/$$total"
 
@@ -149,7 +165,7 @@ UNIT_BIN = $(UNIT_BUILD_DIR)/dosmud_unit
 UNIT_COV_BIN = $(UNIT_COV_BUILD_DIR)/dosmud_unit_cov
 UNIT_CFLAGS = $(TEST_CFLAGS) -I$(UNIT_DIR)
 UNIT_COV_CFLAGS = $(UNIT_CFLAGS) -fprofile-arcs -ftest-coverage
-UNIT_GAMEPLAY_SRC = $(PLAT_SRC) src/game.c src/gout.c src/gprog.c src/combat.c src/genc.c \
+UNIT_GAMEPLAY_SRC = $(PLAT_SRC) src/buildid.c src/game.c src/gout.c src/gprog.c src/combat.c src/genc.c \
 	src/dialogue.c src/npc.c src/gatmos.c src/grendr.c src/fmt.c src/invent.c \
 	src/command.c src/world.c src/items.c src/replay.c src/save.c src/txtres.c
 UNIT_CORE_SRC = $(UNIT_GAMEPLAY_SRC) $(HARNESS_SRC)
@@ -174,27 +190,27 @@ UNIT_CC_QUIET = @
 UNIT_LINK_ANNOUNCE = @echo "building $(UNIT_BIN)..."
 endif
 
-$(UNIT_BUILD_DIR)/%.o: src/%.c
+$(UNIT_BUILD_DIR)/%.o: src/%.c $(VERSION_HDR)
 	@mkdir -p $(UNIT_BUILD_DIR)
 	$(UNIT_CC_QUIET)$(CC) $(UNIT_CFLAGS) -c $< -o $@
 
-$(UNIT_BUILD_DIR)/%.o: $(UNIT_DIR)/%.c
+$(UNIT_BUILD_DIR)/%.o: $(UNIT_DIR)/%.c $(VERSION_HDR)
 	@mkdir -p $(UNIT_BUILD_DIR)
 	$(UNIT_CC_QUIET)$(CC) $(UNIT_CFLAGS) -c $< -o $@
 
-$(UNIT_BUILD_DIR)/%.o: $(HARNESS_DIR)/%.c
+$(UNIT_BUILD_DIR)/%.o: $(HARNESS_DIR)/%.c $(VERSION_HDR)
 	@mkdir -p $(UNIT_BUILD_DIR)
 	$(UNIT_CC_QUIET)$(CC) $(UNIT_CFLAGS) -c $< -o $@
 
-$(UNIT_COV_BUILD_DIR)/%.o: src/%.c
+$(UNIT_COV_BUILD_DIR)/%.o: src/%.c $(VERSION_HDR)
 	@mkdir -p $(UNIT_COV_BUILD_DIR)
 	$(UNIT_CC_QUIET)$(CC) $(UNIT_COV_CFLAGS) -c $< -o $@
 
-$(UNIT_COV_BUILD_DIR)/%.o: $(UNIT_DIR)/%.c
+$(UNIT_COV_BUILD_DIR)/%.o: $(UNIT_DIR)/%.c $(VERSION_HDR)
 	@mkdir -p $(UNIT_COV_BUILD_DIR)
 	$(UNIT_CC_QUIET)$(CC) $(UNIT_COV_CFLAGS) -c $< -o $@
 
-$(UNIT_COV_BUILD_DIR)/%.o: $(HARNESS_DIR)/%.c
+$(UNIT_COV_BUILD_DIR)/%.o: $(HARNESS_DIR)/%.c $(VERSION_HDR)
 	@mkdir -p $(UNIT_COV_BUILD_DIR)
 	$(UNIT_CC_QUIET)$(CC) $(UNIT_COV_CFLAGS) -c $< -o $@
 
@@ -276,19 +292,19 @@ SOAK_TEST_SRC = $(SOAK_DIR)/soak_main.c $(SOAK_DIR)/soak_sim.c $(SOAK_DIR)/soak_
 SOAK_CORE_OBJS = $(addprefix $(SOAK_BUILD_DIR)/,$(notdir $(SOAK_CORE_SRC:.c=.o)))
 SOAK_TEST_OBJS = $(addprefix $(SOAK_BUILD_DIR)/,$(notdir $(SOAK_TEST_SRC:.c=.o)))
 
-$(SOAK_BUILD_DIR)/%.o: src/%.c
+$(SOAK_BUILD_DIR)/%.o: src/%.c $(VERSION_HDR)
 	@mkdir -p $(SOAK_BUILD_DIR)
 	@$(CC) $(SOAK_CFLAGS) -c $< -o $@
 
-$(SOAK_BUILD_DIR)/%.o: $(SOAK_DIR)/%.c
+$(SOAK_BUILD_DIR)/%.o: $(SOAK_DIR)/%.c $(VERSION_HDR)
 	@mkdir -p $(SOAK_BUILD_DIR)
 	@$(CC) $(SOAK_CFLAGS) -c $< -o $@
 
-$(SOAK_BUILD_DIR)/%.o: $(HARNESS_DIR)/%.c
+$(SOAK_BUILD_DIR)/%.o: $(HARNESS_DIR)/%.c $(VERSION_HDR)
 	@mkdir -p $(SOAK_BUILD_DIR)
 	@$(CC) $(SOAK_CFLAGS) -c $< -o $@
 
-$(SOAK_BUILD_DIR)/unit_util.o: $(UNIT_DIR)/unit_util.c
+$(SOAK_BUILD_DIR)/unit_util.o: $(UNIT_DIR)/unit_util.c $(VERSION_HDR)
 	@mkdir -p $(SOAK_BUILD_DIR)
 	@$(CC) $(SOAK_CFLAGS) -c $< -o $@
 
@@ -307,6 +323,7 @@ clean:
 	rm -f $(BIN)
 	rm -f dosmud.exe
 	rm -rf $(UNIT_BUILD_DIR)
+	rm -rf $(BUILD_INCLUDE_DIR)
 	rm -rf $(SOAK_BUILD_DIR)
 	rm -f $(REGRESSION_DIR)/*.output tests/*.output
 	rm -f dosmud_unit dosmud_unit-*.gcno dosmud_unit-*.gcda *.gcov src/*.gcno src/*.gcda

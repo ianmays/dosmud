@@ -21,6 +21,7 @@ void game_render(const struct GameState *game);
 /* Drain per-step GameEventQueue; dispatch generic GameEvent kinds to render_* helpers. */
 void game_render_output(const struct GameState *game, const GameEventQueue *out);
 void game_print_help(int topic);
+void render_msg_version(const char *line);
 
 void render_bandit_encounter_open(int enemy_level);
 void render_combat_start(int player_hp, int enemy_hp, int enemy_level);

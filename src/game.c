@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include "buildid.h"
 #include "platform.h"
 #include "game.h"
 #include "invent.h"
@@ -320,6 +321,11 @@ static int game_cmd_session(struct GameState *game, struct Command *cmd,
     }
     if (cmd->type == CMD_QUIT) {
         game->running = 0;
+        return 1;
+    }
+    if (cmd->type == CMD_VERSION) {
+        game_event_push(out, GAME_EVENT_VERSION, 0, 0, 0, 0,
+            build_version_line());
         return 1;
     }
     return 0;
