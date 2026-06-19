@@ -96,7 +96,7 @@ Workflow (milestone 4) can run in parallel with architecture once unblocked. Mil
 |------|---------|------------------------|
 | XS | single trivial change | *(none currently)* |
 | S | narrow feature or tooling slice | #4, #197 |
-| M | one subsystem feature or refactor | #5, #7, #9, #31, #49, #51, #54, #100, #101, #102, #129, #130, #131, #132, #145, #187, #195, #196 |
+| M | one subsystem feature or refactor | #5, #7, #9, #31, #49, #51, #54, #100, #101, #102, #129, #130, #131, #132, #145, #187, #195, #196, #202, #203, #206, #207 |
 | L | major mechanism or platform path | #8, #15, #50, #52, #107 |
 | XL | foundational or multi-area epic | #48, #55, #76, #92 |
 
@@ -428,6 +428,8 @@ dosmud --seed 1234
 | [#34](https://github.com/ianmays/dosmud/issues/34) | modern windows build | L |
 | [#72](https://github.com/ianmays/dosmud/issues/72) | sub-agents | S |
 | [#180](https://github.com/ianmays/dosmud/issues/180) | asciinema recording and Pages playback for agent playtests | M |
+| [#202](https://github.com/ianmays/dosmud/issues/202) | add build identity and version command | M |
+| [#203](https://github.com/ianmays/dosmud/issues/203) | add GitHub release packaging and release notes workflow | M |
 
 ### [#74](https://github.com/ianmays/dosmud/issues/74) - Agent skills
 
@@ -461,6 +463,10 @@ Lightweight CI timings/stats workflow: `scripts/ci-stats.sh` (or equivalent) emi
 Done ✅ ([#151](https://github.com/ianmays/dosmud/pull/151)).
 
 ### [#180](https://github.com/ianmays/dosmud/issues/180) - asciinema recording and Pages playback for agent playtests
+
+### [#202](https://github.com/ianmays/dosmud/issues/202) - Add build identity and version command
+
+### [#203](https://github.com/ianmays/dosmud/issues/203) - Add GitHub release packaging and release notes workflow
 
 ## [Advanced Architecture](https://github.com/ianmays/dosmud/milestone/5)
 
@@ -638,6 +644,7 @@ Author-defined structure does **not** abandon project determinism: same seed, in
 | Issue | Title | Size |
 |-------|-------|------|
 | [#48](https://github.com/ianmays/dosmud/issues/48) | SDL renderer | XL |
+| [#207](https://github.com/ianmays/dosmud/issues/207) | add 25-line safe output mode | M |
 
 ### [#48](https://github.com/ianmays/dosmud/issues/48) - SDL renderer
 
@@ -662,6 +669,8 @@ NOT:
 - combat logic
 - world state
 
+### [#207](https://github.com/ianmays/dosmud/issues/207) - Add 25-line safe output mode
+
 ## [Advanced Mechanics](https://github.com/ianmays/dosmud/milestone/8)
 
 | Issue | Title | Size |
@@ -677,6 +686,7 @@ NOT:
 | [#52](https://github.com/ianmays/dosmud/issues/52) | npc schedules | L |
 | [#49](https://github.com/ianmays/dosmud/issues/49) | quests | M |
 | [#145](https://github.com/ianmays/dosmud/issues/145) | local map viewport (region/world maps deferred) | M |
+| [#206](https://github.com/ianmays/dosmud/issues/206) | define player defeat and respawn flow | M |
 
 ### [#4](https://github.com/ianmays/dosmud/issues/4) - Combat initiative
 
@@ -743,6 +753,8 @@ Bandit corpses open a small interactive loot menu instead of auto-transferring o
 ### [#145](https://github.com/ianmays/dosmud/issues/145) - Local map viewport (region/world map deferred)
 
 Follow-up to [#142](https://github.com/ianmays/dosmud/issues/142) / PR 144. Player-centered viewport for `map`. Region/world tiers are future issues, not this issue's M scope.
+
+### [#206](https://github.com/ianmays/dosmud/issues/206) - Define player defeat and respawn flow
 
 ## [Engine Enhancements](https://github.com/ianmays/dosmud/milestone/9)
 
