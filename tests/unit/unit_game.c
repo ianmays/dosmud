@@ -564,6 +564,68 @@ TEST game_version_emits_version_event_without_tick(void)
     PASS();
 }
 
+TEST game_version_allowed_during_bandit_dialogue(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    char line[] = "version";
+
+    unit_game_fresh(&game, 45u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game_event_queue_reset(&out);
+    enemy_begin_encounter(&game, &out);
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, game_process_input(&game, line, &out));
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(0, game.tick);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_VERSION, out.events[0].kind);
+    PASS();
+}
+
+TEST game_version_allowed_during_combat(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    char line[] = "version";
+    u32 tick_before_version;
+
+    unit_game_fresh(&game, 46u);
+    ASSERT_EQ(1, testharn_apply(&game, "@fixture bandit_combat_turn1"));
+    tick_before_version = game.tick;
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, game_process_input(&game, line, &out));
+    ASSERT_EQ(GAME_MODE_COMBAT, game.mode);
+    ASSERT_EQ(tick_before_version, game.tick);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_VERSION, out.events[0].kind);
+    PASS();
+}
+
+TEST game_version_allowed_during_loot_menu(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    char line[] = "version";
+
+    unit_game_fresh(&game, 47u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game.corpse_present[WORLD_ROOM_CAMP] = 1;
+    game.corpse_item[WORLD_ROOM_CAMP][0] = ITEM_HERB;
+    ASSERT_EQ(1, run_cmd_out(&game, "loot", &out));
+    ASSERT_EQ(1, game.tick);
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(DIALOGUE_LOOT, game.dialogue);
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, game_process_input(&game, line, &out));
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(DIALOGUE_LOOT, game.dialogue);
+    ASSERT_EQ(1, game.tick);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_VERSION, out.events[0].kind);
+    PASS();
+}
+
 TEST game_unknown_command_emits_event(void)
 {
     struct GameState game;
@@ -834,6 +896,9 @@ SUITE(game) {
     RUN_TEST(game_help_emits_help_event);
     RUN_TEST(game_map_emits_map_event);
     RUN_TEST(game_version_emits_version_event_without_tick);
+    RUN_TEST(game_version_allowed_during_bandit_dialogue);
+    RUN_TEST(game_version_allowed_during_combat);
+    RUN_TEST(game_version_allowed_during_loot_menu);
     RUN_TEST(game_unknown_command_emits_event);
     RUN_TEST(game_cannot_move_emits_event);
     RUN_TEST(game_move_emits_move_then_look);

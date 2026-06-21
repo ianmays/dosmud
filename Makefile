@@ -32,7 +32,9 @@ printf 'elapsed: %s.%03ds\n' "$$elapsed_s" "$$elapsed_rem"; \
 exit $$status
 endef
 
-$(VERSION_HDR): VERSION scripts/gen-version-header.sh
+FORCE:
+
+$(VERSION_HDR): FORCE VERSION scripts/gen-version-header.sh
 	sh scripts/gen-version-header.sh VERSION $@
 
 build-all:
@@ -343,4 +345,4 @@ test-dos-prepare-norun:
 dos-run:
 	powershell.exe -ExecutionPolicy Bypass -File dos-prepare.ps1 -NoBuild $(if $(SEED),-Seed $(SEED))
 
-.PHONY: build-all build build-win win-run run test-all test test-win test-run-bin snapshot-run test-run build-unit test-unit test-unit-verbose test-unit-verbose-gameplay test-unit-coverage test-unit-coverage-verbose build-soak test-soak check-layers clean dos-prepare test-dos-prepare dos-prepare-norun test-dos-prepare-norun dos-run
+.PHONY: FORCE build-all build build-win win-run run test-all test test-win test-run-bin snapshot-run test-run build-unit test-unit test-unit-verbose test-unit-verbose-gameplay test-unit-coverage test-unit-coverage-verbose build-soak test-soak check-layers clean dos-prepare test-dos-prepare dos-prepare-norun test-dos-prepare-norun dos-run

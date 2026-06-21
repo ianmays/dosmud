@@ -52,7 +52,7 @@ make build
 
 Release and `TEST_MODE` runs both support in-session `save`, `load`, and `version` commands. The first pass uses a single-slot `save.dat` file in the current working directory.
 
-Build identity comes from the checked-in [`VERSION`](VERSION) file plus generated metadata when Git is available. Native `make` builds write `build/include/version.h` with `+build.<count>.g<sha>[.dirty]`; DOS/OpenWatcom builds fall back to the checked-in [`include/version.h`](include/version.h) metadata if no generated header is present.
+Build identity comes from the checked-in [`VERSION`](VERSION) file plus generated metadata when Git is available. Native `make` builds write `build/include/version.h` with `+build.<count>.g<sha>[.dirty]`; DOS/OpenWatcom builds fall back to the checked-in [`include/version.h`](include/version.h) metadata if no generated header is present. When you bump the base project version, update both files together so DOS and native builds stay aligned.
 
 Replay logging is a `TEST_MODE` debugging path, not a release-build feature. Use it from a test build:
 

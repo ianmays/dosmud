@@ -7,8 +7,6 @@
  * shadows include/version.h on native builds when Git metadata is available.
  */
 
-const char *build_base_version(void);
-const char *build_version_string(void);
 const char *build_version_line(void);
 
 #endif

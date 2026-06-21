@@ -267,6 +267,7 @@ static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd,
             cmd->type != CMD_BAG &&
             cmd->type != CMD_WIELD &&
             cmd->type != CMD_UNWIELD &&
+            cmd->type != CMD_VERSION &&
             cmd->type != CMD_HELP &&
             cmd->type != CMD_QUIT) {
         push_dialogue_guard(out, GAME_DIALOGUE_GUARD_BANDIT_WAITING_REPLY);
@@ -282,6 +283,7 @@ static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd,
             cmd->type != CMD_MAP &&
             cmd->type != CMD_BAG &&
             cmd->type != CMD_DROP &&
+            cmd->type != CMD_VERSION &&
             cmd->type != CMD_HELP &&
             cmd->type != CMD_QUIT) {
         push_dialogue_guard(out, GAME_DIALOGUE_GUARD_LOOT_WAITING_REPLY);
@@ -296,6 +298,7 @@ static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd,
             cmd->type != CMD_BAG &&
             cmd->type != CMD_WIELD &&
             cmd->type != CMD_UNWIELD &&
+            cmd->type != CMD_VERSION &&
             cmd->type != CMD_HELP &&
             cmd->type != CMD_QUIT &&
             !(game_enemy_handover_pick_active(game) && cmd->type == CMD_GIVE)) {
