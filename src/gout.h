@@ -20,6 +20,7 @@ enum GameEventKind {
     /* #157: game.c command router emits; grendr maps to player-visible text. */
     GAME_EVENT_MAP,
     GAME_EVENT_HELP,           /* arg0 = command help topic (CMD_HELP_*) */
+    GAME_EVENT_VERSION,        /* #202: text = build identity line from buildid */
     GAME_EVENT_WAIT,
     GAME_EVENT_CANNOT_MOVE,    /* text = direction name */
     GAME_EVENT_UNKNOWN_COMMAND,

@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include "buildid.h"
 #include "platform.h"
 #include "game.h"
 #include "invent.h"
@@ -266,6 +267,7 @@ static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd,
             cmd->type != CMD_BAG &&
             cmd->type != CMD_WIELD &&
             cmd->type != CMD_UNWIELD &&
+            cmd->type != CMD_VERSION &&
             cmd->type != CMD_HELP &&
             cmd->type != CMD_QUIT) {
         push_dialogue_guard(out, GAME_DIALOGUE_GUARD_BANDIT_WAITING_REPLY);
@@ -281,6 +283,7 @@ static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd,
             cmd->type != CMD_MAP &&
             cmd->type != CMD_BAG &&
             cmd->type != CMD_DROP &&
+            cmd->type != CMD_VERSION &&
             cmd->type != CMD_HELP &&
             cmd->type != CMD_QUIT) {
         push_dialogue_guard(out, GAME_DIALOGUE_GUARD_LOOT_WAITING_REPLY);
@@ -295,6 +298,7 @@ static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd,
             cmd->type != CMD_BAG &&
             cmd->type != CMD_WIELD &&
             cmd->type != CMD_UNWIELD &&
+            cmd->type != CMD_VERSION &&
             cmd->type != CMD_HELP &&
             cmd->type != CMD_QUIT &&
             !(game_enemy_handover_pick_active(game) && cmd->type == CMD_GIVE)) {
@@ -320,6 +324,12 @@ static int game_cmd_session(struct GameState *game, struct Command *cmd,
     }
     if (cmd->type == CMD_QUIT) {
         game->running = 0;
+        return 1;
+    }
+    if (cmd->type == CMD_VERSION) {
+        /* build identity from buildid; render owned by grendr (render_msg_version). */
+        game_event_push(out, GAME_EVENT_VERSION, 0, 0, 0, 0,
+            build_version_line());
         return 1;
     }
     return 0;

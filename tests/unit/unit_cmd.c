@@ -36,6 +36,8 @@ TEST command_parse_core_verbs(void)
     ASSERT_EQ(CMD_SAVE, cmd.type);
     ASSERT_EQ(1, parse_line("load", &cmd));
     ASSERT_EQ(CMD_LOAD, cmd.type);
+    ASSERT_EQ(1, parse_line("version", &cmd));
+    ASSERT_EQ(CMD_VERSION, cmd.type);
     ASSERT_EQ(1, parse_line("unwield", &cmd));
     ASSERT_EQ(CMD_UNWIELD, cmd.type);
     PASS();
@@ -59,6 +61,8 @@ TEST command_parse_move_and_help(void)
     ASSERT_EQ(CMD_HELP_TOPIC_TAKE, cmd.arg);
     ASSERT_EQ(1, parse_line("help xyzzy", &cmd));
     ASSERT_EQ(CMD_HELP_TOPIC_UNKNOWN, cmd.arg);
+    ASSERT_EQ(1, parse_line("help version", &cmd));
+    ASSERT_EQ(CMD_HELP_TOPIC_VERSION, cmd.arg);
     PASS();
 }
 
@@ -132,6 +136,7 @@ TEST command_advances_time_matrix(void)
     ASSERT_EQ(0, command_advances_time(CMD_LOOK));
     ASSERT_EQ(0, command_advances_time(CMD_HELP));
     ASSERT_EQ(0, command_advances_time(CMD_REPLY));
+    ASSERT_EQ(0, command_advances_time(CMD_VERSION));
     PASS();
 }
 
@@ -143,6 +148,7 @@ TEST command_help_line_topics(void)
     ASSERT(strstr(command_help_line(CMD_HELP_TOPIC_TAKE), "take all") != 0);
     ASSERT(strstr(command_help_line(CMD_HELP_TOPIC_SAVE), "save.dat") != 0);
     ASSERT(strstr(command_help_line(CMD_HELP_TOPIC_LOAD), "save.dat") != 0);
+    ASSERT(strstr(command_help_line(CMD_HELP_TOPIC_VERSION), "build identity") != 0);
     PASS();
 }
 

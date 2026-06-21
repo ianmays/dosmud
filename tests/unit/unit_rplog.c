@@ -166,6 +166,7 @@ TEST replay_log_capture_step_modes_kinds_and_escapes(void)
         GAME_EVENT_ROOM_LOOK,
         GAME_EVENT_MAP,
         GAME_EVENT_HELP,
+        GAME_EVENT_VERSION,
         GAME_EVENT_WAIT,
         GAME_EVENT_CANNOT_MOVE,
         GAME_EVENT_UNKNOWN_COMMAND,
@@ -225,6 +226,7 @@ TEST replay_log_capture_step_modes_kinds_and_escapes(void)
     ASSERT(0 != strstr(text, "step=1 kind=input tick=0 running=1 mode=dialogue"));
     ASSERT(0 != strstr(text, "step=2 kind=unknown tick=0 running=1 mode=combat"));
     ASSERT(0 != strstr(text, "kind=GAME_EVENT_MAP"));
+    ASSERT(0 != strstr(text, "kind=GAME_EVENT_VERSION"));
     ASSERT(0 != strstr(text, "kind=GAME_EVENT_COMBAT"));
     ASSERT(0 != strstr(text, "kind=GAME_EVENT_OBSERVATION"));
     ASSERT(0 != strstr(text, "kind=GAME_EVENT_CORPSE_VIEW"));

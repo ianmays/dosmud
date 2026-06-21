@@ -17,13 +17,13 @@ make test-soak
 
 Purpose:
 
-- `make build`: native GCC development build; prints `elapsed: <seconds>` after the compile/link step
+- `make build`: native GCC development build; generates `build/include/version.h` from [`VERSION`](../VERSION) via `scripts/gen-version-header.sh`, then compiles; prints `elapsed: <seconds>` after the compile/link step
 - `make build-win`: WSL cross-compile to a native Windows console `dosmud.exe` with `x86_64-w64-mingw32-gcc`
 - `make win-run`: launches the existing Windows `dosmud.exe` in a new Windows console window; does not build
 - `make check-layers`: core/render boundary guard (no `printf` in `src/*.c` except `main.c`, `grendr.c`, and the platform files `platpos.c`, `platwin.c`, and `platdos.c`)
 - `make test`: strict deterministic compile (`-Werror`, `-DTEST_MODE`, `-g -O0`); does not run `check-layers`; prints `elapsed: <seconds>` after the compile/link step
 - `make test-win`: WSL cross-compile of the native Windows console `TEST_MODE` executable (`dosmud.exe`); compile-only, no snapshot run from Linux
-- `make snapshot-run`: runs every name in `SNAPSHOT_TESTS` plus `seed_cli` against the existing native `TEST_MODE` binary (`./dosmud`; see [Snapshot test files](#snapshot-test-files)). Each step prints `snapshot: <name>`. Finishes with `snapshot tests passed: N/M` (for example `76/76` snapshots plus `seed_cli`, 77 steps total).
+- `make snapshot-run`: runs every name in `SNAPSHOT_TESTS` plus `seed_cli` and `version_cli` against the existing native `TEST_MODE` binary (`./dosmud`; see [Snapshot test files](#snapshot-test-files)). Each step prints `snapshot: <name>`. Finishes with `snapshot tests passed: N/M` (for example `79/79` names in `SNAPSHOT_TESTS` plus `seed_cli` and `version_cli`, 81 steps total).
 - `make test-run`: builds the test binary (`make test`), then runs `make snapshot-run`.
 - `make test-unit`: builds and runs the greatest unit suite (`tests/unit/build/dosmud_unit`, `TEST_MODE` only; not linked into release `dosmud`)
 - `make test-soak`: builds and runs long-run soak/stress checks (`tests/soak/build/dosmud_soak`; separate from unit tests)
@@ -36,12 +36,15 @@ Use these when you want to launch a playable or interactive binary rather than r
 - `make test-run-bin`: builds the native `TEST_MODE` binary if needed, then launches it; pass `SEED=<unsigned>` to forward `--seed`
 - `make dos-run`: launches the existing prepared DOS release executable without rebuilding
 - `make win-run`: launches the existing repo-root Windows `dosmud.exe` from the most recent `make build-win` or `make test-win`; pass `SEED=<unsigned>` to forward `--seed`
+- `./dosmud --version`: prints the current build identity and exits without starting the game loop
 
 For the WSL -> Windows path, build `dosmud.exe` with `make build-win` or `make test-win`, then launch it with `make win-run` or directly from Windows PowerShell, `cmd.exe`, or Windows Terminal. `win-run` launches whatever repo-root `dosmud.exe` was produced by the most recent Windows cross-build, opens a new Windows console window, and forwards `SEED=<n>` when set. This issue adds a console app path only; a GUI or alternate renderer remains separate work.
 
 `TEST_MODE` runs may also pass `--replay-log [path]` to `./dosmud` or `./dosmud --seed <n>`. If the path is omitted, logging defaults to `replay.log` in the current working directory. The replay log is a sidecar text file, so it does not change snapshot stdout output by itself. Release builds do not accept the flag.
 
-All builds also support in-session `save` and `load` commands. The first pass uses a single-slot `save.dat` in the current working directory; snapshots that exercise save/load must clean up that sidecar in the `Makefile`.
+All builds also support in-session `save`, `load`, and `version` commands. The first pass uses a single-slot `save.dat` in the current working directory; snapshots that exercise save/load must clean up that sidecar in the `Makefile`.
+
+Build identity comes from the checked-in [`VERSION`](../VERSION) file plus generated metadata. Native `make` builds write `build/include/version.h` through `scripts/gen-version-header.sh`, producing a SemVer-style build string such as `0.1.0-dev+build.184.gabc1234` and appending `.dirty` when the tree is not clean. DOS/OpenWatcom builds and other environments without that generated header fall back to the checked-in [`include/version.h`](../include/version.h) metadata (`+local` by default).
 
 ## Test layers
 
@@ -139,7 +142,7 @@ make test-unit-coverage-verbose     # verbose coverage build, then full gcov blo
 
 **In-scope modules (branch coverage target ~90%+):** `command`, `invent`, `combat`, `game`, `genc`, `dialogue`, `npc`, `gatmos`, `world`, `gprog`, `items`, `fmt`, `gout`, `replay`, `save`, `testharn`
 
-**Out of scope for the unit coverage bar:** `grendr`, `txtres`, `main`, `platpos` / `platwin` / `platdos` (presentation or shell-edge glue; `fmt` holds testable format logic; snapshots cover printed output and ASCII art)
+**Out of scope for the unit coverage bar:** `buildid`, `grendr`, `txtres`, `main`, `platpos` / `platwin` / `platdos` (presentation or shell-edge glue; `buildid` is read-only identity covered by `unit_cmd.c`, `unit_game.c`, `unit_gout.c`, and version snapshots; `fmt` holds testable format logic; snapshots cover printed output and ASCII art)
 
 **Harness-only fixture:** `bag_full_gate` - applies `game_inv_bag_add` without resetting baseline; returns fixture failure (`-2`) when the bag is already full (used by unit tests for `testharn_apply` error paths)
 
@@ -297,7 +300,7 @@ Add new fixtures in [`tests/harness/testharn.c`](https://github.com/ianmays/dosm
 2. Use `@fixture` for setup; add inject in the fixture or via a `*_ready` fixture when outcomes must be fixed.
 3. Use `quiet_explore` when the test calls `wait` or `move`.
 4. Run `make test && make snapshot-run` (or `./dosmud < tests/regression/<name>.input > tests/regression/<name>.output`) and copy or diff against `tests/regression/<name>.expect`.
-5. Add `<name>` to `SNAPSHOT_TESTS` in the [Makefile](https://github.com/ianmays/dosmud/blob/main/Makefile) (`seed_cli` stays separate: it uses `--seed` with `smoke.input`). When a snapshot also asserts or creates a sidecar file (see `replay_log` and `save_load` below), add a Makefile branch beside the default `./dosmud < input > output` path.
+5. Add `<name>` to `SNAPSHOT_TESTS` in the [Makefile](https://github.com/ianmays/dosmud/blob/main/Makefile) (`seed_cli` stays separate: it uses `--seed` with `smoke.input`). When a snapshot also asserts or creates a sidecar file (see `replay_log`, `save_load`, and the tokenized `version` build-id checks below), add a Makefile branch beside the default `./dosmud < input > output` path.
 6. Document new fixtures in this file.
 
 ### Snapshot test files
@@ -307,6 +310,8 @@ Each process run uses one `.input` file until `quit`. `make snapshot-run` runs `
 **Replay sidecar (`replay_log`):** the only snapshot that also golden-checks a `TEST_MODE` `--replay-log` file. `make snapshot-run` runs `./dosmud --seed 1234 --replay-log tests/regression/replay_log_log.output < tests/regression/replay_log.input` and diffs both stdout (`replay_log.expect`) and the sidecar log (`replay_log_log.expect`). Player-visible stdout stays unchanged; the log records `dosmud-replay-v1` header lines plus per-step metadata and serialized `GameEvent` rows.
 
 **Save sidecar (`save_load`):** exercises the in-session `save` / `load` shell commands. `make snapshot-run` removes `save.dat`, runs the snapshot, diffs stdout against `save_load.expect`, then removes `save.dat` again so the single-slot file does not leak across tests.
+
+**Version snapshots (`version`, `version_cli`):** build identity includes generated Git metadata, so the expectation files keep `@VERSION@` placeholders. `make snapshot-run` substitutes the current `BUILD_VERSION_STRING` from `build/include/version.h` before diffing stdout.
 
 **Core / inventory (also in `SNAPSHOT_TESTS`):** `smoke`, `bandit_handover`, `bandit_wielded_give`, `area_items`, `map`, `equipment`, `craft_wielded`, `take_all`, `take_all_bag_full`, `bag_view`, `bag_stacks`.
 
@@ -392,7 +397,7 @@ make dos-prepare SEED=1234
 make test-dos-prepare SEED=1234
 ```
 
-Invalid flags print `usage: dosmud [--seed <unsigned>]` to stderr and exit with status 1. Seed values must be decimal, non-negative, and at most `CFG_SEED_CLI_MAX` (4294967295); leading `+`/`-` and out-of-range values are rejected.
+Invalid flags print `usage: dosmud [--version] [--seed <unsigned>]` (plus `--replay-log [path]` in `TEST_MODE`) to stderr and exit with status 1. Seed values must be decimal, non-negative, and at most `CFG_SEED_CLI_MAX` (4294967295); leading `+`/`-` and out-of-range values are rejected.
 
 ## Combined cross-path checks
 
@@ -416,7 +421,7 @@ In `dos-prepare.local.ps1`:
 - `$source` should be Windows-reachable for Linux-hosted project files.
 - `$mountpoint`, `$destination`, `$dospath` should be Windows-visible emulator paths.
 
-The Open Watcom build (`build.bat`) only needs `src/`, `include/`, and `build.bat`. `dos-prepare.ps1` deletes the Windows DOS tree, copies only those paths (separate `robocopy` per directory plus `build.bat`), then strips any stray `.git`, `tests/`, docs, or Linux build junk if an old full mirror left them behind. It launches one waited DOS session for `build.bat`, records the elapsed `build.bat` time in the host console, appends the same line to `build.log` when that file exists, verifies success from the executable and available log output, and then launches the runtime DOS session unless `-NoRun` is set. Add new DOS inputs under `src/` or `include/` (or extend `dos-prepare.ps1` if a new top-level tree is required).
+The Open Watcom build (`build.bat`) only needs `src/`, `include/`, and `build.bat`. `dos-prepare.ps1` deletes the Windows DOS tree, copies only those paths (separate `robocopy` per directory plus `build.bat`), then strips any stray `.git`, `tests/`, docs, or Linux build junk if an old full mirror left them behind. It launches one waited DOS session for `build.bat`, records the elapsed `build.bat` time in the host console, appends the same line to `build.log` when that file exists, verifies success from the executable and available log output, and then launches the runtime DOS session unless `-NoRun` is set. Version metadata for that path comes from the checked-in `include/version.h` fallback, not the native generated `build/include/version.h`. Add new DOS inputs under `src/` or `include/` (or extend `dos-prepare.ps1` if a new top-level tree is required).
 
 ## CI (GitHub Actions)
 

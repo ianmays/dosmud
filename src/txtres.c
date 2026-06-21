@@ -1,5 +1,6 @@
 #include "txtres.h"
 #include "config.h"
+#include "version.h"
 #include "world.h"
 
 /*
@@ -89,18 +90,20 @@ const char *txtres_dir_name(int dir)
 const char *const TXT_MAIN_TEST_MODE = "TEST MODE";
 #ifdef TEST_MODE
 const char *const TXT_MAIN_USAGE =
-    "usage: dosmud [--seed <unsigned>] [--replay-log [path]]";
+    "usage: dosmud [--version] [--seed <unsigned>] [--replay-log [path]]";
 #else
-const char *const TXT_MAIN_USAGE = "usage: dosmud [--seed <unsigned>]";
+const char *const TXT_MAIN_USAGE =
+    "usage: dosmud [--version] [--seed <unsigned>]";
 #endif
 const char *const TXT_MAIN_TITLE = "dosmud";
 const char *const TXT_MAIN_TITLE_SEED_FMT = "%s (seed %lu)\n";
+const char *const TXT_MAIN_VERSION_FMT = "dosmud " BUILD_VERSION_STRING;
 const char *const TXT_MAIN_HELP_HINT = "Type 'help' for commands.";
 const char *const TXT_MAIN_PROMPT = "\n> ";
 const char *const TXT_MAIN_BYE = "bye";
 
 const char *const TXT_COMMAND_HELP =
-    "Commands: look, map, inspect [rustle|creak|water|grit], take/get/pickup <item> or take all, drop/give <item>, bag, wield <weapon>, unwield, eat/use <item>, craft <item>, loot, move <dir>, wait, talk, 1/2/3 or reply <1-3>, save, load, help [topic], quit";
+    "Commands: look, map, inspect [rustle|creak|water|grit], take/get/pickup <item> or take all, drop/give <item>, bag, wield <weapon>, unwield, eat/use <item>, craft <item>, loot, move <dir>, wait, talk, 1/2/3 or reply <1-3>, save, load, version, help [topic], quit";
 
 const char *const TXT_HELP_TOPIC_UNKNOWN =
     "No help for that topic. Type 'help' for the full command list.";
@@ -164,6 +167,9 @@ const char *const TXT_HELP_SAVE =
 
 const char *const TXT_HELP_LOAD =
     "load - restore the current run from save.dat without advancing time.";
+
+const char *const TXT_HELP_VERSION =
+    "version - print the build identity without advancing time.";
 
 const char *const TXT_MAP_HEADER = "Explored locations:\n";
 

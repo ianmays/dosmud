@@ -52,6 +52,8 @@ static const char *replay_event_name(int kind)
         return "GAME_EVENT_MAP";
     case GAME_EVENT_HELP:
         return "GAME_EVENT_HELP";
+    case GAME_EVENT_VERSION:
+        return "GAME_EVENT_VERSION";
     case GAME_EVENT_WAIT:
         return "GAME_EVENT_WAIT";
     case GAME_EVENT_CANNOT_MOVE:
