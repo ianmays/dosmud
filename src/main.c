@@ -51,7 +51,8 @@ static u32 default_rng_seed(void)
 }
 
 /*
- * Parse optional CLI args. Updates *out_seed and *out_replay_path when present.
+ * Parse optional CLI args. Updates *out_seed, *out_print_version, and
+ * *out_replay_path when present.
  * Returns 0 on success, -1 on invalid or unknown arguments.
  */
 static int parse_cli_args(int argc, char **argv, u32 *out_seed,
@@ -416,6 +417,7 @@ int main(int argc, char **argv)
         return 1;
     }
     if (print_version) {
+        /* shell-only early exit; in-game version uses GAME_EVENT_VERSION. */
         printf("%s\n", build_version_line());
         return 0;
     }

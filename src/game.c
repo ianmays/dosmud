@@ -324,6 +324,7 @@ static int game_cmd_session(struct GameState *game, struct Command *cmd,
         return 1;
     }
     if (cmd->type == CMD_VERSION) {
+        /* build identity from buildid; render owned by grendr (render_msg_version). */
         game_event_push(out, GAME_EVENT_VERSION, 0, 0, 0, 0,
             build_version_line());
         return 1;

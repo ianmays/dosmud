@@ -166,9 +166,16 @@ Conventions:
 - startup
 - main loop orchestration
 - input/timing integration
+- `--version` CLI (all builds); prints the shared build identity via [`buildid.c`](https://github.com/ianmays/dosmud/blob/main/src/buildid.c) and exits before the game loop
 - `TEST_MODE` only: optional replay log capture via `--replay-log [path]`
 - `TEST_MODE`: delegates `@fixture` and `@seed` lines to `testharn`
 - in-session `save` / `load` shell commands (all builds); intercepts before `game_process_input` so ticks do not advance
+
+### `buildid`
+
+- read-only build identity accessors in [`buildid.c`](https://github.com/ianmays/dosmud/blob/main/src/buildid.c); values come from `version.h` and [`txtres.c`](https://github.com/ianmays/dosmud/blob/main/src/txtres.c) (`TXT_MAIN_VERSION_FMT`)
+- shared by `main.c` (`--version`) and `game.c` (`CMD_VERSION` → `GAME_EVENT_VERSION` with `build_version_line()`)
+- no game state or RNG mutation
 
 ### `replay`
 
@@ -220,6 +227,7 @@ New `src/*.c` and `src/*.h` basenames must stay within **classic FAT 8+3** (at m
 - parse raw text into structured commands
 - keep parsing separate from execution/mutation
 - recognizes `save` and `load` tokens (`CMD_SAVE`, `CMD_LOAD`); `main.c` handles file I/O before gameplay mutation
+- recognizes `version` (`CMD_VERSION`); `game.c` emits `GAME_EVENT_VERSION` so render stays print-free
 
 ### `world`
 
