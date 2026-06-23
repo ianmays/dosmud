@@ -237,6 +237,25 @@ TEST dialogue_cmd_reply_frog_event(void)
     PASS();
 }
 
+/* Reply follows game.dialogue, not player room, after a mid-branch move. */
+TEST dialogue_cmd_reply_frog_after_move_stays_on_dialogue_table(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 26u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_POND, 0);
+    talk_out(&game, &out);
+    game.player.room_id = WORLD_ROOM_CAMP;
+    ASSERT_EQ(1, reply_out(&game, 1, &out));
+    ASSERT_EQ(GAME_EVENT_DIALOGUE, out.events[0].kind);
+    ASSERT_EQ(GAME_DIALOGUE_ACTOR_FROG, out.events[0].arg0);
+    ASSERT_EQ(GAME_DIALOGUE_PHASE_REPLY, out.events[0].arg1);
+    ASSERT_EQ(1, out.events[0].arg2);
+    ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
+    PASS();
+}
+
 TEST dialogue_cmd_talk_nobody_event(void)
 {
     struct GameState game;
@@ -295,6 +314,7 @@ SUITE(dialogue) {
     RUN_TEST(dialogue_cmd_talk_watchman_event);
     RUN_TEST(dialogue_cmd_talk_frog_event);
     RUN_TEST(dialogue_cmd_reply_frog_event);
+    RUN_TEST(dialogue_cmd_reply_frog_after_move_stays_on_dialogue_table);
     RUN_TEST(dialogue_cmd_talk_nobody_event);
     RUN_TEST(dialogue_cmd_talk_bandit_blocks_event);
     RUN_TEST(dialogue_cmd_reply_frog_invalid_event);

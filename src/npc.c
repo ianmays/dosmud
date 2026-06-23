@@ -11,11 +11,16 @@
  * DIALOGUE*; grendr maps copy.
  */
 
+/*
+ * Parallel authored table for fixed room NPCs: talk opens by player room_id;
+ * reply resolves by game.dialogue so a mid-branch move does not retarget actor.
+ */
 struct NpcRoomInfo {
     int room_id;
     int actor;
     int dialogue_kind;
-    int talk_phase;
+    int open_phase;
+    int reply_phase;
 };
 
 /* Authored roster placement rows; stable world rooms like NPC_ROOM_INFO talk hooks. */
@@ -85,13 +90,16 @@ static const struct NpcProfile *npc_profile_by_actor(int actor)
 static const struct NpcRoomInfo NPC_ROOM_INFO[] = {
     /* Frog keeps its custom rendered copy, but event phases now match other NPCs. */
     { WORLD_ROOM_POND, GAME_DIALOGUE_ACTOR_FROG,
-        DIALOGUE_NPC_FROG, GAME_DIALOGUE_PHASE_TALK },
+        DIALOGUE_NPC_FROG, GAME_DIALOGUE_PHASE_TALK, GAME_DIALOGUE_PHASE_REPLY },
     { WORLD_ROOM_TOWER, GAME_DIALOGUE_ACTOR_WATCHMAN,
-        DIALOGUE_NPC_WATCHMAN, GAME_DIALOGUE_PHASE_TALK },
+        DIALOGUE_NPC_WATCHMAN, GAME_DIALOGUE_PHASE_TALK,
+        GAME_DIALOGUE_PHASE_REPLY },
     { WORLD_ROOM_ORCHARD, GAME_DIALOGUE_ACTOR_HERBALIST,
-        DIALOGUE_NPC_HERBALIST, GAME_DIALOGUE_PHASE_TALK },
+        DIALOGUE_NPC_HERBALIST, GAME_DIALOGUE_PHASE_TALK,
+        GAME_DIALOGUE_PHASE_REPLY },
     { WORLD_ROOM_CATACOMBS, GAME_DIALOGUE_ACTOR_ARCHIVIST,
-        DIALOGUE_NPC_ARCHIVIST, GAME_DIALOGUE_PHASE_TALK }
+        DIALOGUE_NPC_ARCHIVIST, GAME_DIALOGUE_PHASE_TALK,
+        GAME_DIALOGUE_PHASE_REPLY }
 };
 
 /*
@@ -176,6 +184,22 @@ static const struct NpcRoomInfo *npc_room_info(int room_id)
 
     for (i = 0; i < (int)(sizeof(NPC_ROOM_INFO) / sizeof(NPC_ROOM_INFO[0])); ++i) {
         if (NPC_ROOM_INFO[i].room_id == room_id) {
+            return &NPC_ROOM_INFO[i];
+        }
+    }
+    return 0;
+}
+
+/*
+ * Room talk stays in the parallel table, so dialogue-kind replies resolve
+ * through the same authored row that opened the branch.
+ */
+static const struct NpcRoomInfo *npc_room_dialogue_info(int dialogue_kind)
+{
+    int i;
+
+    for (i = 0; i < (int)(sizeof(NPC_ROOM_INFO) / sizeof(NPC_ROOM_INFO[0])); ++i) {
+        if (NPC_ROOM_INFO[i].dialogue_kind == dialogue_kind) {
             return &NPC_ROOM_INFO[i];
         }
     }
@@ -286,12 +310,11 @@ int npc_room_actor(int room_id)
 /* Enemy replies stay in genc.c; traveler and room NPCs are all NPC-owned. */
 int npc_dialogue_actor(int dialogue_kind)
 {
-    int i;
+    const struct NpcRoomInfo *info;
 
-    for (i = 0; i < (int)(sizeof(NPC_ROOM_INFO) / sizeof(NPC_ROOM_INFO[0])); ++i) {
-        if (NPC_ROOM_INFO[i].dialogue_kind == dialogue_kind) {
-            return NPC_ROOM_INFO[i].actor;
-        }
+    info = npc_room_dialogue_info(dialogue_kind);
+    if (info != 0) {
+        return info->actor;
     }
     return GAME_DIALOGUE_ACTOR_NONE;
 }
@@ -498,9 +521,33 @@ int npc_open_room_dialogue(struct GameState *game, struct GameEventQueue *out)
     if (info == 0) {
         return 0;
     }
-    /* Talk opens dialogue mode and queues one TALK event; reply uses dialogue_cmd_reply. */
-    npc_push_dialogue(out, info->actor, info->talk_phase, 0);
+    /* Talk opens dialogue mode and queues one TALK event; reply uses npc_room_cmd_reply. */
+    npc_push_dialogue(out, info->actor, info->open_phase, 0);
     game_set_mode_dialogue(game, info->dialogue_kind);
+    return 1;
+}
+
+/*
+ * Room-talk reply path: keyed on game->dialogue, not player room. Non-room
+ * kinds (traveler, enemy) return 0 so genc and roaming slices keep ownership.
+ */
+int npc_room_cmd_reply(struct GameState *game, int choice, GameEventQueue *out)
+{
+    const struct NpcRoomInfo *info;
+
+    if (game->mode != GAME_MODE_DIALOGUE) {
+        return 0;
+    }
+    info = npc_room_dialogue_info(game->dialogue);
+    if (info == 0) {
+        return 0;
+    }
+    if (!npc_choice_is_valid(choice)) {
+        npc_push_dialogue_guard(out, GAME_DIALOGUE_GUARD_PICK_123);
+        return 1;
+    }
+    npc_push_dialogue(out, info->actor, info->reply_phase, choice);
+    game_set_mode_explore(game);
     return 1;
 }
 
