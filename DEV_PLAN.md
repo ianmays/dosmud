@@ -853,8 +853,6 @@ Done ([#210](https://github.com/ianmays/dosmud/pull/210)).
 ### Testing
 - Unit: `unit_gout.c` (`txtres_dialogue_narrative_key`, `txtres_encounter_narrative_key`)
 - Snapshots: `narrative_indirection`
-
-GitHub blocked-by [#195](https://github.com/ianmays/dosmud/issues/195) (closed when [#209](https://github.com/ianmays/dosmud/pull/209) merges).
 ### [#197](https://github.com/ianmays/dosmud/issues/197) - Room NPC talk table cleanup
 
 ## [Multiplayer](https://github.com/ianmays/dosmud/milestone/11)
