@@ -684,49 +684,44 @@ static void render_equip_result_event(const GameEvent *ev)
 
 /*
  * #160: GAME_EVENT_DIALOGUE adapter; arg0=actor, arg1=phase, arg2=choice.
- * Maps actor/phase/choice payloads to render_* dialogue helpers.
+ * txtres owns the stable actor/phase -> narrative key lookup; grendr only
+ * dispatches the resolved key to the matching portrait/menu or reply helper.
  */
 static void render_dialogue_event(const GameEvent *ev)
 {
-    switch (ev->arg0) {
-    case GAME_DIALOGUE_ACTOR_FROG:
-        /* Frog uses shared TALK/REPLY phases; render_* names are legacy. */
-        if (ev->arg1 == GAME_DIALOGUE_PHASE_TALK) {
-            render_frog_dialogue_intro();
-        } else if (ev->arg1 == GAME_DIALOGUE_PHASE_REPLY) {
-            render_frog_dialogue_branch(ev->arg2);
-        }
+    int key;
+
+    key = txtres_dialogue_narrative_key(ev->arg0, ev->arg1);
+    switch (key) {
+    case TXTRES_NARRATIVE_TRAVELER_REPLY:
+        render_traveler_reply(ev->arg2);
         break;
-    case GAME_DIALOGUE_ACTOR_WATCHMAN:
-        if (ev->arg1 == GAME_DIALOGUE_PHASE_TALK) {
-            render_msg_watchman_talk();
-        } else if (ev->arg1 == GAME_DIALOGUE_PHASE_REPLY) {
-            render_msg_watchman_reply(ev->arg2);
-        }
+    case TXTRES_NARRATIVE_FROG_TALK:
+        render_frog_dialogue_intro();
         break;
-    case GAME_DIALOGUE_ACTOR_HERBALIST:
-        if (ev->arg1 == GAME_DIALOGUE_PHASE_TALK) {
-            render_msg_herbalist_talk();
-        } else if (ev->arg1 == GAME_DIALOGUE_PHASE_REPLY) {
-            render_msg_herbalist_reply(ev->arg2);
-        }
+    case TXTRES_NARRATIVE_FROG_REPLY:
+        render_frog_dialogue_branch(ev->arg2);
         break;
-    case GAME_DIALOGUE_ACTOR_ARCHIVIST:
-        if (ev->arg1 == GAME_DIALOGUE_PHASE_TALK) {
-            render_msg_archivist_talk();
-        } else if (ev->arg1 == GAME_DIALOGUE_PHASE_REPLY) {
-            render_msg_archivist_reply(ev->arg2);
-        }
+    case TXTRES_NARRATIVE_WATCHMAN_TALK:
+        render_msg_watchman_talk();
         break;
-    case GAME_DIALOGUE_ACTOR_TRAVELER:
-        if (ev->arg1 == GAME_DIALOGUE_PHASE_REPLY) {
-            render_traveler_reply(ev->arg2);
-        }
+    case TXTRES_NARRATIVE_WATCHMAN_REPLY:
+        render_msg_watchman_reply(ev->arg2);
         break;
-    case GAME_DIALOGUE_ACTOR_NOBODY:
-        if (ev->arg1 == GAME_DIALOGUE_PHASE_TALK) {
-            render_msg_nobody_talk();
-        }
+    case TXTRES_NARRATIVE_HERBALIST_TALK:
+        render_msg_herbalist_talk();
+        break;
+    case TXTRES_NARRATIVE_HERBALIST_REPLY:
+        render_msg_herbalist_reply(ev->arg2);
+        break;
+    case TXTRES_NARRATIVE_ARCHIVIST_TALK:
+        render_msg_archivist_talk();
+        break;
+    case TXTRES_NARRATIVE_ARCHIVIST_REPLY:
+        render_msg_archivist_reply(ev->arg2);
+        break;
+    case TXTRES_NARRATIVE_NOBODY_TALK:
+        render_msg_nobody_talk();
         break;
     default:
         break;
@@ -735,46 +730,41 @@ static void render_dialogue_event(const GameEvent *ev)
 
 /*
  * #160: GAME_EVENT_ENCOUNTER adapter; arg0=kind, arg1=action, arg2=outcome.
- * Maps encounter kind/action/outcome to render_* encounter helpers.
+ * txtres owns the stable encounter -> narrative key table so bandit/traveler
+ * growth does not reopen event-kind branches in the render path.
  */
 static void render_encounter_event(const GameEvent *ev)
 {
-    if (ev->arg1 == GAME_ENCOUNTER_ACTION_OPEN) {
-        if (ev->arg0 == GAME_ENCOUNTER_BANDIT) {
-            render_bandit_encounter_open(ev->arg3);
-        } else if (ev->arg0 == GAME_ENCOUNTER_TRAVELER) {
-            render_traveler_scene();
-        }
-        return;
-    }
-    /* Wanderer OPEN only; bandit owns handover/give/intimidate replies. */
-    if (ev->arg0 != GAME_ENCOUNTER_BANDIT) {
-        return;
-    }
-    switch (ev->arg1) {
-    case GAME_ENCOUNTER_ACTION_HANDOVER_PROMPT:
+    int key;
+
+    key = txtres_encounter_narrative_key(ev->arg0, ev->arg1, ev->arg2);
+    switch (key) {
+    case TXTRES_NARRATIVE_BANDIT_OPEN:
+        render_bandit_encounter_open(ev->arg3);
+        break;
+    case TXTRES_NARRATIVE_TRAVELER_SCENE:
+        render_traveler_scene();
+        break;
+    case TXTRES_NARRATIVE_BANDIT_HANDOVER_PROMPT:
         render_bandit_handover_pick_prompt();
         break;
-    case GAME_ENCOUNTER_ACTION_HANDOVER:
-        if (ev->arg2 == GAME_ENCOUNTER_OUTCOME_BAG_EMPTY) {
-            render_msg_bag_empty_bandit();
-        }
+    case TXTRES_NARRATIVE_BANDIT_BAG_EMPTY:
+        render_msg_bag_empty_bandit();
         break;
-    case GAME_ENCOUNTER_ACTION_GIVE:
-        if (ev->arg2 == GAME_ENCOUNTER_OUTCOME_OK) {
-            render_msg_hand_over_item(ev->text);
-        } else if (ev->arg2 == GAME_ENCOUNTER_OUTCOME_NOT_CARRYING) {
-            render_msg_bandit_give_not_carrying();
-        } else if (ev->arg2 == GAME_ENCOUNTER_OUTCOME_WRONG_CONTEXT) {
-            render_msg_give_wrong_context();
-        }
+    case TXTRES_NARRATIVE_BANDIT_GIVE_OK:
+        render_msg_hand_over_item(ev->text);
         break;
-    case GAME_ENCOUNTER_ACTION_INTIMIDATE:
-        if (ev->arg2 == GAME_ENCOUNTER_OUTCOME_SUCCESS) {
-            render_msg_intimidate_success();
-        } else if (ev->arg2 == GAME_ENCOUNTER_OUTCOME_FAIL) {
-            render_msg_intimidate_fail();
-        }
+    case TXTRES_NARRATIVE_BANDIT_GIVE_NOT_CARRYING:
+        render_msg_bandit_give_not_carrying();
+        break;
+    case TXTRES_NARRATIVE_BANDIT_GIVE_WRONG_CONTEXT:
+        render_msg_give_wrong_context();
+        break;
+    case TXTRES_NARRATIVE_BANDIT_INTIMIDATE_SUCCESS:
+        render_msg_intimidate_success();
+        break;
+    case TXTRES_NARRATIVE_BANDIT_INTIMIDATE_FAIL:
+        render_msg_intimidate_fail();
         break;
     default:
         break;
