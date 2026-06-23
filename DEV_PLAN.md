@@ -816,7 +816,7 @@ Move the ambient bandit encounter off the one-off `GameState.enemy_handover_pick
 | Instance | `NpcState[]` | `game.h`, `npc.c` | Done ([#187](https://github.com/ianmays/dosmud/pull/188)) |
 | Placement profile | `NpcProfile[]` / `NPC_PROFILES[]` | `npc.c` | Done ([#192](https://github.com/ianmays/dosmud/pull/192); [#107](https://github.com/ianmays/dosmud/issues/107)) |
 | Encounter gameplay | handler registry | `genc.c` | Done ([#209](https://github.com/ianmays/dosmud/pull/209)) |
-| Narrative | txtres indirection | `grendr.c`, `txtres.c` | Open ([#196](https://github.com/ianmays/dosmud/issues/196)) |
+| Narrative | txtres indirection | `grendr.c`, `txtres.c` | Done ✅ |
 | Room talk | `NPC_ROOM_INFO` (parallel table) | `npc.c`, `dialogue.c` | Open ([#197](https://github.com/ianmays/dosmud/issues/197)) |
 | Schedule / quest | rules over profile ids | #52, #49 | Future (m8) |
 
@@ -832,7 +832,7 @@ Move the ambient bandit encounter off the one-off `GameState.enemy_handover_pick
 | (existing) | [#52](https://github.com/ianmays/dosmud/issues/52) npc schedules | L | - | m8; profile v1 done |
 | (existing) | [#49](https://github.com/ianmays/dosmud/issues/49) quests | M | #52 | m8 |
 
-**Dependency order (blocked-by):** m9 NPC chain **complete** ([#104](https://github.com/ianmays/dosmud/issues/104) through [#107](https://github.com/ianmays/dosmud/issues/107)). m10 encounter registry **done** ([#209](https://github.com/ianmays/dosmud/pull/209)); open [#196](https://github.com/ianmays/dosmud/issues/196) (narrative indirection) and [#197](https://github.com/ianmays/dosmud/issues/197) (room talk table). Then m8/m6 content that depends on authored tables.
+**Dependency order (blocked-by):** m9 NPC chain **complete** ([#104](https://github.com/ianmays/dosmud/issues/104) through [#107](https://github.com/ianmays/dosmud/issues/107)). m10 encounter registry **done** ([#209](https://github.com/ianmays/dosmud/pull/209)); narrative indirection **done**; open [#197](https://github.com/ianmays/dosmud/issues/197) (room talk table). Then m8/m6 content that depends on authored tables.
 
 ### [#195](https://github.com/ianmays/dosmud/issues/195) - Encounter handler registry
 
@@ -845,6 +845,8 @@ Thin static `EncounterHandler` table in `genc.c` keyed by `GAME_ENCOUNTER_*`; ba
 - Snapshots: none - existing bandit snapshots unchanged
 
 ### [#196](https://github.com/ianmays/dosmud/issues/196) - Narrative event indirection
+
+Done ✅.
 
 GitHub blocked-by [#195](https://github.com/ianmays/dosmud/issues/195) (closed when [#209](https://github.com/ianmays/dosmud/pull/209) merges).
 ### [#197](https://github.com/ianmays/dosmud/issues/197) - Room NPC talk table cleanup

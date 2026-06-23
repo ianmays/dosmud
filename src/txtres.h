@@ -14,6 +14,37 @@ extern const char *const TXT_ROOM_ANIMAL_FALLBACK;
 extern const char *const TXT_ROOM_NOISE_FALLBACK;
 const char *txtres_dir_name(int dir);
 
+/*
+ * Stable render-scene keys for dialogue/encounter events. txtres owns the
+ * event-to-scene mapping; grendr renders by key so authored content can grow
+ * without reopening event-kind switch ladders.
+ */
+enum TxtresNarrativeKey {
+    TXTRES_NARRATIVE_NONE = 0,
+    TXTRES_NARRATIVE_BANDIT_OPEN,
+    TXTRES_NARRATIVE_TRAVELER_SCENE,
+    TXTRES_NARRATIVE_TRAVELER_REPLY,
+    TXTRES_NARRATIVE_FROG_TALK,
+    TXTRES_NARRATIVE_FROG_REPLY,
+    TXTRES_NARRATIVE_WATCHMAN_TALK,
+    TXTRES_NARRATIVE_WATCHMAN_REPLY,
+    TXTRES_NARRATIVE_HERBALIST_TALK,
+    TXTRES_NARRATIVE_HERBALIST_REPLY,
+    TXTRES_NARRATIVE_ARCHIVIST_TALK,
+    TXTRES_NARRATIVE_ARCHIVIST_REPLY,
+    TXTRES_NARRATIVE_NOBODY_TALK,
+    TXTRES_NARRATIVE_BANDIT_HANDOVER_PROMPT,
+    TXTRES_NARRATIVE_BANDIT_BAG_EMPTY,
+    TXTRES_NARRATIVE_BANDIT_GIVE_OK,
+    TXTRES_NARRATIVE_BANDIT_GIVE_NOT_CARRYING,
+    TXTRES_NARRATIVE_BANDIT_GIVE_WRONG_CONTEXT,
+    TXTRES_NARRATIVE_BANDIT_INTIMIDATE_SUCCESS,
+    TXTRES_NARRATIVE_BANDIT_INTIMIDATE_FAIL
+};
+
+int txtres_dialogue_narrative_key(int actor, int phase);
+int txtres_encounter_narrative_key(int kind, int action, int outcome);
+
 extern const char *const TXT_MAIN_TEST_MODE;
 extern const char *const TXT_MAIN_USAGE;
 extern const char *const TXT_MAIN_TITLE;

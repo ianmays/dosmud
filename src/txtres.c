@@ -1,5 +1,6 @@
 #include "txtres.h"
 #include "config.h"
+#include "gout.h"
 #include "version.h"
 #include "world.h"
 
@@ -78,6 +79,62 @@ const char *const g_room_art_captions[CFG_ROOM_MAX] = {
 const char *const TXT_ROOM_ANIMAL_FALLBACK = "something";
 const char *const TXT_ROOM_NOISE_FALLBACK = "You hear a distant animal noise.";
 
+static const unsigned char g_dialogue_narrative_keys[][3] = {
+    { TXTRES_NARRATIVE_NONE, TXTRES_NARRATIVE_NONE, TXTRES_NARRATIVE_NONE },
+    { TXTRES_NARRATIVE_NONE, TXTRES_NARRATIVE_FROG_TALK,
+        TXTRES_NARRATIVE_FROG_REPLY },
+    { TXTRES_NARRATIVE_NONE, TXTRES_NARRATIVE_WATCHMAN_TALK,
+        TXTRES_NARRATIVE_WATCHMAN_REPLY },
+    { TXTRES_NARRATIVE_NONE, TXTRES_NARRATIVE_HERBALIST_TALK,
+        TXTRES_NARRATIVE_HERBALIST_REPLY },
+    { TXTRES_NARRATIVE_NONE, TXTRES_NARRATIVE_ARCHIVIST_TALK,
+        TXTRES_NARRATIVE_ARCHIVIST_REPLY },
+    { TXTRES_NARRATIVE_NONE, TXTRES_NARRATIVE_NONE,
+        TXTRES_NARRATIVE_TRAVELER_REPLY },
+    { TXTRES_NARRATIVE_NONE, TXTRES_NARRATIVE_NOBODY_TALK,
+        TXTRES_NARRATIVE_NONE },
+    { TXTRES_NARRATIVE_NONE, TXTRES_NARRATIVE_NONE,
+        TXTRES_NARRATIVE_NONE },
+    { TXTRES_NARRATIVE_NONE, TXTRES_NARRATIVE_NONE,
+        TXTRES_NARRATIVE_NONE },
+    { TXTRES_NARRATIVE_NONE, TXTRES_NARRATIVE_NONE,
+        TXTRES_NARRATIVE_NONE },
+    { TXTRES_NARRATIVE_NONE, TXTRES_NARRATIVE_NONE,
+        TXTRES_NARRATIVE_NONE }
+};
+
+struct EncounterNarrativeMap {
+    unsigned char kind;
+    unsigned char action;
+    unsigned char outcome;
+    unsigned char key;
+};
+
+static const struct EncounterNarrativeMap g_encounter_narrative_keys[] = {
+    { GAME_ENCOUNTER_BANDIT, GAME_ENCOUNTER_ACTION_OPEN,
+        GAME_ENCOUNTER_OUTCOME_NONE, TXTRES_NARRATIVE_BANDIT_OPEN },
+    { GAME_ENCOUNTER_TRAVELER, GAME_ENCOUNTER_ACTION_OPEN,
+        GAME_ENCOUNTER_OUTCOME_NONE, TXTRES_NARRATIVE_TRAVELER_SCENE },
+    { GAME_ENCOUNTER_BANDIT, GAME_ENCOUNTER_ACTION_HANDOVER_PROMPT,
+        GAME_ENCOUNTER_OUTCOME_NONE, TXTRES_NARRATIVE_BANDIT_HANDOVER_PROMPT },
+    { GAME_ENCOUNTER_BANDIT, GAME_ENCOUNTER_ACTION_HANDOVER,
+        GAME_ENCOUNTER_OUTCOME_BAG_EMPTY, TXTRES_NARRATIVE_BANDIT_BAG_EMPTY },
+    { GAME_ENCOUNTER_BANDIT, GAME_ENCOUNTER_ACTION_GIVE,
+        GAME_ENCOUNTER_OUTCOME_OK, TXTRES_NARRATIVE_BANDIT_GIVE_OK },
+    { GAME_ENCOUNTER_BANDIT, GAME_ENCOUNTER_ACTION_GIVE,
+        GAME_ENCOUNTER_OUTCOME_NOT_CARRYING,
+        TXTRES_NARRATIVE_BANDIT_GIVE_NOT_CARRYING },
+    { GAME_ENCOUNTER_BANDIT, GAME_ENCOUNTER_ACTION_GIVE,
+        GAME_ENCOUNTER_OUTCOME_WRONG_CONTEXT,
+        TXTRES_NARRATIVE_BANDIT_GIVE_WRONG_CONTEXT },
+    { GAME_ENCOUNTER_BANDIT, GAME_ENCOUNTER_ACTION_INTIMIDATE,
+        GAME_ENCOUNTER_OUTCOME_SUCCESS,
+        TXTRES_NARRATIVE_BANDIT_INTIMIDATE_SUCCESS },
+    { GAME_ENCOUNTER_BANDIT, GAME_ENCOUNTER_ACTION_INTIMIDATE,
+        GAME_ENCOUNTER_OUTCOME_FAIL,
+        TXTRES_NARRATIVE_BANDIT_INTIMIDATE_FAIL }
+};
+
 const char *txtres_dir_name(int dir)
 {
     if (dir == DIR_NORTH) return "north";
@@ -85,6 +142,43 @@ const char *txtres_dir_name(int dir)
     if (dir == DIR_EAST) return "east";
     if (dir == DIR_WEST) return "west";
     return "unknown";
+}
+
+int txtres_dialogue_narrative_key(int actor, int phase)
+{
+    if (actor < 0 ||
+            actor >= (int)(sizeof(g_dialogue_narrative_keys) /
+                sizeof(g_dialogue_narrative_keys[0]))) {
+        return TXTRES_NARRATIVE_NONE;
+    }
+    if (phase < 0 ||
+            phase >= (int)(sizeof(g_dialogue_narrative_keys[0]) /
+                sizeof(g_dialogue_narrative_keys[0][0]))) {
+        return TXTRES_NARRATIVE_NONE;
+    }
+    return g_dialogue_narrative_keys[actor][phase];
+}
+
+int txtres_encounter_narrative_key(int kind, int action, int outcome)
+{
+    int i;
+
+    for (i = 0;
+            i < (int)(sizeof(g_encounter_narrative_keys) /
+                sizeof(g_encounter_narrative_keys[0]));
+            ++i) {
+        if (g_encounter_narrative_keys[i].kind != kind) {
+            continue;
+        }
+        if (g_encounter_narrative_keys[i].action != action) {
+            continue;
+        }
+        if (g_encounter_narrative_keys[i].outcome != outcome) {
+            continue;
+        }
+        return g_encounter_narrative_keys[i].key;
+    }
+    return TXTRES_NARRATIVE_NONE;
 }
 
 const char *const TXT_MAIN_TEST_MODE = "TEST MODE";

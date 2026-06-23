@@ -3,6 +3,7 @@
 #include "command.h"
 #include "gout.h"
 #include "items.h"
+#include "txtres.h"
 
 TEST game_event_queue_reset_clears_state(void)
 {
@@ -283,6 +284,52 @@ TEST game_dialogue_actor_bandit_ids_are_distinct(void)
     PASS();
 }
 
+TEST txtres_dialogue_narrative_key_maps_stable_scenes(void)
+{
+    ASSERT_EQ(TXTRES_NARRATIVE_FROG_TALK,
+        txtres_dialogue_narrative_key(GAME_DIALOGUE_ACTOR_FROG,
+            GAME_DIALOGUE_PHASE_TALK));
+    ASSERT_EQ(TXTRES_NARRATIVE_FROG_REPLY,
+        txtres_dialogue_narrative_key(GAME_DIALOGUE_ACTOR_FROG,
+            GAME_DIALOGUE_PHASE_REPLY));
+    ASSERT_EQ(TXTRES_NARRATIVE_WATCHMAN_TALK,
+        txtres_dialogue_narrative_key(GAME_DIALOGUE_ACTOR_WATCHMAN,
+            GAME_DIALOGUE_PHASE_TALK));
+    ASSERT_EQ(TXTRES_NARRATIVE_TRAVELER_REPLY,
+        txtres_dialogue_narrative_key(GAME_DIALOGUE_ACTOR_TRAVELER,
+            GAME_DIALOGUE_PHASE_REPLY));
+    ASSERT_EQ(TXTRES_NARRATIVE_ARCHIVIST_REPLY,
+        txtres_dialogue_narrative_key(GAME_DIALOGUE_ACTOR_ARCHIVIST,
+            GAME_DIALOGUE_PHASE_REPLY));
+    ASSERT_EQ(TXTRES_NARRATIVE_NONE,
+        txtres_dialogue_narrative_key(GAME_DIALOGUE_ACTOR_TRAVELER,
+            GAME_DIALOGUE_PHASE_TALK));
+    ASSERT_EQ(TXTRES_NARRATIVE_NONE,
+        txtres_dialogue_narrative_key(99, GAME_DIALOGUE_PHASE_TALK));
+    PASS();
+}
+
+TEST txtres_encounter_narrative_key_maps_stable_scenes(void)
+{
+    ASSERT_EQ(TXTRES_NARRATIVE_BANDIT_OPEN,
+        txtres_encounter_narrative_key(GAME_ENCOUNTER_BANDIT,
+            GAME_ENCOUNTER_ACTION_OPEN, GAME_ENCOUNTER_OUTCOME_NONE));
+    ASSERT_EQ(TXTRES_NARRATIVE_TRAVELER_SCENE,
+        txtres_encounter_narrative_key(GAME_ENCOUNTER_TRAVELER,
+            GAME_ENCOUNTER_ACTION_OPEN, GAME_ENCOUNTER_OUTCOME_NONE));
+    ASSERT_EQ(TXTRES_NARRATIVE_BANDIT_GIVE_OK,
+        txtres_encounter_narrative_key(GAME_ENCOUNTER_BANDIT,
+            GAME_ENCOUNTER_ACTION_GIVE, GAME_ENCOUNTER_OUTCOME_OK));
+    ASSERT_EQ(TXTRES_NARRATIVE_BANDIT_INTIMIDATE_FAIL,
+        txtres_encounter_narrative_key(GAME_ENCOUNTER_BANDIT,
+            GAME_ENCOUNTER_ACTION_INTIMIDATE,
+            GAME_ENCOUNTER_OUTCOME_FAIL));
+    ASSERT_EQ(TXTRES_NARRATIVE_NONE,
+        txtres_encounter_narrative_key(GAME_ENCOUNTER_TRAVELER,
+            GAME_ENCOUNTER_ACTION_GIVE, GAME_ENCOUNTER_OUTCOME_OK));
+    PASS();
+}
+
 SUITE(gout) {
     RUN_TEST(game_event_queue_reset_clears_state);
     RUN_TEST(game_event_push_ignores_null_output);
@@ -298,4 +345,6 @@ SUITE(gout) {
     RUN_TEST(game_event_push_records_bandit_actor_value);
     RUN_TEST(game_event_push_records_bandit_ambush_actor_value);
     RUN_TEST(game_dialogue_actor_bandit_ids_are_distinct);
+    RUN_TEST(txtres_dialogue_narrative_key_maps_stable_scenes);
+    RUN_TEST(txtres_encounter_narrative_key_maps_stable_scenes);
 }

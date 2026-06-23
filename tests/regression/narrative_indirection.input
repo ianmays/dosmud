@@ -1,0 +1,10 @@
+@fixture traveler_dialogue
+1
+@fixture at_tower
+talk
+2
+@fixture bandit_handover_pick
+give stick
+@fixture bandit_intimidate_ok
+3
+quit
