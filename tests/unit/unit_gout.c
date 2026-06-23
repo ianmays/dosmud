@@ -284,6 +284,10 @@ TEST game_dialogue_actor_bandit_ids_are_distinct(void)
     PASS();
 }
 
+/*
+ * txtres narrative-key lookups live in the gout suite: the contract spans
+ * GAME_EVENT_DIALOGUE/ENCOUNTER payload enums and stable txtres scene keys.
+ */
 TEST txtres_dialogue_narrative_key_maps_stable_scenes(void)
 {
     ASSERT_EQ(TXTRES_NARRATIVE_FROG_TALK,

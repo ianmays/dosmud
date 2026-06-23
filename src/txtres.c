@@ -5,8 +5,9 @@
 #include "world.h"
 
 /*
- * txtres is the single home for static player-facing copy. It keeps prose in
- * one place so rendering and gameplay code do not scatter literals.
+ * txtres is the single home for static player-facing copy and narrative-scene
+ * key tables. Prose and event-to-scene mappings stay here so rendering and
+ * gameplay code do not scatter literals or reopen switch ladders.
  */
 
 const char *const g_room_names[CFG_ROOM_MAX] = {
@@ -79,6 +80,11 @@ const char *const g_room_art_captions[CFG_ROOM_MAX] = {
 const char *const TXT_ROOM_ANIMAL_FALLBACK = "something";
 const char *const TXT_ROOM_NOISE_FALLBACK = "You hear a distant animal noise.";
 
+/*
+ * actor rows follow GameDialogueActor; columns follow GameDialoguePhase (gout.h).
+ * Pad through GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH; bandit slots stay NONE until
+ * authored dialogue scenes land.
+ */
 static const unsigned char g_dialogue_narrative_keys[][3] = {
     { TXTRES_NARRATIVE_NONE, TXTRES_NARRATIVE_NONE, TXTRES_NARRATIVE_NONE },
     { TXTRES_NARRATIVE_NONE, TXTRES_NARRATIVE_FROG_TALK,
@@ -110,6 +116,10 @@ struct EncounterNarrativeMap {
     unsigned char key;
 };
 
+/*
+ * Sparse kind/action/outcome rows for GAME_EVENT_ENCOUNTER payloads (gout.h).
+ * Traveler OPEN only; bandit owns handover, give, and intimidate replies.
+ */
 static const struct EncounterNarrativeMap g_encounter_narrative_keys[] = {
     { GAME_ENCOUNTER_BANDIT, GAME_ENCOUNTER_ACTION_OPEN,
         GAME_ENCOUNTER_OUTCOME_NONE, TXTRES_NARRATIVE_BANDIT_OPEN },

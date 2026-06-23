@@ -42,6 +42,7 @@ enum TxtresNarrativeKey {
     TXTRES_NARRATIVE_BANDIT_INTIMIDATE_FAIL
 };
 
+/* Unknown actor/phase or kind/action/outcome tuples return TXTRES_NARRATIVE_NONE. */
 int txtres_dialogue_narrative_key(int actor, int phase);
 int txtres_encounter_narrative_key(int kind, int action, int outcome);
 

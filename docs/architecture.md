@@ -62,9 +62,9 @@ printf("Player moved.\n");
 
 Presentation only: room art, HUD, combat text, inventory messages, and exploration map output.
 
-- **`txtres`** holds static copy; it does not print
+- **`txtres`** holds static copy and stable dialogue/encounter event-to-scene key tables (`TxtresNarrativeKey`, `txtres_dialogue_narrative_key`, `txtres_encounter_narrative_key`); it does not print
 - **`fmt`** builds player-visible strings from `GameState` into caller buffers (no terminal I/O); logic-heavy formatting (for example aggregated bag lists) lives here
-- **`grendr`** is the only gameplay-adjacent module that may call `printf`; it prints `fmt` output, applies newline/spacing tiers, draws ASCII art, and acts as the DOSMUD text-render adapter over the generic `GameEvent` queue (room/move, command/navigation, inventory/item, combat/progression, dialogue/encounter, ambient/inspect).
+- **`grendr`** is the only gameplay-adjacent module that may call `printf`; it prints `fmt` output, applies newline/spacing tiers, draws ASCII art, and acts as the DOSMUD text-render adapter over the generic `GameEvent` queue (room/move, command/navigation, inventory/item, combat/progression, dialogue/encounter, ambient/inspect). For `GAME_EVENT_DIALOGUE` and `GAME_EVENT_ENCOUNTER`, it resolves a `TxtresNarrativeKey` through `txtres` and dispatches to the matching `render_*` helper so authored scenes can grow without reopening actor/phase switch ladders in the render path.
 
 Platform or frontend code runs simulation first, then hands the resulting `GameEvent` records to render; render never changes simulation state.
 
@@ -242,6 +242,7 @@ New `src/*.c` and `src/*.h` basenames must stay within **classic FAT 8+3** (at m
 - art is intentionally compact to work well with 25 line displays (DOS standard)
 - no gameplay mutation
 - calls [`fmt.c`](https://github.com/ianmays/dosmud/blob/main/src/fmt.c) for logic-heavy strings, then prints; static copy from [`txtres.c`](https://github.com/ianmays/dosmud/blob/main/src/txtres.c) (`TXT_*` constants and `g_room_*` arrays), not scattered literals
+- `GAME_EVENT_DIALOGUE` and `GAME_EVENT_ENCOUNTER`: resolve `TxtresNarrativeKey` via `txtres`, then call the portrait/menu or encounter `render_*` helper for that key
 - newline tiers (`render_gap`, `render_paragraph`, and related rules): [Newline and spacing](#newline-and-spacing)
 
 ### `fmt`
@@ -257,6 +258,7 @@ New `src/*.c` and `src/*.h` basenames must stay within **classic FAT 8+3** (at m
 - trailing `\n` only on copy strings; see [Newline and spacing](#newline-and-spacing)
 - exported globals, not thin getters
 - functions only where selection matters
+- owns stable `TxtresNarrativeKey` tables that map dialogue actor/phase and encounter kind/action/outcome payloads to render-scene keys consumed by `grendr` (m10 narrative indirection; [#196](https://github.com/ianmays/dosmud/issues/196))
 
 ### `invent`
 

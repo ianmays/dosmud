@@ -72,7 +72,7 @@ Use this section when deciding what to write, not only what to run. Agents and c
 
 **Lesson from [#90](https://github.com/ianmays/dosmud/issues/90):** when command handling moves from `game.c` into a slice module, add tests in that slice's `unit_*.c` file. Green `unit_game.c` tests that only call `game_process_input` do not document slice ownership or catch regressions in new entry points.
 
-**For `GameEvent` producer work:** assert payload contracts where the producer owns them. Keep queue reset/overflow/order rules in `unit_gout.c`, router sequencing in `unit_game.c`, slice payload semantics in the owning `unit_*.c`, and harness fixture shape in `unit_harn.c`. Snapshots should prove rendered text, not replace direct payload assertions.
+**For `GameEvent` producer work:** assert payload contracts where the producer owns them. Keep queue reset/overflow/order rules in `unit_gout.c`, router sequencing in `unit_game.c`, slice payload semantics in the owning `unit_*.c`, and harness fixture shape in `unit_harn.c`. Narrative key lookup (`txtres_dialogue_narrative_key`, `txtres_encounter_narrative_key`) also lives in `unit_gout.c` beside queue contracts even though the tables are authored in `txtres.c`. Snapshots should prove rendered text, not replace direct payload assertions.
 
 ## Test gap audit (agents and CI)
 
@@ -142,7 +142,7 @@ make test-unit-coverage-verbose     # verbose coverage build, then full gcov blo
 
 **In-scope modules (branch coverage target ~90%+):** `command`, `invent`, `combat`, `game`, `genc`, `dialogue`, `npc`, `gatmos`, `world`, `gprog`, `items`, `fmt`, `gout`, `replay`, `save`, `testharn`
 
-**Out of scope for the unit coverage bar:** `buildid`, `grendr`, `txtres`, `main`, `platpos` / `platwin` / `platdos` (presentation or shell-edge glue; `buildid` is read-only identity covered by `unit_cmd.c`, `unit_game.c`, `unit_gout.c`, and version snapshots; `fmt` holds testable format logic; snapshots cover printed output and ASCII art)
+**Out of scope for the unit coverage bar:** `buildid`, `grendr`, `txtres`, `main`, `platpos` / `platwin` / `platdos` (presentation or shell-edge glue; `buildid` is read-only identity covered by `unit_cmd.c`, `unit_game.c`, `unit_gout.c`, and version snapshots; `txtres` narrative key tables are covered in `unit_gout.c`; `fmt` holds testable format logic; snapshots cover printed output and ASCII art)
 
 **Harness-only fixture:** `bag_full_gate` - applies `game_inv_bag_add` without resetting baseline; returns fixture failure (`-2`) when the bag is already full (used by unit tests for `testharn_apply` error paths)
 
@@ -317,7 +317,7 @@ Each process run uses one `.input` file until `quit`. `make snapshot-run` runs `
 
 **Movement / time:** `walk_north`, `walk_map`, `wait_tick`.
 
-**NPC talk:** `frog_hint`, `frog_replies`, `watchman_talk`, `traveler_replies`, `traveler_talk_blocked`, `herbalist_talk`, `archivist_talk`, `talk_nobody`, `game_event_dialogue` (`frog_hint` proves the generic room-NPC hint also applies at the pond; the others cover pond frog, bandit camp talk, traveler interaction, and tower watchman through generic `GAME_EVENT_DIALOGUE` / `GAME_EVENT_ENCOUNTER` paths; [#175](https://github.com/ianmays/dosmud/pull/175)).
+**NPC talk:** `frog_hint`, `frog_replies`, `watchman_talk`, `traveler_replies`, `traveler_talk_blocked`, `herbalist_talk`, `archivist_talk`, `talk_nobody`, `game_event_dialogue`, `narrative_indirection` (`frog_hint` proves the generic room-NPC hint also applies at the pond; the others cover pond frog, bandit camp talk, traveler interaction, and tower watchman through generic `GAME_EVENT_DIALOGUE` / `GAME_EVENT_ENCOUNTER` paths; `narrative_indirection` exercises traveler, watchman, and bandit give/intimidate scenes end-to-end through the `txtres` narrative-key indirection path; [#175](https://github.com/ianmays/dosmud/pull/175), [#196](https://github.com/ianmays/dosmud/issues/196)).
 
 **Eat / use:** `use_salve`, `use_torch`, `use_spear`, `use_stone`, `eat_berry`, `eat_fish`, `eat_berry_heal`, `eat_fish_heal`, `eat_not_edible`, `eat_missing`.
 
