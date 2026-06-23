@@ -33,6 +33,8 @@ int npc_begin_encounter(struct GameState *game, int actor, int dialogue,
                         struct GameEventQueue *out);
 int npc_end_encounter(struct GameState *game, int actor);
 int npc_open_room_dialogue(struct GameState *game, struct GameEventQueue *out);
+int npc_room_cmd_reply(struct GameState *game, int choice,
+                       struct GameEventQueue *out);
 void npc_seed_profiles(struct GameState *game);
 void npc_roaming_activate_due(struct GameState *game);
 void npc_roaming_update_separation(struct GameState *game);

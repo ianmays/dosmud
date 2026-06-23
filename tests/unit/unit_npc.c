@@ -90,6 +90,42 @@ TEST npc_open_room_dialogue_watchman(void)
     PASS();
 }
 
+TEST npc_room_cmd_reply_frog_uses_dialogue_table(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 31u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_POND, 0);
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, npc_open_room_dialogue(&game, &out));
+    game.player.room_id = WORLD_ROOM_CAMP;
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, npc_room_cmd_reply(&game, 2, &out));
+    ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_DIALOGUE, out.events[0].kind);
+    ASSERT_EQ(GAME_DIALOGUE_ACTOR_FROG, out.events[0].arg0);
+    ASSERT_EQ(GAME_DIALOGUE_PHASE_REPLY, out.events[0].arg1);
+    ASSERT_EQ(2, out.events[0].arg2);
+    PASS();
+}
+
+TEST npc_room_cmd_reply_skips_non_room_dialogue(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 32u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game_set_mode_dialogue(&game, DIALOGUE_TRAVELER);
+    game_event_queue_reset(&out);
+    ASSERT_EQ(0, npc_room_cmd_reply(&game, 1, &out));
+    ASSERT_EQ(DIALOGUE_TRAVELER, game.dialogue);
+    ASSERT_EQ(0, out.count);
+    PASS();
+}
+
 TEST npc_open_room_dialogue_none(void)
 {
     struct GameState game;
@@ -513,6 +549,8 @@ SUITE(npc) {
     RUN_TEST(npc_choice_validation);
     RUN_TEST(npc_open_room_dialogue_frog);
     RUN_TEST(npc_open_room_dialogue_watchman);
+    RUN_TEST(npc_room_cmd_reply_frog_uses_dialogue_table);
+    RUN_TEST(npc_room_cmd_reply_skips_non_room_dialogue);
     RUN_TEST(npc_open_room_dialogue_none);
     RUN_TEST(npc_seed_profiles_traveler_state);
     RUN_TEST(npc_seed_roaming_bandit_sets_state);
