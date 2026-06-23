@@ -203,9 +203,10 @@ Own:
 
 #### `genc.c` (encounter)
 Own:
-- random encounter spawning
-- bandit logic
-- encounter sequencing
+- encounter handler registry (`EncounterHandler` table keyed by encounter id)
+- roster encounter open path (`enemy_begin_encounter`)
+- bandit reply and give handlers
+- `genc_cmd_reply` / `genc_cmd_give` dispatch
 
 Goal:
 - reduce coupling
@@ -627,7 +628,7 @@ Blocked-by [#196](https://github.com/ianmays/dosmud/issues/196) (narrative indir
 
 ### [#54](https://github.com/ianmays/dosmud/issues/54) - Procedural encounters
 
-After [#107](https://github.com/ianmays/dosmud/issues/107), procedural encounter work means **rules over roster profiles** (roam, respawn, co-location), not player-site ambush spawn. Blocked-by [#195](https://github.com/ianmays/dosmud/issues/195) (encounter handler registry); placement profile v1 delivered in [#192](https://github.com/ianmays/dosmud/pull/192).
+After [#107](https://github.com/ianmays/dosmud/issues/107), procedural encounter work means **rules over roster profiles** (roam, respawn, co-location), not player-site ambush spawn. Encounter handler registry delivered in [#209](https://github.com/ianmays/dosmud/pull/209); placement profile v1 in [#192](https://github.com/ianmays/dosmud/pull/192).
 
 ### [#55](https://github.com/ianmays/dosmud/issues/55) - Larger worlds
 
@@ -635,7 +636,7 @@ After [#107](https://github.com/ianmays/dosmud/issues/107), procedural encounter
 
 North-star **consumer** of [m10](#authored-content-and-engine-ioc) placement and narrative layers (and m8 [#49](https://github.com/ianmays/dosmud/issues/49) / [#52](https://github.com/ianmays/dosmud/issues/52)), not a substitute for them. GitHub intent: author-defined narrative pathway rather than seed-planted randomness alone; may leverage TEST_MODE fixtures and replay for deterministic beat tests.
 
-Author-defined structure does **not** abandon project determinism: same seed, inputs, and pathway state should replay identically. Deferred until m10 narrative indirection is underway. When grooming, consider splitting into (a) pathway / beat engine hooks and (b) authored story data packs. Blocked-by (GitHub): [#196](https://github.com/ianmays/dosmud/issues/196) and [#195](https://github.com/ianmays/dosmud/issues/195). Full delivery benefits from m8 [#52](https://github.com/ianmays/dosmud/issues/52) and [#49](https://github.com/ianmays/dosmud/issues/49) but does not require them to start.
+Author-defined structure does **not** abandon project determinism: same seed, inputs, and pathway state should replay identically. Deferred until m10 narrative indirection is underway. When grooming, consider splitting into (a) pathway / beat engine hooks and (b) authored story data packs. Blocked-by (GitHub): [#196](https://github.com/ianmays/dosmud/issues/196); [#195](https://github.com/ianmays/dosmud/issues/195) delivered ([#209](https://github.com/ianmays/dosmud/pull/209)). Full delivery benefits from m8 [#52](https://github.com/ianmays/dosmud/issues/52) and [#49](https://github.com/ianmays/dosmud/issues/49) but does not require them to start.
 
 ### [#130](https://github.com/ianmays/dosmud/issues/130) - Night time
 
@@ -814,7 +815,7 @@ Move the ambient bandit encounter off the one-off `GameState.enemy_handover_pick
 |-------|----------|-------|--------|
 | Instance | `NpcState[]` | `game.h`, `npc.c` | Done ([#187](https://github.com/ianmays/dosmud/pull/188)) |
 | Placement profile | `NpcProfile[]` / `NPC_PROFILES[]` | `npc.c` | Done ([#192](https://github.com/ianmays/dosmud/pull/192); [#107](https://github.com/ianmays/dosmud/issues/107)) |
-| Encounter gameplay | handler registry | `genc.c` | Open ([#195](https://github.com/ianmays/dosmud/issues/195)) |
+| Encounter gameplay | handler registry | `genc.c` | Done ([#209](https://github.com/ianmays/dosmud/pull/209)) |
 | Narrative | txtres indirection | `grendr.c`, `txtres.c` | Open ([#196](https://github.com/ianmays/dosmud/issues/196)) |
 | Room talk | `NPC_ROOM_INFO` (parallel table) | `npc.c`, `dialogue.c` | Open ([#197](https://github.com/ianmays/dosmud/issues/197)) |
 | Schedule / quest | rules over profile ids | #52, #49 | Future (m8) |
@@ -831,13 +832,21 @@ Move the ambient bandit encounter off the one-off `GameState.enemy_handover_pick
 | (existing) | [#52](https://github.com/ianmays/dosmud/issues/52) npc schedules | L | - | m8; profile v1 done |
 | (existing) | [#49](https://github.com/ianmays/dosmud/issues/49) quests | M | #52 | m8 |
 
-**Dependency order (blocked-by):** m9 NPC chain **complete** ([#104](https://github.com/ianmays/dosmud/issues/104) through [#107](https://github.com/ianmays/dosmud/issues/107)). Open m10: [#195](https://github.com/ianmays/dosmud/issues/195) before [#196](https://github.com/ianmays/dosmud/issues/196); [#197](https://github.com/ianmays/dosmud/issues/197) may run in parallel with #195 when unblocked. Then m8/m6 content that depends on authored tables.
+**Dependency order (blocked-by):** m9 NPC chain **complete** ([#104](https://github.com/ianmays/dosmud/issues/104) through [#107](https://github.com/ianmays/dosmud/issues/107)). m10 encounter registry **done** ([#209](https://github.com/ianmays/dosmud/pull/209)); open [#196](https://github.com/ianmays/dosmud/issues/196) (narrative indirection) and [#197](https://github.com/ianmays/dosmud/issues/197) (room talk table). Then m8/m6 content that depends on authored tables.
 
 ### [#195](https://github.com/ianmays/dosmud/issues/195) - Encounter handler registry
 
+Done ✅ ([#209](https://github.com/ianmays/dosmud/pull/209)).
+
+Thin static `EncounterHandler` table in `genc.c` keyed by `GAME_ENCOUNTER_*`; bandit reply/give are the first populated row; `genc_cmd_reply` and `genc_cmd_give` dispatch through the registry.
+
+### Testing
+- Unit: `unit_genc.c` (registry dispatch, unsupported encounter kind fallbacks)
+- Snapshots: none - existing bandit snapshots unchanged
+
 ### [#196](https://github.com/ianmays/dosmud/issues/196) - Narrative event indirection
 
-GitHub blocked-by [#195](https://github.com/ianmays/dosmud/issues/195) (open).
+GitHub blocked-by [#195](https://github.com/ianmays/dosmud/issues/195) (closed when [#209](https://github.com/ianmays/dosmud/pull/209) merges).
 ### [#197](https://github.com/ianmays/dosmud/issues/197) - Room NPC talk table cleanup
 
 ## [Multiplayer](https://github.com/ianmays/dosmud/milestone/11)
