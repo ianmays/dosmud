@@ -3,8 +3,9 @@
 #include "npc.h"
 
 /*
- * Dialogue dispatch handles fixed room-NPC replies. The npc seam owns room
- * identity and actor lookup so frog and other room NPCs share one path.
+ * Dialogue command dispatch: talk guards, nobody hint, and room-talk open.
+ * Room-talk replies delegate to npc_room_cmd_reply (authored table keyed by
+ * game.dialogue, not player room).
  */
 
 int dialogue_cmd_reply(struct GameState *game, int choice, GameEventQueue *out)

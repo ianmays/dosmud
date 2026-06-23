@@ -90,6 +90,7 @@ TEST npc_open_room_dialogue_watchman(void)
     PASS();
 }
 
+/* Reply follows game.dialogue, not player room, after a mid-branch move. */
 TEST npc_room_cmd_reply_frog_uses_dialogue_table(void)
 {
     struct GameState game;
@@ -111,6 +112,7 @@ TEST npc_room_cmd_reply_frog_uses_dialogue_table(void)
     PASS();
 }
 
+/* Traveler dialogue_kind is outside NPC_ROOM_INFO; reply helper is a no-op. */
 TEST npc_room_cmd_reply_skips_non_room_dialogue(void)
 {
     struct GameState game;

@@ -237,6 +237,7 @@ TEST dialogue_cmd_reply_frog_event(void)
     PASS();
 }
 
+/* Reply follows game.dialogue, not player room, after a mid-branch move. */
 TEST dialogue_cmd_reply_frog_after_move_stays_on_dialogue_table(void)
 {
     struct GameState game;

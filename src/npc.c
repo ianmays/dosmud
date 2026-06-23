@@ -11,6 +11,10 @@
  * DIALOGUE*; grendr maps copy.
  */
 
+/*
+ * Parallel authored table for fixed room NPCs: talk opens by player room_id;
+ * reply resolves by game.dialogue so a mid-branch move does not retarget actor.
+ */
 struct NpcRoomInfo {
     int room_id;
     int actor;
@@ -517,12 +521,16 @@ int npc_open_room_dialogue(struct GameState *game, struct GameEventQueue *out)
     if (info == 0) {
         return 0;
     }
-    /* Talk opens dialogue mode and queues one TALK event; reply uses dialogue_cmd_reply. */
+    /* Talk opens dialogue mode and queues one TALK event; reply uses npc_room_cmd_reply. */
     npc_push_dialogue(out, info->actor, info->open_phase, 0);
     game_set_mode_dialogue(game, info->dialogue_kind);
     return 1;
 }
 
+/*
+ * Room-talk reply path: keyed on game->dialogue, not player room. Non-room
+ * kinds (traveler, enemy) return 0 so genc and roaming slices keep ownership.
+ */
 int npc_room_cmd_reply(struct GameState *game, int choice, GameEventQueue *out)
 {
     const struct NpcRoomInfo *info;
