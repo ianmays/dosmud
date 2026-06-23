@@ -833,7 +833,7 @@ Move the ambient bandit encounter off the one-off `GameState.enemy_handover_pick
 
 **Dependency order (blocked-by):** m9 NPC chain **complete** ([#104](https://github.com/ianmays/dosmud/issues/104) through [#107](https://github.com/ianmays/dosmud/issues/107)). Open m10: [#195](https://github.com/ianmays/dosmud/issues/195) before [#196](https://github.com/ianmays/dosmud/issues/196); [#197](https://github.com/ianmays/dosmud/issues/197) may run in parallel with #195 when unblocked. Then m8/m6 content that depends on authored tables.
 
-### [#195](https://github.com/ianmays/dosmud/issues/195) - Encounter handler registry
+### [#195](https://github.com/ianmays/dosmud/issues/195) - Encounter handler registry - Done ✅
 
 ### [#196](https://github.com/ianmays/dosmud/issues/196) - Narrative event indirection
 

@@ -59,6 +59,14 @@ static void begin_enemy_state(struct GameState *game)
     begin_enemy(game, &out);
 }
 
+static int begin_enemy_kind(struct GameState *game, int actor, int encounter,
+                            GameEventQueue *out)
+{
+    game_event_queue_reset(out);
+    return npc_begin_encounter(game, actor, DIALOGUE_ENEMY, encounter,
+        game->player.room_id, 0, out);
+}
+
 TEST genc_skips_when_busy(void)
 {
     struct GameState game;
@@ -291,6 +299,21 @@ TEST genc_cmd_reply_invalid_choice(void)
     PASS();
 }
 
+TEST genc_cmd_reply_unsupported_encounter_kind(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 10u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    ASSERT(begin_enemy_kind(&game, GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH,
+        GAME_ENCOUNTER_TRAVELER, &out) >= 0);
+    ASSERT_EQ(0, enemy_reply(&game, 1, &out));
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(0, out.count);
+    PASS();
+}
+
 TEST genc_cmd_reply_bag_empty_then_combat(void)
 {
     struct GameState game;
@@ -308,6 +331,24 @@ TEST genc_cmd_reply_bag_empty_then_combat(void)
     PASS();
 }
 
+TEST genc_cmd_give_unsupported_encounter_kind_falls_back_to_wrong_context(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 11u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    ASSERT(begin_enemy_kind(&game, GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH,
+        GAME_ENCOUNTER_TRAVELER, &out) >= 0);
+    ASSERT_EQ(1, enemy_give(&game, ITEM_STICK, &out));
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
+    ASSERT_EQ(GAME_ENCOUNTER_BANDIT, out.events[0].arg0);
+    ASSERT_EQ(GAME_ENCOUNTER_ACTION_GIVE, out.events[0].arg1);
+    ASSERT_EQ(GAME_ENCOUNTER_OUTCOME_WRONG_CONTEXT, out.events[0].arg2);
+    PASS();
+}
+
 SUITE(genc) {
     RUN_TEST(genc_skips_when_busy);
     RUN_TEST(genc_opens_dialogue);
@@ -321,5 +362,7 @@ SUITE(genc) {
     RUN_TEST(genc_cmd_reply_intimidate_clears_handover_pick);
     RUN_TEST(genc_cmd_reply_intimidate_fail);
     RUN_TEST(genc_cmd_reply_invalid_choice);
+    RUN_TEST(genc_cmd_reply_unsupported_encounter_kind);
     RUN_TEST(genc_cmd_reply_bag_empty_then_combat);
+    RUN_TEST(genc_cmd_give_unsupported_encounter_kind_falls_back_to_wrong_context);
 }
