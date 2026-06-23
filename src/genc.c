@@ -10,6 +10,7 @@
  * Enemy encounter handling stays separate from combat so the dialogue
  * branch can gate handover and intimidation.
  * #160: queues GAME_EVENT_ENCOUNTER / DIALOGUE_GUARD; grendr maps to text.
+ * #195: reply/give dispatch by enemy->encounter; only bandit rows live here.
  */
 
 /*
@@ -28,6 +29,10 @@ static void push_dialogue_guard(GameEventQueue *out, int reason)
     game_event_push(out, GAME_EVENT_DIALOGUE_GUARD, reason, 0, 0, 0, 0);
 }
 
+/*
+ * Per-kind reply/give hooks; table index matches GAME_ENCOUNTER_* in gout.h.
+ * Empty rows (e.g. traveler) stay NPC-owned; genc_cmd_* skips them.
+ */
 typedef int (*EncounterReplyHandler)(struct GameState *game,
                                      struct NpcState *enemy, int choice,
                                      GameEventQueue *out);
@@ -171,6 +176,10 @@ int genc_cmd_give(struct GameState *game, int item_arg, GameEventQueue *out)
             return handler->give(game, enemy, item_arg, out);
         }
     }
+    /*
+     * CMD_GIVE always stops in genc; bandit WRONG_CONTEXT preserves the
+     * pre-registry give fallback when no handler row exists.
+     */
     push_encounter(out, GAME_ENCOUNTER_BANDIT, GAME_ENCOUNTER_ACTION_GIVE,
         GAME_ENCOUNTER_OUTCOME_WRONG_CONTEXT, 0, 0);
     return 1;
@@ -187,6 +196,7 @@ int genc_cmd_reply(struct GameState *game, int choice, GameEventQueue *out)
     }
     handler = encounter_handler(enemy->encounter);
     if (handler == 0 || handler->reply == 0) {
+        /* Unhandled kind: game_cmd_reply may fall through to npc roaming reply. */
         return 0;
     }
     return handler->reply(game, enemy, choice, out);

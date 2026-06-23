@@ -9,8 +9,9 @@
 #include "unit_util.h"
 
 /*
- * out-taking helpers assert #160 encounter events; *_state wraps a local
- * GameEventQueue for mode-only tests that do not inspect the queue.
+ * Direct genc API tests with local GameEventQueue fixtures.
+ * out-taking helpers assert #160 encounter events; *_state drops the queue.
+ * begin_enemy_kind sets encounter ids the normal open path never assigns.
  */
 static void begin_enemy(struct GameState *game, GameEventQueue *out)
 {
@@ -59,6 +60,7 @@ static void begin_enemy_state(struct GameState *game)
     begin_enemy(game, &out);
 }
 
+/* Stub encounter id on an active enemy slot; skips enemy_begin_encounter ordering. */
 static int begin_enemy_kind(struct GameState *game, int actor, int encounter,
                             GameEventQueue *out)
 {
@@ -299,6 +301,7 @@ TEST genc_cmd_reply_invalid_choice(void)
     PASS();
 }
 
+/* GAME_ENCOUNTER_TRAVELER has no genc row; reply returns 0 with an empty queue. */
 TEST genc_cmd_reply_unsupported_encounter_kind(void)
 {
     struct GameState game;
@@ -331,6 +334,7 @@ TEST genc_cmd_reply_bag_empty_then_combat(void)
     PASS();
 }
 
+/* Unsupported kind still emits bandit GIVE WRONG_CONTEXT (always-consumed give path). */
 TEST genc_cmd_give_unsupported_encounter_kind_falls_back_to_wrong_context(void)
 {
     struct GameState game;
