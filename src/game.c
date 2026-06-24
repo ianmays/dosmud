@@ -22,7 +22,10 @@ static void push_dialogue_guard(GameEventQueue *out, int reason)
     game_event_push(out, GAME_EVENT_DIALOGUE_GUARD, reason, 0, 0, 0, 0);
 }
 
-/* Non-enemy menus may yield to ordinary explore verbs without skipping the verb. */
+/*
+ * Menu-native verbs keep the modal open (numbered reply, repeat talk, repeat
+ * loot-to-leave); help/version/quit stay allowed like combat menus.
+ */
 static int cmd_preserves_noncombat_menu(const struct GameState *game,
                                         const struct Command *cmd)
 {
@@ -43,6 +46,10 @@ static int cmd_preserves_noncombat_menu(const struct GameState *game,
     return 0;
 }
 
+/*
+ * #205: dismiss non-enemy dialogue before mode guards so explore verbs run
+ * after close. Enemy menus keep combat-like gating in game_cmd_allowed_in_mode.
+ */
 static void maybe_close_noncombat_menu(struct GameState *game,
                                        const struct Command *cmd,
                                        GameEventQueue *out)
@@ -55,6 +62,7 @@ static void maybe_close_noncombat_menu(struct GameState *game,
     }
 
     if (game->dialogue == DIALOGUE_LOOT) {
+        /* invent-owned leave; same path as loot with no corpse index. */
         (void)game_inv_cmd_loot(game, 0, out);
         return;
     }
@@ -314,7 +322,10 @@ static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd,
         return 0;
     }
 
-    /* Corpse menu is modal like combat; loot again while open acts as "leave". */
+    /*
+     * Corpse menu is modal like combat; loot again while open acts as "leave".
+     * Other explore verbs exit via maybe_close_noncombat_menu before this guard.
+     */
     if (game->mode == GAME_MODE_DIALOGUE &&
             game->dialogue == DIALOGUE_LOOT &&
             cmd->type != CMD_REPLY &&
@@ -491,6 +502,7 @@ static int game_cmd_reply(struct GameState *game, struct Command *cmd,
 static int apply_command(struct GameState *game, struct Command *cmd,
                          GameEventQueue *out)
 {
+    /* Menu exit must precede mode guards so the verb is not blocked. */
     maybe_close_noncombat_menu(game, cmd, out);
 
     if (!game_cmd_allowed_in_mode(game, cmd, out)) {
