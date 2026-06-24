@@ -12,6 +12,7 @@ static int inv_loot(struct GameState *game, GameEventQueue *out)
     return game_inv_cmd_loot(game, 0, out);
 }
 
+/* Direct invent API; loot_all=1 mirrors CMD_LOOT_ALL from command_parse */
 static int inv_loot_all(struct GameState *game, GameEventQueue *out)
 {
     game_event_queue_reset(out);

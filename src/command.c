@@ -228,6 +228,7 @@ int command_parse(char *line, struct Command *out_cmd)
     }
     if (strcmp(word1, "loot") == 0) {
         out_cmd->type = CMD_LOOT;
+        /* bare loot opens menu; only "loot all" sets CMD_LOOT_ALL (no item names) */
         if (count == 1) {
             return 1;
         }

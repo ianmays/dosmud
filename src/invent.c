@@ -268,12 +268,8 @@ int game_inv_bag_remove_item(struct GameState *game, int item_id)
 }
 
 /*
- * Opens the interactive corpse menu (DIALOGUE_LOOT); replies go to
- * game_inv_cmd_loot_reply via CMD_REPLY in game.c.
- */
-/*
- * Bulk loot stays invent-owned: it drains the dense corpse slots in visible
- * order, then falls back to the same bag-full/menu state as single-slot loot.
+ * Bulk loot stays invent-owned: drains corpse_item[] from slot 0 in visible
+ * order; on bag full, re-queues CORPSE_VIEW like game_inv_cmd_loot_reply.
  */
 static int loot_all_from_corpse(struct GameState *game, int room_id,
                                 GameEventQueue *out)
@@ -299,12 +295,18 @@ static int loot_all_from_corpse(struct GameState *game, int room_id,
     return 1;
 }
 
+/*
+ * loot_all=0 opens the interactive corpse menu (DIALOGUE_LOOT); replies go to
+ * game_inv_cmd_loot_reply via CMD_REPLY in game.c. loot_all=1 bulk-transfers
+ * without menu replies, from explore or while the loot menu is already open.
+ */
 int game_inv_cmd_loot(struct GameState *game, int loot_all, GameEventQueue *out)
 {
     int room_id;
 
     room_id = game->player.room_id;
     if (game->mode == GAME_MODE_DIALOGUE && game->dialogue == DIALOGUE_LOOT) {
+        /* bare loot again means leave; loot all bulk-takes remaining slots */
         if (loot_all) {
             return loot_all_from_corpse(game, room_id, out);
         }
@@ -324,6 +326,7 @@ int game_inv_cmd_loot(struct GameState *game, int loot_all, GameEventQueue *out)
         return 1;
     }
     if (loot_all) {
+        /* DIALOGUE_LOOT before bulk take so bag-full can re-queue the menu */
         game_set_mode_dialogue(game, DIALOGUE_LOOT);
         return loot_all_from_corpse(game, room_id, out);
     }
