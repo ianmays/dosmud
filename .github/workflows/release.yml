@@ -89,6 +89,7 @@ jobs:
           notes_json="$(mktemp)"
           title_file="$(mktemp)"
           body_file="$(mktemp)"
+          update_json="$(mktemp)"
 
           gh api \
             --method POST \
@@ -120,14 +121,32 @@ PY
 
           if gh release view "$tag" --repo "$repo" >/dev/null 2>&1; then
             release_id="$(gh release view "$tag" --repo "$repo" --json databaseId --jq .databaseId)"
+            python3 - "$title_file" "$body_file" "$update_json" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], "r", encoding="utf-8") as handle:
+    title = handle.read()
+
+with open(sys.argv[2], "r", encoding="utf-8") as handle:
+    body = handle.read()
+
+with open(sys.argv[3], "w", encoding="utf-8") as handle:
+    json.dump(
+        {
+            "name": title,
+            "body": body,
+            "draft": True,
+            "prerelease": False,
+        },
+        handle,
+    )
+PY
             gh api \
               --method PATCH \
               -H "Accept: application/vnd.github+json" \
               "repos/${repo}/releases/${release_id}" \
-              -f name="$title" \
-              -F draft=true \
-              -F prerelease=false \
-              -f body="$(cat "$body_file")" \
+              --input "$update_json" \
               >/dev/null
           else
             gh release create "$tag" \
