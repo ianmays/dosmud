@@ -8,6 +8,7 @@ This manual is the canonical project documentation set for architecture, testing
 - [Testing](testing.md)
 - [CI Metrics](ci-metrics.html)
 - [Contributor Guide](contributor-guide.md)
+- GitHub Releases follow the tagged draft-release flow documented in [Testing](testing.md#ci-github-actions) and [Contributor Guide](contributor-guide.md)
 
 ## Roadmap and agents
 

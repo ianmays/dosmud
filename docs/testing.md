@@ -431,6 +431,8 @@ Successful `main` CI runs trigger [`.github/workflows/ci-metrics.yml`](https://g
 
 When the metrics schema grows, use [`scripts/backfill-ci-history.py`](https://github.com/ianmays/dosmud/blob/main/scripts/backfill-ci-history.py) to enrich older `ci-metrics/history.json` entries from an archived CI log. It takes the target history file, the target run SHA, and the source log file, then patches only the matching history record.
 
+Tagged releases use [`.github/workflows/release.yml`](https://github.com/ianmays/dosmud/blob/main/.github/workflows/release.yml). That workflow runs only for tags matching `v*`, builds the native Linux and Windows binaries, packages them with `README.md`, `VERSION`, and `release-metadata.txt`, writes a `SHA256SUMS.txt`, and creates or refreshes a **draft** GitHub Release. Notes come from GitHub's generated release notes API plus [`.github/release.yml`](https://github.com/ianmays/dosmud/blob/main/.github/release.yml) category rules. The maintainer is expected to review and publish the draft release manually. DOS/OpenWatcom packaging stays outside CI for now because that path still depends on the host-side Windows prep flow.
+
 ## Build artifacts
 
 | Target | Output |
@@ -442,6 +444,7 @@ When the metrics schema grows, use [`scripts/backfill-ci-history.py`](https://gi
 | `make test-run` | `tests/regression/<name>.output` (gitignored) |
 | `make build-soak` / `make test-soak` | `tests/soak/build/dosmud_soak`, `*.o` (gitignored) |
 | `make dos-prepare` | `dosmud.exe` and `build.log` in the prepared DOS tree (`$destination` in `dos-prepare.local.ps1`; not mirrored from Linux) |
+| release workflow (`v*` tag) | GitHub Release assets: `dosmud-<tag>-linux-x86_64.tar.gz`, `dosmud-<tag>-windows-x86_64.zip`, `SHA256SUMS.txt` |
 
 `make clean` removes `./dosmud`, `tests/unit/build/`, snapshot `*.output`, and legacy root-level unit/coverage junk.
 

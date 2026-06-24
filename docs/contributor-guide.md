@@ -24,6 +24,15 @@ Recommended workflow:
 - keep commits small and reviewable
 - update documentation when behavior or workflows change
 
+Maintainer release flow:
+
+- bump the checked-in `VERSION` (and `include/version.h` fallback when the base version changes)
+- push a version tag such as `v0.1.0`
+- let [`.github/workflows/release.yml`](https://github.com/ianmays/dosmud/blob/main/.github/workflows/release.yml) build Linux and Windows bundles and create or refresh a draft GitHub Release
+- review the generated notes, edit limitations or headings if needed, then publish the draft release
+
+Release notes are grouped by [`.github/release.yml`](https://github.com/ianmays/dosmud/blob/main/.github/release.yml). That keeps durable release downloads tied to tags, while ordinary CI artifacts stay attached to individual workflow runs.
+
 Before opening a draft PR (agents and contributors with automation):
 
 ```text

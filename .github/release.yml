@@ -1,0 +1,26 @@
+changelog:
+  exclude:
+    labels:
+      - ignore-for-release
+  categories:
+    - title: Gameplay
+      labels:
+        - gameplay
+    - title: Engine
+      labels:
+        - engine
+    - title: Tooling
+      labels:
+        - tooling
+    - title: Tests
+      labels:
+        - test
+        - tests
+        - regression
+    - title: Documentation
+      labels:
+        - documentation
+        - docs
+    - title: Other Changes
+      labels:
+        - "*"

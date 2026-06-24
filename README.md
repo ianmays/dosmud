@@ -34,6 +34,8 @@ The manual is deployed as [Github Pages](https://ianmays.github.io/dosmud/).
 
 The published [CI Metrics dashboard](https://ianmays.github.io/dosmud/ci-metrics.html) shows merged `main` CI history, including timing trends and soak benchmark history, for quick regression checks.
 
+Tagged releases use a separate GitHub Release workflow. Temporary CI artifacts remain tied to workflow runs, while durable download bundles are attached only to version tags such as `v0.1.0`.
+
 ## At a glance
 \* this is an AI-generated image - purely intended to give a sense of what this project is all about before you move on, do **not** consider this a source of truth as it may contain hallucinations 
 
@@ -74,6 +76,12 @@ make win-run
 ```
 
 This requires the MinGW cross-compiler (`x86_64-w64-mingw32-gcc`) in WSL and emits `dosmud.exe`. `make win-run` launches the existing executable in a new Windows console window and supports `SEED=<n>`; run `make build-win` or `make test-win` first.
+
+Release downloads are built from the same native paths:
+
+- Linux release bundle: `make build`
+- Windows release bundle: `make build-win`
+- DOS/OpenWatcom packaging is still manual and not attached by the first GitHub Release workflow
 
 Native layers/strict/test checks:
 
