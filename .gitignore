@@ -35,3 +35,6 @@ dosmud_quota_ledger.csv
 
 # System files
 *:Zone.Identifier
+
+# Python
+scripts/__pycache__/
