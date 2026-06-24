@@ -10,7 +10,7 @@ Thanks for contributing to dosmud.
 - Keep gameplay deterministic for identical seed + inputs.
 - Prefer simple, explicit, procedural code over heavy abstractions.
 - Avoid unrelated refactors in the same PR.
-- Keep core gameplay free of `printf` and other terminal I/O; use `render_*` in `grendr` instead (`make check-layers` allows `printf` only in `main.c`, `grendr.c`, and the platform files `platpos.c`, `platwin.c`, or `platdos.c`; `make test-all` runs the guard before the test build). Newline and spacing rules for `txtres` and `grendr` are in [architecture.md](architecture.md#newline-and-spacing).
+- Keep core gameplay free of `printf` and other terminal I/O; use `render_`* in `grendr` instead (`make check-layers` allows `printf` only in `main.c`, `grendr.c`, and the platform files `platpos.c`, `platwin.c`, or `platdos.c`; `make test-all` runs the guard before the test build). Newline and spacing rules for `txtres` and `grendr` are in [architecture.md](architecture.md#newline-and-spacing).
 
 ## Pull Requests Required
 
@@ -24,35 +24,24 @@ Recommended workflow:
 - keep commits small and reviewable
 - update documentation when behavior or workflows change
 
-### Maintainer release flow
-
-- bump the checked-in `VERSION` (and `include/version.h` fallback when the base version changes)
-- push a version tag such as `v0.1.0`
-- let [`.github/workflows/release.yml`](https://github.com/ianmays/dosmud/blob/main/.github/workflows/release.yml) build Linux and Windows bundles and create or refresh a draft GitHub Release
-- review the generated notes, edit limitations or headings if needed, then publish the draft release
-
-Release notes are grouped by [`.github/release.yml`](https://github.com/ianmays/dosmud/blob/main/.github/release.yml). That keeps durable release downloads tied to tags, while ordinary CI artifacts stay attached to individual workflow runs.
-
-Tagged bundles use the same native release binaries as local `make build` / `make build-win` and qualitative playtests (`make build`, `./dosmud --seed <N>`; see [play-tester skill](https://github.com/ianmays/dosmud/blob/main/.cursor/skills/play-tester/SKILL.md)). Each archive includes `VERSION`, `README.md`, and `release-metadata.txt` with the built `BUILD_VERSION_STRING` from `build/include/version.h`.
-
-Before opening a draft PR (agents and contributors with automation):
+### Before opening a draft PR (agents and contributors with automation)
 
 ```text
 implement → make test* → pre-draft-pr-passes (agents) or individual passes → draft PR
 ```
 
-- Pre-draft PR passes (agents, default): [`.cursor/skills/pre-draft-pr-passes/SKILL.md`](https://github.com/ianmays/dosmud/blob/main/.cursor/skills/pre-draft-pr-passes/SKILL.md) orchestrates test-gap, comment, and documentation subagents (see [AGENTS.md](https://github.com/ianmays/dosmud/blob/main/AGENTS.md#pre-draft-pr-passes))
-- Test-gap pass: [`.cursor/skills/testing-gap-auditor/SKILL.md`](https://github.com/ianmays/dosmud/blob/main/.cursor/skills/testing-gap-auditor/SKILL.md) (see [AGENTS.md](https://github.com/ianmays/dosmud/blob/main/AGENTS.md#testing-pass)); CI runs `scripts/check-test-gaps.sh` in informative mode (log gaps; fix before merge)
-- Comment pass: [`.cursor/skills/code-commenter/SKILL.md`](https://github.com/ianmays/dosmud/blob/main/.cursor/skills/code-commenter/SKILL.md) on `src/`, `include/`, and `tests/` C sources (see [AGENTS.md](https://github.com/ianmays/dosmud/blob/main/AGENTS.md#comment-pass))
-- Documentation pass: [`.cursor/skills/documentation-maintainer/SKILL.md`](https://github.com/ianmays/dosmud/blob/main/.cursor/skills/documentation-maintainer/SKILL.md) (see [AGENTS.md](https://github.com/ianmays/dosmud/blob/main/AGENTS.md#documentation-pass))
+- Pre-draft PR passes (agents, default): `[.cursor/skills/pre-draft-pr-passes/SKILL.md](https://github.com/ianmays/dosmud/blob/main/.cursor/skills/pre-draft-pr-passes/SKILL.md)` orchestrates test-gap, comment, and documentation subagents (see [AGENTS.md](https://github.com/ianmays/dosmud/blob/main/AGENTS.md#pre-draft-pr-passes))
+- Test-gap pass: `[.cursor/skills/testing-gap-auditor/SKILL.md](https://github.com/ianmays/dosmud/blob/main/.cursor/skills/testing-gap-auditor/SKILL.md)` (see [AGENTS.md](https://github.com/ianmays/dosmud/blob/main/AGENTS.md#testing-pass)); CI runs `scripts/check-test-gaps.sh` in informative mode (log gaps; fix before merge)
+- Comment pass: `[.cursor/skills/code-commenter/SKILL.md](https://github.com/ianmays/dosmud/blob/main/.cursor/skills/code-commenter/SKILL.md)` on `src/`, `include/`, and `tests/` C sources (see [AGENTS.md](https://github.com/ianmays/dosmud/blob/main/AGENTS.md#comment-pass))
+- Documentation pass: `[.cursor/skills/documentation-maintainer/SKILL.md](https://github.com/ianmays/dosmud/blob/main/.cursor/skills/documentation-maintainer/SKILL.md)` (see [AGENTS.md](https://github.com/ianmays/dosmud/blob/main/AGENTS.md#documentation-pass))
 
 **Qualitative playtesting (optional):** agents or contributors can run interactive play sessions with the [play-tester skill](https://github.com/ianmays/dosmud/blob/main/.cursor/skills/play-tester/SKILL.md) (`make build`, `./dosmud --seed <N>`, transcripts under `playtest/sessions/` which are gitignored). Reports number **ideas** and **improvements** for easy follow-up (e.g. file issues for `ideas 4` and `improvements 2`); seed-scripted events stay in the session log, not the backlog. See [AGENTS.md](https://github.com/ianmays/dosmud/blob/main/AGENTS.md#playtesting-optional).
 
 The repo’s GitHub project uses a **Status** field on issues: **Planning** when forming an implementation plan (add decided plan as a comment), **In progress** while you implement (before the PR exists), **Review** once the draft PR is up, **Done** after merge. Details for agents: [AGENTS.md](https://github.com/ianmays/dosmud/blob/main/AGENTS.md).
 
-[`DEV_PLAN.md`](https://github.com/ianmays/dosmud/blob/main/DEV_PLAN.md) is a manually curated roadmap log tied to [GitHub milestones](https://github.com/ianmays/dosmud/milestones). When you open a draft **implementation** PR for an issue that already has a section here, mark **Done ✅** (optional PR link). Do not mark Done on hygiene or docs-only PRs. Issue **blocked-by** relationships on GitHub express sequencing. It is not a living status tracker (no updates on push or merge).
+`[DEV_PLAN.md](https://github.com/ianmays/dosmud/blob/main/DEV_PLAN.md)` is a manually curated roadmap log tied to [GitHub milestones](https://github.com/ianmays/dosmud/milestones). When you open a draft **implementation** PR for an issue that already has a section here, mark **Done ✅** (optional PR link). Do not mark Done on hygiene or docs-only PRs. Issue **blocked-by** relationships on GitHub express sequencing. It is not a living status tracker (no updates on push or merge).
 
-**New milestone issues:** set **Size** and **Priority** on [project #1](https://github.com/users/ianmays/projects/1), wire **blocked-by** on GitHub, add the DEV_PLAN table row + stub in a **docs PR** when the milestone is tracked there (agents in plan mode do GitHub steps only), and align Backlog stack order. Mark **Done ✅** in DEV_PLAN when the implementation draft PR opens, not at issue create. Agents and contributors: [`.cursor/skills/milestone-issue-hygiene/SKILL.md`](https://github.com/ianmays/dosmud/blob/main/.cursor/skills/milestone-issue-hygiene/SKILL.md). Drift audits: [`.cursor/skills/audit-github-devplan/SKILL.md`](https://github.com/ianmays/dosmud/blob/main/.cursor/skills/audit-github-devplan/SKILL.md). See [AGENTS.md](https://github.com/ianmays/dosmud/blob/main/AGENTS.md#dev_plan-updates).
+**New milestone issues:** set **Size** and **Priority** on [project #1](https://github.com/users/ianmays/projects/1), wire **blocked-by** on GitHub, add the DEV_PLAN table row + stub in a **docs PR** when the milestone is tracked there (agents in plan mode do GitHub steps only), and align Backlog stack order. Mark **Done ✅** in DEV_PLAN when the implementation draft PR opens, not at issue create. Agents and contributors: `[.cursor/skills/milestone-issue-hygiene/SKILL.md](https://github.com/ianmays/dosmud/blob/main/.cursor/skills/milestone-issue-hygiene/SKILL.md)`. Drift audits: `[.cursor/skills/audit-github-devplan/SKILL.md](https://github.com/ianmays/dosmud/blob/main/.cursor/skills/audit-github-devplan/SKILL.md)`. See [AGENTS.md](https://github.com/ianmays/dosmud/blob/main/AGENTS.md#dev_plan-updates).
 
 ### After you push
 
@@ -63,7 +52,7 @@ The repo’s GitHub project uses a **Status** field on issues: **Planning** when
 - When a push addresses inline review comments, resolve those PR review threads on GitHub (agents: same-turn step in [pr-after-push skill](https://github.com/ianmays/dosmud/blob/main/.cursor/skills/pr-after-push/SKILL.md)).
 - Project board **Review** can be set when the draft PR is opened; GitHub **Ready for review** (`isDraft` false) starts the review-trigger convention, not board status alone.
 
-Agents: policy in [AGENTS.md](https://github.com/ianmays/dosmud/blob/main/AGENTS.md#after-git-push-to-a-pr-branch-mandatory); procedure in [`.cursor/skills/pr-after-push/SKILL.md`](https://github.com/ianmays/dosmud/blob/main/.cursor/skills/pr-after-push/SKILL.md).
+Agents: policy in [AGENTS.md](https://github.com/ianmays/dosmud/blob/main/AGENTS.md#after-git-push-to-a-pr-branch-mandatory); procedure in `[.cursor/skills/pr-after-push/SKILL.md](https://github.com/ianmays/dosmud/blob/main/.cursor/skills/pr-after-push/SKILL.md)`.
 
 ### CI review surfaces
 
@@ -75,7 +64,7 @@ Use the CI outputs for different review questions:
 
 For the workflow details behind these outputs, including how `ci-stats.json` is published and how the dashboard history is updated, see [testing.md](testing.md#ci-github-actions).
 
-## Local Validation Before Opening a PR
+### Local Validation Before Opening a PR
 
 Run:
 
@@ -120,10 +109,10 @@ For detailed environment and workflow information, see `testing.md`.
 
 - Keep the **title** (subject line) concise; start with a lower-case character.
 - Write the **body** in lower-case phrase-style lines, not sentences or paragraphs.
-- **Two or more** logical changes in the body: use markdown bullets (`- `); every bullet starts lower-case.
+- **Two or more** logical changes in the body: use markdown bullets (`-` ); every bullet starts lower-case.
 - **Exactly one** logical change: one lower-case body line without a bullet is fine.
 - Never start the body (or any bullet) with an upper-case letter.
-- Squash-merge and agent drafting: [`.cursor/skills/squash-commit-message/SKILL.md`](https://github.com/ianmays/dosmud/blob/main/.cursor/skills/squash-commit-message/SKILL.md), [`.cursor/rules/commit-messages.mdc`](https://github.com/ianmays/dosmud/blob/main/.cursor/rules/commit-messages.mdc).
+- Squash-merge and agent drafting: `[.cursor/skills/squash-commit-message/SKILL.md](https://github.com/ianmays/dosmud/blob/main/.cursor/skills/squash-commit-message/SKILL.md)`, `[.cursor/rules/commit-messages.mdc](https://github.com/ianmays/dosmud/blob/main/.cursor/rules/commit-messages.mdc)`.
 - Keep commits logically focused and easy to review.
 
 ## Documentation
@@ -131,3 +120,14 @@ For detailed environment and workflow information, see `testing.md`.
 Canonical ownership and the documentation-pass policy: [AGENTS.md](https://github.com/ianmays/dosmud/blob/main/AGENTS.md#documentation-ownership) and [AGENTS.md](https://github.com/ianmays/dosmud/blob/main/AGENTS.md#documentation-pass).
 
 Roadmap hygiene when filing milestone issues: [milestone-issue-hygiene](https://github.com/ianmays/dosmud/blob/main/.cursor/skills/milestone-issue-hygiene/SKILL.md). Drift audits: [audit-github-devplan](https://github.com/ianmays/dosmud/blob/main/.cursor/skills/audit-github-devplan/SKILL.md).
+
+## Maintainer release flow
+
+- bump the checked-in `VERSION` (and `include/version.h` fallback when the base version changes)
+- push a version tag such as `v0.1.0`
+- let `[.github/workflows/release.yml](https://github.com/ianmays/dosmud/blob/main/.github/workflows/release.yml)` build Linux and Windows bundles and create or refresh a draft GitHub Release
+- review the generated notes, edit limitations or headings if needed, then publish the draft release
+
+Release notes are grouped by `[.github/release.yml](https://github.com/ianmays/dosmud/blob/main/.github/release.yml)`. That keeps durable release downloads tied to tags, while ordinary CI artifacts stay attached to individual workflow runs.
+
+Tagged bundles use the same native release binaries as local `make build` / `make build-win` and qualitative playtests (`make build`, `./dosmud --seed <N>`; see [play-tester skill](https://github.com/ianmays/dosmud/blob/main/.cursor/skills/play-tester/SKILL.md)). Each archive includes `VERSION`, `README.md`, and `release-metadata.txt` with the built `BUILD_VERSION_STRING` from `build/include/version.h`.
