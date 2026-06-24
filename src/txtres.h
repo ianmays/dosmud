@@ -180,6 +180,7 @@ extern const char *const TXT_MSG_BANDIT_BLOCK_TALK;
 extern const char *const TXT_MSG_LOOT_WAITING;
 extern const char *const TXT_MSG_TRAVELER_WAITING;
 extern const char *const TXT_MSG_NOBODY_TALK;
+extern const char *const TXT_MSG_DIALOGUE_CLOSED;
 const char *txtres_msg_watchman_reply(int arg);
 const char *txtres_msg_herbalist_reply(int arg);
 const char *txtres_msg_archivist_reply(int arg);

@@ -22,6 +22,46 @@ static void push_dialogue_guard(GameEventQueue *out, int reason)
     game_event_push(out, GAME_EVENT_DIALOGUE_GUARD, reason, 0, 0, 0, 0);
 }
 
+/* Non-enemy menus may yield to ordinary explore verbs without skipping the verb. */
+static int cmd_preserves_noncombat_menu(const struct GameState *game,
+                                        const struct Command *cmd)
+{
+    if (cmd->type == CMD_REPLY) {
+        return 1;
+    }
+    if (cmd->type == CMD_HELP ||
+            cmd->type == CMD_VERSION ||
+            cmd->type == CMD_QUIT) {
+        return 1;
+    }
+    if (game->dialogue != DIALOGUE_LOOT && cmd->type == CMD_TALK) {
+        return 1;
+    }
+    if (game->dialogue == DIALOGUE_LOOT && cmd->type == CMD_LOOT) {
+        return 1;
+    }
+    return 0;
+}
+
+static void maybe_close_noncombat_menu(struct GameState *game,
+                                       const struct Command *cmd,
+                                       GameEventQueue *out)
+{
+    if (game->mode != GAME_MODE_DIALOGUE || game->dialogue == DIALOGUE_ENEMY) {
+        return;
+    }
+    if (cmd_preserves_noncombat_menu(game, cmd)) {
+        return;
+    }
+
+    if (game->dialogue == DIALOGUE_LOOT) {
+        (void)game_inv_cmd_loot(game, 0, out);
+        return;
+    }
+    push_dialogue_guard(out, GAME_DIALOGUE_GUARD_DIALOGUE_CLOSED);
+    game_set_mode_explore(game);
+}
+
 /* Handover gating reads NPC_FLAG_HANDOVER_PICK on the active enemy slot. */
 static int game_enemy_handover_pick_active(const struct GameState *game)
 {
@@ -451,6 +491,8 @@ static int game_cmd_reply(struct GameState *game, struct Command *cmd,
 static int apply_command(struct GameState *game, struct Command *cmd,
                          GameEventQueue *out)
 {
+    maybe_close_noncombat_menu(game, cmd, out);
+
     if (!game_cmd_allowed_in_mode(game, cmd, out)) {
         return 0;
     }

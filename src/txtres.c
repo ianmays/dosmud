@@ -404,6 +404,7 @@ const char *const TXT_MSG_LOOT_WAITING =
     "Finish looting with the numbered corpse menu, or type loot to leave the body alone.\n";
 const char *const TXT_MSG_TRAVELER_WAITING = "The traveler is waiting for an answer (1/2/3).\n";
 const char *const TXT_MSG_NOBODY_TALK = "Nobody here wants to talk.\n";
+const char *const TXT_MSG_DIALOGUE_CLOSED = "You leave the conversation and turn back to the room.\n";
 const char *const TXT_MSG_HAND_OVER_ITEM_FMT = "You hand over your %s. The bandit backs off and leaves.\n";
 const char *const TXT_MSG_BAG_EMPTY_BANDIT = "Your bag is empty. The bandit laughs and attacks.\n";
 const char *const TXT_MSG_INTIMIDATE_SUCCESS = "You keep your voice steady. The bandit grunts and withdraws.\n";

@@ -626,6 +626,30 @@ TEST game_version_allowed_during_loot_menu(void)
     PASS();
 }
 
+TEST game_traveler_dialogue_closes_before_look(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    u32 tick_before_look;
+
+    unit_game_fresh(&game, 48u);
+    ASSERT_EQ(1, testharn_apply(&game, "@fixture traveler_dialogue"));
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(DIALOGUE_TRAVELER, game.dialogue);
+
+    tick_before_look = game.tick;
+    ASSERT_EQ(1, run_cmd_out(&game, "look", &out));
+    ASSERT_EQ(tick_before_look, game.tick);
+    ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
+    ASSERT_EQ(DIALOGUE_NONE, game.dialogue);
+    ASSERT_EQ(2, out.count);
+    ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[0].kind);
+    ASSERT_EQ(GAME_DIALOGUE_GUARD_DIALOGUE_CLOSED, out.events[0].arg0);
+    ASSERT_EQ(GAME_EVENT_ROOM_LOOK, out.events[1].kind);
+    ASSERT_EQ(WORLD_ROOM_ROAD, game.player.room_id);
+    PASS();
+}
+
 TEST game_unknown_command_emits_event(void)
 {
     struct GameState game;
@@ -856,11 +880,45 @@ TEST game_drop_allowed_while_loot_menu_open_after_bag_full(void)
     tick_before_drop = game.tick;
     ASSERT_EQ(1, run_cmd_out(&game, "drop stick", &out));
     ASSERT_EQ(tick_before_drop + 1U, game.tick);
+    ASSERT(out.count >= 2);
     ASSERT_EQ(GAME_EVENT_ITEM_RESULT, out.events[0].kind);
-    ASSERT_EQ(GAME_ITEM_ACTION_DROP, out.events[0].arg0);
-    ASSERT_EQ(GAME_ITEM_OUTCOME_OK, out.events[0].arg1);
+    ASSERT_EQ(GAME_ITEM_ACTION_LOOT, out.events[0].arg0);
+    ASSERT_EQ(GAME_ITEM_OUTCOME_LEFT_BEHIND, out.events[0].arg1);
+    ASSERT_EQ(GAME_EVENT_ITEM_RESULT, out.events[1].kind);
+    ASSERT_EQ(GAME_ITEM_ACTION_DROP, out.events[1].arg0);
+    ASSERT_EQ(GAME_ITEM_OUTCOME_OK, out.events[1].arg1);
     ASSERT_EQ(0, game.bag_count);
+    ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
+    PASS();
+}
+
+TEST game_loot_menu_closes_before_bag_view(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    u32 tick_before_bag;
+
+    unit_game_fresh(&game, 49u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game.corpse_present[WORLD_ROOM_CAMP] = 1;
+    game.corpse_item[WORLD_ROOM_CAMP][0] = ITEM_HERB;
+
+    ASSERT_EQ(1, run_cmd_out(&game, "loot", &out));
     ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(DIALOGUE_LOOT, game.dialogue);
+
+    tick_before_bag = game.tick;
+    ASSERT_EQ(1, run_cmd_out(&game, "bag", &out));
+    ASSERT_EQ(tick_before_bag, game.tick);
+    ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
+    ASSERT_EQ(DIALOGUE_NONE, game.dialogue);
+    ASSERT_EQ(2, out.count);
+    ASSERT_EQ(GAME_EVENT_ITEM_RESULT, out.events[0].kind);
+    ASSERT_EQ(GAME_ITEM_ACTION_LOOT, out.events[0].arg0);
+    ASSERT_EQ(GAME_ITEM_OUTCOME_LEFT_BEHIND, out.events[0].arg1);
+    ASSERT_EQ(GAME_EVENT_BAG_VIEW, out.events[1].kind);
+    ASSERT_EQ(1, game.corpse_present[WORLD_ROOM_CAMP]);
+    ASSERT_EQ(ITEM_HERB, game.corpse_item[WORLD_ROOM_CAMP][0]);
     PASS();
 }
 
@@ -929,6 +987,7 @@ SUITE(game) {
     RUN_TEST(game_version_allowed_during_bandit_dialogue);
     RUN_TEST(game_version_allowed_during_combat);
     RUN_TEST(game_version_allowed_during_loot_menu);
+    RUN_TEST(game_traveler_dialogue_closes_before_look);
     RUN_TEST(game_unknown_command_emits_event);
     RUN_TEST(game_cannot_move_emits_event);
     RUN_TEST(game_move_emits_move_then_look);
@@ -940,5 +999,6 @@ SUITE(game) {
     RUN_TEST(game_loot_leave_keeps_corpse_without_advancing_time);
     RUN_TEST(game_loot_reply_four_leaves_three_item_corpse);
     RUN_TEST(game_drop_allowed_while_loot_menu_open_after_bag_full);
+    RUN_TEST(game_loot_menu_closes_before_bag_view);
     RUN_TEST(game_loot_all_stops_at_bag_full_without_advancing_time);
 }
