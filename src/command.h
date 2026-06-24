@@ -36,6 +36,8 @@
 
 /* Passed in Command.arg when type is CMD_TAKE and the user requested "all". */
 #define CMD_TAKE_ALL (-1)
+/* Passed in Command.arg when type is CMD_LOOT and the user requested "all". */
+#define CMD_LOOT_ALL (-1)
 
 enum CommandType {
     CMD_INVALID = 0,

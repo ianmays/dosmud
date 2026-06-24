@@ -32,6 +32,9 @@ TEST command_parse_core_verbs(void)
     ASSERT_EQ(CMD_TALK, cmd.type);
     ASSERT_EQ(1, parse_line("loot", &cmd));
     ASSERT_EQ(CMD_LOOT, cmd.type);
+    ASSERT_EQ(1, parse_line("loot all", &cmd));
+    ASSERT_EQ(CMD_LOOT, cmd.type);
+    ASSERT_EQ(CMD_LOOT_ALL, cmd.arg);
     ASSERT_EQ(1, parse_line("save", &cmd));
     ASSERT_EQ(CMD_SAVE, cmd.type);
     ASSERT_EQ(1, parse_line("load", &cmd));
@@ -84,6 +87,7 @@ TEST command_parse_items_and_reply(void)
     ASSERT_EQ(CMD_TAKE_ALL, cmd.arg);
     ASSERT_EQ(0, parse_line("take", &cmd));
     ASSERT_EQ(0, parse_line("take diamond", &cmd));
+    ASSERT_EQ(0, parse_line("loot berry", &cmd));
     ASSERT_EQ(1, parse_line("reply 2", &cmd));
     ASSERT_EQ(CMD_REPLY, cmd.type);
     ASSERT_EQ(2, cmd.arg);

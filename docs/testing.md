@@ -327,7 +327,7 @@ Each process run uses one `.input` file until `quit`. `make snapshot-run` runs `
 
 **Combat:** `combat_defend`, `combat_salve`, `combat_no_salve`, `combat_invalid`, `combat_take_blocked`, `combat_victory_xp`, `level_up`.
 
-**Loot:** `loot_spear`, `loot_stick`, `loot_berry`, `loot_herb`, `loot_fish`, `loot_empty`, `loot_stripped`, `loot_bag_full`, `loot_multi` (interactive corpse menu open, take, multi-slot menu, and full-bag retry paths).
+**Loot:** `loot_spear`, `loot_stick`, `loot_berry`, `loot_herb`, `loot_fish`, `loot_empty`, `loot_stripped`, `loot_bag_full`, `loot_multi`, `loot_all_multi`, `loot_all_bag_full` (interactive corpse menu open, selective take, bulk `loot all`, multi-slot menu, and full-bag retry paths).
 
 **Bandit dialogue:** `bandit_fight`, `bandit_intimidate_ok`, `bandit_intimidate_fail`, `bandit_bag_empty`, `bandit_road`.
 
