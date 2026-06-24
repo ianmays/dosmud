@@ -99,49 +99,15 @@ jobs:
             -f target_commitish="${GITHUB_SHA}" \
             > "$notes_json"
 
-          python3 - "$notes_json" "$title_file" "$body_file" <<'PY'
-import json
-import sys
-
-with open(sys.argv[1], "r", encoding="utf-8") as handle:
-    payload = json.load(handle)
-
-with open(sys.argv[2], "w", encoding="utf-8") as handle:
-    handle.write(payload["name"])
-
-with open(sys.argv[3], "w", encoding="utf-8") as handle:
-    handle.write(
-        "Maintainer note: review the generated notes, adjust headings or known "
-        "limitations if needed, then publish this draft release.\n\n"
-    )
-    handle.write(payload["body"])
-PY
+          python3 scripts/prep-release-files.py notes \
+            "$notes_json" "$title_file" "$body_file"
 
           title="$(cat "$title_file")"
 
           if gh release view "$tag" --repo "$repo" >/dev/null 2>&1; then
             release_id="$(gh release view "$tag" --repo "$repo" --json databaseId --jq .databaseId)"
-            python3 - "$title_file" "$body_file" "$update_json" <<'PY'
-import json
-import sys
-
-with open(sys.argv[1], "r", encoding="utf-8") as handle:
-    title = handle.read()
-
-with open(sys.argv[2], "r", encoding="utf-8") as handle:
-    body = handle.read()
-
-with open(sys.argv[3], "w", encoding="utf-8") as handle:
-    json.dump(
-        {
-            "name": title,
-            "body": body,
-            "draft": True,
-            "prerelease": False,
-        },
-        handle,
-    )
-PY
+            python3 scripts/prep-release-files.py update \
+              "$title_file" "$body_file" "$update_json"
             gh api \
               --method PATCH \
               -H "Accept: application/vnd.github+json" \

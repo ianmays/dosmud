@@ -15,12 +15,9 @@ changelog:
     - title: Tests
       labels:
         - test
-        - tests
-        - regression
     - title: Documentation
       labels:
         - documentation
-        - docs
     - title: Other Changes
       labels:
         - "*"
