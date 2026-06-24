@@ -27,7 +27,8 @@ int game_inv_bag_add(struct GameState *game, int item_id);
 int game_inv_bag_remove_index(struct GameState *game, int index);
 int game_inv_bag_remove_item(struct GameState *game, int item_id);
 
-int game_inv_cmd_loot(struct GameState *game, struct GameEventQueue *out);
+int game_inv_cmd_loot(struct GameState *game, int loot_all,
+                      struct GameEventQueue *out);
 /* CMD_REPLY handler while DIALOGUE_LOOT is active; choice is 1-based menu index. */
 int game_inv_cmd_loot_reply(struct GameState *game, int choice,
                             struct GameEventQueue *out);

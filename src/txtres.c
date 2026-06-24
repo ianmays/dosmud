@@ -243,7 +243,7 @@ const char *const TXT_HELP_CRAFT =
     "craft <item> or build <item> - torch needs stick+reed, salve needs herb+berry, spear needs stick+stone (ingredients in bag or wielded where applicable). Not while fighting.";
 
 const char *const TXT_HELP_LOOT =
-    "loot - inspect a bandit corpse, then use the numbered corpse menu to take an item or leave the rest.";
+    "loot - inspect a bandit corpse, then use the numbered corpse menu to take an item, loot all, or leave the rest.";
 
 const char *const TXT_HELP_TALK =
     "talk (speak) - speak with an NPC in the room or advance certain encounters.";
@@ -452,6 +452,7 @@ const char *const TXT_INV_LEAVE_BODY = "You leave the rest on the body.\n";
 const char *const TXT_INV_CORPSE_HEADER = "On the body:\n";
 const char *const TXT_INV_CORPSE_LINE_FMT = "  [%d] %s\n";
 const char *const TXT_INV_CORPSE_LEAVE_FMT = "  [%d] Leave the rest.\n";
+const char *const TXT_INV_CORPSE_ALL = "Type loot all to grab everything you can carry.\n";
 const char *const TXT_INV_LOOT_FMT = "You loot a %s from the body.\n";
 const char *const TXT_INV_NO_RUMMAGE_COMBAT = "You cannot rummage through gear mid-fight.\n";
 const char *const TXT_INV_TAKE_NOTHING = "There is nothing here to take.\n";

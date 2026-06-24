@@ -1430,6 +1430,7 @@ void render_inv_corpse_menu(const GameEvent *ev)
             item_name(ev->room_item[slot]));
     }
     RENDER_PRINTF(TXT_INV_CORPSE_LEAVE_FMT, ev->arg1);
+    RENDER_PRINTF("%s", TXT_INV_CORPSE_ALL);
     RENDER_PRINTF(TXT_REPLY_PROMPT_FMT, ev->arg1);
 }
 

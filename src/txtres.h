@@ -209,6 +209,7 @@ extern const char *const TXT_INV_LEAVE_BODY;
 extern const char *const TXT_INV_CORPSE_HEADER;
 extern const char *const TXT_INV_CORPSE_LINE_FMT;
 extern const char *const TXT_INV_CORPSE_LEAVE_FMT;
+extern const char *const TXT_INV_CORPSE_ALL;
 extern const char *const TXT_INV_LOOT_FMT;
 extern const char *const TXT_INV_NO_RUMMAGE_COMBAT;
 extern const char *const TXT_INV_TAKE_NOTHING;

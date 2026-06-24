@@ -271,12 +271,43 @@ int game_inv_bag_remove_item(struct GameState *game, int item_id)
  * Opens the interactive corpse menu (DIALOGUE_LOOT); replies go to
  * game_inv_cmd_loot_reply via CMD_REPLY in game.c.
  */
-int game_inv_cmd_loot(struct GameState *game, GameEventQueue *out)
+/*
+ * Bulk loot stays invent-owned: it drains the dense corpse slots in visible
+ * order, then falls back to the same bag-full/menu state as single-slot loot.
+ */
+static int loot_all_from_corpse(struct GameState *game, int room_id,
+                                GameEventQueue *out)
+{
+    int item_id;
+
+    while (game_corpse_has_loot(game, room_id)) {
+        item_id = game->corpse_item[room_id][0];
+        if (!game_inv_bag_add(game, item_id)) {
+            push_item_result(out, GAME_ITEM_ACTION_LOOT,
+                GAME_ITEM_OUTCOME_BAG_FULL_DROP, item_id, 0);
+            push_corpse_view(out, game, room_id);
+            return 1;
+        }
+
+        corpse_remove_slot_compact(game, room_id, 0);
+        push_item_result(out, GAME_ITEM_ACTION_LOOT, GAME_ITEM_OUTCOME_OK,
+            item_id, 0);
+    }
+
+    game_corpse_clear(game, room_id);
+    game_set_mode_explore(game);
+    return 1;
+}
+
+int game_inv_cmd_loot(struct GameState *game, int loot_all, GameEventQueue *out)
 {
     int room_id;
 
     room_id = game->player.room_id;
     if (game->mode == GAME_MODE_DIALOGUE && game->dialogue == DIALOGUE_LOOT) {
+        if (loot_all) {
+            return loot_all_from_corpse(game, room_id, out);
+        }
         push_item_result(out, GAME_ITEM_ACTION_LOOT,
             GAME_ITEM_OUTCOME_LEFT_BEHIND, ITEM_NONE, 0);
         game_set_mode_explore(game);
@@ -291,6 +322,10 @@ int game_inv_cmd_loot(struct GameState *game, GameEventQueue *out)
         push_item_result(out, GAME_ITEM_ACTION_LOOT,
             GAME_ITEM_OUTCOME_BODY_STRIPPED, ITEM_NONE, 0);
         return 1;
+    }
+    if (loot_all) {
+        game_set_mode_dialogue(game, DIALOGUE_LOOT);
+        return loot_all_from_corpse(game, room_id, out);
     }
     game_set_mode_dialogue(game, DIALOGUE_LOOT);
     game_corpse_queue_view(game, room_id, out);

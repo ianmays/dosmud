@@ -228,7 +228,14 @@ int command_parse(char *line, struct Command *out_cmd)
     }
     if (strcmp(word1, "loot") == 0) {
         out_cmd->type = CMD_LOOT;
-        return 1;
+        if (count == 1) {
+            return 1;
+        }
+        if (count == 2 && strcmp(word2, "all") == 0) {
+            out_cmd->arg = CMD_LOOT_ALL;
+            return 1;
+        }
+        return 0;
     }
     if (strcmp(word1, "unwield") == 0) {
         out_cmd->type = CMD_UNWIELD;
