@@ -17,6 +17,19 @@ if [ ! -f "$version_header" ]; then
     exit 1
 fi
 
+base_version=$(sed -n 's/^#define BUILD_BASE_VERSION "\(.*\)"/\1/p' "$version_header")
+tag_version=${tag#v}
+
+if [ -z "$base_version" ]; then
+    echo "could not read BUILD_BASE_VERSION from $version_header" >&2
+    exit 1
+fi
+
+if [ "$tag_version" != "$base_version" ]; then
+    echo "tag $tag does not match BUILD_BASE_VERSION $base_version" >&2
+    exit 1
+fi
+
 version_string=$(sed -n 's/^#define BUILD_VERSION_STRING "\(.*\)"/\1/p' "$version_header")
 if [ -z "$version_string" ]; then
     echo "could not read BUILD_VERSION_STRING from $version_header" >&2

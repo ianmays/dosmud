@@ -90,35 +90,26 @@ jobs:
           set -eu
           tag="${GITHUB_REF_NAME}"
           repo="${GITHUB_REPOSITORY}"
-          notes_json="$(mktemp)"
-          title_file="$(mktemp)"
-          body_file="$(mktemp)"
-          update_json="$(mktemp)"
-
-          gh api \
-            --method POST \
-            -H "Accept: application/vnd.github+json" \
-            "repos/${repo}/releases/generate-notes" \
-            -f tag_name="$tag" \
-            -f target_commitish="${GITHUB_SHA}" \
-            > "$notes_json"
-
-          python3 scripts/prep-release-files.py notes \
-            "$notes_json" "$title_file" "$body_file"
-
-          title="$(cat "$title_file")"
 
           if gh release view "$tag" --repo "$repo" >/dev/null 2>&1; then
-            release_id="$(gh release view "$tag" --repo "$repo" --json databaseId --jq .databaseId)"
-            python3 scripts/prep-release-files.py update \
-              "$title_file" "$body_file" "$update_json"
-            gh api \
-              --method PATCH \
-              -H "Accept: application/vnd.github+json" \
-              "repos/${repo}/releases/${release_id}" \
-              --input "$update_json" \
-              >/dev/null
+            echo "release $tag already exists - keeping current release notes and state"
           else
+            notes_json="$(mktemp)"
+            title_file="$(mktemp)"
+            body_file="$(mktemp)"
+
+            gh api \
+              --method POST \
+              -H "Accept: application/vnd.github+json" \
+              "repos/${repo}/releases/generate-notes" \
+              -f tag_name="$tag" \
+              -f target_commitish="${GITHUB_SHA}" \
+              > "$notes_json"
+
+            python3 scripts/prep-release-files.py notes \
+              "$notes_json" "$title_file" "$body_file"
+
+            title="$(cat "$title_file")"
             gh release create "$tag" \
               --repo "$repo" \
               --draft \
