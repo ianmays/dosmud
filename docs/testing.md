@@ -317,7 +317,7 @@ Each process run uses one `.input` file until `quit`. `make snapshot-run` runs `
 
 **Movement / time:** `walk_north`, `walk_map`, `wait_tick`.
 
-**NPC talk:** `frog_hint`, `frog_replies`, `watchman_talk`, `traveler_replies`, `traveler_talk_blocked`, `herbalist_talk`, `archivist_talk`, `talk_nobody`, `game_event_dialogue`, `narrative_indirection` (`frog_hint` proves the generic room-NPC hint also applies at the pond; the others cover pond frog, bandit camp talk, traveler interaction, and tower watchman through generic `GAME_EVENT_DIALOGUE` / `GAME_EVENT_ENCOUNTER` paths; `narrative_indirection` exercises traveler, watchman, and bandit give/intimidate scenes end-to-end through the `txtres` narrative-key indirection path; [#175](https://github.com/ianmays/dosmud/pull/175), [#196](https://github.com/ianmays/dosmud/issues/196)).
+**NPC talk:** `frog_hint`, `frog_replies`, `watchman_talk`, `traveler_replies`, `traveler_talk_blocked`, `herbalist_talk`, `archivist_talk`, `talk_nobody`, `dialogue_menu_exit`, `game_event_dialogue`, `narrative_indirection` (`frog_hint` proves the generic room-NPC hint also applies at the pond; the others cover pond frog, bandit camp talk, traveler interaction, and tower watchman through generic `GAME_EVENT_DIALOGUE` / `GAME_EVENT_ENCOUNTER` paths; `dialogue_menu_exit` uses `@fixture traveler_dialogue` and `look` to dismiss a room-NPC menu before the verb runs; `narrative_indirection` exercises traveler, watchman, and bandit give/intimidate scenes end-to-end through the `txtres` narrative-key indirection path; [#175](https://github.com/ianmays/dosmud/pull/175), [#196](https://github.com/ianmays/dosmud/issues/196), [#205](https://github.com/ianmays/dosmud/issues/205)).
 
 **Eat / use:** `use_salve`, `use_torch`, `use_spear`, `use_stone`, `eat_berry`, `eat_fish`, `eat_berry_heal`, `eat_fish_heal`, `eat_not_edible`, `eat_missing`.
 
@@ -327,7 +327,7 @@ Each process run uses one `.input` file until `quit`. `make snapshot-run` runs `
 
 **Combat:** `combat_defend`, `combat_salve`, `combat_no_salve`, `combat_invalid`, `combat_take_blocked`, `combat_victory_xp`, `level_up`.
 
-**Loot:** `loot_spear`, `loot_stick`, `loot_berry`, `loot_herb`, `loot_fish`, `loot_empty`, `loot_stripped`, `loot_bag_full`, `loot_multi`, `loot_all_multi`, `loot_all_bag_full` (interactive corpse menu open, selective take, bulk `loot all`, multi-slot menu, and full-bag retry paths).
+**Loot:** `loot_spear`, `loot_stick`, `loot_berry`, `loot_herb`, `loot_fish`, `loot_empty`, `loot_stripped`, `loot_bag_full`, `loot_multi`, `loot_menu_exit`, `loot_all_multi`, `loot_all_bag_full` (interactive corpse menu open, selective take, bulk `loot all`, multi-slot menu, full-bag retry paths, and `loot_menu_exit` dismisses the corpse menu via a non-menu explore verb before that verb runs; [#205](https://github.com/ianmays/dosmud/issues/205)).
 
 **Bandit dialogue:** `bandit_fight`, `bandit_intimidate_ok`, `bandit_intimidate_fail`, `bandit_bag_empty`, `bandit_road`.
 

@@ -89,6 +89,7 @@ SNAPSHOT_TESTS = \
 	bandit_handover bandit_wielded_give area_items map equipment craft_wielded \
 	walk_north walk_map wait_tick \
 	frog_hint frog_replies watchman_talk traveler_replies traveler_talk_blocked herbalist_talk archivist_talk talk_nobody \
+	dialogue_menu_exit \
 	game_event_dialogue narrative_indirection \
 	use_salve use_torch use_spear use_stone eat_berry eat_fish eat_berry_heal eat_fish_heal \
 	eat_not_edible eat_missing bag_stacks bag_view \
@@ -97,6 +98,7 @@ SNAPSHOT_TESTS = \
 	combat_defend combat_salve combat_no_salve combat_invalid combat_take_blocked \
 	combat_victory_xp level_up \
 	loot_spear loot_stick loot_berry loot_herb loot_fish loot_empty loot_stripped loot_bag_full loot_multi \
+	loot_menu_exit \
 	loot_all_multi loot_all_bag_full \
 	bandit_fight bandit_intimidate_ok bandit_intimidate_fail bandit_bag_empty bandit_road \
 	unknown_cmd cannot_move give_wrong_context reply_nobody post_combat_reply_guard reply_invalid \
