@@ -471,6 +471,8 @@ Done ✅ ([#208](https://github.com/ianmays/dosmud/pull/208)).
 
 ### [#203](https://github.com/ianmays/dosmud/issues/203) - Add GitHub release packaging and release notes workflow
 
+Done ✅ ([#212](https://github.com/ianmays/dosmud/pull/212)).
+
 ## [Advanced Architecture](https://github.com/ianmays/dosmud/milestone/5)
 
 | Issue | Title | Size |

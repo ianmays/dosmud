@@ -24,6 +24,17 @@ Recommended workflow:
 - keep commits small and reviewable
 - update documentation when behavior or workflows change
 
+### Maintainer release flow
+
+- bump the checked-in `VERSION` (and `include/version.h` fallback when the base version changes)
+- push a version tag such as `v0.1.0`
+- let [`.github/workflows/release.yml`](https://github.com/ianmays/dosmud/blob/main/.github/workflows/release.yml) build Linux and Windows bundles and create or refresh a draft GitHub Release
+- review the generated notes, edit limitations or headings if needed, then publish the draft release
+
+Release notes are grouped by [`.github/release.yml`](https://github.com/ianmays/dosmud/blob/main/.github/release.yml). That keeps durable release downloads tied to tags, while ordinary CI artifacts stay attached to individual workflow runs.
+
+Tagged bundles use the same native release binaries as local `make build` / `make build-win` and qualitative playtests (`make build`, `./dosmud --seed <N>`; see [play-tester skill](https://github.com/ianmays/dosmud/blob/main/.cursor/skills/play-tester/SKILL.md)). Each archive includes `VERSION`, `README.md`, and `release-metadata.txt` with the built `BUILD_VERSION_STRING` from `build/include/version.h`.
+
 Before opening a draft PR (agents and contributors with automation):
 
 ```text

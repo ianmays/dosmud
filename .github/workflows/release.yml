@@ -1,0 +1,121 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install build tools
+        run: sudo apt-get update && sudo apt-get install -y gcc make
+
+      - name: Build Linux release binary
+        run: make build
+
+      - name: Package Linux release artifact
+        run: sh scripts/package-release.sh linux "${GITHUB_REF_NAME}" release-dist
+
+      - name: Upload Linux release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-linux
+          path: release-dist/*
+
+  build-windows:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install cross-build tools
+        run: sudo apt-get update && sudo apt-get install -y make mingw-w64
+
+      - name: Build Windows release binary
+        run: make build-win
+
+      - name: Package Windows release artifact
+        run: sh scripts/package-release.sh windows "${GITHUB_REF_NAME}" release-dist
+
+      - name: Upload Windows release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-windows
+          path: release-dist/*
+
+  publish-release:
+    runs-on: ubuntu-latest
+    needs:
+      - build-linux
+      - build-windows
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-linux
+          path: release-dist
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-windows
+          path: release-dist
+
+      - name: Write release checksums
+        run: |
+          set -eu
+          cd release-dist
+          sha256sum * > SHA256SUMS.txt
+
+      - name: Create or update draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          tag="${GITHUB_REF_NAME}"
+          repo="${GITHUB_REPOSITORY}"
+
+          if gh release view "$tag" --repo "$repo" >/dev/null 2>&1; then
+            echo "release $tag already exists - keeping current release notes and state"
+          else
+            notes_json="$(mktemp)"
+            title_file="$(mktemp)"
+            body_file="$(mktemp)"
+
+            gh api \
+              --method POST \
+              -H "Accept: application/vnd.github+json" \
+              "repos/${repo}/releases/generate-notes" \
+              -f tag_name="$tag" \
+              -f target_commitish="${GITHUB_SHA}" \
+              > "$notes_json"
+
+            python3 scripts/prep-release-files.py notes \
+              "$notes_json" "$title_file" "$body_file"
+
+            title="$(cat "$title_file")"
+            gh release create "$tag" \
+              --repo "$repo" \
+              --draft \
+              --verify-tag \
+              --title "$title" \
+              --notes-file "$body_file"
+          fi
+
+          gh release upload "$tag" release-dist/* --repo "$repo" --clobber
