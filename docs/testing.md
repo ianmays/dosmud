@@ -205,9 +205,9 @@ Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_
 | `bandit_combat_defend_ready` | Combat turn 1 + inject queue for enemy damage after defend |
 | `bandit_combat_salve_ready` | Combat turn 1, salve in bag + inject for enemy turn after salve (player at max HP via `fixture_bandit_combat_turn1`) |
 | `bandit_combat_level_ready` | Near-kill combat + inject for victory + `xp = 19` (level-up test) |
-| `bandit_fight_ready` | Bandit dialogue + inject for `combat_start` enemy HP spread |
+| `bandit_fight_ready` | Bandit dialogue + inject for player-initiative `combat_start` enemy HP spread |
 | `bandit_intimidate_ok` | Bandit dialogue + inject (`CFG_TEST_INTIMIDATE_OK`) for reply `3` success |
-| `bandit_intimidate_fail` | Bandit dialogue + inject (`CFG_TEST_INTIMIDATE_FAIL`) for reply `3` failure |
+| `bandit_intimidate_fail` | Bandit dialogue + inject (`CFG_TEST_INTIMIDATE_FAIL`) for reply `3` failure; opens enemy-initiative combat |
 | `bandit_victory_spear` / `stick` / `berry` / `herb` / `fish` | Near-kill + inject hit, corpse loot count (one item), item roll, kill XP; leaves one corpse-menu item ready for `loot` |
 | `bandit_victory_multi` | Near-kill + inject for three corpse items (stick, berry, herb) via `CFG_TEST_VICTORY_LOOT_COUNT_THREE` |
 | `bandit_victory_none` | Near-kill + inject for stripped corpse (`CFG_TEST_VICTORY_LOOT_COUNT_NONE`) |
@@ -278,7 +278,7 @@ Snapshots use three determinism levels:
 
 1. **Teleport state** - fixtures set `GameState` directly. Do not walk RNG-heavy setup (`take stick`, intimidate, waiting for the road bandit to open). `tests/regression/map.*` checks map **render** with explored flags set by the fixture; `tests/regression/walk_map.*` checks `room_explored` updated by a real `move` (with `quiet_explore`).
 
-2. **Inject rolls** (`TEST_MODE` only) - use `game_roll_inject_begin` for any asserted outcome that goes through `game_roll_spread` / `game_roll_percent`: combat damage, corpse loot count and per-item rolls, kill XP, bandit intimidate (reply `3`), and `combat_start` enemy HP. Constants live under `#ifdef TEST_MODE` in [`config.h`](https://github.com/ianmays/dosmud/blob/main/include/config.h) (`CFG_TEST_EQUIPMENT_*`, `CFG_TEST_COMBAT_*`, `CFG_TEST_INTIMIDATE_*`, `CFG_TEST_VICTORY_*` including `CFG_TEST_VICTORY_LOOT_COUNT_*`). Do not bypass combat with render-only hit lines. If combat tuning changes, update those constants and `.expect`.
+2. **Inject rolls** (`TEST_MODE` only) - use `game_roll_inject_begin` for any asserted outcome that goes through `game_roll_spread` / `game_roll_percent`: combat damage, corpse loot count and per-item rolls, kill XP, bandit intimidate (reply `3`), and `combat_start` rolls (enemy HP spread always; player-initiative also rolls player hit damage on open; enemy-initiative also rolls enemy damage before the menu). Constants live under `#ifdef TEST_MODE` in [`config.h`](https://github.com/ianmays/dosmud/blob/main/include/config.h) (`CFG_TEST_EQUIPMENT_*`, `CFG_TEST_COMBAT_*`, `CFG_TEST_INTIMIDATE_*`, `CFG_TEST_VICTORY_*` including `CFG_TEST_VICTORY_LOOT_COUNT_*`). Do not bypass combat with render-only hit lines. If combat tuning changes, update those constants and `.expect`.
 
 3. **Seed reset** - after each `@fixture` or `@seed`, `main.c` calls `plat_seed_rng(game.seed)` for stream isolation between harness blocks. Do not rely on seed alone for asserted mechanics; use inject or teleport.
 
