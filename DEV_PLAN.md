@@ -695,7 +695,9 @@ NOT:
 
 ### [#4](https://github.com/ianmays/dosmud/issues/4) - Combat initiative
 
-Whoever starts combat gets one immediate player strike before the normal combat menu loop (no stat roll). Stat-based initiative modifiers deferred to [#15](https://github.com/ianmays/dosmud/issues/15). Not blocked by [#15](https://github.com/ianmays/dosmud/issues/15).
+Done ✅ ([#215](https://github.com/ianmays/dosmud/pull/215)).
+
+Whoever starts combat gets one immediate opening strike (player or enemy via `CombatInitiator`) before the normal combat menu loop (no stat roll). Bandit fight is player-initiative; intimidate-fail and bag-empty are enemy-initiative. Stat-based initiative modifiers deferred to [#15](https://github.com/ianmays/dosmud/issues/15). Not blocked by [#15](https://github.com/ianmays/dosmud/issues/15).
 
 ### [#5](https://github.com/ianmays/dosmud/issues/5) - Enemy difficulty (level)
 

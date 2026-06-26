@@ -40,8 +40,14 @@
 /* bandit intimidate: percent roll must be < CFG_BANDIT_INTIMIDATE_SUCCESS_BELOW to pass */
 #define CFG_TEST_INTIMIDATE_OK 10
 #define CFG_TEST_INTIMIDATE_FAIL 70
-/* combat_start enemy HP spread; defend/salve enemy damage spread */
+/* combat_start inject queues for deterministic initiative snapshots */
 #define CFG_TEST_FIGHT_ENEMY_HP_SPREAD 0
+#define CFG_TEST_FIGHT_PLAYER_HIT_SPREAD 0
+#define CFG_TEST_INTIMIDATE_FAIL_ENEMY_HP_SPREAD 0
+#define CFG_TEST_INTIMIDATE_FAIL_ENEMY_DMG 0
+#define CFG_TEST_BAG_EMPTY_ENEMY_HP_SPREAD 4
+#define CFG_TEST_BAG_EMPTY_ENEMY_DMG 3
+/* defend/salve enemy damage spread */
 #define CFG_TEST_COMBAT_DEFEND_ENEMY_DMG 0
 #define CFG_TEST_COMBAT_SALVE_ENEMY_DMG 0
 /* victory: player hit spread, corpse loot count, corpse item rolls, kill XP spread */

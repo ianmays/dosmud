@@ -87,10 +87,12 @@ static int bandit_cmd_give(struct GameState *game, struct NpcState *enemy,
 static int bandit_cmd_reply(struct GameState *game, struct NpcState *enemy,
                             int choice, GameEventQueue *out)
 {
-    /* Reply choice decides whether the enemy opens combat, asks for tribute, or reacts to intimidation. */
+    /* Reply maps to tribute, intimidation, or combat; fight is player-initiative,
+     * bag-empty and intimidate-fail are enemy-initiative (#4).
+     */
     if (choice == 1) {
         enemy->flags &= ~NPC_FLAG_HANDOVER_PICK;
-        combat_start(game, out);
+        combat_start(game, out, COMBAT_INITIATOR_PLAYER);
         return 1;
     }
     if (choice == 2) {
@@ -99,7 +101,7 @@ static int bandit_cmd_reply(struct GameState *game, struct NpcState *enemy,
                 GAME_ENCOUNTER_ACTION_HANDOVER,
                 GAME_ENCOUNTER_OUTCOME_BAG_EMPTY, 0, 0);
             enemy->flags &= ~NPC_FLAG_HANDOVER_PICK;
-            combat_start(game, out);
+            combat_start(game, out, COMBAT_INITIATOR_ENEMY);
             return 1;
         }
         enemy->flags |= NPC_FLAG_HANDOVER_PICK;
@@ -120,7 +122,7 @@ static int bandit_cmd_reply(struct GameState *game, struct NpcState *enemy,
             push_encounter(out, GAME_ENCOUNTER_BANDIT,
                 GAME_ENCOUNTER_ACTION_INTIMIDATE,
                 GAME_ENCOUNTER_OUTCOME_FAIL, 0, 0);
-            combat_start(game, out);
+            combat_start(game, out, COMBAT_INITIATOR_ENEMY);
         }
         return 1;
     }

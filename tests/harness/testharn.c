@@ -74,11 +74,16 @@ static int fixture_bandit_dialogue(struct GameState *game)
 static void fixture_bandit_dialogue_empty(struct GameState *game)
 {
     GameEventQueue out;
+    static const int rolls[2] = {
+        CFG_TEST_BAG_EMPTY_ENEMY_HP_SPREAD,
+        CFG_TEST_BAG_EMPTY_ENEMY_DMG
+    };
 
     fixture_bandit_base(game);
     harness_drop_output(&out);
     enemy_begin_encounter(game, &out);
     game_render_output(game, &out);
+    game_roll_inject_begin(game, rolls, 2);
 }
 
 static int fixture_bandit_handover_pick(struct GameState *game)
@@ -128,6 +133,7 @@ static void fixture_bandit_combat_turn1(struct GameState *game)
     game->combat.defending = 0;
     render_combat_start(game->player_hp, game->combat.enemy_hp,
         game->combat.enemy_level);
+    render_combat_menu();
 }
 
 static int fixture_bandit_combat_turn1_resolve(struct GameState *game)
@@ -213,24 +219,33 @@ static void fixture_bandit_combat_level_ready(struct GameState *game)
 
 static int fixture_bandit_intimidate_inject(struct GameState *game, int roll)
 {
-    int rolls[1];
+    int rolls[3];
+    int roll_count;
 
     if (!fixture_bandit_dialogue(game)) {
         return 0;
     }
     rolls[0] = roll;
-    game_roll_inject_begin(game, rolls, 1);
+    roll_count = 1;
+    if (roll == CFG_TEST_INTIMIDATE_FAIL) {
+        rolls[roll_count++] = CFG_TEST_INTIMIDATE_FAIL_ENEMY_HP_SPREAD;
+        rolls[roll_count++] = CFG_TEST_INTIMIDATE_FAIL_ENEMY_DMG;
+    }
+    game_roll_inject_begin(game, rolls, roll_count);
     return 1;
 }
 
 static int fixture_bandit_fight_ready(struct GameState *game)
 {
-    static const int rolls[1] = { CFG_TEST_FIGHT_ENEMY_HP_SPREAD };
+    static const int rolls[2] = {
+        CFG_TEST_FIGHT_ENEMY_HP_SPREAD,
+        CFG_TEST_FIGHT_PLAYER_HIT_SPREAD
+    };
 
     if (!fixture_bandit_dialogue(game)) {
         return 0;
     }
-    game_roll_inject_begin(game, rolls, 1);
+    game_roll_inject_begin(game, rolls, 2);
     return 1;
 }
 

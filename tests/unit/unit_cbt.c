@@ -8,10 +8,12 @@
 #include "npc.h"
 #include "unit_util.h"
 
-static void start_combat_out(struct GameState *game, GameEventQueue *out)
+/* Wraps combat_start with queue reset; initiator selects the opening strike path. */
+static void start_combat_out(struct GameState *game, GameEventQueue *out,
+                             int initiator)
 {
     game_event_queue_reset(out);
-    combat_start(game, out);
+    combat_start(game, out, initiator);
 }
 
 static void resolve_reply_out(struct GameState *game, int choice,
@@ -38,22 +40,32 @@ TEST combat_start_mode(void)
 {
     struct GameState game;
     GameEventQueue out;
-    int rolls[1];
+    int rolls[2];
 
     unit_game_fresh(&game, 2u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     rolls[0] = CFG_TEST_FIGHT_ENEMY_HP_SPREAD;
-    game_roll_inject_begin(&game, rolls, 1);
-    start_combat_out(&game, &out);
+    rolls[1] = 0;
+    game_roll_inject_begin(&game, rolls, 2);
+    start_combat_out(&game, &out, COMBAT_INITIATOR_PLAYER);
     ASSERT_EQ(GAME_MODE_COMBAT, game.mode);
-    ASSERT_EQ(CFG_COMBAT_ENEMY_HP_BASE + CFG_TEST_FIGHT_ENEMY_HP_SPREAD, game.combat.enemy_hp);
-    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(CFG_COMBAT_ENEMY_HP_BASE + CFG_TEST_FIGHT_ENEMY_HP_SPREAD -
+        CFG_COMBAT_PLAYER_HIT_BASE - CFG_START_DAMAGE_BONUS,
+        game.combat.enemy_hp);
+    ASSERT_EQ(4, out.count);
     ASSERT_EQ(GAME_EVENT_COMBAT, out.events[0].kind);
     ASSERT_EQ(GAME_COMBAT_PHASE_START, out.events[0].arg0);
     ASSERT_EQ(game.player_hp, out.events[0].arg1);
     ASSERT_EQ(CFG_COMBAT_ENEMY_HP_BASE + CFG_TEST_FIGHT_ENEMY_HP_SPREAD,
         out.events[0].arg2);
     ASSERT_EQ(1, out.events[0].arg3);
+    ASSERT_EQ(GAME_COMBAT_PHASE_PLAYER_DAMAGE, out.events[1].arg0);
+    ASSERT_EQ(CFG_COMBAT_PLAYER_HIT_BASE + CFG_START_DAMAGE_BONUS,
+        out.events[1].arg1);
+    ASSERT_EQ(GAME_COMBAT_PHASE_STATUS, out.events[2].arg0);
+    ASSERT_EQ(game.player_hp, out.events[2].arg1);
+    ASSERT_EQ(game.combat.enemy_hp, out.events[2].arg2);
+    ASSERT_EQ(GAME_COMBAT_PHASE_MENU, out.events[3].arg0);
     PASS();
 }
 
@@ -62,7 +74,7 @@ TEST combat_start_uses_enemy_level_scaling(void)
     /* Direct combat_start: level comes from DIALOGUE_ENEMY slot, not combat_enemy_level default. */
     struct GameState game;
     GameEventQueue out;
-    int rolls[1];
+    int rolls[2];
     int slot;
 
     unit_game_fresh(&game, 15u);
@@ -72,14 +84,42 @@ TEST combat_start_uses_enemy_level_scaling(void)
     game.npcs[slot].dialogue = DIALOGUE_ENEMY;
     game.npcs[slot].level = 3;
     rolls[0] = CFG_TEST_FIGHT_ENEMY_HP_SPREAD;
-    game_roll_inject_begin(&game, rolls, 1);
-    start_combat_out(&game, &out);
+    rolls[1] = 0;
+    game_roll_inject_begin(&game, rolls, 2);
+    start_combat_out(&game, &out, COMBAT_INITIATOR_PLAYER);
     ASSERT_EQ(3, game.combat.enemy_level);
     ASSERT_EQ(CFG_COMBAT_ENEMY_HP_BASE +
             (2 * CFG_COMBAT_ENEMY_HP_PER_LEVEL) +
-            CFG_TEST_FIGHT_ENEMY_HP_SPREAD,
+            CFG_TEST_FIGHT_ENEMY_HP_SPREAD -
+            CFG_COMBAT_PLAYER_HIT_BASE - CFG_START_DAMAGE_BONUS,
         game.combat.enemy_hp);
     ASSERT_EQ(3, out.events[0].arg3);
+    PASS();
+}
+
+TEST combat_enemy_initiative_strikes_before_menu(void)
+{
+    /* Direct combat_start: roll0 enemy HP spread, roll1 enemy damage spread. */
+    struct GameState game;
+    GameEventQueue out;
+    int rolls[2];
+
+    unit_game_fresh(&game, 18u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    rolls[0] = CFG_TEST_FIGHT_ENEMY_HP_SPREAD;
+    rolls[1] = 0;
+    game_roll_inject_begin(&game, rolls, 2);
+    start_combat_out(&game, &out, COMBAT_INITIATOR_ENEMY);
+    ASSERT_EQ(GAME_MODE_COMBAT, game.mode);
+    ASSERT_EQ(CFG_START_MAX_HP - CFG_COMBAT_ENEMY_DMG_BASE, game.player_hp);
+    ASSERT_EQ(4, out.count);
+    ASSERT_EQ(GAME_COMBAT_PHASE_START, out.events[0].arg0);
+    ASSERT_EQ(GAME_COMBAT_PHASE_ENEMY_DAMAGE, out.events[1].arg0);
+    ASSERT_EQ(CFG_COMBAT_ENEMY_DMG_BASE, out.events[1].arg1);
+    ASSERT_EQ(GAME_COMBAT_PHASE_STATUS, out.events[2].arg0);
+    ASSERT_EQ(game.player_hp, out.events[2].arg1);
+    ASSERT_EQ(game.combat.enemy_hp, out.events[2].arg2);
+    ASSERT_EQ(GAME_COMBAT_PHASE_MENU, out.events[3].arg0);
     PASS();
 }
 
@@ -366,6 +406,7 @@ SUITE(combat) {
     RUN_TEST(combat_attack_bonus);
     RUN_TEST(combat_start_mode);
     RUN_TEST(combat_start_uses_enemy_level_scaling);
+    RUN_TEST(combat_enemy_initiative_strikes_before_menu);
     RUN_TEST(combat_reply_defend_reduces_damage);
     RUN_TEST(combat_reply_salve_in_combat);
     RUN_TEST(combat_reply_salve_at_full_hp);

@@ -253,9 +253,12 @@ TEST game_bandit_fight_reply(void)
     enemy_begin_encounter(&game, &out);
     ASSERT_EQ(1, run_cmd_out(&game, "1", &out));
     ASSERT_EQ(GAME_MODE_COMBAT, game.mode);
-    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(4, out.count);
     ASSERT_EQ(GAME_EVENT_COMBAT, out.events[0].kind);
     ASSERT_EQ(GAME_COMBAT_PHASE_START, out.events[0].arg0);
+    ASSERT_EQ(GAME_COMBAT_PHASE_PLAYER_DAMAGE, out.events[1].arg0);
+    ASSERT_EQ(GAME_COMBAT_PHASE_STATUS, out.events[2].arg0);
+    ASSERT_EQ(GAME_COMBAT_PHASE_MENU, out.events[3].arg0);
     PASS();
 }
 
@@ -273,12 +276,15 @@ TEST game_bandit_intimidate_fail(void)
     game_roll_inject_begin(&game, rolls, 1);
     ASSERT_EQ(1, run_cmd_out(&game, "3", &out));
     ASSERT_EQ(GAME_MODE_COMBAT, game.mode);
-    ASSERT_EQ(2, out.count);
+    ASSERT_EQ(5, out.count);
     ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
     ASSERT_EQ(GAME_ENCOUNTER_ACTION_INTIMIDATE, out.events[0].arg1);
     ASSERT_EQ(GAME_ENCOUNTER_OUTCOME_FAIL, out.events[0].arg2);
     ASSERT_EQ(GAME_EVENT_COMBAT, out.events[1].kind);
     ASSERT_EQ(GAME_COMBAT_PHASE_START, out.events[1].arg0);
+    ASSERT_EQ(GAME_COMBAT_PHASE_ENEMY_DAMAGE, out.events[2].arg0);
+    ASSERT_EQ(GAME_COMBAT_PHASE_STATUS, out.events[3].arg0);
+    ASSERT_EQ(GAME_COMBAT_PHASE_MENU, out.events[4].arg0);
     PASS();
 }
 
