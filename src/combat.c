@@ -96,6 +96,47 @@ int combat_player_attack_bonus(const struct GameState *game)
     return bonus;
 }
 
+static int combat_player_attack(struct GameState *game, GameEventQueue *out)
+{
+    int dmg;
+
+    dmg = CFG_COMBAT_PLAYER_HIT_BASE +
+        game_roll_spread(game, CFG_COMBAT_PLAYER_HIT_SPREAD) +
+        combat_player_attack_bonus(game);
+    game->combat.enemy_hp -= dmg;
+    push_combat_phase(out, GAME_COMBAT_PHASE_PLAYER_DAMAGE, dmg, 0, 0);
+    return dmg;
+}
+
+static int combat_finish_victory(struct GameState *game, int enemy_level,
+                                 GameEventQueue *out)
+{
+    /* Defeat is resolved immediately so corpse state is fixed on the same turn. */
+    game->combat.enemy_hp = 0;
+    /* Enemy teardown follows the active DIALOGUE_ENEMY slot, not a fixed actor id. */
+    combat_end_active_enemy_encounter(game);
+    game_set_mode_explore(game);
+    push_combat_phase(out, GAME_COMBAT_PHASE_ENEMY_DEFEATED, 0, 0,
+        enemy_level);
+    /* Clear stale corpse slots before seeding the new defeat loot table. */
+    game_corpse_clear(game, game->player.room_id);
+    game->corpse_present[game->player.room_id] = 1;
+    {
+        int drop_count;
+        int slot;
+
+        drop_count = combat_roll_corpse_item_count(game);
+        /* One item-tier draw per slot before the kill XP spread roll. */
+        for (slot = 0; slot < drop_count; ++slot) {
+            (void)game_corpse_try_add(game, game->player.room_id,
+                combat_roll_corpse_item(game));
+        }
+    }
+    progression_gain_enemy_xp(game, enemy_level,
+        game_roll_spread(game, CFG_COMBAT_KILL_XP_SPREAD), out);
+    return 1;
+}
+
 static void combat_enemy_turn(struct GameState *game, GameEventQueue *out)
 {
     int dmg;
@@ -124,7 +165,7 @@ static void combat_enemy_turn(struct GameState *game, GameEventQueue *out)
         game->player_hp, game->combat.enemy_hp, level);
 }
 
-void combat_start(struct GameState *game, GameEventQueue *out)
+void combat_start(struct GameState *game, GameEventQueue *out, int initiator)
 {
     int slot;
     int level;
@@ -143,20 +184,33 @@ void combat_start(struct GameState *game, GameEventQueue *out)
     game->combat.defending = 0;
     push_combat_phase(out, GAME_COMBAT_PHASE_START,
         game->player_hp, game->combat.enemy_hp, level);
+
+    /* Initiative stays combat-owned so encounter callers only declare who opened. */
+    if (initiator == COMBAT_INITIATOR_PLAYER) {
+        combat_player_attack(game, out);
+        if (game->combat.enemy_hp <= 0) {
+            (void)combat_finish_victory(game, level, out);
+            return;
+        }
+        push_combat_phase(out, GAME_COMBAT_PHASE_STATUS,
+            game->player_hp, game->combat.enemy_hp, level);
+        push_combat_phase(out, GAME_COMBAT_PHASE_MENU, 0, 0, 0);
+        return;
+    }
+
+    combat_enemy_turn(game, out);
+    if (game->running && game->mode == GAME_MODE_COMBAT) {
+        push_combat_phase(out, GAME_COMBAT_PHASE_MENU, 0, 0, 0);
+    }
 }
 
 void combat_resolve_reply(struct GameState *game, int choice, GameEventQueue *out)
 {
-    int dmg;
     int enemy_level;
 
     enemy_level = combat_enemy_level(game);
     if (choice == 1) {
-        dmg = CFG_COMBAT_PLAYER_HIT_BASE +
-            game_roll_spread(game, CFG_COMBAT_PLAYER_HIT_SPREAD) +
-            combat_player_attack_bonus(game);
-        game->combat.enemy_hp -= dmg;
-        push_combat_phase(out, GAME_COMBAT_PHASE_PLAYER_DAMAGE, dmg, 0, 0);
+        (void)combat_player_attack(game, out);
     } else if (choice == 2) {
         game->combat.defending = 1;
         push_combat_phase(out, GAME_COMBAT_PHASE_BRACED, 0, 0, 0);
@@ -178,29 +232,7 @@ void combat_resolve_reply(struct GameState *game, int choice, GameEventQueue *ou
     }
 
     if (game->combat.enemy_hp <= 0) {
-        /* Defeat is resolved immediately so corpse state is fixed on the same turn. */
-        game->combat.enemy_hp = 0;
-        /* Enemy teardown follows the active DIALOGUE_ENEMY slot, not a fixed actor id. */
-        combat_end_active_enemy_encounter(game);
-        game_set_mode_explore(game);
-        push_combat_phase(out, GAME_COMBAT_PHASE_ENEMY_DEFEATED, 0, 0,
-            enemy_level);
-        /* Clear stale corpse slots before seeding the new defeat loot table. */
-        game_corpse_clear(game, game->player.room_id);
-        game->corpse_present[game->player.room_id] = 1;
-        {
-            int drop_count;
-            int slot;
-
-            drop_count = combat_roll_corpse_item_count(game);
-            /* One item-tier draw per slot before the kill XP spread roll. */
-            for (slot = 0; slot < drop_count; ++slot) {
-                (void)game_corpse_try_add(game, game->player.room_id,
-                    combat_roll_corpse_item(game));
-            }
-        }
-        progression_gain_enemy_xp(game, enemy_level,
-            game_roll_spread(game, CFG_COMBAT_KILL_XP_SPREAD), out);
+        (void)combat_finish_victory(game, enemy_level, out);
         return;
     }
 
