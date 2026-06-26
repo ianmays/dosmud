@@ -1,4 +1,5 @@
 #include "greatest.h"
+#include <string.h>
 #include "config.h"
 #include "game.h"
 #include "items.h"
@@ -6,6 +7,16 @@
 #include "testharn.h"
 #include "world.h"
 #include "unit_util.h"
+
+static int run_cmd_out(struct GameState *game, const char *line,
+                       GameEventQueue *out)
+{
+    char buf[CFG_INPUT_MAX];
+
+    strcpy(buf, line);
+    game_event_queue_reset(out);
+    return game_process_input(game, buf, out);
+}
 
 TEST testharn_seed_directive(void)
 {
@@ -253,6 +264,48 @@ TEST testharn_fixture_bandit_combat_turn1_sets_enemy_level(void)
     PASS();
 }
 
+TEST testharn_fixture_bandit_fight_ready_consumes_opening_rolls(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    int rc;
+
+    unit_game_fresh(&game, 26u);
+    rc = testharn_apply(&game, "@fixture bandit_fight_ready");
+    ASSERT_EQ(1, rc);
+    ASSERT_EQ(1, run_cmd_out(&game, "1", &out));
+    ASSERT_EQ(1, game_roll_inject_fully_consumed(&game));
+    PASS();
+}
+
+TEST testharn_fixture_bandit_intimidate_fail_consumes_opening_rolls(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    int rc;
+
+    unit_game_fresh(&game, 27u);
+    rc = testharn_apply(&game, "@fixture bandit_intimidate_fail");
+    ASSERT_EQ(1, rc);
+    ASSERT_EQ(1, run_cmd_out(&game, "3", &out));
+    ASSERT_EQ(1, game_roll_inject_fully_consumed(&game));
+    PASS();
+}
+
+TEST testharn_fixture_bandit_dialogue_empty_consumes_opening_rolls(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    int rc;
+
+    unit_game_fresh(&game, 28u);
+    rc = testharn_apply(&game, "@fixture bandit_dialogue_empty");
+    ASSERT_EQ(1, rc);
+    ASSERT_EQ(1, run_cmd_out(&game, "2", &out));
+    ASSERT_EQ(1, game_roll_inject_fully_consumed(&game));
+    PASS();
+}
+
 SUITE(testharn) {
     RUN_TEST(testharn_seed_directive);
     RUN_TEST(testharn_seed_invalid);
@@ -266,5 +319,8 @@ SUITE(testharn) {
     RUN_TEST(testharn_fixture_sweep);
     RUN_TEST(testharn_fixture_corpse_stripped_clears_corpse_items);
     RUN_TEST(testharn_fixture_bandit_combat_turn1_sets_enemy_level);
+    RUN_TEST(testharn_fixture_bandit_fight_ready_consumes_opening_rolls);
+    RUN_TEST(testharn_fixture_bandit_intimidate_fail_consumes_opening_rolls);
+    RUN_TEST(testharn_fixture_bandit_dialogue_empty_consumes_opening_rolls);
     RUN_TEST(testharn_not_harness_line);
 }
