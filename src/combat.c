@@ -8,8 +8,8 @@
 #include "npc.h"
 
 /*
- * combat.c resolves the short battle loop only: it applies a reply, advances
- * the enemy turn, and converts a defeat into corpse state plus XP.
+ * combat.c resolves the short battle loop only: opening initiative, reply
+ * resolution, enemy turn, and defeat into corpse state plus XP.
  * #159: queues GAME_EVENT_COMBAT phases; grendr maps them to combat copy.
  */
 
@@ -96,6 +96,7 @@ int combat_player_attack_bonus(const struct GameState *game)
     return bonus;
 }
 
+/* Player strike shared by resolve choice 1 and player-initiative combat_start. */
 static int combat_player_attack(struct GameState *game, GameEventQueue *out)
 {
     int dmg;
@@ -108,6 +109,7 @@ static int combat_player_attack(struct GameState *game, GameEventQueue *out)
     return dmg;
 }
 
+/* Corpse/XP teardown shared by resolve and one-shot player-initiative kills. */
 static int combat_finish_victory(struct GameState *game, int enemy_level,
                                  GameEventQueue *out)
 {
@@ -143,7 +145,7 @@ static void combat_enemy_turn(struct GameState *game, GameEventQueue *out)
     int level;
 
     level = combat_enemy_level(game);
-    /* The enemy turn happens only after a non-terminal player reply. */
+    /* Enemy strike after a reply, or immediately on enemy-initiative start. */
     dmg = CFG_COMBAT_ENEMY_DMG_BASE +
         ((level - 1) * CFG_COMBAT_ENEMY_DMG_PER_LEVEL) +
         game_roll_spread(game, CFG_COMBAT_ENEMY_DMG_SPREAD);
@@ -199,6 +201,7 @@ void combat_start(struct GameState *game, GameEventQueue *out, int initiator)
     }
 
     combat_enemy_turn(game, out);
+    /* MENU only when the opening strike did not down the player (running cleared). */
     if (game->running && game->mode == GAME_MODE_COMBAT) {
         push_combat_phase(out, GAME_COMBAT_PHASE_MENU, 0, 0, 0);
     }

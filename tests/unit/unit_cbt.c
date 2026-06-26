@@ -8,6 +8,7 @@
 #include "npc.h"
 #include "unit_util.h"
 
+/* Wraps combat_start with queue reset; initiator selects the opening strike path. */
 static void start_combat_out(struct GameState *game, GameEventQueue *out,
                              int initiator)
 {
@@ -98,6 +99,7 @@ TEST combat_start_uses_enemy_level_scaling(void)
 
 TEST combat_enemy_initiative_strikes_before_menu(void)
 {
+    /* Direct combat_start: roll0 enemy HP spread, roll1 enemy damage spread. */
     struct GameState game;
     GameEventQueue out;
     int rolls[2];
