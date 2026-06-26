@@ -695,7 +695,7 @@ NOT:
 
 ### [#4](https://github.com/ianmays/dosmud/issues/4) - Combat initiative
 
-Done ✅.
+Done ✅ ([#215](https://github.com/ianmays/dosmud/pull/215)).
 
 Whoever starts combat gets one immediate player strike before the normal combat menu loop (no stat roll). Stat-based initiative modifiers deferred to [#15](https://github.com/ianmays/dosmud/issues/15). Not blocked by [#15](https://github.com/ianmays/dosmud/issues/15).
 
