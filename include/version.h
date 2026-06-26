@@ -6,7 +6,7 @@
  * where the generated native header is unavailable.
  */
 
-#define BUILD_BASE_VERSION "0.1.0-dev"
-#define BUILD_VERSION_STRING "0.1.0-dev+local"
+#define BUILD_BASE_VERSION "0.1.0"
+#define BUILD_VERSION_STRING "0.1.0+local"
 
 #endif
