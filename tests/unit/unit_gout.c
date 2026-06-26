@@ -115,7 +115,7 @@ TEST game_event_push_records_command_nav_kinds(void)
     game_event_queue_reset(&out);
     ASSERT(0 != game_event_push(&out, GAME_EVENT_MAP, 0, 0, 0, 0, 0));
     ASSERT(0 != game_event_push(&out, GAME_EVENT_HELP, CMD_HELP_TOPIC_MOVE, 0, 0, 0, 0));
-    ASSERT(0 != game_event_push(&out, GAME_EVENT_VERSION, 0, 0, 0, 0, "dosmud 0.1.0+local"));
+    ASSERT(0 != game_event_push(&out, GAME_EVENT_VERSION, 0, 0, 0, 0, TXT_MAIN_VERSION_FMT));
     ASSERT(0 != game_event_push(&out, GAME_EVENT_WAIT, 0, 0, 0, 0, 0));
     ASSERT(0 != game_event_push(&out, GAME_EVENT_CANNOT_MOVE, 0, 0, 0, 0, "east"));
     ASSERT(0 != game_event_push(&out, GAME_EVENT_UNKNOWN_COMMAND, 0, 0, 0, 0, 0));
@@ -124,7 +124,7 @@ TEST game_event_push_records_command_nav_kinds(void)
     ASSERT_EQ(GAME_EVENT_HELP, out.events[1].kind);
     ASSERT_EQ(CMD_HELP_TOPIC_MOVE, out.events[1].arg0);
     ASSERT_EQ(GAME_EVENT_VERSION, out.events[2].kind);
-    ASSERT_STR_EQ("dosmud 0.1.0+local", out.events[2].text);
+    ASSERT_STR_EQ(TXT_MAIN_VERSION_FMT, out.events[2].text);
     ASSERT_EQ(GAME_EVENT_WAIT, out.events[3].kind);
     ASSERT_EQ(GAME_EVENT_CANNOT_MOVE, out.events[4].kind);
     ASSERT_STR_EQ("east", out.events[4].text);
