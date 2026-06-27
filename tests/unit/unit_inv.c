@@ -287,6 +287,11 @@ TEST invent_coin_helpers(void)
     ASSERT_EQ(0, game_inv_coins_add(&game, -1));
     ASSERT_EQ(0, game_inv_coins_try_spend(&game, -1));
     ASSERT_EQ(CFG_START_COINS + 3, game.coins);
+    game.coins = CFG_COINS_MAX - 1;
+    ASSERT_EQ(0, game_inv_coins_add(&game, 2));
+    ASSERT_EQ(CFG_COINS_MAX - 1, game.coins);
+    ASSERT_EQ(1, game_inv_coins_add(&game, 1));
+    ASSERT_EQ(CFG_COINS_MAX, game.coins);
     PASS();
 }
 

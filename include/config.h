@@ -91,6 +91,7 @@
 #define CFG_START_DAMAGE_BONUS 0
 #define CFG_START_XP 0
 #define CFG_START_COINS 0
+#define CFG_COINS_MAX 32767
 
 /* Combat */
 #define CFG_COMBAT_ENEMY_HP_BASE 8

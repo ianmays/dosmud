@@ -274,7 +274,7 @@ int game_inv_bag_remove_item(struct GameState *game, int item_id)
  */
 int game_inv_coins_add(struct GameState *game, int amount)
 {
-    if (amount < 0) {
+    if (amount < 0 || amount > CFG_COINS_MAX - game->coins) {
         return 0;
     }
     game->coins += amount;

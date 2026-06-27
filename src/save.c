@@ -649,6 +649,7 @@ static int save_validate_game(const struct GameState *game)
             game->level < CFG_START_LEVEL ||
             game->xp < 0 ||
             game->coins < 0 ||
+            game->coins > CFG_COINS_MAX ||
             game->max_hp < 1 ||
             game->damage_bonus < 0 ||
             !save_valid_item(game->weapon_equipped) ||
@@ -718,6 +719,9 @@ int save_write_game(const char *path, const struct GameState *game,
         return SAVE_RESULT_IO;
     }
     if (!save_valid_rng_draw_count(rng_draw_count)) {
+        return SAVE_RESULT_RANGE;
+    }
+    if (!save_validate_game(game)) {
         return SAVE_RESULT_RANGE;
     }
     if (!save_make_sidecar_path(path, "tmp", tmp_path, sizeof(tmp_path)) ||
