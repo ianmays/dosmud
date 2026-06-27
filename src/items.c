@@ -3,8 +3,8 @@
 #include "items.h"
 
 /*
- * Item metadata lives in one place so parsing, rendering, and combat bonuses
- * share the same names and values.
+ * Item metadata lives in one place so parsing, rendering, combat, and economy
+ * share the same names, effects, and coin values.
  */
 
 int item_from_word(char *word)
@@ -67,6 +67,7 @@ int item_weapon_damage_bonus(int item_id)
 
 int item_value(int item_id)
 {
+    /* Baseline coin value from config; wallet changes stay in invent coin helpers. */
     if (item_id == ITEM_BERRY) return CFG_ITEM_VALUE_BERRY;
     if (item_id == ITEM_STICK) return CFG_ITEM_VALUE_STICK;
     if (item_id == ITEM_REED) return CFG_ITEM_VALUE_REED;

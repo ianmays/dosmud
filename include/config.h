@@ -106,7 +106,7 @@
 #define CFG_COMBAT_KILL_XP_SPREAD 5
 #define CFG_COMBAT_KILL_XP_PER_LEVEL 4
 
-/* Item effects (used in combat and inventory) */
+/* Item coin values (item_value in items.c; spent via invent coin helpers) */
 #define CFG_ITEM_VALUE_BERRY 1
 #define CFG_ITEM_VALUE_STICK 1
 #define CFG_ITEM_VALUE_REED 1
@@ -116,6 +116,8 @@
 #define CFG_ITEM_VALUE_TORCH 4
 #define CFG_ITEM_VALUE_SALVE 7
 #define CFG_ITEM_VALUE_SPEAR 6
+
+/* Item effects (used in combat and inventory) */
 #define CFG_BERRY_HEAL_AMOUNT 1
 #define CFG_FISH_HEAL_AMOUNT 2
 #define CFG_SALVE_HEAL_AMOUNT 5

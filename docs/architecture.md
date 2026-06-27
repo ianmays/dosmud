@@ -128,7 +128,7 @@ Commands mutate game state, world ticks mutate simulation state, and rendering o
 [`include/config.h`](https://github.com/ianmays/dosmud/blob/main/include/config.h) is the compile-time home for:
 
 - structural limits (`CFG_ROOM_MAX`, `CFG_BAG_MAX`, `CFG_AREA_ITEM_SLOTS` ground slots per room, `CFG_CORPSE_ITEM_SLOTS` per-room corpse loot slots, buffers, etc.)
-- gameplay tuning (combat enemy level scaling, bandit corpse loot thresholds, food/salve heal amounts, progression, ambient systems, bandit/traveler roaming timing)
+- gameplay tuning (combat enemy level scaling, bandit corpse loot thresholds, food/salve heal amounts, item value metadata and starting coins, progression, ambient systems, bandit/traveler roaming timing)
 - world-generation numeric policy (`world_init` counts and loop bounds)
 - `WORLD_ROOM_*` room IDs
 
@@ -187,8 +187,8 @@ Conventions:
 ### `save`
 
 - shell-edge binary serialization in [`save.c`](https://github.com/ianmays/dosmud/blob/main/src/save.c); called only from `main.c`
-- versioned, field-by-field save format (`DMSV`, version 9) for `GameState`, `World`, and tracked RNG draw count
-- loads only the current `SAVE_VERSION`; version 9 expands the persisted NPC slot count to `CFG_NPC_MAX` and older files return `SAVE_RESULT_FORMAT` during active development instead of carrying migration paths; successful loads use the persisted roster and combat snapshot as written (no profile upgrade or combat backfill on read)
+- versioned, field-by-field save format (`DMSV`, version 10) for `GameState`, `World`, and tracked RNG draw count
+- loads only the current `SAVE_VERSION`; version 9 expanded the persisted NPC slot count to `CFG_NPC_MAX`; version 10 adds persisted `GameState.coins`; older files return `SAVE_RESULT_FORMAT` during active development instead of carrying migration paths; successful loads use the persisted roster and combat snapshot as written (no profile upgrade or combat backfill on read)
 - validates magic, version, and field ranges into a staging buffer before replacing the live game state; failed loads leave the caller's `GameState` untouched
 - fixed-size NPC roster (`GameState.npcs[]` with actor, dialogue, encounter, level, room, flags, and return tick per slot); `CombatState.enemy_level` snapshots the active encounter level for in-combat save/load; enemy handover-pick state lives on `NPC_FLAG_HANDOVER_PICK` on the active enemy slot; `TEST_MODE` builds append roll-injection and quiet-tick fields after the shared payload, while release builds use the shorter record and reject extra trailing bytes
 - keeps render queues and replay logs out of the save format
@@ -269,11 +269,13 @@ New `src/*.c` and `src/*.h` basenames must stay within **classic FAT 8+3** (at m
 - `eat` and inventory `use salve` restore HP via `game_heal_player`; at max HP the item is still consumed but no heal is applied (player sees an already-full message)
 - wield/unwield commands track `weapon_equipped` on `GameState`; a wielded weapon is not stored in `bag[]` (it occupies the hand slot only until unwield, drop, or bandit handover moves it)
 - combat adds `item_weapon_damage_bonus` from `weapon_equipped` when the player attacks; it does not require the weapon id to appear in the bag
+- player coin balance on `GameState.coins`; `game_inv_coins_add` and `game_inv_coins_try_spend` keep wallet mutation in this slice; bag view appends a coins line via `grendr` (merchant and trade flows remain future work)
 
 ### `items`
 
 - item metadata and lookup
 - `item_food_heal_amount` for edible heal values (`CFG_BERRY_HEAL_AMOUNT`, `CFG_FISH_HEAL_AMOUNT`)
+- `item_value` for per-item economy metadata (`CFG_ITEM_VALUE_*` in [`config.h`](https://github.com/ianmays/dosmud/blob/main/include/config.h)); foundation for future trade and loot pricing
 
 ## Core data ownership
 

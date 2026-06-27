@@ -271,6 +271,7 @@ TEST invent_bag_view_event(void)
     PASS();
 }
 
+/* Direct invent wallet API; no player command path in this foundation slice. */
 TEST invent_coin_helpers(void)
 {
     struct GameState game;

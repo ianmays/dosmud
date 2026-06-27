@@ -267,9 +267,13 @@ int game_inv_bag_remove_item(struct GameState *game, int item_id)
     return game_inv_bag_remove_index(game, idx);
 }
 
+/*
+ * Wallet mutation stays invent-owned so future trade and loot share one path.
+ * Both helpers return 0 on invalid amount; try_spend leaves balance unchanged
+ * when amount exceeds game->coins (no partial debit).
+ */
 int game_inv_coins_add(struct GameState *game, int amount)
 {
-    /* Keep wallet mutation in invent so future trade and loot flows share one owner. */
     if (amount < 0) {
         return 0;
     }
