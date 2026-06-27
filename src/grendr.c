@@ -1503,6 +1503,8 @@ void render_inv_bag(const struct GameState *game)
             RENDER_PRINTF("%s", TXT_INV_BAG_LIST_TOO_LONG);
         }
     }
+    /* Read-only wallet line; game->coins is invent-owned, not mutated here. */
+    RENDER_PRINTF(TXT_INV_BAG_COINS_FMT, game->coins);
     if (game->weapon_equipped != ITEM_NONE) {
         RENDER_PRINTF(TXT_INV_BAG_WIELDING_FMT, item_name(game->weapon_equipped));
     }

@@ -190,7 +190,7 @@ are handled by `testharn` before normal command parsing. Harness lines are not e
 
 Prefer fixtures over long setup scripts when a test needs a specific mode, inventory, or encounter. After changing fixture output, regenerate the matching `.expect` with `make test-run` and review the diff.
 
-Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_init`: mode, room, tick, player stats, bag, combat, NPC roster state, corpses, ground items, env focus, and map exploration). That leaves the world graph and `GameState.seed` unchanged. `main.c` then calls `plat_seed_rng(game.seed)` so tracked `plat_rand()` draws match that seed and follow-up rolls do not depend on earlier commands in the same run.
+Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_init`: mode, room, tick, player stats, bag, coins, combat, NPC roster state, corpses, ground items, env focus, and map exploration). That leaves the world graph and `GameState.seed` unchanged. `main.c` then calls `plat_seed_rng(game.seed)` so tracked `plat_rand()` draws match that seed and follow-up rolls do not depend on earlier commands in the same run.
 
 **Bandit / combat** (camp baseline; bandit setups clear camp ground items so the stick is only in bag or wield slot):
 

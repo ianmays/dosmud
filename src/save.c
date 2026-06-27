@@ -15,7 +15,7 @@
  */
 
 #define SAVE_MAGIC "DMSV"
-#define SAVE_VERSION 9
+#define SAVE_VERSION 10
 #define SAVE_PATH_BUF_MAX 260
 
 /*
@@ -390,6 +390,7 @@ static int save_write_game_state(FILE *fp, const struct GameState *game,
             !save_write_s16(fp, game->bag_capacity) ||
             !save_write_s16(fp, game->level) ||
             !save_write_s16(fp, game->xp) ||
+            !save_write_s16(fp, game->coins) ||
             !save_write_s16(fp, game->max_hp) ||
             !save_write_s16(fp, game->damage_bonus) ||
             !save_write_s16(fp, game->weapon_equipped) ||
@@ -431,6 +432,7 @@ static int save_read_game_state(FILE *fp, struct GameState *game,
             !save_read_s16(fp, &game->bag_capacity) ||
             !save_read_s16(fp, &game->level) ||
             !save_read_s16(fp, &game->xp) ||
+            !save_read_s16(fp, &game->coins) ||
             !save_read_s16(fp, &game->max_hp) ||
             !save_read_s16(fp, &game->damage_bonus) ||
             !save_read_s16(fp, &game->weapon_equipped) ||
@@ -646,6 +648,8 @@ static int save_validate_game(const struct GameState *game)
             game->bag_capacity > CFG_BAG_MAX ||
             game->level < CFG_START_LEVEL ||
             game->xp < 0 ||
+            game->coins < 0 ||
+            game->coins > CFG_COINS_MAX ||
             game->max_hp < 1 ||
             game->damage_bonus < 0 ||
             !save_valid_item(game->weapon_equipped) ||
@@ -715,6 +719,9 @@ int save_write_game(const char *path, const struct GameState *game,
         return SAVE_RESULT_IO;
     }
     if (!save_valid_rng_draw_count(rng_draw_count)) {
+        return SAVE_RESULT_RANGE;
+    }
+    if (!save_validate_game(game)) {
         return SAVE_RESULT_RANGE;
     }
     if (!save_make_sidecar_path(path, "tmp", tmp_path, sizeof(tmp_path)) ||

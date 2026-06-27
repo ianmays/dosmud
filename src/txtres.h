@@ -222,6 +222,7 @@ extern const char *const TXT_INV_NOT_CARRYING_FMT;
 extern const char *const TXT_INV_GROUND_FULL_FMT;
 extern const char *const TXT_INV_DROP_FMT;
 extern const char *const TXT_INV_BAG_HEADER_FMT;
+extern const char *const TXT_INV_BAG_COINS_FMT;
 extern const char *const TXT_INV_BAG_EMPTY;
 extern const char *const TXT_INV_BAG_LIST_TOO_LONG;
 extern const char *const TXT_INV_NO_EAT_COMBAT;

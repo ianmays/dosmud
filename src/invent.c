@@ -268,6 +268,29 @@ int game_inv_bag_remove_item(struct GameState *game, int item_id)
 }
 
 /*
+ * Wallet mutation stays invent-owned so future trade and loot share one path.
+ * Both helpers return 0 on invalid amount; try_spend leaves balance unchanged
+ * when amount exceeds game->coins (no partial debit).
+ */
+int game_inv_coins_add(struct GameState *game, int amount)
+{
+    if (amount < 0 || amount > CFG_COINS_MAX - game->coins) {
+        return 0;
+    }
+    game->coins += amount;
+    return 1;
+}
+
+int game_inv_coins_try_spend(struct GameState *game, int amount)
+{
+    if (amount < 0 || amount > game->coins) {
+        return 0;
+    }
+    game->coins -= amount;
+    return 1;
+}
+
+/*
  * Bulk loot stays invent-owned: drains corpse_item[] from slot 0 in visible
  * order; on bag full, re-queues CORPSE_VIEW like game_inv_cmd_loot_reply.
  */

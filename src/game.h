@@ -94,6 +94,8 @@ struct GameState {
     int bag_capacity;
     int level;
     int xp;
+    /* Inventory-owned currency balance; foundation for future economy slices. */
+    int coins;
     int max_hp;
     int damage_bonus;
     int weapon_equipped;

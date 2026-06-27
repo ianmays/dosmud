@@ -48,6 +48,7 @@ static void save_fill_fixture(struct GameState *game)
     game->bag_capacity = 6;
     game->level = 3;
     game->xp = 14;
+    game->coins = 11;
     game->max_hp = 24;
     game->damage_bonus = 2;
     game->weapon_equipped = ITEM_SPEAR;
@@ -145,6 +146,7 @@ static int save_games_equal(const struct GameState *a,
             a->bag_capacity != b->bag_capacity ||
             a->level != b->level ||
             a->xp != b->xp ||
+            a->coins != b->coins ||
             a->max_hp != b->max_hp ||
             a->damage_bonus != b->damage_bonus ||
             a->weapon_equipped != b->weapon_equipped ||
@@ -420,6 +422,25 @@ TEST save_rejects_write_with_excessive_rng_draw_count(void)
     PASS();
 }
 
+TEST save_rejects_write_with_excessive_coin_balance(void)
+{
+    struct GameState game;
+    FILE *fp;
+
+    save_cleanup_file();
+    save_fill_fixture(&game);
+    game.coins = CFG_COINS_MAX + 1;
+
+    ASSERT_EQ(SAVE_RESULT_RANGE,
+        save_write_game(save_test_path(), &game, plat_rand_draw_count()));
+
+    fp = fopen(save_test_path(), "rb");
+    ASSERT(fp == 0);
+
+    save_cleanup_file();
+    PASS();
+}
+
 TEST save_failed_write_preserves_existing_save(void)
 {
     struct GameState original;
@@ -486,18 +507,17 @@ TEST save_rejects_excessive_map_coordinate_span(void)
 TEST save_rejects_combat_midfight_without_enemy_level(void)
 {
     struct GameState game;
-    struct GameState loaded;
-    u32 loaded_draws;
+    FILE *fp;
 
     save_cleanup_file();
     save_fill_fixture(&game);
     game.mode = GAME_MODE_COMBAT;
     game.combat.enemy_hp = 5;
     game.combat.enemy_level = 0;
-    ASSERT_EQ(SAVE_RESULT_OK,
-        save_write_game(save_test_path(), &game, 7U));
     ASSERT_EQ(SAVE_RESULT_RANGE,
-        save_read_game(save_test_path(), &loaded, &loaded_draws));
+        save_write_game(save_test_path(), &game, 7U));
+    fp = fopen(save_test_path(), "rb");
+    ASSERT(fp == 0);
     save_cleanup_file();
     PASS();
 }
@@ -505,19 +525,18 @@ TEST save_rejects_combat_midfight_without_enemy_level(void)
 TEST save_rejects_oversized_bandit_level(void)
 {
     struct GameState game;
-    struct GameState loaded;
+    FILE *fp;
     int slot;
-    u32 loaded_draws;
 
     save_cleanup_file();
     save_fill_fixture(&game);
     slot = npc_find_by_actor(&game, GAME_DIALOGUE_ACTOR_BANDIT);
     ASSERT(slot >= 0);
     game.npcs[slot].level = 99;
-    ASSERT_EQ(SAVE_RESULT_OK,
-        save_write_game(save_test_path(), &game, 7U));
     ASSERT_EQ(SAVE_RESULT_RANGE,
-        save_read_game(save_test_path(), &loaded, &loaded_draws));
+        save_write_game(save_test_path(), &game, 7U));
+    fp = fopen(save_test_path(), "rb");
+    ASSERT(fp == 0);
     save_cleanup_file();
     PASS();
 }
@@ -525,18 +544,17 @@ TEST save_rejects_oversized_bandit_level(void)
 TEST save_rejects_oversized_combat_enemy_level(void)
 {
     struct GameState game;
-    struct GameState loaded;
-    u32 loaded_draws;
+    FILE *fp;
 
     save_cleanup_file();
     save_fill_fixture(&game);
     game.mode = GAME_MODE_COMBAT;
     game.combat.enemy_hp = 5;
     game.combat.enemy_level = 99;
-    ASSERT_EQ(SAVE_RESULT_OK,
-        save_write_game(save_test_path(), &game, 7U));
     ASSERT_EQ(SAVE_RESULT_RANGE,
-        save_read_game(save_test_path(), &loaded, &loaded_draws));
+        save_write_game(save_test_path(), &game, 7U));
+    fp = fopen(save_test_path(), "rb");
+    ASSERT(fp == 0);
     save_cleanup_file();
     PASS();
 }
@@ -589,6 +607,7 @@ SUITE(save)
     RUN_TEST(save_rejects_out_of_range_without_mutating_target);
     RUN_TEST(save_rejects_excessive_rng_draw_count);
     RUN_TEST(save_rejects_write_with_excessive_rng_draw_count);
+    RUN_TEST(save_rejects_write_with_excessive_coin_balance);
     RUN_TEST(save_failed_write_preserves_existing_save);
     RUN_TEST(save_rejects_excessive_map_coordinate_span);
     RUN_TEST(save_rejects_combat_midfight_without_enemy_level);

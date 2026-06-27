@@ -22,5 +22,6 @@ int item_is_edible(int item_id);
 int item_food_heal_amount(int item_id);
 int item_is_weapon(int item_id);
 int item_weapon_damage_bonus(int item_id);
+int item_value(int item_id);
 
 #endif

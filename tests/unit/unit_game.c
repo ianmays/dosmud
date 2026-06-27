@@ -100,6 +100,17 @@ TEST game_mode_setters(void)
     PASS();
 }
 
+TEST game_reset_fixture_baseline_resets_starting_coins(void)
+{
+    struct GameState game;
+
+    unit_game_fresh(&game, 50u);
+    game.coins = 9;
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    ASSERT_EQ(CFG_START_COINS, game.coins);
+    PASS();
+}
+
 TEST game_describe_current_room_emits_look(void)
 {
     struct GameState game;
@@ -963,6 +974,7 @@ SUITE(game) {
     RUN_TEST(game_heal_player_at_max);
     RUN_TEST(game_heal_player_clamps);
     RUN_TEST(game_mode_setters);
+    RUN_TEST(game_reset_fixture_baseline_resets_starting_coins);
     RUN_TEST(game_describe_current_room_emits_look);
     RUN_TEST(game_describe_current_room_overflow_keeps_prior_event);
     RUN_TEST(game_roll_inject_consume);

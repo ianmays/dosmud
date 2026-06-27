@@ -90,6 +90,8 @@
 #define CFG_START_LEVEL 1
 #define CFG_START_DAMAGE_BONUS 0
 #define CFG_START_XP 0
+#define CFG_START_COINS 0
+#define CFG_COINS_MAX 32767
 
 /* Combat */
 #define CFG_COMBAT_ENEMY_HP_BASE 8
@@ -104,6 +106,17 @@
 #define CFG_COMBAT_KILL_XP_BASE 12
 #define CFG_COMBAT_KILL_XP_SPREAD 5
 #define CFG_COMBAT_KILL_XP_PER_LEVEL 4
+
+/* Item coin values (item_value in items.c; spent via invent coin helpers) */
+#define CFG_ITEM_VALUE_BERRY 1
+#define CFG_ITEM_VALUE_STICK 1
+#define CFG_ITEM_VALUE_REED 1
+#define CFG_ITEM_VALUE_STONE 1
+#define CFG_ITEM_VALUE_HERB 3
+#define CFG_ITEM_VALUE_FISH 2
+#define CFG_ITEM_VALUE_TORCH 4
+#define CFG_ITEM_VALUE_SALVE 7
+#define CFG_ITEM_VALUE_SPEAR 6
 
 /* Item effects (used in combat and inventory) */
 #define CFG_BERRY_HEAL_AMOUNT 1
