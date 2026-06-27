@@ -48,6 +48,7 @@ static void save_fill_fixture(struct GameState *game)
     game->bag_capacity = 6;
     game->level = 3;
     game->xp = 14;
+    game->coins = 11;
     game->max_hp = 24;
     game->damage_bonus = 2;
     game->weapon_equipped = ITEM_SPEAR;
@@ -145,6 +146,7 @@ static int save_games_equal(const struct GameState *a,
             a->bag_capacity != b->bag_capacity ||
             a->level != b->level ||
             a->xp != b->xp ||
+            a->coins != b->coins ||
             a->max_hp != b->max_hp ||
             a->damage_bonus != b->damage_bonus ||
             a->weapon_equipped != b->weapon_equipped ||

@@ -723,6 +723,10 @@ Blocked-by [#52](https://github.com/ianmays/dosmud/issues/52).
 
 ### [#50](https://github.com/ianmays/dosmud/issues/50) - Economy
 
+Done ✅.
+
+Economy foundation: item value metadata, persisted player coin balance, and bag-visible wallet output. Merchant flows and authored NPC trade remain follow-up work under [#132](https://github.com/ianmays/dosmud/issues/132).
+
 ### [#132](https://github.com/ianmays/dosmud/issues/132) - NPC trade
 
 ### [#102](https://github.com/ianmays/dosmud/issues/102) - Fixed location enemies (Bandits)

@@ -26,6 +26,8 @@ int game_inv_player_has_item(struct GameState *game, int item_id);
 int game_inv_bag_add(struct GameState *game, int item_id);
 int game_inv_bag_remove_index(struct GameState *game, int index);
 int game_inv_bag_remove_item(struct GameState *game, int item_id);
+int game_inv_coins_add(struct GameState *game, int amount);
+int game_inv_coins_try_spend(struct GameState *game, int amount);
 
 /* loot_all bypasses the numbered menu and drains corpse slots until full or empty */
 int game_inv_cmd_loot(struct GameState *game, int loot_all,

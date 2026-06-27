@@ -180,6 +180,7 @@ static void reset_mutable_state(struct GameState *game, int room_id, u32 tick)
     game->bag_capacity = CFG_START_BAG_CAPACITY;
     game->level = CFG_START_LEVEL;
     game->xp = CFG_START_XP;
+    game->coins = CFG_START_COINS;
     game->max_hp = CFG_START_MAX_HP;
     game->damage_bonus = CFG_START_DAMAGE_BONUS;
     game->weapon_equipped = ITEM_NONE;

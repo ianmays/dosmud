@@ -271,6 +271,24 @@ TEST invent_bag_view_event(void)
     PASS();
 }
 
+TEST invent_coin_helpers(void)
+{
+    struct GameState game;
+
+    unit_game_fresh(&game, 22u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    ASSERT_EQ(CFG_START_COINS, game.coins);
+    ASSERT_EQ(1, game_inv_coins_add(&game, 7));
+    ASSERT_EQ(CFG_START_COINS + 7, game.coins);
+    ASSERT_EQ(1, game_inv_coins_try_spend(&game, 4));
+    ASSERT_EQ(CFG_START_COINS + 3, game.coins);
+    ASSERT_EQ(0, game_inv_coins_try_spend(&game, 9));
+    ASSERT_EQ(0, game_inv_coins_add(&game, -1));
+    ASSERT_EQ(0, game_inv_coins_try_spend(&game, -1));
+    ASSERT_EQ(CFG_START_COINS + 3, game.coins);
+    PASS();
+}
+
 TEST invent_eat_heals_damaged(void)
 {
     struct GameState game;
@@ -632,6 +650,7 @@ SUITE(invent) {
     RUN_TEST(invent_take_combat_blocked);
     RUN_TEST(invent_eat_and_use);
     RUN_TEST(invent_bag_view_event);
+    RUN_TEST(invent_coin_helpers);
     RUN_TEST(invent_eat_heals_damaged);
     RUN_TEST(invent_salve_at_max_hp);
     RUN_TEST(invent_craft_torch);
