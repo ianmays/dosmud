@@ -243,7 +243,7 @@ New `src/*.c` and `src/*.h` basenames must stay within **classic FAT 8+3** (at m
 - art is intentionally compact to work well with 25 line displays (DOS standard)
 - no gameplay mutation
 - calls [`fmt.c`](https://github.com/ianmays/dosmud/blob/main/src/fmt.c) for logic-heavy strings, then prints; static copy from [`txtres.c`](https://github.com/ianmays/dosmud/blob/main/src/txtres.c) (`TXT_*` constants and `g_room_*` arrays), not scattered literals
-- `GAME_EVENT_DIALOGUE` and `GAME_EVENT_ENCOUNTER`: resolve `TxtresNarrativeKey` via `txtres`, then call the portrait/menu or encounter `render_*` helper for that key
+- `GAME_EVENT_DIALOGUE` and `GAME_EVENT_ENCOUNTER`: resolve `TxtresNarrativeKey` via `txtres`, then call the portrait/menu or encounter `render_*` helper for that key; `GAME_EVENT_DIALOGUE` `arg3` carries authored scene detail when talk/reply branches need more than choice alone (Herbalist story scenes for [#76](https://github.com/ianmays/dosmud/issues/76))
 - newline tiers (`render_gap`, `render_paragraph`, and related rules): [Newline and spacing](#newline-and-spacing)
 
 ### `fmt`
@@ -272,7 +272,7 @@ New `src/*.c` and `src/*.h` basenames must stay within **classic FAT 8+3** (at m
 
 ### `items`
 
-- item metadata and lookup
+- item metadata and lookup; `ITEM_MARSH_ROOT` and `marsh-root`/`root` word aliases for the [#76](https://github.com/ianmays/dosmud/issues/76) fetch item
 - `item_food_heal_amount` for edible heal values (`CFG_BERRY_HEAL_AMOUNT`, `CFG_FISH_HEAL_AMOUNT`)
 
 ## Core data ownership

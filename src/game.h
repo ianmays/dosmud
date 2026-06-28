@@ -31,12 +31,17 @@ enum DialogueKind {
     DIALOGUE_LOOT
 };
 
+/* Persisted progress for npc.c herbalist branch (#76); not a generic quest layer. */
 enum HerbalistStoryState {
     HERBALIST_STORY_NONE = 0,
     HERBALIST_STORY_REQUESTED,
     HERBALIST_STORY_COMPLETE
 };
 
+/*
+ * Runtime talk/reply scene derived from herbalist_story plus bag contents;
+ * queued as GAME_EVENT_DIALOGUE arg3 for grendr/txtres copy branching.
+ */
 enum HerbalistDialogueScene {
     HERBALIST_SCENE_NOT_STARTED = 0,
     HERBALIST_SCENE_REQUESTED,
@@ -101,7 +106,9 @@ struct GameState {
     int env_focus_room;
     int env_focus_kind;
     u32 env_focus_expires_tick;
+    /* npc.c herbalist branch (#76); saved in save v10+. */
     int herbalist_story;
+    /* one-shot guard: marsh-root seeded at most once per playthrough/save. */
     int marsh_root_spawned;
     int room_item[CFG_ROOM_MAX][CFG_AREA_ITEM_SLOTS];
     int bag[CFG_BAG_MAX];

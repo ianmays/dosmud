@@ -309,6 +309,7 @@ static void fixture_at_orchard(struct GameState *game)
     game->room_explored[WORLD_ROOM_ORCHARD] = 1;
 }
 
+/* Pre-seed marsh root so snapshots skip lazy npc seeding on talk. */
 static void fixture_story_orchard_requested(struct GameState *game)
 {
     fixture_at_orchard(game);
@@ -337,6 +338,7 @@ static void fixture_story_orchard_done(struct GameState *game)
     game->world.rooms[WORLD_ROOM_ORCHARD].desc[CFG_DESC_MAX - 1] = '\0';
 }
 
+/* Marsh room with authored root visible for take/examine snapshot paths. */
 static void fixture_story_marsh_root(struct GameState *game)
 {
     game_reset_fixture_baseline(game, WORLD_ROOM_MARSH, 2);

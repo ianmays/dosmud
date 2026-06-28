@@ -386,6 +386,7 @@ static int save_write_game_state(FILE *fp, const struct GameState *game,
             !save_write_s16(fp, game->env_focus_room) ||
             !save_write_s16(fp, game->env_focus_kind) ||
             !save_write_u32(fp, game->env_focus_expires_tick) ||
+            /* v10: herbalist story fields (#76). */
             !save_write_s16(fp, game->herbalist_story) ||
             !save_write_s16(fp, game->marsh_root_spawned) ||
             !save_write_s16(fp, game->bag_count) ||
@@ -429,6 +430,7 @@ static int save_read_game_state(FILE *fp, struct GameState *game,
             !save_read_s16(fp, &game->env_focus_room) ||
             !save_read_s16(fp, &game->env_focus_kind) ||
             !save_read_u32(fp, &game->env_focus_expires_tick) ||
+            /* v10: herbalist story fields (#76). */
             !save_read_s16(fp, &game->herbalist_story) ||
             !save_read_s16(fp, &game->marsh_root_spawned) ||
             !save_read_s16(fp, &game->bag_count) ||

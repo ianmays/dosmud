@@ -636,7 +636,7 @@ After [#107](https://github.com/ianmays/dosmud/issues/107), procedural encounter
 
 ### [#76](https://github.com/ianmays/dosmud/issues/76) - Concrete narrative
 
-Done ✅
+Done ✅ ([#217](https://github.com/ianmays/dosmud/pull/217))
 
 Delivered as a narrow authored vertical slice rather than a broad story epic: the Herbalist requests a marsh-root, the root appears deterministically in the Marsh after the request, the player can return it, and completion persists through save/load with a small Orchard room-copy hook. This proves one authored narrative beat on top of m10 narrative indirection ([#210](https://github.com/ianmays/dosmud/pull/210)) without widening into generic quests, trade, schedules, or a dialogue framework.
 

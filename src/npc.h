@@ -51,6 +51,7 @@ int npc_roaming_cmd_reply(struct GameState *game, int choice,
                           struct GameEventQueue *out);
 /* Canonical GAME_EVENT_DIALOGUE / DIALOGUE_GUARD producers for npc-using slices. */
 void npc_push_dialogue(struct GameEventQueue *out, int actor, int phase, int choice);
+/* detail is GAME_EVENT_DIALOGUE arg3 when copy needs more than actor/phase/choice. */
 void npc_push_dialogue_detail(struct GameEventQueue *out, int actor, int phase,
                               int choice, int detail);
 void npc_push_dialogue_guard(struct GameEventQueue *out, int reason);

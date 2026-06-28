@@ -19,6 +19,7 @@ int item_from_word(char *word)
     if (strcmp(word, "torch") == 0) return ITEM_TORCH;
     if (strcmp(word, "salve") == 0) return ITEM_SALVE;
     if (strcmp(word, "spear") == 0) return ITEM_SPEAR;
+    /* "root" aliases marsh-root; no other item uses that word today (#76). */
     if (strcmp(word, "marsh-root") == 0 ||
             strcmp(word, "marshroot") == 0 ||
             strcmp(word, "root") == 0) return ITEM_MARSH_ROOT;

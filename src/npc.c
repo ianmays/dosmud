@@ -210,6 +210,12 @@ static const struct NpcRoomInfo *npc_room_dialogue_info(int dialogue_kind)
     return 0;
 }
 
+/*
+ * #76 herbalist vertical slice: npc.c owns story transitions, marsh-root
+ * seeding, orchard desc mutation, and scene selection. Reply events keep the
+ * pre-choice HerbalistDialogueScene in arg3 so txtres copy matches the menu
+ * just closed.
+ */
 static int npc_room_has_item(const struct GameState *game, int room_id, int item_id)
 {
     int slot;
@@ -240,6 +246,7 @@ static int herbalist_dialogue_scene(const struct GameState *game)
     return HERBALIST_SCENE_NOT_STARTED;
 }
 
+/* Turn-in swaps orchard desc in-place; incomplete story restores authored baseline. */
 static void herbalist_apply_world_hook(struct GameState *game)
 {
     if (game->herbalist_story == HERBALIST_STORY_COMPLETE) {
@@ -670,6 +677,7 @@ int npc_open_room_dialogue(struct GameState *game, struct GameEventQueue *out)
     if (info == 0) {
         return 0;
     }
+    /* Multi-scene herbalist bypasses generic npc_push_dialogue (needs arg3 scene). */
     if (info->dialogue_kind == DIALOGUE_NPC_HERBALIST) {
         return herbalist_open_dialogue(game, out);
     }
@@ -910,7 +918,8 @@ int npc_roaming_cmd_reply(struct GameState *game, int choice, GameEventQueue *ou
 
 /*
  * #160: shared dialogue producers (payload layout in gout.h). Slices queue
- * actor/phase/choice here; grendr maps GAME_EVENT_DIALOGUE* to copy.
+ * actor/phase/choice here; detail becomes arg3 (e.g. HerbalistDialogueScene).
+ * grendr maps GAME_EVENT_DIALOGUE* to copy.
  */
 void npc_push_dialogue_detail(struct GameEventQueue *out, int actor, int phase,
                               int choice, int detail)
