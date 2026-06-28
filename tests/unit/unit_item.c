@@ -17,6 +17,9 @@ TEST items_from_word_aliases(void)
     char w10[] = "torch";
     char w11[] = "salve";
     char w12[] = "spear";
+    char w13[] = "marsh-root";
+    char w14[] = "marshroot";
+    char w15[] = "root";
 
     ASSERT_EQ(ITEM_BERRY, item_from_word(w1));
     ASSERT_EQ(ITEM_BERRY, item_from_word(w2));
@@ -30,6 +33,9 @@ TEST items_from_word_aliases(void)
     ASSERT_EQ(ITEM_TORCH, item_from_word(w10));
     ASSERT_EQ(ITEM_SALVE, item_from_word(w11));
     ASSERT_EQ(ITEM_SPEAR, item_from_word(w12));
+    ASSERT_EQ(ITEM_MARSH_ROOT, item_from_word(w13));
+    ASSERT_EQ(ITEM_MARSH_ROOT, item_from_word(w14));
+    ASSERT_EQ(ITEM_MARSH_ROOT, item_from_word(w15));
     PASS();
 }
 
@@ -44,6 +50,7 @@ TEST items_name_and_flags(void)
 {
     ASSERT_STR_EQ("berry", item_name(ITEM_BERRY));
     ASSERT_STR_EQ("stick", item_name(ITEM_STICK));
+    ASSERT_STR_EQ("marsh-root", item_name(ITEM_MARSH_ROOT));
     ASSERT_STR_EQ("unknown", item_name(99));
     ASSERT_EQ(1, item_is_edible(ITEM_BERRY));
     ASSERT_EQ(1, item_is_edible(ITEM_FISH));

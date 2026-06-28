@@ -15,7 +15,7 @@
  */
 
 #define SAVE_MAGIC "DMSV"
-#define SAVE_VERSION 9
+#define SAVE_VERSION 10
 #define SAVE_PATH_BUF_MAX 260
 
 /*
@@ -386,6 +386,8 @@ static int save_write_game_state(FILE *fp, const struct GameState *game,
             !save_write_s16(fp, game->env_focus_room) ||
             !save_write_s16(fp, game->env_focus_kind) ||
             !save_write_u32(fp, game->env_focus_expires_tick) ||
+            !save_write_s16(fp, game->herbalist_story) ||
+            !save_write_s16(fp, game->marsh_root_spawned) ||
             !save_write_s16(fp, game->bag_count) ||
             !save_write_s16(fp, game->bag_capacity) ||
             !save_write_s16(fp, game->level) ||
@@ -427,6 +429,8 @@ static int save_read_game_state(FILE *fp, struct GameState *game,
             !save_read_s16(fp, &game->env_focus_room) ||
             !save_read_s16(fp, &game->env_focus_kind) ||
             !save_read_u32(fp, &game->env_focus_expires_tick) ||
+            !save_read_s16(fp, &game->herbalist_story) ||
+            !save_read_s16(fp, &game->marsh_root_spawned) ||
             !save_read_s16(fp, &game->bag_count) ||
             !save_read_s16(fp, &game->bag_capacity) ||
             !save_read_s16(fp, &game->level) ||
@@ -467,7 +471,7 @@ static int save_string_has_nul(const char *text, unsigned int size)
 
 static int save_valid_item(int item_id)
 {
-    return item_id >= ITEM_NONE && item_id <= ITEM_SPEAR;
+    return item_id >= ITEM_NONE && item_id <= ITEM_MARSH_ROOT;
 }
 
 static int save_valid_room_index(int room_id, int room_count)
@@ -640,6 +644,9 @@ static int save_validate_game(const struct GameState *game)
             !save_valid_room_or_none(game->env_focus_room, room_count) ||
             game->env_focus_kind < GAME_ENV_NONE ||
             game->env_focus_kind > GAME_ENV_GRIT ||
+            game->herbalist_story < HERBALIST_STORY_NONE ||
+            game->herbalist_story > HERBALIST_STORY_COMPLETE ||
+            !save_valid_boolish(game->marsh_root_spawned) ||
             game->bag_count < 0 ||
             game->bag_count > CFG_BAG_MAX ||
             game->bag_capacity < 0 ||

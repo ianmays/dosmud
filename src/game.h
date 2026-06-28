@@ -31,6 +31,19 @@ enum DialogueKind {
     DIALOGUE_LOOT
 };
 
+enum HerbalistStoryState {
+    HERBALIST_STORY_NONE = 0,
+    HERBALIST_STORY_REQUESTED,
+    HERBALIST_STORY_COMPLETE
+};
+
+enum HerbalistDialogueScene {
+    HERBALIST_SCENE_NOT_STARTED = 0,
+    HERBALIST_SCENE_REQUESTED,
+    HERBALIST_SCENE_READY,
+    HERBALIST_SCENE_COMPLETE
+};
+
 /* Stored in GameState.env_focus_kind; render consumes the same values. */
 #define GAME_ENV_NONE 0
 #define GAME_ENV_RUSTLE 1
@@ -88,6 +101,8 @@ struct GameState {
     int env_focus_room;
     int env_focus_kind;
     u32 env_focus_expires_tick;
+    int herbalist_story;
+    int marsh_root_spawned;
     int room_item[CFG_ROOM_MAX][CFG_AREA_ITEM_SLOTS];
     int bag[CFG_BAG_MAX];
     int bag_count;

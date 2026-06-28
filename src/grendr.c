@@ -684,6 +684,7 @@ static void render_equip_result_event(const GameEvent *ev)
 
 /*
  * #160: GAME_EVENT_DIALOGUE adapter; arg0=actor, arg1=phase, arg2=choice.
+ * arg3 carries authored scene detail for branches that need more than choice.
  * txtres owns the stable actor/phase -> narrative key lookup; grendr only
  * dispatches the resolved key to the matching portrait/menu or reply helper.
  */
@@ -709,10 +710,10 @@ static void render_dialogue_event(const GameEvent *ev)
         render_msg_watchman_reply(ev->arg2);
         break;
     case TXTRES_NARRATIVE_HERBALIST_TALK:
-        render_msg_herbalist_talk();
+        render_msg_herbalist_talk(ev->arg3);
         break;
     case TXTRES_NARRATIVE_HERBALIST_REPLY:
-        render_msg_herbalist_reply(ev->arg2);
+        render_msg_herbalist_reply(ev->arg2, ev->arg3);
         break;
     case TXTRES_NARRATIVE_ARCHIVIST_TALK:
         render_msg_archivist_talk();
@@ -1323,15 +1324,32 @@ void render_msg_watchman_talk(void)
     render_copy(TXT_REPLY_PROMPT);
 }
 
-void render_msg_herbalist_talk(void)
+void render_msg_herbalist_talk(int scene)
 {
     render_gap();
     art_herbalist_portrait();
     render_gap();
-    render_copy(TXT_MSG_HERBALIST_TALK_LINE1);
-    render_copy(TXT_MSG_HERBALIST_TALK_LINE2);
-    render_copy(TXT_MSG_HERBALIST_TALK_LINE3);
-    render_copy(TXT_MSG_HERBALIST_TALK_LINE4);
+    if (scene == HERBALIST_SCENE_REQUESTED) {
+        render_copy(TXT_MSG_HERBALIST_REQ_LINE1);
+        render_copy(TXT_MSG_HERBALIST_REQ_LINE2);
+        render_copy(TXT_MSG_HERBALIST_REQ_LINE3);
+        render_copy(TXT_MSG_HERBALIST_REQ_LINE4);
+    } else if (scene == HERBALIST_SCENE_READY) {
+        render_copy(TXT_MSG_HERBALIST_READY_LINE1);
+        render_copy(TXT_MSG_HERBALIST_READY_LINE2);
+        render_copy(TXT_MSG_HERBALIST_READY_LINE3);
+        render_copy(TXT_MSG_HERBALIST_READY_LINE4);
+    } else if (scene == HERBALIST_SCENE_COMPLETE) {
+        render_copy(TXT_MSG_HERBALIST_DONE_LINE1);
+        render_copy(TXT_MSG_HERBALIST_DONE_LINE2);
+        render_copy(TXT_MSG_HERBALIST_DONE_LINE3);
+        render_copy(TXT_MSG_HERBALIST_DONE_LINE4);
+    } else {
+        render_copy(TXT_MSG_HERBALIST_TALK_LINE1);
+        render_copy(TXT_MSG_HERBALIST_TALK_LINE2);
+        render_copy(TXT_MSG_HERBALIST_TALK_LINE3);
+        render_copy(TXT_MSG_HERBALIST_TALK_LINE4);
+    }
     render_copy(TXT_REPLY_PROMPT);
 }
 
@@ -1357,9 +1375,9 @@ void render_msg_watchman_reply(int arg)
     RENDER_PRINTF("%s", txtres_msg_watchman_reply(arg));
 }
 
-void render_msg_herbalist_reply(int arg)
+void render_msg_herbalist_reply(int arg, int scene)
 {
-    RENDER_PRINTF("%s", txtres_msg_herbalist_reply(arg));
+    RENDER_PRINTF("%s", txtres_msg_herbalist_reply(arg, scene));
 }
 
 void render_msg_archivist_reply(int arg)

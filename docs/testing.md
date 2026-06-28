@@ -222,9 +222,11 @@ Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_
 | `at_road` | Road, tick 1, explore, camp and road explored on map |
 | `bandit_road` | `at_road` plus roster-backed traveler off so the seeded road bandit can open on `wait` before its roaming warm-up expires |
 | `at_marsh_reed` | Marsh, tick 2, stick in bag, reed on ground, camp and marsh explored |
+| `story_marsh_root` | Marsh, tick 2, Herbalist request active, reed plus marsh-root on the ground |
 | `quiet_camp_dual_ground` | Camp, quiet ticks on, stick and reed on ground for multi-item pickup tests |
 | `quiet_camp_dual_ground_full_bag` | `quiet_camp_dual_ground` plus a full bag for take-all refusal snapshots |
 | `at_pond` / `at_tower` / `at_orchard` / `at_catacombs` | Named room, explore, room explored |
+| `story_orchard_requested` / `story_orchard_ready` / `story_orchard_done` | Orchard baseline with the Herbalist slice in requested, turn-in-ready, or completed state |
 | `quiet_explore` | `at_camp` + `test_quiet_ticks` + roster-backed traveler off (for `wait` / `move` snapshots) |
 
 **Traveler (roaming NPC)** (co-located dialogue without tick movement):
@@ -255,7 +257,7 @@ Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_
 | `corpse_stripped` | Corpse present, no corpse-menu items |
 | `corpse_loot_full_bag` | Full bag + corpse with one stick in corpse slot 1 |
 
-For marsh item/craft snapshots, prefer `at_marsh_reed` over walking camp intimidate plus `south` (avoids tick RNG on travel). For movement that depends on exit layout (`north` from marsh, `move north` from camp), chain `@fixture world_boot` before room fixtures so the graph stays stable if `world_init` changes.
+For marsh item/craft snapshots, prefer `at_marsh_reed` or `story_marsh_root` over walking camp intimidate plus `south` (avoids tick RNG on travel). For movement that depends on exit layout (`north` from marsh, `move north` from camp), chain `@fixture world_boot` before room fixtures so the graph stays stable if `world_init` changes.
 
 ```text
 @fixture world_boot
@@ -309,7 +311,7 @@ Each process run uses one `.input` file until `quit`. `make snapshot-run` runs `
 
 **Replay sidecar (`replay_log`):** the only snapshot that also golden-checks a `TEST_MODE` `--replay-log` file. `make snapshot-run` runs `./dosmud --seed 1234 --replay-log tests/regression/replay_log_log.output < tests/regression/replay_log.input` and diffs both stdout (`replay_log.expect`) and the sidecar log (`replay_log_log.expect`). Player-visible stdout stays unchanged; the log records `dosmud-replay-v1` header lines plus per-step metadata and serialized `GameEvent` rows.
 
-**Save sidecar (`save_load`):** exercises the in-session `save` / `load` shell commands. `make snapshot-run` removes `save.dat`, runs the snapshot, diffs stdout against `save_load.expect`, then removes `save.dat` again so the single-slot file does not leak across tests.
+**Save sidecar (`save_load`, `herbalist_save_load`):** exercises the in-session `save` / `load` shell commands. `make snapshot-run` removes `save.dat`, runs the snapshot, diffs stdout against the matching `.expect`, then removes `save.dat` again so the single-slot file does not leak across tests.
 
 **Version snapshots (`version`, `version_cli`):** build identity includes generated Git metadata, so the expectation files keep `@VERSION@` placeholders. `make snapshot-run` substitutes the current `BUILD_VERSION_STRING` from `build/include/version.h` before diffing stdout.
 
@@ -317,7 +319,7 @@ Each process run uses one `.input` file until `quit`. `make snapshot-run` runs `
 
 **Movement / time:** `walk_north`, `walk_map`, `wait_tick`.
 
-**NPC talk:** `frog_hint`, `frog_replies`, `watchman_talk`, `traveler_replies`, `traveler_talk_blocked`, `herbalist_talk`, `archivist_talk`, `talk_nobody`, `dialogue_menu_exit`, `game_event_dialogue`, `narrative_indirection` (`frog_hint` proves the generic room-NPC hint also applies at the pond; the others cover pond frog, bandit camp talk, traveler interaction, and tower watchman through generic `GAME_EVENT_DIALOGUE` / `GAME_EVENT_ENCOUNTER` paths; `dialogue_menu_exit` uses `@fixture traveler_dialogue` and `look` to dismiss a room-NPC menu before the verb runs; `narrative_indirection` exercises traveler, watchman, and bandit give/intimidate scenes end-to-end through the `txtres` narrative-key indirection path; [#175](https://github.com/ianmays/dosmud/pull/175), [#196](https://github.com/ianmays/dosmud/issues/196), [#205](https://github.com/ianmays/dosmud/issues/205)).
+**NPC talk:** `frog_hint`, `frog_replies`, `watchman_talk`, `traveler_replies`, `traveler_talk_blocked`, `herbalist_talk`, `herbalist_request`, `herbalist_incomplete`, `herbalist_complete`, `herbalist_followup`, `archivist_talk`, `talk_nobody`, `dialogue_menu_exit`, `game_event_dialogue`, `narrative_indirection` (`frog_hint` proves the generic room-NPC hint also applies at the pond; the Herbalist set covers the first authored narrative slice through request, reminder, hand-in, and follow-up states; the others cover pond frog, bandit camp talk, traveler interaction, and tower watchman through generic `GAME_EVENT_DIALOGUE` / `GAME_EVENT_ENCOUNTER` paths; `dialogue_menu_exit` uses `@fixture traveler_dialogue` and `look` to dismiss a room-NPC menu before the verb runs; `narrative_indirection` exercises traveler, watchman, and bandit give/intimidate scenes end-to-end through the `txtres` narrative-key indirection path; [#175](https://github.com/ianmays/dosmud/pull/175), [#196](https://github.com/ianmays/dosmud/issues/196), [#205](https://github.com/ianmays/dosmud/issues/205), [#76](https://github.com/ianmays/dosmud/issues/76)).
 
 **Eat / use:** `use_salve`, `use_torch`, `use_spear`, `use_stone`, `eat_berry`, `eat_fish`, `eat_berry_heal`, `eat_fish_heal`, `eat_not_edible`, `eat_missing`.
 
@@ -333,7 +335,7 @@ Each process run uses one `.input` file until `quit`. `make snapshot-run` runs `
 
 **Meta / inventory:** `unknown_cmd`, `cannot_move`, `give_wrong_context`, `reply_nobody`, `post_combat_reply_guard`, `reply_invalid`, `craft_salve`, `craft_unknown`, `take_nothing`, `take_wrong_item`.
 
-**Save/load:** `save_load` (single-slot `save.dat` round-trip with a deterministic post-load move).
+**Save/load:** `save_load`, `herbalist_save_load` (single-slot `save.dat` round-trip with a deterministic post-load move or authored-story follow-up state).
 
 **Replay:** `replay_log` (stdout plus sidecar log golden files; [#156](https://github.com/ianmays/dosmud/issues/156)).
 

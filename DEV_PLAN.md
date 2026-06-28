@@ -96,9 +96,9 @@ Workflow (milestone 4) can run in parallel with architecture once unblocked. Mil
 |------|---------|------------------------|
 | XS | single trivial change | *(none currently)* |
 | S | narrow feature or tooling slice | #4, #197 |
-| M | one subsystem feature or refactor | #5, #7, #9, #31, #49, #51, #54, #100, #101, #102, #129, #130, #131, #132, #145, #187, #195, #196, #202, #203, #206, #207 |
+| M | one subsystem feature or refactor | #5, #7, #9, #31, #49, #51, #54, #76, #100, #101, #102, #129, #130, #131, #132, #145, #187, #195, #196, #202, #203, #206, #207 |
 | L | major mechanism or platform path | #8, #15, #50, #52, #107 |
-| XL | foundational or multi-area epic | #48, #55, #76, #92 |
+| XL | foundational or multi-area epic | #48, #55, #92 |
 
 [#71](https://github.com/ianmays/dosmud/issues/71) **XL** and [#47](https://github.com/ianmays/dosmud/issues/47) **L** established the engine boundary and event-queue seam ([#164](https://github.com/ianmays/dosmud/pull/164)). [#104](https://github.com/ianmays/dosmud/issues/104) npc module landed ([#185](https://github.com/ianmays/dosmud/pull/185)). Remaining XL gates: [#48](https://github.com/ianmays/dosmud/issues/48) (renderer) and m11 [#92](https://github.com/ianmays/dosmud/issues/92) (multiplayer).
 
@@ -616,7 +616,7 @@ Gameplay and world content after core architecture stabilizes. Related mechanics
 | [#8](https://github.com/ianmays/dosmud/issues/8) | complex dialogue | L |
 | [#51](https://github.com/ianmays/dosmud/issues/51) | weather | M |
 | [#54](https://github.com/ianmays/dosmud/issues/54) | procedural encounters | M |
-| [#76](https://github.com/ianmays/dosmud/issues/76) | concrete narrative | XL |
+| [#76](https://github.com/ianmays/dosmud/issues/76) | concrete narrative | M |
 | [#130](https://github.com/ianmays/dosmud/issues/130) | night time | M |
 | [#131](https://github.com/ianmays/dosmud/issues/131) | cooking skill | M |
 
@@ -636,9 +636,9 @@ After [#107](https://github.com/ianmays/dosmud/issues/107), procedural encounter
 
 ### [#76](https://github.com/ianmays/dosmud/issues/76) - Concrete narrative
 
-North-star **consumer** of [m10](#authored-content-and-engine-ioc) placement and narrative layers (and m8 [#49](https://github.com/ianmays/dosmud/issues/49) / [#52](https://github.com/ianmays/dosmud/issues/52)), not a substitute for them. GitHub intent: author-defined narrative pathway rather than seed-planted randomness alone; may leverage TEST_MODE fixtures and replay for deterministic beat tests.
+Done ✅
 
-Author-defined structure does **not** abandon project determinism: same seed, inputs, and pathway state should replay identically. m10 narrative indirection delivered ([#210](https://github.com/ianmays/dosmud/pull/210)); when grooming, consider splitting into (a) pathway / beat engine hooks and (b) authored story data packs. Full delivery benefits from m8 [#52](https://github.com/ianmays/dosmud/issues/52) and [#49](https://github.com/ianmays/dosmud/issues/49) but does not require them to start.
+Delivered as a narrow authored vertical slice rather than a broad story epic: the Herbalist requests a marsh-root, the root appears deterministically in the Marsh after the request, the player can return it, and completion persists through save/load with a small Orchard room-copy hook. This proves one authored narrative beat on top of m10 narrative indirection ([#210](https://github.com/ianmays/dosmud/pull/210)) without widening into generic quests, trade, schedules, or a dialogue framework.
 
 ### [#130](https://github.com/ianmays/dosmud/issues/130) - Night time
 
@@ -830,7 +830,7 @@ Move the ambient bandit encounter off the one-off `GameState.enemy_handover_pick
 
 **Non-goals:** external config files, DOS runtime parsing, quest DSL, multiplayer (m11 [#92](https://github.com/ianmays/dosmud/issues/92)).
 
-**Consumers:** m8 [#52](https://github.com/ianmays/dosmud/issues/52), [#49](https://github.com/ianmays/dosmud/issues/49); m6 [#76](https://github.com/ianmays/dosmud/issues/76) (XL), [#8](https://github.com/ianmays/dosmud/issues/8), [#54](https://github.com/ianmays/dosmud/issues/54).
+**Consumers:** m8 [#52](https://github.com/ianmays/dosmud/issues/52), [#49](https://github.com/ianmays/dosmud/issues/49); m6 [#76](https://github.com/ianmays/dosmud/issues/76) (M), [#8](https://github.com/ianmays/dosmud/issues/8), [#54](https://github.com/ianmays/dosmud/issues/54).
 
 | Issue | Title | Size | Blocked by | Notes |
 |-------|-------|------|------------|-------|

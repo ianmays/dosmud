@@ -6,6 +6,7 @@
 #include "items.h"
 #include "npc.h"
 #include "testharn.h"
+#include "txtres.h"
 #include "unit_util.h"
 
 TEST harness_baseline_matches_start_fields(void)
@@ -186,6 +187,35 @@ TEST harness_apply_env_focus_water(void)
     PASS();
 }
 
+TEST harness_apply_story_orchard_ready(void)
+{
+    struct GameState game;
+    int rc;
+
+    unit_game_fresh(&game, 81u);
+    rc = testharn_apply(&game, "@fixture story_orchard_ready");
+    ASSERT_EQ(1, rc);
+    ASSERT_EQ(WORLD_ROOM_ORCHARD, game.player.room_id);
+    ASSERT_EQ(HERBALIST_STORY_REQUESTED, game.herbalist_story);
+    ASSERT_EQ(1, game.marsh_root_spawned);
+    ASSERT_EQ(1, game_inv_player_has_item(&game, ITEM_MARSH_ROOT));
+    PASS();
+}
+
+TEST harness_apply_story_orchard_done_updates_desc(void)
+{
+    struct GameState game;
+    int rc;
+
+    unit_game_fresh(&game, 82u);
+    rc = testharn_apply(&game, "@fixture story_orchard_done");
+    ASSERT_EQ(1, rc);
+    ASSERT_EQ(HERBALIST_STORY_COMPLETE, game.herbalist_story);
+    ASSERT_STR_EQ(TXT_STORY_ORCHARD_DONE_DESC,
+        game.world.rooms[WORLD_ROOM_ORCHARD].desc);
+    PASS();
+}
+
 TEST harness_apply_corpse_loot_full_bag_sets_corpse_slot(void)
 {
     struct GameState game;
@@ -229,6 +259,8 @@ SUITE(harness) {
     RUN_TEST(harness_apply_traveler_dialogue);
     RUN_TEST(harness_apply_bandit_road);
     RUN_TEST(harness_apply_env_focus_water);
+    RUN_TEST(harness_apply_story_orchard_ready);
+    RUN_TEST(harness_apply_story_orchard_done_updates_desc);
     RUN_TEST(harness_apply_corpse_loot_full_bag_sets_corpse_slot);
     RUN_TEST(harness_seed_repeatable_rolls);
 }

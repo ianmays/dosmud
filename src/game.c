@@ -176,6 +176,8 @@ static void reset_mutable_state(struct GameState *game, int room_id, u32 tick)
     game->env_focus_room = -1;
     game->env_focus_kind = GAME_ENV_NONE;
     game->env_focus_expires_tick = 0;
+    game->herbalist_story = HERBALIST_STORY_NONE;
+    game->marsh_root_spawned = 0;
     game->bag_count = 0;
     game->bag_capacity = CFG_START_BAG_CAPACITY;
     game->level = CFG_START_LEVEL;

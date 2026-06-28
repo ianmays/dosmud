@@ -2,8 +2,11 @@
 #include "config.h"
 #include "game.h"
 #include "gout.h"
+#include "invent.h"
+#include "items.h"
 #include "npc.h"
 #include "platform.h"
+#include "txtres.h"
 #include "world.h"
 #include "unit_util.h"
 
@@ -87,6 +90,46 @@ TEST npc_open_room_dialogue_watchman(void)
     ASSERT_EQ(1, out.count);
     ASSERT_EQ(GAME_DIALOGUE_ACTOR_WATCHMAN, out.events[0].arg0);
     ASSERT_EQ(GAME_DIALOGUE_PHASE_TALK, out.events[0].arg1);
+    PASS();
+}
+
+TEST npc_open_room_dialogue_herbalist_requested_scene(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 311u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ORCHARD, 0);
+    game.herbalist_story = HERBALIST_STORY_REQUESTED;
+    game.marsh_root_spawned = 1;
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, npc_open_room_dialogue(&game, &out));
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(DIALOGUE_NPC_HERBALIST, game.dialogue);
+    ASSERT_EQ(GAME_DIALOGUE_ACTOR_HERBALIST, out.events[0].arg0);
+    ASSERT_EQ(HERBALIST_SCENE_REQUESTED, out.events[0].arg3);
+    PASS();
+}
+
+TEST npc_room_cmd_reply_herbalist_turn_in_updates_story(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 312u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ORCHARD, 0);
+    game.herbalist_story = HERBALIST_STORY_REQUESTED;
+    game.marsh_root_spawned = 1;
+    game_inv_bag_add(&game, ITEM_MARSH_ROOT);
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, npc_open_room_dialogue(&game, &out));
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, npc_room_cmd_reply(&game, 1, &out));
+    ASSERT_EQ(HERBALIST_STORY_COMPLETE, game.herbalist_story);
+    ASSERT_STR_EQ(TXT_STORY_ORCHARD_DONE_DESC,
+        game.world.rooms[WORLD_ROOM_ORCHARD].desc);
+    ASSERT_EQ(-1, game_inv_bag_find_index(&game, ITEM_MARSH_ROOT));
+    ASSERT_EQ(HERBALIST_SCENE_READY, out.events[0].arg3);
     PASS();
 }
 
@@ -551,6 +594,8 @@ SUITE(npc) {
     RUN_TEST(npc_choice_validation);
     RUN_TEST(npc_open_room_dialogue_frog);
     RUN_TEST(npc_open_room_dialogue_watchman);
+    RUN_TEST(npc_open_room_dialogue_herbalist_requested_scene);
+    RUN_TEST(npc_room_cmd_reply_herbalist_turn_in_updates_story);
     RUN_TEST(npc_room_cmd_reply_frog_uses_dialogue_table);
     RUN_TEST(npc_room_cmd_reply_skips_non_room_dialogue);
     RUN_TEST(npc_open_room_dialogue_none);

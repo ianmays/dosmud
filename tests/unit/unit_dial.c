@@ -3,6 +3,9 @@
 #include "dialogue.h"
 #include "game.h"
 #include "gout.h"
+#include "invent.h"
+#include "items.h"
+#include "txtres.h"
 #include "world.h"
 #include "unit_util.h"
 
@@ -34,6 +37,18 @@ static int reply_out_state(struct GameState *game, int choice)
     GameEventQueue out;
 
     return reply_out(game, choice, &out);
+}
+
+static int room_has_item(const struct GameState *game, int room_id, int item_id)
+{
+    int slot;
+
+    for (slot = 0; slot < CFG_AREA_ITEM_SLOTS; ++slot) {
+        if (game->room_item[room_id][slot] == item_id) {
+            return 1;
+        }
+    }
+    return 0;
 }
 
 TEST dialogue_cmd_talk_watchman(void)
@@ -181,6 +196,74 @@ TEST dialogue_cmd_reply_herbalist(void)
     PASS();
 }
 
+TEST dialogue_cmd_reply_herbalist_starts_request_and_seeds_root(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 115u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ORCHARD, 0);
+    ASSERT_EQ(1, talk_out(&game, &out));
+    ASSERT_EQ(HERBALIST_SCENE_NOT_STARTED, out.events[0].arg3);
+    ASSERT_EQ(1, reply_out(&game, 1, &out));
+    ASSERT_EQ(HERBALIST_STORY_REQUESTED, game.herbalist_story);
+    ASSERT_EQ(1, game.marsh_root_spawned);
+    ASSERT(room_has_item(&game, WORLD_ROOM_MARSH, ITEM_MARSH_ROOT));
+    ASSERT_EQ(GAME_EVENT_DIALOGUE, out.events[0].kind);
+    ASSERT_EQ(HERBALIST_SCENE_NOT_STARTED, out.events[0].arg3);
+    PASS();
+}
+
+TEST dialogue_cmd_talk_herbalist_ready_scene(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 116u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ORCHARD, 0);
+    game.herbalist_story = HERBALIST_STORY_REQUESTED;
+    game.marsh_root_spawned = 1;
+    game_inv_bag_add(&game, ITEM_MARSH_ROOT);
+    ASSERT_EQ(1, talk_out(&game, &out));
+    ASSERT_EQ(GAME_EVENT_DIALOGUE, out.events[0].kind);
+    ASSERT_EQ(HERBALIST_SCENE_READY, out.events[0].arg3);
+    PASS();
+}
+
+TEST dialogue_cmd_reply_herbalist_turn_in_completes_story(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 117u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ORCHARD, 0);
+    game.herbalist_story = HERBALIST_STORY_REQUESTED;
+    game.marsh_root_spawned = 1;
+    game_inv_bag_add(&game, ITEM_MARSH_ROOT);
+    ASSERT_EQ(1, talk_out(&game, &out));
+    ASSERT_EQ(1, reply_out(&game, 1, &out));
+    ASSERT_EQ(HERBALIST_STORY_COMPLETE, game.herbalist_story);
+    ASSERT_EQ(-1, game_inv_bag_find_index(&game, ITEM_MARSH_ROOT));
+    ASSERT_STR_EQ(TXT_STORY_ORCHARD_DONE_DESC,
+        game.world.rooms[WORLD_ROOM_ORCHARD].desc);
+    ASSERT_EQ(HERBALIST_SCENE_READY, out.events[0].arg3);
+    PASS();
+}
+
+TEST dialogue_cmd_talk_herbalist_complete_scene(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 118u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ORCHARD, 0);
+    game.herbalist_story = HERBALIST_STORY_COMPLETE;
+    ASSERT_EQ(1, talk_out(&game, &out));
+    ASSERT_EQ(GAME_EVENT_DIALOGUE, out.events[0].kind);
+    ASSERT_EQ(HERBALIST_SCENE_COMPLETE, out.events[0].arg3);
+    PASS();
+}
+
 TEST dialogue_cmd_reply_archivist(void)
 {
     struct GameState game;
@@ -310,6 +393,10 @@ SUITE(dialogue) {
     RUN_TEST(dialogue_cmd_reply_frog_invalid);
     RUN_TEST(dialogue_cmd_reply_watchman);
     RUN_TEST(dialogue_cmd_reply_herbalist);
+    RUN_TEST(dialogue_cmd_reply_herbalist_starts_request_and_seeds_root);
+    RUN_TEST(dialogue_cmd_talk_herbalist_ready_scene);
+    RUN_TEST(dialogue_cmd_reply_herbalist_turn_in_completes_story);
+    RUN_TEST(dialogue_cmd_talk_herbalist_complete_scene);
     RUN_TEST(dialogue_cmd_reply_archivist);
     RUN_TEST(dialogue_cmd_talk_watchman_event);
     RUN_TEST(dialogue_cmd_talk_frog_event);

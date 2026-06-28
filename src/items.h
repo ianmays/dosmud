@@ -15,6 +15,7 @@
 #define ITEM_TORCH 7
 #define ITEM_SALVE 8
 #define ITEM_SPEAR 9
+#define ITEM_MARSH_ROOT 10
 
 int item_from_word(char *word);
 const char *item_name(int item_id);

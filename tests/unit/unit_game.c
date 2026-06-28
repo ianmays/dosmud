@@ -8,6 +8,7 @@
 #include "items.h"
 #include "npc.h"
 #include "testharn.h"
+#include "txtres.h"
 #include "unit_util.h"
 
 static int run_cmd_out(struct GameState *game, const char *line,
@@ -43,6 +44,18 @@ static struct NpcState *traveler_npc(struct GameState *game)
         return 0;
     }
     return &game->npcs[slot];
+}
+
+static int room_has_item(const struct GameState *game, int room_id, int item_id)
+{
+    int slot;
+
+    for (slot = 0; slot < CFG_AREA_ITEM_SLOTS; ++slot) {
+        if (game->room_item[room_id][slot] == item_id) {
+            return 1;
+        }
+    }
+    return 0;
 }
 
 TEST game_heal_player_applies(void)
@@ -958,6 +971,43 @@ TEST game_loot_all_stops_at_bag_full_without_advancing_time(void)
     PASS();
 }
 
+TEST game_herbalist_request_then_take_root(void)
+{
+    struct GameState game;
+
+    unit_game_fresh(&game, 220u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ORCHARD, 0);
+    ASSERT_EQ(1, run_cmd(&game, "talk"));
+    ASSERT_EQ(1, run_cmd(&game, "1"));
+    ASSERT_EQ(HERBALIST_STORY_REQUESTED, game.herbalist_story);
+    ASSERT(room_has_item(&game, WORLD_ROOM_MARSH, ITEM_MARSH_ROOT));
+
+    game.player.room_id = WORLD_ROOM_MARSH;
+    game.room_explored[WORLD_ROOM_MARSH] = 1;
+    ASSERT_EQ(1, run_cmd(&game, "take marsh-root"));
+    ASSERT_EQ(1, game_inv_player_has_item(&game, ITEM_MARSH_ROOT));
+    ASSERT(!room_has_item(&game, WORLD_ROOM_MARSH, ITEM_MARSH_ROOT));
+    PASS();
+}
+
+TEST game_herbalist_turn_in_updates_orchard_desc(void)
+{
+    struct GameState game;
+
+    unit_game_fresh(&game, 221u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ORCHARD, 0);
+    game.herbalist_story = HERBALIST_STORY_REQUESTED;
+    game.marsh_root_spawned = 1;
+    game_inv_bag_add(&game, ITEM_MARSH_ROOT);
+
+    ASSERT_EQ(1, run_cmd(&game, "talk"));
+    ASSERT_EQ(1, run_cmd(&game, "1"));
+    ASSERT_EQ(HERBALIST_STORY_COMPLETE, game.herbalist_story);
+    ASSERT_STR_EQ(TXT_STORY_ORCHARD_DONE_DESC,
+        game.world.rooms[WORLD_ROOM_ORCHARD].desc);
+    PASS();
+}
+
 SUITE(game) {
     RUN_TEST(game_heal_player_applies);
     RUN_TEST(game_heal_player_at_max);
@@ -1007,4 +1057,6 @@ SUITE(game) {
     RUN_TEST(game_drop_allowed_while_loot_menu_open_after_bag_full);
     RUN_TEST(game_loot_menu_closes_before_bag_view);
     RUN_TEST(game_loot_all_stops_at_bag_full_without_advancing_time);
+    RUN_TEST(game_herbalist_request_then_take_root);
+    RUN_TEST(game_herbalist_turn_in_updates_orchard_desc);
 }
