@@ -124,7 +124,7 @@ After behavioral implementation, tests, and any code-commenter pass, run a **doc
 | [documentation-after-implement rule](.cursor/rules/documentation-after-implement.mdc) | Gate before draft PR |
 | [documentation-maintainer skill](.cursor/skills/documentation-maintainer/SKILL.md) | Checklist and output format |
 | [docs-steward agent](.cursor/agents/docs-steward.md) | Judgement; what to update or delegate |
-| [milestone-issue-hygiene skill](.cursor/skills/milestone-issue-hygiene/SKILL.md) | Milestone issue create/groom (GitHub + DEV_PLAN when committing) |
+| [milestone-issue-hygiene skill](.cursor/skills/milestone-issue-hygiene/SKILL.md) | Milestone issue create/groom (GitHub-first; skip root `DEV_PLAN.md` by default) |
 | [audit-github-devplan skill](.cursor/skills/audit-github-devplan/SKILL.md) | Roadmap drift audit (fix only if user asks) |
 
 Order: `implement → make test (and related targets) → test-gap pass → code-commenter pass (if src/, include/, or tests/ C sources touched) → documentation pass → draft PR`.
