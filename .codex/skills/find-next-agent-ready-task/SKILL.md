@@ -17,7 +17,7 @@ description: Find the next agent-ready dosmud issue from GitHub project board 1,
 
 - Use `gh project item-list` as the source of truth.
 - Do not infer order from issue number, milestone, labels, or root `DEV_PLAN.md` lane text.
-- Root [`DEV_PLAN.md`](../../DEV_PLAN.md) (Roadmap v2) records strategic sequencing; **Agent-ready** column order on project #1 overrides it for task pick.
+- Root [`DEV_PLAN.md`](../../../DEV_PLAN.md) (Roadmap v2) records strategic sequencing; **Agent-ready** column order on project #1 overrides it for task pick.
 - Do not skip the project-board handoff when the user wants the next task.
 - Keep the selection deterministic: use the first returned Agent-ready item.
 
