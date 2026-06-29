@@ -67,7 +67,7 @@ Do not mirror board columns here.
 
 Ticket creation, milestone reconciliation, and board status checks were handled by the Roadmap v2 operationalisation pass.
 
-GitHub milestones group Roadmap v2 lanes (Authored Interaction Spine v1, World Reactivity and Atmosphere v1, Playability and Text UX v1, Deferred / Long-term) plus existing Renderer, Multiplayer, and Workflow and Tooling Maturity buckets. Milestones are reporting groupings, not board columns.
+GitHub milestones group Roadmap v2 lanes (Authored Interaction Spine v1, World Reactivity and Atmosphere v1, Playability and Text UX v1, Deferred / Long-term) plus existing Renderer, Multiplayer, and Workflow and Tooling Maturity buckets. Legacy v1 milestones (for example Content Expansion and Advanced Mechanics) are **closed** with zero open issues; open tickets such as [#54](https://github.com/ianmays/dosmud/issues/54) live under the Roadmap v2 milestones above. Milestones are reporting groupings, not board columns.
 
 ## Active authored-content spine
 
