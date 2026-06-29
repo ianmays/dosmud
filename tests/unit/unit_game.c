@@ -1033,6 +1033,28 @@ TEST game_herbalist_retry_seed_when_marsh_slot_frees(void)
     PASS();
 }
 
+TEST game_herbalist_drop_root_outside_marsh_does_not_duplicate(void)
+{
+    struct GameState game;
+
+    unit_game_fresh(&game, 223u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ORCHARD, 0);
+    ASSERT_EQ(1, run_cmd(&game, "talk"));
+    ASSERT_EQ(1, run_cmd(&game, "1"));
+    ASSERT_EQ(HERBALIST_STORY_REQUESTED, game.herbalist_story);
+    ASSERT(room_has_item(&game, WORLD_ROOM_MARSH, ITEM_MARSH_ROOT));
+
+    game.player.room_id = WORLD_ROOM_MARSH;
+    game.room_explored[WORLD_ROOM_MARSH] = 1;
+    ASSERT_EQ(1, run_cmd(&game, "take marsh-root"));
+    game.player.room_id = WORLD_ROOM_ROAD;
+    game.room_explored[WORLD_ROOM_ROAD] = 1;
+    ASSERT_EQ(1, run_cmd(&game, "drop root"));
+    ASSERT(room_has_item(&game, WORLD_ROOM_ROAD, ITEM_MARSH_ROOT));
+    ASSERT(!room_has_item(&game, WORLD_ROOM_MARSH, ITEM_MARSH_ROOT));
+    PASS();
+}
+
 SUITE(game) {
     RUN_TEST(game_heal_player_applies);
     RUN_TEST(game_heal_player_at_max);
@@ -1085,4 +1107,5 @@ SUITE(game) {
     RUN_TEST(game_herbalist_request_then_take_root);
     RUN_TEST(game_herbalist_turn_in_updates_orchard_desc);
     RUN_TEST(game_herbalist_retry_seed_when_marsh_slot_frees);
+    RUN_TEST(game_herbalist_drop_root_outside_marsh_does_not_duplicate);
 }

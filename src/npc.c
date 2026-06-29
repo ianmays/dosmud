@@ -231,6 +231,18 @@ static int npc_room_has_item(const struct GameState *game, int room_id, int item
     return 0;
 }
 
+static int npc_any_room_has_item(const struct GameState *game, int item_id)
+{
+    int room_id;
+
+    for (room_id = 0; room_id < CFG_ROOM_MAX; ++room_id) {
+        if (npc_room_has_item(game, room_id, item_id)) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 static int herbalist_dialogue_scene(const struct GameState *game)
 {
     /* Keep the persisted seam tiny: ready-to-turn-in is derived from inventory. */
@@ -266,7 +278,7 @@ static void herbalist_seed_marsh_root(struct GameState *game)
 
     /* Keep one recoverable root in play when the requested story beat is active. */
     if (game_inv_player_has_item(game, ITEM_MARSH_ROOT) ||
-            npc_room_has_item(game, WORLD_ROOM_MARSH, ITEM_MARSH_ROOT)) {
+            npc_any_room_has_item(game, ITEM_MARSH_ROOT)) {
         game->marsh_root_spawned = 1;
         return;
     }
