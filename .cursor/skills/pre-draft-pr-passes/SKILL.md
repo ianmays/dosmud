@@ -116,7 +116,7 @@ Report using the documentation-maintainer skill output format.
 
 - If a subagent committed or edited files, parent recomputes `SCOPE_FILES` before the next step.
 - Do not open draft PR until all non-skipped steps complete.
-- Draft PR, DEV_PLAN Done marking, GitHub board moves stay in [agent-workflow](../../rules/agent-workflow.mdc).
+- Draft PR, GitHub board moves stay in [agent-workflow](../../rules/agent-workflow.mdc). Root `DEV_PLAN.md` edits only per AGENTS **DEV_PLAN updates** (no v1 Done by default).
 
 ## Deduplication guard
 

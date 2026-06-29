@@ -87,7 +87,7 @@ Body:
 ```
 - when-to-add table in docs/testing.md; testing-discipline always-on rule
 - AGENTS Testing expectations and planning Testing subsection; agent-workflow PR checklist
-- contributor and architecture pointers; DEV_PLAN #135 Done with PR link
+- contributor and architecture pointers; project board Status to Review when opening draft PR
 ```
 
 ## Checklist

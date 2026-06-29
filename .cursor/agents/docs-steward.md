@@ -24,7 +24,7 @@ Procedure and checklist: [`.cursor/skills/documentation-maintainer/SKILL.md`](..
 2. **Testing and build** - [`docs/testing.md`](../../docs/testing.md) when Makefile targets or test workflow changes.
 3. **Contributor workflow** - [`docs/contributor-guide.md`](../../docs/contributor-guide.md) for human-facing PR/process changes.
 4. **Agent entrypoints** - [`AGENTS.md`](../../AGENTS.md) Cursor configuration when rules, skills, or agents change.
-5. **Roadmap** - `DEV_PLAN.md` per AGENTS table; never mark **Done** on hygiene-only PRs.
+5. **Roadmap** - root `DEV_PLAN.md` per AGENTS **DEV_PLAN updates** (Roadmap v2 lanes/spine only when warranted; no v1 Done on hygiene-only PRs).
 
 ## Delegate (do not inline)
 

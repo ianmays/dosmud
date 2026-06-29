@@ -14,7 +14,7 @@ Guidance for AI/code agents working in this repository.
 - ALWAYS check for an existing GitHub Issue before starting work.
 - NEVER modify or reopen Closed Issues.
 - ALWAYS create a branch before making changes.
-- Update [`DEV_PLAN.md`](DEV_PLAN.md) per **DEV_PLAN updates** below when opening a draft PR. That file is a roadmap log, not a living status tracker - do not change it on pushes or after merge.
+- Follow [`DEV_PLAN.md`](DEV_PLAN.md) **DEV_PLAN updates** below when opening a draft PR. Root `DEV_PLAN.md` is Roadmap v2 (strategic index) - not a living status tracker and not the v1 milestone ledger; do not change it on pushes or after merge unless explicitly updating roadmap docs.
 - ALWAYS open draft PRs first.
 - ALWAYS link PRs to their corresponding Issues.
 - ALWAYS complete a **documentation pass** before opening a draft PR (see [Documentation pass](#documentation-pass)).
@@ -52,7 +52,7 @@ Plan mode forbids code and repo changes, but GitHub project status updates and i
 - ALWAYS apply appropriate labels (`gameplay`, `non-functional`, `tooling`, `documentation`, etc).
 - ALWAYS add the `agent` label to agent-created Issues.
 - ALWAYS add new Issues to the dosmud GitHub project.
-- If the issue has a **Milestone** listed in [`DEV_PLAN.md`](DEV_PLAN.md) (milestone index): run [milestone-issue-hygiene](.cursor/skills/milestone-issue-hygiene/SKILL.md) in the **same turn** for GitHub metadata (Size, Priority, blocked-by, issue body scope/Testing, project stack order, hygiene comment). Add DEV_PLAN table row + stub via a **docs PR** when execution is allowed; in **plan mode**, defer `DEV_PLAN.md` commits (GitHub-only hygiene). Do **not** skip DEV_PLAN for milestone-tracked issues once a branch is allowed.
+- If the issue has a **Milestone**: run [milestone-issue-hygiene](.cursor/skills/milestone-issue-hygiene/SKILL.md) in the **same turn** for GitHub metadata (Size, Priority, blocked-by, issue body scope/Testing, project stack order, hygiene comment). **Do not** add v1 milestone table rows, stubs, or Done markers to root `DEV_PLAN.md` unless explicitly requested; in **plan mode**, defer all `DEV_PLAN.md` commits (GitHub-only hygiene).
 
 ### Status transitions
 
@@ -124,7 +124,7 @@ After behavioral implementation, tests, and any code-commenter pass, run a **doc
 | [documentation-after-implement rule](.cursor/rules/documentation-after-implement.mdc) | Gate before draft PR |
 | [documentation-maintainer skill](.cursor/skills/documentation-maintainer/SKILL.md) | Checklist and output format |
 | [docs-steward agent](.cursor/agents/docs-steward.md) | Judgement; what to update or delegate |
-| [milestone-issue-hygiene skill](.cursor/skills/milestone-issue-hygiene/SKILL.md) | Milestone issue create/groom (GitHub + DEV_PLAN when committing) |
+| [milestone-issue-hygiene skill](.cursor/skills/milestone-issue-hygiene/SKILL.md) | Milestone issue create/groom (GitHub-first; skip root `DEV_PLAN.md` by default) |
 | [audit-github-devplan skill](.cursor/skills/audit-github-devplan/SKILL.md) | Roadmap drift audit (fix only if user asks) |
 
 Order: `implement → make test (and related targets) → test-gap pass → code-commenter pass (if src/, include/, or tests/ C sources touched) → documentation pass → draft PR`.
@@ -141,27 +141,24 @@ Skip when the user opts out, the branch diff vs `main` is unchanged since a docu
 | `docs/testing.md` | deterministic testing and build workflow |
 | `docs/contributor-guide.md` | contributor and PR workflow |
 | `AGENTS.md` | agent workflow, Cursor index, DEV_PLAN policy |
-| `DEV_PLAN.md` | curated roadmap log (see **DEV_PLAN updates** below) |
+| `DEV_PLAN.md` | Roadmap v2 strategic index (see **DEV_PLAN updates** below) |
 
 Prefer linking between documents over duplicating large instruction blocks.
 
+**Roadmap note:** root [`DEV_PLAN.md`](DEV_PLAN.md) now tracks Roadmap v2 as a strategic index, not the full v1 milestone ledger. The archived v1 plan lives at [`docs/archive/DEV_PLAN_v1_engine_foundation.md`](docs/archive/DEV_PLAN_v1_engine_foundation.md). When updating roadmap docs, follow the current root `DEV_PLAN.md` structure rather than recreating v1 milestone tables or Done-marker sections unless explicitly requested.
+
 #### DEV_PLAN updates
 
-[`DEV_PLAN.md`](DEV_PLAN.md) is a manually curated roadmap log aligned with GitHub milestones, not a catalog of every GitHub issue.
-
-Before editing for a draft PR, search `DEV_PLAN.md` for the issue (e.g. `#90` or its section heading):
+Root [`DEV_PLAN.md`](DEV_PLAN.md) is **Roadmap v2** - a strategic index (current phase, active lanes, authored-content spine, parked systems). It is **not** the v1 milestone ledger.
 
 | Situation | Action |
 |-----------|--------|
-| Issue **already has a section** (implementation draft PR) | Mark that section **Done ✅** (optional PR link). |
-| New issue with a **Milestone** already represented in DEV_PLAN (milestone heading and issue table) | Add table row + `### [#N](...)` stub via [milestone-issue-hygiene](.cursor/skills/milestone-issue-hygiene/SKILL.md) **docs PR** at create time; mark **Done ✅** only when a draft **implementation** PR opens. |
-| Otherwise (no section; no Milestone; or milestone not in DEV_PLAN) | **Do not** edit DEV_PLAN. Track on the project board and issue/PR. |
+| Draft **implementation** PR (default) | **Do not** add v1 milestone tables, execution-order mermaid, per-issue `###` stubs, or **Done ✅** markers to root `DEV_PLAN.md`. Track Status on [project #1](https://github.com/users/ianmays/projects/1). |
+| User explicitly requests a Roadmap v2 doc update | Edit root `DEV_PLAN.md` using its lane/spine structure only. |
+| v1 history, Done markers, milestone tables | [`docs/archive/DEV_PLAN_v1_engine_foundation.md`](docs/archive/DEV_PLAN_v1_engine_foundation.md) only - when explicitly maintaining archive history. |
+| New issues / milestone hygiene | GitHub Size/Priority, blocked-by, issue body via [milestone-issue-hygiene](.cursor/skills/milestone-issue-hygiene/SKILL.md); no default root `DEV_PLAN.md` commits. |
 
-New BAU issues without a Milestone typically fall in the last row - do not add them.
-
-Check Milestone: `gh issue view <N> --json milestone,title`.
-
-Do not update DEV_PLAN on later pushes or after merge.
+Do not update root `DEV_PLAN.md` on later pushes or after merge unless the user asked for a roadmap doc change.
 
 When auditing milestone alignment, execution order, blocked-by links, or project board Priority vs stack order, use [`.cursor/skills/audit-github-devplan/SKILL.md`](.cursor/skills/audit-github-devplan/SKILL.md).
 

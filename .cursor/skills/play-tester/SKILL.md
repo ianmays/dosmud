@@ -262,15 +262,15 @@ Per [`AGENTS.md`](../../../AGENTS.md) **Issue creation**, for each issue created
 2. Domain label: `gameplay`, `tooling`, `documentation`, etc. (match the item; player-facing feedback is usually `gameplay`).
 3. `agent` and `playtest` labels on every agent-created playtest follow-up issue.
 4. `gh project item-add 1 --owner ianmays --url https://github.com/ianmays/dosmud/issues/<N>` unless the issue is already on project #1.
-5. If the issue has a **Milestone** in [`DEV_PLAN.md`](../../../DEV_PLAN.md) milestone index: run [milestone-issue-hygiene](../milestone-issue-hygiene/SKILL.md) create-time checklist in the same turn (not optional). Otherwise labels + project only.
+5. If the issue has a **GitHub Milestone** (theme on the issue): run [milestone-issue-hygiene](../milestone-issue-hygiene/SKILL.md) create-time checklist in the same turn (not optional). Otherwise labels + project only.
 
 ## Relationship to other workflows
 
 | Tool | Relationship |
 |------|----------------|
 | [testing-gap-auditor](../testing-gap-auditor/SKILL.md) | Play-tester may recommend a snapshot; test-auditor still owns `check-test-gaps.sh` |
-| [milestone-issue-hygiene](../milestone-issue-hygiene/SKILL.md) | Required same-turn pass when filing issues with a DEV_PLAN-tracked milestone |
-| [audit-github-devplan](../audit-github-devplan/SKILL.md) | Play-tester feeds backlog candidates; audit reconciles DEV_PLAN |
+| [milestone-issue-hygiene](../milestone-issue-hygiene/SKILL.md) | Required same-turn pass when filing issues with a GitHub Milestone |
+| [audit-github-devplan](../audit-github-devplan/SKILL.md) | Play-tester feeds backlog candidates; audit reconciles board vs Roadmap v2 / archive |
 | [human-interventions](../human-interventions/SKILL.md) | Documents user design steering during impl, not play sessions |
 
 ## Do not

@@ -12,7 +12,7 @@ This manual is the canonical project documentation set for architecture, testing
 
 ## Roadmap and agents
 
-- [DEV_PLAN.md](https://github.com/ianmays/dosmud/blob/main/DEV_PLAN.md) - curated roadmap log, execution order, milestone tables
+- [DEV_PLAN.md](https://github.com/ianmays/dosmud/blob/main/DEV_PLAN.md) - Roadmap v2 strategic index (lanes, spine, parked systems); v1 archive: [docs/archive/DEV_PLAN_v1_engine_foundation.md](archive/DEV_PLAN_v1_engine_foundation.md)
 - [AGENTS.md](https://github.com/ianmays/dosmud/blob/main/AGENTS.md) - coding agent workflow, Cursor rules/skills index, DEV_PLAN policy
 - [GitHub project #1](https://github.com/users/ianmays/projects/1) - Status, Priority, Size, stack order
 
