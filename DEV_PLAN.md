@@ -188,9 +188,6 @@ Parked unless current authored content creates real pressure:
 - [#222](https://github.com/ianmays/dosmud/issues/222) cutscene-style scene beat v1
 - [#223](https://github.com/ianmays/dosmud/issues/223) acts and chapter boundary planning note
 - [#224](https://github.com/ianmays/dosmud/issues/224) quest DSL and external data packs decision record
-- acts
-- quest DSL
-- external data packs
 - full merchant/shop loop
 - full cutscene framework
 - [#48](https://github.com/ianmays/dosmud/issues/48) SDL renderer (see Lane 5)
