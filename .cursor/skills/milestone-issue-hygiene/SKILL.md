@@ -41,9 +41,9 @@ Milestone hygiene for #N (create-time):
 - [ ] 1. Labels + project item
 - [ ] 2. Size (XS–XL) matches issue scope in body/title
 - [ ] 3. Priority (P0–P2)
-- [ ] 4. blocked-by edges (REST) + DEV_PLAN dependency prose (GitHub + DEV_PLAN when committing)
+- [ ] 4. blocked-by edges (REST) on GitHub
 - [ ] 5. Issue body: scope, Out of scope, Testing subsection
-- [ ] 6. DEV_PLAN row + stub + mermaid (docs PR when not in plan mode)
+- [ ] 6. DEV_PLAN: skip root by default (Roadmap v2 or archive only when user requests)
 - [ ] 7. Project stack order within Status column
 - [ ] 8. Status column (Backlog default; blocked → stay Backlog)
 - [ ] 9. Hygiene comment on issue (summary + skill link)
@@ -61,7 +61,7 @@ Skip `item-add` if the issue is already on [project #1](https://github.com/users
 
 ### 2. Size (project field)
 
-Align with DEV_PLAN **Relative size** legend:
+Align with project board **Size** (XS–XL). For calibration, see archive [`DEV_PLAN_v1_engine_foundation.md`](../../../docs/archive/DEV_PLAN_v1_engine_foundation.md) **Relative size** legend.
 
 | Size | Meaning |
 |------|---------|
@@ -120,7 +120,6 @@ gh api repos/ianmays/dosmud/issues/<blocked>/dependencies/blocked_by \
 ```
 
 - Do **not** block on PRs (issues only)
-- Mirror new chains in DEV_PLAN **Dependencies** prose (~line 77)
 - Verify: `gh api repos/ianmays/dosmud/issues/<N> --jq '.issue_dependencies_summary'`
 
 ### 5. Issue body
@@ -148,7 +147,7 @@ When maintaining **v1 archive** history: edit [`docs/archive/DEV_PLAN_v1_engine_
 
 ### 7. Project stack order
 
-Within the issue's **Status** column (usually Backlog), order by DEV_PLAN execution rank for that milestone.
+Within the issue's **Status** column (usually Backlog), order by Roadmap v2 spine / lane priority or explicit user stack guidance.
 
 **Preferred:** manual drag in GitHub project UI.
 
@@ -187,8 +186,7 @@ Post on the issue:
 - **Milestone:** …
 - **Size:** … | **Priority:** …
 - **blocked-by:** …
-- **DEV_PLAN:** row + section under …
-- **Board:** Backlog, stacked after #… in m8 order
+- **Board:** Backlog, stacked after #… (project #1 order)
 
 Process: [milestone-issue-hygiene](.cursor/skills/milestone-issue-hygiene/SKILL.md)
 ```
@@ -211,7 +209,7 @@ Do **not** auto-move to Agent-ready unless the user asks.
 
 ### When implementation starts
 
-When a draft PR opens for the issue: mark the existing DEV_PLAN section **Done ✅** per [AGENTS.md](../../../AGENTS.md) (optional PR link). That is separate from the initial table row + stub added at issue create time.
+Track Status on [project #1](https://github.com/users/ianmays/projects/1). **Do not** add v1 Done markers or milestone stubs to root `DEV_PLAN.md` on draft PR unless the user explicitly requests a roadmap or archive doc update (see [AGENTS.md DEV_PLAN updates](../../../AGENTS.md)).
 
 ## Humans
 

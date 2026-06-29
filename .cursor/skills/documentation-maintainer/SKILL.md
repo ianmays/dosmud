@@ -51,24 +51,24 @@ Documentation pass:
 | PR, GitHub, agent workflow | [`docs/contributor-guide.md`](../../../docs/contributor-guide.md), [`AGENTS.md`](../../../AGENTS.md) | - |
 | New/changed `.cursor/` rule, skill, agent | [`AGENTS.md`](../../../AGENTS.md) Cursor configuration table | - |
 | Quick-start, clone, run | [`README.md`](../../../README.md) | - |
-| Milestone-tracked issue created/groomed | `DEV_PLAN.md` row + stub (docs PR when allowed) | [milestone-issue-hygiene](../milestone-issue-hygiene/SKILL.md) |
+| Milestone-tracked issue created/groomed | GitHub hygiene per skill; skip root `DEV_PLAN.md` unless user requests Roadmap v2 or archive update | [milestone-issue-hygiene](../milestone-issue-hygiene/SKILL.md) |
 | Roadmap / board / DEV_PLAN drift | Report; doc-only fixes in pass | [audit-github-devplan](../audit-github-devplan/SKILL.md) |
-| Draft **implementation** PR opening | DEV_PLAN **Done** checkmark per AGENTS | AGENTS **DEV_PLAN updates** (not full audit) |
+| Draft **implementation** PR opening | Root `DEV_PLAN.md` only per AGENTS **DEV_PLAN updates** (no v1 Done by default) | AGENTS **DEV_PLAN updates** (not full audit) |
 
 ## Conventions
 
 - No new TODO comments in docs without an existing issue number.
 - Temporary behavior: document intent; cite filed follow-up issue when one exists.
 - Do not edit closed GitHub issues.
-- DEV_PLAN: do not add BAU issues without milestone; **Done** only on implementation draft PR.
-- Plan mode: GitHub-only for milestone hygiene; defer `DEV_PLAN.md` commits until a branch is allowed.
+- DEV_PLAN: root is Roadmap v2 (lanes/spine); do not add v1 tables/stubs/Done unless user requests; v1 history lives in archive.
+- Plan mode: GitHub-only for milestone hygiene; defer root `DEV_PLAN.md` commits until a branch is allowed and scope is explicit.
 
 ## Workflow
 
 1. `git diff main...HEAD --stat` over the full branch (or user paths) to inventory signals; then open doc targets only when warranted.
 2. Walk checklist rows that apply; open each target doc only when the diff warrants it.
 3. Verify links and Makefile/`make` targets if testing or build docs touched.
-4. If milestone issue work: run hygiene skill steps (GitHub + DEV_PLAN when committing).
+4. If milestone issue work: run hygiene skill GitHub steps; skip root `DEV_PLAN.md` unless user requests Roadmap v2 or archive update.
 5. If user asked for audit: run audit skill report; apply doc fixes they approve.
 
 ## Output format

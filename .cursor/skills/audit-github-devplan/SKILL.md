@@ -36,12 +36,12 @@ Canonical policy: [`AGENTS.md`](../../../AGENTS.md) **DEV_PLAN updates** and Roa
 | **DEV_PLAN v1 archive** | [`docs/archive/DEV_PLAN_v1_engine_foundation.md`](../../../docs/archive/DEV_PLAN_v1_engine_foundation.md) | Historical milestone tables, Done markers, execution mermaid |
 | **blocked-by** | Native issue Relationships | Source of truth for blockers |
 | **Project Priority** | P0 / P1 / P2 custom field | Coarse urgency tier; **does not** auto-sort columns |
-| **Project Size** | XS–XL custom field on project #1 | Relative effort / blast radius; **does not** imply schedule (see DEV_PLAN **Relative size**) |
+| **Project Size** | XS–XL custom field on project #1 | Relative effort / blast radius; calibrate against archive **Relative size** legend |
 | **Project stack order** | Global item position (`updateProjectV2ItemPosition`) | Visual order within a Status column |
 
 Priority P0→P1→P2 and execution-order stack **will diverge** (e.g. #47 P1 before #104 P0). That is expected unless the user asks to sort by Priority instead. **Size** is independent of both Priority and stack order.
 
-**Board Status (Planning, Backlog, Parked, etc.):** which column an issue sits in changes often. Document layout exceptions only in [`DEV_PLAN.md`](../../../DEV_PLAN.md). Do **not** duplicate per-issue column placement in skills, rules, or audit reports. When checking stack order, compare **execution order** within each Status group the user cares about; do not recommend Status moves unless the user asks or DEV_PLAN documents a target layout.
+**Board Status (Planning, Backlog, Parked, etc.):** which column an issue sits in changes often. Document layout exceptions in root `DEV_PLAN.md` lanes/spine or the v1 archive when maintaining history. Do **not** duplicate per-issue column placement in skills, rules, or audit reports. When checking stack order, compare board order within each Status group against Roadmap v2 spine/lanes or archive **Execution order** when auditing v1 history; do not recommend Status moves unless the user asks.
 
 ## DEV_PLAN edit rules (audit against these)
 
@@ -66,19 +66,21 @@ Audit progress:
 - [ ] 2. Fetch GitHub milestone + state per ref
 - [ ] 3. Compare DEV_PLAN section vs milestone title
 - [ ] 4. Open roadmap: project board + Priority + Size
-- [ ] 5. Compare board Size vs DEV_PLAN Size column (open issues)
-- [ ] 6. blocked-by vs execution order
+- [ ] 5. Compare board Size vs archive Size column (open issues; v1 history)
+- [ ] 6. blocked-by vs archive execution order (or spine/lanes for v2)
 - [ ] 7. Terminology / doc drift
 - [ ] 8. Write report (fix only if asked)
 ```
 
 ### 1. Inventory DEV_PLAN
 
+Grep **root** Roadmap v2 and **archive** when v1 tables or Done markers matter:
+
 ```bash
-grep -oE '#[0-9]+' DEV_PLAN.md | sort -u
+grep -oE '#[0-9]+' DEV_PLAN.md docs/archive/DEV_PLAN_v1_engine_foundation.md | sort -u
 ```
 
-Note section headings (milestone blocks) each issue sits under.
+Note lane/spine placement in root `DEV_PLAN.md`; note milestone blocks in the archive when auditing v1 history.
 
 ### 2. GitHub issue snapshot
 
@@ -106,11 +108,11 @@ gh api repos/ianmays/dosmud/issues/48 --jq '.issue_dependencies_summary'
 
 Flag:
 
-- Issue in DEV_PLAN under milestone **A**, GitHub milestone **B**
+- Issue in archive under milestone **A**, GitHub milestone **B**
 - Open milestone issue with no project item
-- Closed issue still **open** wording in DEV_PLAN (missing Done ✅)
+- Closed issue still **open** wording in v1 archive (missing Done ✅)
 
-Suggest moves: `gh issue edit <N> --milestone "<title>"` (match [DEV_PLAN milestone index](https://github.com/ianmays/dosmud/milestones)).
+Suggest moves: `gh issue edit <N> --milestone "<title>"` (match [GitHub milestones](https://github.com/ianmays/dosmud/milestones)). For v2, compare issue numbers to root lanes/spine and project #1 Agent-ready stack.
 
 ### 4. Project board (dosmud #1)
 
@@ -119,7 +121,7 @@ gh project item-list 1 --owner ianmays --format json --limit 200
 gh project field-list 1 --owner ianmays --format json
 ```
 
-For open roadmap issues, record **Priority**, **Size**, and stack order within each Status column (GraphQL item list order filtered by Status). Treat DEV_PLAN as canonical for any Status vs pull-order notes.
+For open roadmap issues, record **Priority**, **Size**, and stack order within each Status column (GraphQL item list order filtered by Status). Root Roadmap v2 is canonical for lanes/spine; use the v1 archive for historical Status vs pull-order notes.
 
 GraphQL (status + priority on items):
 
@@ -147,15 +149,17 @@ query {
 }'
 ```
 
-### 5. Size vs DEV_PLAN
+### 5. Size vs DEV_PLAN (v1 archive)
 
-Read DEV_PLAN **Relative size (GitHub project)** legend and milestone **Size** columns. For each open roadmap issue on the board:
+**v1 history only.** Read [`docs/archive/DEV_PLAN_v1_engine_foundation.md`](../../../docs/archive/DEV_PLAN_v1_engine_foundation.md) **Relative size** legend and milestone **Size** columns. For Roadmap v2, compare board **Size** to project calibration (XS–XL) without expecting root `DEV_PLAN.md` tables.
+
+For each open roadmap issue on the board (when auditing v1 tables):
 
 ```bash
 gh project item-list 1 --owner ianmays --format json --limit 200 \
   | python3 -c "
 import json, sys
-EXEC = {71, 47, ...}  # open roadmap set from DEV_PLAN
+EXEC = {71, 47, ...}  # open roadmap set from archive tables
 for it in json.load(sys.stdin)['items']:
     n = it.get('content', {}).get('number')
     if n in EXEC:
@@ -163,11 +167,13 @@ for it in json.load(sys.stdin)['items']:
 "
 ```
 
-Flag when board **Size** differs from DEV_PLAN table for the same issue.
+Flag when board **Size** differs from archive table for the same issue.
 
-### 6. blocked-by vs execution order
+### 6. blocked-by vs execution order (v1 archive)
 
-Read DEV_PLAN **Execution order** and dependency prose. For each edge documented there:
+**v1 history only.** Read archive **Execution order** and dependency prose. For Roadmap v2, compare blocked-by edges to spine/lane intent and project #1 stack order instead of v1 mermaid.
+
+For each edge documented in the archive:
 
 ```bash
 BLOCKER_ID=$(gh api repos/ianmays/dosmud/issues/71 --jq .id)
@@ -200,16 +206,16 @@ Deliver to the user:
 | Issue | DEV_PLAN section | GitHub milestone | Action |
 
 ### DEV_PLAN hygiene
-- (issues to mark Done ✅, stale sections, BAU refs to remove)
+- (v1 archive: issues to mark Done ✅, stale sections; root v2: lane/spine drift only)
 
 ### Dependencies
-- (missing / extra blocked-by vs DEV_PLAN)
+- (missing / extra blocked-by vs archive execution prose or v2 spine)
 
 ### Size mismatches
-| Issue | DEV_PLAN Size | Board Size | Action |
+| Issue | Archive Size (v1) | Board Size | Action |
 
 ### Project board
-- Stack order vs DEV_PLAN execution order (per Status column, if user asked)
+- Stack order vs archive execution order or v2 spine (per Status column, if user asked)
 - Priority vs stack order (expected divergence)
 - Status column placement: see DEV_PLAN only; do not flag unless user asks
 
@@ -224,21 +230,21 @@ Typical batch:
 1. `gh issue edit` milestone moves
 2. REST blocked-by edges
 3. `gh project item-edit` for Priority
-4. GraphQL `updateProjectV2ItemPosition` for stack order within Status (sort by execution rank from DEV_PLAN, not P0/P1/P2)
-5. Docs PR for DEV_PLAN / AGENTS / testing.md terminology
+4. GraphQL `updateProjectV2ItemPosition` for stack order within Status (sort by archive execution rank or v2 spine/lanes, not P0/P1/P2)
+5. Docs PR for root `DEV_PLAN.md` lanes/spine, archive, AGENTS / testing.md terminology
 
 After doc changes: branch + draft PR per [`agent-workflow.mdc`](../../rules/agent-workflow.mdc). GitHub-only metadata may ship without a PR if user prefers.
 
 ## Reorder script pattern
 
-Within each **Status**, sort open roadmap issues by DEV_PLAN execution rank; non-roadmap items keep relative order after them. See [examples.md](examples.md).
+Within each **Status**, sort open roadmap issues by archive execution rank or Roadmap v2 spine; non-roadmap items keep relative order after them. See [examples.md](examples.md).
 
 ## Checklist
 
 - [ ] Report distinguishes Priority vs stack order vs Size
-- [ ] Size checked against DEV_PLAN tables for open roadmap issues
+- [ ] Size checked against archive tables (v1) or board calibration (v2)
 - [ ] DEV_PLAN "do not add new issues" respected in recommendations
-- [ ] blocked-by checked against DEV_PLAN dependency prose
+- [ ] blocked-by checked against archive dependency prose or v2 spine
 - [ ] No drive-by DEV_PLAN edits outside user scope
 - [ ] Milestone titles match DEV_PLAN headings (no Phase prefix)
 

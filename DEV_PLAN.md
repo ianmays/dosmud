@@ -200,7 +200,7 @@ Do **not** create these in the Roadmap v2 reset PR. List them as upcoming Step 3
 - acts / chapter boundary planning note
 - quest DSL / external data packs decision record
 - roadmap reset / board reconciliation issue if useful
-- workflow/agent compatibility cleanup for `AGENTS.md` and roadmap-related skills so v1 `DEV_PLAN` assumptions do not corrupt Roadmap v2
+- optional follow-up: squash-commit-message v1 Done example line if still stale after merge
 
 ## Archive and history
 

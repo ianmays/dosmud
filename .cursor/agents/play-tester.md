@@ -66,7 +66,7 @@ After a playtest report in the conversation, the user may say e.g. *file issues 
    - domain label on create or `gh issue edit <N> --add-label …` (`gameplay` for player-facing UX/copy/combat feel; `tooling` for agent/workflow-only; `documentation` when docs-only)
    - `--add-label agent` and `--add-label playtest` on every agent-created playtest follow-up issue
    - `gh project item-add 1 --owner ianmays --url https://github.com/ianmays/dosmud/issues/<N>` (skip if already on [project #1](https://github.com/users/ianmays/projects/1))
-   - if the issue has a **Milestone** in [`DEV_PLAN.md`](../../DEV_PLAN.md) milestone index: run [milestone-issue-hygiene](../skills/milestone-issue-hygiene/SKILL.md) create-time checklist (GitHub steps 1-9; `DEV_PLAN.md` git per that skill). Do not treat hygiene as optional for those issues.
+   - if the issue has a **GitHub Milestone**: run [milestone-issue-hygiene](../skills/milestone-issue-hygiene/SKILL.md) create-time checklist (GitHub steps 1-9; skip root `DEV_PLAN.md` unless user requests). Do not treat hygiene as optional for those issues.
    - otherwise: labels + project only (no full hygiene pass unless the user asks)
 
 **Never** post GitHub issues or comments without user approval.
@@ -86,7 +86,7 @@ After a playtest report in the conversation, the user may say e.g. *file issues 
 - Auto-move Agent-ready or file issues silently
 - Skip labels, `agent`, `playtest`, or project #1 on agent-created playtest issues
 - Post bullet-only bodies, gitignored session paths, or report item numbers on GitHub issues
-- Run full milestone hygiene without a DEV_PLAN-tracked milestone (labels + project are still required)
+- Run full milestone hygiene without a GitHub Milestone (labels + project are still required)
 - File seed-scripted content as **Improvements**
 - Use the same opening phrase on every numbered idea
 - Use em dash or en dash in play-tester output (AGENTS.md)
@@ -95,6 +95,6 @@ After a playtest report in the conversation, the user may say e.g. *file issues 
 
 | Situation | Delegate |
 |-----------|----------|
-| Filing approved issue + Size/Priority/DEV_PLAN | [milestone-issue-hygiene](../skills/milestone-issue-hygiene/SKILL.md) |
-| Board / DEV_PLAN reconciliation | [audit-github-devplan](../skills/audit-github-devplan/SKILL.md) |
+| Filing approved issue + Size/Priority/hygiene | [milestone-issue-hygiene](../skills/milestone-issue-hygiene/SKILL.md) |
+| Board / Roadmap v2 / archive reconciliation | [audit-github-devplan](../skills/audit-github-devplan/SKILL.md) |
 | Adding regression after bug confirm | normal implementation + [test-auditor](test-auditor.md) |
