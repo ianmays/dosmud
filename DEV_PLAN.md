@@ -141,6 +141,7 @@ This lane is separate from persistent authored world advancement hooks ([#220](h
 
 - [#206](https://github.com/ianmays/dosmud/issues/206) player defeat/respawn flow
 - [#145](https://github.com/ianmays/dosmud/issues/145) local map viewport
+- [#207](https://github.com/ianmays/dosmud/issues/207) 25-line safe output mode
 
 ### Lane 4 - Tooling and showcase
 
@@ -159,9 +160,8 @@ Tooling should support delivery. It should not block the authored-content spine 
 **Contains / currently expected:**
 
 - [#48](https://github.com/ianmays/dosmud/issues/48) SDL renderer
-- [#207](https://github.com/ianmays/dosmud/issues/207) 25-line safe output mode (Renderer milestone; near-term text-output/playability work)
 
-SDL is parked/later unless presentation work is explicitly prioritised. It must not own gameplay, simulation, combat logic, or world state. [#207](https://github.com/ianmays/dosmud/issues/207) stays on the Renderer milestone but is near-term playability/text-output discipline within this lane.
+SDL is parked/later unless presentation work is explicitly prioritised. It must not own gameplay, simulation, combat logic, or world state.
 
 ### Lane 6 - Long-term platform vision
 
