@@ -12,11 +12,11 @@ This manual is the canonical project documentation set for architecture, testing
 
 ## Roadmap and agents
 
-- [DEV_PLAN.md](https://github.com/ianmays/dosmud/blob/main/DEV_PLAN.md) - Roadmap v2 strategic index (lanes, spine, parked systems); v1 archive: [docs/archive/DEV_PLAN_v1_engine_foundation.md](archive/DEV_PLAN_v1_engine_foundation.md)
+- [DEV_PLAN.md](https://github.com/ianmays/dosmud/blob/main/DEV_PLAN.md) - Roadmap v2 strategic index (lanes, spine, parked systems); v1 archive: [DEV_PLAN v1 archive](https://github.com/ianmays/dosmud/blob/main/docs/archive/DEV_PLAN_v1_engine_foundation.md)
 - [AGENTS.md](https://github.com/ianmays/dosmud/blob/main/AGENTS.md) - coding agent workflow, Cursor rules/skills index, DEV_PLAN policy
 - [GitHub project #1](https://github.com/users/ianmays/projects/1) - Status, Priority, Size, stack order
 
-Agents: after implementation, run **code-commenter** (when `src/`, `include/`, or `tests/` C sources changed) and **documentation** passes before a draft PR. See [AGENTS.md](https://github.com/ianmays/dosmud/blob/main/AGENTS.md#comment-pass) and [AGENTS.md](https://github.com/ianmays/dosmud/blob/main/AGENTS.md#documentation-pass).
+Agents: after implementation, run **code-commenter** (when `src/`, `include/`, or `tests/` C sources changed) and **documentation** passes before a draft PR. See [AGENTS.md - comment pass](https://github.com/ianmays/dosmud/blob/main/AGENTS.md#comment-pass) and [AGENTS.md - documentation pass](https://github.com/ianmays/dosmud/blob/main/AGENTS.md#documentation-pass).
 
 ## Scope
 
