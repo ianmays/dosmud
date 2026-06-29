@@ -27,8 +27,8 @@ Root [`DEV_PLAN.md`](../../../DEV_PLAN.md) is **Roadmap v2** (strategic index). 
 
 | Phase | GitHub (labels, project Size/Priority, blocked-by, body, stack order, hygiene comment) | `DEV_PLAN.md` git commits |
 |-------|----------------------------------------------------------------------------------------|---------------------------|
-| **Plan mode** | Yes — allowed per [agent-workflow](../../../.cursor/rules/agent-workflow.mdc) | **No** — plan mode forbids repo file edits |
-| **After plan approval** (or retroactive hygiene) | Yes | **Skip by default** — root `DEV_PLAN.md` is Roadmap v2; edit only when user requests Roadmap v2 or archive updates |
+| **Plan mode** | Yes - allowed per [agent-workflow](../../../.cursor/rules/agent-workflow.mdc) | **No** - plan mode forbids repo file edits |
+| **After plan approval** (or retroactive hygiene) | Yes | **Skip by default** - root `DEV_PLAN.md` is Roadmap v2; edit only when user requests Roadmap v2 or archive updates |
 
 In plan mode: complete create-time checklist steps **1–5, 7–9** on GitHub only; defer step **6** (DEV_PLAN) until a docs or implementation branch is allowed.
 
@@ -137,7 +137,7 @@ gh issue edit <N> --body-file /path/to/body.md
 
 ### 6. DEV_PLAN.md
 
-**Default: skip.** Root [`DEV_PLAN.md`](../../../DEV_PLAN.md) is Roadmap v2 — do **not** add v1 milestone tables, mermaid execution blocks, per-issue stubs, or **Done ✅** markers unless the user explicitly requests a roadmap doc update.
+**Default: skip.** Root [`DEV_PLAN.md`](../../../DEV_PLAN.md) is Roadmap v2 - do **not** add v1 milestone tables, mermaid execution blocks, per-issue stubs, or **Done ✅** markers unless the user explicitly requests a roadmap doc update.
 
 When the user **does** request a Roadmap v2 edit: follow the lane/spine structure in root `DEV_PLAN.md` only.
 
@@ -202,7 +202,7 @@ These are **not** numbered steps 1–9. Run when the situation arises.
 Comment on the blocked issue only:
 
 ```text
-#<blocker> closed — #<N> unblocked (blocked-by cleared). Still Backlog until prioritized.
+#<blocker> closed - #<N> unblocked (blocked-by cleared). Still Backlog until prioritized.
 ```
 
 Do **not** auto-move to Agent-ready unless the user asks.

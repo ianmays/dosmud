@@ -77,7 +77,7 @@ Audit progress:
 Grep **root** Roadmap v2 and **archive** when v1 tables or Done markers matter:
 
 ```bash
-grep -oE '#[0-9]+' DEV_PLAN.md docs/archive/DEV_PLAN_v1_engine_foundation.md | sort -u
+grep -h -oE '#[0-9]+' DEV_PLAN.md docs/archive/DEV_PLAN_v1_engine_foundation.md | sort -u
 ```
 
 Note lane/spine placement in root `DEV_PLAN.md`; note milestone blocks in the archive when auditing v1 history.
