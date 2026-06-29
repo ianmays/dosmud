@@ -111,6 +111,25 @@ TEST npc_open_room_dialogue_herbalist_requested_scene(void)
     PASS();
 }
 
+TEST npc_open_room_dialogue_herbalist_reseeds_missing_root(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 313u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ORCHARD, 0);
+    game.herbalist_story = HERBALIST_STORY_REQUESTED;
+    game.marsh_root_spawned = 1;
+    game.room_item[WORLD_ROOM_MARSH][0] = ITEM_REED;
+    game.room_item[WORLD_ROOM_MARSH][1] = ITEM_NONE;
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, npc_open_room_dialogue(&game, &out));
+    ASSERT_EQ(1, game.marsh_root_spawned);
+    ASSERT_EQ(ITEM_MARSH_ROOT, game.room_item[WORLD_ROOM_MARSH][1]);
+    ASSERT_EQ(HERBALIST_SCENE_REQUESTED, out.events[0].arg3);
+    PASS();
+}
+
 TEST npc_room_cmd_reply_herbalist_turn_in_updates_story(void)
 {
     struct GameState game;
@@ -595,6 +614,7 @@ SUITE(npc) {
     RUN_TEST(npc_open_room_dialogue_frog);
     RUN_TEST(npc_open_room_dialogue_watchman);
     RUN_TEST(npc_open_room_dialogue_herbalist_requested_scene);
+    RUN_TEST(npc_open_room_dialogue_herbalist_reseeds_missing_root);
     RUN_TEST(npc_room_cmd_reply_herbalist_turn_in_updates_story);
     RUN_TEST(npc_room_cmd_reply_frog_uses_dialogue_table);
     RUN_TEST(npc_room_cmd_reply_skips_non_room_dialogue);

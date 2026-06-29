@@ -60,6 +60,7 @@ enum GameEventKind {
  * Dialogue / encounter payload contract (#160):
  * DIALOGUE    arg0=GameEventDialogueActor arg1=GameEventDialoguePhase
  *             arg2=reply choice when PHASE_REPLY; zero otherwise
+ *             arg3=actor-specific detail; Herbalist uses HerbalistDialogueScene
  * ENCOUNTER   arg0=GameEventEncounterKind arg1=action arg2=outcome
  *             arg3=action-specific payload:
  *   OPEN             enemy level for bandits; zero otherwise
