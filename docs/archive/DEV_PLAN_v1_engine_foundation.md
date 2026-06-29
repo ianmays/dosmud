@@ -47,9 +47,9 @@ The project should avoid:
 
 When a draft **implementation** PR is opened for an issue that **already has a section** here, mark that section **Done ✅** under its heading (optional PR link in the body). Do not mark Done at issue-create time or on hygiene/docs-only PRs. That line is not updated on later pushes or after merge.
 
-**Board vs this file:** [Project 1](https://github.com/users/ianmays/projects/1) is the source of truth for **Status** (Backlog, Agent-ready, Planning, In progress, Review, Done) and **Agent-ready** stack order ([find-next-agent-ready-task](.codex/skills/find-next-agent-ready-task/SKILL.md)). This file records milestone themes, GitHub **blocked-by** chains, and **Done ✅** when a draft implementation PR opens. Do not mirror board Status, column placement, or which issues are Agent-ready here - that drifts quickly.
+**Board vs this file:** [Project 1](https://github.com/users/ianmays/projects/1) is the source of truth for **Status** (Backlog, Agent-ready, Planning, In progress, Review, Done) and **Agent-ready** stack order ([find-next-agent-ready-task](../../.codex/skills/find-next-agent-ready-task/SKILL.md)). This file records milestone themes, GitHub **blocked-by** chains, and **Done ✅** when a draft implementation PR opens. Do not mirror board Status, column placement, or which issues are Agent-ready here - that drifts quickly.
 
-**Agents:** search for the issue (`#N` or section heading) before editing. For a new milestone-tracked issue whose milestone is **already represented** in this file: add the table row and `### [#N](...)` stub via [milestone-issue-hygiene](.cursor/skills/milestone-issue-hygiene/SKILL.md) in a **docs PR** (GitHub-only hygiene in plan mode; no `DEV_PLAN.md` commits until a branch is allowed). Mark **Done ✅** only when a draft **implementation** PR opens. Do not add sections for BAU issues without a Milestone, or for Milestones not tracked here. See [`AGENTS.md`](AGENTS.md) **DEV_PLAN updates**. To reconcile this file with GitHub, use [audit-github-devplan](.cursor/skills/audit-github-devplan/SKILL.md).
+**Agents:** search for the issue (`#N` or section heading) before editing. For a new milestone-tracked issue whose milestone is **already represented** in this file: add the table row and `### [#N](...)` stub via [milestone-issue-hygiene](../../.cursor/skills/milestone-issue-hygiene/SKILL.md) in a **docs PR** (GitHub-only hygiene in plan mode; no `DEV_PLAN.md` commits until a branch is allowed). Mark **Done ✅** only when a draft **implementation** PR opens. Do not add sections for BAU issues without a Milestone, or for Milestones not tracked here. See [`AGENTS.md`](../../AGENTS.md) **DEV_PLAN updates**. To reconcile this file with GitHub, use [audit-github-devplan](../../.cursor/skills/audit-github-devplan/SKILL.md).
 
 **Milestones:** [Structural Cleanup + ANSI C89 Enforcement](https://github.com/ianmays/dosmud/milestone/1) · [State Ownership and Boundary Isolation](https://github.com/ianmays/dosmud/milestone/2) · [Deterministic Test Harness Evolution](https://github.com/ianmays/dosmud/milestone/3) · [Workflow and Tooling Maturity](https://github.com/ianmays/dosmud/milestone/4) · [Advanced Architecture](https://github.com/ianmays/dosmud/milestone/5) · [Content Expansion](https://github.com/ianmays/dosmud/milestone/6) · [Renderer](https://github.com/ianmays/dosmud/milestone/7) · [Advanced Mechanics](https://github.com/ianmays/dosmud/milestone/8) · [Engine Enhancements](https://github.com/ianmays/dosmud/milestone/9) · [Authored content and engine IoC](https://github.com/ianmays/dosmud/milestone/10) · [Multiplayer](https://github.com/ianmays/dosmud/milestone/11)
 
@@ -114,7 +114,7 @@ Distinct from GitHub **blocked-by** (Relationships sidebar), which marks technic
 
 Workflow (milestone 4) can run in parallel with architecture once unblocked. Milestones 5 (**GameEvent migration**), 9 (NPC engine), and 10 ([Authored content and engine IoC](#authored-content-and-engine-ioc) platform slices) are **complete**. Current authored-content work intentionally interleaves m6 and m8; renderer (m7) and multiplayer (m11) are parallel lanes, not spine prerequisites.
 
-**Dependencies:** GitHub **blocked-by** (Relationships sidebar) is authoritative for **true prerequisites** only - an issue cannot start until the blocker is merged (technical or functional gate). Do not wire blocked-by for thematic pull order or soft sequencing; the execution diagram is an **open-work index** and the authored-content spine is the **near-term sequence** (wire blocked-by via [milestone-issue-hygiene](.cursor/skills/milestone-issue-hygiene/SKILL.md) when adding issues). [#71](https://github.com/ianmays/dosmud/issues/71) and [#47](https://github.com/ianmays/dosmud/issues/47) are **closed**; downstream issues may still list them as blockers in GitHub Relationships. Key chains: [#71](https://github.com/ianmays/dosmud/issues/71) before [#47](https://github.com/ianmays/dosmud/issues/47) / [#104](https://github.com/ianmays/dosmud/issues/104); [#47](https://github.com/ianmays/dosmud/issues/47) before [#157](https://github.com/ianmays/dosmud/issues/157), [#158](https://github.com/ianmays/dosmud/issues/158), [#159](https://github.com/ianmays/dosmud/issues/159), [#160](https://github.com/ianmays/dosmud/issues/160), [#161](https://github.com/ianmays/dosmud/issues/161), [#162](https://github.com/ianmays/dosmud/issues/162), [#163](https://github.com/ianmays/dosmud/issues/163), and separate lane [#156](https://github.com/ianmays/dosmud/issues/156); direct migration chain order: [#157](https://github.com/ianmays/dosmud/issues/157) before [#158](https://github.com/ianmays/dosmud/issues/158) before [#159](https://github.com/ianmays/dosmud/issues/159) before [#160](https://github.com/ianmays/dosmud/issues/160) before [#161](https://github.com/ianmays/dosmud/issues/161) before [#162](https://github.com/ianmays/dosmud/issues/162) before [#163](https://github.com/ianmays/dosmud/issues/163); [#71](https://github.com/ianmays/dosmud/issues/71) and [#47](https://github.com/ianmays/dosmud/issues/47) before [#48](https://github.com/ianmays/dosmud/issues/48); m9 NPC chain [#104](https://github.com/ianmays/dosmud/issues/104) before [#100](https://github.com/ianmays/dosmud/issues/100) before [#187](https://github.com/ianmays/dosmud/issues/187) before [#101](https://github.com/ianmays/dosmud/issues/101) / [#102](https://github.com/ianmays/dosmud/issues/102) / [#107](https://github.com/ianmays/dosmud/issues/107) (**complete**); m10 chain [#195](https://github.com/ianmays/dosmud/issues/195) before [#196](https://github.com/ianmays/dosmud/issues/196) (**complete**); placement profile v1 delivered in [#192](https://github.com/ianmays/dosmud/pull/192) / [#107](https://github.com/ianmays/dosmud/issues/107) (no separate issue); authored spine (soft order, not all blocked-by): [#76](https://github.com/ianmays/dosmud/issues/76) before [#132](https://github.com/ianmays/dosmud/issues/132) before [#49](https://github.com/ianmays/dosmud/issues/49) before [#8](https://github.com/ianmays/dosmud/issues/8); [#104](https://github.com/ianmays/dosmud/issues/104) before [#8](https://github.com/ianmays/dosmud/issues/8); [#4](https://github.com/ianmays/dosmud/issues/4) and [#5](https://github.com/ianmays/dosmud/issues/5) are **not** blocked by [#15](https://github.com/ianmays/dosmud/issues/15) (combat slices ship first; [#15](https://github.com/ianmays/dosmud/issues/15) may enhance formulas later); [#132](https://github.com/ianmays/dosmud/issues/132) is **not** blocked by [#50](https://github.com/ianmays/dosmud/issues/50) (NPC item exchange ships without coin wallet); [#52](https://github.com/ianmays/dosmud/issues/52) is parked/later and **not** a gate for [#49](https://github.com/ianmays/dosmud/issues/49) or the authored spine; [#142](https://github.com/ianmays/dosmud/issues/142) (fmt render migration) before [#145](https://github.com/ianmays/dosmud/issues/145) (local map viewport); m11 [#92](https://github.com/ianmays/dosmud/issues/92) multiplayer after [#16](https://github.com/ianmays/dosmud/issues/16), [#71](https://github.com/ianmays/dosmud/issues/71), [#47](https://github.com/ianmays/dosmud/issues/47).
+**Dependencies:** GitHub **blocked-by** (Relationships sidebar) is authoritative for **true prerequisites** only - an issue cannot start until the blocker is merged (technical or functional gate). Do not wire blocked-by for thematic pull order or soft sequencing; the execution diagram is an **open-work index** and the authored-content spine is the **near-term sequence** (wire blocked-by via [milestone-issue-hygiene](../../.cursor/skills/milestone-issue-hygiene/SKILL.md) when adding issues). [#71](https://github.com/ianmays/dosmud/issues/71) and [#47](https://github.com/ianmays/dosmud/issues/47) are **closed**; downstream issues may still list them as blockers in GitHub Relationships. Key chains: [#71](https://github.com/ianmays/dosmud/issues/71) before [#47](https://github.com/ianmays/dosmud/issues/47) / [#104](https://github.com/ianmays/dosmud/issues/104); [#47](https://github.com/ianmays/dosmud/issues/47) before [#157](https://github.com/ianmays/dosmud/issues/157), [#158](https://github.com/ianmays/dosmud/issues/158), [#159](https://github.com/ianmays/dosmud/issues/159), [#160](https://github.com/ianmays/dosmud/issues/160), [#161](https://github.com/ianmays/dosmud/issues/161), [#162](https://github.com/ianmays/dosmud/issues/162), [#163](https://github.com/ianmays/dosmud/issues/163), and separate lane [#156](https://github.com/ianmays/dosmud/issues/156); direct migration chain order: [#157](https://github.com/ianmays/dosmud/issues/157) before [#158](https://github.com/ianmays/dosmud/issues/158) before [#159](https://github.com/ianmays/dosmud/issues/159) before [#160](https://github.com/ianmays/dosmud/issues/160) before [#161](https://github.com/ianmays/dosmud/issues/161) before [#162](https://github.com/ianmays/dosmud/issues/162) before [#163](https://github.com/ianmays/dosmud/issues/163); [#71](https://github.com/ianmays/dosmud/issues/71) and [#47](https://github.com/ianmays/dosmud/issues/47) before [#48](https://github.com/ianmays/dosmud/issues/48); m9 NPC chain [#104](https://github.com/ianmays/dosmud/issues/104) before [#100](https://github.com/ianmays/dosmud/issues/100) before [#187](https://github.com/ianmays/dosmud/issues/187) before [#101](https://github.com/ianmays/dosmud/issues/101) / [#102](https://github.com/ianmays/dosmud/issues/102) / [#107](https://github.com/ianmays/dosmud/issues/107) (**complete**); m10 chain [#195](https://github.com/ianmays/dosmud/issues/195) before [#196](https://github.com/ianmays/dosmud/issues/196) (**complete**); placement profile v1 delivered in [#192](https://github.com/ianmays/dosmud/pull/192) / [#107](https://github.com/ianmays/dosmud/issues/107) (no separate issue); authored spine (soft order, not all blocked-by): [#76](https://github.com/ianmays/dosmud/issues/76) before [#132](https://github.com/ianmays/dosmud/issues/132) before [#49](https://github.com/ianmays/dosmud/issues/49) before [#8](https://github.com/ianmays/dosmud/issues/8); [#104](https://github.com/ianmays/dosmud/issues/104) before [#8](https://github.com/ianmays/dosmud/issues/8); [#4](https://github.com/ianmays/dosmud/issues/4) and [#5](https://github.com/ianmays/dosmud/issues/5) are **not** blocked by [#15](https://github.com/ianmays/dosmud/issues/15) (combat slices ship first; [#15](https://github.com/ianmays/dosmud/issues/15) may enhance formulas later); [#132](https://github.com/ianmays/dosmud/issues/132) is **not** blocked by [#50](https://github.com/ianmays/dosmud/issues/50) (NPC item exchange ships without coin wallet); [#52](https://github.com/ianmays/dosmud/issues/52) is parked/later and **not** a gate for [#49](https://github.com/ianmays/dosmud/issues/49) or the authored spine; [#142](https://github.com/ianmays/dosmud/issues/142) (fmt render migration) before [#145](https://github.com/ianmays/dosmud/issues/145) (local map viewport); m11 [#92](https://github.com/ianmays/dosmud/issues/92) multiplayer after [#16](https://github.com/ianmays/dosmud/issues/16), [#71](https://github.com/ianmays/dosmud/issues/71), [#47](https://github.com/ianmays/dosmud/issues/47).
 
 ### Relative size (GitHub project)
 
@@ -290,7 +290,7 @@ Compiler discipline and warning cleanliness should remain early priorities throu
 
 ### [#41](https://github.com/ianmays/dosmud/issues/41) - Compatibility typedefs
 
-Done ✅ - [`include/base.h`](include/base.h) defines `u8`/`u16`/`u32` with documented width assumptions and compile-time `sizeof` guards; tick and byte-flag fields in `game.h` / `world.h` use these types.
+Done ✅ - [`include/base.h`](../../include/base.h) defines `u8`/`u16`/`u32` with documented width assumptions and compile-time `sizeof` guards; tick and byte-flag fields in `game.h` / `world.h` use these types.
 
 ## [State Ownership and Boundary Isolation](https://github.com/ianmays/dosmud/milestone/2)
 
@@ -298,7 +298,7 @@ Done ✅ - [`include/base.h`](include/base.h) defines `u8`/`u16`/`u32` with docu
 
 Done ✅ ([#99](https://github.com/ianmays/dosmud/pull/99)).
 
-[`src/game.h`](src/game.h) defines `GameMode` (`GAME_MODE_EXPLORE`, `GAME_MODE_DIALOGUE`, `GAME_MODE_COMBAT`), `DialogueKind` (room NPCs including frog, traveler, enemy), and `CombatState` (`enemy_hp`, `defending`). `GameState` holds `mode`, `dialogue`, and `combat` instead of overlapping `pond_dialogue`, `traveler_dialogue`, `enemy_dialogue`, `npc_dialogue`, and `combat_active` flags. Transitions go through `game_set_mode_explore`, `game_set_mode_dialogue`, and `game_set_mode_combat` in [`src/game.c`](src/game.c).
+[`src/game.h`](../../src/game.h) defines `GameMode` (`GAME_MODE_EXPLORE`, `GAME_MODE_DIALOGUE`, `GAME_MODE_COMBAT`), `DialogueKind` (room NPCs including frog, traveler, enemy), and `CombatState` (`enemy_hp`, `defending`). `GameState` holds `mode`, `dialogue`, and `combat` instead of overlapping `pond_dialogue`, `traveler_dialogue`, `enemy_dialogue`, `npc_dialogue`, and `combat_active` flags. Transitions go through `game_set_mode_explore`, `game_set_mode_dialogue`, and `game_set_mode_combat` in [`src/game.c`](../../src/game.c).
 
 ### [#44](https://github.com/ianmays/dosmud/issues/44) - Formalize engine boundaries
 
@@ -312,9 +312,9 @@ Done ✅ ([#103](https://github.com/ianmays/dosmud/pull/103)).
 
 Done ✅ ([#106](https://github.com/ianmays/dosmud/pull/106)).
 
-- [`include/platform.h`](include/platform.h) - `plat_poll_line`, `plat_time_now`, `plat_seed_rng`
-- [`src/platdos.c`](src/platdos.c) / [`src/platpos.c`](src/platpos.c) - DOS vs POSIX implementations (FAT 8.3 names; flat `src/` layout)
-- [`src/main.c`](src/main.c) - no `#ifdef __WATCOMC__`; orchestration only
+- [`include/platform.h`](../../include/platform.h) - `plat_poll_line`, `plat_time_now`, `plat_seed_rng`
+- [`src/platdos.c`](../../src/platdos.c) / [`src/platpos.c`](../../src/platpos.c) - DOS vs POSIX implementations (FAT 8.3 names; flat `src/` layout)
+- [`src/main.c`](../../src/main.c) - no `#ifdef __WATCOMC__`; orchestration only
 
 ## [Deterministic Test Harness Evolution](https://github.com/ianmays/dosmud/milestone/3)
 
@@ -339,7 +339,7 @@ Or manually: `./dosmud < tests/regression/<name>.input > tests/regression/<name>
 
 Done ✅ ([#110](https://github.com/ianmays/dosmud/pull/110), [#120](https://github.com/ianmays/dosmud/pull/120)).
 
-`TEST_MODE` builds link [`tests/harness/testharn.c`](tests/harness/testharn.c) and [`tests/harness/th_world.c`](tests/harness/th_world.c). Snapshot `.input` files use `@fixture <name>` for known state without RNG-walking setup. Canonical fixture and test lists: [`docs/testing.md`](docs/testing.md). [#66](https://github.com/ianmays/dosmud/issues/66) added the harness; [#112](https://github.com/ianmays/dosmud/issues/112) migrated brittle snapshots to fixtures and roll inject for `equipment`.
+`TEST_MODE` builds link [`tests/harness/testharn.c`](../../tests/harness/testharn.c) and [`tests/harness/th_world.c`](../../tests/harness/th_world.c). Snapshot `.input` files use `@fixture <name>` for known state without RNG-walking setup. Canonical fixture and test lists: [`docs/testing.md`](../testing.md). [#66](https://github.com/ianmays/dosmud/issues/66) added the harness; [#112](https://github.com/ianmays/dosmud/issues/112) migrated brittle snapshots to fixtures and roll inject for `equipment`.
 
 Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 
@@ -364,16 +364,16 @@ Follow-up (under [#40](https://github.com/ianmays/dosmud/issues/40) umbrella):
 | [#112](https://github.com/ianmays/dosmud/issues/112) | Done ✅: migrate 5 brittle snapshots to fixtures |
 | [#113](https://github.com/ianmays/dosmud/issues/113) | Done ✅: wanderer snapshot fixtures |
 | [#114](https://github.com/ianmays/dosmud/issues/114) | Done ✅: custom world boot fixture |
-| [#115](https://github.com/ianmays/dosmud/issues/115) | Done ✅: snapshot coverage + RNG hardening ([`docs/testing.md`](docs/testing.md)) |
+| [#115](https://github.com/ianmays/dosmud/issues/115) | Done ✅: snapshot coverage + RNG hardening ([`docs/testing.md`](../testing.md)) |
 | [#122](https://github.com/ianmays/dosmud/issues/122) | Done ✅: optional `@seed` harness directive for `.input` files |
 | [#95](https://github.com/ianmays/dosmud/issues/95) | Done ✅: unit tests ([PR 127](https://github.com/ianmays/dosmud/pull/127)); **96%+** branch coverage on core modules |
 | [#116](https://github.com/ianmays/dosmud/issues/116) | Done ✅: soak / stress (`make test-soak`, [PR 133](https://github.com/ianmays/dosmud/pull/133)) |
 
-**Three layers (see [`docs/testing.md`](docs/testing.md)):** snapshots (`make test-run`), unit tests (`make test-unit`), soak/stress (`make test-soak`). `make test-all` runs check-layers, snapshots, unit coverage, and soak.
+**Three layers (see [`docs/testing.md`](../testing.md)):** snapshots (`make test-run`), unit tests (`make test-unit`), soak/stress (`make test-soak`). `make test-all` runs check-layers, snapshots, unit coverage, and soak.
 
 **Snapshot coverage ([#115](https://github.com/ianmays/dosmud/issues/115)) delivered:** 59 snapshots in `SNAPSHOT_TESTS` at delivery plus `seed_cli` (60 total in `make test-run`); suite now 75 in `SNAPSHOT_TESTS` plus `seed_cli` (76 total). Combat defend/salve/victory/loot/level-up, all room NPC talk branches, eat/use/inspect variants, `quiet_explore` for wait/move/map, bandit fight/intimidate/bag-empty/fixed-road, loot tiers, meta commands. RNG: `game_roll_percent` for intimidate; `test_quiet_ticks`; `CFG_TEST_*` inject constants.
 
-**Harness layout (final):** fixture DSL and `@seed` in [`tests/harness/testharn.c`](tests/harness/testharn.c); seed-1234 world graph in [`tests/harness/th_world.c`](tests/harness/th_world.c) (shared by snapshots, unit, soak).
+**Harness layout (final):** fixture DSL and `@seed` in [`tests/harness/testharn.c`](../../tests/harness/testharn.c); seed-1234 world graph in [`tests/harness/th_world.c`](../../tests/harness/th_world.c) (shared by snapshots, unit, soak).
 
 ### [#115](https://github.com/ianmays/dosmud/issues/115) - Snapshot coverage (Done ✅)
 
@@ -383,7 +383,7 @@ Delivered in [PR 123](https://github.com/ianmays/dosmud/pull/123).
 
 - Bandit intimidate uses `game_roll_percent` (injectable in `TEST_MODE`).
 - `GameState.test_quiet_ticks` + `quiet_explore` fixture: tick-advancing tests skip atmosphere, animal noise, bandit ambush, and wanderer movement.
-- Extended [`tests/harness/testharn.c`](tests/harness/testharn.c): room fixtures, bag helpers, env focus, combat-ready/victory inject, intimidate/fight ready fixtures.
+- Extended [`tests/harness/testharn.c`](../../tests/harness/testharn.c): room fixtures, bag helpers, env focus, combat-ready/victory inject, intimidate/fight ready fixtures.
 
 **Tests**
 
@@ -392,8 +392,8 @@ Delivered in [PR 123](https://github.com/ianmays/dosmud/pull/123).
 
 **Docs**
 
-- [`docs/testing.md`](docs/testing.md) - fixture tables, determinism model, snapshot file list, adding-a-snapshot checklist.
-- [`docs/architecture.md`](docs/architecture.md) - harness and RNG split updated.
+- [`docs/testing.md`](../testing.md) - fixture tables, determinism model, snapshot file list, adding-a-snapshot checklist.
+- [`docs/architecture.md`](../architecture.md) - harness and RNG split updated.
 
 **Unit scope:** `command`, `invent`, `combat`, `game`, `genc`, `wanderer`, `dialogue`, `gatmos`, `world` (fixed graph), `gprog`, `items`, `fmt`, `gout`, `replay`, `testharn`. Out of scope: `grendr`, `txtres`, `main`, platform glue.
 
@@ -403,8 +403,8 @@ Delivered in [PR 127](https://github.com/ianmays/dosmud/pull/127).
 
 **Framework**
 
-- [greatest 1.5.0](https://github.com/silentbicycle/greatest/releases/tag/v1.5.0) vendored as [`tests/unit/greatest.h`](tests/unit/greatest.h) (upstream commit + dosmud quiet-output patch in a follow-up commit).
-- `make test-unit`, verbose/coverage targets; 88 unit tests; CI via [`scripts/ci-test-report.sh`](scripts/ci-test-report.sh) with PR result comment.
+- [greatest 1.5.0](https://github.com/silentbicycle/greatest/releases/tag/v1.5.0) vendored as [`tests/unit/greatest.h`](../../tests/unit/greatest.h) (upstream commit + dosmud quiet-output patch in a follow-up commit).
+- `make test-unit`, verbose/coverage targets; 88 unit tests; CI via [`scripts/ci-test-report.sh`](../../scripts/ci-test-report.sh) with PR result comment.
 
 **Coverage**
 
@@ -413,13 +413,13 @@ Delivered in [PR 127](https://github.com/ianmays/dosmud/pull/127).
 
 **Layout / tooling**
 
-- Snapshots under [`tests/regression/`](tests/regression/).
+- Snapshots under [`tests/regression/`](../../tests/regression/).
 - `dos-prepare.ps1` copies only `src/`, `include/`, `build.bat`.
 - Harness `bag_full_gate` fixture for `testharn_apply` `-2` paths.
 
 **Docs**
 
-- [`docs/testing.md`](docs/testing.md) - unit layout, coverage levels, CI PR comment, shared `th_world.c` graph.
+- [`docs/testing.md`](../testing.md) - unit layout, coverage levels, CI PR comment, shared `th_world.c` graph.
 
 ### [#116](https://github.com/ianmays/dosmud/issues/116) - Soak / stress tests (Done ✅)
 
@@ -433,7 +433,7 @@ Delivered in [PR 133](https://github.com/ianmays/dosmud/pull/133).
 **Benchmarks**
 
 - `SOAK_BENCH` lines with `us_per_tick` and `limit=` from `CFG_TEST_SOAK_LIMIT_*` in `config.h`.
-- [`scripts/ci-test-report.sh`](scripts/ci-test-report.sh) soak step + PR benchmark table (parsed from log).
+- [`scripts/ci-test-report.sh`](../../scripts/ci-test-report.sh) soak step + PR benchmark table (parsed from log).
 
 **Related cleanup in [PR 133](https://github.com/ianmays/dosmud/pull/133)**
 
@@ -529,7 +529,7 @@ Done ✅ ([#155](https://github.com/ianmays/dosmud/pull/155)).
 
 ### [#47](https://github.com/ianmays/dosmud/issues/47) - Event queue architecture
 
-Foundation landed in [#164](https://github.com/ianmays/dosmud/pull/164): `GameEvent` / `GameEventQueue` on `gout`, per-step drain via `game_render_output` in `grendr`. Migration slices [#157](https://github.com/ianmays/dosmud/issues/157)-[#161](https://github.com/ianmays/dosmud/issues/161) moved producers to generic `GameEventKind` payloads; [#162](https://github.com/ianmays/dosmud/issues/162) / [#177](https://github.com/ianmays/dosmud/pull/177) removed transitional `GAME_EVENT_LEGACY` and `GAME_OUT_*` compatibility. Seam ownership: [`docs/architecture.md`](docs/architecture.md) Engine and Render sections.
+Foundation landed in [#164](https://github.com/ianmays/dosmud/pull/164): `GameEvent` / `GameEventQueue` on `gout`, per-step drain via `game_render_output` in `grendr`. Migration slices [#157](https://github.com/ianmays/dosmud/issues/157)-[#161](https://github.com/ianmays/dosmud/issues/161) moved producers to generic `GameEventKind` payloads; [#162](https://github.com/ianmays/dosmud/issues/162) / [#177](https://github.com/ianmays/dosmud/pull/177) removed transitional `GAME_EVENT_LEGACY` and `GAME_OUT_*` compatibility. Seam ownership: [`docs/architecture.md`](../architecture.md) Engine and Render sections.
 
 Direct follow-up migration chain (separate from replay/logging):
 - [#157](https://github.com/ianmays/dosmud/issues/157)
@@ -622,18 +622,18 @@ Adjacent track to `#47` follow-ups, but not part of the direct migration chain. 
 Done ✅ ([#183](https://github.com/ianmays/dosmud/pull/183)).
 
 ### Testing
-- Unit: [`unit_rplog.c`](../tests/unit/unit_rplog.c) (`replay_log_reset`, capture serialization, open/header/step increment)
-- Snapshots: `replay_log` (stdout unchanged; sidecar golden [`replay_log_log.expect`](../tests/regression/replay_log_log.expect))
+- Unit: [`unit_rplog.c`](../../tests/unit/unit_rplog.c) (`replay_log_reset`, capture serialization, open/header/step increment)
+- Snapshots: `replay_log` (stdout unchanged; sidecar golden [`replay_log_log.expect`](../../tests/regression/replay_log_log.expect))
 
 ### [#16](https://github.com/ianmays/dosmud/issues/16) - Save/load system
 
 Done ✅ ([#184](https://github.com/ianmays/dosmud/pull/184)).
 
-Single-slot save/load landed through shell-edge [`save.c`](../src/save.c) / [`save.h`](../src/save.h) plus `save` / `load` commands in `main.c`. The binary format is versioned, validates ranges before mutating live state, and stores tracked libc RNG draw count so post-load randomness resumes deterministically.
+Single-slot save/load landed through shell-edge [`save.c`](../../src/save.c) / [`save.h`](../../src/save.h) plus `save` / `load` commands in `main.c`. The binary format is versioned, validates ranges before mutating live state, and stores tracked libc RNG draw count so post-load randomness resumes deterministically.
 
 ### Testing
-- Unit: [`unit_save.c`](../tests/unit/unit_save.c) covers round-trip, bad magic, truncated files, and out-of-range rejection without mutating the target state; [`unit_wrld.c`](../tests/unit/unit_wrld.c) and [`unit_wandr.c`](../tests/unit/unit_wandr.c) assert tracked RNG draw behavior
-- Snapshots: [`save_load`](../tests/regression/save_load.expect) proves single-slot `save.dat` round-trip and deterministic post-load movement
+- Unit: [`unit_save.c`](../../tests/unit/unit_save.c) covers round-trip, bad magic, truncated files, and out-of-range rejection without mutating the target state; [`unit_wrld.c`](../../tests/unit/unit_wrld.c) and [`unit_wandr.c`](../../tests/unit/unit_wandr.c) assert tracked RNG draw behavior
+- Snapshots: [`save_load`](../../tests/regression/save_load.expect) proves single-slot `save.dat` round-trip and deterministic post-load movement
 
 ## [Content Expansion](https://github.com/ianmays/dosmud/milestone/6)
 

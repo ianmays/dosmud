@@ -13,9 +13,13 @@ disable-model-invocation: true
 
 **See also:** proactive setup when creating milestone issues - [milestone-issue-hygiene](../milestone-issue-hygiene/SKILL.md); documentation pass before draft PR - [documentation-maintainer](../documentation-maintainer/SKILL.md). This skill is for **reactive** audits and reconciliation.
 
-Cross-check **GitHub** (issues, milestones, project #1, blocked-by) against **[`DEV_PLAN.md`](../../../DEV_PLAN.md)**. Report mismatches; apply fixes only when the user asks.
+Cross-check **GitHub** (issues, milestones, project #1, blocked-by) against **[`DEV_PLAN.md`](../../../DEV_PLAN.md)** (Roadmap v2) and [`docs/archive/DEV_PLAN_v1_engine_foundation.md`](../../../docs/archive/DEV_PLAN_v1_engine_foundation.md) when v1 history matters. Report mismatches; apply fixes only when the user asks.
 
-Canonical policy: [`AGENTS.md`](../../../AGENTS.md) **DEV_PLAN updates** and DEV_PLAN **Execution order** section.
+## Roadmap v2 guard
+
+Root `DEV_PLAN.md` is a **strategic index** (lanes, spine, parked systems) — not the v1 milestone ledger. **Do not** recommend adding v1 milestone tables, execution-order mermaid, per-issue stubs, or **Done ✅** sections to root `DEV_PLAN.md` unless the user explicitly requests it. v1 Done-marker and milestone-table audits apply to the **archive** only.
+
+Canonical policy: [`AGENTS.md`](../../../AGENTS.md) **DEV_PLAN updates** and Roadmap v2 lanes/spine in root `DEV_PLAN.md`.
 
 ## When to run
 
@@ -28,7 +32,8 @@ Canonical policy: [`AGENTS.md`](../../../AGENTS.md) **DEV_PLAN updates** and DEV
 | Mechanism | What it is | Sort / meaning |
 |-----------|------------|----------------|
 | **GitHub Milestone** | Theme label on an issue | Not strict schedule |
-| **DEV_PLAN execution order** | Suggested pull order + mermaid in DEV_PLAN | Dependency / workflow sequence |
+| **DEV_PLAN (Roadmap v2)** | Lanes, spine, parked systems in root `DEV_PLAN.md` | Strategic sequencing; not Agent-ready queue |
+| **DEV_PLAN v1 archive** | [`docs/archive/DEV_PLAN_v1_engine_foundation.md`](../../../docs/archive/DEV_PLAN_v1_engine_foundation.md) | Historical milestone tables, Done markers, execution mermaid |
 | **blocked-by** | Native issue Relationships | Source of truth for blockers |
 | **Project Priority** | P0 / P1 / P2 custom field | Coarse urgency tier; **does not** auto-sort columns |
 | **Project Size** | XS–XL custom field on project #1 | Relative effort / blast radius; **does not** imply schedule (see DEV_PLAN **Relative size**) |
@@ -42,9 +47,10 @@ Priority P0→P1→P2 and execution-order stack **will diverge** (e.g. #47 P1 be
 
 | Rule | Check |
 |------|-------|
-| Do **not** add new issue sections for newly created BAU issues | Grep new `#N` in DEV_PLAN vs issues created recently |
-| Initial DEV_PLAN row + stub for milestone-tracked issues | Present after [milestone-issue-hygiene](../milestone-issue-hygiene/SKILL.md) docs PR (create time); **not** Done ✅ yet |
-| **Done ✅** on DEV_PLAN section | Only on draft **implementation** PR per AGENTS table (not on hygiene/docs-only PR) |
+| Do **not** add new issue sections for newly created BAU issues to root `DEV_PLAN.md` | Grep new `#N` in root DEV_PLAN vs issues created recently |
+| Root `DEV_PLAN.md` edits | Lane/spine updates only when user requests; no v1 tables/mermaid/Done by default |
+| **Done ✅** on v1 archive section | Only when explicitly maintaining [`docs/archive/DEV_PLAN_v1_engine_foundation.md`](../../../docs/archive/DEV_PLAN_v1_engine_foundation.md) |
+| Initial v1 DEV_PLAN row + stub | Archive only when user requests v1 history maintenance — not default for new issues |
 | Milestones are **themes**, not "Phase N" wording | No `Phase 1`–style milestone labels in docs |
 | Harness layers in docs | `unit` / `soak` / snapshot wording; not Phase B/C unless explicitly historical |
 

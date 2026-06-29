@@ -2,29 +2,33 @@
 name: milestone-issue-hygiene
 description: >-
   After creating or on request for an existing issue: set GitHub project Size
-  and Priority, wire blocked-by relationships, update DEV_PLAN when the milestone
-  is tracked there, and align project stack order. Use when filing milestone
-  issues or when the user asks for roadmap hygiene on #N.
+  and Priority, wire blocked-by relationships, align project stack order. Root
+  DEV_PLAN.md is Roadmap v2 - skip v1 ledger edits unless explicitly requested.
+  Use when filing milestone issues or when the user asks for roadmap hygiene on #N.
 ---
 
 # Milestone issue hygiene
 
-Run when a new issue has a GitHub **Milestone** listed in [`DEV_PLAN.md`](../../../DEV_PLAN.md) milestone index (line 38): **in the same turn** as `gh issue create` (GitHub steps at minimum), with DEV_PLAN commits in a **docs PR** when not in plan mode. Also run retroactively when the user asks for **roadmap hygiene for #N**.
+Run when a new issue has a GitHub **Milestone**: **in the same turn** as `gh issue create` (GitHub steps at minimum). Also run retroactively when the user asks for **roadmap hygiene for #N**.
 
 Reactive audits and bulk fixes: [`.cursor/skills/audit-github-devplan/SKILL.md`](../audit-github-devplan/SKILL.md).
 
+## Roadmap v2 guard
+
+Root [`DEV_PLAN.md`](../../../DEV_PLAN.md) is **Roadmap v2** (strategic index). **Do not** add v1 milestone table rows, execution-order mermaid, per-issue `###` stubs, or **Done ✅** sections to root `DEV_PLAN.md` unless explicitly requested. v1 ledger behaviour applies only to [`docs/archive/DEV_PLAN_v1_engine_foundation.md`](../../../docs/archive/DEV_PLAN_v1_engine_foundation.md). Default: complete GitHub steps below; **skip** step 6 root `DEV_PLAN.md` commits unless the user asks to update Roadmap v2 or maintain the archive.
+
 ## When to run
 
-- Agent or human created an issue with a DEV_PLAN-tracked milestone
-- User: "roadmap hygiene for #145", "size and prioritize #N", "add #N to DEV_PLAN"
-- **Not** for BAU issues without a milestone, or milestones not in DEV_PLAN (GitHub metadata only)
+- Agent or human created an issue with a GitHub **Milestone**
+- User: "roadmap hygiene for #145", "size and prioritize #N"
+- **Not** for BAU issues without a milestone (GitHub metadata only)
 
 ## Timing: plan mode vs DEV_PLAN commits
 
 | Phase | GitHub (labels, project Size/Priority, blocked-by, body, stack order, hygiene comment) | `DEV_PLAN.md` git commits |
 |-------|----------------------------------------------------------------------------------------|---------------------------|
 | **Plan mode** | Yes — allowed per [agent-workflow](../../../.cursor/rules/agent-workflow.mdc) | **No** — plan mode forbids repo file edits |
-| **After plan approval** (or retroactive hygiene) | Yes | Yes — **docs PR** from `main` (e.g. `docs-milestone-hygiene`), or combined with implementation PR if user asks |
+| **After plan approval** (or retroactive hygiene) | Yes | **Skip by default** — root `DEV_PLAN.md` is Roadmap v2; edit only when user requests Roadmap v2 or archive updates |
 
 In plan mode: complete create-time checklist steps **1–5, 7–9** on GitHub only; defer step **6** (DEV_PLAN) until a docs or implementation branch is allowed.
 
@@ -134,21 +138,13 @@ gh issue edit <N> --body-file /path/to/body.md
 
 ### 6. DEV_PLAN.md
 
-**Only** when the issue's milestone already has a section in DEV_PLAN (see [AGENTS.md DEV_PLAN updates](../../../AGENTS.md)). **Skip git edits in plan mode**; open a docs PR when execution is allowed.
+**Default: skip.** Root [`DEV_PLAN.md`](../../../DEV_PLAN.md) is Roadmap v2 — do **not** add v1 milestone tables, mermaid execution blocks, per-issue stubs, or **Done ✅** markers unless the user explicitly requests a roadmap doc update.
 
-Add (initial roadmap entry — not **Done ✅**):
+When the user **does** request a Roadmap v2 edit: follow the lane/spine structure in root `DEV_PLAN.md` only.
 
-1. Row in milestone **table** (Issue | Title | Size)
-2. `### [#N](...) - Title` stub under that milestone
-3. Append issue number to execution-order **mermaid** list for that milestone subgraph (if listed there)
-4. Add `#N` to **Relative size** examples row when representative
-5. New **blocked-by** chains in DEV_PLAN **Dependencies** prose (~line 77)
+When maintaining **v1 archive** history: edit [`docs/archive/DEV_PLAN_v1_engine_foundation.md`](../../../docs/archive/DEV_PLAN_v1_engine_foundation.md) using v1 conventions (table rows, stubs, Done markers).
 
-**Do not** add Done checkmark here — that happens when a draft **implementation** PR opens (see Follow-up below).
-
-**Do not** add new milestone sections or BAU issues without a DEV_PLAN milestone.
-
-Deliver DEV_PLAN edits via a **docs PR** from `main` (this PR is the model for #145) unless the user asks to combine with a gameplay PR.
+**Skip git edits in plan mode.** See [AGENTS.md DEV_PLAN updates](../../../AGENTS.md).
 
 ### 7. Project stack order
 
