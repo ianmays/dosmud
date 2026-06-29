@@ -145,6 +145,8 @@ Skip when the user opts out, the branch diff vs `main` is unchanged since a docu
 
 Prefer linking between documents over duplicating large instruction blocks.
 
+**Roadmap note:** root [`DEV_PLAN.md`](DEV_PLAN.md) now tracks Roadmap v2 as a strategic index, not the full v1 milestone ledger. The archived v1 plan lives at [`docs/archive/DEV_PLAN_v1_engine_foundation.md`](docs/archive/DEV_PLAN_v1_engine_foundation.md). When updating roadmap docs, follow the current root `DEV_PLAN.md` structure rather than recreating v1 milestone tables or Done-marker sections unless explicitly requested.
+
 #### DEV_PLAN updates
 
 [`DEV_PLAN.md`](DEV_PLAN.md) is a manually curated roadmap log aligned with GitHub milestones, not a catalog of every GitHub issue.
