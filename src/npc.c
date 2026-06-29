@@ -280,6 +280,13 @@ static void herbalist_seed_marsh_root(struct GameState *game)
     }
 }
 
+void npc_story_tick(struct GameState *game)
+{
+    if (game->herbalist_story == HERBALIST_STORY_REQUESTED) {
+        herbalist_seed_marsh_root(game);
+    }
+}
+
 static int herbalist_open_dialogue(struct GameState *game, GameEventQueue *out)
 {
     int scene;

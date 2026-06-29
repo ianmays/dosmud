@@ -1008,6 +1008,31 @@ TEST game_herbalist_turn_in_updates_orchard_desc(void)
     PASS();
 }
 
+TEST game_herbalist_retry_seed_when_marsh_slot_frees(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 222u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ORCHARD, 0);
+    game.room_item[WORLD_ROOM_MARSH][0] = ITEM_REED;
+    game.room_item[WORLD_ROOM_MARSH][1] = ITEM_STONE;
+    game.room_item[WORLD_ROOM_MARSH][2] = ITEM_BERRY;
+    game.room_item[WORLD_ROOM_MARSH][3] = ITEM_HERB;
+    ASSERT_EQ(1, run_cmd(&game, "talk"));
+    ASSERT_EQ(1, run_cmd(&game, "1"));
+    ASSERT_EQ(HERBALIST_STORY_REQUESTED, game.herbalist_story);
+    ASSERT_EQ(0, game.marsh_root_spawned);
+    ASSERT(!room_has_item(&game, WORLD_ROOM_MARSH, ITEM_MARSH_ROOT));
+
+    game.room_item[WORLD_ROOM_MARSH][3] = ITEM_NONE;
+    game_event_queue_reset(&out);
+    game_background_step(&game, &out);
+    ASSERT_EQ(1, game.marsh_root_spawned);
+    ASSERT_EQ(ITEM_MARSH_ROOT, game.room_item[WORLD_ROOM_MARSH][3]);
+    PASS();
+}
+
 SUITE(game) {
     RUN_TEST(game_heal_player_applies);
     RUN_TEST(game_heal_player_at_max);
@@ -1059,4 +1084,5 @@ SUITE(game) {
     RUN_TEST(game_loot_all_stops_at_bag_full_without_advancing_time);
     RUN_TEST(game_herbalist_request_then_take_root);
     RUN_TEST(game_herbalist_turn_in_updates_orchard_desc);
+    RUN_TEST(game_herbalist_retry_seed_when_marsh_slot_frees);
 }

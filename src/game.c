@@ -553,6 +553,7 @@ static void advance_world_tick(struct GameState *game, GameEventQueue *out)
      */
     game->tick += 1;
     npc_roaming_update_separation(game);
+    npc_story_tick(game);
 #ifdef TEST_MODE
     if (game->test_quiet_ticks) {
         /* Quiet fixtures keep time moving but suppress ambient randomness. */

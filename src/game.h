@@ -4,6 +4,7 @@
 #include "base.h"
 #include "command.h"
 #include "gout.h"
+#include "npc.h"
 #include "world.h"
 #include "gprog.h"
 
@@ -36,17 +37,6 @@ enum HerbalistStoryState {
     HERBALIST_STORY_NONE = 0,
     HERBALIST_STORY_REQUESTED,
     HERBALIST_STORY_COMPLETE
-};
-
-/*
- * Runtime talk/reply scene derived from herbalist_story plus bag contents;
- * queued as GAME_EVENT_DIALOGUE arg3 for grendr/txtres copy branching.
- */
-enum HerbalistDialogueScene {
-    HERBALIST_SCENE_NOT_STARTED = 0,
-    HERBALIST_SCENE_REQUESTED,
-    HERBALIST_SCENE_READY,
-    HERBALIST_SCENE_COMPLETE
 };
 
 /* Stored in GameState.env_focus_kind; render consumes the same values. */
@@ -108,7 +98,7 @@ struct GameState {
     u32 env_focus_expires_tick;
     /* npc.c herbalist branch (#76); saved in save v10+. */
     int herbalist_story;
-    /* one-shot guard: marsh-root seeded at most once per playthrough/save. */
+    /* Story-owned in-play marker: resets when no marsh-root is reachable. */
     int marsh_root_spawned;
     int room_item[CFG_ROOM_MAX][CFG_AREA_ITEM_SLOTS];
     int bag[CFG_BAG_MAX];

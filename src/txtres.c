@@ -1,7 +1,7 @@
 #include "txtres.h"
 #include "config.h"
-#include "game.h"
 #include "gout.h"
+#include "npc.h"
 #include "version.h"
 #include "world.h"
 
