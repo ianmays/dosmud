@@ -303,6 +303,12 @@ TEST txtres_dialogue_narrative_key_maps_stable_scenes(void)
     ASSERT_EQ(TXTRES_NARRATIVE_WATCHMAN_TALK,
         txtres_dialogue_narrative_key(GAME_DIALOGUE_ACTOR_WATCHMAN,
             GAME_DIALOGUE_PHASE_TALK));
+    ASSERT_EQ(TXTRES_NARRATIVE_HERBALIST_TALK,
+        txtres_dialogue_narrative_key(GAME_DIALOGUE_ACTOR_HERBALIST,
+            GAME_DIALOGUE_PHASE_TALK));
+    ASSERT_EQ(TXTRES_NARRATIVE_HERBALIST_REPLY,
+        txtres_dialogue_narrative_key(GAME_DIALOGUE_ACTOR_HERBALIST,
+            GAME_DIALOGUE_PHASE_REPLY));
     ASSERT_EQ(TXTRES_NARRATIVE_TRAVELER_REPLY,
         txtres_dialogue_narrative_key(GAME_DIALOGUE_ACTOR_TRAVELER,
             GAME_DIALOGUE_PHASE_REPLY));
