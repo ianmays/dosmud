@@ -32,15 +32,15 @@ On the ground: stick. (take stick)
   (hands stained green)                             
 
 An herbalist kneels among fallen fruit.
-"Need a field remedy or just company?"
-  [1] Ask for medicine advice.
+"I could use a steady pair of hands, if you're offering them."
+  [1] Ask what she needs.
   [2] Trade gossip from the road.
   [3] Leave politely.
 (Answer with 1, 2, 3, or reply <n>.)
 
 [T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
-> She mutters ratios: "Two berries, one herb, crush fine."
+> She lowers her voice. "The marsh still grows a root that cuts fever fast. Bring me one, and I'll point you toward older answers than mine."
 
 [T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
@@ -54,16 +54,16 @@ An herbalist kneels among fallen fruit.
                              
   (hands stained green)                             
 
-An herbalist kneels among fallen fruit.
-"Need a field remedy or just company?"
-  [1] Ask for medicine advice.
-  [2] Trade gossip from the road.
-  [3] Leave politely.
+The herbalist brushes pulp from her palms.
+"Bring me a marsh-root from the black water marsh. Freshly cut, not drowned."
+  [1] Ask where to look.
+  [2] Admit you do not have it yet.
+  [3] Leave and keep searching.
 (Answer with 1, 2, 3, or reply <n>.)
 
 [T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
-> She laughs. "Road stories always cost extra."
+> She nods once. "Then do not linger here. The marsh keeps what waits too long."
 
 [T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
@@ -77,16 +77,16 @@ An herbalist kneels among fallen fruit.
                              
   (hands stained green)                             
 
-An herbalist kneels among fallen fruit.
-"Need a field remedy or just company?"
-  [1] Ask for medicine advice.
-  [2] Trade gossip from the road.
-  [3] Leave politely.
+The herbalist brushes pulp from her palms.
+"Bring me a marsh-root from the black water marsh. Freshly cut, not drowned."
+  [1] Ask where to look.
+  [2] Admit you do not have it yet.
+  [3] Leave and keep searching.
 (Answer with 1, 2, 3, or reply <n>.)
 
 [T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
-> She waves without looking up.
+> She turns back to sorting bruised fruit.
 
 [T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 

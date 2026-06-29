@@ -3,6 +3,18 @@
 
 #include "base.h"
 
+/*
+ * Dialogue detail payload for the Herbalist authored slice. This stays out of
+ * GameState headers so render/copy code can consume GAME_EVENT_DIALOGUE arg3
+ * without depending on full orchestration state.
+ */
+enum HerbalistDialogueScene {
+    HERBALIST_SCENE_NOT_STARTED = 0,
+    HERBALIST_SCENE_REQUESTED,
+    HERBALIST_SCENE_READY,
+    HERBALIST_SCENE_COMPLETE
+};
+
 struct GameState;
 struct GameEventQueue;
 
@@ -36,6 +48,8 @@ int npc_open_room_dialogue(struct GameState *game, struct GameEventQueue *out);
 /* Reply for NPC_ROOM_INFO dialogue kinds; ignores player room after talk. */
 int npc_room_cmd_reply(struct GameState *game, int choice,
                        struct GameEventQueue *out);
+/* Maintain authored npc story-world hooks that do not emit events. */
+void npc_story_tick(struct GameState *game);
 void npc_seed_profiles(struct GameState *game);
 void npc_roaming_activate_due(struct GameState *game);
 void npc_roaming_update_separation(struct GameState *game);
@@ -51,6 +65,9 @@ int npc_roaming_cmd_reply(struct GameState *game, int choice,
                           struct GameEventQueue *out);
 /* Canonical GAME_EVENT_DIALOGUE / DIALOGUE_GUARD producers for npc-using slices. */
 void npc_push_dialogue(struct GameEventQueue *out, int actor, int phase, int choice);
+/* detail is GAME_EVENT_DIALOGUE arg3 when copy needs more than actor/phase/choice. */
+void npc_push_dialogue_detail(struct GameEventQueue *out, int actor, int phase,
+                              int choice, int detail);
 void npc_push_dialogue_guard(struct GameEventQueue *out, int reason);
 
 #endif

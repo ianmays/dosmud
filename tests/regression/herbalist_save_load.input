@@ -1,0 +1,7 @@
+@fixture story_orchard_ready
+talk
+1
+save
+load
+look
+quit

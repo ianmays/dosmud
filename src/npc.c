@@ -1,7 +1,11 @@
+#include <string.h>
 #include "npc.h"
 #include "platform.h"
 #include "game.h"
 #include "gout.h"
+#include "invent.h"
+#include "items.h"
+#include "txtres.h"
 #include "world.h"
 
 /*
@@ -204,6 +208,175 @@ static const struct NpcRoomInfo *npc_room_dialogue_info(int dialogue_kind)
         }
     }
     return 0;
+}
+
+/*
+ * #76 herbalist vertical slice: npc.c owns story transitions, marsh-root
+ * seeding, orchard desc mutation, and scene selection. Reply events keep the
+ * pre-choice HerbalistDialogueScene in arg3 so txtres copy matches the menu
+ * just closed.
+ */
+static int npc_room_has_item(const struct GameState *game, int room_id, int item_id)
+{
+    int slot;
+
+    if (room_id < 0 || room_id >= CFG_ROOM_MAX) {
+        return 0;
+    }
+    for (slot = 0; slot < CFG_AREA_ITEM_SLOTS; ++slot) {
+        if (game->room_item[room_id][slot] == item_id) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+static int npc_any_room_has_item(const struct GameState *game, int item_id)
+{
+    int room_id;
+
+    for (room_id = 0; room_id < CFG_ROOM_MAX; ++room_id) {
+        if (npc_room_has_item(game, room_id, item_id)) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+static int herbalist_dialogue_scene(const struct GameState *game)
+{
+    /* Keep the persisted seam tiny: ready-to-turn-in is derived from inventory. */
+    if (game->herbalist_story == HERBALIST_STORY_COMPLETE) {
+        return HERBALIST_SCENE_COMPLETE;
+    }
+    if (game->herbalist_story == HERBALIST_STORY_REQUESTED) {
+        if (game_inv_player_has_item((struct GameState *)game, ITEM_MARSH_ROOT)) {
+            return HERBALIST_SCENE_READY;
+        }
+        return HERBALIST_SCENE_REQUESTED;
+    }
+    return HERBALIST_SCENE_NOT_STARTED;
+}
+
+/* Turn-in swaps orchard desc in-place; incomplete story restores authored baseline. */
+static void herbalist_apply_world_hook(struct GameState *game)
+{
+    if (game->herbalist_story == HERBALIST_STORY_COMPLETE) {
+        strncpy(game->world.rooms[WORLD_ROOM_ORCHARD].desc,
+            TXT_STORY_ORCHARD_DONE_DESC, CFG_DESC_MAX - 1);
+        game->world.rooms[WORLD_ROOM_ORCHARD].desc[CFG_DESC_MAX - 1] = '\0';
+        return;
+    }
+    strncpy(game->world.rooms[WORLD_ROOM_ORCHARD].desc,
+        g_room_descs[WORLD_ROOM_ORCHARD], CFG_DESC_MAX - 1);
+    game->world.rooms[WORLD_ROOM_ORCHARD].desc[CFG_DESC_MAX - 1] = '\0';
+}
+
+static void herbalist_seed_marsh_root(struct GameState *game)
+{
+    int slot;
+
+    /* Keep one recoverable root in play when the requested story beat is active. */
+    if (game_inv_player_has_item(game, ITEM_MARSH_ROOT) ||
+            npc_any_room_has_item(game, ITEM_MARSH_ROOT)) {
+        game->marsh_root_spawned = 1;
+        return;
+    }
+    game->marsh_root_spawned = 0;
+    for (slot = 0; slot < CFG_AREA_ITEM_SLOTS; ++slot) {
+        if (game->room_item[WORLD_ROOM_MARSH][slot] == ITEM_NONE) {
+            game->room_item[WORLD_ROOM_MARSH][slot] = ITEM_MARSH_ROOT;
+            game->marsh_root_spawned = 1;
+            return;
+        }
+    }
+}
+
+void npc_story_tick(struct GameState *game)
+{
+    if (game->herbalist_story == HERBALIST_STORY_REQUESTED) {
+        herbalist_seed_marsh_root(game);
+    }
+}
+
+static int herbalist_open_dialogue(struct GameState *game, GameEventQueue *out)
+{
+    int scene;
+
+    if (game->herbalist_story == HERBALIST_STORY_REQUESTED) {
+        herbalist_seed_marsh_root(game);
+    }
+    herbalist_apply_world_hook(game);
+    scene = herbalist_dialogue_scene(game);
+    npc_push_dialogue_detail(out, GAME_DIALOGUE_ACTOR_HERBALIST,
+        GAME_DIALOGUE_PHASE_TALK, 0, scene);
+    game_set_mode_dialogue(game, DIALOGUE_NPC_HERBALIST);
+    return 1;
+}
+
+static int herbalist_reply_not_started(struct GameState *game, int choice,
+                                       GameEventQueue *out)
+{
+    if (choice == 1) {
+        game->herbalist_story = HERBALIST_STORY_REQUESTED;
+        herbalist_seed_marsh_root(game);
+    }
+    npc_push_dialogue_detail(out, GAME_DIALOGUE_ACTOR_HERBALIST,
+        GAME_DIALOGUE_PHASE_REPLY, choice, HERBALIST_SCENE_NOT_STARTED);
+    game_set_mode_explore(game);
+    return 1;
+}
+
+static int herbalist_reply_requested(struct GameState *game, int choice,
+                                     GameEventQueue *out)
+{
+    herbalist_seed_marsh_root(game);
+    npc_push_dialogue_detail(out, GAME_DIALOGUE_ACTOR_HERBALIST,
+        GAME_DIALOGUE_PHASE_REPLY, choice, HERBALIST_SCENE_REQUESTED);
+    game_set_mode_explore(game);
+    return 1;
+}
+
+static int herbalist_reply_ready(struct GameState *game, int choice,
+                                 GameEventQueue *out)
+{
+    if (choice == 1) {
+        game_inv_bag_remove_item(game, ITEM_MARSH_ROOT);
+        game->herbalist_story = HERBALIST_STORY_COMPLETE;
+        herbalist_apply_world_hook(game);
+    }
+    npc_push_dialogue_detail(out, GAME_DIALOGUE_ACTOR_HERBALIST,
+        GAME_DIALOGUE_PHASE_REPLY, choice, HERBALIST_SCENE_READY);
+    game_set_mode_explore(game);
+    return 1;
+}
+
+static int herbalist_reply_complete(struct GameState *game, int choice,
+                                    GameEventQueue *out)
+{
+    herbalist_apply_world_hook(game);
+    npc_push_dialogue_detail(out, GAME_DIALOGUE_ACTOR_HERBALIST,
+        GAME_DIALOGUE_PHASE_REPLY, choice, HERBALIST_SCENE_COMPLETE);
+    game_set_mode_explore(game);
+    return 1;
+}
+
+static int herbalist_reply(struct GameState *game, int choice,
+                           GameEventQueue *out)
+{
+    int scene;
+
+    scene = herbalist_dialogue_scene(game);
+    if (scene == HERBALIST_SCENE_COMPLETE) {
+        return herbalist_reply_complete(game, choice, out);
+    }
+    if (scene == HERBALIST_SCENE_READY) {
+        return herbalist_reply_ready(game, choice, out);
+    }
+    if (scene == HERBALIST_SCENE_REQUESTED) {
+        return herbalist_reply_requested(game, choice, out);
+    }
+    return herbalist_reply_not_started(game, choice, out);
 }
 
 static const struct NpcProfile *npc_bandit_profile(void)
@@ -521,6 +694,10 @@ int npc_open_room_dialogue(struct GameState *game, struct GameEventQueue *out)
     if (info == 0) {
         return 0;
     }
+    /* Multi-scene herbalist bypasses generic npc_push_dialogue (needs arg3 scene). */
+    if (info->dialogue_kind == DIALOGUE_NPC_HERBALIST) {
+        return herbalist_open_dialogue(game, out);
+    }
     /* Talk opens dialogue mode and queues one TALK event; reply uses npc_room_cmd_reply. */
     npc_push_dialogue(out, info->actor, info->open_phase, 0);
     game_set_mode_dialogue(game, info->dialogue_kind);
@@ -545,6 +722,9 @@ int npc_room_cmd_reply(struct GameState *game, int choice, GameEventQueue *out)
     if (!npc_choice_is_valid(choice)) {
         npc_push_dialogue_guard(out, GAME_DIALOGUE_GUARD_PICK_123);
         return 1;
+    }
+    if (info->dialogue_kind == DIALOGUE_NPC_HERBALIST) {
+        return herbalist_reply(game, choice, out);
     }
     npc_push_dialogue(out, info->actor, info->reply_phase, choice);
     game_set_mode_explore(game);
@@ -755,11 +935,18 @@ int npc_roaming_cmd_reply(struct GameState *game, int choice, GameEventQueue *ou
 
 /*
  * #160: shared dialogue producers (payload layout in gout.h). Slices queue
- * actor/phase/choice here; grendr maps GAME_EVENT_DIALOGUE* to copy.
+ * actor/phase/choice here; detail becomes arg3 (e.g. HerbalistDialogueScene).
+ * grendr maps GAME_EVENT_DIALOGUE* to copy.
  */
+void npc_push_dialogue_detail(struct GameEventQueue *out, int actor, int phase,
+                              int choice, int detail)
+{
+    game_event_push(out, GAME_EVENT_DIALOGUE, actor, phase, choice, detail, 0);
+}
+
 void npc_push_dialogue(struct GameEventQueue *out, int actor, int phase, int choice)
 {
-    game_event_push(out, GAME_EVENT_DIALOGUE, actor, phase, choice, 0, 0);
+    npc_push_dialogue_detail(out, actor, phase, choice, 0);
 }
 
 void npc_push_dialogue_guard(struct GameEventQueue *out, int reason)

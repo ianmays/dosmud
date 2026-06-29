@@ -41,10 +41,13 @@ static void save_fill_fixture(struct GameState *game)
     game->env_focus_room = WORLD_ROOM_TOWER;
     game->env_focus_kind = GAME_ENV_CREAK;
     game->env_focus_expires_tick = 81U;
+    game->herbalist_story = HERBALIST_STORY_REQUESTED;
+    game->marsh_root_spawned = 1;
     game->bag[0] = ITEM_STICK;
     game->bag[1] = ITEM_SALVE;
     game->bag[2] = ITEM_SPEAR;
-    game->bag_count = 3;
+    game->bag[3] = ITEM_MARSH_ROOT;
+    game->bag_count = 4;
     game->bag_capacity = 6;
     game->level = 3;
     game->xp = 14;
@@ -141,6 +144,8 @@ static int save_games_equal(const struct GameState *a,
             a->env_focus_room != b->env_focus_room ||
             a->env_focus_kind != b->env_focus_kind ||
             a->env_focus_expires_tick != b->env_focus_expires_tick ||
+            a->herbalist_story != b->herbalist_story ||
+            a->marsh_root_spawned != b->marsh_root_spawned ||
             a->bag_count != b->bag_count ||
             a->bag_capacity != b->bag_capacity ||
             a->level != b->level ||

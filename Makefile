@@ -89,6 +89,7 @@ SNAPSHOT_TESTS = \
 	bandit_handover bandit_wielded_give area_items map equipment craft_wielded \
 	walk_north walk_map wait_tick \
 	frog_hint frog_replies watchman_talk traveler_replies traveler_talk_blocked herbalist_talk archivist_talk talk_nobody \
+	herbalist_request herbalist_incomplete herbalist_complete herbalist_followup herbalist_save_load \
 	dialogue_menu_exit \
 	game_event_dialogue narrative_indirection \
 	use_salve use_torch use_spear use_stone eat_berry eat_fish eat_berry_heal eat_fish_heal \
@@ -123,6 +124,11 @@ snapshot-run:
 			diff -u $(REGRESSION_DIR)/replay_save_load_log.expect $(REGRESSION_DIR)/replay_save_load_log.output; \
 			rm -f save.dat; \
 		elif [ "$$t" = "save_load" ]; then \
+			rm -f save.dat; \
+			./$(BIN) < $(REGRESSION_DIR)/$$t.input > $(REGRESSION_DIR)/$$t.output; \
+			diff -u $(REGRESSION_DIR)/$$t.expect $(REGRESSION_DIR)/$$t.output; \
+			rm -f save.dat; \
+		elif [ "$$t" = "herbalist_save_load" ]; then \
 			rm -f save.dat; \
 			./$(BIN) < $(REGRESSION_DIR)/$$t.input > $(REGRESSION_DIR)/$$t.output; \
 			diff -u $(REGRESSION_DIR)/$$t.expect $(REGRESSION_DIR)/$$t.output; \

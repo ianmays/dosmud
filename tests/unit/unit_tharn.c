@@ -2,6 +2,7 @@
 #include <string.h>
 #include "config.h"
 #include "game.h"
+#include "invent.h"
 #include "items.h"
 #include "npc.h"
 #include "testharn.h"
@@ -113,6 +114,19 @@ TEST testharn_fixture_quiet_explore(void)
     PASS();
 }
 
+TEST testharn_fixture_story_orchard_ready(void)
+{
+    struct GameState game;
+    int rc;
+
+    unit_game_fresh(&game, 51u);
+    rc = testharn_apply(&game, "@fixture story_orchard_ready");
+    ASSERT_EQ(1, rc);
+    ASSERT_EQ(HERBALIST_STORY_REQUESTED, game.herbalist_story);
+    ASSERT_EQ(1, game_inv_player_has_item(&game, ITEM_MARSH_ROOT));
+    PASS();
+}
+
 TEST testharn_bag_full_gate(void)
 {
     struct GameState game;
@@ -162,6 +176,14 @@ TEST testharn_fixture_sweep(void)
     rc = testharn_apply(&game, "@fixture at_tower");
     ASSERT_EQ(1, rc);
     rc = testharn_apply(&game, "@fixture at_orchard");
+    ASSERT_EQ(1, rc);
+    rc = testharn_apply(&game, "@fixture story_orchard_requested");
+    ASSERT_EQ(1, rc);
+    rc = testharn_apply(&game, "@fixture story_orchard_ready");
+    ASSERT_EQ(1, rc);
+    rc = testharn_apply(&game, "@fixture story_orchard_done");
+    ASSERT_EQ(1, rc);
+    rc = testharn_apply(&game, "@fixture story_marsh_root");
     ASSERT_EQ(1, rc);
     rc = testharn_apply(&game, "@fixture at_catacombs");
     ASSERT_EQ(1, rc);
@@ -315,6 +337,7 @@ SUITE(testharn) {
     RUN_TEST(testharn_fixture_at_camp);
     RUN_TEST(testharn_fixture_world_boot);
     RUN_TEST(testharn_fixture_quiet_explore);
+    RUN_TEST(testharn_fixture_story_orchard_ready);
     RUN_TEST(testharn_bag_full_gate);
     RUN_TEST(testharn_fixture_sweep);
     RUN_TEST(testharn_fixture_corpse_stripped_clears_corpse_items);

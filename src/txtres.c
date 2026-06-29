@@ -1,6 +1,7 @@
 #include "txtres.h"
 #include "config.h"
 #include "gout.h"
+#include "npc.h"
 #include "version.h"
 #include "world.h"
 
@@ -79,6 +80,8 @@ const char *const g_room_art_captions[CFG_ROOM_MAX] = {
 
 const char *const TXT_ROOM_ANIMAL_FALLBACK = "something";
 const char *const TXT_ROOM_NOISE_FALLBACK = "You hear a distant animal noise.";
+const char *const TXT_STORY_ORCHARD_DONE_DESC =
+    "Crooked fruit trees crowd a forgotten lane, and the bitter scent of crushed marsh-root still hangs in the air.";
 
 /*
  * actor rows follow GameDialogueActor; columns follow GameDialoguePhase (gout.h).
@@ -417,9 +420,21 @@ const char *const TXT_MSG_WATCHMAN_TALK_LINE2 = "\"Storms come from the canyon. 
 const char *const TXT_MSG_WATCHMAN_TALK_LINE3 = "  [1] Ask for warning signs.\n  [2] Offer to share a meal.\n";
 const char *const TXT_MSG_WATCHMAN_TALK_LINE4 = "  [3] Say nothing and move on.\n";
 const char *const TXT_MSG_HERBALIST_TALK_LINE1 = "An herbalist kneels among fallen fruit.\n";
-const char *const TXT_MSG_HERBALIST_TALK_LINE2 = "\"Need a field remedy or just company?\"\n";
-const char *const TXT_MSG_HERBALIST_TALK_LINE3 = "  [1] Ask for medicine advice.\n  [2] Trade gossip from the road.\n";
+const char *const TXT_MSG_HERBALIST_TALK_LINE2 = "\"I could use a steady pair of hands, if you're offering them.\"\n";
+const char *const TXT_MSG_HERBALIST_TALK_LINE3 = "  [1] Ask what she needs.\n  [2] Trade gossip from the road.\n";
 const char *const TXT_MSG_HERBALIST_TALK_LINE4 = "  [3] Leave politely.\n";
+const char *const TXT_MSG_HERBALIST_REQ_LINE1 = "The herbalist brushes pulp from her palms.\n";
+const char *const TXT_MSG_HERBALIST_REQ_LINE2 = "\"Bring me a marsh-root from the black water marsh. Freshly cut, not drowned.\"\n";
+const char *const TXT_MSG_HERBALIST_REQ_LINE3 = "  [1] Ask where to look.\n  [2] Admit you do not have it yet.\n";
+const char *const TXT_MSG_HERBALIST_REQ_LINE4 = "  [3] Leave and keep searching.\n";
+const char *const TXT_MSG_HERBALIST_READY_LINE1 = "The herbalist spots the marsh-root in your bag at once.\n";
+const char *const TXT_MSG_HERBALIST_READY_LINE2 = "\"You found one. Will you hand it over?\"\n";
+const char *const TXT_MSG_HERBALIST_READY_LINE3 = "  [1] Give her the marsh-root.\n  [2] Ask why she needs it.\n";
+const char *const TXT_MSG_HERBALIST_READY_LINE4 = "  [3] Keep it for now.\n";
+const char *const TXT_MSG_HERBALIST_DONE_LINE1 = "The herbalist ties the cut root in drying twine.\n";
+const char *const TXT_MSG_HERBALIST_DONE_LINE2 = "\"The worst of the blight should break by morning. What else are you after?\"\n";
+const char *const TXT_MSG_HERBALIST_DONE_LINE3 = "  [1] Ask where to search next.\n  [2] Ask what the root cured.\n";
+const char *const TXT_MSG_HERBALIST_DONE_LINE4 = "  [3] Leave her to the work.\n";
 const char *const TXT_MSG_ARCHIVIST_TALK_LINE1 = "A dust-caked archivist lights a stub candle.\n";
 const char *const TXT_MSG_ARCHIVIST_TALK_LINE2 = "\"Speak quickly. Stone remembers everything.\"\n";
 const char *const TXT_MSG_ARCHIVIST_TALK_LINE3 = "  [1] Ask about the ruins.\n  [2] Ask about safer routes.\n";
@@ -432,11 +447,42 @@ const char *txtres_msg_watchman_reply(int arg)
     return "He nods once and returns to the horizon.\n";
 }
 
-const char *txtres_msg_herbalist_reply(int arg)
+const char *txtres_msg_herbalist_reply(int arg, int scene)
 {
-    if (arg == 1) return "She mutters ratios: \"Two berries, one herb, crush fine.\"\n";
-    if (arg == 2) return "She laughs. \"Road stories always cost extra.\"\n";
-    return "She waves without looking up.\n";
+    if (scene == HERBALIST_SCENE_NOT_STARTED) {
+        if (arg == 1) {
+            return "She lowers her voice. \"The marsh still grows a root that cuts fever fast. Bring me one, and I'll point you toward older answers than mine.\"\n";
+        }
+        if (arg == 2) {
+            return "She smiles thinly. \"Road gossip keeps longer than fruit. Marsh-root does not.\"\n";
+        }
+        return "She waves without looking up.\n";
+    }
+    if (scene == HERBALIST_SCENE_REQUESTED) {
+        if (arg == 1) {
+            return "She gestures with a stained thumb. \"Look where the reeds crowd black water. The root knots low in the mud.\"\n";
+        }
+        if (arg == 2) {
+            return "She nods once. \"Then do not linger here. The marsh keeps what waits too long.\"\n";
+        }
+        return "She turns back to sorting bruised fruit.\n";
+    }
+    if (scene == HERBALIST_SCENE_READY) {
+        if (arg == 1) {
+            return "She takes the marsh-root and crushes it between her stained thumbs.\nThe bitter scent clears the orchard air for a moment.\n\"If you are still hunting answers, start with the Ruins. If the stones lie, try the Catacombs beneath them.\"\n";
+        }
+        if (arg == 2) {
+            return "\"A child upriver is burning with marsh fever,\" she says. \"This cuts it before dusk does.\"\n";
+        }
+        return "She watches the root in your bag and says nothing more.\n";
+    }
+    if (arg == 1) {
+        return "She jerks her chin east. \"The Ruins keep the first layer of truth. The Catacombs keep what sank beneath it.\"\n";
+    }
+    if (arg == 2) {
+        return "She binds the paste into cloth. \"Enough to cool a fever and buy one family another week.\"\n";
+    }
+    return "She nods her thanks and returns to her mortar.\n";
 }
 
 const char *txtres_msg_archivist_reply(int arg)

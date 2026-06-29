@@ -31,6 +31,13 @@ enum DialogueKind {
     DIALOGUE_LOOT
 };
 
+/* Persisted progress for npc.c herbalist branch (#76); not a generic quest layer. */
+enum HerbalistStoryState {
+    HERBALIST_STORY_NONE = 0,
+    HERBALIST_STORY_REQUESTED,
+    HERBALIST_STORY_COMPLETE
+};
+
 /* Stored in GameState.env_focus_kind; render consumes the same values. */
 #define GAME_ENV_NONE 0
 #define GAME_ENV_RUSTLE 1
@@ -88,6 +95,10 @@ struct GameState {
     int env_focus_room;
     int env_focus_kind;
     u32 env_focus_expires_tick;
+    /* npc.c herbalist branch (#76); saved in save v10+. */
+    int herbalist_story;
+    /* Story-owned in-play marker: resets when no marsh-root is reachable. */
+    int marsh_root_spawned;
     int room_item[CFG_ROOM_MAX][CFG_AREA_ITEM_SLOTS];
     int bag[CFG_BAG_MAX];
     int bag_count;

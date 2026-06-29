@@ -12,6 +12,7 @@
 #include "items.h"
 #include "combat.h"
 #include "npc.h"
+#include "txtres.h"
 #include "world.h"
 #include "testharn.h"
 #include "th_world.h"
@@ -306,6 +307,49 @@ static void fixture_at_orchard(struct GameState *game)
 {
     game_reset_fixture_baseline(game, WORLD_ROOM_ORCHARD, 0);
     game->room_explored[WORLD_ROOM_ORCHARD] = 1;
+}
+
+/* Pre-seed marsh root so snapshots skip lazy npc seeding on talk. */
+static void fixture_story_orchard_requested(struct GameState *game)
+{
+    fixture_at_orchard(game);
+    game->herbalist_story = HERBALIST_STORY_REQUESTED;
+    game->marsh_root_spawned = 1;
+    game->room_item[WORLD_ROOM_MARSH][1] = ITEM_MARSH_ROOT;
+}
+
+static int fixture_story_orchard_ready(struct GameState *game)
+{
+    fixture_story_orchard_requested(game);
+    if (!game_inv_bag_add(game, ITEM_MARSH_ROOT)) {
+        return 0;
+    }
+    return 1;
+}
+
+static void fixture_story_orchard_done(struct GameState *game)
+{
+    fixture_at_orchard(game);
+    game->herbalist_story = HERBALIST_STORY_COMPLETE;
+    game->marsh_root_spawned = 1;
+    /* Snapshot fixtures persist the same room-copy mutation the turn-in applies. */
+    strncpy(game->world.rooms[WORLD_ROOM_ORCHARD].desc,
+        TXT_STORY_ORCHARD_DONE_DESC, CFG_DESC_MAX - 1);
+    game->world.rooms[WORLD_ROOM_ORCHARD].desc[CFG_DESC_MAX - 1] = '\0';
+}
+
+/* Marsh room with authored root visible for take/examine snapshot paths. */
+static void fixture_story_marsh_root(struct GameState *game)
+{
+    game_reset_fixture_baseline(game, WORLD_ROOM_MARSH, 2);
+    camp_clear_ground(game);
+    game->herbalist_story = HERBALIST_STORY_REQUESTED;
+    game->marsh_root_spawned = 1;
+    game->room_item[WORLD_ROOM_MARSH][0] = ITEM_REED;
+    game->room_item[WORLD_ROOM_MARSH][1] = ITEM_MARSH_ROOT;
+    game->room_explored[WORLD_ROOM_CAMP] = 1;
+    game->room_explored[WORLD_ROOM_MARSH] = 1;
+    game_set_mode_explore(game);
 }
 
 static void fixture_at_catacombs(struct GameState *game)
@@ -675,6 +719,24 @@ int testharn_apply(struct GameState *game, const char *line)
     }
     if (fixture_name_is("at_orchard", name)) {
         fixture_at_orchard(game);
+        return 1;
+    }
+    if (fixture_name_is("story_orchard_requested", name)) {
+        fixture_story_orchard_requested(game);
+        return 1;
+    }
+    if (fixture_name_is("story_orchard_ready", name)) {
+        if (!fixture_story_orchard_ready(game)) {
+            return -2;
+        }
+        return 1;
+    }
+    if (fixture_name_is("story_orchard_done", name)) {
+        fixture_story_orchard_done(game);
+        return 1;
+    }
+    if (fixture_name_is("story_marsh_root", name)) {
+        fixture_story_marsh_root(game);
         return 1;
     }
     if (fixture_name_is("at_catacombs", name)) {
