@@ -9,6 +9,7 @@
 #include "grendr.h"
 #include "dialogue.h"
 #include "game.h"
+#include "npc.h"
 #include "gout.h"
 #include "combat.h"
 #include "items.h"

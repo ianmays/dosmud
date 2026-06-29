@@ -4,7 +4,6 @@
 #include "base.h"
 #include "command.h"
 #include "gout.h"
-#include "npc.h"
 #include "world.h"
 #include "gprog.h"
 

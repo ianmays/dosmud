@@ -460,7 +460,7 @@ const char *txtres_msg_herbalist_reply(int arg, int scene)
     }
     if (scene == HERBALIST_SCENE_REQUESTED) {
         if (arg == 1) {
-            return "She points south with a stained thumb. \"Look where the reeds crowd black water. The root knots low in the mud.\"\n";
+            return "She gestures with a stained thumb. \"Look where the reeds crowd black water. The root knots low in the mud.\"\n";
         }
         if (arg == 2) {
             return "She nods once. \"Then do not linger here. The marsh keeps what waits too long.\"\n";

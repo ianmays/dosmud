@@ -5,6 +5,7 @@
 #include "gout.h"
 #include "invent.h"
 #include "items.h"
+#include "npc.h"
 #include "txtres.h"
 #include "world.h"
 #include "unit_util.h"
