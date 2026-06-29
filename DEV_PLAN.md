@@ -41,9 +41,9 @@ When a draft **implementation** PR is opened for an issue that **already has a s
 
 ### Execution order (open work)
 
-Milestone numbers are **themes**, not strict schedule. Suggested pull order for open issues (execution diagram below; distinct from GitHub **blocked-by**, which marks technical prerequisites only):
+Milestone numbers are **themes**, not strict schedule. **Open-work index and soft sequencing** (diagram below) - **not** the [project board](https://github.com/users/ianmays/projects/1) Agent-ready queue. Use the **authored-content spine** for near-term pull order. Milestone nodes group open issues by theme; **later/parked** labels inside a node do not mean those issues are active now.
 
-Dashed edges mark **completed** prerequisite chains (m5, m9); solid edges are the open pull order from m10 onward.
+Dashed edges mark **completed** prerequisite chains (m5, m9, m10). Dashed edges from m10 foundations to m6/m8 show where open work sits thematically - not a strict m10 -> all m8 -> all m6 schedule.
 
 ```mermaid
 flowchart LR
@@ -55,38 +55,52 @@ flowchart LR
   subgraph m9_done [Engine_NPC done]
     M9a["104,100,187,101,102,107"]
   end
-  subgraph m10 [Authored_content_IoC]
+  subgraph m10_done [Authored_content_IoC done]
     M10["195,196,197"]
   end
   subgraph m8 [Advanced_Mechanics]
-    M8["4,15,132,50,9,31,52,49,145,206"]
+    M8["spine: 132,49; playability: 145,206; later: 15,9,31,52"]
   end
   subgraph m6 [Content_Expansion]
-    M6["55,7,8,51,54,76,130,131"]
+    M6["spine: 8; content later: 7,54,55,51,130,131"]
   end
   subgraph m7 [Renderer]
-    M7["48,207"]
+    M7["playability: 207; later: 48"]
   end
   subgraph m11 [Multiplayer]
-    M11["92"]
+    M11["parked: 92"]
   end
   M5chain -.-> M5adj
   M5chain -.-> M5late
   M5chain -.-> m9_done
-  m9_done -.-> m10
-  m10 --> m8
-  m8 --> m6
+  m9_done -.-> m10_done
+  m10_done -.-> m6
+  m10_done -.-> m8
   M5chain -.-> m7
   M5chain -.-> m11
 ```
+
+**Authored-content spine** - **near-term pull order** (soft sequencing; can interleave m6 and m8 milestones):
+
+```text
+#76 proves one authored world hook locally (Done)
+#132 proves NPC item exchange/rewards
+#49 extracts progress helpers
+#8 wires dialogue choices to actions/state changes
+#TBC generalises authored world advancement hooks
+```
+
+Parked/later unless current authored content creates real pressure: [#50](https://github.com/ianmays/dosmud/issues/50) economy, [#52](https://github.com/ianmays/dosmud/issues/52) schedules, [#9](https://github.com/ianmays/dosmud/issues/9) reputation, acts, quest DSL, external data packs, [#48](https://github.com/ianmays/dosmud/issues/48) SDL renderer, [#92](https://github.com/ianmays/dosmud/issues/92) multiplayer. Near-term playability (not spine): [#207](https://github.com/ianmays/dosmud/issues/207) 25-line safe output. Tooling/showcase (not spine): [#180](https://github.com/ianmays/dosmud/issues/180) asciinema.
+
+Distinct from GitHub **blocked-by** (Relationships sidebar), which marks technical prerequisites only.
 
 **Completed (m5):** [#71](https://github.com/ianmays/dosmud/issues/71) engine boundary, [#47](https://github.com/ianmays/dosmud/issues/47) event queue ([#164](https://github.com/ianmays/dosmud/pull/164)), [#157](https://github.com/ianmays/dosmud/issues/157) command/navigation GameEvent migration ([#167](https://github.com/ianmays/dosmud/pull/167)), [#158](https://github.com/ianmays/dosmud/issues/158) inventory/item GameEvent migration ([#173](https://github.com/ianmays/dosmud/pull/173)), [#159](https://github.com/ianmays/dosmud/issues/159) combat/progression GameEvent migration ([#174](https://github.com/ianmays/dosmud/pull/174)), [#160](https://github.com/ianmays/dosmud/issues/160) dialogue/encounter GameEvent migration ([#175](https://github.com/ianmays/dosmud/pull/175)), [#161](https://github.com/ianmays/dosmud/issues/161) ambient/inspect GameEvent migration ([#176](https://github.com/ianmays/dosmud/pull/176)), [#162](https://github.com/ianmays/dosmud/issues/162) legacy GAME_OUT removal ([#177](https://github.com/ianmays/dosmud/pull/177)), [#163](https://github.com/ianmays/dosmud/issues/163) GameEvent test coverage pass ([#181](https://github.com/ianmays/dosmud/pull/181)), adjacent [#156](https://github.com/ianmays/dosmud/issues/156) replay event log ([#183](https://github.com/ianmays/dosmud/pull/183)), and [#16](https://github.com/ianmays/dosmud/issues/16) save/load ([#184](https://github.com/ianmays/dosmud/pull/184)). **m5 GameEvent migration chain complete.**
 
 **Completed (m9 NPC chain):** [#104](https://github.com/ianmays/dosmud/issues/104) npc module ([#185](https://github.com/ianmays/dosmud/pull/185)), [#100](https://github.com/ianmays/dosmud/issues/100) roaming NPC ([#186](https://github.com/ianmays/dosmud/pull/186)), [#187](https://github.com/ianmays/dosmud/issues/187) fixed-size roster ([#188](https://github.com/ianmays/dosmud/pull/188)), [#101](https://github.com/ianmays/dosmud/issues/101) reusable enemy NPC ([#189](https://github.com/ianmays/dosmud/pull/189)), [#102](https://github.com/ianmays/dosmud/issues/102) fixed road bandit ([#190](https://github.com/ianmays/dosmud/pull/190)), [#107](https://github.com/ianmays/dosmud/issues/107) roaming bandit encounter ([#192](https://github.com/ianmays/dosmud/pull/192)). **m9 NPC roster + roaming encounter chain complete.**
 
-Workflow (milestone 4) can run in parallel with architecture once unblocked. Milestone 5 **GameEvent migration** (#157 through #163) and adjacent [#156](https://github.com/ianmays/dosmud/issues/156) / [#16](https://github.com/ianmays/dosmud/issues/16) are **complete**. Content (6) and renderer (7) are not gated on all of mechanics (8). Open m10 platform slices: [Authored content and engine IoC](#authored-content-and-engine-ioc).
+Workflow (milestone 4) can run in parallel with architecture once unblocked. Milestones 5 (**GameEvent migration**), 9 (NPC engine), and 10 ([Authored content and engine IoC](#authored-content-and-engine-ioc) platform slices) are **complete**. Current authored-content work intentionally interleaves m6 and m8; renderer (m7) and multiplayer (m11) are parallel lanes, not spine prerequisites.
 
-**Dependencies:** GitHub **blocked-by** (Relationships sidebar) is authoritative for **true prerequisites** only - an issue cannot start until the blocker is merged (technical or functional gate). Do not wire blocked-by for thematic pull order or soft sequencing; the execution diagram and milestone chains below are a **suggested pull-order index** (wire blocked-by via [milestone-issue-hygiene](.cursor/skills/milestone-issue-hygiene/SKILL.md) when adding issues). [#71](https://github.com/ianmays/dosmud/issues/71) and [#47](https://github.com/ianmays/dosmud/issues/47) are **closed**; downstream issues may still list them as blockers in GitHub Relationships. Key chains: [#71](https://github.com/ianmays/dosmud/issues/71) before [#47](https://github.com/ianmays/dosmud/issues/47) / [#104](https://github.com/ianmays/dosmud/issues/104); [#47](https://github.com/ianmays/dosmud/issues/47) before [#157](https://github.com/ianmays/dosmud/issues/157), [#158](https://github.com/ianmays/dosmud/issues/158), [#159](https://github.com/ianmays/dosmud/issues/159), [#160](https://github.com/ianmays/dosmud/issues/160), [#161](https://github.com/ianmays/dosmud/issues/161), [#162](https://github.com/ianmays/dosmud/issues/162), [#163](https://github.com/ianmays/dosmud/issues/163), and separate lane [#156](https://github.com/ianmays/dosmud/issues/156); direct migration chain order: [#157](https://github.com/ianmays/dosmud/issues/157) before [#158](https://github.com/ianmays/dosmud/issues/158) before [#159](https://github.com/ianmays/dosmud/issues/159) before [#160](https://github.com/ianmays/dosmud/issues/160) before [#161](https://github.com/ianmays/dosmud/issues/161) before [#162](https://github.com/ianmays/dosmud/issues/162) before [#163](https://github.com/ianmays/dosmud/issues/163); [#71](https://github.com/ianmays/dosmud/issues/71) and [#47](https://github.com/ianmays/dosmud/issues/47) before [#48](https://github.com/ianmays/dosmud/issues/48); m9 NPC chain [#104](https://github.com/ianmays/dosmud/issues/104) before [#100](https://github.com/ianmays/dosmud/issues/100) before [#187](https://github.com/ianmays/dosmud/issues/187) before [#101](https://github.com/ianmays/dosmud/issues/101) / [#102](https://github.com/ianmays/dosmud/issues/102) / [#107](https://github.com/ianmays/dosmud/issues/107) (**complete**); m10 chain: [#195](https://github.com/ianmays/dosmud/issues/195) before [#196](https://github.com/ianmays/dosmud/issues/196); placement profile v1 delivered in [#192](https://github.com/ianmays/dosmud/pull/192) / [#107](https://github.com/ianmays/dosmud/issues/107) (no separate issue); [#195](https://github.com/ianmays/dosmud/issues/195) before m6 [#54](https://github.com/ianmays/dosmud/issues/54); [#196](https://github.com/ianmays/dosmud/issues/196) before m6 [#8](https://github.com/ianmays/dosmud/issues/8) and [#76](https://github.com/ianmays/dosmud/issues/76); [#104](https://github.com/ianmays/dosmud/issues/104) before [#8](https://github.com/ianmays/dosmud/issues/8); [#4](https://github.com/ianmays/dosmud/issues/4) and [#5](https://github.com/ianmays/dosmud/issues/5) are **not** blocked by [#15](https://github.com/ianmays/dosmud/issues/15) (combat slices ship first; [#15](https://github.com/ianmays/dosmud/issues/15) may enhance formulas later); [#132](https://github.com/ianmays/dosmud/issues/132) is **not** blocked by [#50](https://github.com/ianmays/dosmud/issues/50) (NPC item exchange can ship without merged wallet foundation; coin buy/sell can integrate when [#50](https://github.com/ianmays/dosmud/issues/50) lands); [#52](https://github.com/ianmays/dosmud/issues/52) before [#49](https://github.com/ianmays/dosmud/issues/49); [#142](https://github.com/ianmays/dosmud/issues/142) (fmt render migration) before [#145](https://github.com/ianmays/dosmud/issues/145) (local map viewport); m11 [#92](https://github.com/ianmays/dosmud/issues/92) multiplayer after [#16](https://github.com/ianmays/dosmud/issues/16), [#71](https://github.com/ianmays/dosmud/issues/71), [#47](https://github.com/ianmays/dosmud/issues/47).
+**Dependencies:** GitHub **blocked-by** (Relationships sidebar) is authoritative for **true prerequisites** only - an issue cannot start until the blocker is merged (technical or functional gate). Do not wire blocked-by for thematic pull order or soft sequencing; the execution diagram is an **open-work index** and the authored-content spine is the **near-term sequence** (wire blocked-by via [milestone-issue-hygiene](.cursor/skills/milestone-issue-hygiene/SKILL.md) when adding issues). [#71](https://github.com/ianmays/dosmud/issues/71) and [#47](https://github.com/ianmays/dosmud/issues/47) are **closed**; downstream issues may still list them as blockers in GitHub Relationships. Key chains: [#71](https://github.com/ianmays/dosmud/issues/71) before [#47](https://github.com/ianmays/dosmud/issues/47) / [#104](https://github.com/ianmays/dosmud/issues/104); [#47](https://github.com/ianmays/dosmud/issues/47) before [#157](https://github.com/ianmays/dosmud/issues/157), [#158](https://github.com/ianmays/dosmud/issues/158), [#159](https://github.com/ianmays/dosmud/issues/159), [#160](https://github.com/ianmays/dosmud/issues/160), [#161](https://github.com/ianmays/dosmud/issues/161), [#162](https://github.com/ianmays/dosmud/issues/162), [#163](https://github.com/ianmays/dosmud/issues/163), and separate lane [#156](https://github.com/ianmays/dosmud/issues/156); direct migration chain order: [#157](https://github.com/ianmays/dosmud/issues/157) before [#158](https://github.com/ianmays/dosmud/issues/158) before [#159](https://github.com/ianmays/dosmud/issues/159) before [#160](https://github.com/ianmays/dosmud/issues/160) before [#161](https://github.com/ianmays/dosmud/issues/161) before [#162](https://github.com/ianmays/dosmud/issues/162) before [#163](https://github.com/ianmays/dosmud/issues/163); [#71](https://github.com/ianmays/dosmud/issues/71) and [#47](https://github.com/ianmays/dosmud/issues/47) before [#48](https://github.com/ianmays/dosmud/issues/48); m9 NPC chain [#104](https://github.com/ianmays/dosmud/issues/104) before [#100](https://github.com/ianmays/dosmud/issues/100) before [#187](https://github.com/ianmays/dosmud/issues/187) before [#101](https://github.com/ianmays/dosmud/issues/101) / [#102](https://github.com/ianmays/dosmud/issues/102) / [#107](https://github.com/ianmays/dosmud/issues/107) (**complete**); m10 chain [#195](https://github.com/ianmays/dosmud/issues/195) before [#196](https://github.com/ianmays/dosmud/issues/196) (**complete**); placement profile v1 delivered in [#192](https://github.com/ianmays/dosmud/pull/192) / [#107](https://github.com/ianmays/dosmud/issues/107) (no separate issue); authored spine (soft order, not all blocked-by): [#76](https://github.com/ianmays/dosmud/issues/76) before [#132](https://github.com/ianmays/dosmud/issues/132) before [#49](https://github.com/ianmays/dosmud/issues/49) before [#8](https://github.com/ianmays/dosmud/issues/8); [#104](https://github.com/ianmays/dosmud/issues/104) before [#8](https://github.com/ianmays/dosmud/issues/8); [#4](https://github.com/ianmays/dosmud/issues/4) and [#5](https://github.com/ianmays/dosmud/issues/5) are **not** blocked by [#15](https://github.com/ianmays/dosmud/issues/15) (combat slices ship first; [#15](https://github.com/ianmays/dosmud/issues/15) may enhance formulas later); [#132](https://github.com/ianmays/dosmud/issues/132) is **not** blocked by [#50](https://github.com/ianmays/dosmud/issues/50) (NPC item exchange ships without coin wallet); [#52](https://github.com/ianmays/dosmud/issues/52) is parked/later and **not** a gate for [#49](https://github.com/ianmays/dosmud/issues/49) or the authored spine; [#142](https://github.com/ianmays/dosmud/issues/142) (fmt render migration) before [#145](https://github.com/ianmays/dosmud/issues/145) (local map viewport); m11 [#92](https://github.com/ianmays/dosmud/issues/92) multiplayer after [#16](https://github.com/ianmays/dosmud/issues/16), [#71](https://github.com/ianmays/dosmud/issues/71), [#47](https://github.com/ianmays/dosmud/issues/47).
 
 ### Relative size (GitHub project)
 
@@ -96,25 +110,25 @@ Workflow (milestone 4) can run in parallel with architecture once unblocked. Mil
 |------|---------|------------------------|
 | XS | single trivial change | *(none currently)* |
 | S | narrow feature or tooling slice | #4, #197 |
-| M | one subsystem feature or refactor | #5, #7, #9, #31, #49, #51, #54, #100, #101, #102, #129, #130, #131, #132, #145, #187, #195, #196, #202, #203, #206, #207 |
-| L | major mechanism or platform path | #8, #15, #50, #52, #76, #107 |
+| M | one subsystem feature or refactor | #5, #7, #9, #31, #49, #51, #52, #54, #100, #101, #102, #129, #130, #131, #132, #145, #187, #195, #196, #202, #203, #206, #207 |
+| L | major mechanism or platform path | #8, #15, #50, #76, #107 |
 | XL | foundational or multi-area epic | #48, #55, #92 |
 
 [#71](https://github.com/ianmays/dosmud/issues/71) **XL** and [#47](https://github.com/ianmays/dosmud/issues/47) **L** established the engine boundary and event-queue seam ([#164](https://github.com/ianmays/dosmud/pull/164)). [#104](https://github.com/ianmays/dosmud/issues/104) npc module landed ([#185](https://github.com/ianmays/dosmud/pull/185)). Remaining XL gates: [#48](https://github.com/ianmays/dosmud/issues/48) (renderer) and m11 [#92](https://github.com/ianmays/dosmud/issues/92) (multiplayer).
 
 ### Current Project Priority
 
-The project is currently in an architectural consolidation phase.
+Core architecture seams (m5 GameEvent migration, m9 NPC engine, m10 authored-content IoC) are largely landed. Near-term value is **narrow authored content** that proves local world hooks and interaction seams - not broad economy, quest frameworks, or schedule systems.
 
 Highest-value work:
 
-1. clarify subsystem ownership
-2. reduce architecture drift
-3. improve deterministic testing
+1. deliver the authored-content spine (#132, #49, #8) in small proven slices
+2. preserve deterministic testing and save/load safety on authored state
+3. clarify subsystem ownership as new content lands
 4. preserve ANSI C89 portability
-5. improve workflow/tooling discipline
+5. improve workflow/tooling discipline where it supports playtesting and delivery
 
-Large-scale gameplay/content expansion should remain secondary until the core architecture stabilizes.
+Deferred unless authored content creates real pressure: full economy ([#50](https://github.com/ianmays/dosmud/issues/50)), NPC schedules ([#52](https://github.com/ianmays/dosmud/issues/52)), reputation ([#9](https://github.com/ianmays/dosmud/issues/9)), acts, quest DSL, external data packs, SDL renderer ([#48](https://github.com/ianmays/dosmud/issues/48)), multiplayer ([#92](https://github.com/ianmays/dosmud/issues/92)).
 
 ### Hard Constraints
 
@@ -465,6 +479,8 @@ Done ✅ ([#151](https://github.com/ianmays/dosmud/pull/151)).
 
 ### [#180](https://github.com/ianmays/dosmud/issues/180) - asciinema recording and Pages playback for agent playtests
 
+Tooling/showcase lane - useful later for recording richer agent playtests. Not on the authored-content spine.
+
 ### [#202](https://github.com/ianmays/dosmud/issues/202) - Add build identity and version command
 
 Done ✅ ([#208](https://github.com/ianmays/dosmud/pull/208)).
@@ -607,13 +623,13 @@ Single-slot save/load landed through shell-edge [`save.c`](../src/save.c) / [`sa
 
 ## [Content Expansion](https://github.com/ianmays/dosmud/milestone/6)
 
-Gameplay and world content after core architecture stabilizes. Related mechanics (economy, quests, schedules, reputation) live under [Advanced Mechanics](https://github.com/ianmays/dosmud/milestone/8). Authored cast, encounters, and narrative pathway issues (#8, #54, #76) depend on [Authored content and engine IoC](#authored-content-and-engine-ioc) (milestone 10) for table-driven placement and narrative hooks.
+Gameplay and world content built on completed m10 platform slices ([Authored content and engine IoC](#authored-content-and-engine-ioc)). Related mechanics (item exchange, progress helpers, schedules, reputation) live under [Advanced Mechanics](https://github.com/ianmays/dosmud/milestone/8); the authored-content spine intentionally interleaves m6 and m8 work.
 
 | Issue | Title | Size |
 |-------|-------|------|
 | [#55](https://github.com/ianmays/dosmud/issues/55) | larger worlds | XL |
 | [#7](https://github.com/ianmays/dosmud/issues/7) | interactive world events | M |
-| [#8](https://github.com/ianmays/dosmud/issues/8) | complex dialogue | L |
+| [#8](https://github.com/ianmays/dosmud/issues/8) | dialogue branching and action follow-ups | L |
 | [#51](https://github.com/ianmays/dosmud/issues/51) | weather | M |
 | [#54](https://github.com/ianmays/dosmud/issues/54) | procedural encounters | M |
 | [#76](https://github.com/ianmays/dosmud/issues/76) | first authored narrative slice | L |
@@ -622,9 +638,15 @@ Gameplay and world content after core architecture stabilizes. Related mechanics
 
 ### [#7](https://github.com/ianmays/dosmud/issues/7) - Interactive world events
 
-### [#8](https://github.com/ianmays/dosmud/issues/8) - Complex dialogue
+Ambient world-effect interactivity: local interactions such as touching, listening, disturbing, using, or inspecting environmental features (for example, richer follow-ups after `inspect water`). This is **not** the same as persistent authored world advancement hooks - future `#TBC` authored world advancement hooks remain a separate follow-up.
 
-Narrative indirection delivered ([#210](https://github.com/ianmays/dosmud/pull/210)); placement profile v1 delivered in [#192](https://github.com/ianmays/dosmud/pull/192). Remaining breadth work can build on `TxtresNarrativeKey` tables instead of hard-coded room switches.
+### [#8](https://github.com/ianmays/dosmud/issues/8) - Dialogue branching and action follow-ups
+
+Comes after [#76](https://github.com/ianmays/dosmud/issues/76), [#132](https://github.com/ianmays/dosmud/issues/132), and [#49](https://github.com/ianmays/dosmud/issues/49) on the authored spine. m10 narrative indirection is delivered ([#210](https://github.com/ianmays/dosmud/pull/210)); placement profile v1 in [#192](https://github.com/ianmays/dosmud/pull/192).
+
+Narrow authored branching/action-follow-up slice: a small number of authored choices; choices can trigger already-existing actions or state changes; deterministic and save/load safe where relevant. Wires dialogue to proven quest/progress and item-exchange seams where useful.
+
+**Not:** a full dialogue tree framework, arbitrary graph engine, scripting system, external data format, cutscene system, quest framework, NPC trade, economy, or schedules.
 
 ### [#51](https://github.com/ianmays/dosmud/issues/51) - Weather
 
@@ -638,7 +660,17 @@ After [#107](https://github.com/ianmays/dosmud/issues/107), procedural encounter
 
 Done ✅ ([#217](https://github.com/ianmays/dosmud/pull/217))
 
-Scope narrowed from broad concrete narrative toward a first authored narrative slice. The delivered path is a single Herbalist vertical slice: request marsh-root, spawn or re-seed the root deterministically in the Marsh while the request is active, return it, persist completion through save/load, and apply a small Orchard room-copy hook. This proves one authored narrative beat on top of m10 narrative indirection ([#210](https://github.com/ianmays/dosmud/pull/210)) without widening into generic quests, trade, schedules, or a dialogue framework.
+Herbalist marsh-root vertical slice:
+
+- Herbalist requests marsh-root at the Orchard
+- marsh-root is available deterministically in the Marsh while requested
+- player returns it; Herbalist accepts and gives follow-up clue text
+- completion persists through save/load
+- Orchard room copy changes after completion
+
+Proves **one authored narrative beat** and **one local world hook** on m10 narrative indirection ([#210](https://github.com/ianmays/dosmud/pull/210)).
+
+**Not:** generic quests ([#49](https://github.com/ianmays/dosmud/issues/49)), NPC item exchange ([#132](https://github.com/ianmays/dosmud/issues/132)), schedules ([#52](https://github.com/ianmays/dosmud/issues/52)), economy ([#50](https://github.com/ianmays/dosmud/issues/50)), dialogue framework ([#8](https://github.com/ianmays/dosmud/issues/8)), cutscenes, acts, quest DSL, or external data packs.
 
 ### [#130](https://github.com/ianmays/dosmud/issues/130) - Night time
 
@@ -653,7 +685,7 @@ Scope narrowed from broad concrete narrative toward a first authored narrative s
 
 ### [#48](https://github.com/ianmays/dosmud/issues/48) - SDL renderer
 
-Target structure:
+Later presentation lane - **parked** unless presentation work is explicitly prioritized. Not an active authored-content prerequisite. Parallel to m11 multiplayer in the execution diagram.
 
 ```text
 core/
@@ -676,6 +708,8 @@ NOT:
 
 ### [#207](https://github.com/ianmays/dosmud/issues/207) - Add 25-line safe output mode
 
+Near-term playability/rendering concern (safe output within 25 lines). Not on the authored-content spine.
+
 ## [Advanced Mechanics](https://github.com/ianmays/dosmud/milestone/8)
 
 | Issue | Title | Size |
@@ -684,12 +718,12 @@ NOT:
 | [#4](https://github.com/ianmays/dosmud/issues/4) | combat initiative | S |
 | [#5](https://github.com/ianmays/dosmud/issues/5) | enemy difficulty (level) | M |
 | [#15](https://github.com/ianmays/dosmud/issues/15) | character stats and rolls | L |
-| [#50](https://github.com/ianmays/dosmud/issues/50) | economy | L |
-| [#132](https://github.com/ianmays/dosmud/issues/132) | NPC trade | M |
+| [#50](https://github.com/ianmays/dosmud/issues/50) | economy (parked) | L |
+| [#132](https://github.com/ianmays/dosmud/issues/132) | npc item exchange and rewards | M |
 | [#9](https://github.com/ianmays/dosmud/issues/9) | reputation system | M |
 | [#31](https://github.com/ianmays/dosmud/issues/31) | easy / hard mode | M |
-| [#52](https://github.com/ianmays/dosmud/issues/52) | npc schedules | L |
-| [#49](https://github.com/ianmays/dosmud/issues/49) | quests | M |
+| [#52](https://github.com/ianmays/dosmud/issues/52) | npc availability and schedule v1 | M |
+| [#49](https://github.com/ianmays/dosmud/issues/49) | quest/progress helper extraction | M |
 | [#145](https://github.com/ianmays/dosmud/issues/145) | local map viewport (region/world maps deferred) | M |
 | [#206](https://github.com/ianmays/dosmud/issues/206) | define player defeat and respawn flow | M |
 
@@ -707,27 +741,39 @@ Enemy profile `level` scales HP, damage, and XP via config; difficulty compares 
 
 ### [#9](https://github.com/ianmays/dosmud/issues/9) - Reputation system
 
+**Parked/later** unless authored content creates real faction or reputation pressure. Not on the authored-content spine.
+
 ### [#15](https://github.com/ianmays/dosmud/issues/15) - Character stats and rolls
 
 Rolled strength / vitality (etc.) at game start; may later wire into combat formulas and initiative. Does **not** block [#4](https://github.com/ianmays/dosmud/issues/4) or [#5](https://github.com/ianmays/dosmud/issues/5).
 
 ### [#31](https://github.com/ianmays/dosmud/issues/31) - Easy / hard mode
 
-### [#52](https://github.com/ianmays/dosmud/issues/52) - NPC schedules
+### [#52](https://github.com/ianmays/dosmud/issues/52) - NPC availability and schedule v1
 
-Placement profile v1 delivered in [#192](https://github.com/ianmays/dosmud/pull/192); schedule **rules over profile ids** remain future m8 work after m10 platform slices land. GitHub blocked-by [#104](https://github.com/ianmays/dosmud/issues/104) (npc module, closed); prerequisite satisfied.
+**Parked/later** on the authored spine - pull only when authored content needs NPC absence, availability, or movement. Size **M**: one-NPC (or tiny fixed-set) v1 slice, not a schedule framework. Placement profile v1 delivered in [#192](https://github.com/ianmays/dosmud/pull/192). GitHub blocked-by [#104](https://github.com/ianmays/dosmud/issues/104) (npc module, closed); prerequisite satisfied.
 
-### [#49](https://github.com/ianmays/dosmud/issues/49) - Quests
+Narrow v1: one NPC or a tiny fixed set; static deterministic schedule/availability; room presence and `talk` availability respect the schedule.
 
-Blocked-by [#52](https://github.com/ianmays/dosmud/issues/52).
+**Not:** full day/night simulation ([#130](https://github.com/ianmays/dosmud/issues/130)), pathfinding, routines for every NPC, or a broader time system. Does **not** block [#49](https://github.com/ianmays/dosmud/issues/49) or the authored spine.
 
-### [#50](https://github.com/ianmays/dosmud/issues/50) - Economy
+### [#49](https://github.com/ianmays/dosmud/issues/49) - Quest/progress helper extraction
 
-Draft in review ([#216](https://github.com/ianmays/dosmud/pull/216)): foundation slice only - `item_value` metadata, player coin balance, save v10 persistence, bag coin display. Merchant buy/sell commands and pricing flows remain open on this issue. Not a prerequisite for [#132](https://github.com/ianmays/dosmud/issues/132).
+After [#76](https://github.com/ianmays/dosmud/issues/76); preferably after [#132](https://github.com/ianmays/dosmud/issues/132). Review the landed `#76` implementation and extract only small helpers genuinely proven by that slice (started, item-ready, completed, follow-up checks). Keep state fixed-size, explicit, save/load friendly, and deterministic.
 
-### [#132](https://github.com/ianmays/dosmud/issues/132) - NPC trade
+**Not:** a generic quest framework, quest DSL, journal system, NPC trade system ([#132](https://github.com/ianmays/dosmud/issues/132)), schedule system ([#52](https://github.com/ianmays/dosmud/issues/52)), economy ([#50](https://github.com/ianmays/dosmud/issues/50)), or content scripting layer.
 
-Give/receive items with NPCs (dialogue-driven exchange, bag or floor delivery, feedback). Not blocked by [#50](https://github.com/ianmays/dosmud/issues/50); does not require merged coin wallet or item-value foundation. Optional integration with economy state when [#50](https://github.com/ianmays/dosmud/issues/50) lands.
+### [#50](https://github.com/ianmays/dosmud/issues/50) - Economy (parked)
+
+**Parked/de-emphasised.** Full economy - shops, currency, buy/sell loops, price balancing, merchant systems - is future work unless authored content creates real pressure. [#132](https://github.com/ianmays/dosmud/issues/132) owns simple NPC item exchange and rewards **without coins**. Not a prerequisite for [#132](https://github.com/ianmays/dosmud/issues/132).
+
+[PR #216](https://github.com/ianmays/dosmud/pull/216) (open, approved) was a premature economy-foundation attempt (`item_value`, coin balance, save v10) - treat as superseded unless merged later; **no Done marker** on this issue.
+
+### [#132](https://github.com/ianmays/dosmud/issues/132) - NPC item exchange and rewards
+
+Next step on the authored spine after [#76](https://github.com/ianmays/dosmud/issues/76). Simple authored item exchange: player gives/offers item to NPC; NPC accepts, rejects, or comments; optional reward item goes to bag or floor; deterministic, save/load safe, test covered. Routes copy through existing event/txtres boundaries.
+
+**Not:** economy ([#50](https://github.com/ianmays/dosmud/issues/50)), shops, currency, generic merchant loop, quest framework ([#49](https://github.com/ianmays/dosmud/issues/49)), dialogue framework ([#8](https://github.com/ianmays/dosmud/issues/8)), schedules ([#52](https://github.com/ianmays/dosmud/issues/52)), or reputation ([#9](https://github.com/ianmays/dosmud/issues/9)). **Not** blocked by [#50](https://github.com/ianmays/dosmud/issues/50).
 
 ### [#102](https://github.com/ianmays/dosmud/issues/102) - Fixed location enemies (Bandits)
 
@@ -826,21 +872,21 @@ Move the ambient bandit encounter off the one-off `GameState.enemy_handover_pick
 | Encounter gameplay | handler registry | `genc.c` | Done ([#209](https://github.com/ianmays/dosmud/pull/209)) |
 | Narrative | txtres indirection | `grendr.c`, `txtres.c` | Done ([#210](https://github.com/ianmays/dosmud/pull/210)) |
 | Room talk | `NPC_ROOM_INFO` (parallel table) | `npc.c`, `dialogue.c` | Done ([#211](https://github.com/ianmays/dosmud/pull/211); [#197](https://github.com/ianmays/dosmud/issues/197)) |
-| Schedule / quest | rules over profile ids | #52, #49 | Future (m8) |
+| Schedule / quest helpers | rules over profile ids | #52 (optional), #49 | Open (m8); spine after #76/#132 |
 
 **Non-goals:** external config files, DOS runtime parsing, quest DSL, multiplayer (m11 [#92](https://github.com/ianmays/dosmud/issues/92)).
 
-**Consumers:** m8 [#52](https://github.com/ianmays/dosmud/issues/52), [#49](https://github.com/ianmays/dosmud/issues/49); m6 [#76](https://github.com/ianmays/dosmud/issues/76) (L), [#8](https://github.com/ianmays/dosmud/issues/8), [#54](https://github.com/ianmays/dosmud/issues/54).
+**Consumers:** authored spine [#132](https://github.com/ianmays/dosmud/issues/132), [#49](https://github.com/ianmays/dosmud/issues/49), [#8](https://github.com/ianmays/dosmud/issues/8); m6 [#54](https://github.com/ianmays/dosmud/issues/54), [#7](https://github.com/ianmays/dosmud/issues/7); optional later [#52](https://github.com/ianmays/dosmud/issues/52). [#76](https://github.com/ianmays/dosmud/issues/76) Done ([#217](https://github.com/ianmays/dosmud/pull/217)).
 
 | Issue | Title | Size | Blocked by | Notes |
 |-------|-------|------|------------|-------|
-| [#195](https://github.com/ianmays/dosmud/issues/195) | encounter handler registry | M | - | Thin indirection in `genc.c` |
-| [#196](https://github.com/ianmays/dosmud/issues/196) | narrative event indirection | M | #195 | Reduce `grendr.c` encounter switches |
-| [#197](https://github.com/ianmays/dosmud/issues/197) | room NPC talk table cleanup | S | - | Keep `NPC_ROOM_INFO` parallel; do not fold into `NpcProfile` |
-| (existing) | [#52](https://github.com/ianmays/dosmud/issues/52) npc schedules | L | - | m8; profile v1 done |
-| (existing) | [#49](https://github.com/ianmays/dosmud/issues/49) quests | M | #52 | m8 |
+| [#195](https://github.com/ianmays/dosmud/issues/195) | encounter handler registry | M | - | Done ([#209](https://github.com/ianmays/dosmud/pull/209)) |
+| [#196](https://github.com/ianmays/dosmud/issues/196) | narrative event indirection | M | #195 | Done ([#210](https://github.com/ianmays/dosmud/pull/210)) |
+| [#197](https://github.com/ianmays/dosmud/issues/197) | room NPC talk table cleanup | S | - | Done ([#211](https://github.com/ianmays/dosmud/pull/211)) |
+| (existing) | [#52](https://github.com/ianmays/dosmud/issues/52) npc availability and schedule v1 | M | - | m8; parked/later |
+| (existing) | [#49](https://github.com/ianmays/dosmud/issues/49) quest/progress helper extraction | M | - | m8; after #76/#132 on spine |
 
-**Dependency order (blocked-by):** m9 NPC chain **complete** ([#104](https://github.com/ianmays/dosmud/issues/104) through [#107](https://github.com/ianmays/dosmud/issues/107)). m10 encounter registry **done** ([#209](https://github.com/ianmays/dosmud/pull/209)); narrative indirection **done**; room talk **done** ([#211](https://github.com/ianmays/dosmud/pull/211)). Then m8/m6 content that depends on authored tables.
+**Platform complete:** m9 NPC chain ([#104](https://github.com/ianmays/dosmud/issues/104) through [#107](https://github.com/ianmays/dosmud/issues/107)) and m10 slices ([#195](https://github.com/ianmays/dosmud/issues/195)-[#197](https://github.com/ianmays/dosmud/issues/197), delivered via [#209](https://github.com/ianmays/dosmud/pull/209)-[#211](https://github.com/ianmays/dosmud/pull/211)). **Authored-content spine** (soft order): [#76](https://github.com/ianmays/dosmud/issues/76) Done -> [#132](https://github.com/ianmays/dosmud/issues/132) -> [#49](https://github.com/ianmays/dosmud/issues/49) -> [#8](https://github.com/ianmays/dosmud/issues/8) -> `#TBC` authored world advancement hooks.
 
 ### [#195](https://github.com/ianmays/dosmud/issues/195) - Encounter handler registry
 
@@ -873,7 +919,7 @@ Keep `NPC_ROOM_INFO` as the separate authored room-talk table in `npc.c`; replie
 
 ## [Multiplayer](https://github.com/ianmays/dosmud/milestone/11)
 
-Multi-session connectivity (local TCP/IP server and clients, or serial host-guest) deferred until [#71](https://github.com/ianmays/dosmud/issues/71) engine boundary, [#16](https://github.com/ianmays/dosmud/issues/16) save/load, and m10 platform slices stabilize. XL epic; parallel to renderer (m7) in the execution diagram, not on the m9 -> m10 -> m8 -> m6 content path.
+Long-term platform vision - **parked** until the single-player authored spine is stronger. Engine boundary ([#71](https://github.com/ianmays/dosmud/issues/71)), save/load ([#16](https://github.com/ianmays/dosmud/issues/16)), and m10 platform foundations are in place. XL epic; parallel to renderer (m7) in the execution diagram, not on the authored-content spine.
 
 | Issue | Title | Size |
 |-------|-------|------|
