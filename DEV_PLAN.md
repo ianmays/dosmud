@@ -65,7 +65,9 @@ This file records:
 
 Do not mirror board columns here.
 
-Ticket creation and board reconciliation happen in **Step 3B**, not in the Roadmap v2 reset PR.
+Ticket creation, milestone reconciliation, and board status checks were handled by the Roadmap v2 operationalisation pass.
+
+GitHub milestones group Roadmap v2 lanes (Authored Interaction Spine v1, World Reactivity and Atmosphere v1, Playability and Text UX v1, Deferred / Long-term) plus existing Renderer, Multiplayer, and Workflow and Tooling Maturity buckets. Milestones are reporting groupings, not board columns.
 
 ## Active authored-content spine
 
@@ -76,7 +78,7 @@ Near-term soft sequence:
 #132 npc item exchange and rewards
 #49 quest/progress helper extraction
 #8 dialogue branching and action follow-ups
-#TBC authored world advancement hooks v1
+#220 authored world advancement hooks v1
 ```
 
 Principle:
@@ -91,7 +93,7 @@ Frameworks last.
 - [#132](https://github.com/ianmays/dosmud/issues/132) proves NPC item exchange/rewards.
 - [#49](https://github.com/ianmays/dosmud/issues/49) extracts helpers from proven content.
 - [#8](https://github.com/ianmays/dosmud/issues/8) wires choices to existing actions/state changes.
-- `#TBC` generalises persistent authored world advancement hooks.
+- [#220](https://github.com/ianmays/dosmud/issues/220) generalises persistent authored world advancement hooks.
 
 ## Active lanes
 
@@ -104,7 +106,7 @@ Frameworks last.
 - [#132](https://github.com/ianmays/dosmud/issues/132) npc item exchange and rewards
 - [#49](https://github.com/ianmays/dosmud/issues/49) quest/progress helper extraction
 - [#8](https://github.com/ianmays/dosmud/issues/8) dialogue branching and action follow-ups
-- `#TBC` authored world advancement hooks v1
+- [#220](https://github.com/ianmays/dosmud/issues/220) authored world advancement hooks v1
 
 **Out of scope for this lane:**
 
@@ -125,10 +127,11 @@ Frameworks last.
 
 - [#7](https://github.com/ianmays/dosmud/issues/7) ambient world-effect interactivity
 - [#51](https://github.com/ianmays/dosmud/issues/51) weather, if still wanted
+- [#54](https://github.com/ianmays/dosmud/issues/54) procedural encounters / more encounters
 - [#130](https://github.com/ianmays/dosmud/issues/130) night time, if kept small
 - future authored environmental consequences if needed
 
-This lane is separate from persistent authored world advancement hooks (`#TBC`).
+This lane is separate from persistent authored world advancement hooks ([#220](https://github.com/ianmays/dosmud/issues/220)).
 
 ### Lane 3 - Playability and text-output discipline
 
@@ -138,7 +141,6 @@ This lane is separate from persistent authored world advancement hooks (`#TBC`).
 
 - [#206](https://github.com/ianmays/dosmud/issues/206) player defeat/respawn flow
 - [#145](https://github.com/ianmays/dosmud/issues/145) local map viewport
-- [#207](https://github.com/ianmays/dosmud/issues/207) 25-line safe output mode
 
 ### Lane 4 - Tooling and showcase
 
@@ -157,8 +159,9 @@ Tooling should support delivery. It should not block the authored-content spine 
 **Contains / currently expected:**
 
 - [#48](https://github.com/ianmays/dosmud/issues/48) SDL renderer
+- [#207](https://github.com/ianmays/dosmud/issues/207) 25-line safe output mode (Renderer milestone; near-term text-output/playability work)
 
-SDL is parked/later unless presentation work is explicitly prioritised. It must not own gameplay, simulation, combat logic, or world state.
+SDL is parked/later unless presentation work is explicitly prioritised. It must not own gameplay, simulation, combat logic, or world state. [#207](https://github.com/ianmays/dosmud/issues/207) stays on the Renderer milestone but is near-term playability/text-output discipline within this lane.
 
 ### Lane 6 - Long-term platform vision
 
@@ -180,6 +183,11 @@ Parked unless current authored content creates real pressure:
 - [#15](https://github.com/ianmays/dosmud/issues/15) stats and rolls
 - [#31](https://github.com/ianmays/dosmud/issues/31) easy / hard mode
 - [#55](https://github.com/ianmays/dosmud/issues/55) larger worlds
+- [#131](https://github.com/ianmays/dosmud/issues/131) cooking skill
+- [#221](https://github.com/ianmays/dosmud/issues/221) narration triggers v1
+- [#222](https://github.com/ianmays/dosmud/issues/222) cutscene-style scene beat v1
+- [#223](https://github.com/ianmays/dosmud/issues/223) acts and chapter boundary planning note
+- [#224](https://github.com/ianmays/dosmud/issues/224) quest DSL and external data packs decision record
 - acts
 - quest DSL
 - external data packs
@@ -190,16 +198,15 @@ Parked unless current authored content creates real pressure:
 
 Parking does not mean cancelled. It means not part of the current authored-adventure spine.
 
-## Missing tickets to create in Step 3B
+## Step 3B follow-up tickets (created)
 
-Do **not** create these in the Roadmap v2 reset PR. List them as upcoming Step 3B work:
+- [#220](https://github.com/ianmays/dosmud/issues/220) authored world advancement hooks v1
+- [#221](https://github.com/ianmays/dosmud/issues/221) narration triggers v1
+- [#222](https://github.com/ianmays/dosmud/issues/222) cutscene-style scene beat v1
+- [#223](https://github.com/ianmays/dosmud/issues/223) acts and chapter boundary planning note
+- [#224](https://github.com/ianmays/dosmud/issues/224) quest DSL and external data packs decision record
 
-- authored world advancement hooks v1
-- narration triggers v1
-- cutscene-style scene beat v1
-- acts / chapter boundary planning note
-- quest DSL / external data packs decision record
-- roadmap reset / board reconciliation issue if useful
+Ticket F (agent/skill compatibility cleanup) not created: compatibility already covered by PR #219 and no live blocking gaps found.
 
 ## Archive and history
 
