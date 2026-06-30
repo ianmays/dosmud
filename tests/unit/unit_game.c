@@ -479,6 +479,33 @@ TEST game_give_in_enemy_dialogue_beats_room_npc_exchange(void)
     PASS();
 }
 
+TEST game_give_closes_traveler_dialogue_before_room_npc_exchange(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    int slot;
+
+    unit_game_fresh(&game, 192u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ORCHARD, 0);
+    game.herbalist_story = HERBALIST_STORY_REQUESTED;
+    game.marsh_root_spawned = 1;
+    ASSERT_EQ(1, game_inv_bag_add(&game, ITEM_MARSH_ROOT));
+    slot = npc_find_by_actor(&game, GAME_DIALOGUE_ACTOR_TRAVELER);
+    ASSERT(slot >= 0);
+    game.npcs[slot].room_id = WORLD_ROOM_ORCHARD;
+    game.npcs[slot].dialogue = DIALOGUE_TRAVELER;
+    game.npcs[slot].flags |= NPC_FLAG_ACTIVE;
+    game_set_mode_dialogue(&game, DIALOGUE_TRAVELER);
+    ASSERT_EQ(1, run_cmd_out(&game, "give marsh-root", &out));
+    ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
+    ASSERT_EQ(HERBALIST_STORY_COMPLETE, game.herbalist_story);
+    ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[0].kind);
+    ASSERT_EQ(GAME_DIALOGUE_GUARD_DIALOGUE_CLOSED, out.events[0].arg0);
+    ASSERT_EQ(GAME_EVENT_DIALOGUE, out.events[1].kind);
+    ASSERT_EQ(HERBALIST_SCENE_GIVE_REWARD_BAG, out.events[1].arg3);
+    PASS();
+}
+
 TEST game_give_without_npc_target_is_guarded(void)
 {
     struct GameState game;
@@ -1135,6 +1162,7 @@ SUITE(game) {
     RUN_TEST(game_unknown_command);
     RUN_TEST(game_give_after_handover_fixture);
     RUN_TEST(game_give_in_enemy_dialogue_beats_room_npc_exchange);
+    RUN_TEST(game_give_closes_traveler_dialogue_before_room_npc_exchange);
     RUN_TEST(game_give_to_herbalist_routes_room_npc_exchange);
     RUN_TEST(game_give_without_npc_target_is_guarded);
     RUN_TEST(game_traveler_reply_fixture);

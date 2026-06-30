@@ -24,8 +24,8 @@ static void push_dialogue_guard(GameEventQueue *out, int reason)
 
 /*
  * Menu-native verbs keep the modal open (numbered reply, repeat talk, repeat
- * loot-to-leave, give/offer handoffs); help/version/quit stay allowed like
- * combat menus.
+ * loot-to-leave, and the active Herbalist give/offering prompt); help/version/
+ * quit stay allowed like combat menus.
  */
 static int cmd_preserves_noncombat_menu(const struct GameState *game,
                                         const struct Command *cmd)
@@ -44,7 +44,7 @@ static int cmd_preserves_noncombat_menu(const struct GameState *game,
     if (game->dialogue == DIALOGUE_LOOT && cmd->type == CMD_LOOT) {
         return 1;
     }
-    if (game->dialogue != DIALOGUE_LOOT && cmd->type == CMD_GIVE) {
+    if (game->dialogue == DIALOGUE_NPC_HERBALIST && cmd->type == CMD_GIVE) {
         return 1;
     }
     return 0;
