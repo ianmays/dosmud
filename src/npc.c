@@ -3,6 +3,7 @@
 #include "platform.h"
 #include "game.h"
 #include "gout.h"
+#include "gstory.h"
 #include "invent.h"
 #include "items.h"
 #include "txtres.h"
@@ -211,51 +212,16 @@ static const struct NpcRoomInfo *npc_room_dialogue_info(int dialogue_kind)
 }
 
 /*
- * #76 herbalist vertical slice: npc.c owns story transitions, marsh-root
- * seeding, orchard desc mutation, and scene selection. Reply events keep the
- * pre-choice HerbalistDialogueScene in arg3 so txtres copy matches the menu
- * just closed.
+ * #76 herbalist vertical slice: npc.c owns story transitions, orchard desc
+ * mutation, and reply routing. Fetch-quest scene derivation and marsh-root
+ * seeding call gstory helpers (#49). Reply events keep the pre-choice
+ * HerbalistDialogueScene in arg3 so txtres copy matches the menu just closed.
  */
-static int npc_room_has_item(const struct GameState *game, int room_id, int item_id)
-{
-    int slot;
-
-    if (room_id < 0 || room_id >= CFG_ROOM_MAX) {
-        return 0;
-    }
-    for (slot = 0; slot < CFG_AREA_ITEM_SLOTS; ++slot) {
-        if (game->room_item[room_id][slot] == item_id) {
-            return 1;
-        }
-    }
-    return 0;
-}
-
-static int npc_any_room_has_item(const struct GameState *game, int item_id)
-{
-    int room_id;
-
-    for (room_id = 0; room_id < CFG_ROOM_MAX; ++room_id) {
-        if (npc_room_has_item(game, room_id, item_id)) {
-            return 1;
-        }
-    }
-    return 0;
-}
-
 static int herbalist_dialogue_scene(const struct GameState *game)
 {
-    /* Keep the persisted seam tiny: ready-to-turn-in is derived from inventory. */
-    if (game->herbalist_story == HERBALIST_STORY_COMPLETE) {
-        return HERBALIST_SCENE_COMPLETE;
-    }
-    if (game->herbalist_story == HERBALIST_STORY_REQUESTED) {
-        if (game_inv_player_has_item((struct GameState *)game, ITEM_MARSH_ROOT)) {
-            return HERBALIST_SCENE_READY;
-        }
-        return HERBALIST_SCENE_REQUESTED;
-    }
-    return HERBALIST_SCENE_NOT_STARTED;
+    /* StoryFetchScene values align 1:1 with the first four HerbalistDialogueScene values. */
+    return (int)story_fetch_scene(game->herbalist_story,
+        game_inv_player_has_item((struct GameState *)game, ITEM_MARSH_ROOT));
 }
 
 /* Turn-in swaps orchard desc in-place; incomplete story restores authored baseline. */
@@ -272,24 +238,11 @@ static void herbalist_apply_world_hook(struct GameState *game)
     game->world.rooms[WORLD_ROOM_ORCHARD].desc[CFG_DESC_MAX - 1] = '\0';
 }
 
+/* Requested beat: gstory keeps one recoverable marsh root in play for turn-in. */
 static void herbalist_seed_marsh_root(struct GameState *game)
 {
-    int slot;
-
-    /* Keep one recoverable root in play when the requested story beat is active. */
-    if (game_inv_player_has_item(game, ITEM_MARSH_ROOT) ||
-            npc_any_room_has_item(game, ITEM_MARSH_ROOT)) {
-        game->marsh_root_spawned = 1;
-        return;
-    }
-    game->marsh_root_spawned = 0;
-    for (slot = 0; slot < CFG_AREA_ITEM_SLOTS; ++slot) {
-        if (game->room_item[WORLD_ROOM_MARSH][slot] == ITEM_NONE) {
-            game->room_item[WORLD_ROOM_MARSH][slot] = ITEM_MARSH_ROOT;
-            game->marsh_root_spawned = 1;
-            return;
-        }
-    }
+    story_seed_recoverable_item(game, WORLD_ROOM_MARSH, ITEM_MARSH_ROOT,
+        &game->marsh_root_spawned);
 }
 
 void npc_story_tick(struct GameState *game)
