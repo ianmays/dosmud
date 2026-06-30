@@ -9,7 +9,7 @@
 struct GameState;
 struct GameEventQueue;
 
-/* Where game_inv_deliver_room_item (and NPC reward routing) placed an item. */
+/* Result codes from game_inv_deliver_room_item bag-then-ground placement. */
 #define GAME_ITEM_DELIVERY_NONE 0
 #define GAME_ITEM_DELIVERY_BAG 1
 #define GAME_ITEM_DELIVERY_GROUND 2

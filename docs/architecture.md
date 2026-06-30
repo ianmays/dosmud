@@ -270,7 +270,7 @@ New `src/*.c` and `src/*.h` basenames must stay within **classic FAT 8+3** (at m
 - item use and crafting behavior
 - `eat` and inventory `use salve` restore HP via `game_heal_player`; at max HP the item is still consumed but no heal is applied (player sees an already-full message)
 - wield/unwield commands track `weapon_equipped` on `GameState`; a wielded weapon is not stored in `bag[]` (it occupies the hand slot only until unwield, drop, or bandit handover moves it)
-- `game_inv_remove_carried_item` clears wielded gear before the bag; `game_inv_deliver_room_item` places reward items in the bag or on the current room floor for room-NPC exchanges ([#132](https://github.com/ianmays/dosmud/issues/132))
+- `game_inv_remove_carried_item` clears wielded gear before the bag; `game_inv_deliver_room_item` is a shared bag-then-ground helper (unit-tested delivery semantics); authored room-NPC exchanges such as Herbalist plan the reward destination in `npc.c`, then call `game_inv_bag_add` / `game_room_ground_try_add` directly ([#132](https://github.com/ianmays/dosmud/issues/132))
 - combat adds `item_weapon_damage_bonus` from `weapon_equipped` when the player attacks; it does not require the weapon id to appear in the bag
 
 ### `items`

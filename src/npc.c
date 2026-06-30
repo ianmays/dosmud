@@ -347,7 +347,12 @@ static int herbalist_exchange(struct GameState *game, int item_arg,
     int reward_delivery;
     int detail;
 
-    if (item_arg != ITEM_MARSH_ROOT || game->herbalist_story != HERBALIST_STORY_REQUESTED) {
+    if (game->herbalist_story != HERBALIST_STORY_REQUESTED) {
+        npc_push_dialogue_guard(out, GAME_DIALOGUE_GUARD_GIVE_REJECTED);
+        game_set_mode_explore(game);
+        return 1;
+    }
+    if (item_arg != ITEM_MARSH_ROOT) {
         npc_push_dialogue_detail(out, GAME_DIALOGUE_ACTOR_HERBALIST,
             GAME_DIALOGUE_PHASE_REPLY, 0, HERBALIST_SCENE_GIVE_REJECTED);
         game_set_mode_explore(game);

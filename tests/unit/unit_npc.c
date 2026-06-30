@@ -165,6 +165,24 @@ TEST npc_room_cmd_reply_herbalist_turn_in_updates_story(void)
     PASS();
 }
 
+TEST npc_cmd_give_herbalist_rejects_before_request(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 316u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ORCHARD, 0);
+    game.herbalist_story = HERBALIST_STORY_NONE;
+    game_inv_bag_add(&game, ITEM_STICK);
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, npc_cmd_give(&game, ITEM_STICK, &out));
+    ASSERT_EQ(HERBALIST_STORY_NONE, game.herbalist_story);
+    ASSERT_EQ(1, game_inv_player_has_item(&game, ITEM_STICK));
+    ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[0].kind);
+    ASSERT_EQ(GAME_DIALOGUE_GUARD_GIVE_REJECTED, out.events[0].arg0);
+    PASS();
+}
+
 TEST npc_cmd_give_herbalist_rejects_wrong_item(void)
 {
     struct GameState game;
@@ -701,6 +719,7 @@ SUITE(npc) {
     RUN_TEST(npc_open_room_dialogue_herbalist_requested_scene);
     RUN_TEST(npc_open_room_dialogue_herbalist_reseeds_missing_root);
     RUN_TEST(npc_room_cmd_reply_herbalist_turn_in_updates_story);
+    RUN_TEST(npc_cmd_give_herbalist_rejects_before_request);
     RUN_TEST(npc_cmd_give_herbalist_rejects_wrong_item);
     RUN_TEST(npc_cmd_give_herbalist_drops_reward_when_bag_full);
     RUN_TEST(npc_cmd_give_herbalist_keeps_root_when_no_reward_space);
