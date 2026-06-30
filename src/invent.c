@@ -190,7 +190,7 @@ static void corpse_remove_slot_compact(struct GameState *game, int room_id, int 
     game->corpse_item[room_id][CFG_CORPSE_ITEM_SLOTS - 1] = ITEM_NONE;
 }
 
-int game_inv_bag_find_index(struct GameState *game, int item_id)
+int game_inv_bag_find_index(const struct GameState *game, int item_id)
 {
     int i;
     for (i = 0; i < game->bag_count; ++i) {
@@ -201,7 +201,7 @@ int game_inv_bag_find_index(struct GameState *game, int item_id)
     return -1;
 }
 
-int game_inv_player_has_item(struct GameState *game, int item_id)
+int game_inv_player_has_item(const struct GameState *game, int item_id)
 {
     if (game_inv_bag_find_index(game, item_id) >= 0) {
         return 1;

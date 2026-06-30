@@ -221,7 +221,7 @@ static int herbalist_dialogue_scene(const struct GameState *game)
 {
     /* StoryFetchScene values align 1:1 with the first four HerbalistDialogueScene values. */
     return (int)story_fetch_scene(game->herbalist_story,
-        game_inv_player_has_item((struct GameState *)game, ITEM_MARSH_ROOT));
+        game_inv_player_has_item(game, ITEM_MARSH_ROOT));
 }
 
 /* Turn-in swaps orchard desc in-place; incomplete story restores authored baseline. */

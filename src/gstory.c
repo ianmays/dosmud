@@ -31,7 +31,7 @@ int story_world_has_item(const struct GameState *game, int item_id)
 {
     int room_id;
 
-    if (game_inv_player_has_item((struct GameState *)game, item_id)) {
+    if (game_inv_player_has_item(game, item_id)) {
         return 1;
     }
     for (room_id = 0; room_id < CFG_ROOM_MAX; ++room_id) {
