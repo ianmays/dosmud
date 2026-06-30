@@ -585,6 +585,29 @@ TEST save_round_trip_preserves_seeded_roaming_bandit(void)
     PASS();
 }
 
+TEST save_round_trip_preserves_herbalist_reward_on_ground(void)
+{
+    struct GameState game;
+    struct GameState loaded;
+    u32 loaded_draws;
+
+    unit_game_fresh(&game, 987u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ORCHARD, 0);
+    game.herbalist_story = HERBALIST_STORY_COMPLETE;
+    game.room_item[WORLD_ROOM_ORCHARD][0] = ITEM_SALVE;
+
+    save_cleanup_file();
+    ASSERT_EQ(SAVE_RESULT_OK,
+        save_write_game(save_test_path(), &game, plat_rand_draw_count()));
+    ASSERT_EQ(SAVE_RESULT_OK,
+        save_read_game(save_test_path(), &loaded, &loaded_draws));
+    ASSERT_EQ(HERBALIST_STORY_COMPLETE, loaded.herbalist_story);
+    ASSERT_EQ(ITEM_SALVE, loaded.room_item[WORLD_ROOM_ORCHARD][0]);
+    ASSERT_EQ(0U, loaded_draws);
+    save_cleanup_file();
+    PASS();
+}
+
 SUITE(save)
 {
     RUN_TEST(save_round_trip_preserves_state_and_rng_count);
@@ -600,4 +623,5 @@ SUITE(save)
     RUN_TEST(save_rejects_oversized_bandit_level);
     RUN_TEST(save_rejects_oversized_combat_enemy_level);
     RUN_TEST(save_round_trip_preserves_seeded_roaming_bandit);
+    RUN_TEST(save_round_trip_preserves_herbalist_reward_on_ground);
 }

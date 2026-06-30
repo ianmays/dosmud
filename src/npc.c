@@ -337,13 +337,78 @@ static int herbalist_reply_requested(struct GameState *game, int choice,
     return 1;
 }
 
+/*
+ * Herbalist marsh-root exchange; reply [1] and give/offer marsh-root both route
+ * here instead of invent-only bag removal.
+ */
+static int herbalist_exchange(struct GameState *game, int item_arg,
+                              GameEventQueue *out)
+{
+    int reward_delivery;
+    int detail;
+
+    if (game->herbalist_story != HERBALIST_STORY_REQUESTED) {
+        npc_push_dialogue_guard(out, GAME_DIALOGUE_GUARD_GIVE_REJECTED);
+        game_set_mode_explore(game);
+        return 1;
+    }
+    if (item_arg != ITEM_MARSH_ROOT) {
+        npc_push_dialogue_detail(out, GAME_DIALOGUE_ACTOR_HERBALIST,
+            GAME_DIALOGUE_PHASE_REPLY, 0, HERBALIST_SCENE_GIVE_REJECTED);
+        game_set_mode_explore(game);
+        return 1;
+    }
+
+    if (!game_inv_player_has_item(game, ITEM_MARSH_ROOT)) {
+        npc_push_dialogue_detail(out, GAME_DIALOGUE_ACTOR_HERBALIST,
+            GAME_DIALOGUE_PHASE_REPLY, 0, HERBALIST_SCENE_GIVE_NOT_CARRYING);
+        game_set_mode_explore(game);
+        return 1;
+    }
+
+    /*
+     * Decide the reward destination before removing the offered root so a
+     * full bag still forces the reward onto the room floor for this exchange.
+     */
+    reward_delivery = GAME_ITEM_DELIVERY_BAG;
+    if (game->bag_count >= game->bag_capacity) {
+        if (game_room_ground_has_space(game, game->player.room_id)) {
+            reward_delivery = GAME_ITEM_DELIVERY_GROUND;
+        } else {
+            reward_delivery = GAME_ITEM_DELIVERY_NONE;
+        }
+    }
+    if (reward_delivery == GAME_ITEM_DELIVERY_NONE) {
+        npc_push_dialogue_detail(out, GAME_DIALOGUE_ACTOR_HERBALIST,
+            GAME_DIALOGUE_PHASE_REPLY, 0, HERBALIST_SCENE_GIVE_REWARD_NO_SPACE);
+        game_set_mode_explore(game);
+        return 1;
+    }
+
+    game_inv_remove_carried_item(game, ITEM_MARSH_ROOT);
+    if (reward_delivery == GAME_ITEM_DELIVERY_BAG) {
+        game_inv_bag_add(game, ITEM_SALVE);
+    } else {
+        game_room_ground_try_add(game, game->player.room_id, ITEM_SALVE);
+    }
+    game->herbalist_story = HERBALIST_STORY_COMPLETE;
+    herbalist_apply_world_hook(game);
+    detail = HERBALIST_SCENE_GIVE_REWARD_BAG;
+    if (reward_delivery == GAME_ITEM_DELIVERY_GROUND) {
+        detail = HERBALIST_SCENE_GIVE_REWARD_GROUND;
+    }
+    npc_push_dialogue_detail(out, GAME_DIALOGUE_ACTOR_HERBALIST,
+        GAME_DIALOGUE_PHASE_REPLY, 1, detail);
+    game_set_mode_explore(game);
+    return 1;
+}
+
 static int herbalist_reply_ready(struct GameState *game, int choice,
                                  GameEventQueue *out)
 {
     if (choice == 1) {
-        game_inv_bag_remove_item(game, ITEM_MARSH_ROOT);
-        game->herbalist_story = HERBALIST_STORY_COMPLETE;
-        herbalist_apply_world_hook(game);
+        /* Same exchange path as npc_cmd_give in the orchard. */
+        return herbalist_exchange(game, ITEM_MARSH_ROOT, out);
     }
     npc_push_dialogue_detail(out, GAME_DIALOGUE_ACTOR_HERBALIST,
         GAME_DIALOGUE_PHASE_REPLY, choice, HERBALIST_SCENE_READY);
@@ -728,6 +793,25 @@ int npc_room_cmd_reply(struct GameState *game, int choice, GameEventQueue *out)
     }
     npc_push_dialogue(out, info->actor, info->reply_phase, choice);
     game_set_mode_explore(game);
+    return 1;
+}
+
+int npc_cmd_give(struct GameState *game, int item_arg, struct GameEventQueue *out)
+{
+    const struct NpcRoomInfo *info;
+
+    info = npc_room_info(game->player.room_id);
+    if (info == 0) {
+        return 0;
+    }
+    /* Room-NPC item exchange stays NPC-owned; enemy handover remains in genc.c. */
+    if (info->dialogue_kind == DIALOGUE_NPC_HERBALIST) {
+        return herbalist_exchange(game, item_arg, out);
+    }
+    npc_push_dialogue_guard(out, GAME_DIALOGUE_GUARD_GIVE_REJECTED);
+    if (game->mode == GAME_MODE_DIALOGUE) {
+        game_set_mode_explore(game);
+    }
     return 1;
 }
 

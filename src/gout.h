@@ -206,6 +206,10 @@ enum GameEventDialogueGuardReason {
     GAME_DIALOGUE_GUARD_NOBODY_WAITING_REPLY,
     /* non-loot dialogue dismissed by explore verb before the verb runs (#205). */
     GAME_DIALOGUE_GUARD_DIALOGUE_CLOSED,
+    /* give/offer with no room NPC handler and no enemy handover active. */
+    GAME_DIALOGUE_GUARD_GIVE_NO_TARGET,
+    /* room NPC present but refuses the offered item. */
+    GAME_DIALOGUE_GUARD_GIVE_REJECTED,
     /* arg1 may widen the visible valid range for menu-specific reply guards. */
     GAME_DIALOGUE_GUARD_PICK_123
 };

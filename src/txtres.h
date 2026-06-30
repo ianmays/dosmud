@@ -182,6 +182,8 @@ extern const char *const TXT_MSG_LOOT_WAITING;
 extern const char *const TXT_MSG_TRAVELER_WAITING;
 extern const char *const TXT_MSG_NOBODY_TALK;
 extern const char *const TXT_MSG_DIALOGUE_CLOSED;
+extern const char *const TXT_MSG_GIVE_NO_TARGET;
+extern const char *const TXT_MSG_GIVE_REJECTED;
 const char *txtres_msg_watchman_reply(int arg);
 const char *txtres_msg_herbalist_reply(int arg, int scene);
 const char *txtres_msg_archivist_reply(int arg);

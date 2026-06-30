@@ -12,7 +12,13 @@ enum HerbalistDialogueScene {
     HERBALIST_SCENE_NOT_STARTED = 0,
     HERBALIST_SCENE_REQUESTED,
     HERBALIST_SCENE_READY,
-    HERBALIST_SCENE_COMPLETE
+    HERBALIST_SCENE_COMPLETE,
+    /* give/offering exchange outcomes (arg3 on GAME_EVENT_DIALOGUE). */
+    HERBALIST_SCENE_GIVE_REJECTED,
+    HERBALIST_SCENE_GIVE_NOT_CARRYING,
+    HERBALIST_SCENE_GIVE_REWARD_BAG,
+    HERBALIST_SCENE_GIVE_REWARD_GROUND,
+    HERBALIST_SCENE_GIVE_REWARD_NO_SPACE
 };
 
 struct GameState;
@@ -48,6 +54,9 @@ int npc_open_room_dialogue(struct GameState *game, struct GameEventQueue *out);
 /* Reply for NPC_ROOM_INFO dialogue kinds; ignores player room after talk. */
 int npc_room_cmd_reply(struct GameState *game, int choice,
                        struct GameEventQueue *out);
+/* Fixed room-NPC give/offering hook; returns 1 when a room NPC consumed it. */
+int npc_cmd_give(struct GameState *game, int item_arg,
+                 struct GameEventQueue *out);
 /* Maintain authored npc story-world hooks that do not emit events. */
 void npc_story_tick(struct GameState *game);
 void npc_seed_profiles(struct GameState *game);

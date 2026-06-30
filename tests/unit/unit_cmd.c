@@ -76,6 +76,9 @@ TEST command_parse_items_and_reply(void)
     ASSERT_EQ(1, parse_line("take stick", &cmd));
     ASSERT_EQ(CMD_TAKE, cmd.type);
     ASSERT_EQ(ITEM_STICK, cmd.arg);
+    ASSERT_EQ(1, parse_line("offer marsh-root", &cmd));
+    ASSERT_EQ(CMD_GIVE, cmd.type);
+    ASSERT_EQ(ITEM_MARSH_ROOT, cmd.arg);
     ASSERT_EQ(1, parse_line("take all", &cmd));
     ASSERT_EQ(CMD_TAKE, cmd.type);
     ASSERT_EQ(CMD_TAKE_ALL, cmd.arg);
@@ -150,6 +153,7 @@ TEST command_help_line_topics(void)
     ASSERT(strcmp(command_help_line(CMD_HELP_TOPIC_LOOK),
             command_help_line(CMD_HELP_TOPIC_UNKNOWN)) != 0);
     ASSERT(strstr(command_help_line(CMD_HELP_TOPIC_TAKE), "take all") != 0);
+    ASSERT(strstr(command_help_line(CMD_HELP_TOPIC_GIVE), "offer <item>") != 0);
     ASSERT(strstr(command_help_line(CMD_HELP_TOPIC_SAVE), "save.dat") != 0);
     ASSERT(strstr(command_help_line(CMD_HELP_TOPIC_LOAD), "save.dat") != 0);
     ASSERT(strstr(command_help_line(CMD_HELP_TOPIC_VERSION), "build identity") != 0);

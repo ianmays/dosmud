@@ -24,7 +24,8 @@ static void push_dialogue_guard(GameEventQueue *out, int reason)
 
 /*
  * Menu-native verbs keep the modal open (numbered reply, repeat talk, repeat
- * loot-to-leave); help/version/quit stay allowed like combat menus.
+ * loot-to-leave, and the active Herbalist give/offering prompt); help/version/
+ * quit stay allowed like combat menus.
  */
 static int cmd_preserves_noncombat_menu(const struct GameState *game,
                                         const struct Command *cmd)
@@ -41,6 +42,9 @@ static int cmd_preserves_noncombat_menu(const struct GameState *game,
         return 1;
     }
     if (game->dialogue == DIALOGUE_LOOT && cmd->type == CMD_LOOT) {
+        return 1;
+    }
+    if (game->dialogue == DIALOGUE_NPC_HERBALIST && cmd->type == CMD_GIVE) {
         return 1;
     }
     return 0;
@@ -534,8 +538,19 @@ static int apply_command(struct GameState *game, struct Command *cmd,
     if (game_cmd_reply(game, cmd, out)) {
         return 1;
     }
+    /*
+     * Enemy handovers keep modal ownership while DIALOGUE_ENEMY is active.
+     * Room NPC exchange handles only non-enemy gives in authored NPC rooms.
+     */
     if (cmd->type == CMD_GIVE) {
-        return genc_cmd_give(game, cmd->arg, out);
+        if (game->mode == GAME_MODE_DIALOGUE && game->dialogue == DIALOGUE_ENEMY) {
+            return genc_cmd_give(game, cmd->arg, out);
+        }
+        if (npc_cmd_give(game, cmd->arg, out)) {
+            return 1;
+        }
+        push_dialogue_guard(out, GAME_DIALOGUE_GUARD_GIVE_NO_TARGET);
+        return 1;
     }
     return 0;
 }

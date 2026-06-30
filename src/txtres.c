@@ -210,7 +210,7 @@ const char *const TXT_MAIN_PROMPT = "\n> ";
 const char *const TXT_MAIN_BYE = "bye";
 
 const char *const TXT_COMMAND_HELP =
-    "Commands: look, map, inspect [rustle|creak|water|grit], take/get/pickup <item> or take all, drop/give <item>, bag, wield <weapon>, unwield, eat/use <item>, craft <item>, loot, move <dir>, wait, talk, 1/2/3 or reply <1-3>, save, load, version, help [topic], quit";
+    "Commands: look, map, inspect [rustle|creak|water|grit], take/get/pickup <item> or take all, drop/give/offer <item>, bag, wield <weapon>, unwield, eat/use <item>, craft <item>, loot, move <dir>, wait, talk, 1/2/3 or reply <1-3>, save, load, version, help [topic], quit";
 
 const char *const TXT_HELP_TOPIC_UNKNOWN =
     "No help for that topic. Type 'help' for the full command list.";
@@ -255,7 +255,7 @@ const char *const TXT_HELP_REPLY =
     "1, 2, 3, or reply <1-3> - answer during bandit dialogue or combat. After choosing 2, use give <item> to surrender one carried item.";
 
 const char *const TXT_HELP_GIVE =
-    "give <item> - after choosing [2] during a bandit standoff, surrender one item you carry (same names as take/drop).";
+    "give or offer <item> - hand an item to a room NPC when they will accept it, or surrender one item after choosing [2] during a bandit standoff.";
 
 const char *const TXT_HELP_QUIT =
     "quit or exit - leave the game.";
@@ -408,6 +408,8 @@ const char *const TXT_MSG_LOOT_WAITING =
 const char *const TXT_MSG_TRAVELER_WAITING = "The traveler is waiting for an answer (1/2/3).\n";
 const char *const TXT_MSG_NOBODY_TALK = "Nobody here wants to talk.\n";
 const char *const TXT_MSG_DIALOGUE_CLOSED = "You leave the conversation and turn back to the room.\n";
+const char *const TXT_MSG_GIVE_NO_TARGET = "Nobody here is waiting for an offered item.\n";
+const char *const TXT_MSG_GIVE_REJECTED = "That offer goes nowhere.\n";
 const char *const TXT_MSG_HAND_OVER_ITEM_FMT = "You hand over your %s. The bandit backs off and leaves.\n";
 const char *const TXT_MSG_BAG_EMPTY_BANDIT = "Your bag is empty. The bandit laughs and attacks.\n";
 const char *const TXT_MSG_INTIMIDATE_SUCCESS = "You keep your voice steady. The bandit grunts and withdraws.\n";
@@ -469,12 +471,27 @@ const char *txtres_msg_herbalist_reply(int arg, int scene)
     }
     if (scene == HERBALIST_SCENE_READY) {
         if (arg == 1) {
-            return "She takes the marsh-root and crushes it between her stained thumbs.\nThe bitter scent clears the orchard air for a moment.\n\"If you are still hunting answers, start with the Ruins. If the stones lie, try the Catacombs beneath them.\"\n";
+            return "She studies the root in your hands but waits for you to hand it over properly.\nUse give marsh-root if you want her to take it now.\n";
         }
         if (arg == 2) {
             return "\"A child upriver is burning with marsh fever,\" she says. \"This cuts it before dusk does.\"\n";
         }
         return "She watches the root in your bag and says nothing more.\n";
+    }
+    if (scene == HERBALIST_SCENE_GIVE_REJECTED) {
+        return "She shakes her head. \"Not that. Bring me a marsh-root if you mean to help.\"\n";
+    }
+    if (scene == HERBALIST_SCENE_GIVE_NOT_CARRYING) {
+        return "Her eyes flick to your empty hands. \"Come back when the marsh-root is actually with you.\"\n";
+    }
+    if (scene == HERBALIST_SCENE_GIVE_REWARD_BAG) {
+        return "She takes the marsh-root and crushes it between her stained thumbs.\nThe bitter scent clears the orchard air for a moment.\nShe presses a salve into your bag before turning back to her mortar.\n\"If you are still hunting answers, start with the Ruins. If the stones lie, try the Catacombs beneath them.\"\n";
+    }
+    if (scene == HERBALIST_SCENE_GIVE_REWARD_GROUND) {
+        return "She takes the marsh-root and crushes it between her stained thumbs.\nThe bitter scent clears the orchard air for a moment.\nYour bag is full, so she leaves a salve at your feet before returning to her mortar.\n\"If you are still hunting answers, start with the Ruins. If the stones lie, try the Catacombs beneath them.\"\n";
+    }
+    if (scene == HERBALIST_SCENE_GIVE_REWARD_NO_SPACE) {
+        return "She glances from your full bag to the cluttered ground and does not take the root.\n\"Make room first. I will not waste the cure in the dirt.\"\n";
     }
     if (arg == 1) {
         return "She jerks her chin east. \"The Ruins keep the first layer of truth. The Catacombs keep what sank beneath it.\"\n";
