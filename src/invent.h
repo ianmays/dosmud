@@ -25,9 +25,9 @@ void game_corpse_clear(struct GameState *game, int room_id);
 int game_corpse_queue_view(struct GameState *game, int room_id,
                            struct GameEventQueue *out);
 
-int game_inv_bag_find_index(struct GameState *game, int item_id);
+int game_inv_bag_find_index(const struct GameState *game, int item_id);
 /* True when the item is in the bag or is the wielded weapon. */
-int game_inv_player_has_item(struct GameState *game, int item_id);
+int game_inv_player_has_item(const struct GameState *game, int item_id);
 int game_inv_bag_add(struct GameState *game, int item_id);
 int game_inv_bag_remove_index(struct GameState *game, int index);
 int game_inv_bag_remove_item(struct GameState *game, int item_id);

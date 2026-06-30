@@ -140,7 +140,7 @@ make test-unit-coverage-verbose     # verbose coverage build, then full gcov blo
 - Determinism: call `plat_seed_rng(fixed_seed)` in setup; use `game_roll_inject_*` and `CFG_TEST_*` for asserted combat/intimidate outcomes
 - Snapshots assert player-visible output; unit tests assert `GameState` and parse results
 
-**In-scope modules (branch coverage target ~90%+):** `command`, `invent`, `combat`, `game`, `genc`, `dialogue`, `npc`, `gatmos`, `world`, `gprog`, `items`, `fmt`, `gout`, `replay`, `save`, `testharn`
+**In-scope modules (branch coverage target ~90%+):** `command`, `invent`, `combat`, `game`, `genc`, `dialogue`, `npc`, `gatmos`, `world`, `gprog`, `gstory`, `items`, `fmt`, `gout`, `replay`, `save`, `testharn`
 
 **Out of scope for the unit coverage bar:** `buildid`, `grendr`, `txtres`, `main`, `platpos` / `platwin` / `platdos` (presentation or shell-edge glue; `buildid` is read-only identity covered by `unit_cmd.c`, `unit_game.c`, `unit_gout.c`, and version snapshots; `txtres` narrative key tables are covered in `unit_gout.c`; `fmt` holds testable format logic; snapshots cover printed output and ASCII art)
 

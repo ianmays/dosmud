@@ -142,6 +142,21 @@ TEST npc_open_room_dialogue_herbalist_reseeds_missing_root(void)
     PASS();
 }
 
+TEST npc_open_room_dialogue_herbalist_ready_scene(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 314u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ORCHARD, 0);
+    game.herbalist_story = HERBALIST_STORY_REQUESTED;
+    game_inv_bag_add(&game, ITEM_MARSH_ROOT);
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, npc_open_room_dialogue(&game, &out));
+    ASSERT_EQ(HERBALIST_SCENE_READY, out.events[0].arg3);
+    PASS();
+}
+
 TEST npc_room_cmd_reply_herbalist_turn_in_updates_story(void)
 {
     struct GameState game;
@@ -718,6 +733,7 @@ SUITE(npc) {
     RUN_TEST(npc_open_room_dialogue_watchman);
     RUN_TEST(npc_open_room_dialogue_herbalist_requested_scene);
     RUN_TEST(npc_open_room_dialogue_herbalist_reseeds_missing_root);
+    RUN_TEST(npc_open_room_dialogue_herbalist_ready_scene);
     RUN_TEST(npc_room_cmd_reply_herbalist_turn_in_updates_story);
     RUN_TEST(npc_cmd_give_herbalist_rejects_before_request);
     RUN_TEST(npc_cmd_give_herbalist_rejects_wrong_item);

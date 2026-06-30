@@ -125,6 +125,21 @@ TEST invent_bag_add_remove(void)
     PASS();
 }
 
+TEST invent_player_has_item_const_query(void)
+{
+    struct GameState game;
+    const struct GameState *view;
+
+    unit_game_fresh(&game, 2u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    ASSERT_EQ(1, game_inv_bag_add(&game, ITEM_STICK));
+    view = &game;
+    ASSERT_EQ(1, game_inv_player_has_item(view, ITEM_STICK));
+    ASSERT_EQ(0, game_inv_player_has_item(view, ITEM_FISH));
+    ASSERT_EQ(-1, game_inv_bag_find_index(view, ITEM_FISH));
+    PASS();
+}
+
 TEST invent_remove_carried_prefers_weapon_then_bag(void)
 {
     struct GameState game;
@@ -674,6 +689,7 @@ TEST invent_unwield_to_ground(void)
 SUITE(invent) {
     RUN_TEST(invent_ground_slots);
     RUN_TEST(invent_bag_add_remove);
+    RUN_TEST(invent_player_has_item_const_query);
     RUN_TEST(invent_remove_carried_prefers_weapon_then_bag);
     RUN_TEST(invent_deliver_room_item_uses_bag_then_ground);
     RUN_TEST(invent_take_drop_paths);

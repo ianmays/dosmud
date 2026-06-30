@@ -16,6 +16,7 @@ npc: unit_npc.c
 gatmos: unit_gatmos.c
 world: unit_wrld.c
 gprog: unit_gprog.c
+gstory: unit_gstry.c
 items: unit_item.c
 fmt: unit_fmt.c
 gout: unit_gout.c
