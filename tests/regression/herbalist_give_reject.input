@@ -1,0 +1,4 @@
+@fixture story_orchard_requested
+@fixture bag_full_gate
+give stick
+quit

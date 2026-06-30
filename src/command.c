@@ -65,6 +65,9 @@ static int help_topic_from_word(const char *w)
     if (strcmp(w, "give") == 0) {
         return CMD_HELP_TOPIC_GIVE;
     }
+    if (strcmp(w, "offer") == 0) {
+        return CMD_HELP_TOPIC_GIVE;
+    }
     if (strcmp(w, "talk") == 0 || strcmp(w, "speak") == 0) {
         return CMD_HELP_TOPIC_TALK;
     }
@@ -197,7 +200,7 @@ int command_parse(char *line, struct Command *out_cmd)
         out_cmd->arg = item_from_word(word2);
         return out_cmd->arg != ITEM_NONE;
     }
-    if (strcmp(word1, "give") == 0) {
+    if (strcmp(word1, "give") == 0 || strcmp(word1, "offer") == 0) {
         out_cmd->type = CMD_GIVE;
         if (count < 2) return 0;
         out_cmd->arg = item_from_word(word2);

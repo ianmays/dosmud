@@ -90,6 +90,7 @@ SNAPSHOT_TESTS = \
 	walk_north walk_map wait_tick \
 	frog_hint frog_replies watchman_talk traveler_replies traveler_talk_blocked herbalist_talk archivist_talk talk_nobody \
 	herbalist_request herbalist_incomplete herbalist_complete herbalist_followup herbalist_save_load \
+	herbalist_give_reject herbalist_give_floor \
 	dialogue_menu_exit \
 	game_event_dialogue narrative_indirection \
 	use_salve use_torch use_spear use_stone eat_berry eat_fish eat_berry_heal eat_fish_heal \

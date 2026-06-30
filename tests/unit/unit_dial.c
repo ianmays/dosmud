@@ -247,7 +247,7 @@ TEST dialogue_cmd_reply_herbalist_turn_in_completes_story(void)
     ASSERT_EQ(-1, game_inv_bag_find_index(&game, ITEM_MARSH_ROOT));
     ASSERT_STR_EQ(TXT_STORY_ORCHARD_DONE_DESC,
         game.world.rooms[WORLD_ROOM_ORCHARD].desc);
-    ASSERT_EQ(HERBALIST_SCENE_READY, out.events[0].arg3);
+    ASSERT_EQ(HERBALIST_SCENE_GIVE_REWARD_BAG, out.events[0].arg3);
     PASS();
 }
 

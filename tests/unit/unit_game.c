@@ -438,6 +438,40 @@ TEST game_give_after_handover_fixture(void)
     PASS();
 }
 
+TEST game_give_to_herbalist_routes_room_npc_exchange(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 19u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ORCHARD, 0);
+    game.herbalist_story = HERBALIST_STORY_REQUESTED;
+    game.marsh_root_spawned = 1;
+    ASSERT_EQ(1, game_inv_bag_add(&game, ITEM_MARSH_ROOT));
+    ASSERT_EQ(1, run_cmd_out(&game, "give marsh-root", &out));
+    ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
+    ASSERT_EQ(HERBALIST_STORY_COMPLETE, game.herbalist_story);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_DIALOGUE, out.events[0].kind);
+    ASSERT_EQ(HERBALIST_SCENE_GIVE_REWARD_BAG, out.events[0].arg3);
+    PASS();
+}
+
+TEST game_give_without_npc_target_is_guarded(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 19u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    ASSERT_EQ(1, game_inv_bag_add(&game, ITEM_STICK));
+    ASSERT_EQ(1, run_cmd_out(&game, "give stick", &out));
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[0].kind);
+    ASSERT_EQ(GAME_DIALOGUE_GUARD_GIVE_NO_TARGET, out.events[0].arg0);
+    PASS();
+}
+
 TEST game_traveler_reply_fixture(void)
 {
     struct GameState game;
@@ -1078,6 +1112,8 @@ SUITE(game) {
     RUN_TEST(game_inspect_none_and_wrong);
     RUN_TEST(game_unknown_command);
     RUN_TEST(game_give_after_handover_fixture);
+    RUN_TEST(game_give_to_herbalist_routes_room_npc_exchange);
+    RUN_TEST(game_give_without_npc_target_is_guarded);
     RUN_TEST(game_traveler_reply_fixture);
     RUN_TEST(game_wait_and_help);
     RUN_TEST(game_session_help_no_tick);

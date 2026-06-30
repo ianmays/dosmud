@@ -267,6 +267,26 @@ int game_inv_bag_remove_item(struct GameState *game, int item_id)
     return game_inv_bag_remove_index(game, idx);
 }
 
+int game_inv_remove_carried_item(struct GameState *game, int item_id)
+{
+    if (game->weapon_equipped == item_id) {
+        game->weapon_equipped = ITEM_NONE;
+        return 1;
+    }
+    return game_inv_bag_remove_item(game, item_id);
+}
+
+int game_inv_deliver_room_item(struct GameState *game, int room_id, int item_id)
+{
+    if (game_inv_bag_add(game, item_id)) {
+        return GAME_ITEM_DELIVERY_BAG;
+    }
+    if (game_room_ground_try_add(game, room_id, item_id)) {
+        return GAME_ITEM_DELIVERY_GROUND;
+    }
+    return GAME_ITEM_DELIVERY_NONE;
+}
+
 /*
  * Bulk loot stays invent-owned: drains corpse_item[] from slot 0 in visible
  * order; on bag full, re-queues CORPSE_VIEW like game_inv_cmd_loot_reply.

@@ -59,6 +59,18 @@ TEST npc_choice_validation(void)
     PASS();
 }
 
+static int room_has_item(const struct GameState *game, int room_id, int item_id)
+{
+    int slot;
+
+    for (slot = 0; slot < CFG_AREA_ITEM_SLOTS; ++slot) {
+        if (game->room_item[room_id][slot] == item_id) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 TEST npc_open_room_dialogue_frog(void)
 {
     struct GameState game;
@@ -148,7 +160,48 @@ TEST npc_room_cmd_reply_herbalist_turn_in_updates_story(void)
     ASSERT_STR_EQ(TXT_STORY_ORCHARD_DONE_DESC,
         game.world.rooms[WORLD_ROOM_ORCHARD].desc);
     ASSERT_EQ(-1, game_inv_bag_find_index(&game, ITEM_MARSH_ROOT));
-    ASSERT_EQ(HERBALIST_SCENE_READY, out.events[0].arg3);
+    ASSERT_EQ(HERBALIST_SCENE_GIVE_REWARD_BAG, out.events[0].arg3);
+    ASSERT_EQ(1, game_inv_player_has_item(&game, ITEM_SALVE));
+    PASS();
+}
+
+TEST npc_cmd_give_herbalist_rejects_wrong_item(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 314u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ORCHARD, 0);
+    game.herbalist_story = HERBALIST_STORY_REQUESTED;
+    game_inv_bag_add(&game, ITEM_STICK);
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, npc_cmd_give(&game, ITEM_STICK, &out));
+    ASSERT_EQ(HERBALIST_STORY_REQUESTED, game.herbalist_story);
+    ASSERT_EQ(1, game_inv_player_has_item(&game, ITEM_STICK));
+    ASSERT_EQ(HERBALIST_SCENE_GIVE_REJECTED, out.events[0].arg3);
+    PASS();
+}
+
+TEST npc_cmd_give_herbalist_drops_reward_when_bag_full(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 315u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ORCHARD, 0);
+    game.herbalist_story = HERBALIST_STORY_REQUESTED;
+    game.marsh_root_spawned = 1;
+    game_inv_bag_add(&game, ITEM_MARSH_ROOT);
+    game.bag_count = game.bag_capacity;
+    game.bag[0] = ITEM_MARSH_ROOT;
+    game.bag[1] = ITEM_STICK;
+    game.bag[2] = ITEM_REED;
+    game.bag[3] = ITEM_STONE;
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, npc_cmd_give(&game, ITEM_MARSH_ROOT, &out));
+    ASSERT_EQ(HERBALIST_STORY_COMPLETE, game.herbalist_story);
+    ASSERT_EQ(1, room_has_item(&game, WORLD_ROOM_ORCHARD, ITEM_SALVE));
+    ASSERT_EQ(HERBALIST_SCENE_GIVE_REWARD_GROUND, out.events[0].arg3);
     PASS();
 }
 
@@ -251,6 +304,7 @@ static int profile_bandit_level(u32 seed, int actor, int room_id)
         (int)((seed + (u32)actor + (u32)room_id) %
             (PROFILE_BANDIT_LEVEL_MAX - PROFILE_BANDIT_LEVEL_MIN + 1));
 }
+
 
 static int roaming_npc_reply_out(struct GameState *game, int choice,
                                  GameEventQueue *out)
@@ -616,6 +670,8 @@ SUITE(npc) {
     RUN_TEST(npc_open_room_dialogue_herbalist_requested_scene);
     RUN_TEST(npc_open_room_dialogue_herbalist_reseeds_missing_root);
     RUN_TEST(npc_room_cmd_reply_herbalist_turn_in_updates_story);
+    RUN_TEST(npc_cmd_give_herbalist_rejects_wrong_item);
+    RUN_TEST(npc_cmd_give_herbalist_drops_reward_when_bag_full);
     RUN_TEST(npc_room_cmd_reply_frog_uses_dialogue_table);
     RUN_TEST(npc_room_cmd_reply_skips_non_room_dialogue);
     RUN_TEST(npc_open_room_dialogue_none);

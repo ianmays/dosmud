@@ -79,6 +79,18 @@ static int inv_loot_reply(struct GameState *game, int choice, GameEventQueue *ou
     return game_inv_cmd_loot_reply(game, choice, out);
 }
 
+static int room_has_item(const struct GameState *game, int room_id, int item_id)
+{
+    int slot;
+
+    for (slot = 0; slot < CFG_AREA_ITEM_SLOTS; ++slot) {
+        if (game->room_item[room_id][slot] == item_id) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 TEST invent_ground_slots(void)
 {
     struct GameState game;
@@ -110,6 +122,43 @@ TEST invent_bag_add_remove(void)
     ASSERT_EQ(0, game_inv_bag_remove_item(&game, ITEM_FISH));
     ASSERT_EQ(1, game_inv_bag_remove_item(&game, ITEM_STICK));
     ASSERT_EQ(0, game_inv_player_has_item(&game, ITEM_STICK));
+    PASS();
+}
+
+TEST invent_remove_carried_prefers_weapon_then_bag(void)
+{
+    struct GameState game;
+
+    unit_game_fresh(&game, 2u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    ASSERT_EQ(1, game_inv_bag_add(&game, ITEM_SPEAR));
+    game.weapon_equipped = ITEM_SPEAR;
+    ASSERT_EQ(1, game_inv_remove_carried_item(&game, ITEM_SPEAR));
+    ASSERT_EQ(ITEM_NONE, game.weapon_equipped);
+    ASSERT_EQ(0, game_inv_bag_find_index(&game, ITEM_SPEAR));
+    ASSERT_EQ(1, game_inv_remove_carried_item(&game, ITEM_SPEAR));
+    ASSERT_EQ(-1, game_inv_bag_find_index(&game, ITEM_SPEAR));
+    PASS();
+}
+
+TEST invent_deliver_room_item_uses_bag_then_ground(void)
+{
+    struct GameState game;
+
+    unit_game_fresh(&game, 2u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    ASSERT_EQ(GAME_ITEM_DELIVERY_BAG,
+        game_inv_deliver_room_item(&game, WORLD_ROOM_CAMP, ITEM_SALVE));
+    ASSERT_EQ(1, game_inv_player_has_item(&game, ITEM_SALVE));
+
+    game.bag_count = game.bag_capacity;
+    game.bag[0] = ITEM_STICK;
+    game.bag[1] = ITEM_REED;
+    game.bag[2] = ITEM_STONE;
+    game.bag[3] = ITEM_BERRY;
+    ASSERT_EQ(GAME_ITEM_DELIVERY_GROUND,
+        game_inv_deliver_room_item(&game, WORLD_ROOM_CAMP, ITEM_HERB));
+    ASSERT_EQ(1, room_has_item(&game, WORLD_ROOM_CAMP, ITEM_HERB));
     PASS();
 }
 
@@ -625,6 +674,8 @@ TEST invent_unwield_to_ground(void)
 SUITE(invent) {
     RUN_TEST(invent_ground_slots);
     RUN_TEST(invent_bag_add_remove);
+    RUN_TEST(invent_remove_carried_prefers_weapon_then_bag);
+    RUN_TEST(invent_deliver_room_item_uses_bag_then_ground);
     RUN_TEST(invent_take_drop_paths);
     RUN_TEST(invent_take_all_paths);
     RUN_TEST(invent_take_all_bag_full);

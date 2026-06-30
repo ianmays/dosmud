@@ -878,6 +878,12 @@ static void render_dialogue_guard_event(const GameEvent *ev)
     case GAME_DIALOGUE_GUARD_DIALOGUE_CLOSED:
         RENDER_PRINTF("%s", TXT_MSG_DIALOGUE_CLOSED);
         break;
+    case GAME_DIALOGUE_GUARD_GIVE_NO_TARGET:
+        RENDER_PRINTF("%s", TXT_MSG_GIVE_NO_TARGET);
+        break;
+    case GAME_DIALOGUE_GUARD_GIVE_REJECTED:
+        RENDER_PRINTF("%s", TXT_MSG_GIVE_REJECTED);
+        break;
     case GAME_DIALOGUE_GUARD_PICK_123:
         render_msg_pick_123(ev->arg1);
         break;

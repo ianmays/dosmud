@@ -43,6 +43,9 @@ static int cmd_preserves_noncombat_menu(const struct GameState *game,
     if (game->dialogue == DIALOGUE_LOOT && cmd->type == CMD_LOOT) {
         return 1;
     }
+    if (game->dialogue != DIALOGUE_LOOT && cmd->type == CMD_GIVE) {
+        return 1;
+    }
     return 0;
 }
 
@@ -535,7 +538,14 @@ static int apply_command(struct GameState *game, struct Command *cmd,
         return 1;
     }
     if (cmd->type == CMD_GIVE) {
-        return genc_cmd_give(game, cmd->arg, out);
+        if (npc_cmd_give(game, cmd->arg, out)) {
+            return 1;
+        }
+        if (game->mode == GAME_MODE_DIALOGUE && game->dialogue == DIALOGUE_ENEMY) {
+            return genc_cmd_give(game, cmd->arg, out);
+        }
+        push_dialogue_guard(out, GAME_DIALOGUE_GUARD_GIVE_NO_TARGET);
+        return 1;
     }
     return 0;
 }

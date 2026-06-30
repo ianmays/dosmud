@@ -9,6 +9,10 @@
 struct GameState;
 struct GameEventQueue;
 
+#define GAME_ITEM_DELIVERY_NONE 0
+#define GAME_ITEM_DELIVERY_BAG 1
+#define GAME_ITEM_DELIVERY_GROUND 2
+
 /* Places item_id on the ground if a slot is free; returns 1 if stored. */
 int game_room_ground_try_add(struct GameState *game, int room_id, int item_id);
 /* Returns 1 when at least one ground slot is empty in this room. */
@@ -26,6 +30,10 @@ int game_inv_player_has_item(struct GameState *game, int item_id);
 int game_inv_bag_add(struct GameState *game, int item_id);
 int game_inv_bag_remove_index(struct GameState *game, int index);
 int game_inv_bag_remove_item(struct GameState *game, int item_id);
+/* Remove one carried item, preferring the wielded slot before the bag. */
+int game_inv_remove_carried_item(struct GameState *game, int item_id);
+/* Bag first, then room ground. Returns GAME_ITEM_DELIVERY_* above. */
+int game_inv_deliver_room_item(struct GameState *game, int room_id, int item_id);
 
 /* loot_all bypasses the numbered menu and drains corpse slots until full or empty */
 int game_inv_cmd_loot(struct GameState *game, int loot_all,
