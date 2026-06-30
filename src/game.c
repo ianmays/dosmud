@@ -539,15 +539,15 @@ static int apply_command(struct GameState *game, struct Command *cmd,
         return 1;
     }
     /*
-     * Room NPC exchange (npc.c) runs before enemy handover (genc.c); unmatched
-     * gives emit a dialogue guard instead of falling through to genc.
+     * Enemy handovers keep modal ownership while DIALOGUE_ENEMY is active.
+     * Room NPC exchange handles only non-enemy gives in authored NPC rooms.
      */
     if (cmd->type == CMD_GIVE) {
-        if (npc_cmd_give(game, cmd->arg, out)) {
-            return 1;
-        }
         if (game->mode == GAME_MODE_DIALOGUE && game->dialogue == DIALOGUE_ENEMY) {
             return genc_cmd_give(game, cmd->arg, out);
+        }
+        if (npc_cmd_give(game, cmd->arg, out)) {
+            return 1;
         }
         push_dialogue_guard(out, GAME_DIALOGUE_GUARD_GIVE_NO_TARGET);
         return 1;

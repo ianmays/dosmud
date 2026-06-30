@@ -457,6 +457,28 @@ TEST game_give_to_herbalist_routes_room_npc_exchange(void)
     PASS();
 }
 
+TEST game_give_in_enemy_dialogue_beats_room_npc_exchange(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 191u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ORCHARD, 0);
+    game.herbalist_story = HERBALIST_STORY_REQUESTED;
+    ASSERT_EQ(1, game_inv_bag_add(&game, ITEM_STICK));
+    ASSERT(npc_spawn(&game, GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH, DIALOGUE_ENEMY,
+        GAME_ENCOUNTER_BANDIT, WORLD_ROOM_ORCHARD,
+        NPC_FLAG_ACTIVE | NPC_FLAG_HANDOVER_PICK) >= 0);
+    game_set_mode_dialogue(&game, DIALOGUE_ENEMY);
+    ASSERT_EQ(1, run_cmd_out(&game, "give stick", &out));
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
+    ASSERT_EQ(GAME_ENCOUNTER_ACTION_GIVE, out.events[0].arg1);
+    ASSERT_EQ(GAME_ENCOUNTER_OUTCOME_OK, out.events[0].arg2);
+    ASSERT_EQ(ITEM_STICK, out.events[0].arg3);
+    PASS();
+}
+
 TEST game_give_without_npc_target_is_guarded(void)
 {
     struct GameState game;
@@ -1112,6 +1134,7 @@ SUITE(game) {
     RUN_TEST(game_inspect_none_and_wrong);
     RUN_TEST(game_unknown_command);
     RUN_TEST(game_give_after_handover_fixture);
+    RUN_TEST(game_give_in_enemy_dialogue_beats_room_npc_exchange);
     RUN_TEST(game_give_to_herbalist_routes_room_npc_exchange);
     RUN_TEST(game_give_without_npc_target_is_guarded);
     RUN_TEST(game_traveler_reply_fixture);

@@ -206,6 +206,36 @@ TEST npc_cmd_give_herbalist_drops_reward_when_bag_full(void)
     PASS();
 }
 
+TEST npc_cmd_give_herbalist_keeps_root_when_no_reward_space(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    int slot;
+
+    unit_game_fresh(&game, 316u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ORCHARD, 0);
+    game.herbalist_story = HERBALIST_STORY_REQUESTED;
+    game.marsh_root_spawned = 1;
+    game_inv_bag_add(&game, ITEM_MARSH_ROOT);
+    /* marsh-root stays carried while the bag and orchard ground are both full. */
+    game.bag_count = game.bag_capacity;
+    game.bag[0] = ITEM_MARSH_ROOT;
+    game.bag[1] = ITEM_STICK;
+    game.bag[2] = ITEM_REED;
+    game.bag[3] = ITEM_STONE;
+    game.bag[4] = ITEM_BERRY;
+    for (slot = 0; slot < CFG_AREA_ITEM_SLOTS; ++slot) {
+        game.room_item[WORLD_ROOM_ORCHARD][slot] = ITEM_HERB;
+    }
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, npc_cmd_give(&game, ITEM_MARSH_ROOT, &out));
+    ASSERT_EQ(HERBALIST_STORY_REQUESTED, game.herbalist_story);
+    ASSERT_EQ(1, game_inv_player_has_item(&game, ITEM_MARSH_ROOT));
+    ASSERT_EQ(0, room_has_item(&game, WORLD_ROOM_ORCHARD, ITEM_SALVE));
+    ASSERT_EQ(HERBALIST_SCENE_GIVE_REWARD_NO_SPACE, out.events[0].arg3);
+    PASS();
+}
+
 /* Reply follows game.dialogue, not player room, after a mid-branch move. */
 TEST npc_room_cmd_reply_frog_uses_dialogue_table(void)
 {
@@ -673,6 +703,7 @@ SUITE(npc) {
     RUN_TEST(npc_room_cmd_reply_herbalist_turn_in_updates_story);
     RUN_TEST(npc_cmd_give_herbalist_rejects_wrong_item);
     RUN_TEST(npc_cmd_give_herbalist_drops_reward_when_bag_full);
+    RUN_TEST(npc_cmd_give_herbalist_keeps_root_when_no_reward_space);
     RUN_TEST(npc_room_cmd_reply_frog_uses_dialogue_table);
     RUN_TEST(npc_room_cmd_reply_skips_non_room_dialogue);
     RUN_TEST(npc_open_room_dialogue_none);
