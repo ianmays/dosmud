@@ -69,19 +69,23 @@ Ticket creation, milestone reconciliation, and board status checks were handled 
 
 GitHub milestones group Roadmap v2 lanes (Authored Interaction Spine v1, World Reactivity and Atmosphere v1, Playability and Text UX v1, Deferred / Long-term) plus existing Renderer, Multiplayer, and Workflow and Tooling Maturity buckets. Legacy v1 milestones (for example Content Expansion and Advanced Mechanics) are **closed** with zero open issues; open tickets such as [#54](https://github.com/ianmays/dosmud/issues/54) live under the Roadmap v2 milestones above. Milestones are reporting groupings, not board columns.
 
-## Active authored-content spine
+## Active lanes
 
-Near-term soft sequence:
+### Lane 1 - Authored interaction spine
+
+**Purpose:** Make authored story interaction repeatable without building a generic quest engine.
+
+**Near-term soft sequence** (soft order only; do not create GitHub blocked-by from this list):
 
 ```text
-#76 first authored narrative slice - Done
-#132 npc item exchange and rewards
+#76 first authored narrative slice - Done (PR #217)
+#132 npc item exchange and rewards - Done (PR #226)
 #49 quest/progress helper extraction
 #8 dialogue branching and action follow-ups
 #220 authored world advancement hooks v1
 ```
 
-Principle:
+**Principle:**
 
 ```text
 Content pressure first.
@@ -89,21 +93,8 @@ Reusable seams second.
 Frameworks last.
 ```
 
-- [#76](https://github.com/ianmays/dosmud/issues/76) proved one authored world hook locally (Done - [PR #217](https://github.com/ianmays/dosmud/pull/217)).
-- [#132](https://github.com/ianmays/dosmud/issues/132) proves NPC item exchange/rewards.
-- [#49](https://github.com/ianmays/dosmud/issues/49) extracts helpers from proven content.
-- [#8](https://github.com/ianmays/dosmud/issues/8) wires choices to existing actions/state changes.
-- [#220](https://github.com/ianmays/dosmud/issues/220) generalises persistent authored world advancement hooks.
+**Open work:**
 
-## Active lanes
-
-### Lane 1 - Authored interaction spine
-
-**Purpose:** Make authored story interaction repeatable without building a generic quest engine.
-
-**Contains / currently expected:**
-
-- [#132](https://github.com/ianmays/dosmud/issues/132) npc item exchange and rewards
 - [#49](https://github.com/ianmays/dosmud/issues/49) quest/progress helper extraction
 - [#8](https://github.com/ianmays/dosmud/issues/8) dialogue branching and action follow-ups
 - [#220](https://github.com/ianmays/dosmud/issues/220) authored world advancement hooks v1
@@ -194,16 +185,6 @@ Parked unless current authored content creates real pressure:
 - [#92](https://github.com/ianmays/dosmud/issues/92) multiplayer (see Lane 6)
 
 Parking does not mean cancelled. It means not part of the current authored-adventure spine.
-
-## Step 3B follow-up tickets (created)
-
-- [#220](https://github.com/ianmays/dosmud/issues/220) authored world advancement hooks v1
-- [#221](https://github.com/ianmays/dosmud/issues/221) narration triggers v1
-- [#222](https://github.com/ianmays/dosmud/issues/222) cutscene-style scene beat v1
-- [#223](https://github.com/ianmays/dosmud/issues/223) acts and chapter boundary planning note
-- [#224](https://github.com/ianmays/dosmud/issues/224) quest DSL and external data packs decision record
-
-Ticket F (agent/skill compatibility cleanup) not created: compatibility already covered by PR #219 and no live blocking gaps found.
 
 ## Archive and history
 
