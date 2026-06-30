@@ -17,7 +17,7 @@ Cross-check **GitHub** (issues, milestones, project #1, blocked-by) against **[`
 
 ## Roadmap v2 guard
 
-Root `DEV_PLAN.md` is a **strategic index** (lanes, spine, parked systems) - not the v1 milestone ledger. **Do not** recommend adding v1 milestone tables, execution-order mermaid, per-issue stubs, or **Done ✅** sections to root `DEV_PLAN.md` unless the user explicitly requests it. v1 Done-marker and milestone-table audits apply to the **archive** only.
+Root `DEV_PLAN.md` is a **strategic index** (lanes, parked systems) - not the v1 milestone ledger. **Do not** recommend v1 milestone tables, execution-order mermaid, per-issue stubs, or Done **sections** on root `DEV_PLAN.md`. Lane **Contains** inline Done per [AGENTS.md DEV_PLAN updates](../../../AGENTS.md) is allowed and is not a policy breach. v1 Done-section audits apply to the **archive** only.
 
 Canonical policy: [`AGENTS.md`](../../../AGENTS.md) **DEV_PLAN updates** and Roadmap v2 lanes/spine in root `DEV_PLAN.md`.
 
@@ -48,7 +48,7 @@ Priority P0→P1→P2 and execution-order stack **will diverge** (e.g. #47 P1 be
 | Rule | Check |
 |------|-------|
 | Do **not** add new issue sections for newly created BAU issues to root `DEV_PLAN.md` | Grep new `#N` in root DEV_PLAN vs issues created recently |
-| Root `DEV_PLAN.md` edits | Lane/spine updates only when user requests; no v1 tables/mermaid/Done by default |
+| Root `DEV_PLAN.md` edits | Lane updates and inline **Contains** Done per AGENTS; no v1 tables/mermaid/Done sections |
 | **Done ✅** on v1 archive section | Only when explicitly maintaining [`docs/archive/DEV_PLAN_v1_engine_foundation.md`](../../../docs/archive/DEV_PLAN_v1_engine_foundation.md) |
 | Initial v1 DEV_PLAN row + stub | Archive only when user requests v1 history maintenance - not default for new issues |
 | Milestones are **themes**, not "Phase N" wording | No `Phase 1`–style milestone labels in docs |

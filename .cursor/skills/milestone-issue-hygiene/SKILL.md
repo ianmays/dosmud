@@ -15,7 +15,7 @@ Reactive audits and bulk fixes: [`.cursor/skills/audit-github-devplan/SKILL.md`]
 
 ## Roadmap v2 guard
 
-Root [`DEV_PLAN.md`](../../../DEV_PLAN.md) is **Roadmap v2** (strategic index). **Do not** add v1 milestone table rows, execution-order mermaid, per-issue `###` stubs, or **Done ✅** sections to root `DEV_PLAN.md` unless explicitly requested. v1 ledger behaviour applies only to [`docs/archive/DEV_PLAN_v1_engine_foundation.md`](../../../docs/archive/DEV_PLAN_v1_engine_foundation.md). Default: complete GitHub steps below; **skip** step 6 root `DEV_PLAN.md` commits unless the user asks to update Roadmap v2 or maintain the archive.
+Root [`DEV_PLAN.md`](../../../DEV_PLAN.md) is **Roadmap v2** (strategic index). **Do not** add v1 milestone tables, execution-order mermaid, per-issue `###` stubs, or Done **sections** to root `DEV_PLAN.md`. Lane **Contains** inline Done (`- ✅ Done (PR #…)`) is allowed per [AGENTS.md DEV_PLAN updates](../../../AGENTS.md) after merge or when the user requests a roadmap update. v1 ledger behaviour applies only to [`docs/archive/DEV_PLAN_v1_engine_foundation.md`](../../../docs/archive/DEV_PLAN_v1_engine_foundation.md). Default: complete GitHub steps below; **skip** step 6 root `DEV_PLAN.md` commits unless the user asks to update Roadmap v2 or maintain the archive.
 
 ## When to run
 
@@ -137,9 +137,9 @@ gh issue edit <N> --body-file /path/to/body.md
 
 ### 6. DEV_PLAN.md
 
-**Default: skip.** Root [`DEV_PLAN.md`](../../../DEV_PLAN.md) is Roadmap v2 - do **not** add v1 milestone tables, mermaid execution blocks, per-issue stubs, or **Done ✅** markers unless the user explicitly requests a roadmap doc update.
+**Default: skip.** Root [`DEV_PLAN.md`](../../../DEV_PLAN.md) is Roadmap v2 - do **not** add v1 milestone tables, mermaid execution blocks, per-issue stubs, or Done **sections** unless the user explicitly requests a roadmap doc update.
 
-When the user **does** request a Roadmap v2 edit: follow the lane/spine structure in root `DEV_PLAN.md` only.
+When the user **does** request a Roadmap v2 edit (including after merge): follow lane structure; inline Done on the **Contains** line per [AGENTS.md DEV_PLAN updates](../../../AGENTS.md).
 
 When maintaining **v1 archive** history: edit [`docs/archive/DEV_PLAN_v1_engine_foundation.md`](../../../docs/archive/DEV_PLAN_v1_engine_foundation.md) using v1 conventions (table rows, stubs, Done markers).
 
@@ -209,7 +209,7 @@ Do **not** auto-move to Agent-ready unless the user asks.
 
 ### When implementation starts
 
-Track Status on [project #1](https://github.com/users/ianmays/projects/1). **Do not** add v1 Done markers or milestone stubs to root `DEV_PLAN.md` on draft PR unless the user explicitly requests a roadmap or archive doc update (see [AGENTS.md DEV_PLAN updates](../../../AGENTS.md)).
+Track Status on [project #1](https://github.com/users/ianmays/projects/1). After merge, lane **Contains** Done may be added per [AGENTS.md DEV_PLAN updates](../../../AGENTS.md); do not add v1 tables, stubs, or Done sections on draft PR unless the user requests.
 
 ## Humans
 

@@ -53,14 +53,14 @@ Documentation pass:
 | Quick-start, clone, run | [`README.md`](../../../README.md) | - |
 | Milestone-tracked issue created/groomed | GitHub hygiene per skill; skip root `DEV_PLAN.md` unless user requests Roadmap v2 or archive update | [milestone-issue-hygiene](../milestone-issue-hygiene/SKILL.md) |
 | Roadmap / board / DEV_PLAN drift | Report; doc-only fixes in pass | [audit-github-devplan](../audit-github-devplan/SKILL.md) |
-| Draft **implementation** PR opening | Root `DEV_PLAN.md` only per AGENTS **DEV_PLAN updates** (no v1 Done by default) | AGENTS **DEV_PLAN updates** (not full audit) |
+| Draft **implementation** PR opening | Root `DEV_PLAN.md` per AGENTS **DEV_PLAN updates** (inline Contains Done after merge; no v1 Done sections) | AGENTS **DEV_PLAN updates** (not full audit) |
 
 ## Conventions
 
 - No new TODO comments in docs without an existing issue number.
 - Temporary behavior: document intent; cite filed follow-up issue when one exists.
 - Do not edit closed GitHub issues.
-- DEV_PLAN: root is Roadmap v2 (lanes/spine); do not add v1 tables/stubs/Done unless user requests; v1 history lives in archive.
+- DEV_PLAN: root is Roadmap v2 (lanes); inline Contains Done per AGENTS after merge; no v1 tables/stubs/Done sections; v1 history in archive.
 - Plan mode: GitHub-only for milestone hygiene; defer root `DEV_PLAN.md` commits until a branch is allowed and scope is explicit.
 
 ## Workflow

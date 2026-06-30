@@ -52,7 +52,7 @@ Plan mode forbids code and repo changes, but GitHub project status updates and i
 - ALWAYS apply appropriate labels (`gameplay`, `non-functional`, `tooling`, `documentation`, etc).
 - ALWAYS add the `agent` label to agent-created Issues.
 - ALWAYS add new Issues to the dosmud GitHub project.
-- If the issue has a **Milestone**: run [milestone-issue-hygiene](.cursor/skills/milestone-issue-hygiene/SKILL.md) in the **same turn** for GitHub metadata (Size, Priority, blocked-by, issue body scope/Testing, project stack order, hygiene comment). **Do not** add v1 milestone table rows, stubs, or Done markers to root `DEV_PLAN.md` unless explicitly requested; in **plan mode**, defer all `DEV_PLAN.md` commits (GitHub-only hygiene).
+- If the issue has a **Milestone**: run [milestone-issue-hygiene](.cursor/skills/milestone-issue-hygiene/SKILL.md) in the **same turn** for GitHub metadata (Size, Priority, blocked-by, issue body scope/Testing, project stack order, hygiene comment). **Do not** add v1 milestone table rows, per-issue `###` stubs, or Done **sections** to root `DEV_PLAN.md`; lane **Contains** Done markers follow [DEV_PLAN updates](#dev_plan-updates) below. In **plan mode**, defer all `DEV_PLAN.md` commits (GitHub-only hygiene).
 
 ### Status transitions
 
@@ -145,18 +145,30 @@ Skip when the user opts out, the branch diff vs `main` is unchanged since a docu
 
 Prefer linking between documents over duplicating large instruction blocks.
 
-**Roadmap note:** root [`DEV_PLAN.md`](DEV_PLAN.md) now tracks Roadmap v2 as a strategic index, not the full v1 milestone ledger. The archived v1 plan lives at [`docs/archive/DEV_PLAN_v1_engine_foundation.md`](docs/archive/DEV_PLAN_v1_engine_foundation.md). When updating roadmap docs, follow the current root `DEV_PLAN.md` structure rather than recreating v1 milestone tables or Done-marker sections unless explicitly requested.
+**Roadmap note:** root [`DEV_PLAN.md`](DEV_PLAN.md) is a strategic index (lanes, parked systems), not the v1 milestone ledger. The archive lives at [`docs/archive/DEV_PLAN_v1_engine_foundation.md`](docs/archive/DEV_PLAN_v1_engine_foundation.md). Follow the current lane structure; v1 milestone tables and per-issue `###` stubs belong in the archive only.
 
 #### DEV_PLAN updates
 
-Root [`DEV_PLAN.md`](DEV_PLAN.md) is **Roadmap v2** - a strategic index (current phase, active lanes, authored-content spine, parked systems). It is **not** the v1 milestone ledger.
+Root [`DEV_PLAN.md`](DEV_PLAN.md) is **Roadmap v2** - a strategic index (current phase, active lanes, parked systems). It is **not** the v1 milestone ledger.
+
+**Roadmap v2 Done convention** (allowed on root `DEV_PLAN.md`):
+
+- Mark delivery **once** on the issue's lane **Contains / currently expected** line after merge (or when the user requests a roadmap doc update).
+- Format: `- [#N](issue-url) short title - ✅ Done (PR [#PR](pr-url))`
+- Do **not** duplicate Done on other bullets, soft-sequence blocks, or separate Done sections.
+- Do **not** mark Done at issue-create time, on draft PR open, or on hygiene-only PRs unless the user asks.
+
+**Forbidden on root `DEV_PLAN.md`** (v1 ledger patterns; use archive instead):
+
+- milestone tables, execution-order mermaid, per-issue `###` stubs, Done **sections** under headings
 
 | Situation | Action |
 |-----------|--------|
-| Draft **implementation** PR (default) | **Do not** add v1 milestone tables, execution-order mermaid, per-issue `###` stubs, or **Done ✅** markers to root `DEV_PLAN.md`. Track Status on [project #1](https://github.com/users/ianmays/projects/1). |
-| User explicitly requests a Roadmap v2 doc update | Edit root `DEV_PLAN.md` using its lane/spine structure only. |
-| v1 history, Done markers, milestone tables | [`docs/archive/DEV_PLAN_v1_engine_foundation.md`](docs/archive/DEV_PLAN_v1_engine_foundation.md) only - when explicitly maintaining archive history. |
-| New issues / milestone hygiene | GitHub Size/Priority, blocked-by, issue body via [milestone-issue-hygiene](.cursor/skills/milestone-issue-hygiene/SKILL.md); no default root `DEV_PLAN.md` commits. |
+| Draft **implementation** PR (default) | Skip root `DEV_PLAN.md` Done edits until merge unless the user requests a roadmap update. Track Status on [project #1](https://github.com/users/ianmays/projects/1). |
+| After **merge** or user roadmap doc update | Mark Done on the lane **Contains** line per the convention above (optional in the same docs commit as other roadmap edits). |
+| User explicitly requests a Roadmap v2 doc update | Edit root `DEV_PLAN.md` using its lane structure; inline Done allowed per convention. |
+| v1 history, milestone tables, `###` stubs, Done sections | [`docs/archive/DEV_PLAN_v1_engine_foundation.md`](docs/archive/DEV_PLAN_v1_engine_foundation.md) only. |
+| New issues / milestone hygiene | GitHub metadata via [milestone-issue-hygiene](.cursor/skills/milestone-issue-hygiene/SKILL.md); skip root `DEV_PLAN.md` by default. |
 
 Do not update root `DEV_PLAN.md` on later pushes or after merge unless the user asked for a roadmap doc change.
 
