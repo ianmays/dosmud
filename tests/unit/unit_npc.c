@@ -192,6 +192,7 @@ TEST npc_cmd_give_herbalist_drops_reward_when_bag_full(void)
     game.herbalist_story = HERBALIST_STORY_REQUESTED;
     game.marsh_root_spawned = 1;
     game_inv_bag_add(&game, ITEM_MARSH_ROOT);
+    /* marsh-root stays carried in bag[0] while the bag stays at capacity. */
     game.bag_count = game.bag_capacity;
     game.bag[0] = ITEM_MARSH_ROOT;
     game.bag[1] = ITEM_STICK;

@@ -267,6 +267,9 @@ int game_inv_bag_remove_item(struct GameState *game, int item_id)
     return game_inv_bag_remove_index(game, idx);
 }
 
+/*
+ * Give/surrender consumes the wielded copy before a bag stack of the same item.
+ */
 int game_inv_remove_carried_item(struct GameState *game, int item_id)
 {
     if (game->weapon_equipped == item_id) {

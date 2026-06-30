@@ -201,6 +201,7 @@ Conventions:
 - headless step surface: `game_describe_current_room`, `game_process_input`, and `game_background_step` mutate `GameState` and append `GameEvent` records supplied by the caller
 - explicit game modes in [`game.h`](https://github.com/ianmays/dosmud/blob/main/src/game.h): `GameMode` (explore, dialogue, combat), `DialogueKind` for the active dialogue when in dialogue mode (room NPCs including the pond frog, traveler, enemy, and the corpse-loot menu), `CombatState` for combat-only fields (`enemy_hp`, snapshotted `enemy_level`, `defending`), the narrow Herbalist story fields (`herbalist_story`, `marsh_root_spawned`) for issue [#76](https://github.com/ianmays/dosmud/issues/76), and `NpcState` / `NpcFlags` for the fixed-size dynamic NPC roster (`GameState.npcs[CFG_NPC_MAX]`, cap in [`config.h`](https://github.com/ianmays/dosmud/blob/main/include/config.h); per-slot `level` holds authored enemy difficulty; `NPC_FLAG_HANDOVER_PICK` gates enemy give-during-dialogue on the active slot)
 - mode transitions via `game_set_mode_explore`, `game_set_mode_dialogue`, and `game_set_mode_combat` (only one major mode at a time)
+- `CMD_GIVE` routes room-NPC item exchange through `npc_cmd_give` first, then `genc_cmd_give` only during enemy handover (`DIALOGUE_ENEMY`); otherwise `game.c` queues `GAME_DIALOGUE_GUARD` with `GAME_DIALOGUE_GUARD_GIVE_NO_TARGET` ([#132](https://github.com/ianmays/dosmud/issues/132))
 - non-enemy dialogue menus and corpse loot menus (`DIALOGUE_LOOT`) dismiss before mode guards when the player types an explore verb that is not menu-native (`reply`, `help`, `version`, `quit`; `talk` while in room-NPC dialogue; repeat `loot` while the loot menu is open); dismissal queues `GAME_DIALOGUE_GUARD` with `GAME_DIALOGUE_GUARD_DIALOGUE_CLOSED` for room-NPC dialogue or routes through invent leave for loot, then the verb runs in explore mode; enemy bandit dialogue (`DIALOGUE_ENEMY`) keeps combat-like reply-only gating unchanged ([#205](https://github.com/ianmays/dosmud/issues/205))
 - `game_is_busy_dialogue` returns true whenever `mode != GAME_MODE_EXPLORE` (ambient encounters, idle background ticks)
 - `game_roll_spread` and `game_roll_percent` centralize gameplay draws used for combat, corpse loot, kill XP, and bandit intimidate (`plat_rand()` when inject is inactive; inject bypasses the draw counter in `TEST_MODE`)
@@ -227,6 +228,7 @@ New `src/*.c` and `src/*.h` basenames must stay within **classic FAT 8+3** (at m
 
 - parse raw text into structured commands
 - keep parsing separate from execution/mutation
+- `give` and `offer` both parse as `CMD_GIVE` with an item word ([#132](https://github.com/ianmays/dosmud/issues/132))
 - recognizes `save` and `load` tokens (`CMD_SAVE`, `CMD_LOAD`); `main.c` handles file I/O before gameplay mutation
 - recognizes `version` (`CMD_VERSION`); `game.c` emits `GAME_EVENT_VERSION` so render stays print-free
 
@@ -243,7 +245,7 @@ New `src/*.c` and `src/*.h` basenames must stay within **classic FAT 8+3** (at m
 - art is intentionally compact to work well with 25 line displays (DOS standard)
 - no gameplay mutation
 - calls [`fmt.c`](https://github.com/ianmays/dosmud/blob/main/src/fmt.c) for logic-heavy strings, then prints; static copy from [`txtres.c`](https://github.com/ianmays/dosmud/blob/main/src/txtres.c) (`TXT_*` constants and `g_room_*` arrays), not scattered literals
-- `GAME_EVENT_DIALOGUE` and `GAME_EVENT_ENCOUNTER`: resolve `TxtresNarrativeKey` via `txtres`, then call the portrait/menu or encounter `render_*` helper for that key; `GAME_EVENT_DIALOGUE` `arg3` carries authored scene detail when talk/reply branches need more than choice alone (Herbalist story scenes for [#76](https://github.com/ianmays/dosmud/issues/76))
+- `GAME_EVENT_DIALOGUE` and `GAME_EVENT_ENCOUNTER`: resolve `TxtresNarrativeKey` via `txtres`, then call the portrait/menu or encounter `render_*` helper for that key; `GAME_EVENT_DIALOGUE` `arg3` carries authored scene detail when talk/reply/give branches need more than choice alone (Herbalist story and exchange scenes for [#76](https://github.com/ianmays/dosmud/issues/76) and [#132](https://github.com/ianmays/dosmud/issues/132))
 - newline tiers (`render_gap`, `render_paragraph`, and related rules): [Newline and spacing](#newline-and-spacing)
 
 ### `fmt`
@@ -268,6 +270,7 @@ New `src/*.c` and `src/*.h` basenames must stay within **classic FAT 8+3** (at m
 - item use and crafting behavior
 - `eat` and inventory `use salve` restore HP via `game_heal_player`; at max HP the item is still consumed but no heal is applied (player sees an already-full message)
 - wield/unwield commands track `weapon_equipped` on `GameState`; a wielded weapon is not stored in `bag[]` (it occupies the hand slot only until unwield, drop, or bandit handover moves it)
+- `game_inv_remove_carried_item` clears wielded gear before the bag; `game_inv_deliver_room_item` places reward items in the bag or on the current room floor for room-NPC exchanges ([#132](https://github.com/ianmays/dosmud/issues/132))
 - combat adds `item_weapon_damage_bonus` from `weapon_equipped` when the player attacks; it does not require the weapon id to appear in the bag
 
 ### `items`

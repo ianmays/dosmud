@@ -337,6 +337,10 @@ static int herbalist_reply_requested(struct GameState *game, int choice,
     return 1;
 }
 
+/*
+ * Herbalist marsh-root exchange; reply [1] and give/offer marsh-root both route
+ * here instead of invent-only bag removal.
+ */
 static int herbalist_exchange(struct GameState *game, int item_arg,
                               GameEventQueue *out)
 {
@@ -398,6 +402,7 @@ static int herbalist_reply_ready(struct GameState *game, int choice,
                                  GameEventQueue *out)
 {
     if (choice == 1) {
+        /* Same exchange path as npc_cmd_give in the orchard. */
         return herbalist_exchange(game, ITEM_MARSH_ROOT, out);
     }
     npc_push_dialogue_detail(out, GAME_DIALOGUE_ACTOR_HERBALIST,

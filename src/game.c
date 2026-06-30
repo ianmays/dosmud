@@ -24,7 +24,8 @@ static void push_dialogue_guard(GameEventQueue *out, int reason)
 
 /*
  * Menu-native verbs keep the modal open (numbered reply, repeat talk, repeat
- * loot-to-leave); help/version/quit stay allowed like combat menus.
+ * loot-to-leave, give/offer handoffs); help/version/quit stay allowed like
+ * combat menus.
  */
 static int cmd_preserves_noncombat_menu(const struct GameState *game,
                                         const struct Command *cmd)
@@ -537,6 +538,10 @@ static int apply_command(struct GameState *game, struct Command *cmd,
     if (game_cmd_reply(game, cmd, out)) {
         return 1;
     }
+    /*
+     * Room NPC exchange (npc.c) runs before enemy handover (genc.c); unmatched
+     * gives emit a dialogue guard instead of falling through to genc.
+     */
     if (cmd->type == CMD_GIVE) {
         if (npc_cmd_give(game, cmd->arg, out)) {
             return 1;
