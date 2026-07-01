@@ -116,12 +116,12 @@ TEST npc_open_room_dialogue_watchman_always_neutral_entry(void)
     game.watchman_flags = WATCHMAN_FLAG_WARNED;
     game_event_queue_reset(&out);
     ASSERT_EQ(1, npc_open_room_dialogue(&game, &out));
-    ASSERT_EQ(WATCHMAN_SCENE_NEUTRAL, out.events[0].arg3);
+    ASSERT_EQ(WATCHMAN_SCENE_NEUTRAL_WARNED, out.events[0].arg3);
     ASSERT_EQ(WATCHMAN_SCENE_NEUTRAL, game.watchman_menu);
     PASS();
 }
 
-TEST npc_room_cmd_reply_watchman_meal_grants_herb(void)
+TEST npc_room_cmd_reply_watchman_meal_give_fed(void)
 {
     struct GameState game;
     GameEventQueue out;
@@ -135,10 +135,13 @@ TEST npc_room_cmd_reply_watchman_meal_grants_herb(void)
     ASSERT_EQ(1, npc_room_cmd_reply(&game, 2, &out));
     ASSERT_EQ(WATCHMAN_SCENE_MEAL_OFFER, game.watchman_menu);
     game_event_queue_reset(&out);
-    ASSERT_EQ(1, npc_room_cmd_reply(&game, 1, &out));
-    ASSERT_EQ(WATCHMAN_FLAG_HERBS, game.watchman_flags);
-    ASSERT_EQ(1, game_inv_player_has_item(&game, ITEM_HERB));
-    ASSERT_EQ(WATCHMAN_SCENE_HERBS_BAG, out.events[0].arg3);
+    ASSERT_EQ(1, npc_cmd_give(&game, ITEM_FISH, &out));
+    ASSERT_EQ(WATCHMAN_FLAG_FED, game.watchman_flags);
+    ASSERT_EQ(0, game_inv_player_has_item(&game, ITEM_FISH));
+    ASSERT_EQ(0, game_inv_player_has_item(&game, ITEM_HERB));
+    ASSERT_EQ(WATCHMAN_SCENE_FOOD_THANKS, out.events[0].arg3);
+    ASSERT_EQ(WATCHMAN_SCENE_NEUTRAL, game.watchman_menu);
+    ASSERT_EQ(WATCHMAN_SCENE_NEUTRAL_FED, out.events[1].arg3);
     PASS();
 }
 
@@ -154,7 +157,7 @@ TEST npc_room_cmd_reply_watchman_apologize_sets_promised(void)
     game_event_queue_reset(&out);
     ASSERT_EQ(1, npc_room_cmd_reply(&game, 2, &out));
     game_event_queue_reset(&out);
-    ASSERT_EQ(1, npc_room_cmd_reply(&game, 2, &out));
+    ASSERT_EQ(1, npc_room_cmd_reply(&game, 1, &out));
     ASSERT_EQ(WATCHMAN_FLAG_PROMISED, game.watchman_flags);
     ASSERT_EQ(WATCHMAN_SCENE_APOLOGY, out.events[0].arg3);
     PASS();
@@ -171,11 +174,12 @@ TEST npc_room_cmd_reply_watchman_meal_no_food(void)
     ASSERT_EQ(1, npc_open_room_dialogue(&game, &out));
     game_event_queue_reset(&out);
     ASSERT_EQ(1, npc_room_cmd_reply(&game, 2, &out));
+    ASSERT_EQ(WATCHMAN_SCENE_MEAL_OFFER_EMPTY, game.watchman_menu);
     game_event_queue_reset(&out);
     ASSERT_EQ(1, npc_room_cmd_reply(&game, 1, &out));
-    ASSERT_EQ(0, (game.watchman_flags & WATCHMAN_FLAG_HERBS));
-    ASSERT_EQ(WATCHMAN_SCENE_NO_FOOD, out.events[0].arg3);
-    ASSERT_EQ(WATCHMAN_SCENE_MEAL_OFFER, game.watchman_menu);
+    ASSERT_EQ(WATCHMAN_FLAG_PROMISED, game.watchman_flags);
+    ASSERT_EQ(WATCHMAN_SCENE_APOLOGY, out.events[0].arg3);
+    ASSERT_EQ(WATCHMAN_SCENE_NEUTRAL, game.watchman_menu);
     PASS();
 }
 
@@ -194,6 +198,45 @@ TEST npc_open_room_dialogue_herbalist_requested_scene(void)
     ASSERT_EQ(DIALOGUE_NPC_HERBALIST, game.dialogue);
     ASSERT_EQ(GAME_DIALOGUE_ACTOR_HERBALIST, out.events[0].arg0);
     ASSERT_EQ(HERBALIST_SCENE_REQUESTED, out.events[0].arg3);
+    ASSERT_EQ(HERBALIST_SCENE_REQUESTED, game.herbalist_menu);
+    PASS();
+}
+
+TEST npc_room_cmd_reply_herbalist_requested_root_opens_quest_submenu(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 317u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ORCHARD, 0);
+    game.herbalist_story = HERBALIST_STORY_REQUESTED;
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, npc_open_room_dialogue(&game, &out));
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, npc_room_cmd_reply(&game, 1, &out));
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(HERBALIST_SCENE_REQUESTED_OPTIONS, game.herbalist_menu);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(HERBALIST_SCENE_REQUESTED_OPTIONS, out.events[0].arg3);
+    PASS();
+}
+
+TEST npc_room_cmd_reply_herbalist_requested_root_gossip_leaves_dialogue(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 318u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ORCHARD, 0);
+    game.herbalist_story = HERBALIST_STORY_REQUESTED;
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, npc_open_room_dialogue(&game, &out));
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, npc_room_cmd_reply(&game, 2, &out));
+    ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
+    ASSERT_EQ(DIALOGUE_NONE, game.dialogue);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(HERBALIST_SCENE_NOT_STARTED, out.events[0].arg3);
     PASS();
 }
 
@@ -806,10 +849,12 @@ SUITE(npc) {
     RUN_TEST(npc_open_room_dialogue_frog);
     RUN_TEST(npc_open_room_dialogue_watchman);
     RUN_TEST(npc_open_room_dialogue_watchman_always_neutral_entry);
-    RUN_TEST(npc_room_cmd_reply_watchman_meal_grants_herb);
+    RUN_TEST(npc_room_cmd_reply_watchman_meal_give_fed);
     RUN_TEST(npc_room_cmd_reply_watchman_apologize_sets_promised);
     RUN_TEST(npc_room_cmd_reply_watchman_meal_no_food);
     RUN_TEST(npc_open_room_dialogue_herbalist_requested_scene);
+    RUN_TEST(npc_room_cmd_reply_herbalist_requested_root_opens_quest_submenu);
+    RUN_TEST(npc_room_cmd_reply_herbalist_requested_root_gossip_leaves_dialogue);
     RUN_TEST(npc_open_room_dialogue_herbalist_reseeds_missing_root);
     RUN_TEST(npc_open_room_dialogue_herbalist_ready_scene);
     RUN_TEST(npc_room_cmd_reply_herbalist_turn_in_updates_story);

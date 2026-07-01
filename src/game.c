@@ -23,6 +23,21 @@ static void push_dialogue_guard(GameEventQueue *out, int reason)
 }
 
 /*
+ * Room-NPC give/offer prompts (herbalist hand-in, watchman meal) stay modal
+ * for bag inspection the same way enemy HANDOVER_PICK does in mode guards.
+ */
+static int game_noncombat_give_offer_active(const struct GameState *game)
+{
+    if (game->mode != GAME_MODE_DIALOGUE) {
+        return 0;
+    }
+    if (game->dialogue == DIALOGUE_NPC_HERBALIST) {
+        return 1;
+    }
+    return npc_watchman_give_offer_active(game);
+}
+
+/*
  * Menu-native verbs keep the modal open (numbered reply, repeat talk, repeat
  * loot-to-leave, and the active Herbalist give/offering prompt); help/version/
  * quit stay allowed like combat menus.
@@ -44,12 +59,8 @@ static int cmd_preserves_noncombat_menu(const struct GameState *game,
     if (game->dialogue == DIALOGUE_LOOT && cmd->type == CMD_LOOT) {
         return 1;
     }
-    if (game->dialogue == DIALOGUE_NPC_HERBALIST && cmd->type == CMD_GIVE) {
-        return 1;
-    }
-    if (game->dialogue == DIALOGUE_NPC_WATCHMAN &&
-            game->watchman_menu == WATCHMAN_SCENE_MEAL_OFFER &&
-            cmd->type == CMD_GIVE) {
+    if (game_noncombat_give_offer_active(game) &&
+            (cmd->type == CMD_GIVE || cmd->type == CMD_BAG)) {
         return 1;
     }
     return 0;
@@ -96,6 +107,7 @@ void game_set_mode_explore(struct GameState *game)
     game->mode = GAME_MODE_EXPLORE;
     game->dialogue = DIALOGUE_NONE;
     game->watchman_menu = 0;
+    game->herbalist_menu = 0;
     /* Drop combat snapshot so explore ticks do not reuse stale enemy scaling. */
     game->combat.enemy_hp = 0;
     game->combat.enemy_level = 0;
@@ -187,6 +199,7 @@ static void reset_mutable_state(struct GameState *game, int room_id, u32 tick)
     game->env_focus_kind = GAME_ENV_NONE;
     game->env_focus_expires_tick = 0;
     game->herbalist_story = HERBALIST_STORY_NONE;
+    game->herbalist_menu = 0;
     game->watchman_flags = 0;
     game->watchman_menu = 0;
     game->marsh_root_spawned = 0;

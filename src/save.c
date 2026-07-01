@@ -16,7 +16,7 @@
  */
 
 #define SAVE_MAGIC "DMSV"
-#define SAVE_VERSION 12
+#define SAVE_VERSION 13
 #define SAVE_PATH_BUF_MAX 260
 
 /*
@@ -389,6 +389,8 @@ static int save_write_game_state(FILE *fp, const struct GameState *game,
             !save_write_u32(fp, game->env_focus_expires_tick) ||
             /* v10: herbalist story fields (#76). */
             !save_write_s16(fp, game->herbalist_story) ||
+            /* v13: herbalist session menu. */
+            !save_write_s16(fp, game->herbalist_menu) ||
             /* v12: watchman flags and session menu (#8). */
             !save_write_s16(fp, game->watchman_flags) ||
             !save_write_s16(fp, game->watchman_menu) ||
@@ -436,6 +438,8 @@ static int save_read_game_state(FILE *fp, struct GameState *game,
             !save_read_u32(fp, &game->env_focus_expires_tick) ||
             /* v10: herbalist story fields (#76). */
             !save_read_s16(fp, &game->herbalist_story) ||
+            /* v13: herbalist session menu. */
+            !save_read_s16(fp, &game->herbalist_menu) ||
             /* v12: watchman flags and session menu (#8). */
             !save_read_s16(fp, &game->watchman_flags) ||
             !save_read_s16(fp, &game->watchman_menu) ||
@@ -655,9 +659,11 @@ static int save_validate_game(const struct GameState *game)
             game->env_focus_kind > GAME_ENV_GRIT ||
             game->herbalist_story < HERBALIST_STORY_NONE ||
             game->herbalist_story > HERBALIST_STORY_COMPLETE ||
+            game->herbalist_menu < 0 ||
+            game->herbalist_menu > HERBALIST_SCENE_GIVE_REWARD_NO_SPACE ||
             game->watchman_flags < 0 ||
             game->watchman_flags > (WATCHMAN_FLAG_WARNED |
-                WATCHMAN_FLAG_HERBS | WATCHMAN_FLAG_PROMISED) ||
+                WATCHMAN_FLAG_FED | WATCHMAN_FLAG_PROMISED) ||
             game->watchman_menu < 0 ||
             game->watchman_menu > WATCHMAN_SCENE_GIVE_REJECTED ||
             !save_valid_boolish(game->marsh_root_spawned) ||

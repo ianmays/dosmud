@@ -365,7 +365,7 @@ TEST game_talk_npcs_and_nobody(void)
     PASS();
 }
 
-TEST game_watchman_meal_thread_grants_herb(void)
+TEST game_watchman_meal_thread_give_fed(void)
 {
     struct GameState game;
 
@@ -375,9 +375,71 @@ TEST game_watchman_meal_thread_grants_herb(void)
     ASSERT_EQ(1, run_cmd(&game, "talk"));
     ASSERT_EQ(1, run_cmd(&game, "2"));
     ASSERT_EQ(WATCHMAN_SCENE_MEAL_OFFER, game.watchman_menu);
-    ASSERT_EQ(1, run_cmd(&game, "1"));
-    ASSERT_EQ(WATCHMAN_FLAG_HERBS, game.watchman_flags);
-    ASSERT_EQ(1, game_inv_player_has_item(&game, ITEM_HERB));
+    ASSERT_EQ(1, run_cmd(&game, "give berry"));
+    ASSERT_EQ(WATCHMAN_FLAG_FED, game.watchman_flags);
+    ASSERT_EQ(0, game_inv_player_has_item(&game, ITEM_BERRY));
+    ASSERT_EQ(WATCHMAN_SCENE_NEUTRAL, game.watchman_menu);
+    PASS();
+}
+
+TEST game_bag_preserves_bandit_handover_dialogue(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    struct NpcState *bandit;
+    int slot;
+
+    unit_game_fresh(&game, 231u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game_inv_bag_add(&game, ITEM_STICK);
+    game_event_queue_reset(&out);
+    enemy_begin_encounter(&game, &out);
+    ASSERT_EQ(1, run_cmd_out(&game, "2", &out));
+    slot = npc_find_by_dialogue(&game, DIALOGUE_ENEMY);
+    bandit = slot >= 0 ? &game.npcs[slot] : 0;
+    ASSERT(bandit != 0);
+    ASSERT_EQ(1, run_cmd_out(&game, "bag", &out));
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(DIALOGUE_ENEMY, game.dialogue);
+    ASSERT_EQ(NPC_FLAG_HANDOVER_PICK, bandit->flags & NPC_FLAG_HANDOVER_PICK);
+    ASSERT_EQ(GAME_EVENT_BAG_VIEW, out.events[out.count - 1].kind);
+    PASS();
+}
+
+TEST game_bag_preserves_watchman_meal_offer_dialogue(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 232u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_TOWER, 0);
+    game_inv_bag_add(&game, ITEM_BERRY);
+    ASSERT_EQ(1, run_cmd_out(&game, "talk", &out));
+    ASSERT_EQ(1, run_cmd_out(&game, "2", &out));
+    ASSERT_EQ(WATCHMAN_SCENE_MEAL_OFFER, game.watchman_menu);
+    ASSERT_EQ(1, run_cmd_out(&game, "bag", &out));
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(DIALOGUE_NPC_WATCHMAN, game.dialogue);
+    ASSERT_EQ(WATCHMAN_SCENE_MEAL_OFFER, game.watchman_menu);
+    ASSERT_EQ(GAME_EVENT_BAG_VIEW, out.events[out.count - 1].kind);
+    PASS();
+}
+
+TEST game_bag_preserves_herbalist_give_dialogue(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 233u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ORCHARD, 0);
+    game.herbalist_story = HERBALIST_STORY_REQUESTED;
+    game.marsh_root_spawned = 1;
+    game_inv_bag_add(&game, ITEM_MARSH_ROOT);
+    ASSERT_EQ(1, run_cmd_out(&game, "talk", &out));
+    ASSERT_EQ(1, run_cmd_out(&game, "bag", &out));
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(DIALOGUE_NPC_HERBALIST, game.dialogue);
+    ASSERT_EQ(GAME_EVENT_BAG_VIEW, out.events[out.count - 1].kind);
     PASS();
 }
 
@@ -1172,7 +1234,10 @@ SUITE(game) {
     RUN_TEST(game_bandit_handover_pick);
     RUN_TEST(game_wait_on_road_bandit_room_opens_encounter);
     RUN_TEST(game_talk_npcs_and_nobody);
-    RUN_TEST(game_watchman_meal_thread_grants_herb);
+    RUN_TEST(game_watchman_meal_thread_give_fed);
+    RUN_TEST(game_bag_preserves_bandit_handover_dialogue);
+    RUN_TEST(game_bag_preserves_watchman_meal_offer_dialogue);
+    RUN_TEST(game_bag_preserves_herbalist_give_dialogue);
     RUN_TEST(game_frog_reply_branch);
     RUN_TEST(game_combat_blocks_inventory_cmds);
     RUN_TEST(game_inspect_none_and_wrong);

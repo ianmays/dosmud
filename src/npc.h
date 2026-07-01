@@ -13,6 +13,10 @@ enum HerbalistDialogueScene {
     HERBALIST_SCENE_REQUESTED,
     HERBALIST_SCENE_READY,
     HERBALIST_SCENE_COMPLETE,
+    /* REQUESTED root talk menu (portrait + re-enter / gossip / leave). */
+    /* HERBALIST_SCENE_REQUESTED uses the root menu while herbalist_menu matches. */
+    /* in-menu talk: options only (no portrait); paired with REQUESTED root */
+    HERBALIST_SCENE_REQUESTED_OPTIONS,
     /* give/offering exchange outcomes (arg3 on GAME_EVENT_DIALOGUE). */
     HERBALIST_SCENE_GIVE_REJECTED,
     HERBALIST_SCENE_GIVE_NOT_CARRYING,
@@ -30,18 +34,20 @@ enum WatchmanDialogueScene {
     WATCHMAN_SCENE_NEUTRAL = 0,
     WATCHMAN_SCENE_AFTER_WARNING,
     WATCHMAN_SCENE_MEAL_OFFER,
-    WATCHMAN_SCENE_AFTER_MEAL,
+    WATCHMAN_SCENE_MEAL_OFFER_EMPTY,
+    /* neutral root copy variants (TALK arg3 only; watchman_menu stays NEUTRAL). */
+    WATCHMAN_SCENE_NEUTRAL_WARNED,
+    WATCHMAN_SCENE_NEUTRAL_FED,
+    WATCHMAN_SCENE_NEUTRAL_WARNED_FED,
     /* reply-only scenes (REPLY events) */
     WATCHMAN_SCENE_PECKISH,
+    WATCHMAN_SCENE_WARNING,
     WATCHMAN_SCENE_CHANGE_SUBJECT,
     WATCHMAN_SCENE_SQUALL_ADVICE,
-    WATCHMAN_SCENE_NO_FOOD,
     WATCHMAN_SCENE_APOLOGY,
     WATCHMAN_SCENE_FOOD_THANKS,
     WATCHMAN_SCENE_ALREADY_FED,
-    WATCHMAN_SCENE_HERBS_BAG,
-    WATCHMAN_SCENE_HERBS_GROUND,
-    WATCHMAN_SCENE_HERBS_NO_SPACE,
+    WATCHMAN_SCENE_GIVE_NOT_CARRYING,
     WATCHMAN_SCENE_GIVE_REJECTED
 };
 
@@ -81,6 +87,8 @@ int npc_room_cmd_reply(struct GameState *game, int choice,
 /* Fixed room-NPC give/offering hook; returns 1 when a room NPC consumed it. */
 int npc_cmd_give(struct GameState *game, int item_arg,
                  struct GameEventQueue *out);
+/* 1 while room watchman meal-offer accepts give/offer (npc.c owns menu rules). */
+int npc_watchman_give_offer_active(const struct GameState *game);
 /* Maintain authored npc story-world hooks that do not emit events. */
 void npc_story_tick(struct GameState *game);
 void npc_seed_profiles(struct GameState *game);

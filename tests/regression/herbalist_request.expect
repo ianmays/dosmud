@@ -41,6 +41,10 @@ An herbalist kneels among fallen fruit.
 [T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
 > She lowers her voice. "The marsh still grows a root that cuts fever fast. Bring me one, and I'll point you toward older answers than mine."
+  [1] Ask where to look.
+  [2] Admit you do not have it yet.
+  [3] Leave and keep searching.
+(Answer with 1, 2, 3, or reply <n>.)
 
 [T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 

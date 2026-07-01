@@ -199,10 +199,10 @@ TEST game_event_push_records_watchman_dialogue_scene_arg3(void)
         WATCHMAN_SCENE_AFTER_WARNING, 0));
     ASSERT(0 != game_event_push(&out, GAME_EVENT_DIALOGUE,
         GAME_DIALOGUE_ACTOR_WATCHMAN, GAME_DIALOGUE_PHASE_REPLY, 2,
-        WATCHMAN_SCENE_HERBS_BAG, 0));
+        WATCHMAN_SCENE_FOOD_THANKS, 0));
     ASSERT_EQ(2, out.count);
     ASSERT_EQ(WATCHMAN_SCENE_AFTER_WARNING, out.events[0].arg3);
-    ASSERT_EQ(WATCHMAN_SCENE_HERBS_BAG, out.events[1].arg3);
+    ASSERT_EQ(WATCHMAN_SCENE_FOOD_THANKS, out.events[1].arg3);
     PASS();
 }
 
