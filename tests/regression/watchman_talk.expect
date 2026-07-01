@@ -42,9 +42,6 @@ A one-eyed watchman leans on the parapet.
 
 > He points west. "If crows go quiet, squall in ten minutes."
 
-[T:0] Tower [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
-
-> 
         .#######.            
        /#########\          
        |  -- (o) |           
@@ -54,20 +51,17 @@ A one-eyed watchman leans on the parapet.
                              
 (wind-tanned lookout)                             
 
-He keeps one eye on the western ridge.
-"The crows went quiet an hour ago. Storm's close."
+The wind picks up along the parapet.
+"Storm signs do not wait for polite company."
   [1] Ask what to do when it hits.
-  [2] Offer to share a meal.
+  [2] Change the subject.
   [3] Leave him to his watch.
 (Answer with 1, 2, 3, or reply <n>.)
 
 [T:0] Tower [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
-> He accepts, then hands you dried herbs. "Stay upright."
+> He grunts. "Say your piece, then."
 
-[T:0] Tower [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
-
-> 
         .#######.            
        /#########\          
        |  -- (o) |           

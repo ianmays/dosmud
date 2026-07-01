@@ -26,14 +26,23 @@ enum HerbalistDialogueScene {
  * as HerbalistDialogueScene; kept in npc.h for render/copy consumers.
  */
 enum WatchmanDialogueScene {
-    /* talk menus */
+    /* talk menus (TALK events) */
     WATCHMAN_SCENE_NEUTRAL = 0,
-    WATCHMAN_SCENE_WARNED,
-    /* reply outcomes from watchman_grant_herbs and neutral/warned branches */
+    WATCHMAN_SCENE_AFTER_WARNING,
+    WATCHMAN_SCENE_MEAL_OFFER,
+    WATCHMAN_SCENE_AFTER_MEAL,
+    /* reply-only scenes (REPLY events) */
+    WATCHMAN_SCENE_PECKISH,
+    WATCHMAN_SCENE_CHANGE_SUBJECT,
+    WATCHMAN_SCENE_SQUALL_ADVICE,
+    WATCHMAN_SCENE_NO_FOOD,
+    WATCHMAN_SCENE_APOLOGY,
+    WATCHMAN_SCENE_FOOD_THANKS,
+    WATCHMAN_SCENE_ALREADY_FED,
     WATCHMAN_SCENE_HERBS_BAG,
     WATCHMAN_SCENE_HERBS_GROUND,
     WATCHMAN_SCENE_HERBS_NO_SPACE,
-    WATCHMAN_SCENE_HERBS_ALREADY
+    WATCHMAN_SCENE_GIVE_REJECTED
 };
 
 struct GameState;

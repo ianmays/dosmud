@@ -421,10 +421,17 @@ const char *const TXT_MSG_WATCHMAN_TALK_LINE1 = "A one-eyed watchman leans on th
 const char *const TXT_MSG_WATCHMAN_TALK_LINE2 = "\"Storms come from the canyon. You carry a torch?\"\n";
 const char *const TXT_MSG_WATCHMAN_TALK_LINE3 = "  [1] Ask for warning signs.\n  [2] Offer to share a meal.\n";
 const char *const TXT_MSG_WATCHMAN_TALK_LINE4 = "  [3] Say nothing and move on.\n";
-const char *const TXT_MSG_WATCHMAN_WARN_LINE1 = "He keeps one eye on the western ridge.\n";
-const char *const TXT_MSG_WATCHMAN_WARN_LINE2 = "\"The crows went quiet an hour ago. Storm's close.\"\n";
-const char *const TXT_MSG_WATCHMAN_WARN_LINE3 = "  [1] Ask what to do when it hits.\n  [2] Offer to share a meal.\n";
-const char *const TXT_MSG_WATCHMAN_WARN_LINE4 = "  [3] Leave him to his watch.\n";
+const char *const TXT_MSG_WATCHMAN_AFTER_WARN_LINE1 = "The wind picks up along the parapet.\n";
+const char *const TXT_MSG_WATCHMAN_AFTER_WARN_LINE2 = "\"Storm signs do not wait for polite company.\"\n";
+const char *const TXT_MSG_WATCHMAN_AFTER_WARN_LINE3 = "  [1] Ask what to do when it hits.\n  [2] Change the subject.\n";
+const char *const TXT_MSG_WATCHMAN_AFTER_WARN_LINE4 = "  [3] Leave him to his watch.\n";
+const char *const TXT_MSG_WATCHMAN_MEAL_LINE1 = "He watches your hands.\n";
+const char *const TXT_MSG_WATCHMAN_MEAL_LINE2 = "\"What have you got on you?\"\n";
+const char *const TXT_MSG_WATCHMAN_MEAL_LINE3 = "  [1] Offer food from your bag.\n  [2] Apologize - no food right now.\n";
+const char *const TXT_MSG_WATCHMAN_MEAL_LINE4 = "  [3] Leave.\n";
+const char *const TXT_MSG_WATCHMAN_AFTER_MEAL_LINE1 = "He tucks the dried herbs into his belt.\n";
+const char *const TXT_MSG_WATCHMAN_AFTER_MEAL_LINE2 = "\"That hit the spot. Anything else before the squall?\"\n";
+const char *const TXT_MSG_WATCHMAN_AFTER_MEAL_LINE3 = "  [1] Ask about something else.\n  [2] Leave.\n";
 const char *const TXT_MSG_HERBALIST_TALK_LINE1 = "An herbalist kneels among fallen fruit.\n";
 const char *const TXT_MSG_HERBALIST_TALK_LINE2 = "\"I could use a steady pair of hands, if you're offering them.\"\n";
 const char *const TXT_MSG_HERBALIST_TALK_LINE3 = "  [1] Ask what she needs.\n  [2] Trade gossip from the road.\n";
@@ -452,32 +459,56 @@ const char *const TXT_MSG_ARCHIVIST_TALK_LINE4 = "  [3] Thank them and leave.\n"
  */
 const char *txtres_msg_watchman_reply(int arg, int scene)
 {
+    if (scene == WATCHMAN_SCENE_PECKISH) {
+        return "He pauses. \"Actually, now that you mention it, I have been feeling a bit peckish.\"\n";
+    }
+    if (scene == WATCHMAN_SCENE_SQUALL_ADVICE) {
+        return "He barks over the wind. \"Find low ground and ditch anything iron.\"\n";
+    }
+    if (scene == WATCHMAN_SCENE_CHANGE_SUBJECT) {
+        return "He grunts. \"Say your piece, then.\"\n";
+    }
+    if (scene == WATCHMAN_SCENE_NO_FOOD) {
+        return "He checks your empty hands. \"Come back when you are actually carrying food.\"\n";
+    }
+    if (scene == WATCHMAN_SCENE_APOLOGY) {
+        return "He nods once. \"Fair enough. Bring something when you can.\"\n";
+    }
+    if (scene == WATCHMAN_SCENE_FOOD_THANKS) {
+        return "He takes the food and chews slowly.\nThen he hands you dried herbs. \"Stay upright.\"\n";
+    }
+    if (scene == WATCHMAN_SCENE_ALREADY_FED) {
+        return "He pats his belt. \"I still have your herbs. Save the meal for the road.\"\n";
+    }
     if (scene == WATCHMAN_SCENE_HERBS_BAG) {
-        return "He accepts, then hands you dried herbs. \"Stay upright.\"\n";
+        return "He accepts your food and presses dried herbs into your bag. \"Stay upright.\"\n";
     }
     if (scene == WATCHMAN_SCENE_HERBS_GROUND) {
-        return "He accepts, then hands you dried herbs.\nYour bag is full, so he sets them at your feet. \"Stay upright.\"\n";
+        return "He accepts your food and hands you dried herbs.\nYour bag is full, so he sets them at your feet. \"Stay upright.\"\n";
     }
     if (scene == WATCHMAN_SCENE_HERBS_NO_SPACE) {
         return "He glances at your full hands and the crowded floor. \"Make room first.\"\n";
     }
-    if (scene == WATCHMAN_SCENE_HERBS_ALREADY) {
-        return "He waves off the meal. \"You already have my herbs. Stay upright.\"\n";
+    if (scene == WATCHMAN_SCENE_GIVE_REJECTED) {
+        return "He is not asking for that right now.\n";
     }
-    if (scene == WATCHMAN_SCENE_WARNED) {
-        if (arg == 1) {
-            return "He barks over the wind. \"Find low ground and ditch anything iron.\"\n";
-        }
-        if (arg == 2) {
-            return "He accepts, then hands you dried herbs. \"Stay upright.\"\n";
-        }
+    if (scene == WATCHMAN_SCENE_AFTER_WARNING) {
         return "He turns back to the horizon without another word.\n";
     }
-    if (arg == 1) {
-        return "He points west. \"If crows go quiet, squall in ten minutes.\"\n";
+    if (scene == WATCHMAN_SCENE_MEAL_OFFER) {
+        return "He lets the silence settle and keeps watching the canyon.\n";
     }
-    if (arg == 2) {
-        return "He accepts, then hands you dried herbs. \"Stay upright.\"\n";
+    if (scene == WATCHMAN_SCENE_AFTER_MEAL) {
+        return "He nods once and returns to his watch.\n";
+    }
+    if (scene == WATCHMAN_SCENE_NEUTRAL) {
+        if (arg == 1) {
+            return "He points west. \"If crows go quiet, squall in ten minutes.\"\n";
+        }
+        if (arg == 2) {
+            return "He pauses. \"Actually, now that you mention it, I have been feeling a bit peckish.\"\n";
+        }
+        return "He nods once and returns to the horizon.\n";
     }
     return "He nods once and returns to the horizon.\n";
 }

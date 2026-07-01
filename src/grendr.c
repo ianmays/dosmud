@@ -1325,11 +1325,20 @@ void render_msg_watchman_talk(int scene)
     render_gap();
     art_watchman_portrait();
     render_gap();
-    if (scene == WATCHMAN_SCENE_WARNED) {
-        render_copy(TXT_MSG_WATCHMAN_WARN_LINE1);
-        render_copy(TXT_MSG_WATCHMAN_WARN_LINE2);
-        render_copy(TXT_MSG_WATCHMAN_WARN_LINE3);
-        render_copy(TXT_MSG_WATCHMAN_WARN_LINE4);
+    if (scene == WATCHMAN_SCENE_AFTER_WARNING) {
+        render_copy(TXT_MSG_WATCHMAN_AFTER_WARN_LINE1);
+        render_copy(TXT_MSG_WATCHMAN_AFTER_WARN_LINE2);
+        render_copy(TXT_MSG_WATCHMAN_AFTER_WARN_LINE3);
+        render_copy(TXT_MSG_WATCHMAN_AFTER_WARN_LINE4);
+    } else if (scene == WATCHMAN_SCENE_MEAL_OFFER) {
+        render_copy(TXT_MSG_WATCHMAN_MEAL_LINE1);
+        render_copy(TXT_MSG_WATCHMAN_MEAL_LINE2);
+        render_copy(TXT_MSG_WATCHMAN_MEAL_LINE3);
+        render_copy(TXT_MSG_WATCHMAN_MEAL_LINE4);
+    } else if (scene == WATCHMAN_SCENE_AFTER_MEAL) {
+        render_copy(TXT_MSG_WATCHMAN_AFTER_MEAL_LINE1);
+        render_copy(TXT_MSG_WATCHMAN_AFTER_MEAL_LINE2);
+        render_copy(TXT_MSG_WATCHMAN_AFTER_MEAL_LINE3);
     } else {
         render_copy(TXT_MSG_WATCHMAN_TALK_LINE1);
         render_copy(TXT_MSG_WATCHMAN_TALK_LINE2);

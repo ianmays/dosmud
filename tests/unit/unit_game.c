@@ -365,17 +365,19 @@ TEST game_talk_npcs_and_nobody(void)
     PASS();
 }
 
-TEST game_watchman_meal_grants_herb(void)
+TEST game_watchman_meal_thread_grants_herb(void)
 {
     struct GameState game;
 
     unit_game_fresh(&game, 230u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_TOWER, 0);
+    game_inv_bag_add(&game, ITEM_BERRY);
     ASSERT_EQ(1, run_cmd(&game, "talk"));
     ASSERT_EQ(1, run_cmd(&game, "2"));
-    ASSERT_EQ(WATCHMAN_STORY_HERBS_GIVEN, game.watchman_story);
+    ASSERT_EQ(WATCHMAN_SCENE_MEAL_OFFER, game.watchman_menu);
+    ASSERT_EQ(1, run_cmd(&game, "1"));
+    ASSERT_EQ(WATCHMAN_FLAG_HERBS, game.watchman_flags);
     ASSERT_EQ(1, game_inv_player_has_item(&game, ITEM_HERB));
-    ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
     PASS();
 }
 
@@ -1170,7 +1172,7 @@ SUITE(game) {
     RUN_TEST(game_bandit_handover_pick);
     RUN_TEST(game_wait_on_road_bandit_room_opens_encounter);
     RUN_TEST(game_talk_npcs_and_nobody);
-    RUN_TEST(game_watchman_meal_grants_herb);
+    RUN_TEST(game_watchman_meal_thread_grants_herb);
     RUN_TEST(game_frog_reply_branch);
     RUN_TEST(game_combat_blocks_inventory_cmds);
     RUN_TEST(game_inspect_none_and_wrong);

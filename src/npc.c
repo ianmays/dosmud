@@ -212,47 +212,77 @@ static const struct NpcRoomInfo *npc_room_dialogue_info(int dialogue_kind)
 }
 
 /*
- * #8 watchman branch: npc.c owns talk/reply routing and herb grant. Reply
- * events keep the pre-choice WatchmanDialogueScene in arg3 so txtres copy
- * matches the menu just closed.
+ * #8 watchman branch: in-menu reply+talk chaining; composable watchman_flags.
+ * watchman_menu is the active talk menu while DIALOGUE_NPC_WATCHMAN is open.
  */
-static int watchman_dialogue_scene(const struct GameState *game)
+static int watchman_find_edible(const struct GameState *game)
 {
-    if (game->watchman_story == WATCHMAN_STORY_WARNED) {
-        return WATCHMAN_SCENE_WARNED;
+    int i;
+
+    for (i = 0; i < game->bag_count; ++i) {
+        if (item_is_edible(game->bag[i])) {
+            return game->bag[i];
+        }
     }
-    return WATCHMAN_SCENE_NEUTRAL;
+    return ITEM_NONE;
 }
 
-static int watchman_grant_herbs(struct GameState *game, int choice,
-                                GameEventQueue *out)
+static void watchman_push_reply_then_menu(struct GameState *game,
+                                          GameEventQueue *out, int choice,
+                                          int reply_scene, int next_menu)
+{
+    npc_push_dialogue_detail(out, GAME_DIALOGUE_ACTOR_WATCHMAN,
+        GAME_DIALOGUE_PHASE_REPLY, choice, reply_scene);
+    game->watchman_menu = next_menu;
+    npc_push_dialogue_detail(out, GAME_DIALOGUE_ACTOR_WATCHMAN,
+        GAME_DIALOGUE_PHASE_TALK, 0, next_menu);
+    game_set_mode_dialogue(game, DIALOGUE_NPC_WATCHMAN);
+}
+
+static void watchman_leave(struct GameState *game, GameEventQueue *out,
+                           int choice, int reply_scene)
+{
+    npc_push_dialogue_detail(out, GAME_DIALOGUE_ACTOR_WATCHMAN,
+        GAME_DIALOGUE_PHASE_REPLY, choice, reply_scene);
+    game_set_mode_explore(game);
+}
+
+static int watchman_plan_herb_delivery(struct GameState *game,
+                                       int food_from_bag)
+{
+    int count_after;
+
+    count_after = game->bag_count;
+    if (food_from_bag) {
+        count_after -= 1;
+    }
+    if (count_after < game->bag_capacity) {
+        return GAME_ITEM_DELIVERY_BAG;
+    }
+    if (game_room_ground_has_space(game, game->player.room_id)) {
+        return GAME_ITEM_DELIVERY_GROUND;
+    }
+    return GAME_ITEM_DELIVERY_NONE;
+}
+
+static int watchman_grant_herb_reward(struct GameState *game, int choice,
+                                      GameEventQueue *out, int next_menu,
+                                      int food_from_bag)
 {
     int reward_delivery;
     int detail;
 
-    /*
-     * Bag-first herb grant mirrors herbalist reward routing; watchman_story
-     * stays unset when bag and room floor are both full so choice 2 can retry.
-     */
-    if (game->watchman_story == WATCHMAN_STORY_HERBS_GIVEN) {
-        npc_push_dialogue_detail(out, GAME_DIALOGUE_ACTOR_WATCHMAN,
-            GAME_DIALOGUE_PHASE_REPLY, choice, WATCHMAN_SCENE_HERBS_ALREADY);
-        game_set_mode_explore(game);
+    if ((game->watchman_flags & WATCHMAN_FLAG_HERBS) != 0) {
+        watchman_push_reply_then_menu(game, out, choice,
+            WATCHMAN_SCENE_ALREADY_FED, next_menu);
         return 1;
     }
 
-    reward_delivery = GAME_ITEM_DELIVERY_BAG;
-    if (game->bag_count >= game->bag_capacity) {
-        if (game_room_ground_has_space(game, game->player.room_id)) {
-            reward_delivery = GAME_ITEM_DELIVERY_GROUND;
-        } else {
-            reward_delivery = GAME_ITEM_DELIVERY_NONE;
-        }
-    }
+    reward_delivery = watchman_plan_herb_delivery(game, food_from_bag);
     if (reward_delivery == GAME_ITEM_DELIVERY_NONE) {
         npc_push_dialogue_detail(out, GAME_DIALOGUE_ACTOR_WATCHMAN,
             GAME_DIALOGUE_PHASE_REPLY, choice, WATCHMAN_SCENE_HERBS_NO_SPACE);
-        game_set_mode_explore(game);
+        game_set_mode_dialogue(game, DIALOGUE_NPC_WATCHMAN);
         return 1;
     }
 
@@ -263,20 +293,44 @@ static int watchman_grant_herbs(struct GameState *game, int choice,
         game_room_ground_try_add(game, game->player.room_id, ITEM_HERB);
         detail = WATCHMAN_SCENE_HERBS_GROUND;
     }
-    game->watchman_story = WATCHMAN_STORY_HERBS_GIVEN;
-    npc_push_dialogue_detail(out, GAME_DIALOGUE_ACTOR_WATCHMAN,
-        GAME_DIALOGUE_PHASE_REPLY, choice, detail);
-    game_set_mode_explore(game);
+    game->watchman_flags |= WATCHMAN_FLAG_HERBS;
+    watchman_push_reply_then_menu(game, out, choice, detail, next_menu);
     return 1;
+}
+
+static int watchman_handover_food(struct GameState *game, int item_arg,
+                                  GameEventQueue *out)
+{
+    if (game->mode != GAME_MODE_DIALOGUE ||
+            game->dialogue != DIALOGUE_NPC_WATCHMAN ||
+            game->watchman_menu != WATCHMAN_SCENE_MEAL_OFFER) {
+        npc_push_dialogue_guard(out, GAME_DIALOGUE_GUARD_GIVE_REJECTED);
+        if (game->mode == GAME_MODE_DIALOGUE) {
+            game_set_mode_explore(game);
+        }
+        return 1;
+    }
+    if (!item_is_edible(item_arg) ||
+            !game_inv_player_has_item(game, item_arg)) {
+        watchman_push_reply_then_menu(game, out, 0, WATCHMAN_SCENE_NO_FOOD,
+            WATCHMAN_SCENE_MEAL_OFFER);
+        return 1;
+    }
+    if (watchman_plan_herb_delivery(game, 1) == GAME_ITEM_DELIVERY_NONE) {
+        npc_push_dialogue_detail(out, GAME_DIALOGUE_ACTOR_WATCHMAN,
+            GAME_DIALOGUE_PHASE_REPLY, 0, WATCHMAN_SCENE_HERBS_NO_SPACE);
+        game_set_mode_dialogue(game, DIALOGUE_NPC_WATCHMAN);
+        return 1;
+    }
+    game_inv_remove_carried_item(game, item_arg);
+    return watchman_grant_herb_reward(game, 1, out, WATCHMAN_SCENE_AFTER_MEAL, 0);
 }
 
 static int watchman_open_dialogue(struct GameState *game, GameEventQueue *out)
 {
-    int scene;
-
-    scene = watchman_dialogue_scene(game);
+    game->watchman_menu = WATCHMAN_SCENE_NEUTRAL;
     npc_push_dialogue_detail(out, GAME_DIALOGUE_ACTOR_WATCHMAN,
-        GAME_DIALOGUE_PHASE_TALK, 0, scene);
+        GAME_DIALOGUE_PHASE_TALK, 0, WATCHMAN_SCENE_NEUTRAL);
     game_set_mode_dialogue(game, DIALOGUE_NPC_WATCHMAN);
     return 1;
 }
@@ -284,41 +338,101 @@ static int watchman_open_dialogue(struct GameState *game, GameEventQueue *out)
 static int watchman_reply_neutral(struct GameState *game, int choice,
                                   GameEventQueue *out)
 {
-    /* choice 1 ("warning signs") persists WARNED; reply arg3 stays NEUTRAL. */
-    if (choice == 1 && game->watchman_story == WATCHMAN_STORY_NONE) {
-        game->watchman_story = WATCHMAN_STORY_WARNED;
+    if (choice == 1) {
+        game->watchman_flags |= WATCHMAN_FLAG_WARNED;
+        watchman_push_reply_then_menu(game, out, choice, WATCHMAN_SCENE_NEUTRAL,
+            WATCHMAN_SCENE_AFTER_WARNING);
+        return 1;
     }
     if (choice == 2) {
-        return watchman_grant_herbs(game, choice, out);
+        if ((game->watchman_flags & WATCHMAN_FLAG_HERBS) != 0) {
+            watchman_push_reply_then_menu(game, out, choice,
+                WATCHMAN_SCENE_ALREADY_FED, WATCHMAN_SCENE_AFTER_MEAL);
+            return 1;
+        }
+        watchman_push_reply_then_menu(game, out, choice, WATCHMAN_SCENE_PECKISH,
+            WATCHMAN_SCENE_MEAL_OFFER);
+        return 1;
     }
-    npc_push_dialogue_detail(out, GAME_DIALOGUE_ACTOR_WATCHMAN,
-        GAME_DIALOGUE_PHASE_REPLY, choice, WATCHMAN_SCENE_NEUTRAL);
-    game_set_mode_explore(game);
+    watchman_leave(game, out, choice, WATCHMAN_SCENE_NEUTRAL);
     return 1;
 }
 
-static int watchman_reply_warned(struct GameState *game, int choice,
-                                 GameEventQueue *out)
+static int watchman_reply_after_warning(struct GameState *game, int choice,
+                                        GameEventQueue *out)
 {
-    if (choice == 2) {
-        return watchman_grant_herbs(game, choice, out);
+    if (choice == 1) {
+        watchman_push_reply_then_menu(game, out, choice,
+            WATCHMAN_SCENE_SQUALL_ADVICE, WATCHMAN_SCENE_AFTER_WARNING);
+        return 1;
     }
-    npc_push_dialogue_detail(out, GAME_DIALOGUE_ACTOR_WATCHMAN,
-        GAME_DIALOGUE_PHASE_REPLY, choice, WATCHMAN_SCENE_WARNED);
-    game_set_mode_explore(game);
+    if (choice == 2) {
+        watchman_push_reply_then_menu(game, out, choice,
+            WATCHMAN_SCENE_CHANGE_SUBJECT, WATCHMAN_SCENE_NEUTRAL);
+        return 1;
+    }
+    watchman_leave(game, out, choice, WATCHMAN_SCENE_AFTER_WARNING);
+    return 1;
+}
+
+static int watchman_reply_meal_offer(struct GameState *game, int choice,
+                                     GameEventQueue *out)
+{
+    int edible;
+
+    if (choice == 1) {
+        edible = watchman_find_edible(game);
+        if (edible == ITEM_NONE) {
+            watchman_push_reply_then_menu(game, out, choice,
+                WATCHMAN_SCENE_NO_FOOD, WATCHMAN_SCENE_MEAL_OFFER);
+            return 1;
+        }
+        if (watchman_plan_herb_delivery(game, 1) == GAME_ITEM_DELIVERY_NONE) {
+            npc_push_dialogue_detail(out, GAME_DIALOGUE_ACTOR_WATCHMAN,
+                GAME_DIALOGUE_PHASE_REPLY, choice,
+                WATCHMAN_SCENE_HERBS_NO_SPACE);
+            game_set_mode_dialogue(game, DIALOGUE_NPC_WATCHMAN);
+            return 1;
+        }
+        game_inv_remove_carried_item(game, edible);
+        return watchman_grant_herb_reward(game, choice, out,
+            WATCHMAN_SCENE_AFTER_MEAL, 0);
+    }
+    if (choice == 2) {
+        game->watchman_flags |= WATCHMAN_FLAG_PROMISED;
+        watchman_push_reply_then_menu(game, out, choice, WATCHMAN_SCENE_APOLOGY,
+            WATCHMAN_SCENE_MEAL_OFFER);
+        return 1;
+    }
+    watchman_leave(game, out, choice, WATCHMAN_SCENE_MEAL_OFFER);
+    return 1;
+}
+
+static int watchman_reply_after_meal(struct GameState *game, int choice,
+                                     GameEventQueue *out)
+{
+    if (choice == 1) {
+        watchman_push_reply_then_menu(game, out, choice,
+            WATCHMAN_SCENE_CHANGE_SUBJECT, WATCHMAN_SCENE_NEUTRAL);
+        return 1;
+    }
+    watchman_leave(game, out, choice, WATCHMAN_SCENE_AFTER_MEAL);
     return 1;
 }
 
 static int watchman_reply(struct GameState *game, int choice,
                           GameEventQueue *out)
 {
-    int scene;
-
-    scene = watchman_dialogue_scene(game);
-    if (scene == WATCHMAN_SCENE_WARNED) {
-        return watchman_reply_warned(game, choice, out);
+    switch (game->watchman_menu) {
+    case WATCHMAN_SCENE_AFTER_WARNING:
+        return watchman_reply_after_warning(game, choice, out);
+    case WATCHMAN_SCENE_MEAL_OFFER:
+        return watchman_reply_meal_offer(game, choice, out);
+    case WATCHMAN_SCENE_AFTER_MEAL:
+        return watchman_reply_after_meal(game, choice, out);
+    default:
+        return watchman_reply_neutral(game, choice, out);
     }
-    return watchman_reply_neutral(game, choice, out);
 }
 
 /*
@@ -877,6 +991,9 @@ int npc_cmd_give(struct GameState *game, int item_arg, struct GameEventQueue *ou
     /* Room-NPC item exchange stays NPC-owned; enemy handover remains in genc.c. */
     if (info->dialogue_kind == DIALOGUE_NPC_HERBALIST) {
         return herbalist_exchange(game, item_arg, out);
+    }
+    if (info->dialogue_kind == DIALOGUE_NPC_WATCHMAN) {
+        return watchman_handover_food(game, item_arg, out);
     }
     npc_push_dialogue_guard(out, GAME_DIALOGUE_GUARD_GIVE_REJECTED);
     if (game->mode == GAME_MODE_DIALOGUE) {

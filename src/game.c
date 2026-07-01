@@ -47,6 +47,11 @@ static int cmd_preserves_noncombat_menu(const struct GameState *game,
     if (game->dialogue == DIALOGUE_NPC_HERBALIST && cmd->type == CMD_GIVE) {
         return 1;
     }
+    if (game->dialogue == DIALOGUE_NPC_WATCHMAN &&
+            game->watchman_menu == WATCHMAN_SCENE_MEAL_OFFER &&
+            cmd->type == CMD_GIVE) {
+        return 1;
+    }
     return 0;
 }
 
@@ -90,6 +95,7 @@ void game_set_mode_explore(struct GameState *game)
 {
     game->mode = GAME_MODE_EXPLORE;
     game->dialogue = DIALOGUE_NONE;
+    game->watchman_menu = 0;
     /* Drop combat snapshot so explore ticks do not reuse stale enemy scaling. */
     game->combat.enemy_hp = 0;
     game->combat.enemy_level = 0;
@@ -181,7 +187,8 @@ static void reset_mutable_state(struct GameState *game, int room_id, u32 tick)
     game->env_focus_kind = GAME_ENV_NONE;
     game->env_focus_expires_tick = 0;
     game->herbalist_story = HERBALIST_STORY_NONE;
-    game->watchman_story = WATCHMAN_STORY_NONE;
+    game->watchman_flags = 0;
+    game->watchman_menu = 0;
     game->marsh_root_spawned = 0;
     game->bag_count = 0;
     game->bag_capacity = CFG_START_BAG_CAPACITY;

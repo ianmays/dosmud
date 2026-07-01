@@ -38,12 +38,10 @@ enum HerbalistStoryState {
     HERBALIST_STORY_COMPLETE
 };
 
-/* Persisted progress for npc.c watchman branch (#8); not a dialogue framework. */
-enum WatchmanStoryState {
-    WATCHMAN_STORY_NONE = 0,
-    WATCHMAN_STORY_WARNED,
-    WATCHMAN_STORY_HERBS_GIVEN
-};
+/* Persisted bit flags for npc.c watchman branch (#8); composable, not exclusive. */
+#define WATCHMAN_FLAG_WARNED 1
+#define WATCHMAN_FLAG_HERBS 2
+#define WATCHMAN_FLAG_PROMISED 4
 
 /* Stored in GameState.env_focus_kind; render consumes the same values. */
 #define GAME_ENV_NONE 0
@@ -104,8 +102,10 @@ struct GameState {
     u32 env_focus_expires_tick;
     /* npc.c herbalist branch (#76); saved in save v10+. */
     int herbalist_story;
-    /* npc.c watchman branch (#8); saved in save v11+. */
-    int watchman_story;
+    /* npc.c watchman branch (#8); saved in save v12+. */
+    int watchman_flags;
+    /* Active watchman talk menu while DIALOGUE_NPC_WATCHMAN; session seam. */
+    int watchman_menu;
     /* Story-owned in-play marker: resets when no marsh-root is reachable. */
     int marsh_root_spawned;
     int room_item[CFG_ROOM_MAX][CFG_AREA_ITEM_SLOTS];

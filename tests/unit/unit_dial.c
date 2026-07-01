@@ -181,8 +181,9 @@ TEST dialogue_cmd_reply_watchman(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_TOWER, 0);
     talk_out_state(&game);
     ASSERT_EQ(1, reply_out_state(&game, 1));
-    ASSERT_EQ(WATCHMAN_STORY_WARNED, game.watchman_story);
-    ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
+    ASSERT_EQ(WATCHMAN_FLAG_WARNED, game.watchman_flags);
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(WATCHMAN_SCENE_AFTER_WARNING, game.watchman_menu);
     PASS();
 }
 
@@ -294,8 +295,7 @@ TEST dialogue_cmd_talk_watchman_event(void)
 }
 
 /*
- * reply arg3 is the menu just closed; follow-up talk reads watchman_story
- * for the warned talk copy.
+ * Warning reply chains REPLY then TALK in one turn; no second talk required.
  */
 TEST dialogue_cmd_reply_watchman_sets_warned_and_followup_talk(void)
 {
@@ -306,25 +306,46 @@ TEST dialogue_cmd_reply_watchman_sets_warned_and_followup_talk(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_TOWER, 0);
     ASSERT_EQ(1, talk_out(&game, &out));
     ASSERT_EQ(1, reply_out(&game, 1, &out));
-    ASSERT_EQ(WATCHMAN_STORY_WARNED, game.watchman_story);
+    ASSERT_EQ(WATCHMAN_FLAG_WARNED, game.watchman_flags);
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(WATCHMAN_SCENE_AFTER_WARNING, game.watchman_menu);
+    ASSERT_EQ(2, out.count);
+    ASSERT_EQ(GAME_DIALOGUE_PHASE_REPLY, out.events[0].arg1);
     ASSERT_EQ(WATCHMAN_SCENE_NEUTRAL, out.events[0].arg3);
-    ASSERT_EQ(1, talk_out(&game, &out));
-    ASSERT_EQ(WATCHMAN_SCENE_WARNED, out.events[0].arg3);
+    ASSERT_EQ(GAME_DIALOGUE_PHASE_TALK, out.events[1].arg1);
+    ASSERT_EQ(WATCHMAN_SCENE_AFTER_WARNING, out.events[1].arg3);
     PASS();
 }
 
-TEST dialogue_cmd_reply_watchman_grants_herb(void)
+TEST dialogue_cmd_reply_watchman_meal_thread_grants_herb(void)
 {
     struct GameState game;
     GameEventQueue out;
 
     unit_game_fresh(&game, 142u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_TOWER, 0);
+    game_inv_bag_add(&game, ITEM_BERRY);
     talk_out(&game, &out);
     ASSERT_EQ(1, reply_out(&game, 2, &out));
-    ASSERT_EQ(WATCHMAN_STORY_HERBS_GIVEN, game.watchman_story);
+    ASSERT_EQ(WATCHMAN_SCENE_MEAL_OFFER, game.watchman_menu);
+    ASSERT_EQ(WATCHMAN_SCENE_PECKISH, out.events[0].arg3);
+    ASSERT_EQ(1, reply_out(&game, 1, &out));
+    ASSERT_EQ(WATCHMAN_FLAG_HERBS, game.watchman_flags);
     ASSERT_EQ(1, game_inv_player_has_item(&game, ITEM_HERB));
-    ASSERT_EQ(WATCHMAN_SCENE_HERBS_BAG, out.events[0].arg3);
+    ASSERT_EQ(0, game_inv_player_has_item(&game, ITEM_BERRY));
+    PASS();
+}
+
+TEST dialogue_cmd_reply_watchman_warned_and_herbs_flags_coexist(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 145u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_TOWER, 0);
+    game.watchman_flags = WATCHMAN_FLAG_WARNED | WATCHMAN_FLAG_HERBS;
+    talk_out(&game, &out);
+    ASSERT_EQ(WATCHMAN_SCENE_NEUTRAL, out.events[0].arg3);
     PASS();
 }
 
@@ -337,7 +358,7 @@ TEST dialogue_cmd_reply_watchman_invalid_reply_preserves_state(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_TOWER, 0);
     talk_out(&game, &out);
     ASSERT_EQ(1, reply_out(&game, 4, &out));
-    ASSERT_EQ(WATCHMAN_STORY_NONE, game.watchman_story);
+    ASSERT_EQ(0, game.watchman_flags);
     ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[0].kind);
     ASSERT_EQ(GAME_DIALOGUE_GUARD_PICK_123, out.events[0].arg0);
     PASS();
@@ -350,11 +371,11 @@ TEST dialogue_cmd_reply_watchman_herbs_already_given(void)
 
     unit_game_fresh(&game, 144u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_TOWER, 0);
-    game.watchman_story = WATCHMAN_STORY_HERBS_GIVEN;
+    game.watchman_flags = WATCHMAN_FLAG_HERBS;
     talk_out(&game, &out);
     ASSERT_EQ(1, reply_out(&game, 2, &out));
-    ASSERT_EQ(WATCHMAN_SCENE_HERBS_ALREADY, out.events[0].arg3);
-    ASSERT_EQ(0, game_inv_player_has_item(&game, ITEM_HERB));
+    ASSERT_EQ(WATCHMAN_SCENE_ALREADY_FED, out.events[0].arg3);
+    ASSERT_EQ(WATCHMAN_SCENE_AFTER_MEAL, game.watchman_menu);
     PASS();
 }
 
@@ -461,7 +482,8 @@ SUITE(dialogue) {
     RUN_TEST(dialogue_cmd_reply_frog_invalid);
     RUN_TEST(dialogue_cmd_reply_watchman);
     RUN_TEST(dialogue_cmd_reply_watchman_sets_warned_and_followup_talk);
-    RUN_TEST(dialogue_cmd_reply_watchman_grants_herb);
+    RUN_TEST(dialogue_cmd_reply_watchman_meal_thread_grants_herb);
+    RUN_TEST(dialogue_cmd_reply_watchman_warned_and_herbs_flags_coexist);
     RUN_TEST(dialogue_cmd_reply_watchman_invalid_reply_preserves_state);
     RUN_TEST(dialogue_cmd_reply_watchman_herbs_already_given);
     RUN_TEST(dialogue_cmd_reply_herbalist);
