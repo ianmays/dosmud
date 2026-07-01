@@ -212,6 +212,116 @@ static const struct NpcRoomInfo *npc_room_dialogue_info(int dialogue_kind)
 }
 
 /*
+ * #8 watchman branch: npc.c owns talk/reply routing and herb grant. Reply
+ * events keep the pre-choice WatchmanDialogueScene in arg3 so txtres copy
+ * matches the menu just closed.
+ */
+static int watchman_dialogue_scene(const struct GameState *game)
+{
+    if (game->watchman_story == WATCHMAN_STORY_WARNED) {
+        return WATCHMAN_SCENE_WARNED;
+    }
+    return WATCHMAN_SCENE_NEUTRAL;
+}
+
+static int watchman_grant_herbs(struct GameState *game, int choice,
+                                GameEventQueue *out)
+{
+    int reward_delivery;
+    int detail;
+
+    /*
+     * Bag-first herb grant mirrors herbalist reward routing; watchman_story
+     * stays unset when bag and room floor are both full so choice 2 can retry.
+     */
+    if (game->watchman_story == WATCHMAN_STORY_HERBS_GIVEN) {
+        npc_push_dialogue_detail(out, GAME_DIALOGUE_ACTOR_WATCHMAN,
+            GAME_DIALOGUE_PHASE_REPLY, choice, WATCHMAN_SCENE_HERBS_ALREADY);
+        game_set_mode_explore(game);
+        return 1;
+    }
+
+    reward_delivery = GAME_ITEM_DELIVERY_BAG;
+    if (game->bag_count >= game->bag_capacity) {
+        if (game_room_ground_has_space(game, game->player.room_id)) {
+            reward_delivery = GAME_ITEM_DELIVERY_GROUND;
+        } else {
+            reward_delivery = GAME_ITEM_DELIVERY_NONE;
+        }
+    }
+    if (reward_delivery == GAME_ITEM_DELIVERY_NONE) {
+        npc_push_dialogue_detail(out, GAME_DIALOGUE_ACTOR_WATCHMAN,
+            GAME_DIALOGUE_PHASE_REPLY, choice, WATCHMAN_SCENE_HERBS_NO_SPACE);
+        game_set_mode_explore(game);
+        return 1;
+    }
+
+    if (reward_delivery == GAME_ITEM_DELIVERY_BAG) {
+        game_inv_bag_add(game, ITEM_HERB);
+        detail = WATCHMAN_SCENE_HERBS_BAG;
+    } else {
+        game_room_ground_try_add(game, game->player.room_id, ITEM_HERB);
+        detail = WATCHMAN_SCENE_HERBS_GROUND;
+    }
+    game->watchman_story = WATCHMAN_STORY_HERBS_GIVEN;
+    npc_push_dialogue_detail(out, GAME_DIALOGUE_ACTOR_WATCHMAN,
+        GAME_DIALOGUE_PHASE_REPLY, choice, detail);
+    game_set_mode_explore(game);
+    return 1;
+}
+
+static int watchman_open_dialogue(struct GameState *game, GameEventQueue *out)
+{
+    int scene;
+
+    scene = watchman_dialogue_scene(game);
+    npc_push_dialogue_detail(out, GAME_DIALOGUE_ACTOR_WATCHMAN,
+        GAME_DIALOGUE_PHASE_TALK, 0, scene);
+    game_set_mode_dialogue(game, DIALOGUE_NPC_WATCHMAN);
+    return 1;
+}
+
+static int watchman_reply_neutral(struct GameState *game, int choice,
+                                  GameEventQueue *out)
+{
+    /* choice 1 ("warning signs") persists WARNED; reply arg3 stays NEUTRAL. */
+    if (choice == 1 && game->watchman_story == WATCHMAN_STORY_NONE) {
+        game->watchman_story = WATCHMAN_STORY_WARNED;
+    }
+    if (choice == 2) {
+        return watchman_grant_herbs(game, choice, out);
+    }
+    npc_push_dialogue_detail(out, GAME_DIALOGUE_ACTOR_WATCHMAN,
+        GAME_DIALOGUE_PHASE_REPLY, choice, WATCHMAN_SCENE_NEUTRAL);
+    game_set_mode_explore(game);
+    return 1;
+}
+
+static int watchman_reply_warned(struct GameState *game, int choice,
+                                 GameEventQueue *out)
+{
+    if (choice == 2) {
+        return watchman_grant_herbs(game, choice, out);
+    }
+    npc_push_dialogue_detail(out, GAME_DIALOGUE_ACTOR_WATCHMAN,
+        GAME_DIALOGUE_PHASE_REPLY, choice, WATCHMAN_SCENE_WARNED);
+    game_set_mode_explore(game);
+    return 1;
+}
+
+static int watchman_reply(struct GameState *game, int choice,
+                          GameEventQueue *out)
+{
+    int scene;
+
+    scene = watchman_dialogue_scene(game);
+    if (scene == WATCHMAN_SCENE_WARNED) {
+        return watchman_reply_warned(game, choice, out);
+    }
+    return watchman_reply_neutral(game, choice, out);
+}
+
+/*
  * #76 herbalist vertical slice: npc.c owns story transitions, orchard desc
  * mutation, and reply routing. Fetch-quest scene derivation and marsh-root
  * seeding call gstory helpers (#49). Reply events keep the pre-choice
@@ -712,6 +822,10 @@ int npc_open_room_dialogue(struct GameState *game, struct GameEventQueue *out)
     if (info == 0) {
         return 0;
     }
+    /* Multi-scene watchman bypasses generic npc_push_dialogue (needs arg3 scene). */
+    if (info->dialogue_kind == DIALOGUE_NPC_WATCHMAN) {
+        return watchman_open_dialogue(game, out);
+    }
     /* Multi-scene herbalist bypasses generic npc_push_dialogue (needs arg3 scene). */
     if (info->dialogue_kind == DIALOGUE_NPC_HERBALIST) {
         return herbalist_open_dialogue(game, out);
@@ -740,6 +854,9 @@ int npc_room_cmd_reply(struct GameState *game, int choice, GameEventQueue *out)
     if (!npc_choice_is_valid(choice)) {
         npc_push_dialogue_guard(out, GAME_DIALOGUE_GUARD_PICK_123);
         return 1;
+    }
+    if (info->dialogue_kind == DIALOGUE_NPC_WATCHMAN) {
+        return watchman_reply(game, choice, out);
     }
     if (info->dialogue_kind == DIALOGUE_NPC_HERBALIST) {
         return herbalist_reply(game, choice, out);

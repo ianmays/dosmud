@@ -705,10 +705,10 @@ static void render_dialogue_event(const GameEvent *ev)
         render_frog_dialogue_branch(ev->arg2);
         break;
     case TXTRES_NARRATIVE_WATCHMAN_TALK:
-        render_msg_watchman_talk();
+        render_msg_watchman_talk(ev->arg3);
         break;
     case TXTRES_NARRATIVE_WATCHMAN_REPLY:
-        render_msg_watchman_reply(ev->arg2);
+        render_msg_watchman_reply(ev->arg2, ev->arg3);
         break;
     case TXTRES_NARRATIVE_HERBALIST_TALK:
         render_msg_herbalist_talk(ev->arg3);
@@ -1319,15 +1319,23 @@ void render_msg_traveler_waiting(void)
     RENDER_PRINTF("%s", TXT_MSG_TRAVELER_WAITING);
 }
 
-void render_msg_watchman_talk(void)
+/* scene is WatchmanDialogueScene (GAME_EVENT_DIALOGUE arg3 from npc.c). */
+void render_msg_watchman_talk(int scene)
 {
     render_gap();
     art_watchman_portrait();
     render_gap();
-    render_copy(TXT_MSG_WATCHMAN_TALK_LINE1);
-    render_copy(TXT_MSG_WATCHMAN_TALK_LINE2);
-    render_copy(TXT_MSG_WATCHMAN_TALK_LINE3);
-    render_copy(TXT_MSG_WATCHMAN_TALK_LINE4);
+    if (scene == WATCHMAN_SCENE_WARNED) {
+        render_copy(TXT_MSG_WATCHMAN_WARN_LINE1);
+        render_copy(TXT_MSG_WATCHMAN_WARN_LINE2);
+        render_copy(TXT_MSG_WATCHMAN_WARN_LINE3);
+        render_copy(TXT_MSG_WATCHMAN_WARN_LINE4);
+    } else {
+        render_copy(TXT_MSG_WATCHMAN_TALK_LINE1);
+        render_copy(TXT_MSG_WATCHMAN_TALK_LINE2);
+        render_copy(TXT_MSG_WATCHMAN_TALK_LINE3);
+        render_copy(TXT_MSG_WATCHMAN_TALK_LINE4);
+    }
     render_copy(TXT_REPLY_PROMPT);
 }
 
@@ -1377,9 +1385,9 @@ void render_msg_nobody_talk(void)
     RENDER_PRINTF("%s", TXT_MSG_NOBODY_TALK);
 }
 
-void render_msg_watchman_reply(int arg)
+void render_msg_watchman_reply(int arg, int scene)
 {
-    RENDER_PRINTF("%s", txtres_msg_watchman_reply(arg));
+    RENDER_PRINTF("%s", txtres_msg_watchman_reply(arg, scene));
 }
 
 void render_msg_herbalist_reply(int arg, int scene)

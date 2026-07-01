@@ -3,6 +3,7 @@
 #include "command.h"
 #include "gout.h"
 #include "items.h"
+#include "npc.h"
 #include "txtres.h"
 
 TEST game_event_queue_reset_clears_state(void)
@@ -188,6 +189,23 @@ TEST game_event_push_records_combat_progression_kinds(void)
     PASS();
 }
 
+TEST game_event_push_records_watchman_dialogue_scene_arg3(void)
+{
+    GameEventQueue out;
+
+    game_event_queue_reset(&out);
+    ASSERT(0 != game_event_push(&out, GAME_EVENT_DIALOGUE,
+        GAME_DIALOGUE_ACTOR_WATCHMAN, GAME_DIALOGUE_PHASE_TALK, 0,
+        WATCHMAN_SCENE_WARNED, 0));
+    ASSERT(0 != game_event_push(&out, GAME_EVENT_DIALOGUE,
+        GAME_DIALOGUE_ACTOR_WATCHMAN, GAME_DIALOGUE_PHASE_REPLY, 2,
+        WATCHMAN_SCENE_HERBS_BAG, 0));
+    ASSERT_EQ(2, out.count);
+    ASSERT_EQ(WATCHMAN_SCENE_WARNED, out.events[0].arg3);
+    ASSERT_EQ(WATCHMAN_SCENE_HERBS_BAG, out.events[1].arg3);
+    PASS();
+}
+
 TEST game_event_push_records_ambient_observation_kinds(void)
 {
     GameEventQueue out;
@@ -364,6 +382,7 @@ SUITE(gout) {
     RUN_TEST(game_event_push_records_combat_progression_kinds);
     RUN_TEST(game_event_push_records_ambient_observation_kinds);
     RUN_TEST(game_event_push_records_dialogue_encounter_kinds);
+    RUN_TEST(game_event_push_records_watchman_dialogue_scene_arg3);
     RUN_TEST(game_event_push_records_bandit_actor_value);
     RUN_TEST(game_event_push_records_bandit_ambush_actor_value);
     RUN_TEST(game_dialogue_actor_bandit_ids_are_distinct);

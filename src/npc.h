@@ -21,6 +21,21 @@ enum HerbalistDialogueScene {
     HERBALIST_SCENE_GIVE_REWARD_NO_SPACE
 };
 
+/*
+ * Dialogue detail payload for the watchman authored slice (#8). Same arg3 seam
+ * as HerbalistDialogueScene; kept in npc.h for render/copy consumers.
+ */
+enum WatchmanDialogueScene {
+    /* talk menus */
+    WATCHMAN_SCENE_NEUTRAL = 0,
+    WATCHMAN_SCENE_WARNED,
+    /* reply outcomes from watchman_grant_herbs and neutral/warned branches */
+    WATCHMAN_SCENE_HERBS_BAG,
+    WATCHMAN_SCENE_HERBS_GROUND,
+    WATCHMAN_SCENE_HERBS_NO_SPACE,
+    WATCHMAN_SCENE_HERBS_ALREADY
+};
+
 struct GameState;
 struct GameEventQueue;
 
