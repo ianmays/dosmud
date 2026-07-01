@@ -88,7 +88,7 @@ Frameworks last.
 - [#76](https://github.com/ianmays/dosmud/issues/76) first authored narrative slice - ✅ Done (PR [#217](https://github.com/ianmays/dosmud/pull/217))
 - [#132](https://github.com/ianmays/dosmud/issues/132) npc item exchange and rewards - ✅ Done (PR [#226](https://github.com/ianmays/dosmud/pull/226))
 - [#49](https://github.com/ianmays/dosmud/issues/49) quest/progress helper extraction - ✅ Done (PR [#227](https://github.com/ianmays/dosmud/pull/227))
-- [#8](https://github.com/ianmays/dosmud/issues/8) dialogue branching and action follow-ups
+- [#8](https://github.com/ianmays/dosmud/issues/8) dialogue branching and action follow-ups - ✅ Done (PR [#228](https://github.com/ianmays/dosmud/pull/228))
 - [#220](https://github.com/ianmays/dosmud/issues/220) authored world advancement hooks v1
 
 **Out of scope for this lane:**
