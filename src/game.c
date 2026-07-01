@@ -106,6 +106,7 @@ void game_set_mode_explore(struct GameState *game)
 {
     game->mode = GAME_MODE_EXPLORE;
     game->dialogue = DIALOGUE_NONE;
+    /* npc.c session menus; cleared so explore ticks do not reuse stale routing. */
     game->watchman_menu = 0;
     game->herbalist_menu = 0;
     /* Drop combat snapshot so explore ticks do not reuse stale enemy scaling. */

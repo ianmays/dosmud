@@ -106,11 +106,11 @@ struct GameState {
     u32 env_focus_expires_tick;
     /* npc.c herbalist branch (#76); saved in save v10+. */
     int herbalist_story;
-    /* Active herbalist talk menu while DIALOGUE_NPC_HERBALIST; saved v13+. */
+    /* npc.c herbalist reply routing; mirrors HerbalistDialogueScene; save v13+. */
     int herbalist_menu;
-    /* npc.c watchman branch (#8); saved in save v12+. */
+    /* npc.c watchman branch (#8); composable story flags; save v12+. */
     int watchman_flags;
-    /* Active watchman talk menu while DIALOGUE_NPC_WATCHMAN; session seam. */
+    /* npc.c watchman reply routing; mirrors talk menus; save v12+. */
     int watchman_menu;
     /* Story-owned in-play marker: resets when no marsh-root is reachable. */
     int marsh_root_spawned;

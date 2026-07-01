@@ -16,6 +16,10 @@
  */
 
 #define SAVE_MAGIC "DMSV"
+/*
+ * v12: watchman_flags + watchman_menu (#8). v13: herbalist_menu (#8 menus).
+ * Append-only bumps; loads reject anything below SAVE_VERSION.
+ */
 #define SAVE_VERSION 13
 #define SAVE_PATH_BUF_MAX 260
 
@@ -659,6 +663,7 @@ static int save_validate_game(const struct GameState *game)
             game->env_focus_kind > GAME_ENV_GRIT ||
             game->herbalist_story < HERBALIST_STORY_NONE ||
             game->herbalist_story > HERBALIST_STORY_COMPLETE ||
+            /* v13 herbalist_menu / v12 watchman_* must match npc.h scene enums. */
             game->herbalist_menu < 0 ||
             game->herbalist_menu > HERBALIST_SCENE_GIVE_REWARD_NO_SPACE ||
             game->watchman_flags < 0 ||

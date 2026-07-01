@@ -4,18 +4,15 @@
 #include "base.h"
 
 /*
- * Dialogue detail payload for the Herbalist authored slice. This stays out of
- * GameState headers so render/copy code can consume GAME_EVENT_DIALOGUE arg3
- * without depending on full orchestration state.
+ * Dialogue detail payload for the Herbalist authored slice. arg3 on TALK/REPLY;
+ * GameState.herbalist_menu mirrors the active scene for reply routing in npc.c.
  */
 enum HerbalistDialogueScene {
     HERBALIST_SCENE_NOT_STARTED = 0,
     HERBALIST_SCENE_REQUESTED,
     HERBALIST_SCENE_READY,
     HERBALIST_SCENE_COMPLETE,
-    /* REQUESTED root talk menu (portrait + re-enter / gossip / leave). */
-    /* HERBALIST_SCENE_REQUESTED uses the root menu while herbalist_menu matches. */
-    /* in-menu talk: options only (no portrait); paired with REQUESTED root */
+    /* REQUESTED submenu: root keeps portrait; OPTIONS is copy-only follow-up */
     HERBALIST_SCENE_REQUESTED_OPTIONS,
     /* give/offering exchange outcomes (arg3 on GAME_EVENT_DIALOGUE). */
     HERBALIST_SCENE_GIVE_REJECTED,
@@ -26,8 +23,8 @@ enum HerbalistDialogueScene {
 };
 
 /*
- * Dialogue detail payload for the watchman authored slice (#8). Same arg3 seam
- * as HerbalistDialogueScene; kept in npc.h for render/copy consumers.
+ * Dialogue detail payload for the watchman authored slice (#8). arg3 on TALK/REPLY;
+ * GameState.watchman_menu is reply routing; neutral copy variants use arg3 only.
  */
 enum WatchmanDialogueScene {
     /* talk menus (TALK events) */

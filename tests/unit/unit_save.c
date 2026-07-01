@@ -621,6 +621,7 @@ TEST save_round_trip_preserves_watchman_flags_and_menu(void)
     struct GameState loaded;
     u32 loaded_draws;
 
+    /* save v12+v13: watchman_flags/menu and mid-dialogue mode survive load. */
     unit_game_fresh(&game, 988u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_TOWER, 0);
     game.watchman_flags = WATCHMAN_FLAG_WARNED | WATCHMAN_FLAG_FED;

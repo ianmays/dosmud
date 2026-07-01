@@ -1355,8 +1355,10 @@ void render_msg_watchman_talk(int scene)
     render_copy(TXT_REPLY_PROMPT);
 }
 
+/* scene is HerbalistDialogueScene (GAME_EVENT_DIALOGUE arg3 from npc.c). */
 void render_msg_herbalist_talk(int scene)
 {
+    /* REQUESTED_OPTIONS: submenu copy only; portrait stays on REQUESTED root. */
     if (scene == HERBALIST_SCENE_REQUESTED_OPTIONS) {
         render_copy(TXT_MSG_HERBALIST_REQ_LINE3);
         render_copy(TXT_MSG_HERBALIST_REQ_LINE4);

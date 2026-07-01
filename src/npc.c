@@ -227,6 +227,11 @@ static int watchman_find_edible(const struct GameState *game)
     return ITEM_NONE;
 }
 
+/*
+ * Neutral-root TALK arg3 only: copy variants from composable watchman_flags.
+ * watchman_menu stays WATCHMAN_SCENE_NEUTRAL for reply routing; do not use
+ * *_WARNED/_FED scene ids as menu state.
+ */
 static int watchman_neutral_talk_detail(const struct GameState *game)
 {
     int warned;
@@ -246,6 +251,10 @@ static int watchman_neutral_talk_detail(const struct GameState *game)
     return WATCHMAN_SCENE_NEUTRAL;
 }
 
+/*
+ * One-turn dialogue chain: REPLY (arg3=reply_scene) then TALK (arg3=talk_detail).
+ * grendr drains both events in order so the menu advances without repeat talk.
+ */
 static void watchman_push_reply_then_menu(struct GameState *game,
                                           GameEventQueue *out, int choice,
                                           int reply_scene, int next_menu)
@@ -385,6 +394,7 @@ static int watchman_reply_meal_offer(struct GameState *game, int choice,
 static int watchman_reply(struct GameState *game, int choice,
                           GameEventQueue *out)
 {
+    /* watchman_menu picks the reply table; not always equal to last TALK arg3. */
     switch (game->watchman_menu) {
     case WATCHMAN_SCENE_AFTER_WARNING:
         return watchman_reply_after_warning(game, choice, out);
@@ -453,6 +463,10 @@ static int herbalist_open_dialogue(struct GameState *game, GameEventQueue *out)
     return 1;
 }
 
+/*
+ * Herbalist reply+talk chain (#8 menus): herbalist_menu selects the next reply
+ * table; same two-event seam as watchman_push_reply_then_menu.
+ */
 static void herbalist_push_reply_then_menu(struct GameState *game,
                                            GameEventQueue *out, int choice,
                                            int reply_scene, int next_menu)
@@ -468,6 +482,7 @@ static void herbalist_push_reply_then_menu(struct GameState *game,
 static void herbalist_push_talk_menu(struct GameState *game,
                                      GameEventQueue *out, int next_menu)
 {
+    /* TALK-only menu advance (no preceding REPLY), e.g. REQUESTED root -> OPTIONS. */
     game->herbalist_menu = next_menu;
     npc_push_dialogue_detail(out, GAME_DIALOGUE_ACTOR_HERBALIST,
         GAME_DIALOGUE_PHASE_TALK, 0, next_menu);
@@ -536,6 +551,7 @@ static int herbalist_reply_requested_options(struct GameState *game, int choice,
     return 1;
 }
 
+/* herbalist_menu splits REQUESTED root vs REQUESTED_OPTIONS submenu dispatch. */
 static int herbalist_reply_requested(struct GameState *game, int choice,
                                      GameEventQueue *out)
 {
