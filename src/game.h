@@ -38,6 +38,15 @@ enum HerbalistStoryState {
     HERBALIST_STORY_COMPLETE
 };
 
+/*
+ * Persisted bit flags for npc.c watchman branch (#8); composable, not exclusive.
+ * WARNED and PROMISED are recorded for save/re-talk copy hooks; only FED gates
+ * meal handover today.
+ */
+#define WATCHMAN_FLAG_WARNED 1
+#define WATCHMAN_FLAG_FED 2
+#define WATCHMAN_FLAG_PROMISED 4
+
 /* Stored in GameState.env_focus_kind; render consumes the same values. */
 #define GAME_ENV_NONE 0
 #define GAME_ENV_RUSTLE 1
@@ -97,6 +106,12 @@ struct GameState {
     u32 env_focus_expires_tick;
     /* npc.c herbalist branch (#76); saved in save v10+. */
     int herbalist_story;
+    /* npc.c herbalist reply routing; mirrors HerbalistDialogueScene; save v13+. */
+    int herbalist_menu;
+    /* npc.c watchman branch (#8); composable story flags; save v12+. */
+    int watchman_flags;
+    /* npc.c watchman reply routing; mirrors talk menus; save v12+. */
+    int watchman_menu;
     /* Story-owned in-play marker: resets when no marsh-root is reachable. */
     int marsh_root_spawned;
     int room_item[CFG_ROOM_MAX][CFG_AREA_ITEM_SLOTS];

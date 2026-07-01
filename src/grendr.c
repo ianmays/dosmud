@@ -705,10 +705,10 @@ static void render_dialogue_event(const GameEvent *ev)
         render_frog_dialogue_branch(ev->arg2);
         break;
     case TXTRES_NARRATIVE_WATCHMAN_TALK:
-        render_msg_watchman_talk();
+        render_msg_watchman_talk(ev->arg3);
         break;
     case TXTRES_NARRATIVE_WATCHMAN_REPLY:
-        render_msg_watchman_reply(ev->arg2);
+        render_msg_watchman_reply(ev->arg2, ev->arg3);
         break;
     case TXTRES_NARRATIVE_HERBALIST_TALK:
         render_msg_herbalist_talk(ev->arg3);
@@ -1319,43 +1319,74 @@ void render_msg_traveler_waiting(void)
     RENDER_PRINTF("%s", TXT_MSG_TRAVELER_WAITING);
 }
 
-void render_msg_watchman_talk(void)
+/* scene is WatchmanDialogueScene (GAME_EVENT_DIALOGUE arg3 from npc.c). */
+void render_msg_watchman_talk(int scene)
 {
-    render_gap();
-    art_watchman_portrait();
-    render_gap();
-    render_copy(TXT_MSG_WATCHMAN_TALK_LINE1);
-    render_copy(TXT_MSG_WATCHMAN_TALK_LINE2);
-    render_copy(TXT_MSG_WATCHMAN_TALK_LINE3);
-    render_copy(TXT_MSG_WATCHMAN_TALK_LINE4);
+    const char *line3;
+
+    if (scene == WATCHMAN_SCENE_NEUTRAL ||
+            scene == WATCHMAN_SCENE_NEUTRAL_WARNED ||
+            scene == WATCHMAN_SCENE_NEUTRAL_FED ||
+            scene == WATCHMAN_SCENE_NEUTRAL_WARNED_FED) {
+        render_gap();
+        art_watchman_portrait();
+        render_gap();
+        render_copy(TXT_MSG_WATCHMAN_TALK_LINE1);
+        render_copy(TXT_MSG_WATCHMAN_TALK_LINE2);
+        if (scene == WATCHMAN_SCENE_NEUTRAL_WARNED_FED) {
+            line3 = TXT_MSG_WATCHMAN_TALK_LINE3_WARNED_FED;
+        } else if (scene == WATCHMAN_SCENE_NEUTRAL_WARNED) {
+            line3 = TXT_MSG_WATCHMAN_TALK_LINE3_WARNED;
+        } else if (scene == WATCHMAN_SCENE_NEUTRAL_FED) {
+            line3 = TXT_MSG_WATCHMAN_TALK_LINE3_FED;
+        } else {
+            line3 = TXT_MSG_WATCHMAN_TALK_LINE3;
+        }
+        render_copy(line3);
+        render_copy(TXT_MSG_WATCHMAN_TALK_LINE4);
+    } else if (scene == WATCHMAN_SCENE_AFTER_WARNING) {
+        render_copy(TXT_MSG_WATCHMAN_AFTER_WARN_OPTIONS);
+    } else if (scene == WATCHMAN_SCENE_MEAL_OFFER) {
+        render_copy(TXT_MSG_WATCHMAN_MEAL_GIVE_PROMPT);
+        render_copy(TXT_MSG_WATCHMAN_MEAL_OPTIONS);
+    } else if (scene == WATCHMAN_SCENE_MEAL_OFFER_EMPTY) {
+        render_copy(TXT_MSG_WATCHMAN_MEAL_OPTIONS);
+    }
     render_copy(TXT_REPLY_PROMPT);
 }
 
+/* scene is HerbalistDialogueScene (GAME_EVENT_DIALOGUE arg3 from npc.c). */
 void render_msg_herbalist_talk(int scene)
 {
-    render_gap();
-    art_herbalist_portrait();
-    render_gap();
-    if (scene == HERBALIST_SCENE_REQUESTED) {
-        render_copy(TXT_MSG_HERBALIST_REQ_LINE1);
-        render_copy(TXT_MSG_HERBALIST_REQ_LINE2);
+    /* REQUESTED_OPTIONS: submenu copy only; portrait stays on REQUESTED root. */
+    if (scene == HERBALIST_SCENE_REQUESTED_OPTIONS) {
         render_copy(TXT_MSG_HERBALIST_REQ_LINE3);
         render_copy(TXT_MSG_HERBALIST_REQ_LINE4);
-    } else if (scene == HERBALIST_SCENE_READY) {
-        render_copy(TXT_MSG_HERBALIST_READY_LINE1);
-        render_copy(TXT_MSG_HERBALIST_READY_LINE2);
-        render_copy(TXT_MSG_HERBALIST_READY_LINE3);
-        render_copy(TXT_MSG_HERBALIST_READY_LINE4);
-    } else if (scene == HERBALIST_SCENE_COMPLETE) {
-        render_copy(TXT_MSG_HERBALIST_DONE_LINE1);
-        render_copy(TXT_MSG_HERBALIST_DONE_LINE2);
-        render_copy(TXT_MSG_HERBALIST_DONE_LINE3);
-        render_copy(TXT_MSG_HERBALIST_DONE_LINE4);
     } else {
-        render_copy(TXT_MSG_HERBALIST_TALK_LINE1);
-        render_copy(TXT_MSG_HERBALIST_TALK_LINE2);
-        render_copy(TXT_MSG_HERBALIST_TALK_LINE3);
-        render_copy(TXT_MSG_HERBALIST_TALK_LINE4);
+        render_gap();
+        art_herbalist_portrait();
+        render_gap();
+        if (scene == HERBALIST_SCENE_REQUESTED) {
+            render_copy(TXT_MSG_HERBALIST_REQ_LINE1);
+            render_copy(TXT_MSG_HERBALIST_REQ_LINE2);
+            render_copy(TXT_MSG_HERBALIST_REQ_ROOT_LINE3);
+            render_copy(TXT_MSG_HERBALIST_REQ_ROOT_LINE4);
+        } else if (scene == HERBALIST_SCENE_READY) {
+            render_copy(TXT_MSG_HERBALIST_READY_LINE1);
+            render_copy(TXT_MSG_HERBALIST_READY_LINE2);
+            render_copy(TXT_MSG_HERBALIST_READY_LINE3);
+            render_copy(TXT_MSG_HERBALIST_READY_LINE4);
+        } else if (scene == HERBALIST_SCENE_COMPLETE) {
+            render_copy(TXT_MSG_HERBALIST_DONE_LINE1);
+            render_copy(TXT_MSG_HERBALIST_DONE_LINE2);
+            render_copy(TXT_MSG_HERBALIST_DONE_LINE3);
+            render_copy(TXT_MSG_HERBALIST_DONE_LINE4);
+        } else {
+            render_copy(TXT_MSG_HERBALIST_TALK_LINE1);
+            render_copy(TXT_MSG_HERBALIST_TALK_LINE2);
+            render_copy(TXT_MSG_HERBALIST_TALK_LINE3);
+            render_copy(TXT_MSG_HERBALIST_TALK_LINE4);
+        }
     }
     render_copy(TXT_REPLY_PROMPT);
 }
@@ -1377,9 +1408,9 @@ void render_msg_nobody_talk(void)
     RENDER_PRINTF("%s", TXT_MSG_NOBODY_TALK);
 }
 
-void render_msg_watchman_reply(int arg)
+void render_msg_watchman_reply(int arg, int scene)
 {
-    RENDER_PRINTF("%s", txtres_msg_watchman_reply(arg));
+    RENDER_PRINTF("%s", txtres_msg_watchman_reply(arg, scene));
 }
 
 void render_msg_herbalist_reply(int arg, int scene)

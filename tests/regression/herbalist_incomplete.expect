@@ -33,7 +33,14 @@ On the ground: stick. (take stick)
 
 The herbalist brushes pulp from her palms.
 "Bring me a marsh-root from the black water marsh. Freshly cut, not drowned."
-  [1] Ask where to look.
+  [1] Ask about the marsh-root again.
+  [2] Trade gossip from the road.
+  [3] Leave politely.
+(Answer with 1, 2, 3, or reply <n>.)
+
+[T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
+
+>   [1] Ask where to look.
   [2] Admit you do not have it yet.
   [3] Leave and keep searching.
 (Answer with 1, 2, 3, or reply <n>.)
@@ -41,6 +48,22 @@ The herbalist brushes pulp from her palms.
 [T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
 > She nods once. "Then do not linger here. The marsh keeps what waits too long."
+
+        _;;;;;;_             
+       / _    _ \           
+      (-( )--( )-)           
+       |    ^   |            
+        \__ - _/            
+       ___|''' |___          
+                             
+  (hands stained green)                             
+
+The herbalist brushes pulp from her palms.
+"Bring me a marsh-root from the black water marsh. Freshly cut, not drowned."
+  [1] Ask about the marsh-root again.
+  [2] Trade gossip from the road.
+  [3] Leave politely.
+(Answer with 1, 2, 3, or reply <n>.)
 
 [T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 

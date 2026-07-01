@@ -7,6 +7,7 @@
 #include "config.h"
 #include "greatest.h"
 #include "game.h"
+#include "invent.h"
 #include "items.h"
 #include "npc.h"
 #include "platform.h"
@@ -42,6 +43,9 @@ static void save_fill_fixture(struct GameState *game)
     game->env_focus_kind = GAME_ENV_CREAK;
     game->env_focus_expires_tick = 81U;
     game->herbalist_story = HERBALIST_STORY_REQUESTED;
+    game->herbalist_menu = HERBALIST_SCENE_REQUESTED_OPTIONS;
+    game->watchman_flags = WATCHMAN_FLAG_WARNED;
+    game->watchman_menu = WATCHMAN_SCENE_AFTER_WARNING;
     game->marsh_root_spawned = 1;
     game->bag[0] = ITEM_STICK;
     game->bag[1] = ITEM_SALVE;
@@ -145,6 +149,9 @@ static int save_games_equal(const struct GameState *a,
             a->env_focus_kind != b->env_focus_kind ||
             a->env_focus_expires_tick != b->env_focus_expires_tick ||
             a->herbalist_story != b->herbalist_story ||
+            a->herbalist_menu != b->herbalist_menu ||
+            a->watchman_flags != b->watchman_flags ||
+            a->watchman_menu != b->watchman_menu ||
             a->marsh_root_spawned != b->marsh_root_spawned ||
             a->bag_count != b->bag_count ||
             a->bag_capacity != b->bag_capacity ||
@@ -608,6 +615,34 @@ TEST save_round_trip_preserves_herbalist_reward_on_ground(void)
     PASS();
 }
 
+TEST save_round_trip_preserves_watchman_flags_and_menu(void)
+{
+    struct GameState game;
+    struct GameState loaded;
+    u32 loaded_draws;
+
+    /* save v12+v13: watchman_flags/menu and mid-dialogue mode survive load. */
+    unit_game_fresh(&game, 988u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_TOWER, 0);
+    game.watchman_flags = WATCHMAN_FLAG_WARNED | WATCHMAN_FLAG_FED;
+    game.watchman_menu = WATCHMAN_SCENE_MEAL_OFFER;
+    game.mode = GAME_MODE_DIALOGUE;
+    game.dialogue = DIALOGUE_NPC_WATCHMAN;
+    game_inv_bag_add(&game, ITEM_HERB);
+
+    save_cleanup_file();
+    ASSERT_EQ(SAVE_RESULT_OK,
+        save_write_game(save_test_path(), &game, plat_rand_draw_count()));
+    ASSERT_EQ(SAVE_RESULT_OK,
+        save_read_game(save_test_path(), &loaded, &loaded_draws));
+    ASSERT_EQ(WATCHMAN_FLAG_WARNED | WATCHMAN_FLAG_FED, loaded.watchman_flags);
+    ASSERT_EQ(WATCHMAN_SCENE_MEAL_OFFER, loaded.watchman_menu);
+    ASSERT_EQ(1, game_inv_player_has_item(&loaded, ITEM_HERB));
+    ASSERT_EQ(0U, loaded_draws);
+    save_cleanup_file();
+    PASS();
+}
+
 SUITE(save)
 {
     RUN_TEST(save_round_trip_preserves_state_and_rng_count);
@@ -624,4 +659,5 @@ SUITE(save)
     RUN_TEST(save_rejects_oversized_combat_enemy_level);
     RUN_TEST(save_round_trip_preserves_seeded_roaming_bandit);
     RUN_TEST(save_round_trip_preserves_herbalist_reward_on_ground);
+    RUN_TEST(save_round_trip_preserves_watchman_flags_and_menu);
 }

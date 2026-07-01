@@ -181,7 +181,9 @@ TEST dialogue_cmd_reply_watchman(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_TOWER, 0);
     talk_out_state(&game);
     ASSERT_EQ(1, reply_out_state(&game, 1));
-    ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
+    ASSERT_EQ(WATCHMAN_FLAG_WARNED, game.watchman_flags);
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(WATCHMAN_SCENE_AFTER_WARNING, game.watchman_menu);
     PASS();
 }
 
@@ -208,10 +210,15 @@ TEST dialogue_cmd_reply_herbalist_starts_request_and_seeds_root(void)
     ASSERT_EQ(HERBALIST_SCENE_NOT_STARTED, out.events[0].arg3);
     ASSERT_EQ(1, reply_out(&game, 1, &out));
     ASSERT_EQ(HERBALIST_STORY_REQUESTED, game.herbalist_story);
+    ASSERT_EQ(HERBALIST_SCENE_REQUESTED_OPTIONS, game.herbalist_menu);
     ASSERT_EQ(1, game.marsh_root_spawned);
     ASSERT(room_has_item(&game, WORLD_ROOM_MARSH, ITEM_MARSH_ROOT));
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(2, out.count);
     ASSERT_EQ(GAME_EVENT_DIALOGUE, out.events[0].kind);
     ASSERT_EQ(HERBALIST_SCENE_NOT_STARTED, out.events[0].arg3);
+    ASSERT_EQ(GAME_DIALOGUE_PHASE_TALK, out.events[1].arg1);
+    ASSERT_EQ(HERBALIST_SCENE_REQUESTED_OPTIONS, out.events[1].arg3);
     PASS();
 }
 
@@ -288,6 +295,111 @@ TEST dialogue_cmd_talk_watchman_event(void)
     ASSERT_EQ(GAME_EVENT_DIALOGUE, out.events[0].kind);
     ASSERT_EQ(GAME_DIALOGUE_ACTOR_WATCHMAN, out.events[0].arg0);
     ASSERT_EQ(GAME_DIALOGUE_PHASE_TALK, out.events[0].arg1);
+    ASSERT_EQ(WATCHMAN_SCENE_NEUTRAL, out.events[0].arg3);
+    PASS();
+}
+
+/*
+ * Warning reply chains REPLY then TALK in one turn; no second talk required.
+ */
+TEST dialogue_cmd_reply_watchman_sets_warned_and_followup_talk(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 141u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_TOWER, 0);
+    ASSERT_EQ(1, talk_out(&game, &out));
+    ASSERT_EQ(1, reply_out(&game, 1, &out));
+    ASSERT_EQ(WATCHMAN_FLAG_WARNED, game.watchman_flags);
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(WATCHMAN_SCENE_AFTER_WARNING, game.watchman_menu);
+    ASSERT_EQ(2, out.count);
+    ASSERT_EQ(GAME_DIALOGUE_PHASE_REPLY, out.events[0].arg1);
+    ASSERT_EQ(WATCHMAN_SCENE_WARNING, out.events[0].arg3);
+    ASSERT_EQ(GAME_DIALOGUE_PHASE_TALK, out.events[1].arg1);
+    ASSERT_EQ(WATCHMAN_SCENE_AFTER_WARNING, out.events[1].arg3);
+    PASS();
+}
+
+TEST dialogue_cmd_reply_watchman_meal_thread_give_fed(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 142u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_TOWER, 0);
+    game_inv_bag_add(&game, ITEM_BERRY);
+    talk_out(&game, &out);
+    ASSERT_EQ(1, reply_out(&game, 2, &out));
+    ASSERT_EQ(WATCHMAN_SCENE_MEAL_OFFER, game.watchman_menu);
+    ASSERT_EQ(WATCHMAN_SCENE_PECKISH, out.events[0].arg3);
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, npc_cmd_give(&game, ITEM_BERRY, &out));
+    ASSERT_EQ(WATCHMAN_FLAG_FED, game.watchman_flags);
+    ASSERT_EQ(0, game_inv_player_has_item(&game, ITEM_BERRY));
+    ASSERT_EQ(0, game_inv_player_has_item(&game, ITEM_HERB));
+    ASSERT_EQ(WATCHMAN_SCENE_NEUTRAL, game.watchman_menu);
+    PASS();
+}
+
+TEST dialogue_cmd_reply_watchman_warned_and_fed_flags_coexist(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 145u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_TOWER, 0);
+    game.watchman_flags = WATCHMAN_FLAG_WARNED | WATCHMAN_FLAG_FED;
+    talk_out(&game, &out);
+    ASSERT_EQ(WATCHMAN_SCENE_NEUTRAL_WARNED_FED, out.events[0].arg3);
+    PASS();
+}
+
+TEST dialogue_cmd_reply_watchman_invalid_reply_preserves_state(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 143u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_TOWER, 0);
+    talk_out(&game, &out);
+    ASSERT_EQ(1, reply_out(&game, 4, &out));
+    ASSERT_EQ(0, game.watchman_flags);
+    ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[0].kind);
+    ASSERT_EQ(GAME_DIALOGUE_GUARD_PICK_123, out.events[0].arg0);
+    PASS();
+}
+
+TEST dialogue_cmd_reply_watchman_fed_already(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 144u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_TOWER, 0);
+    game.watchman_flags = WATCHMAN_FLAG_FED;
+    talk_out(&game, &out);
+    ASSERT_EQ(1, reply_out(&game, 2, &out));
+    ASSERT_EQ(WATCHMAN_SCENE_ALREADY_FED, out.events[0].arg3);
+    ASSERT_EQ(WATCHMAN_SCENE_NEUTRAL, game.watchman_menu);
+    ASSERT_EQ(WATCHMAN_SCENE_NEUTRAL_FED, out.events[1].arg3);
+    PASS();
+}
+
+TEST dialogue_cmd_reply_watchman_change_subject_returns_warned_neutral(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 146u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_TOWER, 0);
+    talk_out(&game, &out);
+    ASSERT_EQ(1, reply_out(&game, 1, &out));
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, reply_out(&game, 2, &out));
+    ASSERT_EQ(WATCHMAN_SCENE_NEUTRAL, game.watchman_menu);
+    ASSERT_EQ(WATCHMAN_SCENE_NEUTRAL_WARNED, out.events[1].arg3);
     PASS();
 }
 
@@ -393,6 +505,12 @@ SUITE(dialogue) {
     RUN_TEST(dialogue_cmd_talk_archivist);
     RUN_TEST(dialogue_cmd_reply_frog_invalid);
     RUN_TEST(dialogue_cmd_reply_watchman);
+    RUN_TEST(dialogue_cmd_reply_watchman_sets_warned_and_followup_talk);
+    RUN_TEST(dialogue_cmd_reply_watchman_meal_thread_give_fed);
+    RUN_TEST(dialogue_cmd_reply_watchman_warned_and_fed_flags_coexist);
+    RUN_TEST(dialogue_cmd_reply_watchman_invalid_reply_preserves_state);
+    RUN_TEST(dialogue_cmd_reply_watchman_fed_already);
+    RUN_TEST(dialogue_cmd_reply_watchman_change_subject_returns_warned_neutral);
     RUN_TEST(dialogue_cmd_reply_herbalist);
     RUN_TEST(dialogue_cmd_reply_herbalist_starts_request_and_seeds_root);
     RUN_TEST(dialogue_cmd_talk_herbalist_ready_scene);

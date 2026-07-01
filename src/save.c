@@ -3,6 +3,7 @@
 #include "config.h"
 #include "game.h"
 #include "items.h"
+#include "npc.h"
 #include "save.h"
 
 /*
@@ -15,7 +16,11 @@
  */
 
 #define SAVE_MAGIC "DMSV"
-#define SAVE_VERSION 10
+/*
+ * v12: watchman_flags + watchman_menu (#8). v13: herbalist_menu (#8 menus).
+ * Append-only bumps; loads reject anything below SAVE_VERSION.
+ */
+#define SAVE_VERSION 13
 #define SAVE_PATH_BUF_MAX 260
 
 /*
@@ -388,6 +393,11 @@ static int save_write_game_state(FILE *fp, const struct GameState *game,
             !save_write_u32(fp, game->env_focus_expires_tick) ||
             /* v10: herbalist story fields (#76). */
             !save_write_s16(fp, game->herbalist_story) ||
+            /* v13: herbalist session menu. */
+            !save_write_s16(fp, game->herbalist_menu) ||
+            /* v12: watchman flags and session menu (#8). */
+            !save_write_s16(fp, game->watchman_flags) ||
+            !save_write_s16(fp, game->watchman_menu) ||
             !save_write_s16(fp, game->marsh_root_spawned) ||
             !save_write_s16(fp, game->bag_count) ||
             !save_write_s16(fp, game->bag_capacity) ||
@@ -432,6 +442,11 @@ static int save_read_game_state(FILE *fp, struct GameState *game,
             !save_read_u32(fp, &game->env_focus_expires_tick) ||
             /* v10: herbalist story fields (#76). */
             !save_read_s16(fp, &game->herbalist_story) ||
+            /* v13: herbalist session menu. */
+            !save_read_s16(fp, &game->herbalist_menu) ||
+            /* v12: watchman flags and session menu (#8). */
+            !save_read_s16(fp, &game->watchman_flags) ||
+            !save_read_s16(fp, &game->watchman_menu) ||
             !save_read_s16(fp, &game->marsh_root_spawned) ||
             !save_read_s16(fp, &game->bag_count) ||
             !save_read_s16(fp, &game->bag_capacity) ||
@@ -648,6 +663,14 @@ static int save_validate_game(const struct GameState *game)
             game->env_focus_kind > GAME_ENV_GRIT ||
             game->herbalist_story < HERBALIST_STORY_NONE ||
             game->herbalist_story > HERBALIST_STORY_COMPLETE ||
+            /* v13 herbalist_menu / v12 watchman_* must match npc.h scene enums. */
+            game->herbalist_menu < 0 ||
+            game->herbalist_menu > HERBALIST_SCENE_GIVE_REWARD_NO_SPACE ||
+            game->watchman_flags < 0 ||
+            game->watchman_flags > (WATCHMAN_FLAG_WARNED |
+                WATCHMAN_FLAG_FED | WATCHMAN_FLAG_PROMISED) ||
+            game->watchman_menu < 0 ||
+            game->watchman_menu > WATCHMAN_SCENE_GIVE_REJECTED ||
             !save_valid_boolish(game->marsh_root_spawned) ||
             game->bag_count < 0 ||
             game->bag_count > CFG_BAG_MAX ||

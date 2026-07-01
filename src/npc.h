@@ -4,21 +4,48 @@
 #include "base.h"
 
 /*
- * Dialogue detail payload for the Herbalist authored slice. This stays out of
- * GameState headers so render/copy code can consume GAME_EVENT_DIALOGUE arg3
- * without depending on full orchestration state.
+ * Dialogue detail payload for the Herbalist authored slice. arg3 on TALK/REPLY;
+ * GameState.herbalist_menu mirrors the active scene for reply routing in npc.c.
  */
 enum HerbalistDialogueScene {
     HERBALIST_SCENE_NOT_STARTED = 0,
     HERBALIST_SCENE_REQUESTED,
     HERBALIST_SCENE_READY,
     HERBALIST_SCENE_COMPLETE,
+    /* REQUESTED submenu: root keeps portrait; OPTIONS is copy-only follow-up */
+    HERBALIST_SCENE_REQUESTED_OPTIONS,
     /* give/offering exchange outcomes (arg3 on GAME_EVENT_DIALOGUE). */
     HERBALIST_SCENE_GIVE_REJECTED,
     HERBALIST_SCENE_GIVE_NOT_CARRYING,
     HERBALIST_SCENE_GIVE_REWARD_BAG,
     HERBALIST_SCENE_GIVE_REWARD_GROUND,
     HERBALIST_SCENE_GIVE_REWARD_NO_SPACE
+};
+
+/*
+ * Dialogue detail payload for the watchman authored slice (#8). arg3 on TALK/REPLY;
+ * GameState.watchman_menu is reply routing; neutral copy variants use arg3 only.
+ */
+enum WatchmanDialogueScene {
+    /* talk menus (TALK events) */
+    WATCHMAN_SCENE_NEUTRAL = 0,
+    WATCHMAN_SCENE_AFTER_WARNING,
+    WATCHMAN_SCENE_MEAL_OFFER,
+    WATCHMAN_SCENE_MEAL_OFFER_EMPTY,
+    /* neutral root copy variants (TALK arg3 only; watchman_menu stays NEUTRAL). */
+    WATCHMAN_SCENE_NEUTRAL_WARNED,
+    WATCHMAN_SCENE_NEUTRAL_FED,
+    WATCHMAN_SCENE_NEUTRAL_WARNED_FED,
+    /* reply-only scenes (REPLY events) */
+    WATCHMAN_SCENE_PECKISH,
+    WATCHMAN_SCENE_WARNING,
+    WATCHMAN_SCENE_CHANGE_SUBJECT,
+    WATCHMAN_SCENE_SQUALL_ADVICE,
+    WATCHMAN_SCENE_APOLOGY,
+    WATCHMAN_SCENE_FOOD_THANKS,
+    WATCHMAN_SCENE_ALREADY_FED,
+    WATCHMAN_SCENE_GIVE_NOT_CARRYING,
+    WATCHMAN_SCENE_GIVE_REJECTED
 };
 
 struct GameState;
@@ -57,6 +84,8 @@ int npc_room_cmd_reply(struct GameState *game, int choice,
 /* Fixed room-NPC give/offering hook; returns 1 when a room NPC consumed it. */
 int npc_cmd_give(struct GameState *game, int item_arg,
                  struct GameEventQueue *out);
+/* 1 while room watchman meal-offer accepts give/offer (npc.c owns menu rules). */
+int npc_watchman_give_offer_active(const struct GameState *game);
 /* Maintain authored npc story-world hooks that do not emit events. */
 void npc_story_tick(struct GameState *game);
 void npc_seed_profiles(struct GameState *game);
