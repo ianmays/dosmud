@@ -605,6 +605,7 @@ TEST save_round_trip_preserves_herbalist_reward_on_ground(void)
     unit_game_fresh(&game, 987u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_ORCHARD, 0);
     game.herbalist_story = HERBALIST_STORY_COMPLETE;
+    gwhok_set(&game, WORLD_ADV_ORCHARD_RESTORED);
     game.room_item[WORLD_ROOM_ORCHARD][0] = ITEM_SALVE;
 
     save_cleanup_file();
@@ -629,6 +630,8 @@ TEST save_round_trip_preserves_watchman_flags_and_menu(void)
     unit_game_fresh(&game, 988u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_TOWER, 0);
     game.watchman_flags = WATCHMAN_FLAG_WARNED | WATCHMAN_FLAG_FED;
+    game.world_adv_flags = WORLD_ADV_TOWER_MEAL;
+    gwhok_apply_all(&game);
     game.watchman_menu = WATCHMAN_SCENE_MEAL_OFFER;
     game.mode = GAME_MODE_DIALOGUE;
     game.dialogue = DIALOGUE_NPC_WATCHMAN;
@@ -643,6 +646,31 @@ TEST save_round_trip_preserves_watchman_flags_and_menu(void)
     ASSERT_EQ(WATCHMAN_SCENE_MEAL_OFFER, loaded.watchman_menu);
     ASSERT_EQ(1, game_inv_player_has_item(&loaded, ITEM_HERB));
     ASSERT_EQ(0U, loaded_draws);
+    save_cleanup_file();
+    PASS();
+}
+
+TEST save_rejects_herbalist_complete_without_advancement(void)
+{
+    struct GameState game;
+    struct GameState target;
+    struct GameState before;
+    u32 loaded_draws;
+
+    save_cleanup_file();
+    unit_game_fresh(&game, 991u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ORCHARD, 0);
+    game.herbalist_story = HERBALIST_STORY_COMPLETE;
+    ASSERT_EQ(SAVE_RESULT_OK,
+        save_write_game(save_test_path(), &game, plat_rand_draw_count()));
+
+    unit_game_fresh(&target, 77U);
+    before = target;
+    loaded_draws = 777U;
+    ASSERT_EQ(SAVE_RESULT_RANGE,
+        save_read_game(save_test_path(), &target, &loaded_draws));
+    ASSERT(save_games_equal(&before, &target));
+    ASSERT_EQ(777U, loaded_draws);
     save_cleanup_file();
     PASS();
 }
@@ -687,5 +715,6 @@ SUITE(save)
     RUN_TEST(save_round_trip_preserves_seeded_roaming_bandit);
     RUN_TEST(save_round_trip_preserves_herbalist_reward_on_ground);
     RUN_TEST(save_round_trip_preserves_watchman_flags_and_menu);
+    RUN_TEST(save_rejects_herbalist_complete_without_advancement);
     RUN_TEST(save_round_trip_preserves_world_adv_flags);
 }

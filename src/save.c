@@ -678,6 +678,10 @@ static int save_validate_game(const struct GameState *game)
             game->world_adv_flags < 0 ||
             game->world_adv_flags > (WORLD_ADV_ORCHARD_RESTORED |
                 WORLD_ADV_TOWER_MEAL) ||
+            (game->herbalist_story == HERBALIST_STORY_COMPLETE &&
+                (game->world_adv_flags & WORLD_ADV_ORCHARD_RESTORED) == 0) ||
+            ((game->watchman_flags & WATCHMAN_FLAG_FED) != 0 &&
+                (game->world_adv_flags & WORLD_ADV_TOWER_MEAL) == 0) ||
             !save_valid_boolish(game->marsh_root_spawned) ||
             game->bag_count < 0 ||
             game->bag_count > CFG_BAG_MAX ||

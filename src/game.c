@@ -2,6 +2,7 @@
 #include "buildid.h"
 #include "platform.h"
 #include "game.h"
+#include "gwhok.h"
 #include "invent.h"
 #include "items.h"
 #include "gatmos.h"
@@ -205,6 +206,7 @@ static void reset_mutable_state(struct GameState *game, int room_id, u32 tick)
     game->watchman_menu = 0;
     game->marsh_root_spawned = 0;
     game->world_adv_flags = 0; /* gwhok.c advancement bits; cleared on fresh reset */
+    gwhok_apply_all(game); /* reconcile room desc when fixtures reuse World */
     game->bag_count = 0;
     game->bag_capacity = CFG_START_BAG_CAPACITY;
     game->level = CFG_START_LEVEL;
