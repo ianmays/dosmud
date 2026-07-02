@@ -114,6 +114,8 @@ struct GameState {
     int watchman_menu;
     /* Story-owned in-play marker: resets when no marsh-root is reachable. */
     int marsh_root_spawned;
+    /* gwhok.c authored world advancement flags; save v14+. */
+    int world_adv_flags;
     int room_item[CFG_ROOM_MAX][CFG_AREA_ITEM_SLOTS];
     int bag[CFG_BAG_MAX];
     int bag_count;

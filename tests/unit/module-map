@@ -17,6 +17,7 @@ gatmos: unit_gatmos.c
 world: unit_wrld.c
 gprog: unit_gprog.c
 gstory: unit_gstry.c
+gwhok: unit_gwhok.c
 items: unit_item.c
 fmt: unit_fmt.c
 gout: unit_gout.c

@@ -2,6 +2,7 @@
 #include <string.h>
 #include "config.h"
 #include "game.h"
+#include "gwhok.h"
 #include "items.h"
 #include "npc.h"
 #include "save.h"
@@ -18,9 +19,9 @@
 #define SAVE_MAGIC "DMSV"
 /*
  * v12: watchman_flags + watchman_menu (#8). v13: herbalist_menu (#8 menus).
- * Append-only bumps; loads reject anything below SAVE_VERSION.
+ * v14: world_adv_flags (#220). Append-only bumps; loads reject below SAVE_VERSION.
  */
-#define SAVE_VERSION 13
+#define SAVE_VERSION 14
 #define SAVE_PATH_BUF_MAX 260
 
 /*
@@ -398,6 +399,8 @@ static int save_write_game_state(FILE *fp, const struct GameState *game,
             /* v12: watchman flags and session menu (#8). */
             !save_write_s16(fp, game->watchman_flags) ||
             !save_write_s16(fp, game->watchman_menu) ||
+            /* v14: bits only; main.c gwhok_apply_all reconciles room desc on load. */
+            !save_write_s16(fp, game->world_adv_flags) ||
             !save_write_s16(fp, game->marsh_root_spawned) ||
             !save_write_s16(fp, game->bag_count) ||
             !save_write_s16(fp, game->bag_capacity) ||
@@ -447,6 +450,7 @@ static int save_read_game_state(FILE *fp, struct GameState *game,
             /* v12: watchman flags and session menu (#8). */
             !save_read_s16(fp, &game->watchman_flags) ||
             !save_read_s16(fp, &game->watchman_menu) ||
+            !save_read_s16(fp, &game->world_adv_flags) ||
             !save_read_s16(fp, &game->marsh_root_spawned) ||
             !save_read_s16(fp, &game->bag_count) ||
             !save_read_s16(fp, &game->bag_capacity) ||
@@ -671,6 +675,17 @@ static int save_validate_game(const struct GameState *game)
                 WATCHMAN_FLAG_FED | WATCHMAN_FLAG_PROMISED) ||
             game->watchman_menu < 0 ||
             game->watchman_menu > WATCHMAN_SCENE_GIVE_REJECTED ||
+            game->world_adv_flags < 0 ||
+            game->world_adv_flags > (WORLD_ADV_ORCHARD_RESTORED |
+                WORLD_ADV_TOWER_MEAL) ||
+            (game->herbalist_story == HERBALIST_STORY_COMPLETE &&
+                (game->world_adv_flags & WORLD_ADV_ORCHARD_RESTORED) == 0) ||
+            ((game->world_adv_flags & WORLD_ADV_ORCHARD_RESTORED) != 0 &&
+                game->herbalist_story != HERBALIST_STORY_COMPLETE) ||
+            ((game->watchman_flags & WATCHMAN_FLAG_FED) != 0 &&
+                (game->world_adv_flags & WORLD_ADV_TOWER_MEAL) == 0) ||
+            ((game->world_adv_flags & WORLD_ADV_TOWER_MEAL) != 0 &&
+                (game->watchman_flags & WATCHMAN_FLAG_FED) == 0) ||
             !save_valid_boolish(game->marsh_root_spawned) ||
             game->bag_count < 0 ||
             game->bag_count > CFG_BAG_MAX ||

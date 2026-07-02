@@ -1,0 +1,6 @@
+@fixture tower_meal_ready
+talk
+2
+give berry
+look
+quit

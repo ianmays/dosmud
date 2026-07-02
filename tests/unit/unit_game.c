@@ -4,6 +4,7 @@
 #include "game.h"
 #include "genc.h"
 #include "grendr.h"
+#include "gwhok.h"
 #include "invent.h"
 #include "items.h"
 #include "npc.h"
@@ -377,8 +378,29 @@ TEST game_watchman_meal_thread_give_fed(void)
     ASSERT_EQ(WATCHMAN_SCENE_MEAL_OFFER, game.watchman_menu);
     ASSERT_EQ(1, run_cmd(&game, "give berry"));
     ASSERT_EQ(WATCHMAN_FLAG_FED, game.watchman_flags);
+    ASSERT_EQ(1, gwhok_has(&game, WORLD_ADV_TOWER_MEAL));
+    ASSERT_STR_EQ(TXT_STORY_TOWER_FED_DESC,
+        game.world.rooms[WORLD_ROOM_TOWER].desc);
     ASSERT_EQ(0, game_inv_player_has_item(&game, ITEM_BERRY));
     ASSERT_EQ(WATCHMAN_SCENE_NEUTRAL, game.watchman_menu);
+    PASS();
+}
+
+TEST game_fixture_baseline_clears_tower_advancement_desc(void)
+{
+    struct GameState game;
+
+    unit_game_fresh(&game, 232u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_TOWER, 0);
+    game_inv_bag_add(&game, ITEM_BERRY);
+    ASSERT_EQ(1, run_cmd(&game, "talk"));
+    ASSERT_EQ(1, run_cmd(&game, "2"));
+    ASSERT_EQ(1, run_cmd(&game, "give berry"));
+    ASSERT_STR_EQ(TXT_STORY_TOWER_FED_DESC,
+        game.world.rooms[WORLD_ROOM_TOWER].desc);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_TOWER, 0);
+    ASSERT_STR_EQ(g_room_descs[WORLD_ROOM_TOWER],
+        game.world.rooms[WORLD_ROOM_TOWER].desc);
     PASS();
 }
 
@@ -1164,6 +1186,7 @@ TEST game_herbalist_turn_in_updates_orchard_desc(void)
     ASSERT_EQ(1, run_cmd(&game, "talk"));
     ASSERT_EQ(1, run_cmd(&game, "1"));
     ASSERT_EQ(HERBALIST_STORY_COMPLETE, game.herbalist_story);
+    ASSERT_EQ(1, gwhok_has(&game, WORLD_ADV_ORCHARD_RESTORED));
     ASSERT_STR_EQ(TXT_STORY_ORCHARD_DONE_DESC,
         game.world.rooms[WORLD_ROOM_ORCHARD].desc);
     PASS();
@@ -1235,6 +1258,7 @@ SUITE(game) {
     RUN_TEST(game_wait_on_road_bandit_room_opens_encounter);
     RUN_TEST(game_talk_npcs_and_nobody);
     RUN_TEST(game_watchman_meal_thread_give_fed);
+    RUN_TEST(game_fixture_baseline_clears_tower_advancement_desc);
     RUN_TEST(game_bag_preserves_bandit_handover_dialogue);
     RUN_TEST(game_bag_preserves_watchman_meal_offer_dialogue);
     RUN_TEST(game_bag_preserves_herbalist_give_dialogue);

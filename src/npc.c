@@ -4,6 +4,7 @@
 #include "game.h"
 #include "gout.h"
 #include "gstory.h"
+#include "gwhok.h"
 #include "invent.h"
 #include "items.h"
 #include "txtres.h"
@@ -322,6 +323,11 @@ static int watchman_handover_food(struct GameState *game, int item_arg,
     }
     game_inv_remove_carried_item(game, item_arg);
     game->watchman_flags |= WATCHMAN_FLAG_FED;
+    /*
+     * #220: FED is persisted (save v12+) and save validation pairs it with
+     * WORLD_ADV_TOWER_MEAL; watchman_menu alone is session reply routing.
+     */
+    gwhok_set(game, WORLD_ADV_TOWER_MEAL);
     watchman_push_reply_then_root(game, out, 0, WATCHMAN_SCENE_FOOD_THANKS);
     return 1;
 }
@@ -407,9 +413,10 @@ static int watchman_reply(struct GameState *game, int choice,
 }
 
 /*
- * #76 herbalist vertical slice: npc.c owns story transitions, orchard desc
- * mutation, and reply routing. Fetch-quest scene derivation and marsh-root
- * seeding call gstory helpers (#49). Reply events keep the pre-choice
+ * #76 herbalist vertical slice: npc.c owns story transitions and reply
+ * routing. Orchard/tower room-desc beats call gwhok_set (#220); gwhok.c owns
+ * persisted consequences. Fetch-quest scene derivation and marsh-root seeding
+ * call gstory helpers (#49). Reply events keep the pre-choice
  * HerbalistDialogueScene in arg3 so txtres copy matches the menu just closed.
  */
 static int herbalist_dialogue_scene(const struct GameState *game)
@@ -417,20 +424,6 @@ static int herbalist_dialogue_scene(const struct GameState *game)
     /* StoryFetchScene values align 1:1 with the first four HerbalistDialogueScene values. */
     return (int)story_fetch_scene(game->herbalist_story,
         game_inv_player_has_item(game, ITEM_MARSH_ROOT));
-}
-
-/* Turn-in swaps orchard desc in-place; incomplete story restores authored baseline. */
-static void herbalist_apply_world_hook(struct GameState *game)
-{
-    if (game->herbalist_story == HERBALIST_STORY_COMPLETE) {
-        strncpy(game->world.rooms[WORLD_ROOM_ORCHARD].desc,
-            TXT_STORY_ORCHARD_DONE_DESC, CFG_DESC_MAX - 1);
-        game->world.rooms[WORLD_ROOM_ORCHARD].desc[CFG_DESC_MAX - 1] = '\0';
-        return;
-    }
-    strncpy(game->world.rooms[WORLD_ROOM_ORCHARD].desc,
-        g_room_descs[WORLD_ROOM_ORCHARD], CFG_DESC_MAX - 1);
-    game->world.rooms[WORLD_ROOM_ORCHARD].desc[CFG_DESC_MAX - 1] = '\0';
 }
 
 /* Requested beat: gstory keeps one recoverable marsh root in play for turn-in. */
@@ -445,6 +438,7 @@ void npc_story_tick(struct GameState *game)
     if (game->herbalist_story == HERBALIST_STORY_REQUESTED) {
         herbalist_seed_marsh_root(game);
     }
+    gwhok_apply_all(game); /* reconcile room copy with world_adv_flags each tick */
 }
 
 static int herbalist_open_dialogue(struct GameState *game, GameEventQueue *out)
@@ -454,7 +448,7 @@ static int herbalist_open_dialogue(struct GameState *game, GameEventQueue *out)
     if (game->herbalist_story == HERBALIST_STORY_REQUESTED) {
         herbalist_seed_marsh_root(game);
     }
-    herbalist_apply_world_hook(game);
+    gwhok_apply_all(game);
     scene = herbalist_dialogue_scene(game);
     game->herbalist_menu = scene;
     npc_push_dialogue_detail(out, GAME_DIALOGUE_ACTOR_HERBALIST,
@@ -616,7 +610,7 @@ static int herbalist_exchange(struct GameState *game, int item_arg,
         game_room_ground_try_add(game, game->player.room_id, ITEM_SALVE);
     }
     game->herbalist_story = HERBALIST_STORY_COMPLETE;
-    herbalist_apply_world_hook(game);
+    gwhok_set(game, WORLD_ADV_ORCHARD_RESTORED); /* #220: orchard restoration */
     detail = HERBALIST_SCENE_GIVE_REWARD_BAG;
     if (reward_delivery == GAME_ITEM_DELIVERY_GROUND) {
         detail = HERBALIST_SCENE_GIVE_REWARD_GROUND;
@@ -646,7 +640,7 @@ static int herbalist_reply_ready(struct GameState *game, int choice,
 static int herbalist_reply_complete(struct GameState *game, int choice,
                                     GameEventQueue *out)
 {
-    herbalist_apply_world_hook(game);
+    gwhok_apply_all(game);
     if (choice == 3) {
         herbalist_leave(game, out, choice, HERBALIST_SCENE_COMPLETE);
         return 1;

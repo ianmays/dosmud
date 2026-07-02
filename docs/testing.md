@@ -140,7 +140,7 @@ make test-unit-coverage-verbose     # verbose coverage build, then full gcov blo
 - Determinism: call `plat_seed_rng(fixed_seed)` in setup; use `game_roll_inject_*` and `CFG_TEST_*` for asserted combat/intimidate outcomes
 - Snapshots assert player-visible output; unit tests assert `GameState` and parse results
 
-**In-scope modules (branch coverage target ~90%+):** `command`, `invent`, `combat`, `game`, `genc`, `dialogue`, `npc`, `gatmos`, `world`, `gprog`, `gstory`, `items`, `fmt`, `gout`, `replay`, `save`, `testharn`
+**In-scope modules (branch coverage target ~90%+):** `command`, `invent`, `combat`, `game`, `genc`, `dialogue`, `npc`, `gatmos`, `world`, `gprog`, `gstory`, `gwhok`, `items`, `fmt`, `gout`, `replay`, `save`, `testharn`
 
 **Out of scope for the unit coverage bar:** `buildid`, `grendr`, `txtres`, `main`, `platpos` / `platwin` / `platdos` (presentation or shell-edge glue; `buildid` is read-only identity covered by `unit_cmd.c`, `unit_game.c`, `unit_gout.c`, and version snapshots; `txtres` narrative key tables are covered in `unit_gout.c`; `fmt` holds testable format logic; snapshots cover printed output and ASCII art)
 
@@ -226,7 +226,8 @@ Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_
 | `quiet_camp_dual_ground` | Camp, quiet ticks on, stick and reed on ground for multi-item pickup tests |
 | `quiet_camp_dual_ground_full_bag` | `quiet_camp_dual_ground` plus a full bag for take-all refusal snapshots |
 | `at_pond` / `at_tower` / `at_orchard` / `at_catacombs` | Named room, explore, room explored |
-| `story_orchard_requested` / `story_orchard_ready` / `story_orchard_done` | Orchard baseline with the Herbalist slice in requested, turn-in-ready, or completed state |
+| `story_orchard_requested` / `story_orchard_ready` / `story_orchard_done` | Orchard baseline with the Herbalist slice in requested, turn-in-ready, or completed state (`story_orchard_done` sets `WORLD_ADV_ORCHARD_RESTORED` via `gwhok_set`) |
+| `tower_meal_ready` | Tower, berry in bag, explore (meal `give` / `offer` path for watchman tower desc) |
 | `quiet_explore` | `at_camp` + `test_quiet_ticks` + roster-backed traveler off (for `wait` / `move` snapshots) |
 
 **Traveler (roaming NPC)** (co-located dialogue without tick movement):
@@ -319,7 +320,7 @@ Each process run uses one `.input` file until `quit`. `make snapshot-run` runs `
 
 **Movement / time:** `walk_north`, `walk_map`, `wait_tick`.
 
-**NPC talk:** `frog_hint`, `frog_replies`, `watchman_talk`, `watchman_warned_followup`, `watchman_meal_peckish`, `traveler_replies`, `traveler_talk_blocked`, `herbalist_talk`, `herbalist_request`, `herbalist_incomplete`, `herbalist_complete`, `herbalist_followup`, `herbalist_save_load`, `herbalist_give_reject`, `herbalist_give_floor`, `archivist_talk`, `talk_nobody`, `dialogue_menu_exit`, `game_event_dialogue`, `narrative_indirection` (`frog_hint` proves the generic room-NPC hint also applies at the pond; the Herbalist set covers the first authored narrative slice plus the reusable room-NPC exchange follow-up through request (including REQUESTED root menu and gossip-leaves-dialogue), reminder, accepted hand-in, bag-full floor reward, reject feedback, save/load (`herbalist_menu` in save v13), and follow-up states; `watchman_talk`, `watchman_warned_followup`, and `watchman_meal_peckish` cover tower watchman in-menu warning and meal threads ([#8](https://github.com/ianmays/dosmud/issues/8)); the others cover pond frog, bandit camp talk, and traveler interaction through generic `GAME_EVENT_DIALOGUE` / `GAME_EVENT_ENCOUNTER` paths; `dialogue_menu_exit` uses `@fixture traveler_dialogue` and `look` to dismiss a room-NPC menu before the verb runs; `narrative_indirection` exercises traveler, watchman, and bandit give/intimidate scenes end-to-end through the `txtres` narrative-key indirection path; [#175](https://github.com/ianmays/dosmud/pull/175), [#196](https://github.com/ianmays/dosmud/issues/196), [#205](https://github.com/ianmays/dosmud/issues/205), [#76](https://github.com/ianmays/dosmud/issues/76), [#132](https://github.com/ianmays/dosmud/issues/132)).
+**NPC talk:** `frog_hint`, `frog_replies`, `watchman_talk`, `watchman_warned_followup`, `watchman_meal_peckish`, `watchman_meal_tower_desc`, `traveler_replies`, `traveler_talk_blocked`, `herbalist_talk`, `herbalist_request`, `herbalist_incomplete`, `herbalist_complete`, `herbalist_followup`, `herbalist_save_load`, `herbalist_give_reject`, `herbalist_give_floor`, `archivist_talk`, `talk_nobody`, `dialogue_menu_exit`, `game_event_dialogue`, `narrative_indirection` (`frog_hint` proves the generic room-NPC hint also applies at the pond; the Herbalist set covers the first authored narrative slice plus the reusable room-NPC exchange follow-up through request (including REQUESTED root menu and gossip-leaves-dialogue), reminder, accepted hand-in, bag-full floor reward, reject feedback, save/load (`herbalist_menu` in save v13), and follow-up states; `watchman_talk`, `watchman_warned_followup`, `watchman_meal_peckish`, and `watchman_meal_tower_desc` cover tower watchman in-menu warning and meal threads plus persisted tower room copy after meal `give` ([#8](https://github.com/ianmays/dosmud/issues/8), [#220](https://github.com/ianmays/dosmud/issues/220)); the others cover pond frog, bandit camp talk, and traveler interaction through generic `GAME_EVENT_DIALOGUE` / `GAME_EVENT_ENCOUNTER` paths; `dialogue_menu_exit` uses `@fixture traveler_dialogue` and `look` to dismiss a room-NPC menu before the verb runs; `narrative_indirection` exercises traveler, watchman, and bandit give/intimidate scenes end-to-end through the `txtres` narrative-key indirection path; [#175](https://github.com/ianmays/dosmud/pull/175), [#196](https://github.com/ianmays/dosmud/issues/196), [#205](https://github.com/ianmays/dosmud/issues/205), [#76](https://github.com/ianmays/dosmud/issues/76), [#132](https://github.com/ianmays/dosmud/issues/132)).
 
 **Eat / use:** `use_salve`, `use_torch`, `use_spear`, `use_stone`, `eat_berry`, `eat_fish`, `eat_berry_heal`, `eat_fish_heal`, `eat_not_edible`, `eat_missing`.
 
@@ -335,7 +336,7 @@ Each process run uses one `.input` file until `quit`. `make snapshot-run` runs `
 
 **Meta / inventory:** `unknown_cmd`, `cannot_move`, `give_wrong_context`, `reply_nobody`, `post_combat_reply_guard`, `reply_invalid`, `craft_salve`, `craft_unknown`, `take_nothing`, `take_wrong_item`.
 
-**Save/load:** `save_load`, `herbalist_save_load` (single-slot `save.dat` round-trip with a deterministic post-load move or authored-story follow-up state; `unit_save.c` round-trip fixtures assert save v13 `herbalist_menu` plus v12 `watchman_flags` / `watchman_menu`).
+**Save/load:** `save_load`, `herbalist_save_load` (single-slot `save.dat` round-trip with a deterministic post-load move or authored-story follow-up state; `unit_save.c` round-trip fixtures assert save v14 `world_adv_flags` plus v13 `herbalist_menu` and v12 `watchman_flags` / `watchman_menu`).
 
 **Replay:** `replay_log` (stdout plus sidecar log golden files; [#156](https://github.com/ianmays/dosmud/issues/156)).
 

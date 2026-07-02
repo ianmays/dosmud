@@ -7,6 +7,7 @@
 #include "buildid.h"
 #include "game.h"
 #include "grendr.h"
+#include "gwhok.h"
 #include "invent.h"
 #include "platform.h"
 #include "replay.h"
@@ -223,6 +224,8 @@ static int main_handle_save_load(struct GameState *game, struct Command *cmd,
                         &rng_draw_count);
     if (rc == SAVE_RESULT_OK) {
         *game = g_main_loaded_game;
+        /* save v14+ stores flags only; reconcile room desc before gameplay. */
+        gwhok_apply_all(game);
         /* Restore libc stream position for the loaded seed before new rolls. */
         plat_seed_rng(game->seed);
         plat_rand_advance(rng_draw_count);
