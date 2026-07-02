@@ -323,7 +323,10 @@ static int watchman_handover_food(struct GameState *game, int item_arg,
     }
     game_inv_remove_carried_item(game, item_arg);
     game->watchman_flags |= WATCHMAN_FLAG_FED;
-    /* #220: persisted meal beat; watchman_flags stay session-scoped in npc.c. */
+    /*
+     * #220: FED is persisted (save v12+) and save validation pairs it with
+     * WORLD_ADV_TOWER_MEAL; watchman_menu alone is session reply routing.
+     */
     gwhok_set(game, WORLD_ADV_TOWER_MEAL);
     watchman_push_reply_then_root(game, out, 0, WATCHMAN_SCENE_FOOD_THANKS);
     return 1;
