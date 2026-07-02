@@ -89,7 +89,7 @@ Frameworks last.
 - [#132](https://github.com/ianmays/dosmud/issues/132) npc item exchange and rewards - ✅ Done (PR [#226](https://github.com/ianmays/dosmud/pull/226))
 - [#49](https://github.com/ianmays/dosmud/issues/49) quest/progress helper extraction - ✅ Done (PR [#227](https://github.com/ianmays/dosmud/pull/227))
 - [#8](https://github.com/ianmays/dosmud/issues/8) dialogue branching and action follow-ups - ✅ Done (PR [#228](https://github.com/ianmays/dosmud/pull/228))
-- [#220](https://github.com/ianmays/dosmud/issues/220) authored world advancement hooks v1
+- [#220](https://github.com/ianmays/dosmud/issues/220) authored world advancement hooks v1 - ✅ Done (PR [#229](https://github.com/ianmays/dosmud/pull/229))
 
 **Out of scope for this lane:**
 
