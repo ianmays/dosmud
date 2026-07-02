@@ -21,6 +21,7 @@ if exist game.obj del game.obj
 if exist gout.obj del gout.obj
 if exist gprog.obj del gprog.obj
 if exist gstory.obj del gstory.obj
+if exist gwhok.obj del gwhok.obj
 if exist combat.obj del combat.obj
 if exist genc.obj del genc.obj
 if exist dialogue.obj del dialogue.obj
@@ -73,6 +74,11 @@ if errorlevel 1 goto wcl_bad
 echo Compiling gstory.c ... >> %LOG%
 echo Compiling gstory.c ...
 wcl %WFL% -c -fo=gstory.obj src\gstory.c >> %LOG%
+if errorlevel 1 goto wcl_bad
+
+echo Compiling gwhok.c ... >> %LOG%
+echo Compiling gwhok.c ...
+wcl %WFL% -c -fo=gwhok.obj src\gwhok.c >> %LOG%
 if errorlevel 1 goto wcl_bad
 
 echo Compiling combat.c ... >> %LOG%
@@ -161,7 +167,7 @@ echo Archiving gameplay.lib ...
 REM Keep each wlib line under COMMAND.COM ~127 chars (TEST_MODE adds +tharn.obj).
 wlib -n gameplay.lib +buildid.obj +game.obj +gout.obj >> %LOG%
 if errorlevel 1 goto wcl_bad
-wlib gameplay.lib +gprog.obj +gstory.obj +combat.obj +genc.obj >> %LOG%
+wlib gameplay.lib +gprog.obj +gstory.obj +gwhok.obj +combat.obj +genc.obj >> %LOG%
 if errorlevel 1 goto wcl_bad
 wlib gameplay.lib +dialogue.obj +npc.obj +gatmos.obj >> %LOG%
 if errorlevel 1 goto wcl_bad
