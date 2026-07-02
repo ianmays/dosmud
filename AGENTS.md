@@ -14,7 +14,7 @@ Guidance for AI/code agents working in this repository.
 - ALWAYS check for an existing GitHub Issue before starting work.
 - NEVER modify or reopen Closed Issues.
 - ALWAYS create a branch before making changes.
-- Follow [`DEV_PLAN.md`](DEV_PLAN.md) **DEV_PLAN updates** below when opening a draft PR. Root `DEV_PLAN.md` is Roadmap v2 (strategic index) - not a living status tracker and not the v1 milestone ledger; do not change it on pushes or after merge unless explicitly updating roadmap docs.
+- Follow [`DEV_PLAN.md`](DEV_PLAN.md) **DEV_PLAN updates** below when opening a draft PR. Root `DEV_PLAN.md` is Roadmap v2 (strategic index) - not a living status tracker and not the v1 milestone ledger; intentional roadmap edits (including lane **Contains** Done for the PR's issue) belong in that implementation PR, draft or ready - not auto-updated on every push.
 - ALWAYS open draft PRs first.
 - ALWAYS link PRs to their corresponding Issues.
 - ALWAYS complete a **documentation pass** before opening a draft PR (see [Documentation pass](#documentation-pass)).
@@ -153,10 +153,10 @@ Root [`DEV_PLAN.md`](DEV_PLAN.md) is **Roadmap v2** - a strategic index (current
 
 **Roadmap v2 Done convention** (allowed on root `DEV_PLAN.md`):
 
-- Mark delivery **once** on the issue's lane **Contains / currently expected** line after merge (or when the user requests a roadmap doc update).
-- Format: `- [#N](issue-url) short title - ✅ Done (PR [#PR](pr-url))`
+- Mark delivery **once** on the issue's lane **Contains / currently expected** line **in the same implementation PR** that delivers the issue (draft or ready).
+- Format: `- [#N](issue-url) short title - ✅ Done (PR [#PR](pr-url))` using the **current PR number**
 - Do **not** duplicate Done on other bullets, soft-sequence blocks, or separate Done sections.
-- Do **not** mark Done at issue-create time, on draft PR open, or on hygiene-only PRs unless the user asks.
+- Do **not** mark Done at issue-create time or on hygiene-only PRs unless the user asks.
 
 **Forbidden on root `DEV_PLAN.md`** (v1 ledger patterns; use archive instead):
 
@@ -164,13 +164,17 @@ Root [`DEV_PLAN.md`](DEV_PLAN.md) is **Roadmap v2** - a strategic index (current
 
 | Situation | Action |
 |-----------|--------|
-| Draft **implementation** PR (default) | Skip root `DEV_PLAN.md` Done edits until merge unless the user requests a roadmap update. Track Status on [project #1](https://github.com/users/ianmays/projects/1). |
-| After **merge** or user roadmap doc update | Mark Done on the lane **Contains** line per the convention above (optional in the same docs commit as other roadmap edits). |
-| User explicitly requests a Roadmap v2 doc update | Edit root `DEV_PLAN.md` using its lane structure; inline Done allowed per convention. |
+| Draft or ready **implementation** PR for issue **#N** | Mark **#N** Done on the lane **Contains** line per the convention above (expected in the same PR). |
+| Hygiene/docs-only PR with no implementing issue | Skip root `DEV_PLAN.md` Done unless the user explicitly requests a roadmap edit. |
+| User explicitly requests a Roadmap v2 doc update | Edit root `DEV_PLAN.md` using its lane structure; inline Done allowed per convention when appropriate. |
 | v1 history, milestone tables, `###` stubs, Done sections | [`docs/archive/DEV_PLAN_v1_engine_foundation.md`](docs/archive/DEV_PLAN_v1_engine_foundation.md) only. |
 | New issues / milestone hygiene | GitHub metadata via [milestone-issue-hygiene](.cursor/skills/milestone-issue-hygiene/SKILL.md); skip root `DEV_PLAN.md` by default. |
 
-Do not update root `DEV_PLAN.md` on later pushes or after merge unless the user asked for a roadmap doc change.
+**Reviewer note:** Do not flag inline **Contains** Done when format matches the convention above and the linked issue is in scope for the PR. Flag v1 patterns (tables, stubs, Done sections), duplicate Done markers, or Done for issues not implemented by the PR.
+
+**Project board vs DEV_PLAN:** GitHub project **Status = Done** remains after merge and issue closure (see [Status transitions](#status-transitions) above). `DEV_PLAN` inline Done is a roadmap delivery log, not a substitute for board Status.
+
+Do not add routine `DEV_PLAN.md` churn on unrelated pushes; intentional **Contains** Done for the implementing issue in that PR is expected.
 
 When auditing milestone alignment, execution order, blocked-by links, or project board Priority vs stack order, use [`.cursor/skills/audit-github-devplan/SKILL.md`](.cursor/skills/audit-github-devplan/SKILL.md).
 

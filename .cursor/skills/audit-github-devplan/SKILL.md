@@ -17,7 +17,9 @@ Cross-check **GitHub** (issues, milestones, project #1, blocked-by) against **[`
 
 ## Roadmap v2 guard
 
-Root `DEV_PLAN.md` is a **strategic index** (lanes, parked systems) - not the v1 milestone ledger. **Do not** recommend v1 milestone tables, execution-order mermaid, per-issue stubs, or Done **sections** on root `DEV_PLAN.md`. Lane **Contains** inline Done per [AGENTS.md DEV_PLAN updates](../../../AGENTS.md) is allowed and is not a policy breach. v1 Done-section audits apply to the **archive** only.
+Root `DEV_PLAN.md` is a **strategic index** (lanes, parked systems) - not the v1 milestone ledger. **Do not** recommend v1 milestone tables, execution-order mermaid, per-issue stubs, or Done **sections** on root `DEV_PLAN.md`. Lane **Contains** inline Done per [AGENTS.md DEV_PLAN updates](../../../AGENTS.md) in a scoped implementation PR (draft or ready) is **compliant** and is not a policy breach. v1 Done-section audits apply to the **archive** only.
+
+**PR review:** Do not flag inline **Contains** Done when format matches AGENTS convention and the linked issue is in scope for the PR. Flag v1 patterns, duplicate Done markers, or Done for issues not implemented by the PR.
 
 Canonical policy: [`AGENTS.md`](../../../AGENTS.md) **DEV_PLAN updates** and Roadmap v2 lanes/spine in root `DEV_PLAN.md`.
 

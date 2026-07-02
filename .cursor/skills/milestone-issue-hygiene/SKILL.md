@@ -15,7 +15,7 @@ Reactive audits and bulk fixes: [`.cursor/skills/audit-github-devplan/SKILL.md`]
 
 ## Roadmap v2 guard
 
-Root [`DEV_PLAN.md`](../../../DEV_PLAN.md) is **Roadmap v2** (strategic index). **Do not** add v1 milestone tables, execution-order mermaid, per-issue `###` stubs, or Done **sections** to root `DEV_PLAN.md`. Lane **Contains** inline Done (`- ✅ Done (PR #…)`) is allowed per [AGENTS.md DEV_PLAN updates](../../../AGENTS.md) after merge or when the user requests a roadmap update. v1 ledger behaviour applies only to [`docs/archive/DEV_PLAN_v1_engine_foundation.md`](../../../docs/archive/DEV_PLAN_v1_engine_foundation.md). Default: complete GitHub steps below; **skip** step 6 root `DEV_PLAN.md` commits unless the user asks to update Roadmap v2 or maintain the archive.
+Root [`DEV_PLAN.md`](../../../DEV_PLAN.md) is **Roadmap v2** (strategic index). **Do not** add v1 milestone tables, execution-order mermaid, per-issue `###` stubs, or Done **sections** to root `DEV_PLAN.md`. Lane **Contains** inline Done (`- ✅ Done (PR #…)`) is allowed per [AGENTS.md DEV_PLAN updates](../../../AGENTS.md) in the implementation PR that delivers the issue (draft or ready). v1 ledger behaviour applies only to [`docs/archive/DEV_PLAN_v1_engine_foundation.md`](../../../docs/archive/DEV_PLAN_v1_engine_foundation.md). Default: complete GitHub steps below; **skip** step 6 root `DEV_PLAN.md` commits unless the user asks to update Roadmap v2 or maintain the archive.
 
 ## When to run
 
@@ -139,7 +139,7 @@ gh issue edit <N> --body-file /path/to/body.md
 
 **Default: skip.** Root [`DEV_PLAN.md`](../../../DEV_PLAN.md) is Roadmap v2 - do **not** add v1 milestone tables, mermaid execution blocks, per-issue stubs, or Done **sections** unless the user explicitly requests a roadmap doc update.
 
-When the user **does** request a Roadmap v2 edit (including after merge): follow lane structure; inline Done on the **Contains** line per [AGENTS.md DEV_PLAN updates](../../../AGENTS.md).
+When the user **does** request a Roadmap v2 edit: follow lane structure; inline Done on the **Contains** line per [AGENTS.md DEV_PLAN updates](../../../AGENTS.md). Implementation agents mark Done in the implementation PR (not deferred to merge).
 
 When maintaining **v1 archive** history: edit [`docs/archive/DEV_PLAN_v1_engine_foundation.md`](../../../docs/archive/DEV_PLAN_v1_engine_foundation.md) using v1 conventions (table rows, stubs, Done markers).
 
