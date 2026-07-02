@@ -2,6 +2,7 @@
 #include "config.h"
 #include "game.h"
 #include "gout.h"
+#include "gwhok.h"
 #include "invent.h"
 #include "items.h"
 #include "npc.h"
@@ -137,6 +138,9 @@ TEST npc_room_cmd_reply_watchman_meal_give_fed(void)
     game_event_queue_reset(&out);
     ASSERT_EQ(1, npc_cmd_give(&game, ITEM_FISH, &out));
     ASSERT_EQ(WATCHMAN_FLAG_FED, game.watchman_flags);
+    ASSERT_EQ(1, gwhok_has(&game, WORLD_ADV_TOWER_MEAL));
+    ASSERT_STR_EQ(TXT_STORY_TOWER_FED_DESC,
+        game.world.rooms[WORLD_ROOM_TOWER].desc);
     ASSERT_EQ(0, game_inv_player_has_item(&game, ITEM_FISH));
     ASSERT_EQ(0, game_inv_player_has_item(&game, ITEM_HERB));
     ASSERT_EQ(WATCHMAN_SCENE_FOOD_THANKS, out.events[0].arg3);
@@ -289,6 +293,7 @@ TEST npc_room_cmd_reply_herbalist_turn_in_updates_story(void)
     game_event_queue_reset(&out);
     ASSERT_EQ(1, npc_room_cmd_reply(&game, 1, &out));
     ASSERT_EQ(HERBALIST_STORY_COMPLETE, game.herbalist_story);
+    ASSERT_EQ(1, gwhok_has(&game, WORLD_ADV_ORCHARD_RESTORED));
     ASSERT_STR_EQ(TXT_STORY_ORCHARD_DONE_DESC,
         game.world.rooms[WORLD_ROOM_ORCHARD].desc);
     ASSERT_EQ(-1, game_inv_bag_find_index(&game, ITEM_MARSH_ROOT));

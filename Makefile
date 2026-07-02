@@ -13,7 +13,7 @@ PLAT_SRC = src/platpos.c
 ifeq ($(TARGET),win)
 PLAT_SRC = src/platwin.c
 endif
-SRC = src/main.c $(PLAT_SRC) src/buildid.c src/game.c src/gout.c src/gprog.c src/gstory.c src/combat.c src/genc.c src/dialogue.c src/npc.c src/gatmos.c src/grendr.c src/fmt.c src/invent.c src/command.c src/world.c src/items.c src/replay.c src/save.c src/txtres.c
+SRC = src/main.c $(PLAT_SRC) src/buildid.c src/game.c src/gout.c src/gprog.c src/gstory.c src/gwhok.c src/combat.c src/genc.c src/dialogue.c src/npc.c src/gatmos.c src/grendr.c src/fmt.c src/invent.c src/command.c src/world.c src/items.c src/replay.c src/save.c src/txtres.c
 HARNESS_SRC = $(HARNESS_DIR)/testharn.c $(HARNESS_DIR)/th_world.c
 TEST_SRC = $(SRC) $(HARNESS_SRC)
 REGRESSION_DIR = tests/regression
@@ -88,7 +88,7 @@ SNAPSHOT_TESTS = \
 	smoke \
 	bandit_handover bandit_wielded_give area_items map equipment craft_wielded \
 	walk_north walk_map wait_tick \
-	frog_hint frog_replies watchman_talk watchman_warned_followup watchman_meal_peckish traveler_replies traveler_talk_blocked herbalist_talk archivist_talk talk_nobody \
+	frog_hint frog_replies watchman_talk watchman_warned_followup watchman_meal_peckish watchman_meal_tower_desc traveler_replies traveler_talk_blocked herbalist_talk archivist_talk talk_nobody \
 	herbalist_request herbalist_incomplete herbalist_complete herbalist_followup herbalist_save_load \
 	herbalist_give_reject herbalist_give_floor \
 	dialogue_menu_exit \
@@ -177,7 +177,7 @@ UNIT_BIN = $(UNIT_BUILD_DIR)/dosmud_unit
 UNIT_COV_BIN = $(UNIT_COV_BUILD_DIR)/dosmud_unit_cov
 UNIT_CFLAGS = $(TEST_CFLAGS) -I$(UNIT_DIR)
 UNIT_COV_CFLAGS = $(UNIT_CFLAGS) -fprofile-arcs -ftest-coverage
-UNIT_GAMEPLAY_SRC = $(PLAT_SRC) src/buildid.c src/game.c src/gout.c src/gprog.c src/gstory.c src/combat.c src/genc.c \
+UNIT_GAMEPLAY_SRC = $(PLAT_SRC) src/buildid.c src/game.c src/gout.c src/gprog.c src/gstory.c src/gwhok.c src/combat.c src/genc.c \
 	src/dialogue.c src/npc.c src/gatmos.c src/grendr.c src/fmt.c src/invent.c \
 	src/command.c src/world.c src/items.c src/replay.c src/save.c src/txtres.c
 UNIT_CORE_SRC = $(UNIT_GAMEPLAY_SRC) $(HARNESS_SRC)
@@ -186,13 +186,13 @@ UNIT_TEST_SRC = $(UNIT_DIR)/unit_main.c $(UNIT_DIR)/unit_util.c $(UNIT_DIR)/unit
 	$(UNIT_DIR)/unit_rplog.c \
 	$(UNIT_DIR)/unit_save.c \
 	$(UNIT_DIR)/unit_cmd.c $(UNIT_DIR)/unit_harn.c $(UNIT_DIR)/unit_inv.c $(UNIT_DIR)/unit_cbt.c \
-	$(UNIT_DIR)/unit_gprog.c $(UNIT_DIR)/unit_gstry.c $(UNIT_DIR)/unit_genc.c $(UNIT_DIR)/unit_dial.c $(UNIT_DIR)/unit_npc.c \
+	$(UNIT_DIR)/unit_gprog.c $(UNIT_DIR)/unit_gstry.c $(UNIT_DIR)/unit_gwhok.c $(UNIT_DIR)/unit_genc.c $(UNIT_DIR)/unit_dial.c $(UNIT_DIR)/unit_npc.c \
 	$(UNIT_DIR)/unit_gatmos.c $(UNIT_DIR)/unit_fmt.c $(UNIT_DIR)/unit_wrld.c $(UNIT_DIR)/unit_game.c $(UNIT_DIR)/unit_tharn.c
 UNIT_CORE_OBJS = $(addprefix $(UNIT_BUILD_DIR)/,$(notdir $(UNIT_CORE_SRC:.c=.o)))
 UNIT_TEST_OBJS = $(addprefix $(UNIT_BUILD_DIR)/,$(notdir $(UNIT_TEST_SRC:.c=.o)))
 UNIT_COV_CORE_OBJS = $(addprefix $(UNIT_COV_BUILD_DIR)/,$(notdir $(UNIT_CORE_SRC:.c=.o)))
 UNIT_COV_TEST_OBJS = $(addprefix $(UNIT_COV_BUILD_DIR)/,$(notdir $(UNIT_TEST_SRC:.c=.o)))
-COVERAGE_MODULES = command invent combat game genc dialogue npc gatmos world gprog gstory items fmt gout replay save testharn
+COVERAGE_MODULES = command invent combat game genc dialogue npc gatmos world gprog gstory gwhok items fmt gout replay save testharn
 
 ifeq ($(UNIT_BUILD_VERBOSE),1)
 UNIT_CC_QUIET =

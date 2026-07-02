@@ -82,6 +82,8 @@ const char *const TXT_ROOM_ANIMAL_FALLBACK = "something";
 const char *const TXT_ROOM_NOISE_FALLBACK = "You hear a distant animal noise.";
 const char *const TXT_STORY_ORCHARD_DONE_DESC =
     "Crooked fruit trees crowd a forgotten lane, and the bitter scent of crushed marsh-root still hangs in the air.";
+const char *const TXT_STORY_TOWER_FED_DESC =
+    "A watchtower leans above weathered stairs, and the watchfire burns with a companionable warmth.";
 
 /*
  * actor rows follow GameDialogueActor; columns follow GameDialoguePhase (gout.h).

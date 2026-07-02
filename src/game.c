@@ -204,6 +204,7 @@ static void reset_mutable_state(struct GameState *game, int room_id, u32 tick)
     game->watchman_flags = 0;
     game->watchman_menu = 0;
     game->marsh_root_spawned = 0;
+    game->world_adv_flags = 0; /* gwhok.c advancement bits; cleared on fresh reset */
     game->bag_count = 0;
     game->bag_capacity = CFG_START_BAG_CAPACITY;
     game->level = CFG_START_LEVEL;

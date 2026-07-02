@@ -8,6 +8,7 @@
 #include "game.h"
 #include "genc.h"
 #include "grendr.h"
+#include "gwhok.h"
 #include "invent.h"
 #include "items.h"
 #include "combat.h"
@@ -327,15 +328,23 @@ static int fixture_story_orchard_ready(struct GameState *game)
     return 1;
 }
 
+/* Match production turn-in: flag + gwhok room-desc apply, not manual strncpy. */
 static void fixture_story_orchard_done(struct GameState *game)
 {
     fixture_at_orchard(game);
     game->herbalist_story = HERBALIST_STORY_COMPLETE;
     game->marsh_root_spawned = 1;
-    /* Snapshot fixtures persist the same room-copy mutation the turn-in applies. */
-    strncpy(game->world.rooms[WORLD_ROOM_ORCHARD].desc,
-        TXT_STORY_ORCHARD_DONE_DESC, CFG_DESC_MAX - 1);
-    game->world.rooms[WORLD_ROOM_ORCHARD].desc[CFG_DESC_MAX - 1] = '\0';
+    gwhok_set(game, WORLD_ADV_ORCHARD_RESTORED);
+}
+
+/* Tower with berry in bag for watchman give snapshot paths (#220). */
+static int fixture_tower_meal_ready(struct GameState *game)
+{
+    fixture_at_tower(game);
+    if (!game_inv_bag_add(game, ITEM_BERRY)) {
+        return 0;
+    }
+    return 1;
 }
 
 /* Marsh room with authored root visible for take/examine snapshot paths. */
@@ -715,6 +724,12 @@ int testharn_apply(struct GameState *game, const char *line)
     }
     if (fixture_name_is("at_tower", name)) {
         fixture_at_tower(game);
+        return 1;
+    }
+    if (fixture_name_is("tower_meal_ready", name)) {
+        if (!fixture_tower_meal_ready(game)) {
+            return -2;
+        }
         return 1;
     }
     if (fixture_name_is("at_orchard", name)) {

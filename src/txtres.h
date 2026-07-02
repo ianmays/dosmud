@@ -161,6 +161,7 @@ extern const char *const TXT_WATCHMAN_ART_CAPTION;
 extern const char *const TXT_HERBALIST_ART_CAPTION;
 extern const char *const TXT_ARCHIVIST_ART_CAPTION;
 extern const char *const TXT_STORY_ORCHARD_DONE_DESC;
+extern const char *const TXT_STORY_TOWER_FED_DESC;
 
 extern const char *const TXT_MSG_BANDIT_WAITING;
 extern const char *const TXT_MSG_BANDIT_WAITING_HANDOVER;

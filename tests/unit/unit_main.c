@@ -15,6 +15,7 @@ SUITE_EXTERN(invent);
 SUITE_EXTERN(combat);
 SUITE_EXTERN(gprog);
 SUITE_EXTERN(gstry);
+SUITE_EXTERN(gwhok);
 SUITE_EXTERN(genc);
 SUITE_EXTERN(dialogue);
 SUITE_EXTERN(npc);
@@ -97,6 +98,7 @@ int main(int argc, char **argv)
     RUN_SUITE(combat);
     RUN_SUITE(gprog);
     RUN_SUITE(gstry);
+    RUN_SUITE(gwhok);
     RUN_SUITE(genc);
     RUN_SUITE(dialogue);
     RUN_SUITE(npc);
