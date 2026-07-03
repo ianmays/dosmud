@@ -49,6 +49,10 @@ void render_atmosphere_creak(void);
 void render_atmosphere_water(void);
 void render_atmosphere_reed_drop(void);
 void render_atmosphere_grit(void);
+void render_atmosphere_weather_rain(void);
+void render_atmosphere_weather_fog(void);
+void render_atmosphere_weather_wind(void);
+void render_atmosphere_weather_clear(void);
 
 void render_traveler_scene(void);
 void render_traveler_reply(int choice);

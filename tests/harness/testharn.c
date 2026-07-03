@@ -380,6 +380,23 @@ static void fixture_ambient_camp(struct GameState *game)
     fixture_traveler_off(game);
 }
 
+/* #51: one wait advances tick to the first scheduled weather check (rain at seed 1234). */
+static void fixture_weather_rain_ready(struct GameState *game)
+{
+    fixture_ambient_camp(game);
+    game->tick = (u32)CFG_WEATHER_INITIAL_DELAY_TICKS - 1UL;
+    game->weather_kind = GAME_WEATHER_NONE;
+    game->weather_expires_tick = (u32)CFG_WEATHER_INITIAL_DELAY_TICKS;
+}
+
+/* #51: look snapshot shows fog HUD without waiting for a transition roll. */
+static void fixture_weather_fog(struct GameState *game)
+{
+    fixture_at_camp(game);
+    game->weather_kind = GAME_WEATHER_FOG;
+    game->weather_expires_tick = game->tick + (u32)CFG_WEATHER_DURATION_TICKS;
+}
+
 static void fixture_quiet_camp_dual_ground(struct GameState *game)
 {
     game_reset_fixture_baseline(game, WORLD_ROOM_CAMP, 0);
@@ -764,6 +781,14 @@ int testharn_apply(struct GameState *game, const char *line)
     }
     if (fixture_name_is("ambient_camp", name)) {
         fixture_ambient_camp(game);
+        return 1;
+    }
+    if (fixture_name_is("weather_rain_ready", name)) {
+        fixture_weather_rain_ready(game);
+        return 1;
+    }
+    if (fixture_name_is("weather_fog", name)) {
+        fixture_weather_fog(game);
         return 1;
     }
     if (fixture_name_is("quiet_camp_dual_ground", name)) {

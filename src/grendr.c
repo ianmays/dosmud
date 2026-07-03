@@ -416,15 +416,19 @@ void game_print_location_art(int room_id)
 }
 
 static void render_room_look_snapshot(const struct GameState *game, int room_id,
-                                      const int *room_items, int corpse_present,
+                                      const int *room_items, int look_arg1,
                                       int npc_in_room_hint, int focus_active,
                                       int focus_kind)
 {
     char ground_buf[CFG_FMT_GROUND_MAX];
     const struct Room *room;
+    int corpse_present;
+    int weather_kind;
     int dir;
     int ground_len;
 
+    corpse_present = look_arg1 & 1;
+    weather_kind = look_arg1 >> 1;
     room = &game->world.rooms[room_id];
     game_print_location_art(room_id);
     render_gap();
@@ -460,6 +464,13 @@ static void render_room_look_snapshot(const struct GameState *game, int room_id,
         } else if (focus_kind == GAME_ENV_GRIT) {
             RENDER_PRINTF("%s", TXT_UI_FOCUS_GRIT);
         }
+    }
+    if (weather_kind == GAME_WEATHER_RAIN) {
+        RENDER_PRINTF("%s", TXT_UI_WEATHER_RAIN);
+    } else if (weather_kind == GAME_WEATHER_FOG) {
+        RENDER_PRINTF("%s", TXT_UI_WEATHER_FOG);
+    } else if (weather_kind == GAME_WEATHER_WIND) {
+        RENDER_PRINTF("%s", TXT_UI_WEATHER_WIND);
     }
 }
 
@@ -800,6 +811,18 @@ static void render_environment_event(const GameEvent *ev)
         break;
     case GAME_ENV_EVENT_GRIT:
         render_atmosphere_grit();
+        break;
+    case GAME_ENV_EVENT_WEATHER_RAIN:
+        render_atmosphere_weather_rain();
+        break;
+    case GAME_ENV_EVENT_WEATHER_FOG:
+        render_atmosphere_weather_fog();
+        break;
+    case GAME_ENV_EVENT_WEATHER_WIND:
+        render_atmosphere_weather_wind();
+        break;
+    case GAME_ENV_EVENT_WEATHER_CLEAR:
+        render_atmosphere_weather_clear();
         break;
     default:
         break;
@@ -1203,6 +1226,26 @@ void render_atmosphere_reed_drop(void)
 void render_atmosphere_grit(void)
 {
     render_paragraph(TXT_ATMO_GRIT);
+}
+
+void render_atmosphere_weather_rain(void)
+{
+    render_paragraph(TXT_ATMO_WEATHER_RAIN);
+}
+
+void render_atmosphere_weather_fog(void)
+{
+    render_paragraph(TXT_ATMO_WEATHER_FOG);
+}
+
+void render_atmosphere_weather_wind(void)
+{
+    render_paragraph(TXT_ATMO_WEATHER_WIND);
+}
+
+void render_atmosphere_weather_clear(void)
+{
+    render_paragraph(TXT_ATMO_WEATHER_CLEAR);
 }
 
 void render_traveler_scene(void)

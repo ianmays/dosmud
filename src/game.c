@@ -157,8 +157,14 @@ int game_heal_player(struct GameState *game, int amount)
 
 /*
  * Snapshot current room into a generic look event. arg0 is npc_room_actor for
- * HUD presence; render reads room_id/items from the event body.
+ * HUD presence; arg1 packs corpse_present (bit 0) and weather_kind (upper bits,
+ * #51) at enqueue time so post-tick weather rolls do not reorder look output.
  */
+static int look_arg1_pack(int corpse_present, int weather_kind)
+{
+    return corpse_present | (weather_kind << 1);
+}
+
 static void do_look(struct GameState *game, GameEventQueue *out)
 {
     int i;
@@ -166,7 +172,8 @@ static void do_look(struct GameState *game, GameEventQueue *out)
 
     ev = game_event_push(out, GAME_EVENT_ROOM_LOOK,
         npc_room_actor(game->player.room_id),
-        game->corpse_present[game->player.room_id],
+        look_arg1_pack(game->corpse_present[game->player.room_id],
+            game->weather_kind),
         game->env_focus_active &&
             game->env_focus_room == game->player.room_id &&
             game->tick < game->env_focus_expires_tick,
@@ -209,6 +216,9 @@ static void reset_mutable_state(struct GameState *game, int room_id, u32 tick)
     game->env_interact_active = 0;
     game->env_interact_kind = GAME_ENV_NONE;
     game->env_interact_room = -1;
+    /* gatmos.c defers first weather roll until tick reaches expires_tick. */
+    game->weather_kind = GAME_WEATHER_NONE;
+    game->weather_expires_tick = (u32)CFG_WEATHER_INITIAL_DELAY_TICKS;
     game->herbalist_story = HERBALIST_STORY_NONE;
     game->herbalist_menu = 0;
     game->watchman_flags = 0;
@@ -625,12 +635,13 @@ static void advance_world_tick(struct GameState *game, GameEventQueue *out)
     int roll;
 
     /*
-     * Tick order is deliberate: resolve any roaming co-location first, then
-     * move roaming actors when no encounter opened, then emit ambient events,
-     * then open authored fixed encounters. This keeps room-based enemies
-     * world-owned instead of spawning at the player site.
+     * Tick order: increment tick, advance global weather (#51), then roster
+     * maintenance, roaming encounter checks (fog may block opens only),
+     * roaming movement when no encounter opened, ambient events, then fixed
+     * slot encounters. Keeps room-based enemies world-owned, not player-site.
      */
     game->tick += 1;
+    gatmos_weather_tick(game, out);
     npc_roaming_update_separation(game);
     npc_story_tick(game);
 #ifdef TEST_MODE
@@ -645,12 +656,23 @@ static void advance_world_tick(struct GameState *game, GameEventQueue *out)
     /*
      * Roaming encounters claim the room before movement when already
      * co-located; otherwise the roster gets one movement step, then a second
-     * encounter check in the new room layout.
+     * encounter check in the new room layout. Fog blocks encounter opens only.
      */
-    if (!npc_roaming_begin_encounter_in_room(game, game->player.room_id, out) &&
-            !game_is_busy_dialogue(game)) {
-        npc_roaming_step(game);
-        npc_roaming_begin_encounter_in_room(game, game->player.room_id, out);
+    if (!game_is_busy_dialogue(game)) {
+        int encounter_opened;
+
+        encounter_opened = 0;
+        if (!gatmos_weather_blocks_roaming_encounter(game)) {
+            encounter_opened = npc_roaming_begin_encounter_in_room(
+                game, game->player.room_id, out);
+        }
+        if (!encounter_opened) {
+            npc_roaming_step(game);
+            if (!gatmos_weather_blocks_roaming_encounter(game)) {
+                npc_roaming_begin_encounter_in_room(game,
+                    game->player.room_id, out);
+            }
+        }
     }
 
     world_step(&game->world, game->tick);

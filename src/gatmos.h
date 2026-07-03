@@ -1,6 +1,7 @@
 /*
  * Ambient world feel and room item seeding. The shorter basename keeps the
  * DOS/OpenWatcom tree compatible with FAT 8+3 limits.
+ * #51: owns global weather transitions, atmosphere bias, and fog encounter gate.
  */
 
 #ifndef GATMOS_H
@@ -23,5 +24,8 @@ void gatmos_env_clear_interact(struct GameState *game);
 /* After load: re-queue ENV_MENU when save restored an active env interaction. */
 void gatmos_queue_restored_menu(struct GameState *game,
                                 struct GameEventQueue *out);
+/* #51: global weather tick and fog roaming-encounter gate (hash-only rolls). */
+void gatmos_weather_tick(struct GameState *game, struct GameEventQueue *out);
+int gatmos_weather_blocks_roaming_encounter(struct GameState *game);
 
 #endif
