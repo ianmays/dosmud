@@ -90,6 +90,10 @@ static const char *replay_event_name(int kind)
         return "GAME_EVENT_ITEM_PRESENCE";
     case GAME_EVENT_OBSERVATION:
         return "GAME_EVENT_OBSERVATION";
+    case GAME_EVENT_ENV_MENU:
+        return "GAME_EVENT_ENV_MENU";
+    case GAME_EVENT_ENV_RESULT:
+        return "GAME_EVENT_ENV_RESULT";
     default:
         return "GAME_EVENT_UNKNOWN";
     }

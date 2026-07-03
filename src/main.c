@@ -7,6 +7,7 @@
 #include "buildid.h"
 #include "game.h"
 #include "grendr.h"
+#include "gatmos.h"
 #include "gwhok.h"
 #include "invent.h"
 #include "platform.h"
@@ -194,6 +195,7 @@ static void main_queue_loaded_game(struct GameState *game)
     }
     game_event_queue_reset(&g_main_out);
     game_describe_current_room(game, &g_main_out);
+    gatmos_queue_restored_menu(game, &g_main_out);
 }
 
 /*
@@ -378,7 +380,7 @@ static int main_run_idle_ticks(struct GameState *game, time_t *last_tick_time,
     now_time = plat_time_now();
     ran_tick = 0;
     while ((now_time - *last_tick_time) >= idle_tick_seconds && game->running) {
-        if (game->mode != GAME_MODE_EXPLORE) {
+        if (game_is_busy_dialogue(game)) {
             *last_tick_time = now_time;
             break;
         }

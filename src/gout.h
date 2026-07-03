@@ -42,7 +42,10 @@ enum GameEventKind {
     GAME_EVENT_ENVIRONMENT,
     GAME_EVENT_AMBIENT_NOISE,
     GAME_EVENT_ITEM_PRESENCE,
-    GAME_EVENT_OBSERVATION
+    GAME_EVENT_OBSERVATION,
+    /* #7: gatmos.c post-inspect follow-up menu and reply outcomes. */
+    GAME_EVENT_ENV_MENU,
+    GAME_EVENT_ENV_RESULT
 };
 
 /*
@@ -211,8 +214,10 @@ enum GameEventDialogueGuardReason {
     GAME_DIALOGUE_GUARD_GIVE_NO_TARGET,
     /* room NPC present but refuses the offered item. */
     GAME_DIALOGUE_GUARD_GIVE_REJECTED,
-    /* arg1 may widen the visible valid range for menu-specific reply guards. */
-    GAME_DIALOGUE_GUARD_PICK_123
+    /* arg1 widens valid reply range; env inspect menus reuse for max_choice (#7). */
+    GAME_DIALOGUE_GUARD_PICK_123,
+    /* env inspect menu dismissed by explore verb before the verb runs (#7). */
+    GAME_DIALOGUE_GUARD_ENV_MENU_CLOSED
 };
 
 /*
@@ -221,7 +226,17 @@ enum GameEventDialogueGuardReason {
  * AMBIENT_NOISE  text=room animal noise line
  * ITEM_PRESENCE  arg0=item id; text=item name
  * OBSERVATION    arg0=GameEventObservationOutcome
+ * ENV_MENU       arg0=GAME_ENV_* kind arg1=room_id
+ * ENV_RESULT     arg0=GAME_ENV_* kind arg1=choice (1-based)
+ *                arg2=GameEventEnvResultDetail when needed
  */
+enum GameEventEnvResultDetail {
+    GAME_ENV_RESULT_DETAIL_NONE = 0,
+    GAME_ENV_RESULT_DETAIL_HEALED,
+    GAME_ENV_RESULT_DETAIL_HP_FULL,
+    GAME_ENV_RESULT_DETAIL_ITEM_SPAWNED,
+    GAME_ENV_RESULT_DETAIL_ITEM_FAILED
+};
 enum GameEventEnvironmentKind {
     GAME_ENV_EVENT_NONE = 0,
     GAME_ENV_EVENT_GUST,

@@ -107,6 +107,8 @@ void game_set_mode_explore(struct GameState *game)
 {
     game->mode = GAME_MODE_EXPLORE;
     game->dialogue = DIALOGUE_NONE;
+    /* gatmos post-inspect menu; cleared with other explore overlays. */
+    gatmos_env_clear_interact(game);
     /* npc.c session menus; cleared so explore ticks do not reuse stale routing. */
     game->watchman_menu = 0;
     game->herbalist_menu = 0;
@@ -132,6 +134,10 @@ int game_is_busy_dialogue(struct GameState *game)
 {
     /* Any non-explore mode suppresses ambient encounters and background prompts. */
     if (game->mode != GAME_MODE_EXPLORE) {
+        return 1;
+    }
+    /* gatmos env inspect menu suppresses ambient ticks like dialogue mode. */
+    if (game->env_interact_active) {
         return 1;
     }
     return 0;
@@ -200,6 +206,9 @@ static void reset_mutable_state(struct GameState *game, int room_id, u32 tick)
     game->env_focus_room = -1;
     game->env_focus_kind = GAME_ENV_NONE;
     game->env_focus_expires_tick = 0;
+    game->env_interact_active = 0;
+    game->env_interact_kind = GAME_ENV_NONE;
+    game->env_interact_room = -1;
     game->herbalist_story = HERBALIST_STORY_NONE;
     game->herbalist_menu = 0;
     game->watchman_flags = 0;
@@ -329,6 +338,27 @@ int game_roll_spread(struct GameState *game, int spread)
 int game_roll_percent(struct GameState *game)
 {
     return game_roll_spread(game, CFG_ROLL_PERCENT_RANGE);
+}
+
+/*
+ * #7: dismiss gatmos env inspect menu before mode guards so explore verbs run
+ * after close. Reply/look/map/help/version/quit stay allowed like #205 menus.
+ */
+static void maybe_dismiss_env_menu(struct GameState *game, struct Command *cmd,
+                                   GameEventQueue *out)
+{
+    if (!game->env_interact_active) {
+        return;
+    }
+    if (cmd->type == CMD_REPLY ||
+            cmd->type == CMD_LOOK ||
+            cmd->type == CMD_MAP ||
+            cmd->type == CMD_HELP ||
+            cmd->type == CMD_VERSION ||
+            cmd->type == CMD_QUIT) {
+        return;
+    }
+    gatmos_env_dismiss(game, out);
 }
 
 static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd,
@@ -512,6 +542,14 @@ static int game_cmd_reply(struct GameState *game, struct Command *cmd,
         combat_resolve_reply(game, cmd->arg, out);
         return 1;
     }
+    /* gatmos-owned numbered reply while env_interact_active (#7). */
+    if (game->env_interact_active) {
+        if (gatmos_cmd_env_reply(game, cmd->arg, out)) {
+            return 1;
+        }
+        gatmos_env_dismiss(game, out);
+        return 1;
+    }
     /* Corpse take/leave replies are invent-owned, not dialogue.c actors. */
     if (game->mode == GAME_MODE_DIALOGUE && game->dialogue == DIALOGUE_LOOT) {
         return game_inv_cmd_loot_reply(game, cmd->arg, out);
@@ -535,6 +573,7 @@ static int apply_command(struct GameState *game, struct Command *cmd,
 {
     /* Menu exit must precede mode guards so the verb is not blocked. */
     maybe_close_noncombat_menu(game, cmd, out);
+    maybe_dismiss_env_menu(game, cmd, out);
 
     if (!game_cmd_allowed_in_mode(game, cmd, out)) {
         return 0;

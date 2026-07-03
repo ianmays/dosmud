@@ -5,6 +5,7 @@
 #include "game.h"
 #include "gout.h"
 #include "replay.h"
+#include "world.h"
 
 /*
  * Unit tests for replay.c serialization. Exercises replay_log_* directly with
@@ -184,7 +185,9 @@ TEST replay_log_capture_step_modes_kinds_and_escapes(void)
         GAME_EVENT_ENVIRONMENT,
         GAME_EVENT_AMBIENT_NOISE,
         GAME_EVENT_ITEM_PRESENCE,
-        GAME_EVENT_OBSERVATION
+        GAME_EVENT_OBSERVATION,
+        GAME_EVENT_ENV_MENU,
+        GAME_EVENT_ENV_RESULT
     };
     static const char escaped[] = {'a', '\n', 'b', '\r', 'c', '\t', 'd', '\x01', 'e', '\0'};
     int i;
@@ -229,6 +232,8 @@ TEST replay_log_capture_step_modes_kinds_and_escapes(void)
     ASSERT(0 != strstr(text, "kind=GAME_EVENT_VERSION"));
     ASSERT(0 != strstr(text, "kind=GAME_EVENT_COMBAT"));
     ASSERT(0 != strstr(text, "kind=GAME_EVENT_OBSERVATION"));
+    ASSERT(0 != strstr(text, "kind=GAME_EVENT_ENV_MENU"));
+    ASSERT(0 != strstr(text, "kind=GAME_EVENT_ENV_RESULT"));
     ASSERT(0 != strstr(text, "kind=GAME_EVENT_CORPSE_VIEW"));
     ASSERT(0 != strstr(text, "kind=GAME_EVENT_UNKNOWN"));
     ASSERT(0 != strstr(text, "a\\nb\\rc\\t"));

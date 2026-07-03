@@ -70,6 +70,8 @@ void render_msg_inspect_rustle(void);
 void render_msg_inspect_creak(void);
 void render_msg_inspect_water(void);
 void render_msg_inspect_grit(void);
+void render_msg_env_menu(int kind);
+void render_msg_env_result(int kind, int choice, int detail);
 void render_msg_bandit_blocks_talk(void);
 void render_msg_loot_waiting(void);
 void render_msg_traveler_waiting(void);

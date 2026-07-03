@@ -404,6 +404,40 @@ const char *const TXT_MSG_INSPECT_RUSTLE = "You part the brush and startle a har
 const char *const TXT_MSG_INSPECT_CREAK = "An old branch rocks against another, groaning like timber.\n";
 const char *const TXT_MSG_INSPECT_WATER = "You find a thin runnel cutting fresh lines through mud.\n";
 const char *const TXT_MSG_INSPECT_GRIT = "New tracks cross the grit: light, quick, and already fading.\n";
+const char *const TXT_MSG_ENV_MENU_WATER =
+    "  [1] Follow the runnel downstream.\n  [2] Cup your hands and drink.\n  [3] Step back.\n";
+const char *const TXT_MSG_ENV_MENU_RUSTLE =
+    "  [1] Search the brush.\n  [2] Step back.\n";
+const char *const TXT_MSG_ENV_MENU_CREAK =
+    "  [1] Pull free a splinter.\n  [2] Step back.\n";
+const char *const TXT_MSG_ENV_MENU_GRIT =
+    "  [1] Study the tracks.\n  [2] Step back.\n";
+const char *const TXT_MSG_ENV_RESULT_WATER_FOLLOW =
+    "The runnel bends toward the stream bed and loses itself in reeds.\n";
+const char *const TXT_MSG_ENV_RESULT_WATER_DRINK =
+    "You cup the water. It is cold and clears your head.\n";
+const char *const TXT_MSG_ENV_RESULT_WATER_DRINK_FULL =
+    "You sip, but you already feel steady.\n";
+const char *const TXT_MSG_ENV_RESULT_WATER_LEAVE =
+    "You step back from the muddy runnel.\n";
+const char *const TXT_MSG_ENV_RESULT_RUSTLE_SEARCH =
+    "You comb the brush and find a berry glinting below.\n";
+const char *const TXT_MSG_ENV_RESULT_RUSTLE_SEARCH_FAIL =
+    "The undergrowth is too tangled to turn up more.\n";
+const char *const TXT_MSG_ENV_RESULT_RUSTLE_LEAVE =
+    "You let the brush settle.\n";
+const char *const TXT_MSG_ENV_RESULT_CREAK_SPLINTER =
+    "You tug free a dry splinter.\n";
+const char *const TXT_MSG_ENV_RESULT_CREAK_SPLINTER_FAIL =
+    "The branch holds firm; nothing worth keeping.\n";
+const char *const TXT_MSG_ENV_RESULT_CREAK_LEAVE =
+    "You leave the creaking timber alone.\n";
+const char *const TXT_MSG_ENV_RESULT_GRIT_STUDY =
+    "The tracks double back once, then vanish where the grit thins.\n";
+const char *const TXT_MSG_ENV_RESULT_GRIT_LEAVE =
+    "The grit gives no further answer.\n";
+const char *const TXT_MSG_ENV_MENU_CLOSED =
+    "You turn away from the distraction.\n";
 const char *const TXT_MSG_BANDIT_BLOCK_TALK = "The bandit has your full attention right now.\n";
 const char *const TXT_MSG_LOOT_WAITING =
     "Finish looting with the numbered corpse menu, or type loot to leave the body alone.\n";

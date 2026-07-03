@@ -19,9 +19,10 @@
 #define SAVE_MAGIC "DMSV"
 /*
  * v12: watchman_flags + watchman_menu (#8). v13: herbalist_menu (#8 menus).
- * v14: world_adv_flags (#220). Append-only bumps; loads reject below SAVE_VERSION.
+ * v14: world_adv_flags (#220). v15: env_interact_* (#7).
+ * Append-only bumps; loads reject below SAVE_VERSION.
  */
-#define SAVE_VERSION 14
+#define SAVE_VERSION 15
 #define SAVE_PATH_BUF_MAX 260
 
 /*
@@ -392,6 +393,10 @@ static int save_write_game_state(FILE *fp, const struct GameState *game,
             !save_write_s16(fp, game->env_focus_room) ||
             !save_write_s16(fp, game->env_focus_kind) ||
             !save_write_u32(fp, game->env_focus_expires_tick) ||
+            /* v15: post-inspect env menu (#7). */
+            !save_write_s16(fp, game->env_interact_active) ||
+            !save_write_s16(fp, game->env_interact_kind) ||
+            !save_write_s16(fp, game->env_interact_room) ||
             /* v10: herbalist story fields (#76). */
             !save_write_s16(fp, game->herbalist_story) ||
             /* v13: herbalist session menu. */
@@ -443,6 +448,10 @@ static int save_read_game_state(FILE *fp, struct GameState *game,
             !save_read_s16(fp, &game->env_focus_room) ||
             !save_read_s16(fp, &game->env_focus_kind) ||
             !save_read_u32(fp, &game->env_focus_expires_tick) ||
+            /* v15: post-inspect env menu (#7). */
+            !save_read_s16(fp, &game->env_interact_active) ||
+            !save_read_s16(fp, &game->env_interact_kind) ||
+            !save_read_s16(fp, &game->env_interact_room) ||
             /* v10: herbalist story fields (#76). */
             !save_read_s16(fp, &game->herbalist_story) ||
             /* v13: herbalist session menu. */
@@ -665,6 +674,11 @@ static int save_validate_game(const struct GameState *game)
             !save_valid_room_or_none(game->env_focus_room, room_count) ||
             game->env_focus_kind < GAME_ENV_NONE ||
             game->env_focus_kind > GAME_ENV_GRIT ||
+            /* v15: post-inspect env menu pins; gatmos owns active/kind/room together. */
+            !save_valid_boolish(game->env_interact_active) ||
+            game->env_interact_kind < GAME_ENV_NONE ||
+            game->env_interact_kind > GAME_ENV_GRIT ||
+            !save_valid_room_or_none(game->env_interact_room, room_count) ||
             game->herbalist_story < HERBALIST_STORY_NONE ||
             game->herbalist_story > HERBALIST_STORY_COMPLETE ||
             /* v13 herbalist_menu / v12 watchman_* must match npc.h scene enums. */
