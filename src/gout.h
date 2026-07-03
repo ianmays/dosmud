@@ -49,6 +49,13 @@ enum GameEventKind {
 };
 
 /*
+ * Room look payload (#47, #51): ROOM_LOOK arg0=npc room-actor hint;
+ * arg1=corpse_present (bit 0) | (weather_kind << 1) snapshotted at enqueue;
+ * arg2=env focus active; arg3=GAME_ENV_* focus kind when arg2 set;
+ * room_id and room_item[] hold ground snapshot.
+ */
+
+/*
  * Inventory/item payload contract (#158, #129):
  * ITEM_RESULT  arg0=GameEventItemAction arg1=GameEventItemOutcome
  *              arg2=item id or ITEM_NONE arg3=value/capacity/slots when needed

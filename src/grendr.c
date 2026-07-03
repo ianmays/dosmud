@@ -416,15 +416,19 @@ void game_print_location_art(int room_id)
 }
 
 static void render_room_look_snapshot(const struct GameState *game, int room_id,
-                                      const int *room_items, int corpse_present,
+                                      const int *room_items, int look_arg1,
                                       int npc_in_room_hint, int focus_active,
                                       int focus_kind)
 {
     char ground_buf[CFG_FMT_GROUND_MAX];
     const struct Room *room;
+    int corpse_present;
+    int weather_kind;
     int dir;
     int ground_len;
 
+    corpse_present = look_arg1 & 1;
+    weather_kind = look_arg1 >> 1;
     room = &game->world.rooms[room_id];
     game_print_location_art(room_id);
     render_gap();
@@ -461,11 +465,11 @@ static void render_room_look_snapshot(const struct GameState *game, int room_id,
             RENDER_PRINTF("%s", TXT_UI_FOCUS_GRIT);
         }
     }
-    if (game->weather_kind == GAME_WEATHER_RAIN) {
+    if (weather_kind == GAME_WEATHER_RAIN) {
         RENDER_PRINTF("%s", TXT_UI_WEATHER_RAIN);
-    } else if (game->weather_kind == GAME_WEATHER_FOG) {
+    } else if (weather_kind == GAME_WEATHER_FOG) {
         RENDER_PRINTF("%s", TXT_UI_WEATHER_FOG);
-    } else if (game->weather_kind == GAME_WEATHER_WIND) {
+    } else if (weather_kind == GAME_WEATHER_WIND) {
         RENDER_PRINTF("%s", TXT_UI_WEATHER_WIND);
     }
 }

@@ -2,12 +2,14 @@
 #include "greatest.h"
 #include "config.h"
 #include "game.h"
+#include "gatmos.h"
 #include "genc.h"
 #include "grendr.h"
 #include "gwhok.h"
 #include "invent.h"
 #include "items.h"
 #include "npc.h"
+#include "platform.h"
 #include "testharn.h"
 #include "txtres.h"
 #include "unit_util.h"
@@ -1311,6 +1313,37 @@ TEST game_reset_fixture_baseline_initializes_weather(void)
     PASS();
 }
 
+TEST game_fog_blocks_encounter_still_roams(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    struct NpcState *traveler;
+    struct NpcState *bandit;
+    int before;
+    int bandit_slot;
+
+    unit_game_fresh(&game, 1234u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    traveler = traveler_npc(&game);
+    bandit_slot = npc_find_by_actor(&game, GAME_DIALOGUE_ACTOR_BANDIT);
+    ASSERT(traveler != 0);
+    ASSERT(bandit_slot >= 0);
+    bandit = &game.npcs[bandit_slot];
+    traveler->room_id = WORLD_ROOM_CAMP;
+    traveler->flags |= NPC_FLAG_ACTIVE | NPC_FLAG_ROAMING;
+    bandit->flags &= ~NPC_FLAG_ACTIVE;
+    game.weather_kind = GAME_WEATHER_FOG;
+    game.weather_expires_tick = 100;
+    game.tick = 20;
+    ASSERT_EQ(1, gatmos_weather_blocks_roaming_encounter(&game));
+    plat_seed_rng(42u);
+    before = traveler->room_id;
+    game_event_queue_reset(&out);
+    game_background_step(&game, &out);
+    ASSERT_NEQ(before, traveler->room_id);
+    PASS();
+}
+
 SUITE(game) {
     RUN_TEST(game_heal_player_applies);
     RUN_TEST(game_heal_player_at_max);
@@ -1322,6 +1355,7 @@ SUITE(game) {
     RUN_TEST(game_move_blocked_and_ok);
     RUN_TEST(game_quiet_ticks);
     RUN_TEST(game_reset_fixture_baseline_initializes_weather);
+    RUN_TEST(game_fog_blocks_encounter_still_roams);
     RUN_TEST(game_bandit_intimidate_success);
     RUN_TEST(game_inspect_with_focus);
     RUN_TEST(game_env_inspect_reply);
