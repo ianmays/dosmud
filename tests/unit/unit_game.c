@@ -286,6 +286,25 @@ TEST game_env_menu_dismiss_on_move(void)
     PASS();
 }
 
+TEST game_env_reply_room_mismatch_fail_closed(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 6u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ROAD, 0);
+    game.env_interact_active = 1;
+    game.env_interact_kind = GAME_ENV_WATER;
+    game.env_interact_room = WORLD_ROOM_CAMP;
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, run_cmd_out(&game, "1", &out));
+    ASSERT_EQ(0, game.env_interact_active);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[0].kind);
+    ASSERT_EQ(GAME_DIALOGUE_GUARD_ENV_MENU_CLOSED, out.events[0].arg0);
+    PASS();
+}
+
 TEST game_talk_frog(void)
 {
     struct GameState game;
@@ -1295,6 +1314,7 @@ SUITE(game) {
     RUN_TEST(game_inspect_with_focus);
     RUN_TEST(game_env_inspect_reply);
     RUN_TEST(game_env_menu_dismiss_on_move);
+    RUN_TEST(game_env_reply_room_mismatch_fail_closed);
     RUN_TEST(game_talk_frog);
     RUN_TEST(game_bandit_fight_reply);
     RUN_TEST(game_bandit_intimidate_fail);

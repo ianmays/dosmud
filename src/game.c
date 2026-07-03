@@ -206,6 +206,9 @@ static void reset_mutable_state(struct GameState *game, int room_id, u32 tick)
     game->env_focus_room = -1;
     game->env_focus_kind = GAME_ENV_NONE;
     game->env_focus_expires_tick = 0;
+    game->env_interact_active = 0;
+    game->env_interact_kind = GAME_ENV_NONE;
+    game->env_interact_room = -1;
     game->herbalist_story = HERBALIST_STORY_NONE;
     game->herbalist_menu = 0;
     game->watchman_flags = 0;
@@ -541,7 +544,11 @@ static int game_cmd_reply(struct GameState *game, struct Command *cmd,
     }
     /* gatmos-owned numbered reply while env_interact_active (#7). */
     if (game->env_interact_active) {
-        return gatmos_cmd_env_reply(game, cmd->arg, out);
+        if (gatmos_cmd_env_reply(game, cmd->arg, out)) {
+            return 1;
+        }
+        gatmos_env_dismiss(game, out);
+        return 1;
     }
     /* Corpse take/leave replies are invent-owned, not dialogue.c actors. */
     if (game->mode == GAME_MODE_DIALOGUE && game->dialogue == DIALOGUE_LOOT) {

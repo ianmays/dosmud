@@ -439,6 +439,61 @@ TEST gatmos_env_dismiss_clears_state(void)
     PASS();
 }
 
+TEST gatmos_cmd_env_reply_room_mismatch_dismisses(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    reset_camp(&game);
+    game.env_interact_active = 1;
+    game.env_interact_kind = GAME_ENV_WATER;
+    game.env_interact_room = WORLD_ROOM_CAMP;
+    game.player.room_id = WORLD_ROOM_ROAD;
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, gatmos_cmd_env_reply(&game, 1, &out));
+    ASSERT_EQ(0, game.env_interact_active);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[0].kind);
+    ASSERT_EQ(GAME_DIALOGUE_GUARD_ENV_MENU_CLOSED, out.events[0].arg0);
+    PASS();
+}
+
+TEST gatmos_queue_restored_menu_requeues_active_state(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    reset_camp(&game);
+    game.env_interact_active = 1;
+    game.env_interact_kind = GAME_ENV_WATER;
+    game.env_interact_room = WORLD_ROOM_CAMP;
+    game_event_queue_reset(&out);
+    gatmos_queue_restored_menu(&game, &out);
+    ASSERT_EQ(1, game.env_interact_active);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_ENV_MENU, out.events[0].kind);
+    ASSERT_EQ(GAME_ENV_WATER, out.events[0].arg0);
+    ASSERT_EQ(WORLD_ROOM_CAMP, out.events[0].arg1);
+    PASS();
+}
+
+TEST gatmos_queue_restored_menu_clears_stale_room_pin(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    reset_camp(&game);
+    game.env_interact_active = 1;
+    game.env_interact_kind = GAME_ENV_WATER;
+    game.env_interact_room = WORLD_ROOM_ROAD;
+    game.player.room_id = WORLD_ROOM_CAMP;
+    game_event_queue_reset(&out);
+    gatmos_queue_restored_menu(&game, &out);
+    ASSERT_EQ(0, game.env_interact_active);
+    ASSERT_EQ(0, out.count);
+    PASS();
+}
+
 SUITE(gatmos) {
     RUN_TEST(gatmos_seed_world_items);
     RUN_TEST(gatmos_focus_expiry);
@@ -457,4 +512,7 @@ SUITE(gatmos) {
     RUN_TEST(gatmos_cmd_env_reply_water_drink);
     RUN_TEST(gatmos_cmd_env_reply_invalid_choice);
     RUN_TEST(gatmos_env_dismiss_clears_state);
+    RUN_TEST(gatmos_cmd_env_reply_room_mismatch_dismisses);
+    RUN_TEST(gatmos_queue_restored_menu_requeues_active_state);
+    RUN_TEST(gatmos_queue_restored_menu_clears_stale_room_pin);
 }

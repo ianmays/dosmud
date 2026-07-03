@@ -96,6 +96,18 @@ void gatmos_env_dismiss(struct GameState *game, GameEventQueue *out)
         GAME_DIALOGUE_GUARD_ENV_MENU_CLOSED, 0, 0, 0, 0);
 }
 
+void gatmos_queue_restored_menu(struct GameState *game, GameEventQueue *out)
+{
+    if (!game->env_interact_active ||
+            game->env_interact_room != game->player.room_id ||
+            game->env_interact_kind <= GAME_ENV_NONE ||
+            game->env_interact_kind > GAME_ENV_GRIT) {
+        gatmos_env_clear_interact(game);
+        return;
+    }
+    push_env_menu(out, game->env_interact_kind, game->env_interact_room);
+}
+
 void seed_world_items(struct GameState *game)
 {
     int i;
@@ -293,8 +305,8 @@ static int env_reply_grit(struct GameState *game, int choice,
 }
 
 /*
- * Reply handler for the env menu. Returns 0 when inactive or player left the
- * pinned room; game.c falls through to other reply routers on 0.
+ * Reply handler for the env menu. Returns 0 only when inactive; room mismatch
+ * dismisses the menu and returns 1 so game.c does not fall through silently.
  */
 int gatmos_cmd_env_reply(struct GameState *game, int choice,
                          GameEventQueue *out)
@@ -302,9 +314,12 @@ int gatmos_cmd_env_reply(struct GameState *game, int choice,
     int kind;
     int max_choice;
 
-    if (!game->env_interact_active ||
-            game->env_interact_room != game->player.room_id) {
+    if (!game->env_interact_active) {
         return 0;
+    }
+    if (game->env_interact_room != game->player.room_id) {
+        gatmos_env_dismiss(game, out);
+        return 1;
     }
     kind = game->env_interact_kind;
     max_choice = env_max_choice(kind);

@@ -20,5 +20,8 @@ int gatmos_cmd_env_reply(struct GameState *game, int choice,
 void gatmos_env_dismiss(struct GameState *game, struct GameEventQueue *out);
 /* Reset env_interact_* only; no events (mode reset and successful reply paths). */
 void gatmos_env_clear_interact(struct GameState *game);
+/* After load: re-queue ENV_MENU when save restored an active env interaction. */
+void gatmos_queue_restored_menu(struct GameState *game,
+                                struct GameEventQueue *out);
 
 #endif
