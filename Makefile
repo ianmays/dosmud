@@ -98,6 +98,7 @@ SNAPSHOT_TESTS = \
 	inspect_rustle inspect_creak inspect_water inspect_grit inspect_none inspect_wrong \
 	inspect_water_followup env_menu_dismiss \
 	ambient_rustle ambient_tick_order ambient_item \
+	weather_rain_ambient weather_fog_look \
 	combat_defend combat_salve combat_no_salve combat_invalid combat_take_blocked \
 	combat_victory_xp level_up \
 	loot_spear loot_stick loot_berry loot_herb loot_fish loot_empty loot_stripped loot_bag_full loot_multi \

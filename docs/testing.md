@@ -23,7 +23,7 @@ Purpose:
 - `make check-layers`: core/render boundary guard (no `printf` in `src/*.c` except `main.c`, `grendr.c`, and the platform files `platpos.c`, `platwin.c`, and `platdos.c`)
 - `make test`: strict deterministic compile (`-Werror`, `-DTEST_MODE`, `-g -O0`); does not run `check-layers`; prints `elapsed: <seconds>` after the compile/link step
 - `make test-win`: WSL cross-compile of the native Windows console `TEST_MODE` executable (`dosmud.exe`); compile-only, no snapshot run from Linux
-- `make snapshot-run`: runs every name in `SNAPSHOT_TESTS` plus `seed_cli` and `version_cli` against the existing native `TEST_MODE` binary (`./dosmud`; see [Snapshot test files](#snapshot-test-files)). Each step prints `snapshot: <name>`. Finishes with `snapshot tests passed: N/M` (for example `95/95` names in `SNAPSHOT_TESTS` plus `seed_cli` and `version_cli`, 97 steps total).
+- `make snapshot-run`: runs every name in `SNAPSHOT_TESTS` plus `seed_cli` and `version_cli` against the existing native `TEST_MODE` binary (`./dosmud`; see [Snapshot test files](#snapshot-test-files)). Each step prints `snapshot: <name>`. Finishes with `snapshot tests passed: N/M` (for example `97/97` names in `SNAPSHOT_TESTS` plus `seed_cli` and `version_cli`, 99 steps total).
 - `make test-run`: builds the test binary (`make test`), then runs `make snapshot-run`.
 - `make test-unit`: builds and runs the greatest unit suite (`tests/unit/build/dosmud_unit`, `TEST_MODE` only; not linked into release `dosmud`)
 - `make test-soak`: builds and runs long-run soak/stress checks (`tests/soak/build/dosmud_soak`; separate from unit tests)
@@ -190,7 +190,7 @@ are handled by `testharn` before normal command parsing. Harness lines are not e
 
 Prefer fixtures over long setup scripts when a test needs a specific mode, inventory, or encounter. After changing fixture output, regenerate the matching `.expect` with `make test-run` and review the diff.
 
-Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_init`: mode, room, tick, player stats, bag, combat, NPC roster state, corpses, ground items, env focus, env interact menu, and map exploration). That leaves the world graph and `GameState.seed` unchanged. `main.c` then calls `plat_seed_rng(game.seed)` so tracked `plat_rand()` draws match that seed and follow-up rolls do not depend on earlier commands in the same run.
+Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_init`: mode, room, tick, player stats, bag, combat, NPC roster state, corpses, ground items, env focus, env interact menu, global weather (`weather_kind`, `weather_expires_tick`), and map exploration). That leaves the world graph and `GameState.seed` unchanged. `main.c` then calls `plat_seed_rng(game.seed)` so tracked `plat_rand()` draws match that seed and follow-up rolls do not depend on earlier commands in the same run.
 
 **Bandit / combat** (camp baseline; bandit setups clear camp ground items so the stick is only in bag or wield slot):
 
@@ -229,6 +229,9 @@ Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_
 | `story_orchard_requested` / `story_orchard_ready` / `story_orchard_done` | Orchard baseline with the Herbalist slice in requested, turn-in-ready, or completed state (`story_orchard_done` sets `WORLD_ADV_ORCHARD_RESTORED` via `gwhok_set`) |
 | `tower_meal_ready` | Tower, berry in bag, explore (meal `give` / `offer` path for watchman tower desc) |
 | `quiet_explore` | `at_camp` + `test_quiet_ticks` + roster-backed traveler off (for `wait` / `move` snapshots) |
+| `ambient_camp` | Camp, traveler off; ambient tick snapshots without quiet ticks |
+| `weather_rain_ready` | `ambient_camp` at tick `CFG_WEATHER_INITIAL_DELAY_TICKS - 1` so one `wait` hits the first weather transition ([#51](https://github.com/ianmays/dosmud/issues/51)) |
+| `weather_fog` | Camp with `GAME_WEATHER_FOG` active for room-look weather HUD |
 
 **Traveler (roaming NPC)** (co-located dialogue without tick movement):
 
@@ -326,7 +329,7 @@ Each process run uses one `.input` file until `quit`. `make snapshot-run` runs `
 
 **Inspect:** `inspect_rustle`, `inspect_creak`, `inspect_water`, `inspect_grit`, `inspect_none`, `inspect_wrong`, `inspect_water_followup` (post-inspect water menu reply `1` follow-up copy), `env_menu_dismiss` (`@fixture env_focus_water`, `inspect`, then `north` dismisses the env menu before the move runs; [#7](https://github.com/ianmays/dosmud/issues/7), [#205](https://github.com/ianmays/dosmud/issues/205)-style menu exit).
 
-**Ambient (tick-driven):** `ambient_rustle`, `ambient_tick_order`, `ambient_item` (`@fixture ambient_camp` plus `@seed` for deterministic atmosphere, animal noise, and nearby-item paths).
+**Ambient (tick-driven):** `ambient_rustle`, `ambient_tick_order`, `ambient_item` (`@fixture ambient_camp` plus `@seed` for deterministic atmosphere, animal noise, and nearby-item paths); `weather_rain_ambient` (`@fixture weather_rain_ready`, one `wait` for rain transition copy); `weather_fog_look` (`@fixture weather_fog`, `look` for fog HUD line; [#51](https://github.com/ianmays/dosmud/issues/51)).
 
 **Combat:** `combat_defend`, `combat_salve`, `combat_no_salve`, `combat_invalid`, `combat_take_blocked`, `combat_victory_xp`, `level_up`.
 
@@ -336,7 +339,7 @@ Each process run uses one `.input` file until `quit`. `make snapshot-run` runs `
 
 **Meta / inventory:** `unknown_cmd`, `cannot_move`, `give_wrong_context`, `reply_nobody`, `post_combat_reply_guard`, `reply_invalid`, `craft_salve`, `craft_unknown`, `take_nothing`, `take_wrong_item`.
 
-**Save/load:** `save_load`, `herbalist_save_load` (single-slot `save.dat` round-trip with a deterministic post-load move or authored-story follow-up state; `unit_save.c` round-trip fixtures assert save v15 `env_interact_*` plus v14 `world_adv_flags`, v13 `herbalist_menu`, and v12 `watchman_flags` / `watchman_menu`).
+**Save/load:** `save_load`, `herbalist_save_load` (single-slot `save.dat` round-trip with a deterministic post-load move or authored-story follow-up state; `unit_save.c` round-trip fixtures assert save v16 `weather_kind` / `weather_expires_tick` plus v15 `env_interact_*`, v14 `world_adv_flags`, v13 `herbalist_menu`, and v12 `watchman_flags` / `watchman_menu`).
 
 **Replay:** `replay_log` (stdout plus sidecar log golden files; [#156](https://github.com/ianmays/dosmud/issues/156)).
 
