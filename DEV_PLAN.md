@@ -108,7 +108,7 @@ Frameworks last.
 
 **Contains / currently expected:**
 
-- [#7](https://github.com/ianmays/dosmud/issues/7) ambient world-effect interactivity
+- [#7](https://github.com/ianmays/dosmud/issues/7) ambient world-effect interactivity - ✅ Done (PR [#230](https://github.com/ianmays/dosmud/pull/230))
 - [#51](https://github.com/ianmays/dosmud/issues/51) weather, if still wanted
 - [#54](https://github.com/ianmays/dosmud/issues/54) procedural encounters / more encounters
 - [#130](https://github.com/ianmays/dosmud/issues/130) night time, if kept small
