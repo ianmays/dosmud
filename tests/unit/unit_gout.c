@@ -1,6 +1,7 @@
 #include "greatest.h"
 #include "config.h"
 #include "command.h"
+#include "game.h"
 #include "gout.h"
 #include "items.h"
 #include "npc.h"
@@ -219,7 +220,11 @@ TEST game_event_push_records_ambient_observation_kinds(void)
         ITEM_BERRY, 0, 0, 0, "berry"));
     ASSERT(0 != game_event_push(&out, GAME_EVENT_OBSERVATION,
         GAME_OBS_OUTCOME_WATER, 0, 0, 0, 0));
-    ASSERT_EQ(4, out.count);
+    ASSERT(0 != game_event_push(&out, GAME_EVENT_ENV_MENU,
+        GAME_ENV_WATER, WORLD_ROOM_CAMP, 0, 0, 0));
+    ASSERT(0 != game_event_push(&out, GAME_EVENT_ENV_RESULT,
+        GAME_ENV_WATER, 1, GAME_ENV_RESULT_DETAIL_NONE, 0, 0));
+    ASSERT_EQ(6, out.count);
     ASSERT_EQ(GAME_EVENT_ENVIRONMENT, out.events[0].kind);
     ASSERT_EQ(GAME_ENV_EVENT_RUSTLE, out.events[0].arg0);
     ASSERT_EQ(GAME_EVENT_AMBIENT_NOISE, out.events[1].kind);
@@ -228,6 +233,12 @@ TEST game_event_push_records_ambient_observation_kinds(void)
     ASSERT_EQ(ITEM_BERRY, out.events[2].arg0);
     ASSERT_EQ(GAME_EVENT_OBSERVATION, out.events[3].kind);
     ASSERT_EQ(GAME_OBS_OUTCOME_WATER, out.events[3].arg0);
+    ASSERT_EQ(GAME_EVENT_ENV_MENU, out.events[4].kind);
+    ASSERT_EQ(GAME_ENV_WATER, out.events[4].arg0);
+    ASSERT_EQ(WORLD_ROOM_CAMP, out.events[4].arg1);
+    ASSERT_EQ(GAME_EVENT_ENV_RESULT, out.events[5].kind);
+    ASSERT_EQ(GAME_ENV_WATER, out.events[5].arg0);
+    ASSERT_EQ(1, out.events[5].arg1);
     PASS();
 }
 
@@ -254,7 +265,9 @@ TEST game_event_push_records_dialogue_encounter_kinds(void)
         GAME_DIALOGUE_GUARD_GIVE_NO_TARGET, 0, 0, 0, 0));
     ASSERT(0 != game_event_push(&out, GAME_EVENT_DIALOGUE_GUARD,
         GAME_DIALOGUE_GUARD_GIVE_REJECTED, 0, 0, 0, 0));
-    ASSERT_EQ(8, out.count);
+    ASSERT(0 != game_event_push(&out, GAME_EVENT_DIALOGUE_GUARD,
+        GAME_DIALOGUE_GUARD_ENV_MENU_CLOSED, 0, 0, 0, 0));
+    ASSERT_EQ(9, out.count);
     ASSERT_EQ(GAME_EVENT_DIALOGUE, out.events[0].kind);
     ASSERT_EQ(GAME_DIALOGUE_ACTOR_FROG, out.events[0].arg0);
     ASSERT_EQ(2, out.events[0].arg2);
@@ -274,6 +287,8 @@ TEST game_event_push_records_dialogue_encounter_kinds(void)
     ASSERT_EQ(GAME_DIALOGUE_GUARD_GIVE_NO_TARGET, out.events[6].arg0);
     ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[7].kind);
     ASSERT_EQ(GAME_DIALOGUE_GUARD_GIVE_REJECTED, out.events[7].arg0);
+    ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[8].kind);
+    ASSERT_EQ(GAME_DIALOGUE_GUARD_ENV_MENU_CLOSED, out.events[8].arg0);
     PASS();
 }
 

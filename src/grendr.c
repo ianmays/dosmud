@@ -852,6 +852,22 @@ static void render_observation_event(const GameEvent *ev)
 }
 
 /*
+ * #7: GAME_EVENT_ENV_MENU adapter; arg0=GAME_ENV_* kind.
+ */
+static void render_env_menu_event(const GameEvent *ev)
+{
+    render_msg_env_menu(ev->arg0);
+}
+
+/*
+ * #7: GAME_EVENT_ENV_RESULT adapter; arg0=kind arg1=choice arg2=detail.
+ */
+static void render_env_result_event(const GameEvent *ev)
+{
+    render_msg_env_result(ev->arg0, ev->arg1, ev->arg2);
+}
+
+/*
  * #160: GAME_EVENT_DIALOGUE_GUARD adapter; arg0=GameEventDialogueGuardReason.
  */
 static void render_dialogue_guard_event(const GameEvent *ev)
@@ -886,6 +902,9 @@ static void render_dialogue_guard_event(const GameEvent *ev)
         break;
     case GAME_DIALOGUE_GUARD_PICK_123:
         render_msg_pick_123(ev->arg1);
+        break;
+    case GAME_DIALOGUE_GUARD_ENV_MENU_CLOSED:
+        RENDER_PRINTF("%s", TXT_MSG_ENV_MENU_CLOSED);
         break;
     default:
         break;
@@ -1025,6 +1044,12 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
             break;
         case GAME_EVENT_OBSERVATION:
             render_observation_event(ev);
+            break;
+        case GAME_EVENT_ENV_MENU:
+            render_env_menu_event(ev);
+            break;
+        case GAME_EVENT_ENV_RESULT:
+            render_env_result_event(ev);
             break;
         default:
             break;
@@ -1302,6 +1327,69 @@ void render_msg_inspect_water(void)
 void render_msg_inspect_grit(void)
 {
     RENDER_PRINTF("%s", TXT_MSG_INSPECT_GRIT);
+}
+
+void render_msg_env_menu(int kind)
+{
+    if (kind == GAME_ENV_WATER) {
+        RENDER_PRINTF("%s", TXT_MSG_ENV_MENU_WATER);
+    } else if (kind == GAME_ENV_RUSTLE) {
+        RENDER_PRINTF("%s", TXT_MSG_ENV_MENU_RUSTLE);
+    } else if (kind == GAME_ENV_CREAK) {
+        RENDER_PRINTF("%s", TXT_MSG_ENV_MENU_CREAK);
+    } else if (kind == GAME_ENV_GRIT) {
+        RENDER_PRINTF("%s", TXT_MSG_ENV_MENU_GRIT);
+    }
+    RENDER_PRINTF("%s", TXT_REPLY_PROMPT);
+}
+
+void render_msg_env_result(int kind, int choice, int detail)
+{
+    if (kind == GAME_ENV_WATER) {
+        if (choice == 1) {
+            RENDER_PRINTF("%s", TXT_MSG_ENV_RESULT_WATER_FOLLOW);
+        } else if (choice == 2) {
+            if (detail == GAME_ENV_RESULT_DETAIL_HP_FULL) {
+                RENDER_PRINTF("%s", TXT_MSG_ENV_RESULT_WATER_DRINK_FULL);
+            } else {
+                RENDER_PRINTF("%s", TXT_MSG_ENV_RESULT_WATER_DRINK);
+            }
+        } else {
+            RENDER_PRINTF("%s", TXT_MSG_ENV_RESULT_WATER_LEAVE);
+        }
+        return;
+    }
+    if (kind == GAME_ENV_RUSTLE) {
+        if (choice == 1) {
+            if (detail == GAME_ENV_RESULT_DETAIL_ITEM_FAILED) {
+                RENDER_PRINTF("%s", TXT_MSG_ENV_RESULT_RUSTLE_SEARCH_FAIL);
+            } else {
+                RENDER_PRINTF("%s", TXT_MSG_ENV_RESULT_RUSTLE_SEARCH);
+            }
+        } else {
+            RENDER_PRINTF("%s", TXT_MSG_ENV_RESULT_RUSTLE_LEAVE);
+        }
+        return;
+    }
+    if (kind == GAME_ENV_CREAK) {
+        if (choice == 1) {
+            if (detail == GAME_ENV_RESULT_DETAIL_ITEM_FAILED) {
+                RENDER_PRINTF("%s", TXT_MSG_ENV_RESULT_CREAK_SPLINTER_FAIL);
+            } else {
+                RENDER_PRINTF("%s", TXT_MSG_ENV_RESULT_CREAK_SPLINTER);
+            }
+        } else {
+            RENDER_PRINTF("%s", TXT_MSG_ENV_RESULT_CREAK_LEAVE);
+        }
+        return;
+    }
+    if (kind == GAME_ENV_GRIT) {
+        if (choice == 1) {
+            RENDER_PRINTF("%s", TXT_MSG_ENV_RESULT_GRIT_STUDY);
+        } else {
+            RENDER_PRINTF("%s", TXT_MSG_ENV_RESULT_GRIT_LEAVE);
+        }
+    }
 }
 
 void render_msg_bandit_blocks_talk(void)

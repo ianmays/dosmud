@@ -238,9 +238,51 @@ TEST game_inspect_with_focus(void)
     game.env_focus_expires_tick = game.tick + 10;
     ASSERT_EQ(1, run_cmd_out(&game, "inspect water", &out));
     ASSERT_EQ(0, game.env_focus_active);
-    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(1, game.env_interact_active);
+    ASSERT_EQ(2, out.count);
     ASSERT_EQ(GAME_EVENT_OBSERVATION, out.events[0].kind);
     ASSERT_EQ(GAME_OBS_OUTCOME_WATER, out.events[0].arg0);
+    ASSERT_EQ(GAME_EVENT_ENV_MENU, out.events[1].kind);
+    PASS();
+}
+
+TEST game_env_inspect_reply(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 6u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game.env_focus_active = 1;
+    game.env_focus_room = WORLD_ROOM_CAMP;
+    game.env_focus_kind = GAME_ENV_WATER;
+    game.env_focus_expires_tick = game.tick + 10;
+    ASSERT_EQ(1, run_cmd_out(&game, "inspect", &out));
+    ASSERT_EQ(1, game.env_interact_active);
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, run_cmd_out(&game, "1", &out));
+    ASSERT_EQ(0, game.env_interact_active);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_ENV_RESULT, out.events[0].kind);
+    ASSERT_EQ(GAME_ENV_WATER, out.events[0].arg0);
+    ASSERT_EQ(1, out.events[0].arg1);
+    PASS();
+}
+
+TEST game_env_menu_dismiss_on_move(void)
+{
+    /* game.c maybe_dismiss_env_menu clears gatmos state before move applies. */
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 6u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game.env_interact_active = 1;
+    game.env_interact_kind = GAME_ENV_WATER;
+    game.env_interact_room = WORLD_ROOM_CAMP;
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, run_cmd_out(&game, "north", &out));
+    ASSERT_EQ(0, game.env_interact_active);
     PASS();
 }
 
@@ -1251,6 +1293,8 @@ SUITE(game) {
     RUN_TEST(game_quiet_ticks);
     RUN_TEST(game_bandit_intimidate_success);
     RUN_TEST(game_inspect_with_focus);
+    RUN_TEST(game_env_inspect_reply);
+    RUN_TEST(game_env_menu_dismiss_on_move);
     RUN_TEST(game_talk_frog);
     RUN_TEST(game_bandit_fight_reply);
     RUN_TEST(game_bandit_intimidate_fail);

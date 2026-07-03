@@ -104,6 +104,10 @@ struct GameState {
     int env_focus_room;
     int env_focus_kind;
     u32 env_focus_expires_tick;
+    /* gatmos.c post-inspect follow-up menu (#7); saved in save v15+. */
+    int env_interact_active;
+    int env_interact_kind;
+    int env_interact_room;
     /* npc.c herbalist branch (#76); saved in save v10+. */
     int herbalist_story;
     /* npc.c herbalist reply routing; mirrors HerbalistDialogueScene; save v13+. */

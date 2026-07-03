@@ -336,10 +336,14 @@ TEST gatmos_cmd_inspect_focus(void)
     game.env_focus_kind = GAME_ENV_WATER;
     game.env_focus_expires_tick = game.tick + 10;
     ASSERT_EQ(1, inspect_focus(&game, GAME_ENV_WATER, &out));
-    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(2, out.count);
     ASSERT_EQ(GAME_EVENT_OBSERVATION, out.events[0].kind);
     ASSERT_EQ(GAME_OBS_OUTCOME_WATER, out.events[0].arg0);
+    ASSERT_EQ(GAME_EVENT_ENV_MENU, out.events[1].kind);
+    ASSERT_EQ(GAME_ENV_WATER, out.events[1].arg0);
     ASSERT_EQ(0, game.env_focus_active);
+    ASSERT_EQ(1, game.env_interact_active);
+    ASSERT_EQ(GAME_ENV_WATER, game.env_interact_kind);
     PASS();
 }
 
@@ -375,6 +379,66 @@ TEST gatmos_cmd_inspect_wrong_focus(void)
     PASS();
 }
 
+TEST gatmos_cmd_env_reply_water_drink(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    int hp_before;
+
+    reset_camp(&game);
+    game.player_hp = game.max_hp - 2;
+    hp_before = game.player_hp;
+    game.env_interact_active = 1;
+    game.env_interact_kind = GAME_ENV_WATER;
+    game.env_interact_room = WORLD_ROOM_CAMP;
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, gatmos_cmd_env_reply(&game, 2, &out));
+    ASSERT_EQ(0, game.env_interact_active);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_ENV_RESULT, out.events[0].kind);
+    ASSERT_EQ(GAME_ENV_WATER, out.events[0].arg0);
+    ASSERT_EQ(2, out.events[0].arg1);
+    ASSERT_EQ(GAME_ENV_RESULT_DETAIL_HEALED, out.events[0].arg2);
+    ASSERT_EQ(hp_before + CFG_ENV_WATER_HEAL_AMOUNT, game.player_hp);
+    PASS();
+}
+
+TEST gatmos_cmd_env_reply_invalid_choice(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    reset_camp(&game);
+    game.env_interact_active = 1;
+    game.env_interact_kind = GAME_ENV_RUSTLE;
+    game.env_interact_room = WORLD_ROOM_CAMP;
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, gatmos_cmd_env_reply(&game, 9, &out));
+    ASSERT_EQ(1, game.env_interact_active);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[0].kind);
+    ASSERT_EQ(GAME_DIALOGUE_GUARD_PICK_123, out.events[0].arg0);
+    PASS();
+}
+
+TEST gatmos_env_dismiss_clears_state(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    reset_camp(&game);
+    game.env_interact_active = 1;
+    game.env_interact_kind = GAME_ENV_GRIT;
+    game.env_interact_room = WORLD_ROOM_CAMP;
+    game_event_queue_reset(&out);
+    gatmos_env_dismiss(&game, &out);
+    ASSERT_EQ(0, game.env_interact_active);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[0].kind);
+    ASSERT_EQ(GAME_DIALOGUE_GUARD_ENV_MENU_CLOSED, out.events[0].arg0);
+    PASS();
+}
+
 SUITE(gatmos) {
     RUN_TEST(gatmos_seed_world_items);
     RUN_TEST(gatmos_focus_expiry);
@@ -390,4 +454,7 @@ SUITE(gatmos) {
     RUN_TEST(gatmos_cmd_inspect_focus);
     RUN_TEST(gatmos_cmd_inspect_none);
     RUN_TEST(gatmos_cmd_inspect_wrong_focus);
+    RUN_TEST(gatmos_cmd_env_reply_water_drink);
+    RUN_TEST(gatmos_cmd_env_reply_invalid_choice);
+    RUN_TEST(gatmos_env_dismiss_clears_state);
 }

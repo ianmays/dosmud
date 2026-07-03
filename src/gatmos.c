@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "gatmos.h"
+#include "config.h"
 #include "game.h"
 #include "gout.h"
 #include "invent.h"
@@ -12,6 +13,7 @@
  * room-scoped incidental events.
  * #161: queues GAME_EVENT_ENVIRONMENT / AMBIENT_NOISE / ITEM_PRESENCE /
  * OBSERVATION; grendr maps to text.
+ * #7: post-inspect follow-up menus via env_interact_* and ENV_MENU/RESULT.
  */
 
 static void push_environment(GameEventQueue *out, int kind)
@@ -33,6 +35,65 @@ static void push_item_presence(GameEventQueue *out, int item_id,
 static void push_observation(GameEventQueue *out, int outcome)
 {
     game_event_push(out, GAME_EVENT_OBSERVATION, outcome, 0, 0, 0, 0);
+}
+
+/*
+ * Post-inspect follow-up (#7): env_interact_* is explore-mode state owned here;
+ * game.c routes CMD_REPLY and dismisses on other explore verbs.
+ */
+static void push_env_menu(GameEventQueue *out, int kind, int room_id)
+{
+    game_event_push(out, GAME_EVENT_ENV_MENU, kind, room_id, 0, 0, 0);
+}
+
+static void push_env_result(GameEventQueue *out, int kind, int choice,
+                            int detail)
+{
+    game_event_push(out, GAME_EVENT_ENV_RESULT, kind, choice, detail, 0, 0);
+}
+
+static void push_pick_guard(GameEventQueue *out, int max_choice)
+{
+    game_event_push(out, GAME_EVENT_DIALOGUE_GUARD,
+        GAME_DIALOGUE_GUARD_PICK_123, max_choice, 0, 0, 0);
+}
+
+static int env_max_choice(int kind)
+{
+    if (kind == GAME_ENV_WATER) {
+        return 3;
+    }
+    return 2;
+}
+
+static int env_is_leave_choice(int kind, int choice)
+{
+    return choice == env_max_choice(kind);
+}
+
+void gatmos_env_clear_interact(struct GameState *game)
+{
+    game->env_interact_active = 0;
+    game->env_interact_kind = GAME_ENV_NONE;
+    game->env_interact_room = -1;
+}
+
+static void env_open_menu(struct GameState *game, int kind, GameEventQueue *out)
+{
+    game->env_interact_active = 1;
+    game->env_interact_kind = kind;
+    game->env_interact_room = game->player.room_id;
+    push_env_menu(out, kind, game->player.room_id);
+}
+
+void gatmos_env_dismiss(struct GameState *game, GameEventQueue *out)
+{
+    if (!game->env_interact_active) {
+        return;
+    }
+    gatmos_env_clear_interact(game);
+    game_event_push(out, GAME_EVENT_DIALOGUE_GUARD,
+        GAME_DIALOGUE_GUARD_ENV_MENU_CLOSED, 0, 0, 0, 0);
 }
 
 void seed_world_items(struct GameState *game)
@@ -164,8 +225,118 @@ void maybe_emit_atmosphere(struct GameState *game, GameEventQueue *out)
     maybe_spawn_room_item(game, out);
 }
 
+static int env_reply_water(struct GameState *game, int choice,
+                           GameEventQueue *out)
+{
+    int detail;
+
+    detail = GAME_ENV_RESULT_DETAIL_NONE;
+    if (choice == 1) {
+        /* follow runnel: flavor only */
+    } else if (choice == 2) {
+        if (game_heal_player(game, CFG_ENV_WATER_HEAL_AMOUNT)) {
+            detail = GAME_ENV_RESULT_DETAIL_HEALED;
+        } else {
+            detail = GAME_ENV_RESULT_DETAIL_HP_FULL;
+        }
+    }
+    push_env_result(out, GAME_ENV_WATER, choice, detail);
+    return 1;
+}
+
+static int env_reply_rustle(struct GameState *game, int choice,
+                            GameEventQueue *out)
+{
+    int detail;
+    int room_id;
+
+    detail = GAME_ENV_RESULT_DETAIL_NONE;
+    if (choice == 1) {
+        room_id = game->env_interact_room;
+        if (room_id >= 0 &&
+                game_room_ground_try_add(game, room_id, ITEM_BERRY)) {
+            detail = GAME_ENV_RESULT_DETAIL_ITEM_SPAWNED;
+        } else {
+            detail = GAME_ENV_RESULT_DETAIL_ITEM_FAILED;
+        }
+    }
+    push_env_result(out, GAME_ENV_RUSTLE, choice, detail);
+    return 1;
+}
+
+static int env_reply_creak(struct GameState *game, int choice,
+                           GameEventQueue *out)
+{
+    int detail;
+    int room_id;
+
+    detail = GAME_ENV_RESULT_DETAIL_NONE;
+    if (choice == 1) {
+        room_id = game->env_interact_room;
+        if (room_id >= 0 &&
+                game_room_ground_try_add(game, room_id, ITEM_STICK)) {
+            detail = GAME_ENV_RESULT_DETAIL_ITEM_SPAWNED;
+        } else {
+            detail = GAME_ENV_RESULT_DETAIL_ITEM_FAILED;
+        }
+    }
+    push_env_result(out, GAME_ENV_CREAK, choice, detail);
+    return 1;
+}
+
+static int env_reply_grit(struct GameState *game, int choice,
+                          GameEventQueue *out)
+{
+    (void)game;
+    push_env_result(out, GAME_ENV_GRIT, choice, GAME_ENV_RESULT_DETAIL_NONE);
+    return 1;
+}
+
+/*
+ * Reply handler for the env menu. Returns 0 when inactive or player left the
+ * pinned room; game.c falls through to other reply routers on 0.
+ */
+int gatmos_cmd_env_reply(struct GameState *game, int choice,
+                         GameEventQueue *out)
+{
+    int kind;
+    int max_choice;
+
+    if (!game->env_interact_active ||
+            game->env_interact_room != game->player.room_id) {
+        return 0;
+    }
+    kind = game->env_interact_kind;
+    max_choice = env_max_choice(kind);
+    if (choice < 1 || choice > max_choice) {
+        push_pick_guard(out, max_choice);
+        return 1;
+    }
+    if (env_is_leave_choice(kind, choice)) {
+        gatmos_env_clear_interact(game);
+        push_env_result(out, kind, choice, GAME_ENV_RESULT_DETAIL_NONE);
+        return 1;
+    }
+    if (kind == GAME_ENV_WATER) {
+        (void)env_reply_water(game, choice, out);
+    } else if (kind == GAME_ENV_RUSTLE) {
+        (void)env_reply_rustle(game, choice, out);
+    } else if (kind == GAME_ENV_CREAK) {
+        (void)env_reply_creak(game, choice, out);
+    } else if (kind == GAME_ENV_GRIT) {
+        (void)env_reply_grit(game, choice, out);
+    } else {
+        gatmos_env_clear_interact(game);
+        return 0;
+    }
+    gatmos_env_clear_interact(game);
+    return 1;
+}
+
 int gatmos_cmd_inspect(struct GameState *game, int item_arg, GameEventQueue *out)
 {
+    int kind;
+
     /* Inspection only succeeds while the current room still has an active ambient focus. */
     if (!game->env_focus_active ||
             game->env_focus_room != game->player.room_id ||
@@ -181,18 +352,21 @@ int gatmos_cmd_inspect(struct GameState *game, int item_arg, GameEventQueue *out
         push_observation(out, GAME_OBS_OUTCOME_WRONG_FOCUS);
         return 1;
     }
-    if (game->env_focus_kind == GAME_ENV_RUSTLE) {
+    kind = game->env_focus_kind;
+    if (kind == GAME_ENV_RUSTLE) {
         push_observation(out, GAME_OBS_OUTCOME_RUSTLE);
-    } else if (game->env_focus_kind == GAME_ENV_CREAK) {
+    } else if (kind == GAME_ENV_CREAK) {
         push_observation(out, GAME_OBS_OUTCOME_CREAK);
-    } else if (game->env_focus_kind == GAME_ENV_WATER) {
+    } else if (kind == GAME_ENV_WATER) {
         push_observation(out, GAME_OBS_OUTCOME_WATER);
-    } else if (game->env_focus_kind == GAME_ENV_GRIT) {
+    } else if (kind == GAME_ENV_GRIT) {
         push_observation(out, GAME_OBS_OUTCOME_GRIT);
     }
     game->env_focus_active = 0;
     game->env_focus_room = -1;
     game->env_focus_kind = GAME_ENV_NONE;
     game->env_focus_expires_tick = 0;
+    /* consume focus then open pinned-room menu; cleared on reply or dismiss. */
+    env_open_menu(game, kind, out);
     return 1;
 }

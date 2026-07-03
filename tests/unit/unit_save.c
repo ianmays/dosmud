@@ -44,6 +44,9 @@ static void save_fill_fixture(struct GameState *game)
     game->env_focus_room = WORLD_ROOM_TOWER;
     game->env_focus_kind = GAME_ENV_CREAK;
     game->env_focus_expires_tick = 81U;
+    game->env_interact_active = 1;
+    game->env_interact_kind = GAME_ENV_WATER;
+    game->env_interact_room = WORLD_ROOM_TOWER;
     game->herbalist_story = HERBALIST_STORY_COMPLETE;
     game->herbalist_menu = HERBALIST_SCENE_COMPLETE;
     game->watchman_flags = WATCHMAN_FLAG_WARNED;
@@ -151,6 +154,9 @@ static int save_games_equal(const struct GameState *a,
             a->env_focus_room != b->env_focus_room ||
             a->env_focus_kind != b->env_focus_kind ||
             a->env_focus_expires_tick != b->env_focus_expires_tick ||
+            a->env_interact_active != b->env_interact_active ||
+            a->env_interact_kind != b->env_interact_kind ||
+            a->env_interact_room != b->env_interact_room ||
             a->herbalist_story != b->herbalist_story ||
             a->herbalist_menu != b->herbalist_menu ||
             a->watchman_flags != b->watchman_flags ||
@@ -749,6 +755,29 @@ TEST save_round_trip_preserves_world_adv_flags(void)
     PASS();
 }
 
+TEST save_round_trip_preserves_env_interact_state(void)
+{
+    struct GameState game;
+    struct GameState loaded;
+    u32 loaded_draws;
+
+    save_cleanup_file();
+    unit_game_fresh(&game, 42U);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 5U);
+    game.env_interact_active = 1;
+    game.env_interact_kind = GAME_ENV_WATER;
+    game.env_interact_room = WORLD_ROOM_CAMP;
+    ASSERT_EQ(SAVE_RESULT_OK,
+        save_write_game(save_test_path(), &game, plat_rand_draw_count()));
+    ASSERT_EQ(SAVE_RESULT_OK,
+        save_read_game(save_test_path(), &loaded, &loaded_draws));
+    ASSERT_EQ(1, loaded.env_interact_active);
+    ASSERT_EQ(GAME_ENV_WATER, loaded.env_interact_kind);
+    ASSERT_EQ(WORLD_ROOM_CAMP, loaded.env_interact_room);
+    save_cleanup_file();
+    PASS();
+}
+
 SUITE(save)
 {
     RUN_TEST(save_round_trip_preserves_state_and_rng_count);
@@ -770,4 +799,5 @@ SUITE(save)
     RUN_TEST(save_rejects_tower_meal_without_watchman_fed);
     RUN_TEST(save_rejects_orchard_advancement_without_herbalist_complete);
     RUN_TEST(save_round_trip_preserves_world_adv_flags);
+    RUN_TEST(save_round_trip_preserves_env_interact_state);
 }
