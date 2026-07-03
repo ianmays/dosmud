@@ -461,6 +461,13 @@ static void render_room_look_snapshot(const struct GameState *game, int room_id,
             RENDER_PRINTF("%s", TXT_UI_FOCUS_GRIT);
         }
     }
+    if (game->weather_kind == GAME_WEATHER_RAIN) {
+        RENDER_PRINTF("%s", TXT_UI_WEATHER_RAIN);
+    } else if (game->weather_kind == GAME_WEATHER_FOG) {
+        RENDER_PRINTF("%s", TXT_UI_WEATHER_FOG);
+    } else if (game->weather_kind == GAME_WEATHER_WIND) {
+        RENDER_PRINTF("%s", TXT_UI_WEATHER_WIND);
+    }
 }
 
 void game_render(const struct GameState *game)
@@ -800,6 +807,18 @@ static void render_environment_event(const GameEvent *ev)
         break;
     case GAME_ENV_EVENT_GRIT:
         render_atmosphere_grit();
+        break;
+    case GAME_ENV_EVENT_WEATHER_RAIN:
+        render_atmosphere_weather_rain();
+        break;
+    case GAME_ENV_EVENT_WEATHER_FOG:
+        render_atmosphere_weather_fog();
+        break;
+    case GAME_ENV_EVENT_WEATHER_WIND:
+        render_atmosphere_weather_wind();
+        break;
+    case GAME_ENV_EVENT_WEATHER_CLEAR:
+        render_atmosphere_weather_clear();
         break;
     default:
         break;
@@ -1203,6 +1222,26 @@ void render_atmosphere_reed_drop(void)
 void render_atmosphere_grit(void)
 {
     render_paragraph(TXT_ATMO_GRIT);
+}
+
+void render_atmosphere_weather_rain(void)
+{
+    render_paragraph(TXT_ATMO_WEATHER_RAIN);
+}
+
+void render_atmosphere_weather_fog(void)
+{
+    render_paragraph(TXT_ATMO_WEATHER_FOG);
+}
+
+void render_atmosphere_weather_wind(void)
+{
+    render_paragraph(TXT_ATMO_WEATHER_WIND);
+}
+
+void render_atmosphere_weather_clear(void)
+{
+    render_paragraph(TXT_ATMO_WEATHER_CLEAR);
 }
 
 void render_traveler_scene(void)

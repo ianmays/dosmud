@@ -245,7 +245,12 @@ enum GameEventEnvironmentKind {
     GAME_ENV_EVENT_CREAK,
     GAME_ENV_EVENT_WATER,
     GAME_ENV_EVENT_REED_DROP,
-    GAME_ENV_EVENT_GRIT
+    GAME_ENV_EVENT_GRIT,
+    /* #51: gatmos_weather_tick transition announcements. */
+    GAME_ENV_EVENT_WEATHER_RAIN,
+    GAME_ENV_EVENT_WEATHER_FOG,
+    GAME_ENV_EVENT_WEATHER_WIND,
+    GAME_ENV_EVENT_WEATHER_CLEAR
 };
 
 enum GameEventObservationOutcome {

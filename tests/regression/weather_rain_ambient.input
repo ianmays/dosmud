@@ -1,0 +1,3 @@
+@fixture weather_rain_ready
+wait
+quit

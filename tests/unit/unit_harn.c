@@ -84,6 +84,32 @@ TEST harness_apply_ambient_camp(void)
     PASS();
 }
 
+TEST harness_apply_weather_rain_ready(void)
+{
+    struct GameState game;
+    int rc;
+
+    unit_game_fresh(&game, 4u);
+    rc = testharn_apply(&game, "@fixture weather_rain_ready");
+    ASSERT_EQ(1, rc);
+    ASSERT_EQ((u32)CFG_WEATHER_INITIAL_DELAY_TICKS - 1UL, game.tick);
+    ASSERT_EQ(GAME_WEATHER_NONE, game.weather_kind);
+    ASSERT_EQ((u32)CFG_WEATHER_INITIAL_DELAY_TICKS, game.weather_expires_tick);
+    PASS();
+}
+
+TEST harness_apply_weather_fog(void)
+{
+    struct GameState game;
+    int rc;
+
+    unit_game_fresh(&game, 4u);
+    rc = testharn_apply(&game, "@fixture weather_fog");
+    ASSERT_EQ(1, rc);
+    ASSERT_EQ(GAME_WEATHER_FOG, game.weather_kind);
+    PASS();
+}
+
 TEST harness_apply_quiet_camp_dual_ground(void)
 {
     struct GameState game;
@@ -268,6 +294,8 @@ SUITE(harness) {
     RUN_TEST(harness_apply_unknown_fixture);
     RUN_TEST(harness_apply_bag_full_returns_minus2);
     RUN_TEST(harness_apply_ambient_camp);
+    RUN_TEST(harness_apply_weather_rain_ready);
+    RUN_TEST(harness_apply_weather_fog);
     RUN_TEST(harness_apply_quiet_camp_dual_ground);
     RUN_TEST(harness_apply_quiet_camp_dual_ground_full_bag);
     RUN_TEST(harness_apply_bandit_handover_pick);

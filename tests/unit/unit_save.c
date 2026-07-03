@@ -157,6 +157,8 @@ static int save_games_equal(const struct GameState *a,
             a->env_interact_active != b->env_interact_active ||
             a->env_interact_kind != b->env_interact_kind ||
             a->env_interact_room != b->env_interact_room ||
+            a->weather_kind != b->weather_kind ||
+            a->weather_expires_tick != b->weather_expires_tick ||
             a->herbalist_story != b->herbalist_story ||
             a->herbalist_menu != b->herbalist_menu ||
             a->watchman_flags != b->watchman_flags ||
@@ -778,6 +780,27 @@ TEST save_round_trip_preserves_env_interact_state(void)
     PASS();
 }
 
+TEST save_round_trip_preserves_weather_state(void)
+{
+    struct GameState game;
+    struct GameState loaded;
+    u32 loaded_draws;
+
+    save_cleanup_file();
+    unit_game_fresh(&game, 77U);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 12U);
+    game.weather_kind = GAME_WEATHER_WIND;
+    game.weather_expires_tick = 20U;
+    ASSERT_EQ(SAVE_RESULT_OK,
+        save_write_game(save_test_path(), &game, plat_rand_draw_count()));
+    ASSERT_EQ(SAVE_RESULT_OK,
+        save_read_game(save_test_path(), &loaded, &loaded_draws));
+    ASSERT_EQ(GAME_WEATHER_WIND, loaded.weather_kind);
+    ASSERT_EQ(20U, loaded.weather_expires_tick);
+    save_cleanup_file();
+    PASS();
+}
+
 SUITE(save)
 {
     RUN_TEST(save_round_trip_preserves_state_and_rng_count);
@@ -800,4 +823,5 @@ SUITE(save)
     RUN_TEST(save_rejects_orchard_advancement_without_herbalist_complete);
     RUN_TEST(save_round_trip_preserves_world_adv_flags);
     RUN_TEST(save_round_trip_preserves_env_interact_state);
+    RUN_TEST(save_round_trip_preserves_weather_state);
 }

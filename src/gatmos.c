@@ -11,6 +11,8 @@
 /*
  * Ambient systems live here: starter ground items, atmospheric focus, and
  * room-scoped incidental events.
+ * #51: global weather_kind / weather_expires_tick on GameState; transitions
+ * and fog roaming gate use hash-only rolls (see weather_roll).
  * #161: queues GAME_EVENT_ENVIRONMENT / AMBIENT_NOISE / ITEM_PRESENCE /
  * OBSERVATION; grendr maps to text.
  * #7: post-inspect follow-up menus via env_interact_* and ENV_MENU/RESULT.
@@ -69,6 +71,137 @@ static int env_max_choice(int kind)
 static int env_is_leave_choice(int kind, int choice)
 {
     return choice == env_max_choice(kind);
+}
+
+/*
+ * #51 weather rolls: seed^tick^salt only; never plat_rand so save/replay stay
+ * stable independent of ambient RNG consumption order.
+ */
+static u32 weather_hash(const struct GameState *game, u32 salt)
+{
+    return game->seed ^ (game->tick * 2654435761u) ^ salt;
+}
+
+static int weather_roll(const struct GameState *game, u32 salt)
+{
+    u32 x;
+
+    x = weather_hash(game, salt);
+    return (int)((x >> 16) % (u32)CFG_ROLL_PERCENT_RANGE);
+}
+
+static int weather_kind_from_roll(int roll)
+{
+    if (roll < CFG_WEATHER_ROLL_RAIN_BELOW) {
+        return GAME_WEATHER_RAIN;
+    }
+    if (roll < CFG_WEATHER_ROLL_FOG_BELOW) {
+        return GAME_WEATHER_FOG;
+    }
+    if (roll < CFG_WEATHER_ROLL_WIND_BELOW) {
+        return GAME_WEATHER_WIND;
+    }
+    return GAME_WEATHER_NONE;
+}
+
+static int weather_event_for_kind(int kind)
+{
+    if (kind == GAME_WEATHER_RAIN) {
+        return GAME_ENV_EVENT_WEATHER_RAIN;
+    }
+    if (kind == GAME_WEATHER_FOG) {
+        return GAME_ENV_EVENT_WEATHER_FOG;
+    }
+    if (kind == GAME_WEATHER_WIND) {
+        return GAME_ENV_EVENT_WEATHER_WIND;
+    }
+    return GAME_ENV_EVENT_WEATHER_CLEAR;
+}
+
+static int atmosphere_threshold(int base, int bias, int cap)
+{
+    int v;
+
+    v = base + bias;
+    if (v > cap) {
+        v = cap;
+    }
+    return v;
+}
+
+/* Rain/wind shift plat_rand atmosphere thresholds only; roll source unchanged. */
+static int atmosphere_gust_below(const struct GameState *game)
+{
+    if (game->weather_kind == GAME_WEATHER_WIND) {
+        return atmosphere_threshold(CFG_ATMOSPHERE_ROLL_GUST_BELOW,
+            CFG_WEATHER_WIND_GUST_BIAS, CFG_ATMOSPHERE_ROLL_RUSTLE_BELOW);
+    }
+    return CFG_ATMOSPHERE_ROLL_GUST_BELOW;
+}
+
+static int atmosphere_rustle_below(const struct GameState *game)
+{
+    if (game->weather_kind == GAME_WEATHER_WIND) {
+        return atmosphere_threshold(CFG_ATMOSPHERE_ROLL_RUSTLE_BELOW,
+            CFG_WEATHER_WIND_RUSTLE_BIAS, CFG_ATMOSPHERE_ROLL_CREAK_BELOW);
+    }
+    return CFG_ATMOSPHERE_ROLL_RUSTLE_BELOW;
+}
+
+static int atmosphere_water_below(const struct GameState *game)
+{
+    if (game->weather_kind == GAME_WEATHER_RAIN) {
+        return atmosphere_threshold(CFG_ATMOSPHERE_ROLL_WATER_BELOW,
+            CFG_WEATHER_RAIN_WATER_BIAS, CFG_ATMOSPHERE_ROLL_GRIT_BELOW);
+    }
+    return CFG_ATMOSPHERE_ROLL_WATER_BELOW;
+}
+
+static int atmosphere_grit_below(const struct GameState *game)
+{
+    if (game->weather_kind == GAME_WEATHER_RAIN) {
+        return atmosphere_threshold(CFG_ATMOSPHERE_ROLL_GRIT_BELOW,
+            CFG_WEATHER_RAIN_GRIT_BIAS, CFG_ROLL_PERCENT_RANGE);
+    }
+    return CFG_ATMOSPHERE_ROLL_GRIT_BELOW;
+}
+
+/*
+ * Called from game.c advance_world_tick after tick++; advances weather_kind on
+ * expiry and queues GAME_EVENT_ENVIRONMENT when the kind changes.
+ */
+void gatmos_weather_tick(struct GameState *game, GameEventQueue *out)
+{
+    int roll;
+    int new_kind;
+    int prior_kind;
+
+    if (game->tick < game->weather_expires_tick) {
+        return;
+    }
+    prior_kind = game->weather_kind;
+    roll = weather_roll(game, 0x51u);
+    new_kind = weather_kind_from_roll(roll);
+    game->weather_kind = new_kind;
+    game->weather_expires_tick = game->tick + (u32)CFG_WEATHER_DURATION_TICKS;
+    if (new_kind != prior_kind) {
+        push_environment(out, weather_event_for_kind(new_kind));
+    }
+}
+
+/*
+ * Fog roaming seam: game.c asks before npc_roaming_begin_encounter_in_room;
+ * hash-only per check so fog does not consume plat_rand.
+ */
+int gatmos_weather_blocks_roaming_encounter(struct GameState *game)
+{
+    int roll;
+
+    if (game->weather_kind != GAME_WEATHER_FOG) {
+        return 0;
+    }
+    roll = weather_roll(game, 0xf09u);
+    return roll >= CFG_WEATHER_FOG_ENCOUNTER_ALLOW_BELOW ? 1 : 0;
 }
 
 void gatmos_env_clear_interact(struct GameState *game)
@@ -166,7 +299,10 @@ void maybe_emit_animal_noise(struct GameState *game, GameEventQueue *out)
     if ((game->tick % (u32)CFG_ANIMAL_NOISE_TICK_PERIOD) != 0UL) {
         return;
     }
-    if ((plat_rand() % CFG_ROLL_PERCENT_RANGE) >= CFG_ANIMAL_NOISE_SKIP_ROLL_GE) {
+    /* Fog reads weather_kind only; animal noise roll stays plat_rand. */
+    if ((plat_rand() % CFG_ROLL_PERCENT_RANGE) >=
+            (game->weather_kind == GAME_WEATHER_FOG ?
+                CFG_WEATHER_FOG_NOISE_SKIP_GE : CFG_ANIMAL_NOISE_SKIP_ROLL_GE)) {
         return;
     }
     push_ambient_noise(out,
@@ -186,11 +322,11 @@ void maybe_emit_atmosphere(struct GameState *game, GameEventQueue *out)
     }
 
     roll = plat_rand() % CFG_ROLL_PERCENT_RANGE;
-    if (roll < CFG_ATMOSPHERE_ROLL_GUST_BELOW) {
+    if (roll < atmosphere_gust_below(game)) {
         push_environment(out, GAME_ENV_EVENT_GUST);
         return;
     }
-    if (roll < CFG_ATMOSPHERE_ROLL_RUSTLE_BELOW) {
+    if (roll < atmosphere_rustle_below(game)) {
         push_environment(out, GAME_ENV_EVENT_RUSTLE);
         game->env_focus_active = 1;
         game->env_focus_room = game->player.room_id;
@@ -212,7 +348,7 @@ void maybe_emit_atmosphere(struct GameState *game, GameEventQueue *out)
         game->env_focus_expires_tick = game->tick + CFG_ENV_FOCUS_DURATION_TICKS;
         return;
     }
-    if (roll < CFG_ATMOSPHERE_ROLL_WATER_BELOW) {
+    if (roll < atmosphere_water_below(game)) {
         push_environment(out, GAME_ENV_EVENT_WATER);
         game->env_focus_active = 1;
         game->env_focus_room = game->player.room_id;
@@ -226,7 +362,7 @@ void maybe_emit_atmosphere(struct GameState *game, GameEventQueue *out)
         }
         return;
     }
-    if (roll < CFG_ATMOSPHERE_ROLL_GRIT_BELOW) {
+    if (roll < atmosphere_grit_below(game)) {
         push_environment(out, GAME_ENV_EVENT_GRIT);
         game->env_focus_active = 1;
         game->env_focus_room = game->player.room_id;

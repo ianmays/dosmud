@@ -94,6 +94,9 @@ extern const char *const TXT_UI_FOCUS_RUSTLE;
 extern const char *const TXT_UI_FOCUS_CREAK;
 extern const char *const TXT_UI_FOCUS_WATER;
 extern const char *const TXT_UI_FOCUS_GRIT;
+extern const char *const TXT_UI_WEATHER_RAIN;
+extern const char *const TXT_UI_WEATHER_FOG;
+extern const char *const TXT_UI_WEATHER_WIND;
 
 extern const char *const TXT_BANDIT_OPEN_INTRO;
 extern const char *const TXT_BANDIT_OPEN_LEVEL_FMT;
@@ -131,6 +134,10 @@ extern const char *const TXT_ATMO_CREAK;
 extern const char *const TXT_ATMO_WATER;
 extern const char *const TXT_ATMO_REED_DROP;
 extern const char *const TXT_ATMO_GRIT;
+extern const char *const TXT_ATMO_WEATHER_RAIN;
+extern const char *const TXT_ATMO_WEATHER_FOG;
+extern const char *const TXT_ATMO_WEATHER_WIND;
+extern const char *const TXT_ATMO_WEATHER_CLEAR;
 
 extern const char *const TXT_TRAVELER_INTRO;
 extern const char *const TXT_TRAVELER_ART_CAPTION;

@@ -1300,6 +1300,17 @@ TEST game_herbalist_drop_root_outside_marsh_does_not_duplicate(void)
     PASS();
 }
 
+TEST game_reset_fixture_baseline_initializes_weather(void)
+{
+    struct GameState game;
+
+    unit_game_fresh(&game, 51u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    ASSERT_EQ(GAME_WEATHER_NONE, game.weather_kind);
+    ASSERT_EQ((u32)CFG_WEATHER_INITIAL_DELAY_TICKS, game.weather_expires_tick);
+    PASS();
+}
+
 SUITE(game) {
     RUN_TEST(game_heal_player_applies);
     RUN_TEST(game_heal_player_at_max);
@@ -1310,6 +1321,7 @@ SUITE(game) {
     RUN_TEST(game_roll_inject_consume);
     RUN_TEST(game_move_blocked_and_ok);
     RUN_TEST(game_quiet_ticks);
+    RUN_TEST(game_reset_fixture_baseline_initializes_weather);
     RUN_TEST(game_bandit_intimidate_success);
     RUN_TEST(game_inspect_with_focus);
     RUN_TEST(game_env_inspect_reply);

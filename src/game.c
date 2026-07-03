@@ -209,6 +209,9 @@ static void reset_mutable_state(struct GameState *game, int room_id, u32 tick)
     game->env_interact_active = 0;
     game->env_interact_kind = GAME_ENV_NONE;
     game->env_interact_room = -1;
+    /* gatmos.c defers first weather roll until tick reaches expires_tick. */
+    game->weather_kind = GAME_WEATHER_NONE;
+    game->weather_expires_tick = (u32)CFG_WEATHER_INITIAL_DELAY_TICKS;
     game->herbalist_story = HERBALIST_STORY_NONE;
     game->herbalist_menu = 0;
     game->watchman_flags = 0;
@@ -631,6 +634,8 @@ static void advance_world_tick(struct GameState *game, GameEventQueue *out)
      * world-owned instead of spawning at the player site.
      */
     game->tick += 1;
+    /* #51: weather advances before roaming so fog gate sees current tick/kind. */
+    gatmos_weather_tick(game, out);
     npc_roaming_update_separation(game);
     npc_story_tick(game);
 #ifdef TEST_MODE
@@ -647,10 +652,14 @@ static void advance_world_tick(struct GameState *game, GameEventQueue *out)
      * co-located; otherwise the roster gets one movement step, then a second
      * encounter check in the new room layout.
      */
-    if (!npc_roaming_begin_encounter_in_room(game, game->player.room_id, out) &&
+    /* Fog may block both pre-step and post-step roaming encounter checks. */
+    if (!gatmos_weather_blocks_roaming_encounter(game) &&
+            !npc_roaming_begin_encounter_in_room(game, game->player.room_id, out) &&
             !game_is_busy_dialogue(game)) {
         npc_roaming_step(game);
-        npc_roaming_begin_encounter_in_room(game, game->player.room_id, out);
+        if (!gatmos_weather_blocks_roaming_encounter(game)) {
+            npc_roaming_begin_encounter_in_room(game, game->player.room_id, out);
+        }
     }
 
     world_step(&game->world, game->tick);

@@ -54,6 +54,12 @@ enum HerbalistStoryState {
 #define GAME_ENV_WATER 3
 #define GAME_ENV_GRIT 4
 
+/* Global weather (#51); gatmos.c owns transitions and atmosphere bias. */
+#define GAME_WEATHER_NONE 0
+#define GAME_WEATHER_RAIN 1
+#define GAME_WEATHER_FOG 2
+#define GAME_WEATHER_WIND 3
+
 struct CombatState {
     int enemy_hp;
     /* Active combat snapshot: copied from the encounter owner for save/load stability. */
@@ -108,6 +114,10 @@ struct GameState {
     int env_interact_active;
     int env_interact_kind;
     int env_interact_room;
+    /* gatmos.c global weather (#51); saved in save v16+. */
+    int weather_kind;
+    /* next weather roll when game->tick >= this; hash-only rolls in gatmos.c. */
+    u32 weather_expires_tick;
     /* npc.c herbalist branch (#76); saved in save v10+. */
     int herbalist_story;
     /* npc.c herbalist reply routing; mirrors HerbalistDialogueScene; save v13+. */

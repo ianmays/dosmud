@@ -162,6 +162,19 @@
 #define CFG_ENV_WATER_HEAL_AMOUNT 1
 #define CFG_ATMOSPHERE_FOCUS_EXTRA_ITEM_BELOW 50
 
+/* Weather (#51): hash-driven transitions; biases atmosphere and fog encounters. */
+#define CFG_WEATHER_INITIAL_DELAY_TICKS 5
+#define CFG_WEATHER_DURATION_TICKS 8
+#define CFG_WEATHER_ROLL_RAIN_BELOW 30
+#define CFG_WEATHER_ROLL_FOG_BELOW 55
+#define CFG_WEATHER_ROLL_WIND_BELOW 80
+#define CFG_WEATHER_WIND_GUST_BIAS 15
+#define CFG_WEATHER_WIND_RUSTLE_BIAS 10
+#define CFG_WEATHER_RAIN_WATER_BIAS 8
+#define CFG_WEATHER_RAIN_GRIT_BIAS 5
+#define CFG_WEATHER_FOG_NOISE_SKIP_GE 85
+#define CFG_WEATHER_FOG_ENCOUNTER_ALLOW_BELOW 40
+
 /* Dynamic NPC roster cap (save payload and per-tick roaming walks). */
 #define CFG_NPC_MAX 6
 

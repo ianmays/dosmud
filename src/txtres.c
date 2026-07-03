@@ -301,6 +301,9 @@ const char *const TXT_UI_FOCUS_RUSTLE = "Something is rustling nearby. (inspect 
 const char *const TXT_UI_FOCUS_CREAK = "You can track the source of the creaking. (inspect creak)\n";
 const char *const TXT_UI_FOCUS_WATER = "You can follow the moving water sound. (inspect water)\n";
 const char *const TXT_UI_FOCUS_GRIT = "Fresh grit skids nearby. (inspect grit)\n";
+const char *const TXT_UI_WEATHER_RAIN = "Rain needles the air and darkens the ground.\n";
+const char *const TXT_UI_WEATHER_FOG = "Fog hangs low and shortens the horizon.\n";
+const char *const TXT_UI_WEATHER_WIND = "Wind keeps worrying the treeline.\n";
 
 const char *const TXT_BANDIT_OPEN_INTRO = "A bandit steps from cover with a hand on a rusted blade.\n";
 const char *const TXT_BANDIT_OPEN_LEVEL_FMT = "Bandit Lv: %d.\n";
@@ -343,6 +346,10 @@ const char *const TXT_ATMO_CREAK = "A distant creak rolls across the landscape.\
 const char *const TXT_ATMO_WATER = "You hear water moving somewhere beyond the path.\n";
 const char *const TXT_ATMO_REED_DROP = "A loose reed drifts to your feet.\n";
 const char *const TXT_ATMO_GRIT = "Loose grit skips over stone under an uncertain breeze.\n";
+const char *const TXT_ATMO_WEATHER_RAIN = "Rain settles in, steady and insistent.\n";
+const char *const TXT_ATMO_WEATHER_FOG = "Fog rolls in and muffles distant sound.\n";
+const char *const TXT_ATMO_WEATHER_WIND = "Wind rises and worries everything loose.\n";
+const char *const TXT_ATMO_WEATHER_CLEAR = "The weather eases and the air clears.\n";
 
 const char *const TXT_TRAVELER_INTRO =
     "You nearly bump into a hooded traveler. They straighten with a tired grin.\n";

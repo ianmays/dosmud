@@ -20,9 +20,10 @@
 /*
  * v12: watchman_flags + watchman_menu (#8). v13: herbalist_menu (#8 menus).
  * v14: world_adv_flags (#220). v15: env_interact_* (#7).
+ * v16: weather_kind and weather_expires_tick (#51).
  * Append-only bumps; loads reject below SAVE_VERSION.
  */
-#define SAVE_VERSION 15
+#define SAVE_VERSION 16
 #define SAVE_PATH_BUF_MAX 260
 
 /*
@@ -397,6 +398,9 @@ static int save_write_game_state(FILE *fp, const struct GameState *game,
             !save_write_s16(fp, game->env_interact_active) ||
             !save_write_s16(fp, game->env_interact_kind) ||
             !save_write_s16(fp, game->env_interact_room) ||
+            /* v16: global weather (#51). */
+            !save_write_s16(fp, game->weather_kind) ||
+            !save_write_u32(fp, game->weather_expires_tick) ||
             /* v10: herbalist story fields (#76). */
             !save_write_s16(fp, game->herbalist_story) ||
             /* v13: herbalist session menu. */
@@ -452,6 +456,9 @@ static int save_read_game_state(FILE *fp, struct GameState *game,
             !save_read_s16(fp, &game->env_interact_active) ||
             !save_read_s16(fp, &game->env_interact_kind) ||
             !save_read_s16(fp, &game->env_interact_room) ||
+            /* v16: global weather (#51). */
+            !save_read_s16(fp, &game->weather_kind) ||
+            !save_read_u32(fp, &game->weather_expires_tick) ||
             /* v10: herbalist story fields (#76). */
             !save_read_s16(fp, &game->herbalist_story) ||
             /* v13: herbalist session menu. */
@@ -679,6 +686,9 @@ static int save_validate_game(const struct GameState *game)
             game->env_interact_kind < GAME_ENV_NONE ||
             game->env_interact_kind > GAME_ENV_GRIT ||
             !save_valid_room_or_none(game->env_interact_room, room_count) ||
+            /* v16: gatmos weather_kind must match GAME_WEATHER_* enums. */
+            game->weather_kind < GAME_WEATHER_NONE ||
+            game->weather_kind > GAME_WEATHER_WIND ||
             game->herbalist_story < HERBALIST_STORY_NONE ||
             game->herbalist_story > HERBALIST_STORY_COMPLETE ||
             /* v13 herbalist_menu / v12 watchman_* must match npc.h scene enums. */
