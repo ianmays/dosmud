@@ -172,7 +172,7 @@
 #define CFG_WEATHER_WIND_RUSTLE_BIAS 10
 #define CFG_WEATHER_RAIN_WATER_BIAS 8
 #define CFG_WEATHER_RAIN_GRIT_BIAS 5
-#define CFG_WEATHER_FOG_NOISE_SKIP_GE 85
+#define CFG_WEATHER_FOG_NOISE_SKIP_GE 60
 #define CFG_WEATHER_FOG_ENCOUNTER_ALLOW_BELOW 40
 
 /* Dynamic NPC roster cap (save payload and per-tick roaming walks). */

@@ -555,7 +555,7 @@ TEST gatmos_weather_fog_blocks_roaming_encounter_roll(void)
 
     reset_camp(&game);
     game.seed = 1234u;
-    game.tick = 20; /* hash-only fog encounter block at this seed/tick */
+    game.tick = 4; /* hash-only fog encounter block at this seed/tick */
     game.weather_kind = GAME_WEATHER_FOG;
     ASSERT_EQ(1, gatmos_weather_blocks_roaming_encounter(&game));
     game.weather_kind = GAME_WEATHER_RAIN;
@@ -568,8 +568,8 @@ TEST gatmos_weather_fog_allows_roaming_encounter_low_roll(void)
     struct GameState game;
 
     reset_camp(&game);
-    game.seed = 1u;
-    game.tick = 4;
+    game.seed = 0u;
+    game.tick = 5;
     game.weather_kind = GAME_WEATHER_FOG;
     ASSERT_EQ(0, gatmos_weather_blocks_roaming_encounter(&game));
     PASS();
@@ -622,6 +622,22 @@ TEST gatmos_weather_tick_clear_after_wind(void)
     PASS();
 }
 
+TEST gatmos_weather_roll_u32_wrap_tick13(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    reset_camp(&game);
+    game.seed = 1234u;
+    game.tick = 13;
+    game.weather_kind = GAME_WEATHER_NONE;
+    game.weather_expires_tick = 13;
+    game_event_queue_reset(&out);
+    gatmos_weather_tick(&game, &out);
+    ASSERT_EQ(GAME_WEATHER_WIND, game.weather_kind);
+    PASS();
+}
+
 SUITE(gatmos) {
     RUN_TEST(gatmos_seed_world_items);
     RUN_TEST(gatmos_focus_expiry);
@@ -650,4 +666,5 @@ SUITE(gatmos) {
     RUN_TEST(gatmos_weather_fog_allows_roaming_encounter_low_roll);
     RUN_TEST(gatmos_weather_rain_biases_water_roll);
     RUN_TEST(gatmos_weather_tick_clear_after_wind);
+    RUN_TEST(gatmos_weather_roll_u32_wrap_tick13);
 }

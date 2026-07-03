@@ -75,11 +75,23 @@ static int env_is_leave_choice(int kind, int choice)
 
 /*
  * #51 weather rolls: seed^tick^salt only; never plat_rand so save/replay stay
- * stable independent of ambient RNG consumption order.
+ * stable independent of ambient RNG consumption order. Multiply/xor mask to
+ * 32 bits so LP64 Linux test builds match DOS/Open Watcom u32 wrap.
  */
+#define WEATHER_HASH_MUL 2654435761u
+#define WEATHER_HASH_MASK 0xFFFFFFFFUL
+
+static u32 weather_hash32(u32 value)
+{
+    return value & WEATHER_HASH_MASK;
+}
+
 static u32 weather_hash(const struct GameState *game, u32 salt)
 {
-    return game->seed ^ (game->tick * 2654435761u) ^ salt;
+    u32 tick_mix;
+
+    tick_mix = weather_hash32(game->tick * WEATHER_HASH_MUL);
+    return weather_hash32(game->seed ^ tick_mix ^ salt);
 }
 
 static int weather_roll(const struct GameState *game, u32 salt)
@@ -299,7 +311,7 @@ void maybe_emit_animal_noise(struct GameState *game, GameEventQueue *out)
     if ((game->tick % (u32)CFG_ANIMAL_NOISE_TICK_PERIOD) != 0UL) {
         return;
     }
-    /* Fog reads weather_kind only; animal noise roll stays plat_rand. */
+    /* Fog: lower skip threshold than clear weather (fewer animal-noise events). */
     if ((plat_rand() % CFG_ROLL_PERCENT_RANGE) >=
             (game->weather_kind == GAME_WEATHER_FOG ?
                 CFG_WEATHER_FOG_NOISE_SKIP_GE : CFG_ANIMAL_NOISE_SKIP_ROLL_GE)) {

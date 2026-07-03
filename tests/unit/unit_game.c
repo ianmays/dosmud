@@ -1334,12 +1334,13 @@ TEST game_fog_blocks_encounter_still_roams(void)
     bandit->flags &= ~NPC_FLAG_ACTIVE;
     game.weather_kind = GAME_WEATHER_FOG;
     game.weather_expires_tick = 100;
-    game.tick = 20;
-    ASSERT_EQ(1, gatmos_weather_blocks_roaming_encounter(&game));
+    game.tick = 3;
     plat_seed_rng(42u);
     before = traveler->room_id;
     game_event_queue_reset(&out);
     game_background_step(&game, &out);
+    ASSERT_EQ(4, (int)game.tick);
+    ASSERT_EQ(1, gatmos_weather_blocks_roaming_encounter(&game));
     ASSERT_NEQ(before, traveler->room_id);
     PASS();
 }
