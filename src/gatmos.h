@@ -32,7 +32,6 @@ int gatmos_weather_blocks_roaming_encounter(struct GameState *game);
 void gatmos_daynight_tick(struct GameState *game, struct GameEventQueue *out);
 void gatmos_try_night_lost_on_move(struct GameState *game,
                                    struct GameEventQueue *out);
-int gatmos_day_phase(const struct GameState *game);
 int gatmos_night_map_blanked(const struct GameState *game);
 int gatmos_night_torch_lights_map(const struct GameState *game);
 /* Clear night_lost when the player gains a torch during night (#130). */

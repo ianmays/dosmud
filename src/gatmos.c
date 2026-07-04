@@ -255,12 +255,6 @@ void gatmos_daynight_tick(struct GameState *game, GameEventQueue *out)
     game->day_expires_tick = game->tick + daynight_duration_ticks(game->day_phase);
 }
 
-/* Read accessor for live phase; ROOM_LOOK packs day_phase into arg1 at enqueue. */
-int gatmos_day_phase(const struct GameState *game)
-{
-    return game->day_phase;
-}
-
 /*
  * Render seam for the map command: true when night_lost is set and the player
  * lacks a torch; dawn or torch clears night_lost and restores the grid.
@@ -297,7 +291,8 @@ void gatmos_clear_night_lost_with_torch(struct GameState *game)
 
 /*
  * game.c calls after a successful move during night; hash-only roll when the
- * player lacks a torch. Sets night_lost and queues GAME_ENV_EVENT_NIGHT_LOST.
+ * player lacks a torch and night_lost is clear. Sets night_lost and queues
+ * GAME_ENV_EVENT_NIGHT_LOST once per night episode until dawn or torch.
  */
 void gatmos_try_night_lost_on_move(struct GameState *game, GameEventQueue *out)
 {
@@ -307,6 +302,9 @@ void gatmos_try_night_lost_on_move(struct GameState *game, GameEventQueue *out)
         return;
     }
     if (player_has_torch(game)) {
+        return;
+    }
+    if (game->night_lost) {
         return;
     }
 #ifdef TEST_MODE

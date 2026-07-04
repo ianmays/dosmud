@@ -683,6 +683,27 @@ TEST gatmos_night_lost_on_move_without_torch(void)
     PASS();
 }
 
+TEST gatmos_night_lost_on_move_no_retrigger_when_already_lost(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    reset_camp(&game);
+    game.seed = 1234u;
+    game.tick = 0;
+    game.day_phase = GAME_NIGHT;
+    game.night_lost = 0;
+    game_event_queue_reset(&out);
+    gatmos_try_night_lost_on_move(&game, &out);
+    ASSERT_EQ(1, game.night_lost);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_ENV_EVENT_NIGHT_LOST, out.events[0].arg0);
+    gatmos_try_night_lost_on_move(&game, &out);
+    ASSERT_EQ(1, game.night_lost);
+    ASSERT_EQ(1, out.count);
+    PASS();
+}
+
 TEST gatmos_night_lost_skipped_with_torch(void)
 {
     struct GameState game;
@@ -783,6 +804,7 @@ SUITE(gatmos) {
     RUN_TEST(gatmos_daynight_tick_night_fall);
     RUN_TEST(gatmos_daynight_tick_day_break_clears_lost);
     RUN_TEST(gatmos_night_lost_on_move_without_torch);
+    RUN_TEST(gatmos_night_lost_on_move_no_retrigger_when_already_lost);
     RUN_TEST(gatmos_night_lost_skipped_with_torch);
     RUN_TEST(gatmos_night_map_blanked_truth_table);
     RUN_TEST(gatmos_clear_night_lost_with_torch_wielded);
