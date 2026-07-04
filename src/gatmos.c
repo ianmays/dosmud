@@ -263,7 +263,8 @@ int gatmos_day_phase(const struct GameState *game)
 
 /*
  * Render seam for the map command: true whenever it is night and the player
- * lacks a torch; night_lost still drives move-time disorientation events.
+ * lacks a torch (including immediately after nightfall). night_lost is a
+ * separate move-time flag for GAME_ENV_EVENT_NIGHT_LOST disorientation copy.
  */
 int gatmos_night_map_blanked(const struct GameState *game)
 {
