@@ -43,7 +43,7 @@ int soak_assert_game_state_ok(const struct GameState *game)
     }
     if (game->mode == GAME_MODE_DIALOGUE) {
         if (game->dialogue <= DIALOGUE_NONE ||
-                game->dialogue > DIALOGUE_LOOT) {
+                game->dialogue > DIALOGUE_PEDDLER) {
             return 0;
         }
     }

@@ -496,7 +496,6 @@ const char *const TXT_MSG_ENV_MENU_CLOSED =
 const char *const TXT_MSG_BANDIT_BLOCK_TALK = "The bandit has your full attention right now.\n";
 const char *const TXT_MSG_LOOT_WAITING =
     "Finish looting with the numbered corpse menu, or type loot to leave the body alone.\n";
-const char *const TXT_MSG_TRAVELER_WAITING = "The traveler is waiting for an answer (1/2/3).\n";
 const char *const TXT_MSG_ROAMING_ENCOUNTER_WAITING =
     "They are waiting on your move (reply 1/2/3).\n";
 const char *const TXT_MSG_NOBODY_TALK = "Nobody here wants to talk.\n";

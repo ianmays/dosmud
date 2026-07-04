@@ -946,9 +946,6 @@ static void render_dialogue_guard_event(const GameEvent *ev)
     case GAME_DIALOGUE_GUARD_LOOT_WAITING_REPLY:
         render_msg_loot_waiting();
         break;
-    case GAME_DIALOGUE_GUARD_TRAVELER_WAITING:
-        render_msg_traveler_waiting();
-        break;
     case GAME_DIALOGUE_GUARD_ROAMING_ENCOUNTER_WAITING:
         render_msg_roaming_encounter_waiting();
         break;
@@ -1523,12 +1520,6 @@ void render_msg_bandit_blocks_talk(void)
 void render_msg_loot_waiting(void)
 {
     RENDER_PRINTF("%s", TXT_MSG_LOOT_WAITING);
-}
-
-/* Legacy guard copy; dialogue.c now emits ROAMING_ENCOUNTER_WAITING for all. */
-void render_msg_traveler_waiting(void)
-{
-    RENDER_PRINTF("%s", TXT_MSG_TRAVELER_WAITING);
 }
 
 void render_msg_roaming_encounter_waiting(void)
