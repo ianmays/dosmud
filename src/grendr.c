@@ -1293,6 +1293,7 @@ void render_traveler_scene(void)
 {
     render_gap();
     art_traveler();
+    render_gap();
     render_copy(TXT_TRAVELER_INTRO);
     RENDER_PRINTF("%s", TXT_TRAVELER_QUOTE_A);
     RENDER_PRINTF("%s", TXT_TRAVELER_QUOTE_B);
@@ -1311,6 +1312,7 @@ void render_lost_animal_scene(void)
 {
     render_gap();
     art_lost_animal();
+    render_gap();
     render_copy(TXT_LOST_ANIMAL_INTRO);
     RENDER_PRINTF("%s", TXT_LOST_ANIMAL_QUOTE_A);
     RENDER_PRINTF("%s", TXT_LOST_ANIMAL_QUOTE_B);
@@ -1329,6 +1331,7 @@ void render_peddler_scene(void)
 {
     render_gap();
     art_peddler();
+    render_gap();
     render_copy(TXT_PEDDLER_INTRO);
     RENDER_PRINTF("%s", TXT_PEDDLER_QUOTE_A);
     RENDER_PRINTF("%s", TXT_PEDDLER_QUOTE_B);
