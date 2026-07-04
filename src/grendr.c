@@ -1953,7 +1953,7 @@ void render_exploration_map(const struct GameState *game)
     char exitsbuf[64];
     int len;
 
-    /* Torchless night: gatmos_night_map_blanked; look snapshots do not affect map. */
+    /* night_lost + no torch: gatmos_night_map_blanked; look snapshots unchanged. */
     if (gatmos_night_map_blanked(game)) {
         RENDER_PRINTF("%s", TXT_MAP_NIGHT_BLANK);
         len = fmt_player_room_exits(game, exitsbuf, (int)sizeof(exitsbuf));

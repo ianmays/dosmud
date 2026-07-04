@@ -233,7 +233,7 @@ Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_
 | `weather_rain_ready` | `ambient_camp` at tick `CFG_WEATHER_INITIAL_DELAY_TICKS - 1` so one `wait` hits the first weather transition ([#51](https://github.com/ianmays/dosmud/issues/51)) |
 | `weather_fog` | Camp with `GAME_WEATHER_FOG` active for room-look weather HUD |
 | `night_at_camp` | Camp at night (`GAME_NIGHT`), `night_lost` clear, for room-look night HUD ([#130](https://github.com/ianmays/dosmud/issues/130)) |
-| `night_lost` | Camp at night with `night_lost` set (disorientation flag after a failed lost roll; blank map uses any torchless night) ([#130](https://github.com/ianmays/dosmud/issues/130)) |
+| `night_lost` | Camp at night with `night_lost` set after a failed lost-on-move roll; blank `map` ([#130](https://github.com/ianmays/dosmud/issues/130)) |
 | `night_torch_camp` | Camp at night with a torch in the bag, for torch-lit map copy ([#130](https://github.com/ianmays/dosmud/issues/130)) |
 
 **Friendly roaming NPCs** (co-located dialogue without tick movement; reply routing via `npc_roaming_cmd_reply`):
@@ -334,7 +334,7 @@ Each process run uses one `.input` file until `quit`. `make snapshot-run` runs `
 
 **Inspect:** `inspect_rustle`, `inspect_creak`, `inspect_water`, `inspect_grit`, `inspect_none`, `inspect_wrong`, `inspect_water_followup` (post-inspect water menu reply `1` follow-up copy), `env_menu_dismiss` (`@fixture env_focus_water`, `inspect`, then `north` dismisses the env menu before the move runs; [#7](https://github.com/ianmays/dosmud/issues/7), [#205](https://github.com/ianmays/dosmud/issues/205)-style menu exit).
 
-**Ambient (tick-driven):** `ambient_rustle`, `ambient_tick_order`, `ambient_item` (`@fixture ambient_camp` plus `@seed` for deterministic atmosphere, animal noise, and nearby-item paths); `weather_rain_ambient` (`@fixture weather_rain_ready`, one `wait` for rain transition copy); `weather_fog_look` (`@fixture weather_fog`, `look` for fog HUD line; [#51](https://github.com/ianmays/dosmud/issues/51)); `night_look` (`@fixture night_at_camp`, `look` for night HUD line); `night_map_nightfall` (`@fixture night_at_camp`, `map` for blank torchless night map plus exits); `night_map_lost` (`@fixture night_lost`, `map` for the same blank path with `night_lost` set); `night_map_torch` (`@fixture night_torch_camp`, `map` for torch illumination line plus the grid; [#130](https://github.com/ianmays/dosmud/issues/130)).
+**Ambient (tick-driven):** `ambient_rustle`, `ambient_tick_order`, `ambient_item` (`@fixture ambient_camp` plus `@seed` for deterministic atmosphere, animal noise, and nearby-item paths); `weather_rain_ambient` (`@fixture weather_rain_ready`, one `wait` for rain transition copy); `weather_fog_look` (`@fixture weather_fog`, `look` for fog HUD line; [#51](https://github.com/ianmays/dosmud/issues/51)); `night_look` (`@fixture night_at_camp`, `look` for night HUD line); `night_map_nightfall` (`@fixture night_at_camp`, `map` still renders the grid before a lost roll); `night_map_lost` (`@fixture night_lost`, `map` for blank disoriented map plus exits); `night_map_torch` (`@fixture night_torch_camp`, `map` for torch illumination line plus the grid; [#130](https://github.com/ianmays/dosmud/issues/130)).
 
 **Combat:** `combat_defend`, `combat_salve`, `combat_no_salve`, `combat_invalid`, `combat_take_blocked`, `combat_victory_xp`, `level_up`.
 

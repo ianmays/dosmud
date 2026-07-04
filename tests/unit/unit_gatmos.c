@@ -710,8 +710,10 @@ TEST gatmos_night_map_blanked_truth_table(void)
     ASSERT_EQ(0, gatmos_night_map_blanked(&game));
     game.day_phase = GAME_NIGHT;
     game.night_lost = 0;
-    ASSERT_EQ(1, gatmos_night_map_blanked(&game));
+    ASSERT_EQ(0, gatmos_night_map_blanked(&game));
     ASSERT_EQ(0, gatmos_night_torch_lights_map(&game));
+    game.night_lost = 1;
+    ASSERT_EQ(1, gatmos_night_map_blanked(&game));
     ASSERT_EQ(1, game_inv_bag_add(&game, ITEM_TORCH));
     ASSERT_EQ(0, gatmos_night_map_blanked(&game));
     ASSERT_EQ(1, gatmos_night_torch_lights_map(&game));
