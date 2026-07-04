@@ -263,14 +263,28 @@ int gatmos_day_phase(const struct GameState *game)
 
 /*
  * Render seam for the map command: grendr asks here instead of reading
- * night_lost directly; true only during night after a failed lost roll.
+ * night_lost directly; true during night after lost roll until dawn or torch.
  */
 int gatmos_night_map_blanked(const struct GameState *game)
 {
     if (game->day_phase != GAME_NIGHT) {
         return 0;
     }
+    if (player_has_torch(game)) {
+        return 0;
+    }
     return game->night_lost ? 1 : 0;
+}
+
+void gatmos_clear_night_lost_with_torch(struct GameState *game)
+{
+    if (game->day_phase != GAME_NIGHT) {
+        return;
+    }
+    if (!player_has_torch(game)) {
+        return;
+    }
+    game->night_lost = 0;
 }
 
 /*

@@ -34,5 +34,7 @@ void gatmos_try_night_lost_on_move(struct GameState *game,
                                    struct GameEventQueue *out);
 int gatmos_day_phase(const struct GameState *game);
 int gatmos_night_map_blanked(const struct GameState *game);
+/* Clear night_lost when the player gains a torch during night (#130). */
+void gatmos_clear_night_lost_with_torch(struct GameState *game);
 
 #endif

@@ -1,6 +1,7 @@
 #include "greatest.h"
 #include "config.h"
 #include "game.h"
+#include "gatmos.h"
 #include "gout.h"
 #include "invent.h"
 #include "items.h"
@@ -394,6 +395,24 @@ TEST invent_craft_torch(void)
     PASS();
 }
 
+TEST invent_craft_torch_clears_night_lost(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 130u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game.day_phase = GAME_NIGHT;
+    game.night_lost = 1;
+    game_inv_bag_add(&game, ITEM_STICK);
+    game_inv_bag_add(&game, ITEM_REED);
+    ASSERT_EQ(1, inv_craft(&game, ITEM_TORCH, &out));
+    ASSERT_EQ(GAME_CRAFT_OUTCOME_OK, out.events[0].arg1);
+    ASSERT_EQ(0, game.night_lost);
+    ASSERT_EQ(0, gatmos_night_map_blanked(&game));
+    PASS();
+}
+
 TEST invent_craft_missing_ingredients(void)
 {
     struct GameState game;
@@ -702,6 +721,7 @@ SUITE(invent) {
     RUN_TEST(invent_eat_heals_damaged);
     RUN_TEST(invent_salve_at_max_hp);
     RUN_TEST(invent_craft_torch);
+    RUN_TEST(invent_craft_torch_clears_night_lost);
     RUN_TEST(invent_craft_missing_ingredients);
     RUN_TEST(invent_wield_and_unwield);
     RUN_TEST(invent_loot_corpse);
