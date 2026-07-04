@@ -341,7 +341,7 @@ Each process run uses one `.input` file until `quit`. `make snapshot-run` runs `
 
 **Meta / inventory:** `unknown_cmd`, `cannot_move`, `give_wrong_context`, `reply_nobody`, `post_combat_reply_guard`, `reply_invalid`, `craft_salve`, `craft_unknown`, `take_nothing`, `take_wrong_item`.
 
-**Save/load:** `save_load`, `herbalist_save_load` (single-slot `save.dat` round-trip with a deterministic post-load move or authored-story follow-up state; `unit_save.c` round-trip fixtures assert save v16 `weather_kind` / `weather_expires_tick` plus v15 `env_interact_*`, v14 `world_adv_flags`, v13 `herbalist_menu`, and v12 `watchman_flags` / `watchman_menu`).
+**Save/load:** `save_load`, `herbalist_save_load` (single-slot `save.dat` round-trip with a deterministic post-load move or authored-story follow-up state; `unit_save.c` round-trip fixtures assert save v17 roster width (`CFG_NPC_MAX` 8) plus v16 `weather_kind` / `weather_expires_tick`, v15 `env_interact_*`, v14 `world_adv_flags`, v13 `herbalist_menu`, and v12 `watchman_flags` / `watchman_menu`; v16 and older files reject with `SAVE_RESULT_FORMAT`).
 
 **Replay:** `replay_log` (stdout plus sidecar log golden files; [#156](https://github.com/ianmays/dosmud/issues/156)).
 

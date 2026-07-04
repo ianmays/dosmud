@@ -21,9 +21,10 @@
  * v12: watchman_flags + watchman_menu (#8). v13: herbalist_menu (#8 menus).
  * v14: world_adv_flags (#220). v15: env_interact_* (#7).
  * v16: weather_kind and weather_expires_tick (#51).
+ * v17: CFG_NPC_MAX 8 and lost animal / peddler roster profiles (#54).
  * Append-only bumps; loads reject below SAVE_VERSION.
  */
-#define SAVE_VERSION 16
+#define SAVE_VERSION 17
 #define SAVE_PATH_BUF_MAX 260
 
 /*
@@ -553,7 +554,7 @@ static int save_valid_npc(const struct NpcState *npc, int room_count)
     if (npc->actor < GAME_DIALOGUE_ACTOR_NONE ||
             npc->actor > GAME_DIALOGUE_ACTOR_PEDDLER ||
             npc->dialogue < DIALOGUE_NONE ||
-            npc->dialogue > DIALOGUE_LOOT ||
+            npc->dialogue > DIALOGUE_PEDDLER ||
             npc->encounter < GAME_ENCOUNTER_NONE ||
             npc->encounter > GAME_ENCOUNTER_PEDDLER ||
             npc->level < 0 ||
@@ -677,7 +678,7 @@ static int save_validate_game(const struct GameState *game)
             game->mode < GAME_MODE_EXPLORE ||
             game->mode > GAME_MODE_COMBAT ||
             game->dialogue < DIALOGUE_NONE ||
-            game->dialogue > DIALOGUE_LOOT ||
+            game->dialogue > DIALOGUE_PEDDLER ||
             !save_valid_boolish(game->env_focus_active) ||
             !save_valid_room_or_none(game->env_focus_room, room_count) ||
             game->env_focus_kind < GAME_ENV_NONE ||

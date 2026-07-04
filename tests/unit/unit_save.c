@@ -365,6 +365,32 @@ TEST save_rejects_prior_version_without_mutating_target(void)
     PASS();
 }
 
+TEST save_rejects_v16_roster_layout(void)
+{
+    struct GameState game;
+    struct GameState loaded;
+    FILE *fp;
+    u32 loaded_draws;
+
+    save_cleanup_file();
+    save_fill_fixture(&game);
+    ASSERT_EQ(SAVE_RESULT_OK,
+        save_write_game(save_test_path(), &game, 7U));
+
+    fp = fopen(save_test_path(), "r+b");
+    ASSERT(fp != 0);
+    ASSERT(save_write_version(fp, 16U));
+    fclose(fp);
+
+    unit_game_fresh(&loaded, 77U);
+    loaded_draws = 555U;
+    ASSERT_EQ(SAVE_RESULT_FORMAT,
+        save_read_game(save_test_path(), &loaded, &loaded_draws));
+
+    save_cleanup_file();
+    PASS();
+}
+
 TEST save_rejects_out_of_range_without_mutating_target(void)
 {
     struct GameState game;
@@ -850,6 +876,7 @@ SUITE(save)
     RUN_TEST(save_rejects_bad_magic);
     RUN_TEST(save_rejects_truncated_file);
     RUN_TEST(save_rejects_prior_version_without_mutating_target);
+    RUN_TEST(save_rejects_v16_roster_layout);
     RUN_TEST(save_rejects_out_of_range_without_mutating_target);
     RUN_TEST(save_rejects_excessive_rng_draw_count);
     RUN_TEST(save_rejects_write_with_excessive_rng_draw_count);

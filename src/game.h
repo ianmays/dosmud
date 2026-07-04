@@ -27,11 +27,11 @@ enum DialogueKind {
     DIALOGUE_NPC_HERBALIST,
     DIALOGUE_NPC_ARCHIVIST,
     DIALOGUE_TRAVELER,
+    DIALOGUE_ENEMY,
+    DIALOGUE_LOOT,
     /* Roaming-friendly dialogue-only encounters; npc.c owns reply routing. */
     DIALOGUE_LOST_ANIMAL,
-    DIALOGUE_PEDDLER,
-    DIALOGUE_ENEMY,
-    DIALOGUE_LOOT
+    DIALOGUE_PEDDLER
 };
 
 /* Persisted progress for npc.c herbalist branch (#76); not a generic quest layer. */
