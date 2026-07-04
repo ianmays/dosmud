@@ -88,7 +88,7 @@ SNAPSHOT_TESTS = \
 	smoke \
 	bandit_handover bandit_wielded_give area_items map equipment craft_wielded \
 	walk_north walk_map wait_tick \
-	frog_hint frog_replies watchman_talk watchman_warned_followup watchman_meal_peckish watchman_meal_tower_desc traveler_replies traveler_talk_blocked herbalist_talk archivist_talk talk_nobody \
+	frog_hint frog_replies watchman_talk watchman_warned_followup watchman_meal_peckish watchman_meal_tower_desc traveler_replies traveler_talk_blocked lost_animal_replies lost_animal_talk_blocked peddler_replies peddler_talk_blocked herbalist_talk archivist_talk talk_nobody \
 	herbalist_request herbalist_incomplete herbalist_complete herbalist_followup herbalist_save_load \
 	herbalist_give_reject herbalist_give_floor \
 	dialogue_menu_exit \

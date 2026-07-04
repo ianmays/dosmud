@@ -549,12 +549,13 @@ static int save_valid_npc(const struct NpcState *npc, int room_count)
             npc->flags == 0 &&
             npc->return_tick == 0;
     }
+    /* Upper bounds track GameDialogueActor / GameEventEncounterKind in gout.h. */
     if (npc->actor < GAME_DIALOGUE_ACTOR_NONE ||
-            npc->actor > GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH ||
+            npc->actor > GAME_DIALOGUE_ACTOR_PEDDLER ||
             npc->dialogue < DIALOGUE_NONE ||
             npc->dialogue > DIALOGUE_LOOT ||
             npc->encounter < GAME_ENCOUNTER_NONE ||
-            npc->encounter > GAME_ENCOUNTER_TRAVELER ||
+            npc->encounter > GAME_ENCOUNTER_PEDDLER ||
             npc->level < 0 ||
             !save_valid_room_or_none(npc->room_id, room_count) ||
             (npc->flags & ~allowed_flags) != 0) {

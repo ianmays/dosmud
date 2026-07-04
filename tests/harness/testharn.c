@@ -38,8 +38,8 @@ static void harness_drop_output(GameEventQueue *out)
 }
 
 /*
- * Defers traveler respawn without freeing the roster slot; quiet fixtures rely
- * on npc_deactivate_until so roaming ticks stay inert.
+ * Defers a roaming profile without freeing its roster slot; quiet fixtures and
+ * unit tests use npc_deactivate_until so npc_roaming_step stays inert.
  */
 static void fixture_traveler_off(struct GameState *game)
 {
@@ -420,6 +420,10 @@ static int fixture_quiet_camp_dual_ground_full_bag(struct GameState *game)
     return 1;
 }
 
+/*
+ * Roaming-friendly dialogue fixtures: co-locate the authored profile in its
+ * spawn room, clear NEEDS_SEPARATION, then open via npc_roaming_begin_encounter.
+ */
 static void fixture_traveler_dialogue(struct GameState *game)
 {
     GameEventQueue out;
@@ -431,6 +435,38 @@ static void fixture_traveler_dialogue(struct GameState *game)
     game->npcs[slot].flags |= NPC_FLAG_ACTIVE;
     game->npcs[slot].flags &= ~NPC_FLAG_NEEDS_SEPARATION;
     game->npcs[slot].room_id = WORLD_ROOM_ROAD;
+    harness_drop_output(&out);
+    npc_roaming_begin_encounter(game, &out);
+    game_render_output(game, &out);
+}
+
+static void fixture_lost_animal_dialogue(struct GameState *game)
+{
+    GameEventQueue out;
+    int slot;
+
+    game_reset_fixture_baseline(game, WORLD_ROOM_MEADOW, 0);
+    game->room_explored[WORLD_ROOM_MEADOW] = 1;
+    slot = npc_find_by_actor(game, GAME_DIALOGUE_ACTOR_LOST_ANIMAL);
+    game->npcs[slot].flags |= NPC_FLAG_ACTIVE;
+    game->npcs[slot].flags &= ~NPC_FLAG_NEEDS_SEPARATION;
+    game->npcs[slot].room_id = WORLD_ROOM_MEADOW;
+    harness_drop_output(&out);
+    npc_roaming_begin_encounter(game, &out);
+    game_render_output(game, &out);
+}
+
+static void fixture_peddler_dialogue(struct GameState *game)
+{
+    GameEventQueue out;
+    int slot;
+
+    game_reset_fixture_baseline(game, WORLD_ROOM_GROVE, 0);
+    game->room_explored[WORLD_ROOM_GROVE] = 1;
+    slot = npc_find_by_actor(game, GAME_DIALOGUE_ACTOR_PEDDLER);
+    game->npcs[slot].flags |= NPC_FLAG_ACTIVE;
+    game->npcs[slot].flags &= ~NPC_FLAG_NEEDS_SEPARATION;
+    game->npcs[slot].room_id = WORLD_ROOM_GROVE;
     harness_drop_output(&out);
     npc_roaming_begin_encounter(game, &out);
     game_render_output(game, &out);
@@ -803,6 +839,14 @@ int testharn_apply(struct GameState *game, const char *line)
     }
     if (fixture_name_is("traveler_dialogue", name)) {
         fixture_traveler_dialogue(game);
+        return 1;
+    }
+    if (fixture_name_is("lost_animal_dialogue", name)) {
+        fixture_lost_animal_dialogue(game);
+        return 1;
+    }
+    if (fixture_name_is("peddler_dialogue", name)) {
+        fixture_peddler_dialogue(game);
         return 1;
     }
     if (fixture_name_is("bag_berry", name)) {

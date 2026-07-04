@@ -136,7 +136,9 @@ static const struct EncounterHandler *encounter_handler(int encounter_kind)
         { 0, 0 },
         /* Encounter id order stays in gout.h; genc only fills rows it owns. */
         { bandit_cmd_reply, bandit_cmd_give },
-        { 0, 0 }
+        { 0, 0 }, /* TRAVELER: npc_roaming_cmd_reply */
+        { 0, 0 }, /* LOST_ANIMAL */
+        { 0, 0 }  /* PEDDLER */
     };
 
     if (encounter_kind < 0 ||

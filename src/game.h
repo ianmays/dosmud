@@ -27,6 +27,9 @@ enum DialogueKind {
     DIALOGUE_NPC_HERBALIST,
     DIALOGUE_NPC_ARCHIVIST,
     DIALOGUE_TRAVELER,
+    /* Roaming-friendly dialogue-only encounters; npc.c owns reply routing. */
+    DIALOGUE_LOST_ANIMAL,
+    DIALOGUE_PEDDLER,
     DIALOGUE_ENEMY,
     DIALOGUE_LOOT
 };

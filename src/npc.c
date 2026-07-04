@@ -77,7 +77,19 @@ static const struct NpcProfile NPC_PROFILES[] = {
         1, 3,
         WORLD_ROOM_CANYON,
         NPC_FLAG_ACTIVE | NPC_FLAG_ROAMING | NPC_FLAG_RESPAWNS,
-        8, 6, 10, NPC_RESPAWN_ON_ENCOUNTER_END }
+        8, 6, 10, NPC_RESPAWN_ON_ENCOUNTER_END },
+    /* Dialogue-only roaming profiles (same reply/respawn path as traveler). */
+    { GAME_DIALOGUE_ACTOR_LOST_ANIMAL, DIALOGUE_LOST_ANIMAL,
+        GAME_ENCOUNTER_LOST_ANIMAL,
+        0, 0,
+        WORLD_ROOM_MEADOW,
+        NPC_FLAG_ACTIVE | NPC_FLAG_ROAMING | NPC_FLAG_RESPAWNS,
+        0, 8, 16, NPC_RESPAWN_ON_DIALOGUE_RESOLVE },
+    { GAME_DIALOGUE_ACTOR_PEDDLER, DIALOGUE_PEDDLER, GAME_ENCOUNTER_PEDDLER,
+        0, 0,
+        WORLD_ROOM_GROVE,
+        NPC_FLAG_ACTIVE | NPC_FLAG_ROAMING | NPC_FLAG_RESPAWNS,
+        0, 8, 16, NPC_RESPAWN_ON_DIALOGUE_RESOLVE }
 };
 
 static const struct NpcProfile *npc_profile_by_actor(int actor)
@@ -786,6 +798,17 @@ int npc_choice_is_valid(int choice)
     return choice >= 1 && choice <= 3;
 }
 
+/*
+ * Dialogue kinds routed through npc_roaming_cmd_reply; genc has no reply/give
+ * rows for their GAME_ENCOUNTER_* ids.
+ */
+int npc_is_roaming_friendly_dialogue(int dialogue_kind)
+{
+    return dialogue_kind == DIALOGUE_TRAVELER ||
+        dialogue_kind == DIALOGUE_LOST_ANIMAL ||
+        dialogue_kind == DIALOGUE_PEDDLER;
+}
+
 void npc_clear_all(struct GameState *game)
 {
     int i;
@@ -1230,7 +1253,7 @@ int npc_roaming_cmd_reply(struct GameState *game, int choice, GameEventQueue *ou
 
     /* Return 0 when game.c should try another reply slice or emit a guard. */
     if (game->mode != GAME_MODE_DIALOGUE ||
-            game->dialogue != DIALOGUE_TRAVELER) {
+            !npc_is_roaming_friendly_dialogue(game->dialogue)) {
         return 0;
     }
     npc = npc_find_dialogue_slot(game, game->dialogue);

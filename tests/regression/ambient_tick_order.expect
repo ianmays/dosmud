@@ -26,15 +26,31 @@ On the ground: stick. (take stick)
 
 > You wait.
 
-Something small rustles just out of sight.
+         .---------.         
+        /  o     o  \        
+       |     ^      |        
+       |   /---\    |        
+        \  |###|   /        
+         '-|###|---'         
+                             
+ (no stall, just stubborn mileage)                             
+A peddler shifts a creaking pack and catches your eye between the trees.
+"Road goods, road prices," they say, tapping a bundle of twine. What brings you through the grove?"
+  [1] Ask what sells on a day like this.
+  [2] Warn them bandits haunt the roads.
+  [3] Keep walking.
+(Answer with 1, 2, 3, or reply <n>.)
+
+A distant creak rolls across the landscape.
 
 [T:1] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
-> You wait.
+> You leave the conversation and turn back to the room.
+You wait.
 
 A cricket chirps from beside the coals.
 
-A cool gust threads through the area and fades.
+You hear water moving somewhere beyond the path.
 
 [T:2] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 

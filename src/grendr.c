@@ -289,6 +289,32 @@ static void art_traveler(void)
     RENDER_PRINTF("                             \n");
 }
 
+static void art_lost_animal(void)
+{
+    RENDER_PRINTF("            .-'''-.          \n");
+    RENDER_PRINTF("           /  o o  \\         \n");
+    RENDER_PRINTF("          |   \\_/   |        \n");
+    RENDER_PRINTF("          |  /   \\  |        \n");
+    RENDER_PRINTF("           \\ ~~~  /         \n");
+    RENDER_PRINTF("            '---'            \n");
+    RENDER_PRINTF("                             \n");
+    RENDER_PRINTF(" %s", TXT_LOST_ANIMAL_ART_CAPTION);
+    RENDER_PRINTF("                             \n");
+}
+
+static void art_peddler(void)
+{
+    RENDER_PRINTF("         .---------.         \n");
+    RENDER_PRINTF("        /  o     o  \\        \n");
+    RENDER_PRINTF("       |     ^      |        \n");
+    RENDER_PRINTF("       |   /---\\    |        \n");
+    RENDER_PRINTF("        \\  |###|   /        \n");
+    RENDER_PRINTF("         '-|###|---'         \n");
+    RENDER_PRINTF("                             \n");
+    RENDER_PRINTF(" %s", TXT_PEDDLER_ART_CAPTION);
+    RENDER_PRINTF("                             \n");
+}
+
 static void art_watchman_portrait(void)
 {
     RENDER_PRINTF("        .#######.            \n");
@@ -709,6 +735,12 @@ static void render_dialogue_event(const GameEvent *ev)
     case TXTRES_NARRATIVE_TRAVELER_REPLY:
         render_traveler_reply(ev->arg2);
         break;
+    case TXTRES_NARRATIVE_LOST_ANIMAL_REPLY:
+        render_lost_animal_reply(ev->arg2);
+        break;
+    case TXTRES_NARRATIVE_PEDDLER_REPLY:
+        render_peddler_reply(ev->arg2);
+        break;
     case TXTRES_NARRATIVE_FROG_TALK:
         render_frog_dialogue_intro();
         break;
@@ -743,8 +775,8 @@ static void render_dialogue_event(const GameEvent *ev)
 
 /*
  * #160: GAME_EVENT_ENCOUNTER adapter; arg0=kind, arg1=action, arg2=outcome.
- * txtres owns the stable encounter -> narrative key table so bandit/traveler
- * growth does not reopen event-kind branches in the render path.
+ * txtres owns the stable encounter -> narrative key table so bandit and
+ * roaming-friendly OPEN scenes do not reopen event-kind branches here.
  */
 static void render_encounter_event(const GameEvent *ev)
 {
@@ -757,6 +789,12 @@ static void render_encounter_event(const GameEvent *ev)
         break;
     case TXTRES_NARRATIVE_TRAVELER_SCENE:
         render_traveler_scene();
+        break;
+    case TXTRES_NARRATIVE_LOST_ANIMAL_SCENE:
+        render_lost_animal_scene();
+        break;
+    case TXTRES_NARRATIVE_PEDDLER_SCENE:
+        render_peddler_scene();
         break;
     case TXTRES_NARRATIVE_BANDIT_HANDOVER_PROMPT:
         render_bandit_handover_pick_prompt();
@@ -910,6 +948,9 @@ static void render_dialogue_guard_event(const GameEvent *ev)
         break;
     case GAME_DIALOGUE_GUARD_TRAVELER_WAITING:
         render_msg_traveler_waiting();
+        break;
+    case GAME_DIALOGUE_GUARD_ROAMING_ENCOUNTER_WAITING:
+        render_msg_roaming_encounter_waiting();
         break;
     case GAME_DIALOGUE_GUARD_NOBODY_WAITING_REPLY:
         render_msg_nobody_waiting_reply();
@@ -1266,6 +1307,42 @@ void render_traveler_reply(int choice)
     render_paragraph(txtres_traveler_reply(choice));
 }
 
+void render_lost_animal_scene(void)
+{
+    render_gap();
+    art_lost_animal();
+    render_copy(TXT_LOST_ANIMAL_INTRO);
+    RENDER_PRINTF("%s", TXT_LOST_ANIMAL_QUOTE_A);
+    RENDER_PRINTF("%s", TXT_LOST_ANIMAL_QUOTE_B);
+    RENDER_PRINTF("%s", TXT_LOST_ANIMAL_OPT1);
+    RENDER_PRINTF("%s", TXT_LOST_ANIMAL_OPT2);
+    RENDER_PRINTF("%s", TXT_LOST_ANIMAL_OPT3);
+    RENDER_PRINTF("%s", TXT_REPLY_PROMPT);
+}
+
+void render_lost_animal_reply(int choice)
+{
+    render_paragraph(txtres_lost_animal_reply(choice));
+}
+
+void render_peddler_scene(void)
+{
+    render_gap();
+    art_peddler();
+    render_copy(TXT_PEDDLER_INTRO);
+    RENDER_PRINTF("%s", TXT_PEDDLER_QUOTE_A);
+    RENDER_PRINTF("%s", TXT_PEDDLER_QUOTE_B);
+    RENDER_PRINTF("%s", TXT_PEDDLER_OPT1);
+    RENDER_PRINTF("%s", TXT_PEDDLER_OPT2);
+    RENDER_PRINTF("%s", TXT_PEDDLER_OPT3);
+    RENDER_PRINTF("%s", TXT_REPLY_PROMPT);
+}
+
+void render_peddler_reply(int choice)
+{
+    render_paragraph(txtres_peddler_reply(choice));
+}
+
 void render_frog_dialogue_intro(void)
 {
     render_gap();
@@ -1445,9 +1522,15 @@ void render_msg_loot_waiting(void)
     RENDER_PRINTF("%s", TXT_MSG_LOOT_WAITING);
 }
 
+/* Legacy guard copy; dialogue.c now emits ROAMING_ENCOUNTER_WAITING for all. */
 void render_msg_traveler_waiting(void)
 {
     RENDER_PRINTF("%s", TXT_MSG_TRAVELER_WAITING);
+}
+
+void render_msg_roaming_encounter_waiting(void)
+{
+    RENDER_PRINTF("%s", TXT_MSG_ROAMING_ENCOUNTER_WAITING);
 }
 
 /* scene is WatchmanDialogueScene (GAME_EVENT_DIALOGUE arg3 from npc.c). */

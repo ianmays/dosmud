@@ -24,6 +24,10 @@ enum TxtresNarrativeKey {
     TXTRES_NARRATIVE_BANDIT_OPEN,
     TXTRES_NARRATIVE_TRAVELER_SCENE,
     TXTRES_NARRATIVE_TRAVELER_REPLY,
+    TXTRES_NARRATIVE_LOST_ANIMAL_SCENE,
+    TXTRES_NARRATIVE_LOST_ANIMAL_REPLY,
+    TXTRES_NARRATIVE_PEDDLER_SCENE,
+    TXTRES_NARRATIVE_PEDDLER_REPLY,
     TXTRES_NARRATIVE_FROG_TALK,
     TXTRES_NARRATIVE_FROG_REPLY,
     TXTRES_NARRATIVE_WATCHMAN_TALK,
@@ -148,6 +152,24 @@ extern const char *const TXT_TRAVELER_OPT2;
 extern const char *const TXT_TRAVELER_OPT3;
 const char *txtres_traveler_reply(int choice);
 
+extern const char *const TXT_LOST_ANIMAL_INTRO;
+extern const char *const TXT_LOST_ANIMAL_ART_CAPTION;
+extern const char *const TXT_LOST_ANIMAL_QUOTE_A;
+extern const char *const TXT_LOST_ANIMAL_QUOTE_B;
+extern const char *const TXT_LOST_ANIMAL_OPT1;
+extern const char *const TXT_LOST_ANIMAL_OPT2;
+extern const char *const TXT_LOST_ANIMAL_OPT3;
+const char *txtres_lost_animal_reply(int choice);
+
+extern const char *const TXT_PEDDLER_INTRO;
+extern const char *const TXT_PEDDLER_ART_CAPTION;
+extern const char *const TXT_PEDDLER_QUOTE_A;
+extern const char *const TXT_PEDDLER_QUOTE_B;
+extern const char *const TXT_PEDDLER_OPT1;
+extern const char *const TXT_PEDDLER_OPT2;
+extern const char *const TXT_PEDDLER_OPT3;
+const char *txtres_peddler_reply(int choice);
+
 extern const char *const TXT_FROG_INTRO;
 extern const char *const TXT_FROG_ART_CAPTION;
 extern const char *const TXT_FROG_QUOTE;
@@ -205,6 +227,7 @@ extern const char *const TXT_MSG_ENV_MENU_CLOSED;
 extern const char *const TXT_MSG_BANDIT_BLOCK_TALK;
 extern const char *const TXT_MSG_LOOT_WAITING;
 extern const char *const TXT_MSG_TRAVELER_WAITING;
+extern const char *const TXT_MSG_ROAMING_ENCOUNTER_WAITING;
 extern const char *const TXT_MSG_NOBODY_TALK;
 extern const char *const TXT_MSG_DIALOGUE_CLOSED;
 extern const char *const TXT_MSG_GIVE_NO_TARGET;
