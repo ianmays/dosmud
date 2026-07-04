@@ -195,6 +195,10 @@ TEST testharn_fixture_sweep(void)
     ASSERT_EQ(1, rc);
     rc = testharn_apply(&game, "@fixture traveler_dialogue");
     ASSERT_EQ(1, rc);
+    rc = testharn_apply(&game, "@fixture lost_animal_dialogue");
+    ASSERT_EQ(1, rc);
+    rc = testharn_apply(&game, "@fixture peddler_dialogue");
+    ASSERT_EQ(1, rc);
     rc = testharn_apply(&game, "@fixture bag_berry");
     ASSERT_EQ(1, rc);
     rc = testharn_apply(&game, "@fixture bag_stacked");

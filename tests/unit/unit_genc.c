@@ -308,6 +308,35 @@ TEST genc_cmd_reply_invalid_choice(void)
     PASS();
 }
 
+/* Friendly roaming kinds have empty genc rows; reply returns 0 with an empty queue. */
+TEST genc_cmd_reply_lost_animal_encounter_kind_unhandled(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 10u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    ASSERT(begin_enemy_kind(&game, GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH,
+        GAME_ENCOUNTER_LOST_ANIMAL, &out) >= 0);
+    ASSERT_EQ(0, enemy_reply(&game, 1, &out));
+    ASSERT_EQ(0, out.count);
+    PASS();
+}
+
+TEST genc_cmd_reply_peddler_encounter_kind_unhandled(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 11u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    ASSERT(begin_enemy_kind(&game, GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH,
+        GAME_ENCOUNTER_PEDDLER, &out) >= 0);
+    ASSERT_EQ(0, enemy_reply(&game, 2, &out));
+    ASSERT_EQ(0, out.count);
+    PASS();
+}
+
 /* GAME_ENCOUNTER_TRAVELER has no genc row; reply returns 0 with an empty queue. */
 TEST genc_cmd_reply_unsupported_encounter_kind(void)
 {
@@ -377,6 +406,8 @@ SUITE(genc) {
     RUN_TEST(genc_cmd_reply_intimidate_clears_handover_pick);
     RUN_TEST(genc_cmd_reply_intimidate_fail);
     RUN_TEST(genc_cmd_reply_invalid_choice);
+    RUN_TEST(genc_cmd_reply_lost_animal_encounter_kind_unhandled);
+    RUN_TEST(genc_cmd_reply_peddler_encounter_kind_unhandled);
     RUN_TEST(genc_cmd_reply_unsupported_encounter_kind);
     RUN_TEST(genc_cmd_reply_bag_empty_then_combat);
     RUN_TEST(genc_cmd_give_unsupported_encounter_kind_falls_back_to_wrong_context);

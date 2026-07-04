@@ -365,6 +365,32 @@ TEST save_rejects_prior_version_without_mutating_target(void)
     PASS();
 }
 
+TEST save_rejects_v16_roster_layout(void)
+{
+    struct GameState game;
+    struct GameState loaded;
+    FILE *fp;
+    u32 loaded_draws;
+
+    save_cleanup_file();
+    save_fill_fixture(&game);
+    ASSERT_EQ(SAVE_RESULT_OK,
+        save_write_game(save_test_path(), &game, 7U));
+
+    fp = fopen(save_test_path(), "r+b");
+    ASSERT(fp != 0);
+    ASSERT(save_write_version(fp, 16U));
+    fclose(fp);
+
+    unit_game_fresh(&loaded, 77U);
+    loaded_draws = 555U;
+    ASSERT_EQ(SAVE_RESULT_FORMAT,
+        save_read_game(save_test_path(), &loaded, &loaded_draws));
+
+    save_cleanup_file();
+    PASS();
+}
+
 TEST save_rejects_out_of_range_without_mutating_target(void)
 {
     struct GameState game;
@@ -604,6 +630,49 @@ TEST save_round_trip_preserves_seeded_roaming_bandit(void)
     PASS();
 }
 
+TEST save_round_trip_preserves_seeded_roaming_friendly_profiles(void)
+{
+    struct GameState game;
+    struct GameState loaded;
+    int animal_slot;
+    int peddler_slot;
+    int loaded_animal;
+    int loaded_peddler;
+    u32 loaded_draws;
+
+    save_cleanup_file();
+    unit_game_fresh(&game, 223U);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    animal_slot = npc_find_by_actor(&game, GAME_DIALOGUE_ACTOR_LOST_ANIMAL);
+    peddler_slot = npc_find_by_actor(&game, GAME_DIALOGUE_ACTOR_PEDDLER);
+    ASSERT(animal_slot >= 0);
+    ASSERT(peddler_slot >= 0);
+    ASSERT_EQ(DIALOGUE_LOST_ANIMAL, game.npcs[animal_slot].dialogue);
+    ASSERT_EQ(GAME_ENCOUNTER_LOST_ANIMAL, game.npcs[animal_slot].encounter);
+    ASSERT_EQ(WORLD_ROOM_MEADOW, game.npcs[animal_slot].room_id);
+    ASSERT_EQ(DIALOGUE_PEDDLER, game.npcs[peddler_slot].dialogue);
+    ASSERT_EQ(GAME_ENCOUNTER_PEDDLER, game.npcs[peddler_slot].encounter);
+    ASSERT_EQ(WORLD_ROOM_GROVE, game.npcs[peddler_slot].room_id);
+
+    ASSERT_EQ(SAVE_RESULT_OK,
+        save_write_game(save_test_path(), &game, plat_rand_draw_count()));
+    ASSERT_EQ(SAVE_RESULT_OK,
+        save_read_game(save_test_path(), &loaded, &loaded_draws));
+
+    loaded_animal = npc_find_by_actor(&loaded, GAME_DIALOGUE_ACTOR_LOST_ANIMAL);
+    loaded_peddler = npc_find_by_actor(&loaded, GAME_DIALOGUE_ACTOR_PEDDLER);
+    ASSERT(loaded_animal >= 0);
+    ASSERT(loaded_peddler >= 0);
+    ASSERT_EQ(GAME_ENCOUNTER_LOST_ANIMAL, loaded.npcs[loaded_animal].encounter);
+    ASSERT_EQ(WORLD_ROOM_MEADOW, loaded.npcs[loaded_animal].room_id);
+    ASSERT_EQ(GAME_ENCOUNTER_PEDDLER, loaded.npcs[loaded_peddler].encounter);
+    ASSERT_EQ(WORLD_ROOM_GROVE, loaded.npcs[loaded_peddler].room_id);
+    ASSERT_EQ(0U, loaded_draws);
+
+    save_cleanup_file();
+    PASS();
+}
+
 TEST save_round_trip_preserves_herbalist_reward_on_ground(void)
 {
     struct GameState game;
@@ -807,6 +876,7 @@ SUITE(save)
     RUN_TEST(save_rejects_bad_magic);
     RUN_TEST(save_rejects_truncated_file);
     RUN_TEST(save_rejects_prior_version_without_mutating_target);
+    RUN_TEST(save_rejects_v16_roster_layout);
     RUN_TEST(save_rejects_out_of_range_without_mutating_target);
     RUN_TEST(save_rejects_excessive_rng_draw_count);
     RUN_TEST(save_rejects_write_with_excessive_rng_draw_count);
@@ -816,6 +886,7 @@ SUITE(save)
     RUN_TEST(save_rejects_oversized_bandit_level);
     RUN_TEST(save_rejects_oversized_combat_enemy_level);
     RUN_TEST(save_round_trip_preserves_seeded_roaming_bandit);
+    RUN_TEST(save_round_trip_preserves_seeded_roaming_friendly_profiles);
     RUN_TEST(save_round_trip_preserves_herbalist_reward_on_ground);
     RUN_TEST(save_round_trip_preserves_watchman_flags_and_menu);
     RUN_TEST(save_rejects_herbalist_complete_without_advancement);

@@ -87,7 +87,7 @@ const char *const TXT_STORY_TOWER_FED_DESC =
 
 /*
  * actor rows follow GameDialogueActor; columns follow GameDialoguePhase (gout.h).
- * Pad through GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH; bandit slots stay NONE until
+ * Pad through GAME_DIALOGUE_ACTOR_PEDDLER; bandit slots stay NONE until
  * authored dialogue scenes land.
  */
 static const unsigned char g_dialogue_narrative_keys[][3] = {
@@ -111,7 +111,11 @@ static const unsigned char g_dialogue_narrative_keys[][3] = {
     { TXTRES_NARRATIVE_NONE, TXTRES_NARRATIVE_NONE,
         TXTRES_NARRATIVE_NONE },
     { TXTRES_NARRATIVE_NONE, TXTRES_NARRATIVE_NONE,
-        TXTRES_NARRATIVE_NONE }
+        TXTRES_NARRATIVE_NONE },
+    { TXTRES_NARRATIVE_NONE, TXTRES_NARRATIVE_NONE,
+        TXTRES_NARRATIVE_LOST_ANIMAL_REPLY },
+    { TXTRES_NARRATIVE_NONE, TXTRES_NARRATIVE_NONE,
+        TXTRES_NARRATIVE_PEDDLER_REPLY }
 };
 
 struct EncounterNarrativeMap {
@@ -123,13 +127,17 @@ struct EncounterNarrativeMap {
 
 /*
  * Sparse kind/action/outcome rows for GAME_EVENT_ENCOUNTER payloads (gout.h).
- * Traveler OPEN only; bandit owns handover, give, and intimidate replies.
+ * Roaming-friendly kinds only emit OPEN; bandit owns handover/give/intimidate.
  */
 static const struct EncounterNarrativeMap g_encounter_narrative_keys[] = {
     { GAME_ENCOUNTER_BANDIT, GAME_ENCOUNTER_ACTION_OPEN,
         GAME_ENCOUNTER_OUTCOME_NONE, TXTRES_NARRATIVE_BANDIT_OPEN },
     { GAME_ENCOUNTER_TRAVELER, GAME_ENCOUNTER_ACTION_OPEN,
         GAME_ENCOUNTER_OUTCOME_NONE, TXTRES_NARRATIVE_TRAVELER_SCENE },
+    { GAME_ENCOUNTER_LOST_ANIMAL, GAME_ENCOUNTER_ACTION_OPEN,
+        GAME_ENCOUNTER_OUTCOME_NONE, TXTRES_NARRATIVE_LOST_ANIMAL_SCENE },
+    { GAME_ENCOUNTER_PEDDLER, GAME_ENCOUNTER_ACTION_OPEN,
+        GAME_ENCOUNTER_OUTCOME_NONE, TXTRES_NARRATIVE_PEDDLER_SCENE },
     { GAME_ENCOUNTER_BANDIT, GAME_ENCOUNTER_ACTION_HANDOVER_PROMPT,
         GAME_ENCOUNTER_OUTCOME_NONE, TXTRES_NARRATIVE_BANDIT_HANDOVER_PROMPT },
     { GAME_ENCOUNTER_BANDIT, GAME_ENCOUNTER_ACTION_HANDOVER,
@@ -371,6 +379,46 @@ const char *txtres_traveler_reply(int choice)
     return "They raise both hands. \"Fair. The road spies on everyone anyway.\"\n";
 }
 
+const char *const TXT_LOST_ANIMAL_INTRO =
+    "A shaggy goat trots into view, bells silent and coat dusted with meadow pollen.\n";
+const char *const TXT_LOST_ANIMAL_ART_CAPTION = "(lost from some unseen fold)";
+const char *const TXT_LOST_ANIMAL_QUOTE_A = "\"Maa,\" it says, then noses your sleeve as if you might know the way home. ";
+const char *const TXT_LOST_ANIMAL_QUOTE_B = "What do you do?\"\n";
+const char *const TXT_LOST_ANIMAL_OPT1 = "  [1] Shoo it toward the nearest fence line.\n";
+const char *const TXT_LOST_ANIMAL_OPT2 = "  [2] Share a handful of trail crumbs.\n";
+const char *const TXT_LOST_ANIMAL_OPT3 = "  [3] Leave it to find its own path.\n";
+
+const char *txtres_lost_animal_reply(int choice)
+{
+    if (choice == 1) {
+        return "The goat bleats once, then trots off with offended dignity.\n";
+    }
+    if (choice == 2) {
+        return "It crunches happily, then follows a hoofbeat only it can hear.\n";
+    }
+    return "It watches you go, then turns back to the tall grass.\n";
+}
+
+const char *const TXT_PEDDLER_INTRO =
+    "A peddler shifts a creaking pack and catches your eye between the trees.\n";
+const char *const TXT_PEDDLER_ART_CAPTION = "(no stall, just stubborn mileage)";
+const char *const TXT_PEDDLER_QUOTE_A = "\"Road goods, road prices,\" they say, tapping a bundle of twine. ";
+const char *const TXT_PEDDLER_QUOTE_B = "What brings you through the grove?\"\n";
+const char *const TXT_PEDDLER_OPT1 = "  [1] Ask what sells on a day like this.\n";
+const char *const TXT_PEDDLER_OPT2 = "  [2] Warn them bandits haunt the roads.\n";
+const char *const TXT_PEDDLER_OPT3 = "  [3] Keep walking.\n";
+
+const char *txtres_peddler_reply(int choice)
+{
+    if (choice == 1) {
+        return "They grin. \"Patience and string. Folks always need more string.\"\n";
+    }
+    if (choice == 2) {
+        return "Their smile thins. \"Then I keep my coin close and my feet closer.\"\n";
+    }
+    return "They shrug the pack higher and let the grove swallow the path between you.\n";
+}
+
 const char *const TXT_FROG_INTRO =
     "A damp frog wearing an imaginary crown clears his throat.\n";
 const char *const TXT_FROG_ART_CAPTION = "(His Majesty, Pond Operations)";
@@ -448,7 +496,8 @@ const char *const TXT_MSG_ENV_MENU_CLOSED =
 const char *const TXT_MSG_BANDIT_BLOCK_TALK = "The bandit has your full attention right now.\n";
 const char *const TXT_MSG_LOOT_WAITING =
     "Finish looting with the numbered corpse menu, or type loot to leave the body alone.\n";
-const char *const TXT_MSG_TRAVELER_WAITING = "The traveler is waiting for an answer (1/2/3).\n";
+const char *const TXT_MSG_ROAMING_ENCOUNTER_WAITING =
+    "They are waiting on your move (reply 1/2/3).\n";
 const char *const TXT_MSG_NOBODY_TALK = "Nobody here wants to talk.\n";
 const char *const TXT_MSG_DIALOGUE_CLOSED = "You leave the conversation and turn back to the room.\n";
 const char *const TXT_MSG_GIVE_NO_TARGET = "Nobody here is waiting for an offered item.\n";

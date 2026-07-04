@@ -1128,6 +1128,7 @@ TEST game_drop_allowed_while_loot_menu_open_after_bag_full(void)
 
     unit_game_fresh(&game, 45u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game.test_quiet_ticks = 1;
     game.corpse_present[WORLD_ROOM_CAMP] = 1;
     game.corpse_item[WORLD_ROOM_CAMP][0] = ITEM_BERRY;
     game.corpse_item[WORLD_ROOM_CAMP][1] = ITEM_NONE;

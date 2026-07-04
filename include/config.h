@@ -175,8 +175,11 @@
 #define CFG_WEATHER_FOG_NOISE_SKIP_GE 60
 #define CFG_WEATHER_FOG_ENCOUNTER_ALLOW_BELOW 40
 
-/* Dynamic NPC roster cap (save payload and per-tick roaming walks). */
-#define CFG_NPC_MAX 6
+/*
+ * Dynamic NPC roster cap (save payload and per-tick roaming walks).
+ * Six authored seed profiles plus headroom for dynamic ambush spawns.
+ */
+#define CFG_NPC_MAX 8
 
 /* --- Main loop and test harness --- */
 

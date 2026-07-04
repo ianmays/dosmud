@@ -56,6 +56,10 @@ void render_atmosphere_weather_clear(void);
 
 void render_traveler_scene(void);
 void render_traveler_reply(int choice);
+void render_lost_animal_scene(void);
+void render_lost_animal_reply(int choice);
+void render_peddler_scene(void);
+void render_peddler_reply(int choice);
 void render_frog_dialogue_intro(void);
 void render_frog_dialogue_branch(int choice);
 
@@ -78,7 +82,7 @@ void render_msg_env_menu(int kind);
 void render_msg_env_result(int kind, int choice, int detail);
 void render_msg_bandit_blocks_talk(void);
 void render_msg_loot_waiting(void);
-void render_msg_traveler_waiting(void);
+void render_msg_roaming_encounter_waiting(void);
 void render_msg_watchman_talk(int scene);
 void render_msg_herbalist_talk(int scene);
 void render_msg_archivist_talk(void);

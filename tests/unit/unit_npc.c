@@ -461,6 +461,28 @@ static struct NpcState *traveler_npc(struct GameState *game)
     return &game->npcs[slot];
 }
 
+static struct NpcState *lost_animal_npc(struct GameState *game)
+{
+    int slot;
+
+    slot = npc_find_by_actor(game, GAME_DIALOGUE_ACTOR_LOST_ANIMAL);
+    if (slot < 0) {
+        return 0;
+    }
+    return &game->npcs[slot];
+}
+
+static struct NpcState *peddler_npc(struct GameState *game)
+{
+    int slot;
+
+    slot = npc_find_by_actor(game, GAME_DIALOGUE_ACTOR_PEDDLER);
+    if (slot < 0) {
+        return 0;
+    }
+    return &game->npcs[slot];
+}
+
 static struct NpcState *bandit_npc(struct GameState *game)
 {
     int slot;
@@ -581,8 +603,15 @@ TEST npc_roaming_step_moves(void)
     ASSERT(traveler != 0);
     ASSERT(bandit != 0);
     traveler->room_id = WORLD_ROOM_CAMP;
-    /* Bandit stays inactive so roaming_step RNG applies only to the traveler. */
+    /*
+     * Isolate the traveler roam draw: deactivate every other active profile so
+     * npc_roaming_step RNG is not consumed by co-located slots.
+     */
     bandit->flags &= ~NPC_FLAG_ACTIVE;
+    npc_deactivate_until(&game, GAME_DIALOGUE_ACTOR_LOST_ANIMAL, 999999UL);
+    npc_deactivate_until(&game, GAME_DIALOGUE_ACTOR_PEDDLER, 999999UL);
+    npc_deactivate_until(&game, GAME_DIALOGUE_ACTOR_BANDIT_BRIDGE, 999999UL);
+    npc_deactivate_until(&game, GAME_DIALOGUE_ACTOR_BANDIT_CANYON, 999999UL);
     plat_seed_rng(42u);
     ASSERT_EQ(0U, plat_rand_draw_count());
     before = traveler->room_id;
@@ -599,6 +628,7 @@ TEST npc_spawn_and_presence_support_multiple_instances(void)
 
     unit_game_fresh(&game, 41u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    npc_deactivate_until(&game, GAME_DIALOGUE_ACTOR_LOST_ANIMAL, 999999UL);
     slot = npc_spawn(&game, GAME_DIALOGUE_ACTOR_NOBODY, DIALOGUE_NONE,
         GAME_ENCOUNTER_NONE, WORLD_ROOM_MEADOW, NPC_FLAG_ACTIVE);
     ASSERT(slot >= 0);
@@ -738,10 +768,15 @@ TEST npc_bandit_roaming_waits_for_warmup_tick(void)
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, PROFILE_BANDIT_ROAM_START - 1);
     bandit = bandit_npc(&game);
     ASSERT(bandit != 0);
+    npc_deactivate_until(&game, GAME_DIALOGUE_ACTOR_TRAVELER, 999999UL);
+    npc_deactivate_until(&game, GAME_DIALOGUE_ACTOR_LOST_ANIMAL, 999999UL);
+    npc_deactivate_until(&game, GAME_DIALOGUE_ACTOR_PEDDLER, 999999UL);
+    npc_deactivate_until(&game, GAME_DIALOGUE_ACTOR_BANDIT_BRIDGE, 999999UL);
+    npc_deactivate_until(&game, GAME_DIALOGUE_ACTOR_BANDIT_CANYON, 999999UL);
     before = bandit->room_id;
     plat_seed_rng(game.seed);
     npc_roaming_step(&game);
-    ASSERT_EQ(1U, plat_rand_draw_count());
+    ASSERT_EQ(0U, plat_rand_draw_count());
     ASSERT_EQ(before, bandit->room_id);
     PASS();
 }
@@ -847,6 +882,111 @@ TEST npc_roaming_reply_event(void)
     PASS();
 }
 
+TEST npc_seed_profiles_lost_animal_state(void)
+{
+    struct GameState game;
+    struct NpcState *animal;
+
+    unit_game_fresh(&game, 39u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    animal = lost_animal_npc(&game);
+    ASSERT(animal != 0);
+    ASSERT_EQ(GAME_DIALOGUE_ACTOR_LOST_ANIMAL, animal->actor);
+    ASSERT_EQ(DIALOGUE_LOST_ANIMAL, animal->dialogue);
+    ASSERT_EQ(GAME_ENCOUNTER_LOST_ANIMAL, animal->encounter);
+    ASSERT_EQ(WORLD_ROOM_MEADOW, animal->room_id);
+    ASSERT_EQ(NPC_FLAG_ACTIVE | NPC_FLAG_ROAMING | NPC_FLAG_RESPAWNS,
+        animal->flags);
+    PASS();
+}
+
+TEST npc_seed_profiles_peddler_state(void)
+{
+    struct GameState game;
+    struct NpcState *peddler;
+
+    unit_game_fresh(&game, 39u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    peddler = peddler_npc(&game);
+    ASSERT(peddler != 0);
+    ASSERT_EQ(GAME_DIALOGUE_ACTOR_PEDDLER, peddler->actor);
+    ASSERT_EQ(DIALOGUE_PEDDLER, peddler->dialogue);
+    ASSERT_EQ(GAME_ENCOUNTER_PEDDLER, peddler->encounter);
+    ASSERT_EQ(WORLD_ROOM_GROVE, peddler->room_id);
+    ASSERT_EQ(NPC_FLAG_ACTIVE | NPC_FLAG_ROAMING | NPC_FLAG_RESPAWNS,
+        peddler->flags);
+    PASS();
+}
+
+TEST npc_lost_animal_roaming_encounter_opens_in_matching_room(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    struct NpcState *animal;
+
+    unit_game_fresh(&game, 51u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_MEADOW, 0);
+    animal = lost_animal_npc(&game);
+    ASSERT(animal != 0);
+    animal->flags &= ~NPC_FLAG_NEEDS_SEPARATION;
+    animal->room_id = WORLD_ROOM_MEADOW;
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, npc_roaming_begin_encounter_in_room(&game, WORLD_ROOM_MEADOW,
+            &out));
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(DIALOGUE_LOST_ANIMAL, game.dialogue);
+    ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
+    ASSERT_EQ(GAME_ENCOUNTER_LOST_ANIMAL, out.events[0].arg0);
+    PASS();
+}
+
+TEST npc_peddler_roaming_encounter_opens_in_matching_room(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    struct NpcState *peddler;
+
+    unit_game_fresh(&game, 52u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_GROVE, 0);
+    peddler = peddler_npc(&game);
+    ASSERT(peddler != 0);
+    peddler->flags &= ~NPC_FLAG_NEEDS_SEPARATION;
+    peddler->room_id = WORLD_ROOM_GROVE;
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, npc_roaming_begin_encounter_in_room(&game, WORLD_ROOM_GROVE,
+            &out));
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(DIALOGUE_PEDDLER, game.dialogue);
+    ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
+    ASSERT_EQ(GAME_ENCOUNTER_PEDDLER, out.events[0].arg0);
+    PASS();
+}
+
+TEST npc_lost_animal_roaming_reply_event(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 53u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_MEADOW, 0);
+    game_set_mode_dialogue(&game, DIALOGUE_LOST_ANIMAL);
+    ASSERT_EQ(1, roaming_npc_reply_out(&game, 1, &out));
+    ASSERT_EQ(GAME_EVENT_DIALOGUE, out.events[0].kind);
+    ASSERT_EQ(GAME_DIALOGUE_ACTOR_LOST_ANIMAL, out.events[0].arg0);
+    ASSERT_EQ(GAME_DIALOGUE_PHASE_REPLY, out.events[0].arg1);
+    ASSERT_EQ(1, out.events[0].arg2);
+    PASS();
+}
+
+TEST npc_is_roaming_friendly_dialogue_recognizes_new_kinds(void)
+{
+    ASSERT_EQ(1, npc_is_roaming_friendly_dialogue(DIALOGUE_TRAVELER));
+    ASSERT_EQ(1, npc_is_roaming_friendly_dialogue(DIALOGUE_LOST_ANIMAL));
+    ASSERT_EQ(1, npc_is_roaming_friendly_dialogue(DIALOGUE_PEDDLER));
+    ASSERT_EQ(0, npc_is_roaming_friendly_dialogue(DIALOGUE_ENEMY));
+    PASS();
+}
+
 SUITE(npc) {
     RUN_TEST(npc_room_actor_lookup);
     RUN_TEST(npc_dialogue_actor_lookup);
@@ -886,4 +1026,10 @@ SUITE(npc) {
     RUN_TEST(npc_roaming_reply_cmd_invalid_choice);
     RUN_TEST(npc_roaming_encounter_event);
     RUN_TEST(npc_roaming_reply_event);
+    RUN_TEST(npc_seed_profiles_lost_animal_state);
+    RUN_TEST(npc_seed_profiles_peddler_state);
+    RUN_TEST(npc_lost_animal_roaming_encounter_opens_in_matching_room);
+    RUN_TEST(npc_peddler_roaming_encounter_opens_in_matching_room);
+    RUN_TEST(npc_lost_animal_roaming_reply_event);
+    RUN_TEST(npc_is_roaming_friendly_dialogue_recognizes_new_kinds);
 }

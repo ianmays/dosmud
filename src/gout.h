@@ -173,7 +173,10 @@ enum GameEventDialogueActor {
     GAME_DIALOGUE_ACTOR_BANDIT_BRIDGE = 8,
     GAME_DIALOGUE_ACTOR_BANDIT_CANYON = 9,
     /* dynamic ambush bandit; shares enemy encounter logic */
-    GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH = 10
+    GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH = 10,
+    /* roaming-friendly actors; reply via npc_roaming_cmd_reply, not genc */
+    GAME_DIALOGUE_ACTOR_LOST_ANIMAL = 11,
+    GAME_DIALOGUE_ACTOR_PEDDLER = 12
 };
 
 enum GameEventDialoguePhase {
@@ -185,7 +188,10 @@ enum GameEventDialoguePhase {
 enum GameEventEncounterKind {
     GAME_ENCOUNTER_NONE = 0,
     GAME_ENCOUNTER_BANDIT,
-    GAME_ENCOUNTER_TRAVELER
+    GAME_ENCOUNTER_TRAVELER,
+    /* dialogue-only OPEN encounters; genc handler rows stay empty */
+    GAME_ENCOUNTER_LOST_ANIMAL,
+    GAME_ENCOUNTER_PEDDLER
 };
 
 enum GameEventEncounterAction {
@@ -213,7 +219,8 @@ enum GameEventDialogueGuardReason {
     GAME_DIALOGUE_GUARD_BANDIT_WAITING_HANDOVER_PICK,
     GAME_DIALOGUE_GUARD_BANDIT_BLOCKS_TALK,
     GAME_DIALOGUE_GUARD_LOOT_WAITING_REPLY,
-    GAME_DIALOGUE_GUARD_TRAVELER_WAITING,
+    /* blocks talk while traveler / lost animal / peddler await reply 1/2/3 */
+    GAME_DIALOGUE_GUARD_ROAMING_ENCOUNTER_WAITING,
     GAME_DIALOGUE_GUARD_NOBODY_WAITING_REPLY,
     /* non-loot dialogue dismissed by explore verb before the verb runs (#205). */
     GAME_DIALOGUE_GUARD_DIALOGUE_CLOSED,

@@ -23,7 +23,7 @@ Purpose:
 - `make check-layers`: core/render boundary guard (no `printf` in `src/*.c` except `main.c`, `grendr.c`, and the platform files `platpos.c`, `platwin.c`, and `platdos.c`)
 - `make test`: strict deterministic compile (`-Werror`, `-DTEST_MODE`, `-g -O0`); does not run `check-layers`; prints `elapsed: <seconds>` after the compile/link step
 - `make test-win`: WSL cross-compile of the native Windows console `TEST_MODE` executable (`dosmud.exe`); compile-only, no snapshot run from Linux
-- `make snapshot-run`: runs every name in `SNAPSHOT_TESTS` plus `seed_cli` and `version_cli` against the existing native `TEST_MODE` binary (`./dosmud`; see [Snapshot test files](#snapshot-test-files)). Each step prints `snapshot: <name>`. Finishes with `snapshot tests passed: N/M` (for example `97/97` names in `SNAPSHOT_TESTS` plus `seed_cli` and `version_cli`, 99 steps total).
+- `make snapshot-run`: runs every name in `SNAPSHOT_TESTS` plus `seed_cli` and `version_cli` against the existing native `TEST_MODE` binary (`./dosmud`; see [Snapshot test files](#snapshot-test-files)). Each step prints `snapshot: <name>`. Finishes with `snapshot tests passed: N/M` (for example `101/101` names in `SNAPSHOT_TESTS` plus `seed_cli` and `version_cli`, 103 steps total).
 - `make test-run`: builds the test binary (`make test`), then runs `make snapshot-run`.
 - `make test-unit`: builds and runs the greatest unit suite (`tests/unit/build/dosmud_unit`, `TEST_MODE` only; not linked into release `dosmud`)
 - `make test-soak`: builds and runs long-run soak/stress checks (`tests/soak/build/dosmud_soak`; separate from unit tests)
@@ -161,7 +161,7 @@ Scenarios (see [`tests/soak/soak_sim.c`](https://github.com/ianmays/dosmud/blob/
 
 | Test | Loop |
 |------|------|
-| `soak_background_ticks` | `CFG_TEST_SOAK_TICKS` (10000) × `game_background_step` with the roster-backed roaming bandit, roaming traveler, and atmosphere |
+| `soak_background_ticks` | `CFG_TEST_SOAK_TICKS` (10000) × `game_background_step` with roster-backed roaming NPCs (bandits, traveler, lost animal, peddler) and atmosphere |
 | `soak_command_wait_move` | 10000 × alternate `wait` / `move north` with `test_quiet_ticks` |
 | `soak_combat_loop` | `CFG_TEST_SOAK_COMBAT_ROUNDS` (200) × one-hit combat victory with roll inject |
 
@@ -233,11 +233,13 @@ Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_
 | `weather_rain_ready` | `ambient_camp` at tick `CFG_WEATHER_INITIAL_DELAY_TICKS - 1` so one `wait` hits the first weather transition ([#51](https://github.com/ianmays/dosmud/issues/51)) |
 | `weather_fog` | Camp with `GAME_WEATHER_FOG` active for room-look weather HUD |
 
-**Traveler (roaming NPC)** (co-located dialogue without tick movement):
+**Friendly roaming NPCs** (co-located dialogue without tick movement; reply routing via `npc_roaming_cmd_reply`):
 
 | Fixture | State |
 |---------|--------|
 | `traveler_dialogue` | Road, tick 0, player and roaming traveler co-located, traveler dialogue open (intro + options rendered) |
+| `lost_animal_dialogue` | Meadow, tick 0, player and roaming lost animal co-located, lost-animal dialogue open (intro + options rendered) |
+| `peddler_dialogue` | Grove, tick 0, player and roaming peddler co-located, peddler dialogue open (intro + options rendered) |
 
 **Bags / items** (explore, named room):
 
@@ -323,7 +325,7 @@ Each process run uses one `.input` file until `quit`. `make snapshot-run` runs `
 
 **Movement / time:** `walk_north`, `walk_map`, `wait_tick`.
 
-**NPC talk:** `frog_hint`, `frog_replies`, `watchman_talk`, `watchman_warned_followup`, `watchman_meal_peckish`, `watchman_meal_tower_desc`, `traveler_replies`, `traveler_talk_blocked`, `herbalist_talk`, `herbalist_request`, `herbalist_incomplete`, `herbalist_complete`, `herbalist_followup`, `herbalist_save_load`, `herbalist_give_reject`, `herbalist_give_floor`, `archivist_talk`, `talk_nobody`, `dialogue_menu_exit`, `game_event_dialogue`, `narrative_indirection` (`frog_hint` proves the generic room-NPC hint also applies at the pond; the Herbalist set covers the first authored narrative slice plus the reusable room-NPC exchange follow-up through request (including REQUESTED root menu and gossip-leaves-dialogue), reminder, accepted hand-in, bag-full floor reward, reject feedback, save/load (`herbalist_menu` in save v13), and follow-up states; `watchman_talk`, `watchman_warned_followup`, `watchman_meal_peckish`, and `watchman_meal_tower_desc` cover tower watchman in-menu warning and meal threads plus persisted tower room copy after meal `give` ([#8](https://github.com/ianmays/dosmud/issues/8), [#220](https://github.com/ianmays/dosmud/issues/220)); the others cover pond frog, bandit camp talk, and traveler interaction through generic `GAME_EVENT_DIALOGUE` / `GAME_EVENT_ENCOUNTER` paths; `dialogue_menu_exit` uses `@fixture traveler_dialogue` and `look` to dismiss a room-NPC menu before the verb runs; `narrative_indirection` exercises traveler, watchman, and bandit give/intimidate scenes end-to-end through the `txtres` narrative-key indirection path; [#175](https://github.com/ianmays/dosmud/pull/175), [#196](https://github.com/ianmays/dosmud/issues/196), [#205](https://github.com/ianmays/dosmud/issues/205), [#76](https://github.com/ianmays/dosmud/issues/76), [#132](https://github.com/ianmays/dosmud/issues/132)).
+**NPC talk:** `frog_hint`, `frog_replies`, `watchman_talk`, `watchman_warned_followup`, `watchman_meal_peckish`, `watchman_meal_tower_desc`, `traveler_replies`, `traveler_talk_blocked`, `lost_animal_replies`, `lost_animal_talk_blocked`, `peddler_replies`, `peddler_talk_blocked`, `herbalist_talk`, `herbalist_request`, `herbalist_incomplete`, `herbalist_complete`, `herbalist_followup`, `herbalist_save_load`, `herbalist_give_reject`, `herbalist_give_floor`, `archivist_talk`, `talk_nobody`, `dialogue_menu_exit`, `game_event_dialogue`, `narrative_indirection` (`frog_hint` proves the generic room-NPC hint also applies at the pond; the Herbalist set covers the first authored narrative slice plus the reusable room-NPC exchange follow-up through request (including REQUESTED root menu and gossip-leaves-dialogue), reminder, accepted hand-in, bag-full floor reward, reject feedback, save/load (`herbalist_menu` in save v13), and follow-up states; `watchman_talk`, `watchman_warned_followup`, `watchman_meal_peckish`, and `watchman_meal_tower_desc` cover tower watchman in-menu warning and meal threads plus persisted tower room copy after meal `give` ([#8](https://github.com/ianmays/dosmud/issues/8), [#220](https://github.com/ianmays/dosmud/issues/220)); the others cover pond frog, bandit camp talk, and friendly roaming NPC interaction (traveler, lost animal, peddler) through generic `GAME_EVENT_DIALOGUE` / `GAME_EVENT_ENCOUNTER` paths; `lost_animal_*` and `peddler_*` use `@fixture lost_animal_dialogue` / `peddler_dialogue` for reply branches and `talk` guards; `dialogue_menu_exit` uses `@fixture traveler_dialogue` and `look` to dismiss a room-NPC menu before the verb runs; `narrative_indirection` exercises traveler, watchman, and bandit give/intimidate scenes end-to-end through the `txtres` narrative-key indirection path; [#175](https://github.com/ianmays/dosmud/pull/175), [#196](https://github.com/ianmays/dosmud/issues/196), [#205](https://github.com/ianmays/dosmud/issues/205), [#76](https://github.com/ianmays/dosmud/issues/76), [#132](https://github.com/ianmays/dosmud/issues/132), [#54](https://github.com/ianmays/dosmud/issues/54)).
 
 **Eat / use:** `use_salve`, `use_torch`, `use_spear`, `use_stone`, `eat_berry`, `eat_fish`, `eat_berry_heal`, `eat_fish_heal`, `eat_not_edible`, `eat_missing`.
 
@@ -339,7 +341,7 @@ Each process run uses one `.input` file until `quit`. `make snapshot-run` runs `
 
 **Meta / inventory:** `unknown_cmd`, `cannot_move`, `give_wrong_context`, `reply_nobody`, `post_combat_reply_guard`, `reply_invalid`, `craft_salve`, `craft_unknown`, `take_nothing`, `take_wrong_item`.
 
-**Save/load:** `save_load`, `herbalist_save_load` (single-slot `save.dat` round-trip with a deterministic post-load move or authored-story follow-up state; `unit_save.c` round-trip fixtures assert save v16 `weather_kind` / `weather_expires_tick` plus v15 `env_interact_*`, v14 `world_adv_flags`, v13 `herbalist_menu`, and v12 `watchman_flags` / `watchman_menu`).
+**Save/load:** `save_load`, `herbalist_save_load` (single-slot `save.dat` round-trip with a deterministic post-load move or authored-story follow-up state; `unit_save.c` round-trip fixtures assert save v17 roster width (`CFG_NPC_MAX` 8) plus v16 `weather_kind` / `weather_expires_tick`, v15 `env_interact_*`, v14 `world_adv_flags`, v13 `herbalist_menu`, and v12 `watchman_flags` / `watchman_menu`; v16 and older files reject with `SAVE_RESULT_FORMAT`).
 
 **Replay:** `replay_log` (stdout plus sidecar log golden files; [#156](https://github.com/ianmays/dosmud/issues/156)).
 
