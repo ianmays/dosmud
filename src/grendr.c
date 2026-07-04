@@ -4,6 +4,7 @@
 /*
  * grendr owns terminal presentation: it consumes GameEvent records from core
  * and maps them to printf output, spacing tiers, and ASCII art.
+ * #130: night HUD from ROOM_LOOK arg1; map blank queries gatmos_night_map_blanked.
  */
 
 #include "grendr.h"
@@ -17,6 +18,7 @@
 #include "world.h"
 #include "txtres.h"
 #include "fmt.h"
+#include "gatmos.h"
 
 #ifdef TEST_MODE
 static int g_render_suppress;
@@ -450,11 +452,14 @@ static void render_room_look_snapshot(const struct GameState *game, int room_id,
     const struct Room *room;
     int corpse_present;
     int weather_kind;
+    int day_phase;
     int dir;
     int ground_len;
 
+    /* arg1 layout matches gout.h ROOM_LOOK contract (#47, #51, #130). */
     corpse_present = look_arg1 & 1;
-    weather_kind = look_arg1 >> 1;
+    weather_kind = (look_arg1 >> 1) & 3;
+    day_phase = (look_arg1 >> 3) & 1;
     room = &game->world.rooms[room_id];
     game_print_location_art(room_id);
     render_gap();
@@ -495,8 +500,11 @@ static void render_room_look_snapshot(const struct GameState *game, int room_id,
         RENDER_PRINTF("%s", TXT_UI_WEATHER_RAIN);
     } else if (weather_kind == GAME_WEATHER_FOG) {
         RENDER_PRINTF("%s", TXT_UI_WEATHER_FOG);
-    } else if (weather_kind == GAME_WEATHER_WIND) {
+    } else     if (weather_kind == GAME_WEATHER_WIND) {
         RENDER_PRINTF("%s", TXT_UI_WEATHER_WIND);
+    }
+    if (day_phase == GAME_NIGHT) {
+        RENDER_PRINTF("%s", TXT_UI_NIGHT);
     }
 }
 
@@ -861,6 +869,15 @@ static void render_environment_event(const GameEvent *ev)
         break;
     case GAME_ENV_EVENT_WEATHER_CLEAR:
         render_atmosphere_weather_clear();
+        break;
+    case GAME_ENV_EVENT_NIGHT_FALL:
+        render_atmosphere_night_fall();
+        break;
+    case GAME_ENV_EVENT_DAY_BREAK:
+        render_atmosphere_day_break();
+        break;
+    case GAME_ENV_EVENT_NIGHT_LOST:
+        render_atmosphere_night_lost();
         break;
     default:
         break;
@@ -1284,6 +1301,21 @@ void render_atmosphere_weather_wind(void)
 void render_atmosphere_weather_clear(void)
 {
     render_paragraph(TXT_ATMO_WEATHER_CLEAR);
+}
+
+void render_atmosphere_night_fall(void)
+{
+    render_paragraph(TXT_ATMO_NIGHT_FALL);
+}
+
+void render_atmosphere_day_break(void)
+{
+    render_paragraph(TXT_ATMO_DAY_BREAK);
+}
+
+void render_atmosphere_night_lost(void)
+{
+    render_paragraph(TXT_ATMO_NIGHT_LOST);
 }
 
 void render_traveler_scene(void)
@@ -1918,8 +1950,21 @@ void render_inv_unwield_ground(const char *item_name)
 void render_exploration_map(const struct GameState *game)
 {
     char mapbuf[CFG_FMT_MAP_MAX];
+    char exitsbuf[64];
     int len;
 
+    /* night_lost + no torch: gatmos_night_map_blanked; look snapshots unchanged. */
+    if (gatmos_night_map_blanked(game)) {
+        RENDER_PRINTF("%s", TXT_MAP_NIGHT_BLANK);
+        len = fmt_player_room_exits(game, exitsbuf, (int)sizeof(exitsbuf));
+        if (len >= 0) {
+            RENDER_PRINTF("%s", exitsbuf);
+        }
+        return;
+    }
+    if (gatmos_night_torch_lights_map(game)) {
+        RENDER_PRINTF("%s", TXT_MAP_TORCH_LIGHT);
+    }
     len = fmt_exploration_map(game, mapbuf, (int)sizeof(mapbuf));
     if (len >= 0) {
         RENDER_PRINTF("%s", mapbuf);

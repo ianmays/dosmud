@@ -9,6 +9,7 @@
 #include "game.h"
 #include "gout.h"
 #include "items.h"
+#include "gatmos.h"
 
 /*
  * #158: typed inventory events (payload layout in gout.h). Queue carries item
@@ -235,6 +236,9 @@ int game_inv_bag_add(struct GameState *game, int item_id)
     }
     game->bag[game->bag_count] = item_id;
     game->bag_count += 1;
+    if (item_id == ITEM_TORCH) {
+        gatmos_clear_night_lost_with_torch(game);
+    }
     return 1;
 }
 
@@ -704,6 +708,9 @@ int game_inv_cmd_wield(struct GameState *game, int item_arg, GameEventQueue *out
         }
     }
     game->weapon_equipped = item_arg;
+    if (item_arg == ITEM_TORCH) {
+        gatmos_clear_night_lost_with_torch(game);
+    }
     push_equip_result(out, item_arg, GAME_EQUIP_OUTCOME_WIELDED);
     return 1;
 }

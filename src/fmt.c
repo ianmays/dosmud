@@ -198,6 +198,18 @@ int fmt_room_ground_items(const int *room_items, char *buf, int bufsize)
     return pos;
 }
 
+int fmt_player_room_exits(const struct GameState *game, char *buf, int bufsize)
+{
+    const struct Room *room;
+
+    if (buf == 0 || bufsize <= 0 || game == 0) {
+        return -1;
+    }
+    buf[0] = '\0';
+    room = &game->world.rooms[game->player.room_id];
+    return fmt_buf_append_room_exits(buf, bufsize, 0, room);
+}
+
 int fmt_exploration_map(const struct GameState *game, char *buf, int bufsize)
 {
     const struct Room *room;

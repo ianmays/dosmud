@@ -2,6 +2,7 @@
  * Ambient world feel and room item seeding. The shorter basename keeps the
  * DOS/OpenWatcom tree compatible with FAT 8+3 limits.
  * #51: owns global weather transitions, atmosphere bias, and fog encounter gate.
+ * #130: owns day/night phase cycle, night-lost rolls, and map-blank query.
  */
 
 #ifndef GATMOS_H
@@ -27,5 +28,13 @@ void gatmos_queue_restored_menu(struct GameState *game,
 /* #51: global weather tick and fog roaming-encounter gate (hash-only rolls). */
 void gatmos_weather_tick(struct GameState *game, struct GameEventQueue *out);
 int gatmos_weather_blocks_roaming_encounter(struct GameState *game);
+/* #130: day/night phase tick, lost-on-move, and render/query helpers. */
+void gatmos_daynight_tick(struct GameState *game, struct GameEventQueue *out);
+void gatmos_try_night_lost_on_move(struct GameState *game,
+                                   struct GameEventQueue *out);
+int gatmos_night_map_blanked(const struct GameState *game);
+int gatmos_night_torch_lights_map(const struct GameState *game);
+/* Clear night_lost when the player gains a torch during night (#130). */
+void gatmos_clear_night_lost_with_torch(struct GameState *game);
 
 #endif

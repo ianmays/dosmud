@@ -190,7 +190,7 @@ are handled by `testharn` before normal command parsing. Harness lines are not e
 
 Prefer fixtures over long setup scripts when a test needs a specific mode, inventory, or encounter. After changing fixture output, regenerate the matching `.expect` with `make test-run` and review the diff.
 
-Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_init`: mode, room, tick, player stats, bag, combat, NPC roster state, corpses, ground items, env focus, env interact menu, global weather (`weather_kind`, `weather_expires_tick`), and map exploration). That leaves the world graph and `GameState.seed` unchanged. `main.c` then calls `plat_seed_rng(game.seed)` so tracked `plat_rand()` draws match that seed and follow-up rolls do not depend on earlier commands in the same run.
+Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_init`: mode, room, tick, player stats, bag, combat, NPC roster state, corpses, ground items, env focus, env interact menu, global weather (`weather_kind`, `weather_expires_tick`), global day/night (`day_phase`, `day_expires_tick`, `night_lost`), and map exploration). That leaves the world graph and `GameState.seed` unchanged. `main.c` then calls `plat_seed_rng(game.seed)` so tracked `plat_rand()` draws match that seed and follow-up rolls do not depend on earlier commands in the same run.
 
 **Bandit / combat** (camp baseline; bandit setups clear camp ground items so the stick is only in bag or wield slot):
 
@@ -232,6 +232,9 @@ Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_
 | `ambient_camp` | Camp, traveler off; ambient tick snapshots without quiet ticks |
 | `weather_rain_ready` | `ambient_camp` at tick `CFG_WEATHER_INITIAL_DELAY_TICKS - 1` so one `wait` hits the first weather transition ([#51](https://github.com/ianmays/dosmud/issues/51)) |
 | `weather_fog` | Camp with `GAME_WEATHER_FOG` active for room-look weather HUD |
+| `night_at_camp` | Camp at night (`GAME_NIGHT`), `night_lost` clear, for room-look night HUD ([#130](https://github.com/ianmays/dosmud/issues/130)) |
+| `night_lost` | Camp at night with `night_lost` set after a failed lost-on-move roll; blank `map` ([#130](https://github.com/ianmays/dosmud/issues/130)) |
+| `night_torch_camp` | Camp at night with a torch in the bag, for torch-lit map copy ([#130](https://github.com/ianmays/dosmud/issues/130)) |
 
 **Friendly roaming NPCs** (co-located dialogue without tick movement; reply routing via `npc_roaming_cmd_reply`):
 
@@ -331,7 +334,7 @@ Each process run uses one `.input` file until `quit`. `make snapshot-run` runs `
 
 **Inspect:** `inspect_rustle`, `inspect_creak`, `inspect_water`, `inspect_grit`, `inspect_none`, `inspect_wrong`, `inspect_water_followup` (post-inspect water menu reply `1` follow-up copy), `env_menu_dismiss` (`@fixture env_focus_water`, `inspect`, then `north` dismisses the env menu before the move runs; [#7](https://github.com/ianmays/dosmud/issues/7), [#205](https://github.com/ianmays/dosmud/issues/205)-style menu exit).
 
-**Ambient (tick-driven):** `ambient_rustle`, `ambient_tick_order`, `ambient_item` (`@fixture ambient_camp` plus `@seed` for deterministic atmosphere, animal noise, and nearby-item paths); `weather_rain_ambient` (`@fixture weather_rain_ready`, one `wait` for rain transition copy); `weather_fog_look` (`@fixture weather_fog`, `look` for fog HUD line; [#51](https://github.com/ianmays/dosmud/issues/51)).
+**Ambient (tick-driven):** `ambient_rustle`, `ambient_tick_order`, `ambient_item` (`@fixture ambient_camp` plus `@seed` for deterministic atmosphere, animal noise, and nearby-item paths); `weather_rain_ambient` (`@fixture weather_rain_ready`, one `wait` for rain transition copy); `weather_fog_look` (`@fixture weather_fog`, `look` for fog HUD line; [#51](https://github.com/ianmays/dosmud/issues/51)); `night_look` (`@fixture night_at_camp`, `look` for night HUD line); `night_map_nightfall` (`@fixture night_at_camp`, `map` still renders the grid before a lost roll); `night_map_lost` (`@fixture night_lost`, `map` for blank disoriented map plus exits); `night_map_torch` (`@fixture night_torch_camp`, `map` for torch illumination line plus the grid; [#130](https://github.com/ianmays/dosmud/issues/130)).
 
 **Combat:** `combat_defend`, `combat_salve`, `combat_no_salve`, `combat_invalid`, `combat_take_blocked`, `combat_victory_xp`, `level_up`.
 
@@ -341,7 +344,7 @@ Each process run uses one `.input` file until `quit`. `make snapshot-run` runs `
 
 **Meta / inventory:** `unknown_cmd`, `cannot_move`, `give_wrong_context`, `reply_nobody`, `post_combat_reply_guard`, `reply_invalid`, `craft_salve`, `craft_unknown`, `take_nothing`, `take_wrong_item`.
 
-**Save/load:** `save_load`, `herbalist_save_load` (single-slot `save.dat` round-trip with a deterministic post-load move or authored-story follow-up state; `unit_save.c` round-trip fixtures assert save v17 roster width (`CFG_NPC_MAX` 8) plus v16 `weather_kind` / `weather_expires_tick`, v15 `env_interact_*`, v14 `world_adv_flags`, v13 `herbalist_menu`, and v12 `watchman_flags` / `watchman_menu`; v16 and older files reject with `SAVE_RESULT_FORMAT`).
+**Save/load:** `save_load`, `herbalist_save_load` (single-slot `save.dat` round-trip with a deterministic post-load move or authored-story follow-up state; `unit_save.c` round-trip fixtures assert save v18 `day_phase` / `day_expires_tick` / `night_lost` ([#130](https://github.com/ianmays/dosmud/issues/130)), v17 roster width (`CFG_NPC_MAX` 8), v16 `weather_kind` / `weather_expires_tick`, v15 `env_interact_*`, v14 `world_adv_flags`, v13 `herbalist_menu`, and v12 `watchman_flags` / `watchman_menu`; v17 and older files reject with `SAVE_RESULT_FORMAT`).
 
 **Replay:** `replay_log` (stdout plus sidecar log golden files; [#156](https://github.com/ianmays/dosmud/issues/156)).
 

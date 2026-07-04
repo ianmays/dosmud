@@ -1314,6 +1314,43 @@ TEST game_reset_fixture_baseline_initializes_weather(void)
     PASS();
 }
 
+TEST game_reset_fixture_baseline_initializes_daynight(void)
+{
+    struct GameState game;
+
+    unit_game_fresh(&game, 130u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    ASSERT_EQ(GAME_DAY, game.day_phase);
+    ASSERT_EQ((u32)CFG_DAYNIGHT_INITIAL_DELAY_TICKS, game.day_expires_tick);
+    ASSERT_EQ(0, game.night_lost);
+    PASS();
+}
+
+/* seed 1234 + tick 0 hash roll triggers lost without torch (#130). */
+TEST game_night_move_without_torch_sets_lost(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    int i;
+    int found;
+
+    unit_game_fresh(&game, 1234u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game.day_phase = GAME_NIGHT;
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, run_cmd_out(&game, "north", &out));
+    found = 0;
+    for (i = 0; i < out.count; ++i) {
+        if (out.events[i].kind == GAME_EVENT_ENVIRONMENT &&
+                out.events[i].arg0 == GAME_ENV_EVENT_NIGHT_LOST) {
+            found = 1;
+        }
+    }
+    ASSERT_EQ(1, found);
+    ASSERT_EQ(1, game.night_lost);
+    PASS();
+}
+
 TEST game_fog_blocks_encounter_still_roams(void)
 {
     struct GameState game;
@@ -1357,6 +1394,8 @@ SUITE(game) {
     RUN_TEST(game_move_blocked_and_ok);
     RUN_TEST(game_quiet_ticks);
     RUN_TEST(game_reset_fixture_baseline_initializes_weather);
+    RUN_TEST(game_reset_fixture_baseline_initializes_daynight);
+    RUN_TEST(game_night_move_without_torch_sets_lost);
     RUN_TEST(game_fog_blocks_encounter_still_roams);
     RUN_TEST(game_bandit_intimidate_success);
     RUN_TEST(game_inspect_with_focus);

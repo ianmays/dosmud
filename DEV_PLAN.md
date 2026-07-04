@@ -111,7 +111,7 @@ Frameworks last.
 - [#7](https://github.com/ianmays/dosmud/issues/7) ambient world-effect interactivity - ✅ Done (PR [#230](https://github.com/ianmays/dosmud/pull/230))
 - [#51](https://github.com/ianmays/dosmud/issues/51) weather - ✅ Done (PR [#231](https://github.com/ianmays/dosmud/pull/231))
 - [#54](https://github.com/ianmays/dosmud/issues/54) procedural encounters / more encounters - ✅ Done (PR [#232](https://github.com/ianmays/dosmud/pull/232))
-- [#130](https://github.com/ianmays/dosmud/issues/130) night time, if kept small
+- [#130](https://github.com/ianmays/dosmud/issues/130) night time - ✅ Done (PR [#233](https://github.com/ianmays/dosmud/pull/233))
 - future authored environmental consequences if needed
 
 This lane is separate from persistent authored world advancement hooks ([#220](https://github.com/ianmays/dosmud/issues/220)).

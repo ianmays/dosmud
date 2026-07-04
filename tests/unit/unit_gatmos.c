@@ -5,6 +5,7 @@
 #include "gatmos.h"
 #include "gout.h"
 #include "grendr.h"
+#include "invent.h"
 #include "items.h"
 #include "platform.h"
 #include "unit_util.h"
@@ -622,6 +623,140 @@ TEST gatmos_weather_tick_clear_after_wind(void)
     PASS();
 }
 
+/* #130 day/night: phase alternates on expiry; dawn clears night_lost. */
+TEST gatmos_daynight_tick_night_fall(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    reset_camp(&game);
+    game.tick = (u32)CFG_DAYNIGHT_INITIAL_DELAY_TICKS;
+    game.day_phase = GAME_DAY;
+    game.day_expires_tick = (u32)CFG_DAYNIGHT_INITIAL_DELAY_TICKS;
+    game_event_queue_reset(&out);
+    gatmos_daynight_tick(&game, &out);
+    ASSERT_EQ(GAME_NIGHT, game.day_phase);
+    ASSERT_EQ((u32)CFG_DAYNIGHT_INITIAL_DELAY_TICKS + (u32)CFG_NIGHT_DURATION_TICKS,
+        game.day_expires_tick);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_ENVIRONMENT, out.events[0].kind);
+    ASSERT_EQ(GAME_ENV_EVENT_NIGHT_FALL, out.events[0].arg0);
+    PASS();
+}
+
+TEST gatmos_daynight_tick_day_break_clears_lost(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    reset_camp(&game);
+    game.tick = 18;
+    game.day_phase = GAME_NIGHT;
+    game.day_expires_tick = 18;
+    game.night_lost = 1;
+    game_event_queue_reset(&out);
+    gatmos_daynight_tick(&game, &out);
+    ASSERT_EQ(GAME_DAY, game.day_phase);
+    ASSERT_EQ(0, game.night_lost);
+    ASSERT_EQ(18U + (u32)CFG_DAY_DURATION_TICKS, game.day_expires_tick);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_ENV_EVENT_DAY_BREAK, out.events[0].arg0);
+    PASS();
+}
+
+TEST gatmos_night_lost_on_move_without_torch(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    reset_camp(&game);
+    /* seed 1234 at tick 0 rolls below CFG_NIGHT_LOST_ROLL_BELOW (salt 0x130u). */
+    game.seed = 1234u;
+    game.tick = 0;
+    game.day_phase = GAME_NIGHT;
+    game.night_lost = 0;
+    game_event_queue_reset(&out);
+    gatmos_try_night_lost_on_move(&game, &out);
+    ASSERT_EQ(1, game.night_lost);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_ENV_EVENT_NIGHT_LOST, out.events[0].arg0);
+    PASS();
+}
+
+TEST gatmos_night_lost_on_move_no_retrigger_when_already_lost(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    reset_camp(&game);
+    game.seed = 1234u;
+    game.tick = 0;
+    game.day_phase = GAME_NIGHT;
+    game.night_lost = 0;
+    game_event_queue_reset(&out);
+    gatmos_try_night_lost_on_move(&game, &out);
+    ASSERT_EQ(1, game.night_lost);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_ENV_EVENT_NIGHT_LOST, out.events[0].arg0);
+    gatmos_try_night_lost_on_move(&game, &out);
+    ASSERT_EQ(1, game.night_lost);
+    ASSERT_EQ(1, out.count);
+    PASS();
+}
+
+TEST gatmos_night_lost_skipped_with_torch(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    reset_camp(&game);
+    game.seed = 1234u;
+    game.tick = 0;
+    game.day_phase = GAME_NIGHT;
+    ASSERT_EQ(1, game_inv_bag_add(&game, ITEM_TORCH));
+    game_event_queue_reset(&out);
+    gatmos_try_night_lost_on_move(&game, &out);
+    ASSERT_EQ(0, game.night_lost);
+    ASSERT_EQ(0, out.count);
+    PASS();
+}
+
+TEST gatmos_night_map_blanked_truth_table(void)
+{
+    struct GameState game;
+
+    reset_camp(&game);
+    game.day_phase = GAME_DAY;
+    game.night_lost = 1;
+    ASSERT_EQ(0, gatmos_night_map_blanked(&game));
+    game.day_phase = GAME_NIGHT;
+    game.night_lost = 0;
+    ASSERT_EQ(0, gatmos_night_map_blanked(&game));
+    ASSERT_EQ(0, gatmos_night_torch_lights_map(&game));
+    game.night_lost = 1;
+    ASSERT_EQ(1, gatmos_night_map_blanked(&game));
+    ASSERT_EQ(1, game_inv_bag_add(&game, ITEM_TORCH));
+    ASSERT_EQ(0, gatmos_night_map_blanked(&game));
+    ASSERT_EQ(1, gatmos_night_torch_lights_map(&game));
+    game.night_lost = 1;
+    ASSERT_EQ(0, gatmos_night_map_blanked(&game));
+    PASS();
+}
+
+TEST gatmos_clear_night_lost_with_torch_wielded(void)
+{
+    struct GameState game;
+
+    reset_camp(&game);
+    game.day_phase = GAME_NIGHT;
+    game.night_lost = 1;
+    game.weapon_equipped = ITEM_TORCH;
+    gatmos_clear_night_lost_with_torch(&game);
+    ASSERT_EQ(0, game.night_lost);
+    ASSERT_EQ(0, gatmos_night_map_blanked(&game));
+    PASS();
+}
+
 TEST gatmos_weather_roll_u32_wrap_tick13(void)
 {
     struct GameState game;
@@ -666,5 +801,12 @@ SUITE(gatmos) {
     RUN_TEST(gatmos_weather_fog_allows_roaming_encounter_low_roll);
     RUN_TEST(gatmos_weather_rain_biases_water_roll);
     RUN_TEST(gatmos_weather_tick_clear_after_wind);
+    RUN_TEST(gatmos_daynight_tick_night_fall);
+    RUN_TEST(gatmos_daynight_tick_day_break_clears_lost);
+    RUN_TEST(gatmos_night_lost_on_move_without_torch);
+    RUN_TEST(gatmos_night_lost_on_move_no_retrigger_when_already_lost);
+    RUN_TEST(gatmos_night_lost_skipped_with_torch);
+    RUN_TEST(gatmos_night_map_blanked_truth_table);
+    RUN_TEST(gatmos_clear_night_lost_with_torch_wielded);
     RUN_TEST(gatmos_weather_roll_u32_wrap_tick13);
 }

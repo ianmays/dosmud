@@ -1,6 +1,7 @@
 #include "greatest.h"
 #include "config.h"
 #include "game.h"
+#include "gatmos.h"
 #include "genc.h"
 #include "gwhok.h"
 #include "invent.h"
@@ -107,6 +108,48 @@ TEST harness_apply_weather_fog(void)
     rc = testharn_apply(&game, "@fixture weather_fog");
     ASSERT_EQ(1, rc);
     ASSERT_EQ(GAME_WEATHER_FOG, game.weather_kind);
+    PASS();
+}
+
+TEST harness_apply_night_at_camp(void)
+{
+    struct GameState game;
+    int rc;
+
+    unit_game_fresh(&game, 130u);
+    rc = testharn_apply(&game, "@fixture night_at_camp");
+    ASSERT_EQ(1, rc);
+    ASSERT_EQ(GAME_NIGHT, game.day_phase);
+    ASSERT_EQ(0, game.night_lost);
+    PASS();
+}
+
+TEST harness_apply_night_lost(void)
+{
+    struct GameState game;
+    int rc;
+
+    unit_game_fresh(&game, 131u);
+    rc = testharn_apply(&game, "@fixture night_lost");
+    ASSERT_EQ(1, rc);
+    ASSERT_EQ(GAME_NIGHT, game.day_phase);
+    ASSERT_EQ(1, game.night_lost);
+    ASSERT_EQ(1, game.room_explored[WORLD_ROOM_ROAD]);
+    PASS();
+}
+
+TEST harness_apply_night_torch_camp(void)
+{
+    struct GameState game;
+    int rc;
+
+    unit_game_fresh(&game, 132u);
+    rc = testharn_apply(&game, "@fixture night_torch_camp");
+    ASSERT_EQ(1, rc);
+    ASSERT_EQ(GAME_NIGHT, game.day_phase);
+    ASSERT_EQ(1, game_inv_player_has_item(&game, ITEM_TORCH));
+    ASSERT_EQ(0, gatmos_night_map_blanked(&game));
+    ASSERT_EQ(1, gatmos_night_torch_lights_map(&game));
     PASS();
 }
 
@@ -296,6 +339,9 @@ SUITE(harness) {
     RUN_TEST(harness_apply_ambient_camp);
     RUN_TEST(harness_apply_weather_rain_ready);
     RUN_TEST(harness_apply_weather_fog);
+    RUN_TEST(harness_apply_night_at_camp);
+    RUN_TEST(harness_apply_night_lost);
+    RUN_TEST(harness_apply_night_torch_camp);
     RUN_TEST(harness_apply_quiet_camp_dual_ground);
     RUN_TEST(harness_apply_quiet_camp_dual_ground_full_bag);
     RUN_TEST(harness_apply_bandit_handover_pick);

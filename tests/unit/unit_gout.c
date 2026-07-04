@@ -260,6 +260,22 @@ TEST game_event_push_records_weather_environment_kinds(void)
     PASS();
 }
 
+TEST game_event_push_records_daynight_environment_kinds(void)
+{
+    GameEventQueue out;
+
+    game_event_queue_reset(&out);
+    ASSERT(0 != game_event_push(&out, GAME_EVENT_ENVIRONMENT,
+        GAME_ENV_EVENT_NIGHT_FALL, 0, 0, 0, 0));
+    ASSERT(0 != game_event_push(&out, GAME_EVENT_ENVIRONMENT,
+        GAME_ENV_EVENT_DAY_BREAK, 0, 0, 0, 0));
+    ASSERT(0 != game_event_push(&out, GAME_EVENT_ENVIRONMENT,
+        GAME_ENV_EVENT_NIGHT_LOST, 0, 0, 0, 0));
+    ASSERT_EQ(3, out.count);
+    ASSERT_EQ(GAME_ENV_EVENT_NIGHT_LOST, out.events[2].arg0);
+    PASS();
+}
+
 TEST game_event_push_records_dialogue_encounter_kinds(void)
 {
     GameEventQueue out;
@@ -427,6 +443,7 @@ SUITE(gout) {
     RUN_TEST(game_event_push_records_combat_progression_kinds);
     RUN_TEST(game_event_push_records_ambient_observation_kinds);
     RUN_TEST(game_event_push_records_weather_environment_kinds);
+    RUN_TEST(game_event_push_records_daynight_environment_kinds);
     RUN_TEST(game_event_push_records_dialogue_encounter_kinds);
     RUN_TEST(game_event_push_records_watchman_dialogue_scene_arg3);
     RUN_TEST(game_event_push_records_bandit_actor_value);

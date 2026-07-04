@@ -63,6 +63,10 @@ enum HerbalistStoryState {
 #define GAME_WEATHER_FOG 2
 #define GAME_WEATHER_WIND 3
 
+/* Global day/night (#130); gatmos.c owns phase transitions and night-lost rolls. */
+#define GAME_DAY 0
+#define GAME_NIGHT 1
+
 struct CombatState {
     int enemy_hp;
     /* Active combat snapshot: copied from the encounter owner for save/load stability. */
@@ -121,6 +125,11 @@ struct GameState {
     int weather_kind;
     /* next weather roll when game->tick >= this; hash-only rolls in gatmos.c. */
     u32 weather_expires_tick;
+    /* gatmos.c day/night (#130); saved in save v18+. */
+    int day_phase;
+    u32 day_expires_tick;
+    /* cleared at dawn or when a torch is gained; move rolls set it at night (#130). */
+    int night_lost;
     /* npc.c herbalist branch (#76); saved in save v10+. */
     int herbalist_story;
     /* npc.c herbalist reply routing; mirrors HerbalistDialogueScene; save v13+. */

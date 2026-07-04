@@ -101,6 +101,10 @@ extern const char *const TXT_UI_FOCUS_GRIT;
 extern const char *const TXT_UI_WEATHER_RAIN;
 extern const char *const TXT_UI_WEATHER_FOG;
 extern const char *const TXT_UI_WEATHER_WIND;
+extern const char *const TXT_UI_NIGHT;
+
+extern const char *const TXT_MAP_NIGHT_BLANK;
+extern const char *const TXT_MAP_TORCH_LIGHT;
 
 extern const char *const TXT_BANDIT_OPEN_INTRO;
 extern const char *const TXT_BANDIT_OPEN_LEVEL_FMT;
@@ -142,6 +146,9 @@ extern const char *const TXT_ATMO_WEATHER_RAIN;
 extern const char *const TXT_ATMO_WEATHER_FOG;
 extern const char *const TXT_ATMO_WEATHER_WIND;
 extern const char *const TXT_ATMO_WEATHER_CLEAR;
+extern const char *const TXT_ATMO_NIGHT_FALL;
+extern const char *const TXT_ATMO_DAY_BREAK;
+extern const char *const TXT_ATMO_NIGHT_LOST;
 
 extern const char *const TXT_TRAVELER_INTRO;
 extern const char *const TXT_TRAVELER_ART_CAPTION;

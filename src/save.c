@@ -22,9 +22,10 @@
  * v14: world_adv_flags (#220). v15: env_interact_* (#7).
  * v16: weather_kind and weather_expires_tick (#51).
  * v17: CFG_NPC_MAX 8 and lost animal / peddler roster profiles (#54).
+ * v18: day_phase, day_expires_tick, and night_lost (#130).
  * Append-only bumps; loads reject below SAVE_VERSION.
  */
-#define SAVE_VERSION 17
+#define SAVE_VERSION 18
 #define SAVE_PATH_BUF_MAX 260
 
 /*
@@ -402,6 +403,10 @@ static int save_write_game_state(FILE *fp, const struct GameState *game,
             /* v16: global weather (#51). */
             !save_write_s16(fp, game->weather_kind) ||
             !save_write_u32(fp, game->weather_expires_tick) ||
+            /* v18: day/night (#130). */
+            !save_write_s16(fp, game->day_phase) ||
+            !save_write_u32(fp, game->day_expires_tick) ||
+            !save_write_s16(fp, game->night_lost) ||
             /* v10: herbalist story fields (#76). */
             !save_write_s16(fp, game->herbalist_story) ||
             /* v13: herbalist session menu. */
@@ -460,6 +465,10 @@ static int save_read_game_state(FILE *fp, struct GameState *game,
             /* v16: global weather (#51). */
             !save_read_s16(fp, &game->weather_kind) ||
             !save_read_u32(fp, &game->weather_expires_tick) ||
+            /* v18: day/night (#130). */
+            !save_read_s16(fp, &game->day_phase) ||
+            !save_read_u32(fp, &game->day_expires_tick) ||
+            !save_read_s16(fp, &game->night_lost) ||
             /* v10: herbalist story fields (#76). */
             !save_read_s16(fp, &game->herbalist_story) ||
             /* v13: herbalist session menu. */
@@ -691,6 +700,9 @@ static int save_validate_game(const struct GameState *game)
             /* v16: gatmos weather_kind must match GAME_WEATHER_* enums. */
             game->weather_kind < GAME_WEATHER_NONE ||
             game->weather_kind > GAME_WEATHER_WIND ||
+            game->day_phase < GAME_DAY ||
+            game->day_phase > GAME_NIGHT ||
+            !save_valid_boolish(game->night_lost) ||
             game->herbalist_story < HERBALIST_STORY_NONE ||
             game->herbalist_story > HERBALIST_STORY_COMPLETE ||
             /* v13 herbalist_menu / v12 watchman_* must match npc.h scene enums. */
