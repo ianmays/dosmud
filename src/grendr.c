@@ -1950,11 +1950,16 @@ void render_inv_unwield_ground(const char *item_name)
 void render_exploration_map(const struct GameState *game)
 {
     char mapbuf[CFG_FMT_MAP_MAX];
+    char exitsbuf[64];
     int len;
 
     /* Live night_lost gate; look snapshots do not affect map output. */
     if (gatmos_night_map_blanked(game)) {
         RENDER_PRINTF("%s", TXT_MAP_NIGHT_BLANK);
+        len = fmt_player_room_exits(game, exitsbuf, (int)sizeof(exitsbuf));
+        if (len >= 0) {
+            RENDER_PRINTF("%s", exitsbuf);
+        }
         return;
     }
     len = fmt_exploration_map(game, mapbuf, (int)sizeof(mapbuf));

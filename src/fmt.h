@@ -23,4 +23,8 @@ int fmt_room_ground_items(const int *room_items, char *buf, int bufsize);
  * Returns bytes written excluding NUL, or -1 if bufsize too small. */
 int fmt_exploration_map(const struct GameState *game, char *buf, int bufsize);
 
+/* Open exits for player's current room; label/dir order match look and map footer.
+ * Returns bytes written excluding NUL, or -1 if bufsize too small. */
+int fmt_player_room_exits(const struct GameState *game, char *buf, int bufsize);
+
 #endif

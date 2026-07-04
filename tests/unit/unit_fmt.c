@@ -183,7 +183,6 @@ TEST fmt_map_none_explored(void)
     struct GameState game;
     char out[UNIT_FMT_MAP_BUF];
     int len;
-
     int i;
 
     unit_game_fresh(&game, 20u);
@@ -194,6 +193,21 @@ TEST fmt_map_none_explored(void)
     len = fmt_exploration_map(&game, out, (int)sizeof(out));
     ASSERT_STR_EQ(TXT_MAP_NONE_EXPLORED, out);
     ASSERT_EQ((int)strlen(TXT_MAP_NONE_EXPLORED), len);
+    PASS();
+}
+
+TEST fmt_player_room_exits_camp(void)
+{
+    struct GameState game;
+    char out[32];
+    int len;
+    static const char expect[] = "Exits: north south west\n";
+
+    unit_game_fresh(&game, 25u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    len = fmt_player_room_exits(&game, out, (int)sizeof(out));
+    ASSERT_EQ((int)(sizeof(expect) - 1), len);
+    ASSERT_STR_EQ(expect, out);
     PASS();
 }
 
@@ -295,6 +309,7 @@ SUITE(fmt) {
     RUN_TEST(fmt_ground_bad_args);
     RUN_TEST(fmt_ground_buf_too_small);
     RUN_TEST(fmt_map_none_explored);
+    RUN_TEST(fmt_player_room_exits_camp);
     RUN_TEST(fmt_map_camp_only);
     RUN_TEST(fmt_map_camp_and_road);
     RUN_TEST(fmt_map_bad_args);
