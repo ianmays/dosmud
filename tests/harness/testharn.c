@@ -416,6 +416,15 @@ static void fixture_night_lost(struct GameState *game)
     game->room_explored[WORLD_ROOM_ROAD] = 1;
 }
 
+static void fixture_night_torch_camp(struct GameState *game)
+{
+    fixture_at_camp(game);
+    game->day_phase = GAME_NIGHT;
+    game->night_lost = 0;
+    game->day_expires_tick = game->tick + (u32)CFG_NIGHT_DURATION_TICKS;
+    (void)game_inv_bag_add(game, ITEM_TORCH);
+}
+
 static void fixture_quiet_camp_dual_ground(struct GameState *game)
 {
     game_reset_fixture_baseline(game, WORLD_ROOM_CAMP, 0);
@@ -852,6 +861,10 @@ int testharn_apply(struct GameState *game, const char *line)
     }
     if (fixture_name_is("night_lost", name)) {
         fixture_night_lost(game);
+        return 1;
+    }
+    if (fixture_name_is("night_torch_camp", name)) {
+        fixture_night_torch_camp(game);
         return 1;
     }
     if (fixture_name_is("quiet_camp_dual_ground", name)) {

@@ -316,6 +316,8 @@ const char *const TXT_UI_NIGHT = "Night deepens; paths are hard to hold in mind.
 
 const char *const TXT_MAP_NIGHT_BLANK =
     "Darkness and disorientation erase the map from your mind.\n";
+const char *const TXT_MAP_TORCH_LIGHT =
+    "Your torch illuminates the way ahead.\n";
 
 const char *const TXT_BANDIT_OPEN_INTRO = "A bandit steps from cover with a hand on a rusted blade.\n";
 const char *const TXT_BANDIT_OPEN_LEVEL_FMT = "Bandit Lv: %d.\n";

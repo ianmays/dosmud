@@ -104,6 +104,7 @@ extern const char *const TXT_UI_WEATHER_WIND;
 extern const char *const TXT_UI_NIGHT;
 
 extern const char *const TXT_MAP_NIGHT_BLANK;
+extern const char *const TXT_MAP_TORCH_LIGHT;
 
 extern const char *const TXT_BANDIT_OPEN_INTRO;
 extern const char *const TXT_BANDIT_OPEN_LEVEL_FMT;

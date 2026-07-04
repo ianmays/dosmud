@@ -128,7 +128,7 @@ struct GameState {
     /* gatmos.c day/night (#130); saved in save v18+. */
     int day_phase;
     u32 day_expires_tick;
-    /* cleared at dawn; map blanking reads via gatmos_night_map_blanked (#130). */
+    /* cleared at dawn or when a torch is gained; move rolls set it at night (#130). */
     int night_lost;
     /* npc.c herbalist branch (#76); saved in save v10+. */
     int herbalist_story;

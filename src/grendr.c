@@ -1962,6 +1962,9 @@ void render_exploration_map(const struct GameState *game)
         }
         return;
     }
+    if (gatmos_night_torch_lights_map(game)) {
+        RENDER_PRINTF("%s", TXT_MAP_TORCH_LIGHT);
+    }
     len = fmt_exploration_map(game, mapbuf, (int)sizeof(mapbuf));
     if (len >= 0) {
         RENDER_PRINTF("%s", mapbuf);
