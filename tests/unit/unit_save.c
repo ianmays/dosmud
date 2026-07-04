@@ -79,6 +79,9 @@ static void save_fill_fixture(struct GameState *game)
     game->corpse_item[WORLD_ROOM_ROAD][2] = ITEM_NONE;
     game->room_explored[WORLD_ROOM_ROAD] = 1;
     game->room_explored[WORLD_ROOM_TOWER] = 1;
+    game->day_phase = GAME_NIGHT;
+    game->day_expires_tick = 90U;
+    game->night_lost = 1;
     game->room_item[WORLD_ROOM_TOWER][0] = ITEM_FISH;
     game->room_item[WORLD_ROOM_TOWER][1] = ITEM_REED;
 #ifdef TEST_MODE
@@ -159,6 +162,9 @@ static int save_games_equal(const struct GameState *a,
             a->env_interact_room != b->env_interact_room ||
             a->weather_kind != b->weather_kind ||
             a->weather_expires_tick != b->weather_expires_tick ||
+            a->day_phase != b->day_phase ||
+            a->day_expires_tick != b->day_expires_tick ||
+            a->night_lost != b->night_lost ||
             a->herbalist_story != b->herbalist_story ||
             a->herbalist_menu != b->herbalist_menu ||
             a->watchman_flags != b->watchman_flags ||
@@ -380,6 +386,32 @@ TEST save_rejects_v16_roster_layout(void)
     fp = fopen(save_test_path(), "r+b");
     ASSERT(fp != 0);
     ASSERT(save_write_version(fp, 16U));
+    fclose(fp);
+
+    unit_game_fresh(&loaded, 77U);
+    loaded_draws = 555U;
+    ASSERT_EQ(SAVE_RESULT_FORMAT,
+        save_read_game(save_test_path(), &loaded, &loaded_draws));
+
+    save_cleanup_file();
+    PASS();
+}
+
+TEST save_rejects_v17_daynight_layout(void)
+{
+    struct GameState game;
+    struct GameState loaded;
+    FILE *fp;
+    u32 loaded_draws;
+
+    save_cleanup_file();
+    save_fill_fixture(&game);
+    ASSERT_EQ(SAVE_RESULT_OK,
+        save_write_game(save_test_path(), &game, 7U));
+
+    fp = fopen(save_test_path(), "r+b");
+    ASSERT(fp != 0);
+    ASSERT(save_write_version(fp, 17U));
     fclose(fp);
 
     unit_game_fresh(&loaded, 77U);
@@ -870,6 +902,29 @@ TEST save_round_trip_preserves_weather_state(void)
     PASS();
 }
 
+TEST save_round_trip_preserves_daynight_state(void)
+{
+    struct GameState game;
+    struct GameState loaded;
+    u32 loaded_draws;
+
+    save_cleanup_file();
+    unit_game_fresh(&game, 77U);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 12U);
+    game.day_phase = GAME_NIGHT;
+    game.day_expires_tick = 25U;
+    game.night_lost = 1;
+    ASSERT_EQ(SAVE_RESULT_OK,
+        save_write_game(save_test_path(), &game, plat_rand_draw_count()));
+    ASSERT_EQ(SAVE_RESULT_OK,
+        save_read_game(save_test_path(), &loaded, &loaded_draws));
+    ASSERT_EQ(GAME_NIGHT, loaded.day_phase);
+    ASSERT_EQ(25U, loaded.day_expires_tick);
+    ASSERT_EQ(1, loaded.night_lost);
+    save_cleanup_file();
+    PASS();
+}
+
 SUITE(save)
 {
     RUN_TEST(save_round_trip_preserves_state_and_rng_count);
@@ -877,6 +932,7 @@ SUITE(save)
     RUN_TEST(save_rejects_truncated_file);
     RUN_TEST(save_rejects_prior_version_without_mutating_target);
     RUN_TEST(save_rejects_v16_roster_layout);
+    RUN_TEST(save_rejects_v17_daynight_layout);
     RUN_TEST(save_rejects_out_of_range_without_mutating_target);
     RUN_TEST(save_rejects_excessive_rng_draw_count);
     RUN_TEST(save_rejects_write_with_excessive_rng_draw_count);
@@ -895,4 +951,5 @@ SUITE(save)
     RUN_TEST(save_round_trip_preserves_world_adv_flags);
     RUN_TEST(save_round_trip_preserves_env_interact_state);
     RUN_TEST(save_round_trip_preserves_weather_state);
+    RUN_TEST(save_round_trip_preserves_daynight_state);
 }

@@ -175,6 +175,12 @@
 #define CFG_WEATHER_FOG_NOISE_SKIP_GE 60
 #define CFG_WEATHER_FOG_ENCOUNTER_ALLOW_BELOW 40
 
+/* Day/night (#130): hash-driven phase cycle; night move without torch may blank map. */
+#define CFG_DAYNIGHT_INITIAL_DELAY_TICKS 10
+#define CFG_DAY_DURATION_TICKS 12
+#define CFG_NIGHT_DURATION_TICKS 8
+#define CFG_NIGHT_LOST_ROLL_BELOW 35
+
 /*
  * Dynamic NPC roster cap (save payload and per-tick roaming walks).
  * Six authored seed profiles plus headroom for dynamic ambush spawns.

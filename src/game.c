@@ -157,12 +157,13 @@ int game_heal_player(struct GameState *game, int amount)
 
 /*
  * Snapshot current room into a generic look event. arg0 is npc_room_actor for
- * HUD presence; arg1 packs corpse_present (bit 0) and weather_kind (upper bits,
- * #51) at enqueue time so post-tick weather rolls do not reorder look output.
+ * HUD presence; arg1 packs corpse_present (bit 0), weather_kind (bits 1-2),
+ * and day_phase (bit 3, #130) at enqueue time so post-tick rolls do not reorder
+ * look output.
  */
-static int look_arg1_pack(int corpse_present, int weather_kind)
+static int look_arg1_pack(int corpse_present, int weather_kind, int day_phase)
 {
-    return corpse_present | (weather_kind << 1);
+    return corpse_present | (weather_kind << 1) | (day_phase << 3);
 }
 
 static void do_look(struct GameState *game, GameEventQueue *out)
@@ -173,7 +174,7 @@ static void do_look(struct GameState *game, GameEventQueue *out)
     ev = game_event_push(out, GAME_EVENT_ROOM_LOOK,
         npc_room_actor(game->player.room_id),
         look_arg1_pack(game->corpse_present[game->player.room_id],
-            game->weather_kind),
+            game->weather_kind, game->day_phase),
         game->env_focus_active &&
             game->env_focus_room == game->player.room_id &&
             game->tick < game->env_focus_expires_tick,
@@ -219,6 +220,10 @@ static void reset_mutable_state(struct GameState *game, int room_id, u32 tick)
     /* gatmos.c defers first weather roll until tick reaches expires_tick. */
     game->weather_kind = GAME_WEATHER_NONE;
     game->weather_expires_tick = (u32)CFG_WEATHER_INITIAL_DELAY_TICKS;
+    /* gatmos.c defers first night until tick reaches day_expires_tick. */
+    game->day_phase = GAME_DAY;
+    game->day_expires_tick = (u32)CFG_DAYNIGHT_INITIAL_DELAY_TICKS;
+    game->night_lost = 0;
     game->herbalist_story = HERBALIST_STORY_NONE;
     game->herbalist_menu = 0;
     game->watchman_flags = 0;
@@ -500,6 +505,8 @@ static int game_cmd_move(struct GameState *game, struct Command *cmd,
     if (game->mode == GAME_MODE_DIALOGUE) {
         game_set_mode_explore(game);
     }
+    /* Night-lost env event before MOVE/ROOM_LOOK so announcement precedes look. */
+    gatmos_try_night_lost_on_move(game, out);
     /* room_id already updated; MOVE then ROOM_LOOK preserve render enqueue order */
     game_event_push(out, GAME_EVENT_MOVE, 0, 0, 0, 0, world_dir_name(cmd->dir));
     do_look(game, out);
@@ -635,13 +642,15 @@ static void advance_world_tick(struct GameState *game, GameEventQueue *out)
     int roll;
 
     /*
-     * Tick order: increment tick, advance global weather (#51), then roster
-     * maintenance, roaming encounter checks (fog may block opens only),
-     * roaming movement when no encounter opened, ambient events, then fixed
-     * slot encounters. Keeps room-based enemies world-owned, not player-site.
+     * Tick order: increment tick, advance global weather (#51) and day/night
+     * (#130), then roster maintenance, roaming encounter checks (fog may block
+     * opens only), roaming movement when no encounter opened, ambient events,
+     * then fixed slot encounters. Keeps room-based enemies world-owned, not
+     * player-site.
      */
     game->tick += 1;
     gatmos_weather_tick(game, out);
+    gatmos_daynight_tick(game, out);
     npc_roaming_update_separation(game);
     npc_story_tick(game);
 #ifdef TEST_MODE

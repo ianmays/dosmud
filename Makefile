@@ -99,6 +99,7 @@ SNAPSHOT_TESTS = \
 	inspect_water_followup env_menu_dismiss \
 	ambient_rustle ambient_tick_order ambient_item \
 	weather_rain_ambient weather_fog_look \
+	night_look night_map_lost night_map_torch \
 	combat_defend combat_salve combat_no_salve combat_invalid combat_take_blocked \
 	combat_victory_xp level_up \
 	loot_spear loot_stick loot_berry loot_herb loot_fish loot_empty loot_stripped loot_bag_full loot_multi \

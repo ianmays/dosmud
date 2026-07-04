@@ -312,6 +312,10 @@ const char *const TXT_UI_FOCUS_GRIT = "Fresh grit skids nearby. (inspect grit)\n
 const char *const TXT_UI_WEATHER_RAIN = "Rain needles the air and darkens the ground.\n";
 const char *const TXT_UI_WEATHER_FOG = "Fog hangs low and shortens the horizon.\n";
 const char *const TXT_UI_WEATHER_WIND = "Wind keeps worrying the treeline.\n";
+const char *const TXT_UI_NIGHT = "Night deepens; paths are hard to hold in mind.\n";
+
+const char *const TXT_MAP_NIGHT_BLANK =
+    "Darkness and disorientation erase the map from your mind.\n";
 
 const char *const TXT_BANDIT_OPEN_INTRO = "A bandit steps from cover with a hand on a rusted blade.\n";
 const char *const TXT_BANDIT_OPEN_LEVEL_FMT = "Bandit Lv: %d.\n";
@@ -358,6 +362,10 @@ const char *const TXT_ATMO_WEATHER_RAIN = "Rain settles in, steady and insistent
 const char *const TXT_ATMO_WEATHER_FOG = "Fog rolls in and muffles distant sound.\n";
 const char *const TXT_ATMO_WEATHER_WIND = "Wind rises and worries everything loose.\n";
 const char *const TXT_ATMO_WEATHER_CLEAR = "The weather eases and the air clears.\n";
+const char *const TXT_ATMO_NIGHT_FALL = "Night falls and the land folds into shadow.\n";
+const char *const TXT_ATMO_DAY_BREAK = "Dawn thins the dark and the paths return.\n";
+const char *const TXT_ATMO_NIGHT_LOST =
+    "Without a torch the night swallows your sense of direction.\n";
 
 const char *const TXT_TRAVELER_INTRO =
     "You nearly bump into a hooded traveler. They straighten with a tired grin.\n";

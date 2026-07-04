@@ -110,6 +110,33 @@ TEST harness_apply_weather_fog(void)
     PASS();
 }
 
+TEST harness_apply_night_at_camp(void)
+{
+    struct GameState game;
+    int rc;
+
+    unit_game_fresh(&game, 130u);
+    rc = testharn_apply(&game, "@fixture night_at_camp");
+    ASSERT_EQ(1, rc);
+    ASSERT_EQ(GAME_NIGHT, game.day_phase);
+    ASSERT_EQ(0, game.night_lost);
+    PASS();
+}
+
+TEST harness_apply_night_lost(void)
+{
+    struct GameState game;
+    int rc;
+
+    unit_game_fresh(&game, 131u);
+    rc = testharn_apply(&game, "@fixture night_lost");
+    ASSERT_EQ(1, rc);
+    ASSERT_EQ(GAME_NIGHT, game.day_phase);
+    ASSERT_EQ(1, game.night_lost);
+    ASSERT_EQ(1, game.room_explored[WORLD_ROOM_ROAD]);
+    PASS();
+}
+
 TEST harness_apply_quiet_camp_dual_ground(void)
 {
     struct GameState game;
@@ -296,6 +323,8 @@ SUITE(harness) {
     RUN_TEST(harness_apply_ambient_camp);
     RUN_TEST(harness_apply_weather_rain_ready);
     RUN_TEST(harness_apply_weather_fog);
+    RUN_TEST(harness_apply_night_at_camp);
+    RUN_TEST(harness_apply_night_lost);
     RUN_TEST(harness_apply_quiet_camp_dual_ground);
     RUN_TEST(harness_apply_quiet_camp_dual_ground_full_bag);
     RUN_TEST(harness_apply_bandit_handover_pick);

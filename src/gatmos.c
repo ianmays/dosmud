@@ -13,6 +13,7 @@
  * room-scoped incidental events.
  * #51: global weather_kind / weather_expires_tick on GameState; transitions
  * and fog roaming gate use hash-only rolls (see weather_roll).
+ * #130: day_phase / day_expires_tick / night_lost; phase alternates on expiry.
  * #161: queues GAME_EVENT_ENVIRONMENT / AMBIENT_NOISE / ITEM_PRESENCE /
  * OBSERVATION; grendr maps to text.
  * #7: post-inspect follow-up menus via env_interact_* and ENV_MENU/RESULT.
@@ -214,6 +215,91 @@ int gatmos_weather_blocks_roaming_encounter(struct GameState *game)
     }
     roll = weather_roll(game, 0xf09u);
     return roll >= CFG_WEATHER_FOG_ENCOUNTER_ALLOW_BELOW ? 1 : 0;
+}
+
+/* Wielded or bag-held torch; invent.c owns item presence checks. */
+static int player_has_torch(const struct GameState *game)
+{
+    if (game->weapon_equipped == ITEM_TORCH) {
+        return 1;
+    }
+    return game_inv_player_has_item(game, ITEM_TORCH);
+}
+
+static u32 daynight_duration_ticks(int phase)
+{
+    if (phase == GAME_NIGHT) {
+        return (u32)CFG_NIGHT_DURATION_TICKS;
+    }
+    return (u32)CFG_DAY_DURATION_TICKS;
+}
+
+/*
+ * Called from game.c advance_world_tick after gatmos_weather_tick; alternates
+ * day_phase on expiry, clears night_lost at dawn, and queues transition env
+ * events when the phase changes.
+ */
+void gatmos_daynight_tick(struct GameState *game, GameEventQueue *out)
+{
+    if (game->tick < game->day_expires_tick) {
+        return;
+    }
+    if (game->day_phase == GAME_DAY) {
+        game->day_phase = GAME_NIGHT;
+        push_environment(out, GAME_ENV_EVENT_NIGHT_FALL);
+    } else {
+        game->day_phase = GAME_DAY;
+        game->night_lost = 0;
+        push_environment(out, GAME_ENV_EVENT_DAY_BREAK);
+    }
+    game->day_expires_tick = game->tick + daynight_duration_ticks(game->day_phase);
+}
+
+/* Read accessor for live phase; ROOM_LOOK packs day_phase into arg1 at enqueue. */
+int gatmos_day_phase(const struct GameState *game)
+{
+    return game->day_phase;
+}
+
+/*
+ * Render seam for the map command: grendr asks here instead of reading
+ * night_lost directly; true only during night after a failed lost roll.
+ */
+int gatmos_night_map_blanked(const struct GameState *game)
+{
+    if (game->day_phase != GAME_NIGHT) {
+        return 0;
+    }
+    return game->night_lost ? 1 : 0;
+}
+
+/*
+ * game.c calls after a successful move during night; hash-only roll when the
+ * player lacks a torch. Sets night_lost and queues GAME_ENV_EVENT_NIGHT_LOST.
+ */
+void gatmos_try_night_lost_on_move(struct GameState *game, GameEventQueue *out)
+{
+    int roll;
+
+    if (game->day_phase != GAME_NIGHT) {
+        return;
+    }
+    if (player_has_torch(game)) {
+        return;
+    }
+#ifdef TEST_MODE
+    /* Quiet fixtures suppress hash rolls; advance_world_tick already gated. */
+    if (game->test_quiet_ticks) {
+        return;
+    }
+#endif
+    /* Reuses weather_hash (salt 0x130u); never plat_rand for save/replay stability. */
+    roll = weather_roll(game, 0x130u);
+    if (roll >= CFG_NIGHT_LOST_ROLL_BELOW) {
+        return;
+    }
+    game->night_lost = 1;
+    push_environment(out, GAME_ENV_EVENT_NIGHT_LOST);
 }
 
 void gatmos_env_clear_interact(struct GameState *game)

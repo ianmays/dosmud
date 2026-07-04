@@ -53,6 +53,9 @@ void render_atmosphere_weather_rain(void);
 void render_atmosphere_weather_fog(void);
 void render_atmosphere_weather_wind(void);
 void render_atmosphere_weather_clear(void);
+void render_atmosphere_night_fall(void);
+void render_atmosphere_day_break(void);
+void render_atmosphere_night_lost(void);
 
 void render_traveler_scene(void);
 void render_traveler_reply(int choice);

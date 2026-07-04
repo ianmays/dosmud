@@ -49,9 +49,9 @@ enum GameEventKind {
 };
 
 /*
- * Room look payload (#47, #51): ROOM_LOOK arg0=npc room-actor hint;
- * arg1=corpse_present (bit 0) | (weather_kind << 1) snapshotted at enqueue;
- * arg2=env focus active; arg3=GAME_ENV_* focus kind when arg2 set;
+ * Room look payload (#47, #51, #130): ROOM_LOOK arg0=npc room-actor hint;
+ * arg1=corpse_present (bit 0) | (weather_kind << 1) | (day_phase << 3)
+ * snapshotted at enqueue; arg2=env focus active; arg3=GAME_ENV_* when arg2 set;
  * room_id and room_item[] hold ground snapshot.
  */
 
@@ -264,7 +264,11 @@ enum GameEventEnvironmentKind {
     GAME_ENV_EVENT_WEATHER_RAIN,
     GAME_ENV_EVENT_WEATHER_FOG,
     GAME_ENV_EVENT_WEATHER_WIND,
-    GAME_ENV_EVENT_WEATHER_CLEAR
+    GAME_ENV_EVENT_WEATHER_CLEAR,
+    /* #130: gatmos_daynight_tick and night-lost-on-move announcements. */
+    GAME_ENV_EVENT_NIGHT_FALL,
+    GAME_ENV_EVENT_DAY_BREAK,
+    GAME_ENV_EVENT_NIGHT_LOST
 };
 
 enum GameEventObservationOutcome {
