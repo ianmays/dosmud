@@ -292,11 +292,11 @@ static void art_traveler(void)
 static void art_lost_animal(void)
 {
     RENDER_PRINTF("            .-'''-.          \n");
-    RENDER_PRINTF("           /  o o  \\         \n");
-    RENDER_PRINTF("          |   \\_/   |        \n");
-    RENDER_PRINTF("          |  /   \\  |        \n");
-    RENDER_PRINTF("           \\ ~~~  /         \n");
-    RENDER_PRINTF("            '---'            \n");
+    RENDER_PRINTF("           /  o o  \\        \n");
+    RENDER_PRINTF("          |   \\_/   |       \n");
+    RENDER_PRINTF("          |  /   \\  |       \n");
+    RENDER_PRINTF("           \\  ~~~  /        \n");
+    RENDER_PRINTF("            '-----'          \n");
     RENDER_PRINTF("                             \n");
     RENDER_PRINTF(" %s", TXT_LOST_ANIMAL_ART_CAPTION);
     RENDER_PRINTF("                             \n");
@@ -304,12 +304,12 @@ static void art_lost_animal(void)
 
 static void art_peddler(void)
 {
-    RENDER_PRINTF("         .---------.         \n");
-    RENDER_PRINTF("        /  o     o  \\        \n");
+    RENDER_PRINTF("         .--------.          \n");
+    RENDER_PRINTF("        /  o    o  \\        \n");
     RENDER_PRINTF("       |     ^      |        \n");
-    RENDER_PRINTF("       |   /---\\    |        \n");
+    RENDER_PRINTF("       |   /---\\    |       \n");
     RENDER_PRINTF("        \\  |###|   /        \n");
-    RENDER_PRINTF("         '-|###|---'         \n");
+    RENDER_PRINTF("         '-|###|--'          \n");
     RENDER_PRINTF("                             \n");
     RENDER_PRINTF(" %s", TXT_PEDDLER_ART_CAPTION);
     RENDER_PRINTF("                             \n");
