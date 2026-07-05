@@ -51,7 +51,7 @@ enum GameEventKind {
 /*
  * Room look payload (#47, #51, #130): ROOM_LOOK arg0=npc room-actor hint;
  * arg1=corpse_present (bit 0) | (weather_kind << 1) | (day_phase << 3)
- * snapshotted at enqueue; arg2=env focus active; arg3=GAME_ENV_* when arg2 set;
+ * snapshotted at enqueue; arg2/arg3 unused (per-room inspect clues are not on look);
  * room_id and room_item[] hold ground snapshot.
  */
 
@@ -274,7 +274,6 @@ enum GameEventEnvironmentKind {
 enum GameEventObservationOutcome {
     GAME_OBS_OUTCOME_NONE = 0,
     GAME_OBS_OUTCOME_NOTHING,
-    GAME_OBS_OUTCOME_WRONG_FOCUS,
     GAME_OBS_OUTCOME_RUSTLE,
     GAME_OBS_OUTCOME_CREAK,
     GAME_OBS_OUTCOME_WATER,

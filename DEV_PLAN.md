@@ -112,6 +112,7 @@ Frameworks last.
 - [#51](https://github.com/ianmays/dosmud/issues/51) weather - ✅ Done (PR [#231](https://github.com/ianmays/dosmud/pull/231))
 - [#54](https://github.com/ianmays/dosmud/issues/54) procedural encounters / more encounters - ✅ Done (PR [#232](https://github.com/ianmays/dosmud/pull/232))
 - [#130](https://github.com/ianmays/dosmud/issues/130) night time - ✅ Done (PR [#233](https://github.com/ianmays/dosmud/pull/233))
+- [#234](https://github.com/ianmays/dosmud/issues/234) per-room inspect clues - ✅ Done (PR [#TBD](https://github.com/ianmays/dosmud/pull/TBD))
 - future authored environmental consequences if needed
 
 This lane is separate from persistent authored world advancement hooks ([#220](https://github.com/ianmays/dosmud/issues/220)).

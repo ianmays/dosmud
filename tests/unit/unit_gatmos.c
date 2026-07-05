@@ -35,6 +35,34 @@ static int inspect_focus(struct GameState *game, int item_arg,
     return gatmos_cmd_inspect(game, item_arg, out);
 }
 
+static int room_has_clue(const struct GameState *game, int room_id, int kind)
+{
+    u8 bit;
+
+    if (kind < GAME_ENV_RUSTLE || kind > GAME_ENV_GRIT) {
+        return 0;
+    }
+    if (room_id < 0 || room_id >= CFG_ROOM_MAX) {
+        return 0;
+    }
+    bit = (u8)(1u << (kind - 1));
+    return (game->env_room_clues[room_id] & bit) != 0;
+}
+
+static void room_set_clue(struct GameState *game, int room_id, int kind)
+{
+    u8 bit;
+
+    if (kind < GAME_ENV_RUSTLE || kind > GAME_ENV_GRIT) {
+        return;
+    }
+    if (room_id < 0 || room_id >= CFG_ROOM_MAX) {
+        return;
+    }
+    bit = (u8)(1u << (kind - 1));
+    game->env_room_clues[room_id] |= bit;
+}
+
 TEST gatmos_seed_world_items(void)
 {
     struct GameState game;
@@ -45,29 +73,26 @@ TEST gatmos_seed_world_items(void)
     PASS();
 }
 
-TEST gatmos_focus_expiry(void)
+TEST gatmos_clue_accumulates_on_atmosphere(void)
 {
     struct GameState game;
     GameEventQueue out;
     u32 seed;
-    int cleared;
+    int found;
 
-    cleared = 0;
-    for (seed = 0; seed < 500u; ++seed) {
+    found = 0;
+    for (seed = 0; seed < 800u; ++seed) {
         reset_camp(&game);
-        game.env_focus_active = 1;
-        game.env_focus_room = WORLD_ROOM_CAMP;
-        game.env_focus_kind = GAME_ENV_RUSTLE;
-        game.env_focus_expires_tick = 1;
-        game.tick = 2;
+        room_set_clue(&game, WORLD_ROOM_CAMP, GAME_ENV_RUSTLE);
         plat_seed_rng(seed);
         emit_atmosphere(&game, &out);
-        if (game.env_focus_active == 0) {
-            cleared = 1;
+        if (room_has_clue(&game, WORLD_ROOM_CAMP, GAME_ENV_RUSTLE) &&
+                room_has_clue(&game, WORLD_ROOM_CAMP, GAME_ENV_WATER)) {
+            found = 1;
             break;
         }
     }
-    ASSERT_EQ(1, cleared);
+    ASSERT_EQ(1, found);
     PASS();
 }
 
@@ -127,10 +152,10 @@ TEST gatmos_atmosphere_branches(void)
         reset_camp(&game);
         plat_seed_rng(seed);
         emit_atmosphere(&game, &out);
-        if (game.env_focus_kind == GAME_ENV_RUSTLE) {
+        if (room_has_clue(&game, WORLD_ROOM_CAMP, GAME_ENV_RUSTLE)) {
             found_rustle = 1;
         }
-        if (game.env_focus_kind == GAME_ENV_CREAK) {
+        if (room_has_clue(&game, WORLD_ROOM_CAMP, GAME_ENV_CREAK)) {
             found_creak = 1;
         }
         if (found_rustle && found_creak) {
@@ -142,7 +167,7 @@ TEST gatmos_atmosphere_branches(void)
     PASS();
 }
 
-TEST gatmos_water_and_grit_focus(void)
+TEST gatmos_water_and_grit_clues(void)
 {
     struct GameState game;
     GameEventQueue out;
@@ -156,10 +181,10 @@ TEST gatmos_water_and_grit_focus(void)
         reset_camp(&game);
         plat_seed_rng(seed);
         emit_atmosphere(&game, &out);
-        if (game.env_focus_kind == GAME_ENV_WATER) {
+        if (room_has_clue(&game, WORLD_ROOM_CAMP, GAME_ENV_WATER)) {
             found_water = 1;
         }
-        if (game.env_focus_kind == GAME_ENV_GRIT) {
+        if (room_has_clue(&game, WORLD_ROOM_CAMP, GAME_ENV_GRIT)) {
             found_grit = 1;
         }
         if (found_water && found_grit) {
@@ -213,7 +238,7 @@ TEST gatmos_rustle_berry_drop(void)
         game.room_item[WORLD_ROOM_CAMP][3] = ITEM_NONE;
         plat_seed_rng(seed);
         emit_atmosphere(&game, &out);
-        if (game.env_focus_kind == GAME_ENV_RUSTLE &&
+        if (room_has_clue(&game, WORLD_ROOM_CAMP, GAME_ENV_RUSTLE) &&
                 game.room_item[WORLD_ROOM_CAMP][0] == ITEM_BERRY) {
             found = 1;
             break;
@@ -332,17 +357,14 @@ TEST gatmos_cmd_inspect_focus(void)
     GameEventQueue out;
 
     reset_camp(&game);
-    game.env_focus_active = 1;
-    game.env_focus_room = WORLD_ROOM_CAMP;
-    game.env_focus_kind = GAME_ENV_WATER;
-    game.env_focus_expires_tick = game.tick + 10;
+    room_set_clue(&game, WORLD_ROOM_CAMP, GAME_ENV_WATER);
     ASSERT_EQ(1, inspect_focus(&game, GAME_ENV_WATER, &out));
     ASSERT_EQ(2, out.count);
     ASSERT_EQ(GAME_EVENT_OBSERVATION, out.events[0].kind);
     ASSERT_EQ(GAME_OBS_OUTCOME_WATER, out.events[0].arg0);
     ASSERT_EQ(GAME_EVENT_ENV_MENU, out.events[1].kind);
     ASSERT_EQ(GAME_ENV_WATER, out.events[1].arg0);
-    ASSERT_EQ(0, game.env_focus_active);
+    ASSERT_EQ(0, room_has_clue(&game, WORLD_ROOM_CAMP, GAME_ENV_WATER));
     ASSERT_EQ(1, game.env_interact_active);
     ASSERT_EQ(GAME_ENV_WATER, game.env_interact_kind);
     PASS();
@@ -358,25 +380,48 @@ TEST gatmos_cmd_inspect_none(void)
     ASSERT_EQ(1, out.count);
     ASSERT_EQ(GAME_EVENT_OBSERVATION, out.events[0].kind);
     ASSERT_EQ(GAME_OBS_OUTCOME_NOTHING, out.events[0].arg0);
-    ASSERT_EQ(0, game.env_focus_active);
+    ASSERT_EQ(0, game.env_room_clues[WORLD_ROOM_CAMP]);
     PASS();
 }
 
-TEST gatmos_cmd_inspect_wrong_focus(void)
+TEST gatmos_cmd_inspect_inactive_kind(void)
 {
     struct GameState game;
     GameEventQueue out;
 
     reset_camp(&game);
-    game.env_focus_active = 1;
-    game.env_focus_room = WORLD_ROOM_CAMP;
-    game.env_focus_kind = GAME_ENV_RUSTLE;
-    game.env_focus_expires_tick = game.tick + 10;
+    room_set_clue(&game, WORLD_ROOM_CAMP, GAME_ENV_RUSTLE);
     ASSERT_EQ(1, inspect_focus(&game, GAME_ENV_WATER, &out));
     ASSERT_EQ(1, out.count);
     ASSERT_EQ(GAME_EVENT_OBSERVATION, out.events[0].kind);
-    ASSERT_EQ(GAME_OBS_OUTCOME_WRONG_FOCUS, out.events[0].arg0);
-    ASSERT_EQ(1, game.env_focus_active);
+    ASSERT_EQ(GAME_OBS_OUTCOME_NOTHING, out.events[0].arg0);
+    ASSERT_EQ(1, room_has_clue(&game, WORLD_ROOM_CAMP, GAME_ENV_RUSTLE));
+    PASS();
+}
+
+TEST gatmos_cmd_inspect_clears_one_clue(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    reset_camp(&game);
+    room_set_clue(&game, WORLD_ROOM_CAMP, GAME_ENV_RUSTLE);
+    room_set_clue(&game, WORLD_ROOM_CAMP, GAME_ENV_WATER);
+    ASSERT_EQ(1, inspect_focus(&game, GAME_ENV_WATER, &out));
+    ASSERT_EQ(0, room_has_clue(&game, WORLD_ROOM_CAMP, GAME_ENV_WATER));
+    ASSERT_EQ(1, room_has_clue(&game, WORLD_ROOM_CAMP, GAME_ENV_RUSTLE));
+    PASS();
+}
+
+TEST gatmos_departed_room_clues_cleared(void)
+{
+    struct GameState game;
+
+    reset_camp(&game);
+    room_set_clue(&game, WORLD_ROOM_CAMP, GAME_ENV_RUSTLE);
+    room_set_clue(&game, WORLD_ROOM_CAMP, GAME_ENV_GRIT);
+    gatmos_clear_departed_room_clues(&game, WORLD_ROOM_CAMP);
+    ASSERT_EQ(0, game.env_room_clues[WORLD_ROOM_CAMP]);
     PASS();
 }
 
@@ -775,10 +820,10 @@ TEST gatmos_weather_roll_u32_wrap_tick13(void)
 
 SUITE(gatmos) {
     RUN_TEST(gatmos_seed_world_items);
-    RUN_TEST(gatmos_focus_expiry);
+    RUN_TEST(gatmos_clue_accumulates_on_atmosphere);
     RUN_TEST(gatmos_animal_noise_tick_gate);
     RUN_TEST(gatmos_atmosphere_branches);
-    RUN_TEST(gatmos_water_and_grit_focus);
+    RUN_TEST(gatmos_water_and_grit_clues);
     RUN_TEST(gatmos_room_item_spawn_gate);
     RUN_TEST(gatmos_rustle_berry_drop);
     RUN_TEST(gatmos_environment_gust_event);
@@ -787,7 +832,9 @@ SUITE(gatmos) {
     RUN_TEST(gatmos_tick_event_order);
     RUN_TEST(gatmos_cmd_inspect_focus);
     RUN_TEST(gatmos_cmd_inspect_none);
-    RUN_TEST(gatmos_cmd_inspect_wrong_focus);
+    RUN_TEST(gatmos_cmd_inspect_inactive_kind);
+    RUN_TEST(gatmos_cmd_inspect_clears_one_clue);
+    RUN_TEST(gatmos_departed_room_clues_cleared);
     RUN_TEST(gatmos_cmd_env_reply_water_drink);
     RUN_TEST(gatmos_cmd_env_reply_invalid_choice);
     RUN_TEST(gatmos_env_dismiss_clears_state);

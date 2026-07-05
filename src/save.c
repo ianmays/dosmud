@@ -23,9 +23,10 @@
  * v16: weather_kind and weather_expires_tick (#51).
  * v17: CFG_NPC_MAX 8 and lost animal / peddler roster profiles (#54).
  * v18: day_phase, day_expires_tick, and night_lost (#130).
+ * v19: env_room_clues[CFG_ROOM_MAX] replaces env_focus_* (#234).
  * Append-only bumps; loads reject below SAVE_VERSION.
  */
-#define SAVE_VERSION 18
+#define SAVE_VERSION 19
 #define SAVE_PATH_BUF_MAX 260
 
 /*
@@ -376,6 +377,33 @@ static int save_read_game_arrays(FILE *fp, struct GameState *game)
     return 1;
 }
 
+/* v19: env_room_clues is a fixed CFG_ROOM_MAX array of bit flags, one u8
+ * per room (#234); replaces the single env_focus_active/room/kind/expiry
+ * fields removed below. */
+static int save_write_env_room_clues(FILE *fp, const struct GameState *game)
+{
+    int i;
+
+    for (i = 0; i < CFG_ROOM_MAX; ++i) {
+        if (!save_write_u8(fp, game->env_room_clues[i])) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+static int save_read_env_room_clues(FILE *fp, struct GameState *game)
+{
+    int i;
+
+    for (i = 0; i < CFG_ROOM_MAX; ++i) {
+        if (!save_read_u8(fp, &game->env_room_clues[i])) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
 /*
  * rng_draw_count is plat_rand_draw_count at save time; main.c replays it after
  * load so libc rand() continues where the run left off.
@@ -392,10 +420,7 @@ static int save_write_game_state(FILE *fp, const struct GameState *game,
             !save_write_s16(fp, game->mode) ||
             !save_write_s16(fp, game->dialogue) ||
             !save_write_npcs(fp, game) ||
-            !save_write_s16(fp, game->env_focus_active) ||
-            !save_write_s16(fp, game->env_focus_room) ||
-            !save_write_s16(fp, game->env_focus_kind) ||
-            !save_write_u32(fp, game->env_focus_expires_tick) ||
+            !save_write_env_room_clues(fp, game) ||
             /* v15: post-inspect env menu (#7). */
             !save_write_s16(fp, game->env_interact_active) ||
             !save_write_s16(fp, game->env_interact_kind) ||
@@ -454,10 +479,7 @@ static int save_read_game_state(FILE *fp, struct GameState *game,
             !save_read_s16(fp, &game->mode) ||
             !save_read_s16(fp, &game->dialogue) ||
             !save_read_npcs(fp, game) ||
-            !save_read_s16(fp, &game->env_focus_active) ||
-            !save_read_s16(fp, &game->env_focus_room) ||
-            !save_read_s16(fp, &game->env_focus_kind) ||
-            !save_read_u32(fp, &game->env_focus_expires_tick) ||
+            !save_read_env_room_clues(fp, game) ||
             /* v15: post-inspect env menu (#7). */
             !save_read_s16(fp, &game->env_interact_active) ||
             !save_read_s16(fp, &game->env_interact_kind) ||
@@ -688,10 +710,6 @@ static int save_validate_game(const struct GameState *game)
             game->mode > GAME_MODE_COMBAT ||
             game->dialogue < DIALOGUE_NONE ||
             game->dialogue > DIALOGUE_PEDDLER ||
-            !save_valid_boolish(game->env_focus_active) ||
-            !save_valid_room_or_none(game->env_focus_room, room_count) ||
-            game->env_focus_kind < GAME_ENV_NONE ||
-            game->env_focus_kind > GAME_ENV_GRIT ||
             /* v15: post-inspect env menu pins; gatmos owns active/kind/room together. */
             !save_valid_boolish(game->env_interact_active) ||
             game->env_interact_kind < GAME_ENV_NONE ||
@@ -747,6 +765,12 @@ static int save_validate_game(const struct GameState *game)
     }
     for (slot = 0; slot < CFG_NPC_MAX; ++slot) {
         if (!save_valid_npc(&game->npcs[slot], room_count)) {
+            return 0;
+        }
+    }
+    /* v19: reject stray bits outside the four RUSTLE..GRIT clue kinds. */
+    for (i = 0; i < CFG_ROOM_MAX; ++i) {
+        if ((game->env_room_clues[i] & (u8)~GAME_ENV_CLUE_MASK) != 0) {
             return 0;
         }
     }

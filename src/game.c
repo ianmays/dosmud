@@ -175,10 +175,7 @@ static void do_look(struct GameState *game, GameEventQueue *out)
         npc_room_actor(game->player.room_id),
         look_arg1_pack(game->corpse_present[game->player.room_id],
             game->weather_kind, game->day_phase),
-        game->env_focus_active &&
-            game->env_focus_room == game->player.room_id &&
-            game->tick < game->env_focus_expires_tick,
-        game->env_focus_kind, 0);
+        0, 0, 0);
     if (ev == 0) {
         return;
     }
@@ -210,10 +207,11 @@ static void reset_mutable_state(struct GameState *game, int room_id, u32 tick)
     game->tick = tick;
     npc_clear_all(game);
     npc_seed_profiles(game);
-    game->env_focus_active = 0;
-    game->env_focus_room = -1;
-    game->env_focus_kind = GAME_ENV_NONE;
-    game->env_focus_expires_tick = 0;
+    /* gatmos.c per-room inspect clue bits (#234); no active-focus room/kind
+     * to reset since clues are keyed by room_id, not a single slot. */
+    for (i = 0; i < CFG_ROOM_MAX; ++i) {
+        game->env_room_clues[i] = 0;
+    }
     game->env_interact_active = 0;
     game->env_interact_kind = GAME_ENV_NONE;
     game->env_interact_room = -1;
@@ -491,6 +489,8 @@ static int game_cmd_pass_time(struct GameState *game, struct Command *cmd,
 static int game_cmd_move(struct GameState *game, struct Command *cmd,
                          GameEventQueue *out)
 {
+    int from_room;
+
     if (cmd->type != CMD_MOVE) {
         return 0;
     }
@@ -500,7 +500,10 @@ static int game_cmd_move(struct GameState *game, struct Command *cmd,
             world_dir_name(cmd->dir));
         return 0;
     }
+    from_room = game->player.room_id;
     game->player.room_id = world_move(&game->world, game->player.room_id, cmd->dir);
+    /* game.c owns the move; gatmos.c owns dropping uninspected clues left behind. */
+    gatmos_clear_departed_room_clues(game, from_room);
     game->room_explored[game->player.room_id] = 1;
     if (game->mode == GAME_MODE_DIALOGUE) {
         game_set_mode_explore(game);

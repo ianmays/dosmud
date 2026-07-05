@@ -445,8 +445,7 @@ void game_print_location_art(int room_id)
 
 static void render_room_look_snapshot(const struct GameState *game, int room_id,
                                       const int *room_items, int look_arg1,
-                                      int npc_in_room_hint, int focus_active,
-                                      int focus_kind)
+                                      int npc_in_room_hint)
 {
     char ground_buf[CFG_FMT_GROUND_MAX];
     const struct Room *room;
@@ -484,17 +483,6 @@ static void render_room_look_snapshot(const struct GameState *game, int room_id,
     }
     if (npc_in_room_hint != 0) {
         RENDER_PRINTF("%s", TXT_UI_NPC_HINT);
-    }
-    if (focus_active) {
-        if (focus_kind == GAME_ENV_RUSTLE) {
-            RENDER_PRINTF("%s", TXT_UI_FOCUS_RUSTLE);
-        } else if (focus_kind == GAME_ENV_CREAK) {
-            RENDER_PRINTF("%s", TXT_UI_FOCUS_CREAK);
-        } else if (focus_kind == GAME_ENV_WATER) {
-            RENDER_PRINTF("%s", TXT_UI_FOCUS_WATER);
-        } else if (focus_kind == GAME_ENV_GRIT) {
-            RENDER_PRINTF("%s", TXT_UI_FOCUS_GRIT);
-        }
     }
     if (weather_kind == GAME_WEATHER_RAIN) {
         RENDER_PRINTF("%s", TXT_UI_WEATHER_RAIN);
@@ -909,9 +897,6 @@ static void render_observation_event(const GameEvent *ev)
     case GAME_OBS_OUTCOME_NOTHING:
         render_msg_inspect_nothing();
         break;
-    case GAME_OBS_OUTCOME_WRONG_FOCUS:
-        render_msg_inspect_wrong_focus();
-        break;
     case GAME_OBS_OUTCOME_RUSTLE:
         render_msg_inspect_rustle();
         break;
@@ -1051,7 +1036,7 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
         switch (ev->kind) {
         case GAME_EVENT_ROOM_LOOK:
             render_room_look_snapshot(game, ev->room_id, ev->room_item,
-                ev->arg1, ev->arg0, ev->arg2, ev->arg3);
+                ev->arg1, ev->arg0);
             break;
         case GAME_EVENT_MOVE:
             render_msg_moved(ev->text);
@@ -1454,11 +1439,6 @@ void render_msg_moved(const char *dir_name)
 void render_msg_inspect_nothing(void)
 {
     RENDER_PRINTF("%s", TXT_MSG_INSPECT_NOTHING);
-}
-
-void render_msg_inspect_wrong_focus(void)
-{
-    RENDER_PRINTF("%s", TXT_MSG_INSPECT_WRONG_FOCUS);
 }
 
 void render_msg_inspect_rustle(void)

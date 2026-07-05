@@ -50,12 +50,13 @@ enum HerbalistStoryState {
 #define WATCHMAN_FLAG_FED 2
 #define WATCHMAN_FLAG_PROMISED 4
 
-/* Stored in GameState.env_focus_kind; render consumes the same values. */
+/* Ambient inspect kinds; gatmos.c stores active clues per room as bit flags. */
 #define GAME_ENV_NONE 0
 #define GAME_ENV_RUSTLE 1
 #define GAME_ENV_CREAK 2
 #define GAME_ENV_WATER 3
 #define GAME_ENV_GRIT 4
+#define GAME_ENV_CLUE_MASK 0x0Fu
 
 /* Global weather (#51); gatmos.c owns transitions and atmosphere bias. */
 #define GAME_WEATHER_NONE 0
@@ -113,10 +114,8 @@ struct GameState {
     int dialogue;
     /* NPC roster stores active dynamic instances in deterministic slot order. */
     struct NpcState npcs[CFG_NPC_MAX];
-    int env_focus_active;
-    int env_focus_room;
-    int env_focus_kind;
-    u32 env_focus_expires_tick;
+    /* gatmos.c per-room inspect clues (#234); bit (kind - 1) for RUSTLE..GRIT. */
+    u8 env_room_clues[CFG_ROOM_MAX];
     /* gatmos.c post-inspect follow-up menu (#7); saved in save v15+. */
     int env_interact_active;
     int env_interact_kind;

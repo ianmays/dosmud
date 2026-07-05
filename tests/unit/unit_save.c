@@ -40,10 +40,8 @@ static void save_fill_fixture(struct GameState *game)
     npc_deactivate_until(game, GAME_DIALOGUE_ACTOR_TRAVELER, 103U);
     (void)npc_spawn(game, GAME_DIALOGUE_ACTOR_NOBODY, DIALOGUE_NONE,
         GAME_ENCOUNTER_NONE, WORLD_ROOM_ROAD, NPC_FLAG_ACTIVE);
-    game->env_focus_active = 1;
-    game->env_focus_room = WORLD_ROOM_TOWER;
-    game->env_focus_kind = GAME_ENV_CREAK;
-    game->env_focus_expires_tick = 81U;
+    game->env_room_clues[WORLD_ROOM_TOWER] =
+        (u8)(1u << (GAME_ENV_CREAK - 1));
     game->env_interact_active = 1;
     game->env_interact_kind = GAME_ENV_WATER;
     game->env_interact_room = WORLD_ROOM_TOWER;
@@ -153,10 +151,8 @@ static int save_games_equal(const struct GameState *a,
             a->running != b->running ||
             a->mode != b->mode ||
             a->dialogue != b->dialogue ||
-            a->env_focus_active != b->env_focus_active ||
-            a->env_focus_room != b->env_focus_room ||
-            a->env_focus_kind != b->env_focus_kind ||
-            a->env_focus_expires_tick != b->env_focus_expires_tick ||
+            memcmp(a->env_room_clues, b->env_room_clues,
+                sizeof(a->env_room_clues)) != 0 ||
             a->env_interact_active != b->env_interact_active ||
             a->env_interact_kind != b->env_interact_kind ||
             a->env_interact_room != b->env_interact_room ||
