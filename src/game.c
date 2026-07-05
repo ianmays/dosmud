@@ -212,6 +212,7 @@ static void reset_mutable_state(struct GameState *game, int room_id, u32 tick)
     for (i = 0; i < CFG_ROOM_MAX; ++i) {
         game->env_room_clues[i] = 0;
     }
+    game->env_deferred_extra_event = 0;
     game->env_interact_active = 0;
     game->env_interact_kind = GAME_ENV_NONE;
     game->env_interact_room = -1;
@@ -690,7 +691,7 @@ static void advance_world_tick(struct GameState *game, GameEventQueue *out)
     world_step(&game->world, game->tick);
     maybe_emit_atmosphere(game, out);
     maybe_emit_animal_noise(game, out);
-    gatmos_emit_deferred_atmosphere_extras(out);
+    gatmos_emit_deferred_atmosphere_extras(game, out);
     if (!game_is_busy_dialogue(game)) {
         fixed_opened = npc_fixed_begin_encounter_in_room(game,
             game->player.room_id, out);

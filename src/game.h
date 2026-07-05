@@ -120,6 +120,8 @@ struct GameState {
     struct NpcState npcs[CFG_NPC_MAX];
     /* gatmos.c per-room inspect clues (#234); bit (kind - 1) for RUSTLE..GRIT. */
     u8 env_room_clues[CFG_ROOM_MAX];
+    /* gatmos.c tick-scoped berry/reed drop after inspect clue; 0 when none. */
+    int env_deferred_extra_event;
     /* gatmos.c post-inspect follow-up menu (#7); saved in save v15+. */
     int env_interact_active;
     int env_interact_kind;

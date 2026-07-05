@@ -380,7 +380,7 @@ TEST gatmos_tick_event_order(void)
         if (out.count == 1 &&
                 out.events[0].kind == GAME_EVENT_ENVIRONMENT &&
                 out.events[0].arg0 == GAME_ENV_EVENT_RUSTLE) {
-            gatmos_emit_deferred_atmosphere_extras(&out);
+            gatmos_emit_deferred_atmosphere_extras(&game, &out);
             if (out.count == 2 &&
                     out.events[1].kind == GAME_EVENT_ENVIRONMENT &&
                     out.events[1].arg0 == GAME_ENV_EVENT_BERRY_DROP) {
@@ -390,6 +390,28 @@ TEST gatmos_tick_event_order(void)
         }
     }
     ASSERT_EQ(1, found);
+    PASS();
+}
+
+TEST gatmos_deferred_extra_per_game_state(void)
+{
+    struct GameState game_a;
+    struct GameState game_b;
+    GameEventQueue out;
+
+    reset_camp(&game_a);
+    reset_camp(&game_b);
+    game_a.env_deferred_extra_event = GAME_ENV_EVENT_BERRY_DROP;
+    game_b.env_deferred_extra_event = GAME_ENV_EVENT_REED_DROP;
+    game_event_queue_reset(&out);
+    maybe_emit_atmosphere(&game_b, &out);
+    ASSERT_EQ(GAME_ENV_EVENT_BERRY_DROP, game_a.env_deferred_extra_event);
+    game_event_queue_reset(&out);
+    gatmos_emit_deferred_atmosphere_extras(&game_a, &out);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_ENVIRONMENT, out.events[0].kind);
+    ASSERT_EQ(GAME_ENV_EVENT_BERRY_DROP, out.events[0].arg0);
+    ASSERT_EQ(GAME_ENV_EVENT_NONE, game_a.env_deferred_extra_event);
     PASS();
 }
 
@@ -889,6 +911,7 @@ SUITE(gatmos) {
     RUN_TEST(gatmos_ambient_noise_event);
     RUN_TEST(gatmos_item_presence_event);
     RUN_TEST(gatmos_tick_event_order);
+    RUN_TEST(gatmos_deferred_extra_per_game_state);
     RUN_TEST(gatmos_cmd_inspect_focus);
     RUN_TEST(gatmos_cmd_inspect_none);
     RUN_TEST(gatmos_cmd_inspect_inactive_kind);
