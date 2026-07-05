@@ -61,7 +61,7 @@ Orchard
 Crooked fruit trees crowd a forgotten lane, and the bitter scent of crushed marsh-root still hangs in the air.
 Exits: north west
 On the ground: berry. (take berry)
-Someone nearby might talk. (talk)
+Someone nearby might [talk].
 
 [T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 

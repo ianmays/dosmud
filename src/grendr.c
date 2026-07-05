@@ -446,7 +446,7 @@ void game_print_location_art(int room_id)
 static const char *env_kind_tag(int kind)
 {
     if (kind == GAME_ENV_RUSTLE) {
-        return "rustle";
+        return "rustles";
     }
     if (kind == GAME_ENV_CREAK) {
         return "creak";
@@ -463,16 +463,16 @@ static const char *env_kind_tag(int kind)
 static void render_room_clue_hints(u8 clues)
 {
     if ((clues & (u8)(1u << (GAME_ENV_RUSTLE - 1))) != 0) {
-        RENDER_PRINTF("%s", TXT_UI_CLUE_RUSTLE);
+        RENDER_PRINTF("%s", TXT_ATMO_RUSTLE);
     }
     if ((clues & (u8)(1u << (GAME_ENV_CREAK - 1))) != 0) {
-        RENDER_PRINTF("%s", TXT_UI_CLUE_CREAK);
+        RENDER_PRINTF("%s", TXT_ATMO_CREAK);
     }
     if ((clues & (u8)(1u << (GAME_ENV_WATER - 1))) != 0) {
-        RENDER_PRINTF("%s", TXT_UI_CLUE_WATER);
+        RENDER_PRINTF("%s", TXT_ATMO_WATER);
     }
     if ((clues & (u8)(1u << (GAME_ENV_GRIT - 1))) != 0) {
-        RENDER_PRINTF("%s", TXT_UI_CLUE_GRIT);
+        RENDER_PRINTF("%s", TXT_ATMO_GRIT);
     }
 }
 
