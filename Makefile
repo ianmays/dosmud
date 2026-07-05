@@ -60,7 +60,7 @@ win-run:
 		powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -FilePath '$$win_exe'"; \
 	fi
 
-run: build
+run:
 	./$(BIN) $(RUN_ARGS)
 
 # deterministic

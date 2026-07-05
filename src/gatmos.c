@@ -76,17 +76,25 @@ static u8 env_clue_bit(int kind)
     return (u8)(1u << (kind - 1));
 }
 
-static void gatmos_room_clue_set(struct GameState *game, int room_id, int kind)
+/* Returns 1 when the clue bit was newly set, 0 if already active. */
+static int gatmos_room_clue_set(struct GameState *game, int room_id, int kind)
 {
     u8 bit;
+    u8 prior;
 
     if (room_id < 0 || room_id >= CFG_ROOM_MAX) {
-        return;
+        return 0;
     }
     bit = env_clue_bit(kind);
-    if (bit != 0) {
-        game->env_room_clues[room_id] |= bit;
+    if (bit == 0) {
+        return 0;
     }
+    prior = game->env_room_clues[room_id];
+    if ((prior & bit) != 0) {
+        return 0;
+    }
+    game->env_room_clues[room_id] = (u8)(prior | bit);
+    return 1;
 }
 
 static int gatmos_room_clue_has(const struct GameState *game, int room_id,
@@ -522,35 +530,39 @@ void maybe_emit_atmosphere(struct GameState *game, GameEventQueue *out)
         return;
     }
     if (roll < atmosphere_rustle_below(game)) {
-        push_environment(out, GAME_ENV_EVENT_RUSTLE);
-        gatmos_room_clue_set(game, room_id, GAME_ENV_RUSTLE);
-        if (game_room_ground_has_space(game, game->player.room_id) &&
-                (plat_rand() % CFG_ROLL_PERCENT_RANGE) < CFG_ATMOSPHERE_FOCUS_EXTRA_ITEM_BELOW) {
-            if (game_room_ground_try_add(game, game->player.room_id, ITEM_BERRY)) {
-                push_environment(out, GAME_ENV_EVENT_BERRY_DROP);
+        if (gatmos_room_clue_set(game, room_id, GAME_ENV_RUSTLE)) {
+            push_environment(out, GAME_ENV_EVENT_RUSTLE);
+            if (game_room_ground_has_space(game, game->player.room_id) &&
+                    (plat_rand() % CFG_ROLL_PERCENT_RANGE) < CFG_ATMOSPHERE_FOCUS_EXTRA_ITEM_BELOW) {
+                if (game_room_ground_try_add(game, game->player.room_id, ITEM_BERRY)) {
+                    push_environment(out, GAME_ENV_EVENT_BERRY_DROP);
+                }
             }
         }
         return;
     }
     if (roll < CFG_ATMOSPHERE_ROLL_CREAK_BELOW) {
-        push_environment(out, GAME_ENV_EVENT_CREAK);
-        gatmos_room_clue_set(game, room_id, GAME_ENV_CREAK);
+        if (gatmos_room_clue_set(game, room_id, GAME_ENV_CREAK)) {
+            push_environment(out, GAME_ENV_EVENT_CREAK);
+        }
         return;
     }
     if (roll < atmosphere_water_below(game)) {
-        push_environment(out, GAME_ENV_EVENT_WATER);
-        gatmos_room_clue_set(game, room_id, GAME_ENV_WATER);
-        if (game_room_ground_has_space(game, game->player.room_id) &&
-                (plat_rand() % CFG_ROLL_PERCENT_RANGE) < CFG_ATMOSPHERE_FOCUS_EXTRA_ITEM_BELOW) {
-            if (game_room_ground_try_add(game, game->player.room_id, ITEM_REED)) {
-                push_environment(out, GAME_ENV_EVENT_REED_DROP);
+        if (gatmos_room_clue_set(game, room_id, GAME_ENV_WATER)) {
+            push_environment(out, GAME_ENV_EVENT_WATER);
+            if (game_room_ground_has_space(game, game->player.room_id) &&
+                    (plat_rand() % CFG_ROLL_PERCENT_RANGE) < CFG_ATMOSPHERE_FOCUS_EXTRA_ITEM_BELOW) {
+                if (game_room_ground_try_add(game, game->player.room_id, ITEM_REED)) {
+                    push_environment(out, GAME_ENV_EVENT_REED_DROP);
+                }
             }
         }
         return;
     }
     if (roll < atmosphere_grit_below(game)) {
-        push_environment(out, GAME_ENV_EVENT_GRIT);
-        gatmos_room_clue_set(game, room_id, GAME_ENV_GRIT);
+        if (gatmos_room_clue_set(game, room_id, GAME_ENV_GRIT)) {
+            push_environment(out, GAME_ENV_EVENT_GRIT);
+        }
         return;
     }
     maybe_spawn_room_item(game, out);

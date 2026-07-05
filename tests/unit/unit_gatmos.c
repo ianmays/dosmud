@@ -96,6 +96,45 @@ TEST gatmos_clue_accumulates_on_atmosphere(void)
     PASS();
 }
 
+TEST gatmos_atmosphere_skips_duplicate_clue_announce(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    u32 seed;
+    int i;
+    int announced;
+
+    announced = 0;
+    for (seed = 0; seed < 800u; ++seed) {
+        reset_camp(&game);
+        plat_seed_rng(seed);
+        emit_atmosphere(&game, &out);
+        for (i = 0; i < out.count; ++i) {
+            if (out.events[i].kind == GAME_EVENT_ENVIRONMENT &&
+                    out.events[i].arg0 == GAME_ENV_EVENT_RUSTLE) {
+                announced = 1;
+                break;
+            }
+        }
+        if (announced) {
+            break;
+        }
+    }
+    ASSERT_EQ(1, announced);
+
+    reset_camp(&game);
+    room_set_clue(&game, WORLD_ROOM_CAMP, GAME_ENV_RUSTLE);
+    plat_seed_rng(seed);
+    emit_atmosphere(&game, &out);
+    for (i = 0; i < out.count; ++i) {
+        if (out.events[i].kind == GAME_EVENT_ENVIRONMENT &&
+                out.events[i].arg0 == GAME_ENV_EVENT_RUSTLE) {
+            FAILm("duplicate rustle announce when clue already active");
+        }
+    }
+    PASS();
+}
+
 TEST gatmos_animal_noise_tick_gate(void)
 {
     struct GameState game;
@@ -837,6 +876,7 @@ TEST gatmos_weather_roll_u32_wrap_tick13(void)
 SUITE(gatmos) {
     RUN_TEST(gatmos_seed_world_items);
     RUN_TEST(gatmos_clue_accumulates_on_atmosphere);
+    RUN_TEST(gatmos_atmosphere_skips_duplicate_clue_announce);
     RUN_TEST(gatmos_animal_noise_tick_gate);
     RUN_TEST(gatmos_atmosphere_branches);
     RUN_TEST(gatmos_water_and_grit_clues);
