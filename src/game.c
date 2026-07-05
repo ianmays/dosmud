@@ -688,8 +688,9 @@ static void advance_world_tick(struct GameState *game, GameEventQueue *out)
     }
 
     world_step(&game->world, game->tick);
-    maybe_emit_animal_noise(game, out);
     maybe_emit_atmosphere(game, out);
+    maybe_emit_animal_noise(game, out);
+    gatmos_emit_deferred_atmosphere_extras(out);
     if (!game_is_busy_dialogue(game)) {
         fixed_opened = npc_fixed_begin_encounter_in_room(game,
             game->player.room_id, out);

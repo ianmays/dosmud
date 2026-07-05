@@ -61,6 +61,14 @@ static void push_pick_guard(GameEventQueue *out, int max_choice)
         GAME_DIALOGUE_GUARD_PICK_123, max_choice, 0, 0, 0);
 }
 
+/* Berry/reed extras from rustle/water defer until after animal noise (#234). */
+static int g_pending_extra_env;
+
+static void queue_deferred_extra(int kind)
+{
+    g_pending_extra_env = kind;
+}
+
 /*
  * Per-room inspect clues (#234): env_room_clues[room_id] is a bit set (bit
  * kind-1 for RUSTLE..GRIT), not the old single-slot env_focus_* state
@@ -518,11 +526,23 @@ void maybe_emit_animal_noise(struct GameState *game, GameEventQueue *out)
         world_room_animal_noise(&game->world, game->player.room_id));
 }
 
+void gatmos_emit_deferred_atmosphere_extras(GameEventQueue *out)
+{
+    int kind;
+
+    kind = g_pending_extra_env;
+    g_pending_extra_env = GAME_ENV_EVENT_NONE;
+    if (kind == GAME_ENV_EVENT_BERRY_DROP || kind == GAME_ENV_EVENT_REED_DROP) {
+        push_environment(out, kind);
+    }
+}
+
 void maybe_emit_atmosphere(struct GameState *game, GameEventQueue *out)
 {
     int roll;
     int room_id;
 
+    g_pending_extra_env = GAME_ENV_EVENT_NONE;
     room_id = game->player.room_id;
     roll = plat_rand() % CFG_ROLL_PERCENT_RANGE;
     if (roll < atmosphere_gust_below(game)) {
@@ -535,7 +555,7 @@ void maybe_emit_atmosphere(struct GameState *game, GameEventQueue *out)
             if (game_room_ground_has_space(game, game->player.room_id) &&
                     (plat_rand() % CFG_ROLL_PERCENT_RANGE) < CFG_ATMOSPHERE_FOCUS_EXTRA_ITEM_BELOW) {
                 if (game_room_ground_try_add(game, game->player.room_id, ITEM_BERRY)) {
-                    push_environment(out, GAME_ENV_EVENT_BERRY_DROP);
+                    queue_deferred_extra(GAME_ENV_EVENT_BERRY_DROP);
                 }
             }
         }
@@ -553,7 +573,7 @@ void maybe_emit_atmosphere(struct GameState *game, GameEventQueue *out)
             if (game_room_ground_has_space(game, game->player.room_id) &&
                     (plat_rand() % CFG_ROLL_PERCENT_RANGE) < CFG_ATMOSPHERE_FOCUS_EXTRA_ITEM_BELOW) {
                 if (game_room_ground_try_add(game, game->player.room_id, ITEM_REED)) {
-                    push_environment(out, GAME_ENV_EVENT_REED_DROP);
+                    queue_deferred_extra(GAME_ENV_EVENT_REED_DROP);
                 }
             }
         }

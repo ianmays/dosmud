@@ -45,9 +45,7 @@ Camp
 A small campfire burns quietly.
 Exits: north south west
 
-A cricket chirps from beside the coals.
-
-Something small [rustles] just out of sight.
+You hear [water] moving somewhere beyond the path.
 
 [T:4] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
@@ -55,15 +53,12 @@ Something small [rustles] just out of sight.
 
 Rain settles in, steady and insistent.
 
-You hear [water] moving somewhere beyond the path.
-
 [T:5] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
 > You drop the reed.
 
-A cricket chirps from beside the coals.
-
 A cool gust threads through the area and fades.
+A cricket chirps from beside the coals.
 
 [T:6] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
@@ -83,7 +78,7 @@ Exits: north south west
 On the ground:
   stick (take stick)
   reed (take reed)
-Something small [rustles] just out of sight.
+
 You hear [water] moving somewhere beyond the path.
 Rain needles the air and darkens the ground.
 

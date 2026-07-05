@@ -377,13 +377,16 @@ TEST gatmos_tick_event_order(void)
         game.room_item[WORLD_ROOM_CAMP][3] = ITEM_NONE;
         plat_seed_rng(seed);
         emit_atmosphere(&game, &out);
-        if (out.count == 2 &&
+        if (out.count == 1 &&
                 out.events[0].kind == GAME_EVENT_ENVIRONMENT &&
-                out.events[0].arg0 == GAME_ENV_EVENT_RUSTLE &&
-                out.events[1].kind == GAME_EVENT_ENVIRONMENT &&
-                out.events[1].arg0 == GAME_ENV_EVENT_BERRY_DROP) {
-            found = 1;
-            break;
+                out.events[0].arg0 == GAME_ENV_EVENT_RUSTLE) {
+            gatmos_emit_deferred_atmosphere_extras(&out);
+            if (out.count == 2 &&
+                    out.events[1].kind == GAME_EVENT_ENVIRONMENT &&
+                    out.events[1].arg0 == GAME_ENV_EVENT_BERRY_DROP) {
+                found = 1;
+                break;
+            }
         }
     }
     ASSERT_EQ(1, found);
