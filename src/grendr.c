@@ -70,6 +70,46 @@ static void render_paragraph(const char *text)
     render_copy(text);
 }
 
+/*
+ * Tick ambient flavor (inspect clues, animal noise, gust, item drops): one leading
+ * gap per block, then tight lines with no blank lines between.
+ */
+static int s_atmo_stack_open;
+
+static void atmo_stack_reset(void)
+{
+    s_atmo_stack_open = 0;
+}
+
+static void atmo_stack_line(const char *text)
+{
+    if (!s_atmo_stack_open) {
+        render_gap();
+    }
+    render_copy(text);
+    s_atmo_stack_open = 1;
+}
+
+static void atmo_stack_animal_line(const char *line)
+{
+    if (!s_atmo_stack_open) {
+        render_gap();
+    }
+    RENDER_PRINTF("%s\n", line);
+    s_atmo_stack_open = 1;
+}
+
+static int env_event_is_stack_tier(int kind)
+{
+    if (kind == GAME_ENV_EVENT_GUST || kind == GAME_ENV_EVENT_RUSTLE ||
+            kind == GAME_ENV_EVENT_BERRY_DROP || kind == GAME_ENV_EVENT_CREAK ||
+            kind == GAME_ENV_EVENT_WATER || kind == GAME_ENV_EVENT_REED_DROP ||
+            kind == GAME_ENV_EVENT_GRIT) {
+        return 1;
+    }
+    return 0;
+}
+
 static void art_room_camp(void)
 {
     RENDER_PRINTF("       *      *        $   * \n");
@@ -443,10 +483,62 @@ void game_print_location_art(int room_id)
     art_for_room(room_id);
 }
 
+static const char *env_kind_tag(int kind)
+{
+    if (kind == GAME_ENV_RUSTLE) {
+        return "rustles";
+    }
+    if (kind == GAME_ENV_CREAK) {
+        return "creak";
+    }
+    if (kind == GAME_ENV_WATER) {
+        return "water";
+    }
+    if (kind == GAME_ENV_GRIT) {
+        return "grit";
+    }
+    return "trace";
+}
+
+/* Look footer: one gap before the clue block, tight lines within. */
+static void render_room_clue_hints(u8 clues)
+{
+    int opened;
+
+    opened = 0;
+    if ((clues & (u8)GAME_ENV_CLUE_BIT(GAME_ENV_RUSTLE)) != 0) {
+        if (!opened) {
+            render_gap();
+            opened = 1;
+        }
+        render_copy(TXT_ATMO_RUSTLE);
+    }
+    if ((clues & (u8)GAME_ENV_CLUE_BIT(GAME_ENV_CREAK)) != 0) {
+        if (!opened) {
+            render_gap();
+            opened = 1;
+        }
+        render_copy(TXT_ATMO_CREAK);
+    }
+    if ((clues & (u8)GAME_ENV_CLUE_BIT(GAME_ENV_WATER)) != 0) {
+        if (!opened) {
+            render_gap();
+            opened = 1;
+        }
+        render_copy(TXT_ATMO_WATER);
+    }
+    if ((clues & (u8)GAME_ENV_CLUE_BIT(GAME_ENV_GRIT)) != 0) {
+        if (!opened) {
+            render_gap();
+            opened = 1;
+        }
+        render_copy(TXT_ATMO_GRIT);
+    }
+}
+
 static void render_room_look_snapshot(const struct GameState *game, int room_id,
                                       const int *room_items, int look_arg1,
-                                      int npc_in_room_hint, int focus_active,
-                                      int focus_kind)
+                                      int npc_in_room_hint, u8 room_clues)
 {
     char ground_buf[CFG_FMT_GROUND_MAX];
     const struct Room *room;
@@ -485,17 +577,7 @@ static void render_room_look_snapshot(const struct GameState *game, int room_id,
     if (npc_in_room_hint != 0) {
         RENDER_PRINTF("%s", TXT_UI_NPC_HINT);
     }
-    if (focus_active) {
-        if (focus_kind == GAME_ENV_RUSTLE) {
-            RENDER_PRINTF("%s", TXT_UI_FOCUS_RUSTLE);
-        } else if (focus_kind == GAME_ENV_CREAK) {
-            RENDER_PRINTF("%s", TXT_UI_FOCUS_CREAK);
-        } else if (focus_kind == GAME_ENV_WATER) {
-            RENDER_PRINTF("%s", TXT_UI_FOCUS_WATER);
-        } else if (focus_kind == GAME_ENV_GRIT) {
-            RENDER_PRINTF("%s", TXT_UI_FOCUS_GRIT);
-        }
-    }
+    render_room_clue_hints(room_clues);
     if (weather_kind == GAME_WEATHER_RAIN) {
         RENDER_PRINTF("%s", TXT_UI_WEATHER_RAIN);
     } else if (weather_kind == GAME_WEATHER_FOG) {
@@ -909,8 +991,11 @@ static void render_observation_event(const GameEvent *ev)
     case GAME_OBS_OUTCOME_NOTHING:
         render_msg_inspect_nothing();
         break;
-    case GAME_OBS_OUTCOME_WRONG_FOCUS:
-        render_msg_inspect_wrong_focus();
+    case GAME_OBS_OUTCOME_LEAD_SPENT:
+        render_msg_inspect_lead_spent(ev->arg1);
+        break;
+    case GAME_OBS_OUTCOME_CHOOSE_KIND:
+        render_msg_inspect_choose_kind();
         break;
     case GAME_OBS_OUTCOME_RUSTLE:
         render_msg_inspect_rustle();
@@ -1044,14 +1129,17 @@ static void render_combat_event(const GameEvent *ev)
 void game_render_output(const struct GameState *game, const GameEventQueue *out)
 {
     int i;
+    int flavor;
     const GameEvent *ev;
 
+    atmo_stack_reset();
     for (i = 0; i < out->count; ++i) {
+        flavor = 0;
         ev = &out->events[i];
         switch (ev->kind) {
         case GAME_EVENT_ROOM_LOOK:
             render_room_look_snapshot(game, ev->room_id, ev->room_item,
-                ev->arg1, ev->arg0, ev->arg2, ev->arg3);
+                ev->arg1, ev->arg0, (u8)ev->arg2);
             break;
         case GAME_EVENT_MOVE:
             render_msg_moved(ev->text);
@@ -1113,9 +1201,13 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
         /* #161 ambient/inspect: direct dispatch (gatmos no longer LEGACY). */
         case GAME_EVENT_ENVIRONMENT:
             render_environment_event(ev);
+            if (env_event_is_stack_tier(ev->arg0)) {
+                flavor = 1;
+            }
             break;
         case GAME_EVENT_AMBIENT_NOISE:
             render_ambient_noise_event(ev);
+            flavor = 1;
             break;
         case GAME_EVENT_ITEM_PRESENCE:
             render_item_presence_event(ev);
@@ -1131,6 +1223,9 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
             break;
         default:
             break;
+        }
+        if (!flavor) {
+            atmo_stack_reset();
         }
     }
 }
@@ -1244,77 +1339,83 @@ void render_nearby_item_notice(const char *item_name)
 
 void render_animal_noise_line(const char *line)
 {
-    render_gap();
-    RENDER_PRINTF("%s\n", line);
+    atmo_stack_animal_line(line);
 }
 
 void render_atmosphere_gust(void)
 {
-    render_paragraph(TXT_ATMO_GUST);
+    atmo_stack_line(TXT_ATMO_GUST);
 }
 
 void render_atmosphere_rustle(void)
 {
-    render_paragraph(TXT_ATMO_RUSTLE);
+    atmo_stack_line(TXT_ATMO_RUSTLE);
 }
 
 void render_atmosphere_berry_drop(void)
 {
-    render_copy(TXT_ATMO_BERRY_DROP);
+    atmo_stack_line(TXT_ATMO_BERRY_DROP);
 }
 
 void render_atmosphere_creak(void)
 {
-    render_paragraph(TXT_ATMO_CREAK);
+    atmo_stack_line(TXT_ATMO_CREAK);
 }
 
 void render_atmosphere_water(void)
 {
-    render_paragraph(TXT_ATMO_WATER);
+    atmo_stack_line(TXT_ATMO_WATER);
 }
 
 void render_atmosphere_reed_drop(void)
 {
-    render_copy(TXT_ATMO_REED_DROP);
+    atmo_stack_line(TXT_ATMO_REED_DROP);
 }
 
 void render_atmosphere_grit(void)
 {
-    render_paragraph(TXT_ATMO_GRIT);
+    atmo_stack_line(TXT_ATMO_GRIT);
 }
 
 void render_atmosphere_weather_rain(void)
 {
+    atmo_stack_reset();
     render_paragraph(TXT_ATMO_WEATHER_RAIN);
 }
 
 void render_atmosphere_weather_fog(void)
 {
+    atmo_stack_reset();
     render_paragraph(TXT_ATMO_WEATHER_FOG);
 }
 
 void render_atmosphere_weather_wind(void)
 {
+    atmo_stack_reset();
     render_paragraph(TXT_ATMO_WEATHER_WIND);
 }
 
 void render_atmosphere_weather_clear(void)
 {
+    atmo_stack_reset();
     render_paragraph(TXT_ATMO_WEATHER_CLEAR);
 }
 
 void render_atmosphere_night_fall(void)
 {
+    atmo_stack_reset();
     render_paragraph(TXT_ATMO_NIGHT_FALL);
 }
 
 void render_atmosphere_day_break(void)
 {
+    atmo_stack_reset();
     render_paragraph(TXT_ATMO_DAY_BREAK);
 }
 
 void render_atmosphere_night_lost(void)
 {
+    atmo_stack_reset();
     render_paragraph(TXT_ATMO_NIGHT_LOST);
 }
 
@@ -1456,9 +1557,14 @@ void render_msg_inspect_nothing(void)
     RENDER_PRINTF("%s", TXT_MSG_INSPECT_NOTHING);
 }
 
-void render_msg_inspect_wrong_focus(void)
+void render_msg_inspect_lead_spent(int kind)
 {
-    RENDER_PRINTF("%s", TXT_MSG_INSPECT_WRONG_FOCUS);
+    RENDER_PRINTF(TXT_MSG_INSPECT_LEAD_SPENT_FMT, env_kind_tag(kind));
+}
+
+void render_msg_inspect_choose_kind(void)
+{
+    RENDER_PRINTF("%s", TXT_MSG_INSPECT_CHOOSE_KIND);
 }
 
 void render_msg_inspect_rustle(void)

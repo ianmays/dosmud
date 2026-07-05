@@ -51,8 +51,8 @@ enum GameEventKind {
 /*
  * Room look payload (#47, #51, #130): ROOM_LOOK arg0=npc room-actor hint;
  * arg1=corpse_present (bit 0) | (weather_kind << 1) | (day_phase << 3)
- * snapshotted at enqueue; arg2=env focus active; arg3=GAME_ENV_* when arg2 set;
- * room_id and room_item[] hold ground snapshot.
+ * snapshotted at enqueue; arg2=env_room_clues bitmask for current room (#234);
+ * arg3 unused; room_id and room_item[] hold ground snapshot.
  */
 
 /*
@@ -239,7 +239,8 @@ enum GameEventDialogueGuardReason {
  * ENVIRONMENT    arg0=GameEventEnvironmentKind
  * AMBIENT_NOISE  text=room animal noise line
  * ITEM_PRESENCE  arg0=item id; text=item name
- * OBSERVATION    arg0=GameEventObservationOutcome
+ * OBSERVATION    arg0=GameEventObservationOutcome; arg1=GAME_ENV_* kind for
+ *                LEAD_SPENT when the player named a trace that is not active
  * ENV_MENU       arg0=GAME_ENV_* kind arg1=room_id
  * ENV_RESULT     arg0=GAME_ENV_* kind arg1=choice (1-based)
  *                arg2=GameEventEnvResultDetail when needed
@@ -274,7 +275,8 @@ enum GameEventEnvironmentKind {
 enum GameEventObservationOutcome {
     GAME_OBS_OUTCOME_NONE = 0,
     GAME_OBS_OUTCOME_NOTHING,
-    GAME_OBS_OUTCOME_WRONG_FOCUS,
+    GAME_OBS_OUTCOME_LEAD_SPENT,
+    GAME_OBS_OUTCOME_CHOOSE_KIND,
     GAME_OBS_OUTCOME_RUSTLE,
     GAME_OBS_OUTCOME_CREAK,
     GAME_OBS_OUTCOME_WATER,

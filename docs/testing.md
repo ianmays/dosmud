@@ -23,7 +23,7 @@ Purpose:
 - `make check-layers`: core/render boundary guard (no `printf` in `src/*.c` except `main.c`, `grendr.c`, and the platform files `platpos.c`, `platwin.c`, and `platdos.c`)
 - `make test`: strict deterministic compile (`-Werror`, `-DTEST_MODE`, `-g -O0`); does not run `check-layers`; prints `elapsed: <seconds>` after the compile/link step
 - `make test-win`: WSL cross-compile of the native Windows console `TEST_MODE` executable (`dosmud.exe`); compile-only, no snapshot run from Linux
-- `make snapshot-run`: runs every name in `SNAPSHOT_TESTS` plus `seed_cli` and `version_cli` against the existing native `TEST_MODE` binary (`./dosmud`; see [Snapshot test files](#snapshot-test-files)). Each step prints `snapshot: <name>`. Finishes with `snapshot tests passed: N/M` (for example `101/101` names in `SNAPSHOT_TESTS` plus `seed_cli` and `version_cli`, 103 steps total).
+- `make snapshot-run`: runs every name in `SNAPSHOT_TESTS` plus `seed_cli` and `version_cli` against the existing native `TEST_MODE` binary (`./dosmud`; see [Snapshot test files](#snapshot-test-files)). Each step prints `snapshot: <name>`. Finishes with `snapshot tests passed: N/M` (for example `102/102` names in `SNAPSHOT_TESTS` plus `seed_cli` and `version_cli`, 104 steps total).
 - `make test-run`: builds the test binary (`make test`), then runs `make snapshot-run`.
 - `make test-unit`: builds and runs the greatest unit suite (`tests/unit/build/dosmud_unit`, `TEST_MODE` only; not linked into release `dosmud`)
 - `make test-soak`: builds and runs long-run soak/stress checks (`tests/soak/build/dosmud_soak`; separate from unit tests)
@@ -32,7 +32,7 @@ Purpose:
 
 Use these when you want to launch a playable or interactive binary rather than run a validation step:
 
-- `make run`: builds the native release binary if needed, then launches it; pass `SEED=<unsigned>` to forward `--seed`
+- `make run`: launches the existing repo-root `./dosmud` from the most recent `make build` or `make test`; run `make build` first when the binary is missing or stale; pass `SEED=<unsigned>` to forward `--seed`
 - `make test-run-bin`: builds the native `TEST_MODE` binary if needed, then launches it; pass `SEED=<unsigned>` to forward `--seed`
 - `make dos-run`: launches the existing prepared DOS release executable without rebuilding
 - `make win-run`: launches the existing repo-root Windows `dosmud.exe` from the most recent `make build-win` or `make test-win`; pass `SEED=<unsigned>` to forward `--seed`
@@ -253,11 +253,12 @@ Fixtures call `game_reset_fixture_baseline` first (same mutable fields as `game_
 | `bag_berry_low_hp` / `bag_fish_low_hp` | Same as `bag_berry` / `bag_fish` with `player_hp = CFG_START_MAX_HP - 5` |
 | `bag_craft_salve` | Camp + herb and berry in bag |
 
-**Inspect focus** (camp):
+**Inspect clues** (camp):
 
 | Fixture | State |
 |---------|--------|
-| `env_focus_rustle` / `creak` / `water` / `grit` | Active focus of that kind, valid `expires_tick` |
+| `env_focus_rustle` / `creak` / `water` / `grit` | Sets the matching bit in `env_room_clues[]` for the player's current room ([#234](https://github.com/ianmays/dosmud/issues/234); fixture names kept from the earlier tick-scoped focus for `.input` compatibility) |
+| `env_clues_rustle_water` | Sets both the rustle and water bits on the current room, for asserting sequential single-argument `inspect` on a multi-clue room |
 
 **Loot helpers** (camp):
 
@@ -332,7 +333,7 @@ Each process run uses one `.input` file until `quit`. `make snapshot-run` runs `
 
 **Eat / use:** `use_salve`, `use_torch`, `use_spear`, `use_stone`, `eat_berry`, `eat_fish`, `eat_berry_heal`, `eat_fish_heal`, `eat_not_edible`, `eat_missing`.
 
-**Inspect:** `inspect_rustle`, `inspect_creak`, `inspect_water`, `inspect_grit`, `inspect_none`, `inspect_wrong`, `inspect_water_followup` (post-inspect water menu reply `1` follow-up copy), `env_menu_dismiss` (`@fixture env_focus_water`, `inspect`, then `north` dismisses the env menu before the move runs; [#7](https://github.com/ianmays/dosmud/issues/7), [#205](https://github.com/ianmays/dosmud/issues/205)-style menu exit).
+**Inspect:** `inspect_rustle`, `inspect_creak`, `inspect_water`, `inspect_grit`, `inspect_none`, `inspect_wrong` (`@fixture env_focus_rustle`, `inspect creak` while `[rustles]` remains active yields lead-spent copy), `inspect_multi_clue` (`@fixture env_clues_rustle_water`, inspect each kind in sequence), `inspect_water_followup` (post-inspect water menu reply `1` follow-up copy), `env_menu_dismiss` (`@fixture env_focus_water`, `inspect`, then `north` dismisses the env menu before the move runs; [#7](https://github.com/ianmays/dosmud/issues/7), [#205](https://github.com/ianmays/dosmud/issues/205)-style menu exit). Active clues echo atmosphere copy on `look` with inline `[rustles]` / `[water]` highlights; parser accepts singular and plural inspect targets (`rustles`, `creaks`, `waters`). Atmosphere rolls announce a clue kind only the first time that bit is set in the room; later `wait`/`take` ticks keep the clue without reprinting it until `look`.
 
 **Ambient (tick-driven):** `ambient_rustle`, `ambient_tick_order`, `ambient_item` (`@fixture ambient_camp` plus `@seed` for deterministic atmosphere, animal noise, and nearby-item paths); `weather_rain_ambient` (`@fixture weather_rain_ready`, one `wait` for rain transition copy); `weather_fog_look` (`@fixture weather_fog`, `look` for fog HUD line; [#51](https://github.com/ianmays/dosmud/issues/51)); `night_look` (`@fixture night_at_camp`, `look` for night HUD line); `night_map_nightfall` (`@fixture night_at_camp`, `map` still renders the grid before a lost roll); `night_map_lost` (`@fixture night_lost`, `map` for blank disoriented map plus exits); `night_map_torch` (`@fixture night_torch_camp`, `map` for torch illumination line plus the grid; [#130](https://github.com/ianmays/dosmud/issues/130)).
 
@@ -344,7 +345,7 @@ Each process run uses one `.input` file until `quit`. `make snapshot-run` runs `
 
 **Meta / inventory:** `unknown_cmd`, `cannot_move`, `give_wrong_context`, `reply_nobody`, `post_combat_reply_guard`, `reply_invalid`, `craft_salve`, `craft_unknown`, `take_nothing`, `take_wrong_item`.
 
-**Save/load:** `save_load`, `herbalist_save_load` (single-slot `save.dat` round-trip with a deterministic post-load move or authored-story follow-up state; `unit_save.c` round-trip fixtures assert save v18 `day_phase` / `day_expires_tick` / `night_lost` ([#130](https://github.com/ianmays/dosmud/issues/130)), v17 roster width (`CFG_NPC_MAX` 8), v16 `weather_kind` / `weather_expires_tick`, v15 `env_interact_*`, v14 `world_adv_flags`, v13 `herbalist_menu`, and v12 `watchman_flags` / `watchman_menu`; v17 and older files reject with `SAVE_RESULT_FORMAT`).
+**Save/load:** `save_load`, `herbalist_save_load` (single-slot `save.dat` round-trip with a deterministic post-load move or authored-story follow-up state; `unit_save.c` round-trip fixtures assert save v19 `env_room_clues[CFG_ROOM_MAX]` per-room inspect clue bits ([#234](https://github.com/ianmays/dosmud/issues/234)), v18 `day_phase` / `day_expires_tick` / `night_lost` ([#130](https://github.com/ianmays/dosmud/issues/130)), v17 roster width (`CFG_NPC_MAX` 8), v16 `weather_kind` / `weather_expires_tick`, v15 `env_interact_*`, v14 `world_adv_flags`, v13 `herbalist_menu`, and v12 `watchman_flags` / `watchman_menu`; v18 and older files reject with `SAVE_RESULT_FORMAT`).
 
 **Replay:** `replay_log` (stdout plus sidecar log golden files; [#156](https://github.com/ianmays/dosmud/issues/156)).
 

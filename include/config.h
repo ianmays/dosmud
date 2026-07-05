@@ -158,9 +158,9 @@
 #define CFG_ATMOSPHERE_ROLL_CREAK_BELOW 70
 #define CFG_ATMOSPHERE_ROLL_WATER_BELOW 82
 #define CFG_ATMOSPHERE_ROLL_GRIT_BELOW 92
-#define CFG_ENV_FOCUS_DURATION_TICKS 3
 #define CFG_ENV_WATER_HEAL_AMOUNT 1
-#define CFG_ATMOSPHERE_FOCUS_EXTRA_ITEM_BELOW 50
+/* Roll threshold for berry/reed drop after a newly registered inspect clue. */
+#define CFG_ATMOSPHERE_CLUE_EXTRA_ITEM_BELOW 50
 
 /* Weather (#51): hash-driven transitions; biases atmosphere and fog encounters. */
 #define CFG_WEATHER_INITIAL_DELAY_TICKS 5

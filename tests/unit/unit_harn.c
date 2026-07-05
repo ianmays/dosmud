@@ -251,9 +251,8 @@ TEST harness_apply_env_focus_water(void)
     unit_game_fresh(&game, 7u);
     rc = testharn_apply(&game, "@fixture env_focus_water");
     ASSERT_EQ(1, rc);
-    ASSERT_EQ(1, game.env_focus_active);
-    ASSERT_EQ(game.player.room_id, game.env_focus_room);
-    ASSERT_EQ(GAME_ENV_WATER, game.env_focus_kind);
+    ASSERT_NEQ(0, game.env_room_clues[game.player.room_id] &
+        (u8)(1u << (GAME_ENV_WATER - 1)));
     PASS();
 }
 

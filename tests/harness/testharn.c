@@ -544,13 +544,39 @@ static int fixture_bag_fish_low_hp(struct GameState *game)
     return 1;
 }
 
+/* Fixture name kept as "env_focus_*" for existing @fixture lines in
+ * tests/regression input files; sets one per-room clue bit (#234), not the
+ * old single active-focus state. */
 static void fixture_env_focus(struct GameState *game, int kind)
 {
+    int room_id;
+    u8 bit;
+
     fixture_at_camp(game);
-    game->env_focus_active = 1;
-    game->env_focus_room = game->player.room_id;
-    game->env_focus_kind = kind;
-    game->env_focus_expires_tick = game->tick + CFG_ENV_FOCUS_DURATION_TICKS;
+    if (kind < GAME_ENV_RUSTLE || kind > GAME_ENV_GRIT) {
+        return;
+    }
+    room_id = game->player.room_id;
+    if (room_id < 0 || room_id >= CFG_ROOM_MAX) {
+        return;
+    }
+    bit = (u8)(1u << (kind - 1));
+    game->env_room_clues[room_id] |= bit;
+}
+
+/* Two clue bits active at once, to exercise the ambiguous bare "inspect"
+ * path that gatmos_room_clue_only_kind() rejects (#234). */
+static void fixture_env_clues_rustle_water(struct GameState *game)
+{
+    int room_id;
+
+    fixture_at_camp(game);
+    room_id = game->player.room_id;
+    if (room_id < 0 || room_id >= CFG_ROOM_MAX) {
+        return;
+    }
+    game->env_room_clues[room_id] =
+        (u8)((1u << (GAME_ENV_RUSTLE - 1)) | (1u << (GAME_ENV_WATER - 1)));
 }
 
 /* Corpse flag set with no loot slots (#129 stripped-body path). */
@@ -979,6 +1005,10 @@ int testharn_apply(struct GameState *game, const char *line)
     }
     if (fixture_name_is("env_focus_grit", name)) {
         fixture_env_focus(game, GAME_ENV_GRIT);
+        return 1;
+    }
+    if (fixture_name_is("env_clues_rustle_water", name)) {
+        fixture_env_clues_rustle_water(game);
         return 1;
     }
     if (fixture_name_is("bag_full_gate", name)) {

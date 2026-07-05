@@ -234,12 +234,10 @@ TEST game_inspect_with_focus(void)
 
     unit_game_fresh(&game, 6u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
-    game.env_focus_active = 1;
-    game.env_focus_room = WORLD_ROOM_CAMP;
-    game.env_focus_kind = GAME_ENV_WATER;
-    game.env_focus_expires_tick = game.tick + 10;
+    game.env_room_clues[WORLD_ROOM_CAMP] |= (u8)(1u << (GAME_ENV_WATER - 1));
     ASSERT_EQ(1, run_cmd_out(&game, "inspect water", &out));
-    ASSERT_EQ(0, game.env_focus_active);
+    ASSERT_EQ(0, game.env_room_clues[WORLD_ROOM_CAMP] &
+        (u8)(1u << (GAME_ENV_WATER - 1)));
     ASSERT_EQ(1, game.env_interact_active);
     ASSERT_EQ(2, out.count);
     ASSERT_EQ(GAME_EVENT_OBSERVATION, out.events[0].kind);
@@ -255,10 +253,7 @@ TEST game_env_inspect_reply(void)
 
     unit_game_fresh(&game, 6u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
-    game.env_focus_active = 1;
-    game.env_focus_room = WORLD_ROOM_CAMP;
-    game.env_focus_kind = GAME_ENV_WATER;
-    game.env_focus_expires_tick = game.tick + 10;
+    game.env_room_clues[WORLD_ROOM_CAMP] |= (u8)(1u << (GAME_ENV_WATER - 1));
     ASSERT_EQ(1, run_cmd_out(&game, "inspect", &out));
     ASSERT_EQ(1, game.env_interact_active);
     game_event_queue_reset(&out);
@@ -552,7 +547,7 @@ TEST game_combat_blocks_inventory_cmds(void)
     PASS();
 }
 
-TEST game_inspect_none_and_wrong(void)
+TEST game_inspect_none_and_inactive_kind(void)
 {
     struct GameState game;
     GameEventQueue out;
@@ -563,15 +558,29 @@ TEST game_inspect_none_and_wrong(void)
     ASSERT_EQ(1, out.count);
     ASSERT_EQ(GAME_EVENT_OBSERVATION, out.events[0].kind);
     ASSERT_EQ(GAME_OBS_OUTCOME_NOTHING, out.events[0].arg0);
-    game.env_focus_active = 1;
-    game.env_focus_room = WORLD_ROOM_CAMP;
-    game.env_focus_kind = GAME_ENV_RUSTLE;
-    game.env_focus_expires_tick = game.tick + 10;
+    game.env_room_clues[WORLD_ROOM_CAMP] |= (u8)(1u << (GAME_ENV_RUSTLE - 1));
     ASSERT_EQ(1, run_cmd_out(&game, "inspect water", &out));
     ASSERT_EQ(1, out.count);
     ASSERT_EQ(GAME_EVENT_OBSERVATION, out.events[0].kind);
-    ASSERT_EQ(GAME_OBS_OUTCOME_WRONG_FOCUS, out.events[0].arg0);
-    ASSERT_EQ(1, game.env_focus_active);
+    ASSERT_EQ(GAME_OBS_OUTCOME_LEAD_SPENT, out.events[0].arg0);
+    ASSERT_EQ(GAME_ENV_WATER, out.events[0].arg1);
+    ASSERT_NEQ(0, game.env_room_clues[WORLD_ROOM_CAMP] &
+        (u8)(1u << (GAME_ENV_RUSTLE - 1)));
+    PASS();
+}
+
+TEST game_move_clears_departed_room_clues(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 18u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game.env_room_clues[WORLD_ROOM_CAMP] =
+        (u8)((1u << (GAME_ENV_RUSTLE - 1)) | (1u << (GAME_ENV_WATER - 1)));
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, run_cmd_out(&game, "north", &out));
+    ASSERT_EQ(0, game.env_room_clues[WORLD_ROOM_CAMP]);
     PASS();
 }
 
@@ -1415,7 +1424,8 @@ SUITE(game) {
     RUN_TEST(game_bag_preserves_herbalist_give_dialogue);
     RUN_TEST(game_frog_reply_branch);
     RUN_TEST(game_combat_blocks_inventory_cmds);
-    RUN_TEST(game_inspect_none_and_wrong);
+    RUN_TEST(game_inspect_none_and_inactive_kind);
+    RUN_TEST(game_move_clears_departed_room_clues);
     RUN_TEST(game_unknown_command);
     RUN_TEST(game_give_after_handover_fixture);
     RUN_TEST(game_give_in_enemy_dialogue_beats_room_npc_exchange);

@@ -68,7 +68,8 @@ static int help_topic_from_word(const char *w)
     if (strcmp(w, "offer") == 0) {
         return CMD_HELP_TOPIC_GIVE;
     }
-    if (strcmp(w, "talk") == 0 || strcmp(w, "speak") == 0) {
+    if (strcmp(w, "talk") == 0 || strcmp(w, "speak") == 0 ||
+            strcmp(w, "talks") == 0) {
         return CMD_HELP_TOPIC_TALK;
     }
     if (strcmp(w, "reply") == 0 || strcmp(w, "choices") == 0) {
@@ -96,6 +97,26 @@ static int help_topic_from_word(const char *w)
         return CMD_HELP_TOPIC_HELP;
     }
     return CMD_HELP_TOPIC_UNKNOWN;
+}
+
+static int parse_inspect_kind(const char *word)
+{
+    if (strcmp(word, "rustle") == 0 || strcmp(word, "rustles") == 0 ||
+            strcmp(word, "reeds") == 0) {
+        return 1;
+    }
+    if (strcmp(word, "creak") == 0 || strcmp(word, "creaks") == 0 ||
+            strcmp(word, "timbers") == 0) {
+        return 2;
+    }
+    if (strcmp(word, "water") == 0 || strcmp(word, "waters") == 0 ||
+            strcmp(word, "current") == 0) {
+        return 3;
+    }
+    if (strcmp(word, "grit") == 0 || strcmp(word, "tracks") == 0) {
+        return 4;
+    }
+    return 0;
 }
 
 static int parse_dir(char *word)
@@ -154,7 +175,8 @@ int command_parse(char *line, struct Command *out_cmd)
         out_cmd->type = CMD_QUIT;
         return 1;
     }
-    if (strcmp(word1, "talk") == 0 || strcmp(word1, "speak") == 0) {
+    if (strcmp(word1, "talk") == 0 || strcmp(word1, "speak") == 0 ||
+            strcmp(word1, "talks") == 0) {
         out_cmd->type = CMD_TALK;
         return 1;
     }
@@ -165,23 +187,8 @@ int command_parse(char *line, struct Command *out_cmd)
             out_cmd->arg = 0;
             return 1;
         }
-        if (strcmp(word2, "rustle") == 0 || strcmp(word2, "reeds") == 0) {
-            out_cmd->arg = 1;
-            return 1;
-        }
-        if (strcmp(word2, "creak") == 0 || strcmp(word2, "timbers") == 0) {
-            out_cmd->arg = 2;
-            return 1;
-        }
-        if (strcmp(word2, "water") == 0 || strcmp(word2, "current") == 0) {
-            out_cmd->arg = 3;
-            return 1;
-        }
-        if (strcmp(word2, "grit") == 0 || strcmp(word2, "tracks") == 0) {
-            out_cmd->arg = 4;
-            return 1;
-        }
-        return 0;
+        out_cmd->arg = parse_inspect_kind(word2);
+        return out_cmd->arg != 0;
     }
     if (strcmp(word1, "take") == 0 || strcmp(word1, "get") == 0 ||
             strcmp(word1, "pickup") == 0) {

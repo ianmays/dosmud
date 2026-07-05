@@ -60,7 +60,7 @@ win-run:
 		powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -FilePath '$$win_exe'"; \
 	fi
 
-run: build
+run:
 	./$(BIN) $(RUN_ARGS)
 
 # deterministic
@@ -95,7 +95,7 @@ SNAPSHOT_TESTS = \
 	game_event_dialogue narrative_indirection \
 	use_salve use_torch use_spear use_stone eat_berry eat_fish eat_berry_heal eat_fish_heal \
 	eat_not_edible eat_missing bag_stacks bag_view \
-	inspect_rustle inspect_creak inspect_water inspect_grit inspect_none inspect_wrong \
+	inspect_rustle inspect_creak inspect_water inspect_grit inspect_none inspect_wrong inspect_multi_clue \
 	inspect_water_followup env_menu_dismiss \
 	ambient_rustle ambient_tick_order ambient_item \
 	weather_rain_ambient weather_fog_look \

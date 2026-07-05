@@ -30,6 +30,8 @@ TEST command_parse_core_verbs(void)
     ASSERT_EQ(CMD_QUIT, cmd.type);
     ASSERT_EQ(1, parse_line("talk", &cmd));
     ASSERT_EQ(CMD_TALK, cmd.type);
+    ASSERT_EQ(1, parse_line("talks", &cmd));
+    ASSERT_EQ(CMD_TALK, cmd.type);
     ASSERT_EQ(1, parse_line("loot", &cmd));
     ASSERT_EQ(CMD_LOOT, cmd.type);
     ASSERT_EQ(1, parse_line("loot all", &cmd));
@@ -112,6 +114,8 @@ TEST command_parse_inspect(void)
 
     ASSERT_EQ(1, parse_line("inspect rustle", &cmd));
     ASSERT_EQ(CMD_INSPECT, cmd.type);
+    ASSERT_EQ(1, cmd.arg);
+    ASSERT_EQ(1, parse_line("inspect rustles", &cmd));
     ASSERT_EQ(1, cmd.arg);
     ASSERT_EQ(1, parse_line("inspect reeds", &cmd));
     ASSERT_EQ(1, cmd.arg);

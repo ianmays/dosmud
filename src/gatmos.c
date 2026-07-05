@@ -9,7 +9,7 @@
 #include "world.h"
 
 /*
- * Ambient systems live here: starter ground items, atmospheric focus, and
+ * Ambient systems live here: starter ground items, per-room inspect clues, and
  * room-scoped incidental events.
  * #51: global weather_kind / weather_expires_tick on GameState; transitions
  * and fog roaming gate use hash-only rolls (see weather_roll).
@@ -35,9 +35,9 @@ static void push_item_presence(GameEventQueue *out, int item_id,
     game_event_push(out, GAME_EVENT_ITEM_PRESENCE, item_id, 0, 0, 0, name);
 }
 
-static void push_observation(GameEventQueue *out, int outcome)
+static void push_observation(GameEventQueue *out, int outcome, int kind)
 {
-    game_event_push(out, GAME_EVENT_OBSERVATION, outcome, 0, 0, 0, 0);
+    game_event_push(out, GAME_EVENT_OBSERVATION, outcome, kind, 0, 0, 0);
 }
 
 /*
@@ -59,6 +59,95 @@ static void push_pick_guard(GameEventQueue *out, int max_choice)
 {
     game_event_push(out, GAME_EVENT_DIALOGUE_GUARD,
         GAME_DIALOGUE_GUARD_PICK_123, max_choice, 0, 0, 0);
+}
+
+static void queue_deferred_extra(struct GameState *game, int kind)
+{
+    game->env_deferred_extra_event = kind;
+}
+
+/*
+ * Per-room inspect clues (#234): env_room_clues[room_id] is a bit set (bit
+ * kind-1 for RUSTLE..GRIT), not the old single-slot env_focus_* state
+ * machine. Several clue kinds can be active in one room at once; each bit
+ * persists until gatmos_cmd_inspect consumes it or the player leaves the
+ * room (gatmos_clear_departed_room_clues).
+ */
+
+/* Returns 1 when the clue bit was newly set, 0 if already active. */
+static int gatmos_room_clue_set(struct GameState *game, int room_id, int kind)
+{
+    u8 bit;
+    u8 prior;
+
+    if (room_id < 0 || room_id >= CFG_ROOM_MAX) {
+        return 0;
+    }
+    bit = (u8)GAME_ENV_CLUE_BIT(kind);
+    if (bit == 0) {
+        return 0;
+    }
+    prior = game->env_room_clues[room_id];
+    if ((prior & bit) != 0) {
+        return 0;
+    }
+    game->env_room_clues[room_id] = (u8)(prior | bit);
+    return 1;
+}
+
+static int gatmos_room_clue_has(const struct GameState *game, int room_id,
+                                int kind)
+{
+    u8 bit;
+
+    if (room_id < 0 || room_id >= CFG_ROOM_MAX) {
+        return 0;
+    }
+    bit = (u8)GAME_ENV_CLUE_BIT(kind);
+    if (bit == 0) {
+        return 0;
+    }
+    return (game->env_room_clues[room_id] & bit) != 0;
+}
+
+static void gatmos_room_clue_clear(struct GameState *game, int room_id,
+                                   int kind)
+{
+    u8 bit;
+
+    if (room_id < 0 || room_id >= CFG_ROOM_MAX) {
+        return;
+    }
+    bit = (u8)GAME_ENV_CLUE_BIT(kind);
+    game->env_room_clues[room_id] &= (u8)~bit;
+}
+
+static int gatmos_room_clue_only_kind(const struct GameState *game,
+                                      int room_id)
+{
+    int kind;
+    int found;
+
+    found = GAME_ENV_NONE;
+    for (kind = GAME_ENV_RUSTLE; kind <= GAME_ENV_GRIT; ++kind) {
+        if (gatmos_room_clue_has(game, room_id, kind)) {
+            if (found != GAME_ENV_NONE) {
+                return GAME_ENV_NONE;
+            }
+            found = kind;
+        }
+    }
+    return found;
+}
+
+/* game_cmd_move calls this with the room the player just left; gatmos owns
+ * the decision to drop uninspected clues rather than let them roam with the
+ * player. */
+void gatmos_clear_departed_room_clues(struct GameState *game, int room_id)
+{
+    if (room_id >= 0 && room_id < CFG_ROOM_MAX) {
+        game->env_room_clues[room_id] = 0;
+    }
 }
 
 static int env_max_choice(int kind)
@@ -427,65 +516,64 @@ void maybe_emit_animal_noise(struct GameState *game, GameEventQueue *out)
         world_room_animal_noise(&game->world, game->player.room_id));
 }
 
+void gatmos_emit_deferred_atmosphere_extras(struct GameState *game,
+                                            GameEventQueue *out)
+{
+    int kind;
+
+    kind = game->env_deferred_extra_event;
+    game->env_deferred_extra_event = GAME_ENV_EVENT_NONE;
+    if (kind == GAME_ENV_EVENT_BERRY_DROP || kind == GAME_ENV_EVENT_REED_DROP) {
+        push_environment(out, kind);
+    }
+}
+
 void maybe_emit_atmosphere(struct GameState *game, GameEventQueue *out)
 {
     int roll;
+    int room_id;
 
-    /* Environmental focus is a short-lived state machine keyed by room, kind, and expiry tick. */
-    if (game->env_focus_active && game->tick >= game->env_focus_expires_tick) {
-        game->env_focus_active = 0;
-        game->env_focus_room = -1;
-        game->env_focus_kind = GAME_ENV_NONE;
-        game->env_focus_expires_tick = 0;
-    }
-
+    game->env_deferred_extra_event = GAME_ENV_EVENT_NONE;
+    room_id = game->player.room_id;
     roll = plat_rand() % CFG_ROLL_PERCENT_RANGE;
     if (roll < atmosphere_gust_below(game)) {
         push_environment(out, GAME_ENV_EVENT_GUST);
         return;
     }
     if (roll < atmosphere_rustle_below(game)) {
-        push_environment(out, GAME_ENV_EVENT_RUSTLE);
-        game->env_focus_active = 1;
-        game->env_focus_room = game->player.room_id;
-        game->env_focus_kind = GAME_ENV_RUSTLE;
-        game->env_focus_expires_tick = game->tick + CFG_ENV_FOCUS_DURATION_TICKS;
-        if (game_room_ground_has_space(game, game->player.room_id) &&
-                (plat_rand() % CFG_ROLL_PERCENT_RANGE) < CFG_ATMOSPHERE_FOCUS_EXTRA_ITEM_BELOW) {
-            if (game_room_ground_try_add(game, game->player.room_id, ITEM_BERRY)) {
-                push_environment(out, GAME_ENV_EVENT_BERRY_DROP);
+        if (gatmos_room_clue_set(game, room_id, GAME_ENV_RUSTLE)) {
+            push_environment(out, GAME_ENV_EVENT_RUSTLE);
+            if (game_room_ground_has_space(game, game->player.room_id) &&
+                    (plat_rand() % CFG_ROLL_PERCENT_RANGE) < CFG_ATMOSPHERE_CLUE_EXTRA_ITEM_BELOW) {
+                if (game_room_ground_try_add(game, game->player.room_id, ITEM_BERRY)) {
+                    queue_deferred_extra(game, GAME_ENV_EVENT_BERRY_DROP);
+                }
             }
         }
         return;
     }
     if (roll < CFG_ATMOSPHERE_ROLL_CREAK_BELOW) {
-        push_environment(out, GAME_ENV_EVENT_CREAK);
-        game->env_focus_active = 1;
-        game->env_focus_room = game->player.room_id;
-        game->env_focus_kind = GAME_ENV_CREAK;
-        game->env_focus_expires_tick = game->tick + CFG_ENV_FOCUS_DURATION_TICKS;
+        if (gatmos_room_clue_set(game, room_id, GAME_ENV_CREAK)) {
+            push_environment(out, GAME_ENV_EVENT_CREAK);
+        }
         return;
     }
     if (roll < atmosphere_water_below(game)) {
-        push_environment(out, GAME_ENV_EVENT_WATER);
-        game->env_focus_active = 1;
-        game->env_focus_room = game->player.room_id;
-        game->env_focus_kind = GAME_ENV_WATER;
-        game->env_focus_expires_tick = game->tick + CFG_ENV_FOCUS_DURATION_TICKS;
-        if (game_room_ground_has_space(game, game->player.room_id) &&
-                (plat_rand() % CFG_ROLL_PERCENT_RANGE) < CFG_ATMOSPHERE_FOCUS_EXTRA_ITEM_BELOW) {
-            if (game_room_ground_try_add(game, game->player.room_id, ITEM_REED)) {
-                push_environment(out, GAME_ENV_EVENT_REED_DROP);
+        if (gatmos_room_clue_set(game, room_id, GAME_ENV_WATER)) {
+            push_environment(out, GAME_ENV_EVENT_WATER);
+            if (game_room_ground_has_space(game, game->player.room_id) &&
+                    (plat_rand() % CFG_ROLL_PERCENT_RANGE) < CFG_ATMOSPHERE_CLUE_EXTRA_ITEM_BELOW) {
+                if (game_room_ground_try_add(game, game->player.room_id, ITEM_REED)) {
+                    queue_deferred_extra(game, GAME_ENV_EVENT_REED_DROP);
+                }
             }
         }
         return;
     }
     if (roll < atmosphere_grit_below(game)) {
-        push_environment(out, GAME_ENV_EVENT_GRIT);
-        game->env_focus_active = 1;
-        game->env_focus_room = game->player.room_id;
-        game->env_focus_kind = GAME_ENV_GRIT;
-        game->env_focus_expires_tick = game->tick + CFG_ENV_FOCUS_DURATION_TICKS;
+        if (gatmos_room_clue_set(game, room_id, GAME_ENV_GRIT)) {
+            push_environment(out, GAME_ENV_EVENT_GRIT);
+        }
         return;
     }
     maybe_spawn_room_item(game, out);
@@ -604,38 +692,43 @@ int gatmos_cmd_env_reply(struct GameState *game, int choice,
 
 int gatmos_cmd_inspect(struct GameState *game, int item_arg, GameEventQueue *out)
 {
+    int room_id;
     int kind;
+    u8 clues;
 
-    /* Inspection only succeeds while the current room still has an active ambient focus. */
-    if (!game->env_focus_active ||
-            game->env_focus_room != game->player.room_id ||
-            game->tick >= game->env_focus_expires_tick) {
-        push_observation(out, GAME_OBS_OUTCOME_NOTHING);
-        game->env_focus_active = 0;
-        game->env_focus_room = -1;
-        game->env_focus_kind = GAME_ENV_NONE;
-        game->env_focus_expires_tick = 0;
-        return 1;
+    room_id = game->player.room_id;
+    clues = game->env_room_clues[room_id];
+    if (item_arg != 0) {
+        kind = item_arg;
+        if (!gatmos_room_clue_has(game, room_id, kind)) {
+            if (clues != 0) {
+                push_observation(out, GAME_OBS_OUTCOME_LEAD_SPENT, kind);
+            } else {
+                push_observation(out, GAME_OBS_OUTCOME_NOTHING, 0);
+            }
+            return 1;
+        }
+    } else {
+        kind = gatmos_room_clue_only_kind(game, room_id);
+        if (kind == GAME_ENV_NONE) {
+            if (clues != 0) {
+                push_observation(out, GAME_OBS_OUTCOME_CHOOSE_KIND, 0);
+            } else {
+                push_observation(out, GAME_OBS_OUTCOME_NOTHING, 0);
+            }
+            return 1;
+        }
     }
-    if (item_arg != 0 && item_arg != game->env_focus_kind) {
-        push_observation(out, GAME_OBS_OUTCOME_WRONG_FOCUS);
-        return 1;
-    }
-    kind = game->env_focus_kind;
     if (kind == GAME_ENV_RUSTLE) {
-        push_observation(out, GAME_OBS_OUTCOME_RUSTLE);
+        push_observation(out, GAME_OBS_OUTCOME_RUSTLE, 0);
     } else if (kind == GAME_ENV_CREAK) {
-        push_observation(out, GAME_OBS_OUTCOME_CREAK);
+        push_observation(out, GAME_OBS_OUTCOME_CREAK, 0);
     } else if (kind == GAME_ENV_WATER) {
-        push_observation(out, GAME_OBS_OUTCOME_WATER);
+        push_observation(out, GAME_OBS_OUTCOME_WATER, 0);
     } else if (kind == GAME_ENV_GRIT) {
-        push_observation(out, GAME_OBS_OUTCOME_GRIT);
+        push_observation(out, GAME_OBS_OUTCOME_GRIT, 0);
     }
-    game->env_focus_active = 0;
-    game->env_focus_room = -1;
-    game->env_focus_kind = GAME_ENV_NONE;
-    game->env_focus_expires_tick = 0;
-    /* consume focus then open pinned-room menu; cleared on reply or dismiss. */
+    gatmos_room_clue_clear(game, room_id, kind);
     env_open_menu(game, kind, out);
     return 1;
 }
