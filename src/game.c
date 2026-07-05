@@ -175,7 +175,7 @@ static void do_look(struct GameState *game, GameEventQueue *out)
         npc_room_actor(game->player.room_id),
         look_arg1_pack(game->corpse_present[game->player.room_id],
             game->weather_kind, game->day_phase),
-        0, 0, 0);
+        game->env_room_clues[game->player.room_id], 0, 0);
     if (ev == 0) {
         return;
     }

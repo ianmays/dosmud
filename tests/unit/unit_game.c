@@ -562,7 +562,8 @@ TEST game_inspect_none_and_inactive_kind(void)
     ASSERT_EQ(1, run_cmd_out(&game, "inspect water", &out));
     ASSERT_EQ(1, out.count);
     ASSERT_EQ(GAME_EVENT_OBSERVATION, out.events[0].kind);
-    ASSERT_EQ(GAME_OBS_OUTCOME_NOTHING, out.events[0].arg0);
+    ASSERT_EQ(GAME_OBS_OUTCOME_LEAD_SPENT, out.events[0].arg0);
+    ASSERT_EQ(GAME_ENV_WATER, out.events[0].arg1);
     ASSERT_NEQ(0, game.env_room_clues[WORLD_ROOM_CAMP] &
         (u8)(1u << (GAME_ENV_RUSTLE - 1)));
     PASS();

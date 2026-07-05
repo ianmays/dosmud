@@ -35,9 +35,9 @@ static void push_item_presence(GameEventQueue *out, int item_id,
     game_event_push(out, GAME_EVENT_ITEM_PRESENCE, item_id, 0, 0, 0, name);
 }
 
-static void push_observation(GameEventQueue *out, int outcome)
+static void push_observation(GameEventQueue *out, int outcome, int kind)
 {
-    game_event_push(out, GAME_EVENT_OBSERVATION, outcome, 0, 0, 0, 0);
+    game_event_push(out, GAME_EVENT_OBSERVATION, outcome, kind, 0, 0, 0);
 }
 
 /*
@@ -671,33 +671,39 @@ int gatmos_cmd_inspect(struct GameState *game, int item_arg, GameEventQueue *out
 {
     int room_id;
     int kind;
+    u8 clues;
 
     room_id = game->player.room_id;
+    clues = game->env_room_clues[room_id];
     if (item_arg != 0) {
-        /* "inspect <kind>": succeeds only if that exact bit is active here. */
         kind = item_arg;
         if (!gatmos_room_clue_has(game, room_id, kind)) {
-            push_observation(out, GAME_OBS_OUTCOME_NOTHING);
+            if (clues != 0) {
+                push_observation(out, GAME_OBS_OUTCOME_LEAD_SPENT, kind);
+            } else {
+                push_observation(out, GAME_OBS_OUTCOME_NOTHING, 0);
+            }
             return 1;
         }
     } else {
-        /* bare "inspect": only unambiguous when exactly one clue bit is
-         * active; two or more active clues fall through to NOTHING so the
-         * player must name one. */
         kind = gatmos_room_clue_only_kind(game, room_id);
         if (kind == GAME_ENV_NONE) {
-            push_observation(out, GAME_OBS_OUTCOME_NOTHING);
+            if (clues != 0) {
+                push_observation(out, GAME_OBS_OUTCOME_CHOOSE_KIND, 0);
+            } else {
+                push_observation(out, GAME_OBS_OUTCOME_NOTHING, 0);
+            }
             return 1;
         }
     }
     if (kind == GAME_ENV_RUSTLE) {
-        push_observation(out, GAME_OBS_OUTCOME_RUSTLE);
+        push_observation(out, GAME_OBS_OUTCOME_RUSTLE, 0);
     } else if (kind == GAME_ENV_CREAK) {
-        push_observation(out, GAME_OBS_OUTCOME_CREAK);
+        push_observation(out, GAME_OBS_OUTCOME_CREAK, 0);
     } else if (kind == GAME_ENV_WATER) {
-        push_observation(out, GAME_OBS_OUTCOME_WATER);
+        push_observation(out, GAME_OBS_OUTCOME_WATER, 0);
     } else if (kind == GAME_ENV_GRIT) {
-        push_observation(out, GAME_OBS_OUTCOME_GRIT);
+        push_observation(out, GAME_OBS_OUTCOME_GRIT, 0);
     }
     gatmos_room_clue_clear(game, room_id, kind);
     env_open_menu(game, kind, out);

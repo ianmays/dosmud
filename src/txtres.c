@@ -235,7 +235,7 @@ const char *const TXT_HELP_WAIT =
     "wait (.) - pass time without moving; the world tick advances.";
 
 const char *const TXT_HELP_INSPECT =
-    "inspect <rustle|creak|water|grit> - follow a clue after look. Synonyms: examine, investigate.";
+    "inspect <[rustle|creak|water|grit]> - follow an active clue from look. Synonyms: examine, investigate.";
 
 const char *const TXT_HELP_TAKE =
     "take <item> (get, pickup), or take all - pick up items from the ground into your bag.";
@@ -305,6 +305,14 @@ const char *const TXT_UI_GROUND_ITEMS_TOO_LONG =
     "Too many ground items to list here.\n";
 const char *const TXT_UI_BANDIT_CORPSE = "A bandit corpse lies here. (loot)\n";
 const char *const TXT_UI_NPC_HINT = "Someone nearby might talk. (talk)\n";
+const char *const TXT_UI_CLUE_RUSTLE =
+    "Something rustles nearby. (inspect [rustle])\n";
+const char *const TXT_UI_CLUE_CREAK =
+    "Wood creaks somewhere close. (inspect [creak])\n";
+const char *const TXT_UI_CLUE_WATER =
+    "You can hear water moving. (inspect [water])\n";
+const char *const TXT_UI_CLUE_GRIT =
+    "Fresh grit skids under a shifting breeze. (inspect [grit])\n";
 const char *const TXT_UI_WEATHER_RAIN = "Rain needles the air and darkens the ground.\n";
 const char *const TXT_UI_WEATHER_FOG = "Fog hangs low and shortens the horizon.\n";
 const char *const TXT_UI_WEATHER_WIND = "Wind keeps worrying the treeline.\n";
@@ -350,12 +358,16 @@ const char *const TXT_HUD_FMT =
     "[T:%lu] %s [HP:%d/%d] [Atk:%d] [Lv:%d XP:%d/%d]\n";
 const char *const TXT_NEARBY_ITEM_FMT = "A %s catches your eye nearby.\n";
 const char *const TXT_ATMO_GUST = "A cool gust threads through the area and fades.\n";
-const char *const TXT_ATMO_RUSTLE = "Something small rustles just out of sight.\n";
+const char *const TXT_ATMO_RUSTLE =
+    "Something small rustles just out of sight. (inspect [rustle])\n";
 const char *const TXT_ATMO_BERRY_DROP = "A berry drops from the brush.\n";
-const char *const TXT_ATMO_CREAK = "A distant creak rolls across the landscape.\n";
-const char *const TXT_ATMO_WATER = "You hear water moving somewhere beyond the path.\n";
+const char *const TXT_ATMO_CREAK =
+    "A distant creak rolls across the landscape. (inspect [creak])\n";
+const char *const TXT_ATMO_WATER =
+    "You hear water moving somewhere beyond the path. (inspect [water])\n";
 const char *const TXT_ATMO_REED_DROP = "A loose reed drifts to your feet.\n";
-const char *const TXT_ATMO_GRIT = "Loose grit skips over stone under an uncertain breeze.\n";
+const char *const TXT_ATMO_GRIT =
+    "Loose grit skips over stone under an uncertain breeze. (inspect [grit])\n";
 const char *const TXT_ATMO_WEATHER_RAIN = "Rain settles in, steady and insistent.\n";
 const char *const TXT_ATMO_WEATHER_FOG = "Fog rolls in and muffles distant sound.\n";
 const char *const TXT_ATMO_WEATHER_WIND = "Wind rises and worries everything loose.\n";
@@ -460,6 +472,10 @@ const char *const TXT_MSG_WAIT = "You wait.\n";
 const char *const TXT_MSG_CANNOT_MOVE_FMT = "You cannot move %s from here.\n";
 const char *const TXT_MSG_MOVED_FMT = "You move %s.\n";
 const char *const TXT_MSG_INSPECT_NOTHING = "Nothing here stands out right now.\n";
+const char *const TXT_MSG_INSPECT_LEAD_SPENT_FMT =
+    "That [%s] lead is spent. Other traces remain. (look)\n";
+const char *const TXT_MSG_INSPECT_CHOOSE_KIND =
+    "More than one trace stands out. (inspect [rustle|creak|water|grit])\n";
 const char *const TXT_MSG_INSPECT_RUSTLE = "You part the brush and startle a hare into a low sprint.\n";
 const char *const TXT_MSG_INSPECT_CREAK = "An old branch rocks against another, groaning like timber.\n";
 const char *const TXT_MSG_INSPECT_WATER = "You find a thin runnel cutting fresh lines through mud.\n";

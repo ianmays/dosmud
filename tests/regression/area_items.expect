@@ -26,7 +26,7 @@ On the ground: stick. (take stick)
 
 > You pick up the reed.
 
-A distant creak rolls across the landscape.
+A distant creak rolls across the landscape. (inspect [creak])
 
 [T:3] Marsh [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
@@ -47,7 +47,7 @@ Exits: north south west
 
 A cricket chirps from beside the coals.
 
-Something small rustles just out of sight.
+Something small rustles just out of sight. (inspect [rustle])
 
 [T:4] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
@@ -55,7 +55,7 @@ Something small rustles just out of sight.
 
 Rain settles in, steady and insistent.
 
-You hear water moving somewhere beyond the path.
+You hear water moving somewhere beyond the path. (inspect [water])
 
 [T:5] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
@@ -83,6 +83,8 @@ Exits: north south west
 On the ground:
   stick (take stick)
   reed (take reed)
+Something rustles nearby. (inspect [rustle])
+You can hear water moving. (inspect [water])
 Rain needles the air and darkens the ground.
 
 [T:6] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]

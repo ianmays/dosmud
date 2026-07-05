@@ -443,9 +443,42 @@ void game_print_location_art(int room_id)
     art_for_room(room_id);
 }
 
+static const char *env_kind_tag(int kind)
+{
+    if (kind == GAME_ENV_RUSTLE) {
+        return "rustle";
+    }
+    if (kind == GAME_ENV_CREAK) {
+        return "creak";
+    }
+    if (kind == GAME_ENV_WATER) {
+        return "water";
+    }
+    if (kind == GAME_ENV_GRIT) {
+        return "grit";
+    }
+    return "trace";
+}
+
+static void render_room_clue_hints(u8 clues)
+{
+    if ((clues & (u8)(1u << (GAME_ENV_RUSTLE - 1))) != 0) {
+        RENDER_PRINTF("%s", TXT_UI_CLUE_RUSTLE);
+    }
+    if ((clues & (u8)(1u << (GAME_ENV_CREAK - 1))) != 0) {
+        RENDER_PRINTF("%s", TXT_UI_CLUE_CREAK);
+    }
+    if ((clues & (u8)(1u << (GAME_ENV_WATER - 1))) != 0) {
+        RENDER_PRINTF("%s", TXT_UI_CLUE_WATER);
+    }
+    if ((clues & (u8)(1u << (GAME_ENV_GRIT - 1))) != 0) {
+        RENDER_PRINTF("%s", TXT_UI_CLUE_GRIT);
+    }
+}
+
 static void render_room_look_snapshot(const struct GameState *game, int room_id,
                                       const int *room_items, int look_arg1,
-                                      int npc_in_room_hint)
+                                      int npc_in_room_hint, u8 room_clues)
 {
     char ground_buf[CFG_FMT_GROUND_MAX];
     const struct Room *room;
@@ -484,6 +517,7 @@ static void render_room_look_snapshot(const struct GameState *game, int room_id,
     if (npc_in_room_hint != 0) {
         RENDER_PRINTF("%s", TXT_UI_NPC_HINT);
     }
+    render_room_clue_hints(room_clues);
     if (weather_kind == GAME_WEATHER_RAIN) {
         RENDER_PRINTF("%s", TXT_UI_WEATHER_RAIN);
     } else if (weather_kind == GAME_WEATHER_FOG) {
@@ -897,6 +931,12 @@ static void render_observation_event(const GameEvent *ev)
     case GAME_OBS_OUTCOME_NOTHING:
         render_msg_inspect_nothing();
         break;
+    case GAME_OBS_OUTCOME_LEAD_SPENT:
+        render_msg_inspect_lead_spent(ev->arg1);
+        break;
+    case GAME_OBS_OUTCOME_CHOOSE_KIND:
+        render_msg_inspect_choose_kind();
+        break;
     case GAME_OBS_OUTCOME_RUSTLE:
         render_msg_inspect_rustle();
         break;
@@ -1036,7 +1076,7 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
         switch (ev->kind) {
         case GAME_EVENT_ROOM_LOOK:
             render_room_look_snapshot(game, ev->room_id, ev->room_item,
-                ev->arg1, ev->arg0);
+                ev->arg1, ev->arg0, (u8)ev->arg2);
             break;
         case GAME_EVENT_MOVE:
             render_msg_moved(ev->text);
@@ -1439,6 +1479,16 @@ void render_msg_moved(const char *dir_name)
 void render_msg_inspect_nothing(void)
 {
     RENDER_PRINTF("%s", TXT_MSG_INSPECT_NOTHING);
+}
+
+void render_msg_inspect_lead_spent(int kind)
+{
+    RENDER_PRINTF(TXT_MSG_INSPECT_LEAD_SPENT_FMT, env_kind_tag(kind));
+}
+
+void render_msg_inspect_choose_kind(void)
+{
+    RENDER_PRINTF("%s", TXT_MSG_INSPECT_CHOOSE_KIND);
 }
 
 void render_msg_inspect_rustle(void)

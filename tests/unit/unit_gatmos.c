@@ -394,8 +394,24 @@ TEST gatmos_cmd_inspect_inactive_kind(void)
     ASSERT_EQ(1, inspect_focus(&game, GAME_ENV_WATER, &out));
     ASSERT_EQ(1, out.count);
     ASSERT_EQ(GAME_EVENT_OBSERVATION, out.events[0].kind);
-    ASSERT_EQ(GAME_OBS_OUTCOME_NOTHING, out.events[0].arg0);
+    ASSERT_EQ(GAME_OBS_OUTCOME_LEAD_SPENT, out.events[0].arg0);
+    ASSERT_EQ(GAME_ENV_WATER, out.events[0].arg1);
     ASSERT_EQ(1, room_has_clue(&game, WORLD_ROOM_CAMP, GAME_ENV_RUSTLE));
+    PASS();
+}
+
+TEST gatmos_cmd_inspect_choose_kind(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    reset_camp(&game);
+    room_set_clue(&game, WORLD_ROOM_CAMP, GAME_ENV_RUSTLE);
+    room_set_clue(&game, WORLD_ROOM_CAMP, GAME_ENV_WATER);
+    ASSERT_EQ(1, inspect_focus(&game, 0, &out));
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_OBSERVATION, out.events[0].kind);
+    ASSERT_EQ(GAME_OBS_OUTCOME_CHOOSE_KIND, out.events[0].arg0);
     PASS();
 }
 
@@ -833,6 +849,7 @@ SUITE(gatmos) {
     RUN_TEST(gatmos_cmd_inspect_focus);
     RUN_TEST(gatmos_cmd_inspect_none);
     RUN_TEST(gatmos_cmd_inspect_inactive_kind);
+    RUN_TEST(gatmos_cmd_inspect_choose_kind);
     RUN_TEST(gatmos_cmd_inspect_clears_one_clue);
     RUN_TEST(gatmos_departed_room_clues_cleared);
     RUN_TEST(gatmos_cmd_env_reply_water_drink);

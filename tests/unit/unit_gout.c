@@ -244,12 +244,28 @@ TEST game_event_push_records_ambient_observation_kinds(void)
 
 TEST game_observation_outcome_values_are_stable(void)
 {
-    /* #234 retired GAME_OBS_OUTCOME_WRONG_FOCUS; inactive inspect uses NOTHING. */
+    /* #234 retired GAME_OBS_OUTCOME_WRONG_FOCUS; inactive inspect uses NOTHING
+     * or LEAD_SPENT / CHOOSE_KIND when other clues remain. */
     ASSERT_EQ(1, GAME_OBS_OUTCOME_NOTHING);
-    ASSERT_EQ(2, GAME_OBS_OUTCOME_RUSTLE);
-    ASSERT_EQ(3, GAME_OBS_OUTCOME_CREAK);
-    ASSERT_EQ(4, GAME_OBS_OUTCOME_WATER);
-    ASSERT_EQ(5, GAME_OBS_OUTCOME_GRIT);
+    ASSERT_EQ(2, GAME_OBS_OUTCOME_LEAD_SPENT);
+    ASSERT_EQ(3, GAME_OBS_OUTCOME_CHOOSE_KIND);
+    ASSERT_EQ(4, GAME_OBS_OUTCOME_RUSTLE);
+    ASSERT_EQ(5, GAME_OBS_OUTCOME_CREAK);
+    ASSERT_EQ(6, GAME_OBS_OUTCOME_WATER);
+    ASSERT_EQ(7, GAME_OBS_OUTCOME_GRIT);
+    PASS();
+}
+
+TEST game_event_push_records_room_look_with_clue_mask(void)
+{
+    GameEventQueue out;
+    GameEvent *ev;
+
+    game_event_queue_reset(&out);
+    ev = game_event_push(&out, GAME_EVENT_ROOM_LOOK, 1, 5, 3, 0, 0);
+    ASSERT(0 != ev);
+    ASSERT_EQ(3, out.events[0].arg2);
+    ASSERT_EQ(0, out.events[0].arg3);
     PASS();
 }
 
@@ -467,6 +483,7 @@ SUITE(gout) {
     RUN_TEST(game_event_push_records_combat_progression_kinds);
     RUN_TEST(game_event_push_records_ambient_observation_kinds);
     RUN_TEST(game_observation_outcome_values_are_stable);
+    RUN_TEST(game_event_push_records_room_look_with_clue_mask);
     RUN_TEST(game_event_push_records_room_look_without_clue_args);
     RUN_TEST(game_event_push_records_weather_environment_kinds);
     RUN_TEST(game_event_push_records_daynight_environment_kinds);

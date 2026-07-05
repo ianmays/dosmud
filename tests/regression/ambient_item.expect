@@ -42,7 +42,7 @@ A peddler shifts a creaking pack and catches your eye between the trees.
   [3] Keep walking.
 (Answer with 1, 2, 3, or reply <n>.)
 
-You hear water moving somewhere beyond the path.
+You hear water moving somewhere beyond the path. (inspect [water])
 A loose reed drifts to your feet.
 
 [T:1] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]

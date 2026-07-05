@@ -27,7 +27,7 @@ On the ground: stick. (take stick)
 
 > You pick up the reed.
 
-A distant creak rolls across the landscape.
+A distant creak rolls across the landscape. (inspect [creak])
 
 [T:3] Marsh [HP:20/20] [Atk:1] [Lv:1 XP:0/20]
 
@@ -35,7 +35,7 @@ A distant creak rolls across the landscape.
 
 A heron rattles through the reeds.
 
-Something small rustles just out of sight.
+Something small rustles just out of sight. (inspect [rustle])
 
 [T:4] Marsh [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 

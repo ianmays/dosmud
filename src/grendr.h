@@ -76,6 +76,8 @@ void render_msg_wait(void);
 void render_msg_cannot_move(const char *dir_name);
 void render_msg_moved(const char *dir_name);
 void render_msg_inspect_nothing(void);
+void render_msg_inspect_lead_spent(int kind);
+void render_msg_inspect_choose_kind(void);
 void render_msg_inspect_rustle(void);
 void render_msg_inspect_creak(void);
 void render_msg_inspect_water(void);
