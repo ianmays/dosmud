@@ -76,13 +76,6 @@ static void queue_deferred_extra(int kind)
  * persists until gatmos_cmd_inspect consumes it or the player leaves the
  * room (gatmos_clear_departed_room_clues).
  */
-static u8 env_clue_bit(int kind)
-{
-    if (kind < GAME_ENV_RUSTLE || kind > GAME_ENV_GRIT) {
-        return 0;
-    }
-    return (u8)(1u << (kind - 1));
-}
 
 /* Returns 1 when the clue bit was newly set, 0 if already active. */
 static int gatmos_room_clue_set(struct GameState *game, int room_id, int kind)
@@ -93,7 +86,7 @@ static int gatmos_room_clue_set(struct GameState *game, int room_id, int kind)
     if (room_id < 0 || room_id >= CFG_ROOM_MAX) {
         return 0;
     }
-    bit = env_clue_bit(kind);
+    bit = (u8)GAME_ENV_CLUE_BIT(kind);
     if (bit == 0) {
         return 0;
     }
@@ -113,7 +106,7 @@ static int gatmos_room_clue_has(const struct GameState *game, int room_id,
     if (room_id < 0 || room_id >= CFG_ROOM_MAX) {
         return 0;
     }
-    bit = env_clue_bit(kind);
+    bit = (u8)GAME_ENV_CLUE_BIT(kind);
     if (bit == 0) {
         return 0;
     }
@@ -128,7 +121,7 @@ static void gatmos_room_clue_clear(struct GameState *game, int room_id,
     if (room_id < 0 || room_id >= CFG_ROOM_MAX) {
         return;
     }
-    bit = env_clue_bit(kind);
+    bit = (u8)GAME_ENV_CLUE_BIT(kind);
     game->env_room_clues[room_id] &= (u8)~bit;
 }
 
@@ -553,7 +546,7 @@ void maybe_emit_atmosphere(struct GameState *game, GameEventQueue *out)
         if (gatmos_room_clue_set(game, room_id, GAME_ENV_RUSTLE)) {
             push_environment(out, GAME_ENV_EVENT_RUSTLE);
             if (game_room_ground_has_space(game, game->player.room_id) &&
-                    (plat_rand() % CFG_ROLL_PERCENT_RANGE) < CFG_ATMOSPHERE_FOCUS_EXTRA_ITEM_BELOW) {
+                    (plat_rand() % CFG_ROLL_PERCENT_RANGE) < CFG_ATMOSPHERE_CLUE_EXTRA_ITEM_BELOW) {
                 if (game_room_ground_try_add(game, game->player.room_id, ITEM_BERRY)) {
                     queue_deferred_extra(GAME_ENV_EVENT_BERRY_DROP);
                 }
@@ -571,7 +564,7 @@ void maybe_emit_atmosphere(struct GameState *game, GameEventQueue *out)
         if (gatmos_room_clue_set(game, room_id, GAME_ENV_WATER)) {
             push_environment(out, GAME_ENV_EVENT_WATER);
             if (game_room_ground_has_space(game, game->player.room_id) &&
-                    (plat_rand() % CFG_ROLL_PERCENT_RANGE) < CFG_ATMOSPHERE_FOCUS_EXTRA_ITEM_BELOW) {
+                    (plat_rand() % CFG_ROLL_PERCENT_RANGE) < CFG_ATMOSPHERE_CLUE_EXTRA_ITEM_BELOW) {
                 if (game_room_ground_try_add(game, game->player.room_id, ITEM_REED)) {
                     queue_deferred_extra(GAME_ENV_EVENT_REED_DROP);
                 }

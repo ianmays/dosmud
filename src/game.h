@@ -57,6 +57,10 @@ enum HerbalistStoryState {
 #define GAME_ENV_WATER 3
 #define GAME_ENV_GRIT 4
 #define GAME_ENV_CLUE_MASK 0x0Fu
+/* Bit in env_room_clues[] for kind; 0 when kind is not RUSTLE..GRIT. */
+#define GAME_ENV_CLUE_BIT(kind) \
+    (((kind) >= GAME_ENV_RUSTLE && (kind) <= GAME_ENV_GRIT) ? \
+    (1u << ((kind) - 1)) : 0u)
 
 /* Global weather (#51); gatmos.c owns transitions and atmosphere bias. */
 #define GAME_WEATHER_NONE 0

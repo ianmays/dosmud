@@ -506,28 +506,28 @@ static void render_room_clue_hints(u8 clues)
     int opened;
 
     opened = 0;
-    if ((clues & (u8)(1u << (GAME_ENV_RUSTLE - 1))) != 0) {
+    if ((clues & (u8)GAME_ENV_CLUE_BIT(GAME_ENV_RUSTLE)) != 0) {
         if (!opened) {
             render_gap();
             opened = 1;
         }
         render_copy(TXT_ATMO_RUSTLE);
     }
-    if ((clues & (u8)(1u << (GAME_ENV_CREAK - 1))) != 0) {
+    if ((clues & (u8)GAME_ENV_CLUE_BIT(GAME_ENV_CREAK)) != 0) {
         if (!opened) {
             render_gap();
             opened = 1;
         }
         render_copy(TXT_ATMO_CREAK);
     }
-    if ((clues & (u8)(1u << (GAME_ENV_WATER - 1))) != 0) {
+    if ((clues & (u8)GAME_ENV_CLUE_BIT(GAME_ENV_WATER)) != 0) {
         if (!opened) {
             render_gap();
             opened = 1;
         }
         render_copy(TXT_ATMO_WATER);
     }
-    if ((clues & (u8)(1u << (GAME_ENV_GRIT - 1))) != 0) {
+    if ((clues & (u8)GAME_ENV_CLUE_BIT(GAME_ENV_GRIT)) != 0) {
         if (!opened) {
             render_gap();
             opened = 1;
