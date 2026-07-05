@@ -32,7 +32,7 @@ Purpose:
 
 Use these when you want to launch a playable or interactive binary rather than run a validation step:
 
-- `make run`: builds the native release binary if needed, then launches it; pass `SEED=<unsigned>` to forward `--seed`
+- `make run`: launches the existing repo-root `./dosmud` from the most recent `make build` or `make test`; run `make build` first when the binary is missing or stale; pass `SEED=<unsigned>` to forward `--seed`
 - `make test-run-bin`: builds the native `TEST_MODE` binary if needed, then launches it; pass `SEED=<unsigned>` to forward `--seed`
 - `make dos-run`: launches the existing prepared DOS release executable without rebuilding
 - `make win-run`: launches the existing repo-root Windows `dosmud.exe` from the most recent `make build-win` or `make test-win`; pass `SEED=<unsigned>` to forward `--seed`
