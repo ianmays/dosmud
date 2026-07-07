@@ -32,20 +32,6 @@ On the ground: stick. (take stick)
 > You turn away from the distraction.
 You move north.
 
-  ##     #####      #####    
-        ##########          #
-   ####         ###          
-_____________________________
-            /    \          
-           /      \         
-                             
-   (wagon ruts hold rain)                             
-
-Road
-A dusty road stretches toward pale hills.
-Exits: south west
-On the ground: stone. (take stone)
-
   /\     .-'''''''-.        
   ||    / (.)..(.)  |        
   ||    |  (::::)   |        
@@ -61,8 +47,6 @@ Bandit Lv: 1.
   [2] Hand over one item from your bag or what you are wielding (choose reply 2, then give <item>).
   [3] Talk it down and part ways.
 (Answer with 1, 2, 3, or reply <n>.)
-
-A cool gust threads through the area and fades.
 
 [T:1] Road [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 

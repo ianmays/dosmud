@@ -39,6 +39,19 @@ Bandit Lv: 3.
 
 > You keep your voice steady. The bandit grunts and withdraws.
 
+       *      *        $   * 
+   *               *   $     
+      _________        $     
+     /       /|\       $    
+    /       / | \     \|/  
+___/_______/__|__\ ___XXX___
+                             
+ (campfire at first watch)                             
+
+Camp
+A small campfire burns quietly.
+Exits: north south west
+
 [T:1] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
 > bye

@@ -820,6 +820,9 @@ TEST npc_roaming_reply_cmd_explore(void)
     ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
     ASSERT_EQ(0, traveler->flags & NPC_FLAG_ACTIVE);
     ASSERT_EQ(-1, traveler->room_id);
+    ASSERT_EQ(2, out.count);
+    ASSERT_EQ(GAME_EVENT_DIALOGUE, out.events[0].kind);
+    ASSERT_EQ(GAME_EVENT_ROOM_LOOK, out.events[1].kind);
     PASS();
 }
 
@@ -879,6 +882,24 @@ TEST npc_roaming_reply_event(void)
     ASSERT_EQ(GAME_DIALOGUE_ACTOR_TRAVELER, out.events[0].arg0);
     ASSERT_EQ(GAME_DIALOGUE_PHASE_REPLY, out.events[0].arg1);
     ASSERT_EQ(2, out.events[0].arg2);
+    ASSERT_EQ(GAME_EVENT_ROOM_LOOK, out.events[1].kind);
+    PASS();
+}
+
+TEST npc_roaming_replay_scene_emits_open_event(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 54u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game_set_mode_dialogue(&game, DIALOGUE_TRAVELER);
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, npc_roaming_replay_scene(&game, &out));
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
+    ASSERT_EQ(GAME_ENCOUNTER_TRAVELER, out.events[0].arg0);
+    ASSERT_EQ(GAME_ENCOUNTER_ACTION_OPEN, out.events[0].arg1);
     PASS();
 }
 
@@ -1026,6 +1047,7 @@ SUITE(npc) {
     RUN_TEST(npc_roaming_reply_cmd_invalid_choice);
     RUN_TEST(npc_roaming_encounter_event);
     RUN_TEST(npc_roaming_reply_event);
+    RUN_TEST(npc_roaming_replay_scene_emits_open_event);
     RUN_TEST(npc_seed_profiles_lost_animal_state);
     RUN_TEST(npc_seed_profiles_peddler_state);
     RUN_TEST(npc_lost_animal_roaming_encounter_opens_in_matching_room);

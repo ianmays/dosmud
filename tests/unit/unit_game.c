@@ -538,12 +538,35 @@ TEST game_frog_reply_branch(void)
 TEST game_combat_blocks_inventory_cmds(void)
 {
     struct GameState game;
+    GameEventQueue out;
 
     unit_game_fresh(&game, 15u);
-    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
-    game_set_mode_combat(&game);
+    ASSERT_EQ(1, testharn_apply(&game, "@fixture bandit_combat_turn1"));
     ASSERT_EQ(0, run_cmd(&game, "take stick"));
-    ASSERT_EQ(1, run_cmd(&game, "look"));
+    ASSERT_EQ(0, run_cmd_out(&game, "look", &out));
+    ASSERT_EQ(2, out.count);
+    ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[0].kind);
+    ASSERT_EQ(GAME_DIALOGUE_GUARD_BANDIT_WAITING_REPLY, out.events[0].arg0);
+    ASSERT_EQ(GAME_EVENT_COMBAT, out.events[1].kind);
+    ASSERT_EQ(GAME_COMBAT_PHASE_MENU, out.events[1].arg0);
+    PASS();
+}
+
+TEST game_combat_use_salve_allowed(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    u32 tick_before_use;
+
+    unit_game_fresh(&game, 115u);
+    ASSERT_EQ(1, testharn_apply(&game, "@fixture bandit_combat_salve_ready"));
+    tick_before_use = game.tick;
+    ASSERT_EQ(1, run_cmd_out(&game, "use salve", &out));
+    ASSERT_EQ(GAME_MODE_COMBAT, game.mode);
+    ASSERT_EQ(tick_before_use + 1, game.tick);
+    ASSERT(out.count >= 1);
+    ASSERT_EQ(GAME_EVENT_ITEM_RESULT, out.events[0].kind);
+    ASSERT_EQ(GAME_ITEM_ACTION_USE, out.events[0].arg0);
     PASS();
 }
 
@@ -602,11 +625,12 @@ TEST game_give_after_handover_fixture(void)
     testharn_apply(&game, "@fixture bandit_handover_pick");
     ASSERT_EQ(1, run_cmd_out(&game, "give stick", &out));
     ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
-    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(2, out.count);
     ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
     ASSERT_EQ(GAME_ENCOUNTER_ACTION_GIVE, out.events[0].arg1);
     ASSERT_EQ(GAME_ENCOUNTER_OUTCOME_OK, out.events[0].arg2);
     ASSERT_EQ(ITEM_STICK, out.events[0].arg3);
+    ASSERT_EQ(GAME_EVENT_ROOM_LOOK, out.events[1].kind);
     PASS();
 }
 
@@ -643,11 +667,12 @@ TEST game_give_in_enemy_dialogue_beats_room_npc_exchange(void)
         NPC_FLAG_ACTIVE | NPC_FLAG_HANDOVER_PICK) >= 0);
     game_set_mode_dialogue(&game, DIALOGUE_ENEMY);
     ASSERT_EQ(1, run_cmd_out(&game, "give stick", &out));
-    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(2, out.count);
     ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
     ASSERT_EQ(GAME_ENCOUNTER_ACTION_GIVE, out.events[0].arg1);
     ASSERT_EQ(GAME_ENCOUNTER_OUTCOME_OK, out.events[0].arg2);
     ASSERT_EQ(ITEM_STICK, out.events[0].arg3);
+    ASSERT_EQ(GAME_EVENT_ROOM_LOOK, out.events[1].kind);
     PASS();
 }
 
@@ -703,11 +728,12 @@ TEST game_traveler_reply_fixture(void)
     ASSERT_EQ(1, run_cmd_out(&game, "reply 2", &out));
     ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
     ASSERT_EQ(0, traveler_npc(&game)->flags & NPC_FLAG_ACTIVE);
-    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(2, out.count);
     ASSERT_EQ(GAME_EVENT_DIALOGUE, out.events[0].kind);
     ASSERT_EQ(GAME_DIALOGUE_ACTOR_TRAVELER, out.events[0].arg0);
     ASSERT_EQ(GAME_DIALOGUE_PHASE_REPLY, out.events[0].arg1);
     ASSERT_EQ(2, out.events[0].arg2);
+    ASSERT_EQ(GAME_EVENT_ROOM_LOOK, out.events[1].kind);
     PASS();
 }
 
@@ -900,26 +926,29 @@ TEST game_version_allowed_during_loot_menu(void)
     PASS();
 }
 
-TEST game_traveler_dialogue_closes_before_look(void)
+TEST game_traveler_dialogue_blocks_inspect_and_replays_scene(void)
 {
     struct GameState game;
     GameEventQueue out;
-    u32 tick_before_look;
+    u32 tick_before_inspect;
 
     unit_game_fresh(&game, 48u);
     ASSERT_EQ(1, testharn_apply(&game, "@fixture traveler_dialogue"));
     ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
     ASSERT_EQ(DIALOGUE_TRAVELER, game.dialogue);
 
-    tick_before_look = game.tick;
-    ASSERT_EQ(1, run_cmd_out(&game, "look", &out));
-    ASSERT_EQ(tick_before_look, game.tick);
-    ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
-    ASSERT_EQ(DIALOGUE_NONE, game.dialogue);
+    tick_before_inspect = game.tick;
+    ASSERT_EQ(0, run_cmd_out(&game, "inspect", &out));
+    ASSERT_EQ(tick_before_inspect, game.tick);
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(DIALOGUE_TRAVELER, game.dialogue);
     ASSERT_EQ(2, out.count);
     ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[0].kind);
-    ASSERT_EQ(GAME_DIALOGUE_GUARD_DIALOGUE_CLOSED, out.events[0].arg0);
-    ASSERT_EQ(GAME_EVENT_ROOM_LOOK, out.events[1].kind);
+    ASSERT_EQ(GAME_DIALOGUE_GUARD_ROAMING_ENCOUNTER_WAITING,
+        out.events[0].arg0);
+    ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[1].kind);
+    ASSERT_EQ(GAME_ENCOUNTER_TRAVELER, out.events[1].arg0);
+    ASSERT_EQ(GAME_ENCOUNTER_ACTION_OPEN, out.events[1].arg1);
     ASSERT_EQ(WORLD_ROOM_ROAD, game.player.room_id);
     PASS();
 }
@@ -976,6 +1005,41 @@ TEST game_move_emits_move_then_look(void)
     PASS();
 }
 
+TEST game_move_into_bandit_defers_room_look_until_after_encounter(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    int slot;
+    int i;
+    int saw_look;
+
+    unit_game_fresh(&game, 135u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    disable_traveler(&game);
+    slot = npc_find_by_actor(&game, GAME_DIALOGUE_ACTOR_BANDIT);
+    ASSERT(slot >= 0);
+    game.npcs[slot].flags |= NPC_FLAG_ACTIVE | NPC_FLAG_ROAMING;
+    game.npcs[slot].flags &= ~NPC_FLAG_NEEDS_SEPARATION;
+    game.npcs[slot].room_id = WORLD_ROOM_ROAD;
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, run_cmd_out(&game, "move north", &out));
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(DIALOGUE_ENEMY, game.dialogue);
+    ASSERT_EQ(2, out.count);
+    ASSERT_EQ(GAME_EVENT_MOVE, out.events[0].kind);
+    ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[1].kind);
+    ASSERT_EQ(GAME_ENCOUNTER_BANDIT, out.events[1].arg0);
+    ASSERT_EQ(GAME_ENCOUNTER_ACTION_OPEN, out.events[1].arg1);
+    saw_look = 0;
+    for (i = 0; i < out.count; ++i) {
+        if (out.events[i].kind == GAME_EVENT_ROOM_LOOK) {
+            saw_look = 1;
+        }
+    }
+    ASSERT_EQ(0, saw_look);
+    PASS();
+}
+
 TEST game_roll_spread_zero(void)
 {
     struct GameState game;
@@ -1007,9 +1071,33 @@ TEST game_bandit_waiting_reply_guard_event(void)
     enemy_begin_encounter(&game, &out);
     game_event_queue_reset(&out);
     ASSERT_EQ(0, game_process_input(&game, line, &out));
-    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(2, out.count);
     ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[0].kind);
     ASSERT_EQ(GAME_DIALOGUE_GUARD_BANDIT_WAITING_REPLY, out.events[0].arg0);
+    ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[1].kind);
+    ASSERT_EQ(GAME_ENCOUNTER_ACTION_OPEN, out.events[1].arg1);
+    PASS();
+}
+
+TEST game_bandit_map_replays_modal_prompt(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    u32 tick_before_map;
+
+    unit_game_fresh(&game, 140u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game_event_queue_reset(&out);
+    enemy_begin_encounter(&game, &out);
+    tick_before_map = game.tick;
+    ASSERT_EQ(0, run_cmd_out(&game, "map", &out));
+    ASSERT_EQ(tick_before_map, game.tick);
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(2, out.count);
+    ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[0].kind);
+    ASSERT_EQ(GAME_DIALOGUE_GUARD_BANDIT_WAITING_REPLY, out.events[0].arg0);
+    ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[1].kind);
+    ASSERT_EQ(GAME_ENCOUNTER_ACTION_OPEN, out.events[1].arg1);
     PASS();
 }
 
@@ -1424,6 +1512,7 @@ SUITE(game) {
     RUN_TEST(game_bag_preserves_herbalist_give_dialogue);
     RUN_TEST(game_frog_reply_branch);
     RUN_TEST(game_combat_blocks_inventory_cmds);
+    RUN_TEST(game_combat_use_salve_allowed);
     RUN_TEST(game_inspect_none_and_inactive_kind);
     RUN_TEST(game_move_clears_departed_room_clues);
     RUN_TEST(game_unknown_command);
@@ -1444,13 +1533,15 @@ SUITE(game) {
     RUN_TEST(game_version_allowed_during_bandit_dialogue);
     RUN_TEST(game_version_allowed_during_combat);
     RUN_TEST(game_version_allowed_during_loot_menu);
-    RUN_TEST(game_traveler_dialogue_closes_before_look);
+    RUN_TEST(game_traveler_dialogue_blocks_inspect_and_replays_scene);
     RUN_TEST(game_unknown_command_emits_event);
     RUN_TEST(game_cannot_move_emits_event);
     RUN_TEST(game_move_emits_move_then_look);
+    RUN_TEST(game_move_into_bandit_defers_room_look_until_after_encounter);
     RUN_TEST(game_roll_spread_zero);
     RUN_TEST(game_quit_ends_run);
     RUN_TEST(game_bandit_waiting_reply_guard_event);
+    RUN_TEST(game_bandit_map_replays_modal_prompt);
     RUN_TEST(game_nobody_waiting_reply_guard_event);
     RUN_TEST(game_post_combat_reply_guard_keeps_loot_available);
     RUN_TEST(game_loot_leave_keeps_corpse_without_advancing_time);

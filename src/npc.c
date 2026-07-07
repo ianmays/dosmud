@@ -1266,6 +1266,7 @@ int npc_roaming_cmd_reply(struct GameState *game, int choice, GameEventQueue *ou
     }
     npc_push_dialogue(out, npc->actor, GAME_DIALOGUE_PHASE_REPLY, choice);
     game_set_mode_explore(game);
+    game_describe_current_room(game, out);
     /* Return timing is randomized only after the player resolves the branch. */
     {
         const struct NpcProfile *profile;
@@ -1278,6 +1279,25 @@ int npc_roaming_cmd_reply(struct GameState *game, int choice, GameEventQueue *ou
                 (u32)(plat_rand() % profile->respawn_delay_spread));
         }
     }
+    return 1;
+}
+
+/* Roaming-friendly menus replay their encounter scene after blocked observe verbs. */
+int npc_roaming_replay_scene(struct GameState *game, struct GameEventQueue *out)
+{
+    struct NpcState *npc;
+
+    if (game->mode != GAME_MODE_DIALOGUE ||
+            !npc_is_roaming_friendly_dialogue(game->dialogue)) {
+        return 0;
+    }
+    npc = npc_find_dialogue_slot(game, game->dialogue);
+    if (npc == 0) {
+        return 0;
+    }
+    game_event_push(out, GAME_EVENT_ENCOUNTER, npc->encounter,
+        GAME_ENCOUNTER_ACTION_OPEN, GAME_ENCOUNTER_OUTCOME_NONE,
+        npc->level, 0);
     return 1;
 }
 

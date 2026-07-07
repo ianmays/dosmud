@@ -103,6 +103,8 @@ int npc_roaming_begin_encounter_in_room(struct GameState *game, int room_id,
                                         struct GameEventQueue *out);
 int npc_roaming_cmd_reply(struct GameState *game, int choice,
                           struct GameEventQueue *out);
+int npc_roaming_replay_scene(struct GameState *game,
+                             struct GameEventQueue *out);
 /* Canonical GAME_EVENT_DIALOGUE / DIALOGUE_GUARD producers for npc-using slices. */
 void npc_push_dialogue(struct GameEventQueue *out, int actor, int phase, int choice);
 /* detail is GAME_EVENT_DIALOGUE arg3 when copy needs more than actor/phase/choice. */

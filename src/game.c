@@ -60,6 +60,12 @@ static int cmd_preserves_noncombat_menu(const struct GameState *game,
     if (game->dialogue == DIALOGUE_LOOT && cmd->type == CMD_LOOT) {
         return 1;
     }
+    if (npc_is_roaming_friendly_dialogue(game->dialogue) &&
+            (cmd->type == CMD_LOOK ||
+             cmd->type == CMD_INSPECT ||
+             cmd->type == CMD_MAP)) {
+        return 1;
+    }
     if (game_noncombat_give_offer_active(game) &&
             (cmd->type == CMD_GIVE || cmd->type == CMD_BAG)) {
         return 1;
@@ -385,15 +391,16 @@ static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd,
      */
     if (game->mode == GAME_MODE_COMBAT &&
             cmd->type != CMD_REPLY &&
-            cmd->type != CMD_LOOK &&
-            cmd->type != CMD_MAP &&
             cmd->type != CMD_BAG &&
             cmd->type != CMD_WIELD &&
             cmd->type != CMD_UNWIELD &&
+            cmd->type != CMD_EAT &&
+            cmd->type != CMD_USE &&
             cmd->type != CMD_VERSION &&
             cmd->type != CMD_HELP &&
             cmd->type != CMD_QUIT) {
         push_dialogue_guard(out, GAME_DIALOGUE_GUARD_BANDIT_WAITING_REPLY);
+        combat_replay_menu(out);
         return 0;
     }
 
@@ -419,11 +426,11 @@ static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd,
     if (game->mode == GAME_MODE_DIALOGUE &&
             game->dialogue == DIALOGUE_ENEMY &&
             cmd->type != CMD_REPLY &&
-            cmd->type != CMD_LOOK &&
-            cmd->type != CMD_MAP &&
             cmd->type != CMD_BAG &&
             cmd->type != CMD_WIELD &&
             cmd->type != CMD_UNWIELD &&
+            cmd->type != CMD_EAT &&
+            cmd->type != CMD_USE &&
             cmd->type != CMD_VERSION &&
             cmd->type != CMD_HELP &&
             cmd->type != CMD_QUIT &&
@@ -434,6 +441,17 @@ static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd,
         } else {
             push_dialogue_guard(out, GAME_DIALOGUE_GUARD_BANDIT_WAITING_REPLY);
         }
+        genc_replay_active_prompt(game, out);
+        return 0;
+    }
+
+    if (game->mode == GAME_MODE_DIALOGUE &&
+            npc_is_roaming_friendly_dialogue(game->dialogue) &&
+            (cmd->type == CMD_LOOK ||
+             cmd->type == CMD_INSPECT ||
+             cmd->type == CMD_MAP)) {
+        push_dialogue_guard(out, GAME_DIALOGUE_GUARD_ROAMING_ENCOUNTER_WAITING);
+        npc_roaming_replay_scene(game, out);
         return 0;
     }
 
@@ -511,9 +529,8 @@ static int game_cmd_move(struct GameState *game, struct Command *cmd,
     }
     /* Night-lost env event before MOVE/ROOM_LOOK so announcement precedes look. */
     gatmos_try_night_lost_on_move(game, out);
-    /* room_id already updated; MOVE then ROOM_LOOK preserve render enqueue order */
+    /* room_id already updated; MOVE precedes any deferred look after the tick. */
     game_event_push(out, GAME_EVENT_MOVE, 0, 0, 0, 0, world_dir_name(cmd->dir));
-    do_look(game, out);
     return 1;
 }
 
@@ -642,8 +659,7 @@ static int apply_command(struct GameState *game, struct Command *cmd,
 
 static void advance_world_tick(struct GameState *game, GameEventQueue *out)
 {
-    int fixed_opened;
-    int roll;
+    int encounter_opened;
 
     /*
      * Tick order: increment tick, advance global weather (#51) and day/night
@@ -671,10 +687,8 @@ static void advance_world_tick(struct GameState *game, GameEventQueue *out)
      * co-located; otherwise the roster gets one movement step, then a second
      * encounter check in the new room layout. Fog blocks encounter opens only.
      */
+    encounter_opened = 0;
     if (!game_is_busy_dialogue(game)) {
-        int encounter_opened;
-
-        encounter_opened = 0;
         if (!gatmos_weather_blocks_roaming_encounter(game)) {
             encounter_opened = npc_roaming_begin_encounter_in_room(
                 game, game->player.room_id, out);
@@ -686,22 +700,25 @@ static void advance_world_tick(struct GameState *game, GameEventQueue *out)
                     game->player.room_id, out);
             }
         }
+        if (!encounter_opened) {
+            encounter_opened = npc_fixed_begin_encounter_in_room(game,
+                game->player.room_id, out);
+        }
     }
 
     world_step(&game->world, game->tick);
+    if (encounter_opened) {
+        return;
+    }
     maybe_emit_atmosphere(game, out);
     maybe_emit_animal_noise(game, out);
     gatmos_emit_deferred_atmosphere_extras(game, out);
     if (!game_is_busy_dialogue(game)) {
-        fixed_opened = npc_fixed_begin_encounter_in_room(game,
-            game->player.room_id, out);
         /*
          * Preserve the old ambient RNG cadence after removing the player-site
          * ambush spawn so unchanged seeds keep their non-encounter outputs.
          */
-        roll = plat_rand() % CFG_ROLL_PERCENT_RANGE;
-        (void)fixed_opened;
-        (void)roll;
+        (void)(plat_rand() % CFG_ROLL_PERCENT_RANGE);
     }
 }
 
@@ -736,6 +753,9 @@ int game_process_input(struct GameState *game, char *line, GameEventQueue *out)
                 prior_mode == GAME_MODE_DIALOGUE &&
                 prior_dialogue == DIALOGUE_LOOT)) {
         advance_world_tick(game, out);
+        if (cmd.type == CMD_MOVE && game->mode == GAME_MODE_EXPLORE) {
+            do_look(game, out);
+        }
     }
 
     return 1;

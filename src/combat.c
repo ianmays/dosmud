@@ -32,6 +32,12 @@ int combat_enemy_level(const struct GameState *game)
     return 1;
 }
 
+/* Guarded modal verbs can re-show the current combat menu without replaying turns. */
+void combat_replay_menu(struct GameEventQueue *out)
+{
+    push_combat_phase(out, GAME_COMBAT_PHASE_MENU, 0, 0, 0);
+}
+
 static void combat_end_active_enemy_encounter(struct GameState *game)
 {
     int slot;
