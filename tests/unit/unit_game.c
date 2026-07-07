@@ -1005,6 +1005,7 @@ TEST game_move_emits_move_then_look(void)
     PASS();
 }
 
+/* MOVE defers ROOM_LOOK until explore resumes after an encounter-open tick. */
 TEST game_move_into_bandit_defers_room_look_until_after_encounter(void)
 {
     struct GameState game;

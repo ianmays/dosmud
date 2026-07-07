@@ -21,6 +21,7 @@ void combat_start(struct GameState *game, struct GameEventQueue *out,
 void combat_resolve_reply(struct GameState *game, int choice, struct GameEventQueue *out);
 /* Active encounter level from CombatState; defaults to 1 when unset. */
 int combat_enemy_level(const struct GameState *game);
+/* Re-queue GAME_COMBAT_PHASE_MENU after a blocked modal verb; no turn replay. */
 void combat_replay_menu(struct GameEventQueue *out);
 
 #endif

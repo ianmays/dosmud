@@ -103,6 +103,7 @@ int npc_roaming_begin_encounter_in_room(struct GameState *game, int room_id,
                                         struct GameEventQueue *out);
 int npc_roaming_cmd_reply(struct GameState *game, int choice,
                           struct GameEventQueue *out);
+/* Re-queue roaming-friendly ENCOUNTER OPEN after a blocked observe verb. */
 int npc_roaming_replay_scene(struct GameState *game,
                              struct GameEventQueue *out);
 /* Canonical GAME_EVENT_DIALOGUE / DIALOGUE_GUARD producers for npc-using slices. */

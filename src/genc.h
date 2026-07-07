@@ -12,6 +12,7 @@ struct GameEventQueue;
 void enemy_begin_encounter(struct GameState *game, struct GameEventQueue *out);
 int genc_cmd_reply(struct GameState *game, int choice, struct GameEventQueue *out);
 int genc_cmd_give(struct GameState *game, int item_arg, struct GameEventQueue *out);
+/* Re-queue bandit OPEN or HANDOVER_PROMPT after a blocked modal verb. */
 int genc_replay_active_prompt(struct GameState *game, struct GameEventQueue *out);
 
 #endif

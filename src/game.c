@@ -41,7 +41,8 @@ static int game_noncombat_give_offer_active(const struct GameState *game)
 /*
  * Menu-native verbs keep the modal open (numbered reply, repeat talk, repeat
  * loot-to-leave, and the active Herbalist give/offering prompt); help/version/
- * quit stay allowed like combat menus.
+ * quit stay allowed like combat menus. Roaming-friendly observe verbs skip
+ * #205 auto-close here; game_cmd_allowed_in_mode guards and replays instead.
  */
 static int cmd_preserves_noncombat_menu(const struct GameState *game,
                                         const struct Command *cmd)
@@ -197,6 +198,10 @@ static void do_map(GameEventQueue *out)
     game_event_push(out, GAME_EVENT_MAP, 0, 0, 0, 0, 0);
 }
 
+/*
+ * Slice callers enqueue ROOM_LOOK after peaceful modal exit so encounter
+ * resolution copy precedes the restored room snapshot.
+ */
 void game_describe_current_room(struct GameState *game, GameEventQueue *out)
 {
     do_look(game, out);
@@ -385,9 +390,9 @@ static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd,
                                     GameEventQueue *out)
 {
     /*
-     * Combat and enemy handover are narrow modal states; only the small
-     * command set that preserves the branch is allowed until the player
-     * resolves it.
+     * Combat is a narrow modal state: reply, bag/wield maintenance, eat/use
+     * consumables, and session verbs stay allowed; observe verbs replay the
+     * combat menu without advancing turns.
      */
     if (game->mode == GAME_MODE_COMBAT &&
             cmd->type != CMD_REPLY &&
@@ -423,6 +428,10 @@ static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd,
         return 0;
     }
 
+    /*
+     * Enemy handover mirrors combat gating: bag/wield and eat/use stay allowed;
+     * other verbs replay the active encounter prompt after the guard.
+     */
     if (game->mode == GAME_MODE_DIALOGUE &&
             game->dialogue == DIALOGUE_ENEMY &&
             cmd->type != CMD_REPLY &&
@@ -441,10 +450,15 @@ static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd,
         } else {
             push_dialogue_guard(out, GAME_DIALOGUE_GUARD_BANDIT_WAITING_REPLY);
         }
+        /* guard plus encounter replay keeps the bandit prompt visible */
         genc_replay_active_prompt(game, out);
         return 0;
     }
 
+    /*
+     * Roaming-friendly encounters block look/inspect/map like combat menus;
+     * observe output would dismiss the branch without a numbered reply.
+     */
     if (game->mode == GAME_MODE_DIALOGUE &&
             npc_is_roaming_friendly_dialogue(game->dialogue) &&
             (cmd->type == CMD_LOOK ||
@@ -663,10 +677,9 @@ static void advance_world_tick(struct GameState *game, GameEventQueue *out)
 
     /*
      * Tick order: increment tick, advance global weather (#51) and day/night
-     * (#130), then roster maintenance, roaming encounter checks (fog may block
-     * opens only), roaming movement when no encounter opened, ambient events,
-     * then fixed slot encounters. Keeps room-based enemies world-owned, not
-     * player-site.
+     * (#130), roster maintenance, then roaming and fixed encounter opens (fog
+     * blocks opens only) before world_step. An opened encounter skips ambient
+     * output for this tick so MOVE plus encounter copy stay ahead of ROOM_LOOK.
      */
     game->tick += 1;
     gatmos_weather_tick(game, out);
@@ -753,6 +766,7 @@ int game_process_input(struct GameState *game, char *line, GameEventQueue *out)
                 prior_mode == GAME_MODE_DIALOGUE &&
                 prior_dialogue == DIALOGUE_LOOT)) {
         advance_world_tick(game, out);
+        /* defer look until after tick so encounter-open moves skip ROOM_LOOK */
         if (cmd.type == CMD_MOVE && game->mode == GAME_MODE_EXPLORE) {
             do_look(game, out);
         }
