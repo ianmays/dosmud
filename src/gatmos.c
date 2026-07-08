@@ -140,14 +140,19 @@ static int gatmos_room_clue_only_kind(const struct GameState *game,
     return found;
 }
 
+void gatmos_clear_room_clues(struct GameState *game, int room_id)
+{
+    if (room_id >= 0 && room_id < CFG_ROOM_MAX) {
+        game->env_room_clues[room_id] = 0;
+    }
+}
+
 /* game_cmd_move calls this with the room the player just left; gatmos owns
  * the decision to drop uninspected clues rather than let them roam with the
  * player. */
 void gatmos_clear_departed_room_clues(struct GameState *game, int room_id)
 {
-    if (room_id >= 0 && room_id < CFG_ROOM_MAX) {
-        game->env_room_clues[room_id] = 0;
-    }
+    gatmos_clear_room_clues(game, room_id);
 }
 
 static int env_max_choice(int kind)

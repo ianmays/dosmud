@@ -18,6 +18,8 @@ void maybe_emit_atmosphere(struct GameState *game, struct GameEventQueue *out);
 void gatmos_emit_deferred_atmosphere_extras(struct GameState *game,
                                           struct GameEventQueue *out);
 int gatmos_cmd_inspect(struct GameState *game, int item_arg, struct GameEventQueue *out);
+/* Clear all uninspected clue bits for a room. Encounter opens use this too. */
+void gatmos_clear_room_clues(struct GameState *game, int room_id);
 /* Clear all uninspected clue bits when the player leaves a room (#234). */
 void gatmos_clear_departed_room_clues(struct GameState *game, int room_id);
 /* Numbered reply while env_interact_active; queues ENV_RESULT or guard events. */

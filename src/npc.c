@@ -2,6 +2,7 @@
 #include "npc.h"
 #include "platform.h"
 #include "game.h"
+#include "gatmos.h"
 #include "gout.h"
 #include "gstory.h"
 #include "gwhok.h"
@@ -971,6 +972,7 @@ int npc_begin_encounter(struct GameState *game, int actor, int dialogue,
     if (slot < 0) {
         return -1;
     }
+    gatmos_clear_room_clues(game, room_id);
     npc_push_encounter_open(out, encounter, game->npcs[slot].level);
     game_set_mode_dialogue(game, dialogue);
     return slot;
@@ -1205,6 +1207,7 @@ int npc_fixed_begin_encounter_in_room(struct GameState *game, int room_id,
         }
         /* Fixed encounters keep the authored slot; only mode/event state changes. */
         npc->dialogue = DIALOGUE_ENEMY;
+        gatmos_clear_room_clues(game, room_id);
         npc_push_encounter_open(out, npc->encounter, npc->level);
         game_set_mode_dialogue(game, npc->dialogue);
         return 1;
@@ -1233,6 +1236,7 @@ int npc_roaming_begin_encounter_in_room(struct GameState *game, int room_id,
                 npc_slot_needs_separation(npc)) {
             continue;
         }
+        gatmos_clear_room_clues(game, room_id);
         npc_push_encounter_open(out, npc->encounter, npc->level);
         npc->dialogue = npc_encounter_dialogue_kind(npc);
         game_set_mode_dialogue(game, npc->dialogue);

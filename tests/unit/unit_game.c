@@ -386,6 +386,24 @@ TEST game_bandit_handover_pick(void)
     PASS();
 }
 
+TEST game_enemy_encounter_open_clears_room_clues(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 52u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game.env_room_clues[WORLD_ROOM_CAMP] =
+        (u8)(GAME_ENV_CLUE_BIT(GAME_ENV_RUSTLE) |
+             GAME_ENV_CLUE_BIT(GAME_ENV_WATER));
+    game_event_queue_reset(&out);
+    enemy_begin_encounter(&game, &out);
+    ASSERT_EQ(0U, game.env_room_clues[WORLD_ROOM_CAMP]);
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(DIALOGUE_ENEMY, game.dialogue);
+    PASS();
+}
+
 TEST game_wait_on_road_bandit_room_opens_encounter(void)
 {
     struct GameState game;
@@ -408,6 +426,24 @@ TEST game_wait_on_road_bandit_room_opens_encounter(void)
         }
     }
     ASSERT_EQ(1, saw_open);
+    PASS();
+}
+
+TEST game_roaming_encounter_open_clears_room_clues(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 53u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ROAD, 0);
+    game.env_room_clues[WORLD_ROOM_ROAD] =
+        (u8)(GAME_ENV_CLUE_BIT(GAME_ENV_CREAK) |
+             GAME_ENV_CLUE_BIT(GAME_ENV_GRIT));
+    npc_deactivate_until(&game, GAME_DIALOGUE_ACTOR_TRAVELER, 999999UL);
+    ASSERT_EQ(1, run_cmd_out(&game, "wait", &out));
+    ASSERT_EQ(0U, game.env_room_clues[WORLD_ROOM_ROAD]);
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(DIALOGUE_ENEMY, game.dialogue);
     PASS();
 }
 
@@ -1581,7 +1617,9 @@ SUITE(game) {
     RUN_TEST(game_bandit_fight_reply);
     RUN_TEST(game_bandit_intimidate_fail);
     RUN_TEST(game_bandit_handover_pick);
+    RUN_TEST(game_enemy_encounter_open_clears_room_clues);
     RUN_TEST(game_wait_on_road_bandit_room_opens_encounter);
+    RUN_TEST(game_roaming_encounter_open_clears_room_clues);
     RUN_TEST(game_talk_npcs_and_nobody);
     RUN_TEST(game_watchman_meal_thread_give_fed);
     RUN_TEST(game_fixture_baseline_clears_tower_advancement_desc);
