@@ -439,8 +439,9 @@ static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd,
     }
 
     /*
-     * Enemy handover mirrors combat gating: bag/wield and eat/use stay allowed;
-     * other verbs replay the active encounter prompt after the guard.
+     * Enemy dialogue keeps the bandit prompt modal: reply, bag/wield upkeep,
+     * session verbs, and handover give stay allowed; other verbs replay the
+     * active encounter prompt after the guard.
      */
     if (game->mode == GAME_MODE_DIALOGUE &&
             game->dialogue == DIALOGUE_ENEMY &&
@@ -448,8 +449,6 @@ static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd,
             cmd->type != CMD_BAG &&
             cmd->type != CMD_WIELD &&
             cmd->type != CMD_UNWIELD &&
-            cmd->type != CMD_EAT &&
-            cmd->type != CMD_USE &&
             cmd->type != CMD_VERSION &&
             cmd->type != CMD_HELP &&
             cmd->type != CMD_QUIT &&

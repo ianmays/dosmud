@@ -1270,6 +1270,30 @@ TEST game_bandit_map_replays_modal_prompt(void)
     PASS();
 }
 
+TEST game_bandit_handover_use_salve_replays_modal_prompt(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    u32 tick_before_use;
+
+    unit_game_fresh(&game, 142u);
+    ASSERT_EQ(1, testharn_apply(&game, "@fixture bandit_handover_pick"));
+    ASSERT_EQ(1, game_inv_bag_add(&game, ITEM_SALVE));
+    tick_before_use = game.tick;
+
+    ASSERT_EQ(0, run_cmd_out(&game, "use salve", &out));
+    ASSERT_EQ(tick_before_use, game.tick);
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(DIALOGUE_ENEMY, game.dialogue);
+    ASSERT_EQ(2, out.count);
+    ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[0].kind);
+    ASSERT_EQ(GAME_DIALOGUE_GUARD_BANDIT_WAITING_HANDOVER_PICK,
+        out.events[0].arg0);
+    ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[1].kind);
+    ASSERT_EQ(GAME_ENCOUNTER_ACTION_HANDOVER_PROMPT, out.events[1].arg1);
+    PASS();
+}
+
 TEST game_nobody_waiting_reply_guard_event(void)
 {
     struct GameState game;
@@ -1717,6 +1741,7 @@ SUITE(game) {
     RUN_TEST(game_quit_ends_run);
     RUN_TEST(game_bandit_waiting_reply_guard_event);
     RUN_TEST(game_bandit_map_replays_modal_prompt);
+    RUN_TEST(game_bandit_handover_use_salve_replays_modal_prompt);
     RUN_TEST(game_nobody_waiting_reply_guard_event);
     RUN_TEST(game_post_combat_reply_guard_keeps_loot_available);
     RUN_TEST(game_loot_leave_keeps_corpse_without_advancing_time);
