@@ -1286,25 +1286,6 @@ int npc_roaming_cmd_reply(struct GameState *game, int choice, GameEventQueue *ou
     return 1;
 }
 
-/* Roaming-friendly menus replay their encounter scene after blocked observe verbs. */
-int npc_roaming_replay_scene(struct GameState *game, struct GameEventQueue *out)
-{
-    struct NpcState *npc;
-
-    if (game->mode != GAME_MODE_DIALOGUE ||
-            !npc_is_roaming_friendly_dialogue(game->dialogue)) {
-        return 0;
-    }
-    npc = npc_find_dialogue_slot(game, game->dialogue);
-    if (npc == 0) {
-        return 0;
-    }
-    game_event_push(out, GAME_EVENT_ENCOUNTER, npc->encounter,
-        GAME_ENCOUNTER_ACTION_OPEN, GAME_ENCOUNTER_OUTCOME_NONE,
-        npc->level, 0);
-    return 1;
-}
-
 /*
  * #160: shared dialogue producers (payload layout in gout.h). Slices queue
  * actor/phase/choice here; detail becomes arg3 (e.g. HerbalistDialogueScene).

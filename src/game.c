@@ -41,8 +41,7 @@ static int game_noncombat_give_offer_active(const struct GameState *game)
 /*
  * Menu-native verbs keep the modal open (numbered reply, repeat talk, repeat
  * loot-to-leave, and the active Herbalist give/offering prompt); help/version/
- * quit stay allowed like combat menus. Roaming-friendly observe verbs skip
- * #205 auto-close here; game_cmd_allowed_in_mode guards and replays instead.
+ * quit stay allowed like combat menus.
  */
 static int cmd_preserves_noncombat_menu(const struct GameState *game,
                                         const struct Command *cmd)
@@ -59,12 +58,6 @@ static int cmd_preserves_noncombat_menu(const struct GameState *game,
         return 1;
     }
     if (game->dialogue == DIALOGUE_LOOT && cmd->type == CMD_LOOT) {
-        return 1;
-    }
-    if (npc_is_roaming_friendly_dialogue(game->dialogue) &&
-            (cmd->type == CMD_LOOK ||
-             cmd->type == CMD_INSPECT ||
-             cmd->type == CMD_MAP)) {
         return 1;
     }
     if (game_noncombat_give_offer_active(game) &&
@@ -452,20 +445,6 @@ static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd,
         }
         /* guard plus encounter replay keeps the bandit prompt visible */
         genc_replay_active_prompt(game, out);
-        return 0;
-    }
-
-    /*
-     * Roaming-friendly encounters block look/inspect/map like combat menus;
-     * observe output would dismiss the branch without a numbered reply.
-     */
-    if (game->mode == GAME_MODE_DIALOGUE &&
-            npc_is_roaming_friendly_dialogue(game->dialogue) &&
-            (cmd->type == CMD_LOOK ||
-             cmd->type == CMD_INSPECT ||
-             cmd->type == CMD_MAP)) {
-        push_dialogue_guard(out, GAME_DIALOGUE_GUARD_ROAMING_ENCOUNTER_WAITING);
-        npc_roaming_replay_scene(game, out);
         return 0;
     }
 
