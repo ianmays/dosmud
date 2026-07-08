@@ -1032,7 +1032,7 @@ TEST game_traveler_dialogue_inspect_replays_modal_prompt(void)
     ASSERT_EQ(DIALOGUE_TRAVELER, game.dialogue);
     ASSERT_EQ(2, out.count);
     ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[0].kind);
-    ASSERT_EQ(GAME_DIALOGUE_GUARD_ROAMING_ENCOUNTER_WAITING, out.events[0].arg0);
+    ASSERT_EQ(GAME_DIALOGUE_GUARD_FRIENDLY_DIALOGUE_WAITING, out.events[0].arg0);
     ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[1].kind);
     ASSERT_EQ(GAME_ENCOUNTER_TRAVELER, out.events[1].arg0);
     ASSERT_EQ(GAME_ENCOUNTER_ACTION_OPEN, out.events[1].arg1);
@@ -1059,7 +1059,7 @@ TEST game_watchman_map_replays_modal_prompt(void)
     ASSERT_EQ(DIALOGUE_NPC_WATCHMAN, game.dialogue);
     ASSERT_EQ(2, out.count);
     ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[0].kind);
-    ASSERT_EQ(GAME_DIALOGUE_GUARD_ROAMING_ENCOUNTER_WAITING, out.events[0].arg0);
+    ASSERT_EQ(GAME_DIALOGUE_GUARD_FRIENDLY_DIALOGUE_WAITING, out.events[0].arg0);
     ASSERT_EQ(GAME_EVENT_DIALOGUE, out.events[1].kind);
     ASSERT_EQ(GAME_DIALOGUE_ACTOR_WATCHMAN, out.events[1].arg0);
     ASSERT_EQ(GAME_DIALOGUE_PHASE_TALK, out.events[1].arg1);

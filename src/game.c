@@ -414,7 +414,7 @@ static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd,
             (cmd->type == CMD_LOOK ||
              cmd->type == CMD_INSPECT ||
              cmd->type == CMD_MAP)) {
-        push_dialogue_guard(out, GAME_DIALOGUE_GUARD_ROAMING_ENCOUNTER_WAITING);
+        push_dialogue_guard(out, GAME_DIALOGUE_GUARD_FRIENDLY_DIALOGUE_WAITING);
         (void)npc_replay_active_prompt(game, out);
         return 0;
     }

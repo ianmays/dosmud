@@ -86,7 +86,7 @@ void render_msg_env_menu(int kind);
 void render_msg_env_result(int kind, int choice, int detail);
 void render_msg_bandit_blocks_talk(void);
 void render_msg_loot_waiting(void);
-void render_msg_roaming_encounter_waiting(void);
+void render_msg_friendly_dialogue_waiting(void);
 void render_msg_watchman_talk(int scene);
 void render_msg_herbalist_talk(int scene);
 void render_msg_archivist_talk(void);
