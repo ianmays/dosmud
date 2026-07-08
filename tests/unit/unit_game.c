@@ -570,6 +570,29 @@ TEST game_combat_use_salve_allowed(void)
     PASS();
 }
 
+TEST game_combat_use_salve_skips_ambient_and_clues(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    u32 draws_before;
+    int i;
+
+    unit_game_fresh(&game, 116u);
+    ASSERT_EQ(1, testharn_apply(&game, "@fixture bandit_combat_salve_ready"));
+    draws_before = plat_rand_draw_count();
+    ASSERT_EQ(1, run_cmd_out(&game, "use salve", &out));
+    ASSERT_EQ(0U, game.env_room_clues[game.player.room_id]);
+    ASSERT_EQ(draws_before, plat_rand_draw_count());
+    for (i = 0; i < out.count; ++i) {
+        ASSERT_NEQ(GAME_EVENT_ENVIRONMENT, out.events[i].kind);
+        ASSERT_NEQ(GAME_EVENT_AMBIENT_NOISE, out.events[i].kind);
+        ASSERT_NEQ(GAME_EVENT_ITEM_PRESENCE, out.events[i].kind);
+        ASSERT_NEQ(GAME_EVENT_OBSERVATION, out.events[i].kind);
+        ASSERT_NEQ(GAME_EVENT_ENV_MENU, out.events[i].kind);
+    }
+    PASS();
+}
+
 TEST game_inspect_none_and_inactive_kind(void)
 {
     struct GameState game;
@@ -1568,6 +1591,7 @@ SUITE(game) {
     RUN_TEST(game_frog_reply_branch);
     RUN_TEST(game_combat_blocks_inventory_cmds);
     RUN_TEST(game_combat_use_salve_allowed);
+    RUN_TEST(game_combat_use_salve_skips_ambient_and_clues);
     RUN_TEST(game_inspect_none_and_inactive_kind);
     RUN_TEST(game_move_clears_departed_room_clues);
     RUN_TEST(game_unknown_command);

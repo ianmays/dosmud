@@ -674,6 +674,7 @@ static int apply_command(struct GameState *game, struct Command *cmd,
 static void advance_world_tick(struct GameState *game, GameEventQueue *out)
 {
     int encounter_opened;
+    int busy_before_tick;
 
     /*
      * Tick order: increment tick, advance global weather (#51) and day/night
@@ -686,6 +687,7 @@ static void advance_world_tick(struct GameState *game, GameEventQueue *out)
     gatmos_daynight_tick(game, out);
     npc_roaming_update_separation(game);
     npc_story_tick(game);
+    busy_before_tick = game_is_busy_dialogue(game);
 #ifdef TEST_MODE
     if (game->test_quiet_ticks) {
         /* Quiet fixtures keep time moving but suppress ambient randomness. */
@@ -701,7 +703,7 @@ static void advance_world_tick(struct GameState *game, GameEventQueue *out)
      * encounter check in the new room layout. Fog blocks encounter opens only.
      */
     encounter_opened = 0;
-    if (!game_is_busy_dialogue(game)) {
+    if (!busy_before_tick) {
         if (!gatmos_weather_blocks_roaming_encounter(game)) {
             encounter_opened = npc_roaming_begin_encounter_in_room(
                 game, game->player.room_id, out);
@@ -720,7 +722,7 @@ static void advance_world_tick(struct GameState *game, GameEventQueue *out)
     }
 
     world_step(&game->world, game->tick);
-    if (encounter_opened) {
+    if (busy_before_tick || encounter_opened) {
         return;
     }
     maybe_emit_atmosphere(game, out);
