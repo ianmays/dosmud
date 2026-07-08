@@ -205,13 +205,8 @@ int txtres_encounter_narrative_key(int kind, int action, int outcome)
 }
 
 const char *const TXT_MAIN_TEST_MODE = "TEST MODE";
-#ifdef TEST_MODE
 const char *const TXT_MAIN_USAGE =
-    "usage: dosmud [--version] [--seed <unsigned>] [--replay-log [path]]";
-#else
-const char *const TXT_MAIN_USAGE =
-    "usage: dosmud [--version] [--seed <unsigned>]";
-#endif
+    "usage: dosmud [--version] [--seed <unsigned>|wallclock] [--replay-log [path]]";
 const char *const TXT_MAIN_TITLE = "dosmud";
 const char *const TXT_MAIN_TITLE_SEED_FMT = "%s (seed %lu)\n";
 const char *const TXT_MAIN_VERSION_FMT = "dosmud " BUILD_VERSION_STRING;

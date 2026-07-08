@@ -23,7 +23,7 @@ Purpose:
 - `make check-layers`: core/render boundary guard (no `printf` in `src/*.c` except `main.c`, `grendr.c`, and the platform files `platpos.c`, `platwin.c`, and `platdos.c`)
 - `make test`: strict deterministic compile (`-Werror`, `-DTEST_MODE`, `-g -O0`); does not run `check-layers`; prints `elapsed: <seconds>` after the compile/link step
 - `make test-win`: WSL cross-compile of the native Windows console `TEST_MODE` executable (`dosmud.exe`); compile-only, no snapshot run from Linux
-- `make snapshot-run`: runs every name in `SNAPSHOT_TESTS` plus `seed_cli` and `version_cli` against the existing native `TEST_MODE` binary (`./dosmud`; see [Snapshot test files](#snapshot-test-files)). Each step prints `snapshot: <name>`. Finishes with `snapshot tests passed: N/M` (for example `102/102` names in `SNAPSHOT_TESTS` plus `seed_cli` and `version_cli`, 104 steps total).
+- `make snapshot-run`: runs every name in `SNAPSHOT_TESTS` plus `seed_cli`, `version_cli`, and `usage_cli` against the existing native `TEST_MODE` binary (`./dosmud`; see [Snapshot test files](#snapshot-test-files)). Each step prints `snapshot: <name>`. Finishes with `snapshot tests passed: N/M` (the count is the number of names in `SNAPSHOT_TESTS` plus the three bespoke CLI snapshots).
 - `make test-run`: builds the test binary (`make test`), then runs `make snapshot-run`.
 - `make test-unit`: builds and runs the greatest unit suite (`tests/unit/build/dosmud_unit`, `TEST_MODE` only; not linked into release `dosmud`)
 - `make test-soak`: builds and runs long-run soak/stress checks (`tests/soak/build/dosmud_soak`; separate from unit tests)
@@ -40,7 +40,7 @@ Use these when you want to launch a playable or interactive binary rather than r
 
 For the WSL -> Windows path, build `dosmud.exe` with `make build-win` or `make test-win`, then launch it with `make win-run` or directly from Windows PowerShell, `cmd.exe`, or Windows Terminal. `win-run` launches whatever repo-root `dosmud.exe` was produced by the most recent Windows cross-build, opens a new Windows console window, and forwards `SEED=<n>` when set. This issue adds a console app path only; a GUI or alternate renderer remains separate work.
 
-`TEST_MODE` runs may also pass `--replay-log [path]` to `./dosmud` or `./dosmud --seed <n>`. If the path is omitted, logging defaults to `replay.log` in the current working directory. The replay log is a sidecar text file, so it does not change snapshot stdout output by itself. Release builds do not accept the flag.
+All builds may also pass `--replay-log [path]` to `./dosmud` or `./dosmud --seed <n>`. If the path is omitted, logging defaults to `replay.log` in the current working directory. The replay log is a sidecar text file, so it does not change snapshot stdout output by itself.
 
 All builds also support in-session `save`, `load`, and `version` commands. The first pass uses a single-slot `save.dat` in the current working directory; snapshots that exercise save/load must clean up that sidecar in the `Makefile`.
 
@@ -300,7 +300,7 @@ Snapshots use three determinism levels:
 
 Bandit intimidate in gameplay uses `game_roll_percent` (not direct `plat_rand()`), so intimidate snapshots stay on the inject path.
 
-Add new fixtures in [`tests/harness/testharn.c`](https://github.com/ianmays/dosmud/blob/main/tests/harness/testharn.c) and document them here. `testharn` + `th_world` are linked for `make test` / `dos-prepare MODE=TEST_MODE` and `make test-unit`, not for `make build` or `make test-soak` (soak links `th_world` only).
+Add new fixtures in [`tests/harness/testharn.c`](https://github.com/ianmays/dosmud/blob/main/tests/harness/testharn.c) and document them here. `testharn` + `th_world` are linked for `make test` and `make test-unit`, not for `make build`, the DOS build, or `make test-soak` (soak links `th_world` only). The DOS build never links the harness.
 
 | Fixture | Notes |
 |---------|--------|
@@ -317,13 +317,15 @@ Add new fixtures in [`tests/harness/testharn.c`](https://github.com/ianmays/dosm
 
 ### Snapshot test files
 
-Each process run uses one `.input` file until `quit`. `make snapshot-run` runs `SNAPSHOT_TESTS` (includes `smoke`), then `seed_cli`. `make test-run` is the compile-plus-run wrapper.
+Each process run uses one `.input` file until `quit`. `make snapshot-run` runs `SNAPSHOT_TESTS` (includes `smoke`), then the bespoke CLI snapshots `seed_cli`, `version_cli`, and `usage_cli`. `make test-run` is the compile-plus-run wrapper.
 
-**Replay sidecar (`replay_log`):** the only snapshot that also golden-checks a `TEST_MODE` `--replay-log` file. `make snapshot-run` runs `./dosmud --seed 1234 --replay-log tests/regression/replay_log_log.output < tests/regression/replay_log.input` and diffs both stdout (`replay_log.expect`) and the sidecar log (`replay_log_log.expect`). Player-visible stdout stays unchanged; the log records `dosmud-replay-v1` header lines plus per-step metadata and serialized `GameEvent` rows.
+**Replay sidecar (`replay_log`):** the only snapshot that also golden-checks a `--replay-log` sidecar file. `--replay-log` is a regular feature in every build; the snapshot runs against the `TEST_MODE` binary from `make test` only because that is the binary `make snapshot-run` uses, not because logging is test-only. `make snapshot-run` runs `./dosmud --seed 1234 --replay-log tests/regression/replay_log_log.output < tests/regression/replay_log.input` and diffs both stdout (`replay_log.expect`) and the sidecar log (`replay_log_log.expect`). Player-visible stdout stays unchanged; the log records `dosmud-replay-v1` header lines plus per-step metadata and serialized `GameEvent` rows.
 
 **Save sidecar (`save_load`, `herbalist_save_load`):** exercises the in-session `save` / `load` shell commands. `make snapshot-run` removes `save.dat`, runs the snapshot, diffs stdout against the matching `.expect`, then removes `save.dat` again so the single-slot file does not leak across tests.
 
 **Version snapshots (`version`, `version_cli`):** build identity includes generated Git metadata, so the expectation files keep `@VERSION@` placeholders. `make snapshot-run` substitutes the current `BUILD_VERSION_STRING` from `build/include/version.h` before diffing stdout.
+
+**Usage snapshot (`usage_cli`):** runs `./dosmud --bogus`, asserts a non-zero exit, and diffs the stderr usage line against `usage_cli.expect`. The usage string is build-independent (regular and `TEST_MODE` emit the same text), so this snapshot guards the unified `--seed <unsigned>|wallclock` / `--replay-log` help copy.
 
 **Core / inventory (also in `SNAPSHOT_TESTS`):** `smoke`, `bandit_handover`, `bandit_wielded_give`, `area_items`, `map`, `equipment`, `craft_wielded`, `take_all`, `take_all_bag_full`, `bag_view`, `bag_stacks`.
 
@@ -357,17 +359,10 @@ Use PowerShell-driven DOS prep from Linux host shell to build and sync the DOS t
 make dos-prepare
 ```
 
-TEST_MODE DOS prep without spelling the mode flag directly:
-
-```sh
-make test-dos-prepare
-```
-
 Build and validate the DOS tree without launching the runtime session:
 
 ```sh
 make dos-prepare-norun
-make test-dos-prepare-norun
 ```
 
 Start DOS and launch the most recently prepared DOS executable without rebuilding or refreshing the tree:
@@ -376,7 +371,7 @@ Start DOS and launch the most recently prepared DOS executable without rebuildin
 make dos-run
 ```
 
-There is one prepared DOS tree at `$destination`. `make dos-run` launches whatever executable was most recently prepared there. Run `make dos-prepare` for release mode or `make test-dos-prepare` for `TEST_MODE` before using `make dos-run`.
+There is one prepared DOS tree at `$destination`. `make dos-run` launches whatever executable was most recently prepared there. Run `make dos-prepare` first. The DOS build is always the regular (non-`TEST_MODE`) game: no test harness objects are compiled or linked, so it stays within the 16-bit segment budget.
 
 `make dos-prepare` now prints `elapsed build.bat time: <seconds>` after the Open Watcom build finishes and before the runtime DOS session starts. That elapsed time measures `build.bat` only, not the PowerShell tree refresh/copy phase. When `build.log` is present in the prepared DOS tree, `dos-prepare.ps1` appends the same elapsed line there too.
 
@@ -384,32 +379,24 @@ To pass a custom seed through the DOS helper targets, use `SEED=<unsigned>`, for
 
 ```sh
 make dos-prepare SEED=1234
-make test-dos-prepare SEED=1234
 make dos-prepare-norun SEED=1234
-make test-dos-prepare-norun SEED=1234
 make dos-run SEED=1234
 ```
 
-When you add or remove `src\*.c` files, update `Makefile` (`SRC` or `TEST_SRC`) and `build.bat`. For the Open Watcom path, keep every `wcl` and `wlib` line under the COMMAND.COM length limit (about 127 characters): gameplay sources are packed into `gameplay.lib` via several short `wlib` calls; the final `wcl` link lists `main.obj`, `platdos.obj`, `gameplay.lib`, plus the other `.obj` files. `TEST_MODE` copies [`tests/harness/`](https://github.com/ianmays/dosmud/blob/main/tests/harness/) to `harness\` via `dos-prepare.ps1`, compiles `th_world.c` / `testharn.c` to `thwld.obj` / `tharn.obj`, and archives both into `gameplay.lib`. Use `goto` labels in `build.bat` for conditionals; parenthesized `if (...)` blocks break under COMMAND.COM.
+When you add or remove `src\*.c` files, update `Makefile` (`SRC` or `TEST_SRC`) and `build.bat`. For the Open Watcom path, keep every `wcl` and `wlib` line under the COMMAND.COM length limit (about 127 characters): gameplay sources are packed into `gameplay.lib` via several short `wlib` calls; the final `wcl` link lists `main.obj`, `platdos.obj`, `gameplay.lib`, plus the other `.obj` files. The DOS build compiles `replay.c` unconditionally and archives `replay.obj` into `gameplay.lib`; it never compiles the test harness (`tests/harness/`), so the `_TEXT` segment stays under the 16-bit 64k limit. Use `goto` labels in `build.bat` for conditionals; parenthesized `if (...)` blocks break under COMMAND.COM.
 
-Deterministic DOS validation:
-
-```sh
-make dos-prepare MODE=TEST_MODE
-```
-
-Runtime seed (native or DOS build): the startup banner always prints the active seed, for example `dosmud (seed 1234)`. In `TEST_MODE` the default is `CFG_TEST_RAND_SEED` unless overridden on the command line:
+Runtime seed (native or DOS build): the startup banner always prints the active seed, for example `dosmud (seed 1234)`. Every build defaults to `CFG_DEFAULT_RAND_SEED` (1234) unless overridden on the command line; `--seed wallclock` seeds from the wall clock for per-session variety:
 
 ```sh
 ./dosmud --seed 1234
+./dosmud --seed wallclock
 make run SEED=1234
 make test-run-bin SEED=1234
 make win-run SEED=1234
 make dos-prepare SEED=1234
-make test-dos-prepare SEED=1234
 ```
 
-Invalid flags print `usage: dosmud [--version] [--seed <unsigned>]` (plus `--replay-log [path]` in `TEST_MODE`) to stderr and exit with status 1. Seed values must be decimal, non-negative, and at most `CFG_SEED_CLI_MAX` (4294967295); leading `+`/`-` and out-of-range values are rejected.
+Invalid flags print `usage: dosmud [--version] [--seed <unsigned>|wallclock] [--replay-log [path]]` to stderr and exit with status 1. Seed values must be decimal, non-negative, and at most `CFG_SEED_CLI_MAX` (4294967295), or the literal `wallclock`; leading `+`/`-` and out-of-range values are rejected.
 
 ## Combined cross-path checks
 
@@ -420,7 +407,7 @@ make build-all
 make test-all
 ```
 
-These targets intentionally exercise DOS build prep and native GCC flow together. They validate the DOS build without launching the playable DOS runtime, equivalent to `make dos-prepare-norun` or `make test-dos-prepare-norun` as appropriate.
+These targets intentionally exercise DOS build prep and native GCC flow together. They validate the regular DOS build without launching the playable DOS runtime, equivalent to `make dos-prepare-norun`.
 
 ## Environment and path model
 

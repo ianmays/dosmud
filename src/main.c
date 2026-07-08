@@ -21,6 +21,11 @@
 /*
  * main.c owns shell-level startup, CLI parsing, polling, and the outer loop
  * that bridges platform I/O to game orchestration.
+ *
+ * Replay logging (--replay-log) and the deterministic default seed
+ * (CFG_DEFAULT_RAND_SEED, override with --seed <n>|wallclock) are regular
+ * features in every build. Only the TEST MODE banner, the @fixture/@seed
+ * harness, and the output-overflow guard remain gated behind TEST_MODE.
  */
 
 /*
@@ -31,9 +36,9 @@
 static GameEventQueue g_main_out;
 /* Save/load staging copy stays static so DOS load does not exhaust the stack. */
 static struct GameState g_main_loaded_game;
-#ifdef TEST_MODE
 /* Optional sidecar log; static like g_main_out so the shell loop stays stack-light. */
 static ReplayLog g_replay_log;
+#ifdef TEST_MODE
 static int main_check_output_overflow(void);
 #endif
 
@@ -45,11 +50,8 @@ static void print_prompt(void)
 
 static u32 default_rng_seed(void)
 {
-#ifdef TEST_MODE
-    return (u32)CFG_TEST_RAND_SEED;
-#else
-    return (u32)plat_time_now();
-#endif
+    /* Deterministic default for every build; --seed wallclock opts into time. */
+    return (u32)CFG_DEFAULT_RAND_SEED;
 }
 
 /*
@@ -62,15 +64,11 @@ static int parse_cli_args(int argc, char **argv, u32 *out_seed,
 {
     int i;
     int have_seed;
-#ifdef TEST_MODE
     int have_replay_path;
-#endif
 
     have_seed = 0;
     *out_print_version = 0;
-#ifdef TEST_MODE
     have_replay_path = 0;
-#endif
     if (out_replay_path != 0) {
         *out_replay_path = 0;
     }
@@ -87,6 +85,13 @@ static int parse_cli_args(int argc, char **argv, u32 *out_seed,
                 return -1;
             }
             arg = argv[i + 1];
+            if (strcmp(arg, "wallclock") == 0) {
+                /* Escape hatch: seed from wall-clock instead of the 1234 default. */
+                *out_seed = (u32)plat_time_now();
+                have_seed = 1;
+                ++i;
+                continue;
+            }
             if (arg[0] == '-' || arg[0] == '+') {
                 return -1;
             }
@@ -106,14 +111,13 @@ static int parse_cli_args(int argc, char **argv, u32 *out_seed,
         } else if (strcmp(argv[i], "--version") == 0) {
             *out_print_version = 1;
         } else if (strcmp(argv[i], "--replay-log") == 0) {
-#ifdef TEST_MODE
             if (have_replay_path) {
                 return -1;
             }
             if (out_replay_path == 0) {
                 return -1;
             }
-            *out_replay_path = CFG_TEST_REPLAY_LOG_DEFAULT;
+            *out_replay_path = CFG_REPLAY_LOG_DEFAULT;
             if (i + 1 < argc && argv[i + 1][0] != '-') {
                 *out_replay_path = argv[i + 1];
                 if ((*out_replay_path)[0] == '\0') {
@@ -122,9 +126,6 @@ static int parse_cli_args(int argc, char **argv, u32 *out_seed,
                 ++i;
             }
             have_replay_path = 1;
-#else
-            return -1;
-#endif
         } else {
             return -1;
         }
@@ -147,18 +148,13 @@ static int main_parse_args(int argc, char **argv, u32 *out_seed,
 static int main_capture_replay(int step_kind, const char *input,
                                struct GameState *game)
 {
-#ifdef TEST_MODE
     /* Capture at the shell boundary before the next queue reset drops the step. */
+    /* No-op while the log is disabled (g_replay_log has no open sidecar). */
     if (!replay_log_capture(&g_replay_log, step_kind, input, game, &g_main_out)) {
         fprintf(stderr, "replay log write failed: %s\n",
             g_replay_log.path != 0 ? g_replay_log.path : "(unknown)");
         return 1;
     }
-#else
-    (void)step_kind;
-    (void)input;
-    (void)game;
-#endif
     return 0;
 }
 
@@ -409,16 +405,11 @@ int main(int argc, char **argv)
     u32 rng_seed;
     int print_version;
     int poll_rc;
-#ifdef TEST_MODE
     const char *replay_path;
+
     replay_log_reset(&g_replay_log);
-#endif
-#ifdef TEST_MODE
     if (main_parse_args(argc, argv, &rng_seed, &replay_path,
             &print_version) != 0) {
-#else
-    if (main_parse_args(argc, argv, &rng_seed, 0, &print_version) != 0) {
-#endif
         return 1;
     }
     if (print_version) {
@@ -426,22 +417,19 @@ int main(int argc, char **argv)
         printf("%s\n", build_version_line());
         return 0;
     }
-#ifdef TEST_MODE
     if (replay_path != 0 && !replay_log_open(&g_replay_log, replay_path, rng_seed)) {
         fprintf(stderr, "cannot open replay log: %s\n", replay_path);
         return 1;
     }
-#endif
     plat_seed_rng(rng_seed);
 
 #ifdef TEST_MODE
+    /* Harness-only banner; replay logging and the seed above are un-gated. */
     printf("%s\n", TXT_MAIN_TEST_MODE);
 #endif
 
     if (main_startup(&game, rng_seed) != 0) {
-#ifdef TEST_MODE
         replay_log_close(&g_replay_log);
-#endif
         return 1;
     }
     last_tick_time = plat_time_now();
@@ -453,9 +441,7 @@ int main(int argc, char **argv)
         }
         if (poll_rc > 0) {
             if (main_handle_polled_line(&game, line, &last_tick_time) != 0) {
-#ifdef TEST_MODE
                 replay_log_close(&g_replay_log);
-#endif
                 return 1;
             }
             continue;
@@ -463,9 +449,7 @@ int main(int argc, char **argv)
         poll_rc = main_run_idle_ticks(&game, &last_tick_time,
                                       (time_t)CFG_MAIN_IDLE_TICK_SECONDS);
         if (poll_rc < 0) {
-#ifdef TEST_MODE
             replay_log_close(&g_replay_log);
-#endif
             return 1;
         }
         if (poll_rc > 0) {
@@ -473,9 +457,7 @@ int main(int argc, char **argv)
         }
     }
 
-#ifdef TEST_MODE
     replay_log_close(&g_replay_log);
-#endif
     printf("%s\n", TXT_MAIN_BYE);
     return 0;
 }

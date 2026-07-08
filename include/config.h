@@ -71,8 +71,6 @@
 #define CFG_TEST_SOAK_LIMIT_BACKGROUND_TICKS 50000
 #define CFG_TEST_SOAK_LIMIT_COMMAND_TICKS 50000
 #define CFG_TEST_SOAK_LIMIT_COMBAT_ROUNDS 200000
-/* Default sidecar path when TEST_MODE replay logging is enabled without a path. */
-#define CFG_TEST_REPLAY_LOG_DEFAULT "replay.log"
 #endif
 
 /* --- Gameplay tuning --- */
@@ -192,12 +190,15 @@
 #define CFG_MAIN_IDLE_TICK_SECONDS 20
 
 /*
- * Default libc RNG seed when building with -DTEST_MODE (see Makefile).
- * Override at runtime with: dosmud --seed <unsigned>
+ * Default libc RNG seed for all builds (regular and TEST_MODE) so a fresh
+ * session is deterministic. Override at runtime with dosmud --seed <unsigned>,
+ * or --seed wallclock for a time-based seed.
  */
-#define CFG_TEST_RAND_SEED 1234UL
+#define CFG_DEFAULT_RAND_SEED 1234UL
 /* Maximum --seed value (fits in u32 on all supported targets). */
 #define CFG_SEED_CLI_MAX 4294967295UL
+/* Default sidecar path when replay logging is enabled without an explicit path. */
+#define CFG_REPLAY_LOG_DEFAULT "replay.log"
 /*
  * Persisted RNG draw count ceiling for save/load. Keeps corrupt saves from
  * forcing a huge plat_rand_advance() replay loop on small DOS machines while

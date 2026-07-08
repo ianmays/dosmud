@@ -300,11 +300,7 @@ make dos-prepare
 make dos-run
 ```
 
-Deterministic DOS mode:
-
-```sh
-make dos-prepare MODE=TEST_MODE
-```
+The DOS build is always the regular (non-`TEST_MODE`) game; it is deterministic by default (`--seed 1234`) and never links the test harness. Use `--seed wallclock` for a time-based seed.
 
 ## Testing expectations
 
