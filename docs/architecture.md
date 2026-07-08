@@ -68,7 +68,7 @@ Presentation only: room art, HUD, combat text, inventory messages, and explorati
 
 Platform or frontend code runs simulation first, then hands the resulting `GameEvent` records to render; render never changes simulation state.
 
-The optional replay log path stays outside render. In `TEST_MODE`, `main.c` may mirror each per-step `GameEventQueue` into [`src/replay.c`](https://github.com/ianmays/dosmud/blob/main/src/replay.c) before the next queue reset, but `grendr` remains the only text renderer and the replay log remains a separate persistent record.
+The optional replay log path stays outside render. In all builds, `main.c` may mirror each per-step `GameEventQueue` into [`src/replay.c`](https://github.com/ianmays/dosmud/blob/main/src/replay.c) before the next queue reset when `--replay-log` is active, but `grendr` remains the only text renderer and the replay log remains a separate persistent record.
 
 The save/load path also stays outside render and gameplay slices. [`src/save.c`](https://github.com/ianmays/dosmud/blob/main/src/save.c) serializes the durable `GameState` snapshot at the shell edge, while `main.c` owns the `save` / `load` commands, success/error copy, and post-load room redraw.
 
@@ -90,7 +90,7 @@ Player-facing copy lives in `txtres`; `grendr` owns when a blank line appears be
 
 - `plat_poll_line` - non-blocking stdin poll (DOS `kbhit`/`getch`, Windows console `_kbhit`/`_getch`, or POSIX `select`)
 - `plat_time_now` - wall-clock seconds for idle ticks
-- `plat_seed_rng` - applies `srand((unsigned int)seed)`; `main.c` chooses a `u32` seed (`CFG_TEST_RAND_SEED`, wall clock, or `--seed`). `GameState.seed` stores the full `u32`; libc may use fewer bits (for example 16-bit `unsigned int` on DOS)
+- `plat_seed_rng` - applies `srand((unsigned int)seed)`; `main.c` chooses a `u32` seed (`CFG_DEFAULT_RAND_SEED`, `--seed <unsigned>`, or `--seed wallclock`). `GameState.seed` stores the full `u32`; libc may use fewer bits (for example 16-bit `unsigned int` on DOS)
 - `plat_rand` plus `plat_rand_draw_count` / `plat_rand_advance` - tracked libc RNG draws so save/load can restore the future random stream without serializing libc internals
 
 Implementations are split by toolchain (FAT 8.3 basenames):
@@ -101,7 +101,7 @@ Implementations are split by toolchain (FAT 8.3 basenames):
 
 [`src/main.c`](https://github.com/ianmays/dosmud/blob/main/src/main.c) orchestrates the main loop and may use `printf` for shell-level prompts and banners. It must not include `conio.h`, `dos.h`, or other platform headers directly.
 
-In `TEST_MODE`, `main.c` accepts `--replay-log [path]`, opens a deterministic text log, and records each startup, input, and idle step after simulation produces the queue and before the next reset clears it. The log includes the seed, step index, tick, input text when present, queue overflow state, and serialized `GameEvent` payloads in queue order. If the flag omits a path, logging defaults to `replay.log`.
+In all builds, `main.c` accepts `--replay-log [path]`, opens a deterministic text log, and records each startup, input, and idle step after simulation produces the queue and before the next reset clears it. The log includes the seed, step index, tick, input text when present, queue overflow state, and serialized `GameEvent` payloads in queue order. If the flag omits a path, logging defaults to `replay.log`.
 
 In all builds, `main.c` accepts `--version` at the shell edge and in-session `save`, `load`, and `version` commands. `--version` prints the shared build identity and exits before startup; the in-session `version` command routes through `GAME_EVENT_VERSION` so gameplay remains print-free. Build identity comes from the checked-in `VERSION` file plus generated native metadata in `build/include/version.h`, with the checked-in `include/version.h` fallback covering DOS/OpenWatcom and other non-generated paths. `save` and `load` still do not advance time, use the single-slot `save.dat` path in the current working directory, serialize the durable simulation state through [`src/save.c`](https://github.com/ianmays/dosmud/blob/main/src/save.c), and redraw the restored room immediately after a successful load.
 
@@ -138,7 +138,7 @@ Conventions:
 - keep related values grouped and commented
 - separate gameplay tuning from main-loop/test-harness settings
 - distinguish bandit corpse loot count (`CFG_COMBAT_CORPSE_LOOT_NONE_BELOW` through `TWO_BELOW`, 0-3 drops) and portable item rolls (`CFG_COMBAT_CORPSE_LOOT_SPEAR_BELOW` and siblings) from ambient room finds (`CFG_ROOM_SPAWN_*`, terrain-driven junk like stone)
-- `TEST_MODE` defaults libc RNG to `CFG_TEST_RAND_SEED` for deterministic snapshot output; override with `dosmud --seed <unsigned>`
+- all builds default libc RNG to `CFG_DEFAULT_RAND_SEED` (1234) for deterministic startup; override with `dosmud --seed <unsigned>` or `dosmud --seed wallclock`
 - roll-inject limits and snapshot roll constants (`CFG_ROLL_INJECT_*`, `CFG_TEST_*`) are defined only under `#ifdef TEST_MODE` in `config.h`
 
 ### Test harness (`testharn`, `TEST_MODE` only)
@@ -167,7 +167,7 @@ Conventions:
 - main loop orchestration
 - input/timing integration
 - `--version` CLI (all builds); prints the shared build identity via [`buildid.c`](https://github.com/ianmays/dosmud/blob/main/src/buildid.c) and exits before the game loop
-- `TEST_MODE` only: optional replay log capture via `--replay-log [path]`
+- optional replay log capture via `--replay-log [path]` (all builds)
 - `TEST_MODE`: delegates `@fixture` and `@seed` lines to `testharn`
 - in-session `save` / `load` shell commands (all builds); intercepts before `game_process_input` so ticks do not advance; after a successful load, calls `gwhok_apply_all` so persisted `world_adv_flags` reconcile authored room copy before redraw ([#220](https://github.com/ianmays/dosmud/issues/220))
 
@@ -179,7 +179,7 @@ Conventions:
 
 ### `replay`
 
-- `TEST_MODE` only shell-edge serialization in [`replay.c`](https://github.com/ianmays/dosmud/blob/main/src/replay.c); opened and driven from `main.c`
+- shell-edge serialization in [`replay.c`](https://github.com/ianmays/dosmud/blob/main/src/replay.c) (all builds); opened and driven from `main.c`
 - writes a deterministic sidecar text log (`dosmud-replay-v1`) of startup, input, and idle steps
 - captures each step's `GameEventQueue` after simulation and before the next queue reset; does not mutate gameplay or render state
 - I/O failure surfaces through `main.c` stderr and exits non-zero

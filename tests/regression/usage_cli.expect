@@ -1,0 +1,1 @@
+usage: dosmud [--version] [--seed <unsigned>|wallclock] [--replay-log [path]]

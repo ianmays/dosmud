@@ -67,7 +67,7 @@ run:
 test-all:
 	$(MAKE) check-layers
 	$(MAKE) clean
-	$(MAKE) dos-prepare MODE=$(TEST_MODE_FLAG) NORUN=1
+	$(MAKE) dos-prepare NORUN=1
 	$(MAKE) test-run
 	$(MAKE) test-unit-coverage
 	$(MAKE) test-soak
@@ -114,7 +114,7 @@ SNAPSHOT_TESTS = \
 snapshot-run:
 	@set -e; \
 	n=0; \
-	total=$$(($$(echo $(SNAPSHOT_TESTS) | wc -w) + 2)); \
+	total=$$(($$(echo $(SNAPSHOT_TESTS) | wc -w) + 3)); \
 	for t in $(SNAPSHOT_TESTS); do \
 		echo "snapshot: $$t"; \
 		if [ "$$t" = "replay_log" ]; then \
@@ -157,6 +157,12 @@ snapshot-run:
 	sed "s/@VERSION@/$$version_string/g" $(REGRESSION_DIR)/version_cli.expect > $(REGRESSION_DIR)/version_cli.expect.output; \
 	./$(BIN) --version > $(REGRESSION_DIR)/version_cli.output; \
 	diff -u $(REGRESSION_DIR)/version_cli.expect.output $(REGRESSION_DIR)/version_cli.output; \
+	n=$$((n + 1)); \
+	echo "snapshot: usage_cli"; \
+	if ./$(BIN) --bogus > /dev/null 2> $(REGRESSION_DIR)/usage_cli.output; then \
+		echo "usage_cli: expected non-zero exit for unknown flag"; exit 1; \
+	fi; \
+	diff -u $(REGRESSION_DIR)/usage_cli.expect $(REGRESSION_DIR)/usage_cli.output; \
 	n=$$((n + 1)); \
 	echo "snapshot tests passed: $$n/$$total"
 
@@ -344,18 +350,12 @@ clean:
 	rm -f dosmud_unit dosmud_unit-*.gcno dosmud_unit-*.gcda *.gcov src/*.gcno src/*.gcda
 
 dos-prepare:
-	powershell.exe -ExecutionPolicy Bypass -File dos-prepare.ps1 $(if $(MODE),-Mode $(MODE)) $(if $(NORUN),-NoRun) $(if $(SEED),-Seed $(SEED))
-
-test-dos-prepare:
-	$(MAKE) dos-prepare MODE=$(TEST_MODE_FLAG) $(if $(NORUN),NORUN=1) $(if $(SEED),SEED=$(SEED))
+	powershell.exe -ExecutionPolicy Bypass -File dos-prepare.ps1 $(if $(NORUN),-NoRun) $(if $(SEED),-Seed $(SEED))
 
 dos-prepare-norun:
 	$(MAKE) dos-prepare NORUN=1 $(if $(SEED),SEED=$(SEED))
 
-test-dos-prepare-norun:
-	$(MAKE) test-dos-prepare NORUN=1 $(if $(SEED),SEED=$(SEED))
-
 dos-run:
 	powershell.exe -ExecutionPolicy Bypass -File dos-prepare.ps1 -NoBuild $(if $(SEED),-Seed $(SEED))
 
-.PHONY: FORCE build-all build build-win win-run run test-all test test-win test-run-bin snapshot-run test-run build-unit test-unit test-unit-verbose test-unit-verbose-gameplay test-unit-coverage test-unit-coverage-verbose build-soak test-soak check-layers clean dos-prepare test-dos-prepare dos-prepare-norun test-dos-prepare-norun dos-run
+.PHONY: FORCE build-all build build-win win-run run test-all test test-win test-run-bin snapshot-run test-run build-unit test-unit test-unit-verbose test-unit-verbose-gameplay test-unit-coverage test-unit-coverage-verbose build-soak test-soak check-layers clean dos-prepare dos-prepare-norun dos-run

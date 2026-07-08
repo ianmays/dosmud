@@ -1,5 +1,4 @@
 param(
-    [string]$Mode = "",
     [switch]$NoBuild,
     [switch]$NoRun,
     [string]$Seed = ""
@@ -129,7 +128,6 @@ function Start-DosSession {
 
 Get-Process $dosexecutable -ErrorAction SilentlyContinue | Stop-Process -Force
 
-$buildArgs = if ($Mode) { " $Mode" } else { "" }
 $runCommand = if ($Seed) { "$projectname.exe --seed $Seed" } else { "$projectname.exe" }
 
 if (-not $NoBuild) {
@@ -140,12 +138,11 @@ if (-not $NoBuild) {
   # Copy only build.bat inputs (never repo-root .git, tests, docs, or Linux artifacts).
   Invoke-RobocopyOk 'src' (Join-Path $source 'src') (Join-Path $destination 'src') '/E'
   Invoke-RobocopyOk 'include' (Join-Path $source 'include') (Join-Path $destination 'include') '/E'
-  Invoke-RobocopyOk 'harness' (Join-Path $source 'tests\harness') (Join-Path $destination 'harness') '/E'
   Invoke-RobocopyOk 'build.bat' $source $destination 'build.bat'
   Remove-StaleDosMirrorExtras $destination
 
   $buildStarted = Get-Date
-  Start-DosSession -Commands @("call build.bat$buildArgs", 'exit') -Wait | Out-Null
+  Start-DosSession -Commands @('call build.bat', 'exit') -Wait | Out-Null
   $buildElapsed = (Get-Date) - $buildStarted
   $buildElapsedText = Format-ElapsedSeconds $buildElapsed
   $buildLog = Join-Path $destination 'build.log'

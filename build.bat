@@ -3,7 +3,6 @@ call \watcom\owsetenv
 
 set LOG=build.log
 set WFL=-bt=dos -I. -Iinclude -Isrc
-if "%1"=="TEST_MODE" set WFL=%WFL% -DTEST_MODE -Iharness
 
 echo dosmud Open Watcom build log > %LOG%
 echo. >> %LOG%
@@ -36,8 +35,7 @@ if exist items.obj del items.obj
 if exist save.obj del save.obj
 if exist txtres.obj del txtres.obj
 if exist platdos.obj del platdos.obj
-if exist tharn.obj del tharn.obj
-if exist thwld.obj del thwld.obj
+if exist replay.obj del replay.obj
 if exist gameplay.lib del gameplay.lib
 if exist dosmud.exe del dosmud.exe
 
@@ -146,36 +144,21 @@ echo Compiling txtres.c ...
 wcl %WFL% -c -fo=txtres.obj src\txtres.c >> %LOG%
 if errorlevel 1 goto wcl_bad
 
-if not "%1"=="TEST_MODE" goto skip_testharn
-if exist replay.obj del replay.obj
 echo Compiling replay.c ... >> %LOG%
 echo Compiling replay.c ...
 wcl %WFL% -c -fo=replay.obj src\replay.c >> %LOG%
 if errorlevel 1 goto wcl_bad
-echo Compiling th_world.c ... >> %LOG%
-echo Compiling th_world.c ...
-wcl %WFL% -c -fo=thwld.obj harness\th_world.c >> %LOG%
-if errorlevel 1 goto wcl_bad
-echo Compiling testharn.c ... >> %LOG%
-echo Compiling testharn.c ...
-wcl %WFL% -c -fo=tharn.obj harness\testharn.c >> %LOG%
-if errorlevel 1 goto wcl_bad
-:skip_testharn
 
 echo Archiving gameplay.lib ... >> %LOG%
 echo Archiving gameplay.lib ...
-REM Keep each wlib line under COMMAND.COM ~127 chars (TEST_MODE adds +tharn.obj).
+REM Keep each wlib line under COMMAND.COM ~127 chars.
 wlib -n gameplay.lib +buildid.obj +game.obj +gout.obj >> %LOG%
 if errorlevel 1 goto wcl_bad
 wlib gameplay.lib +gprog.obj +gstory.obj +gwhok.obj +combat.obj +genc.obj >> %LOG%
 if errorlevel 1 goto wcl_bad
 wlib gameplay.lib +dialogue.obj +npc.obj +gatmos.obj >> %LOG%
 if errorlevel 1 goto wcl_bad
-wlib gameplay.lib +fmt.obj +save.obj >> %LOG%
-if errorlevel 1 goto wcl_bad
-if not "%1"=="TEST_MODE" goto wlib_done
-wlib gameplay.lib +replay.obj +thwld.obj +tharn.obj >> %LOG%
-:wlib_done
+wlib gameplay.lib +fmt.obj +save.obj +replay.obj >> %LOG%
 if errorlevel 1 goto wcl_bad
 
 echo Linking dosmud.exe ... >> %LOG%
