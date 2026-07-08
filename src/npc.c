@@ -1121,7 +1121,12 @@ int npc_cmd_give(struct GameState *game, int item_arg, struct GameEventQueue *ou
 {
     const struct NpcRoomInfo *info;
 
-    /* Active dialogue owns give-routing before room presence can retarget it. */
+    /*
+     * The classifier keeps give modal (MODAL_KEEP), so an active dialogue owns
+     * give-routing before room presence can retarget it. A roaming dialogue
+     * with no give exchange rejects and replays its prompt, staying modal
+     * rather than dropping to explore.
+     */
     if (game->mode == GAME_MODE_DIALOGUE) {
         if (game->dialogue == DIALOGUE_NPC_HERBALIST) {
             return herbalist_exchange(game, item_arg, out);

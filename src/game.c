@@ -23,6 +23,15 @@ static void push_dialogue_guard(GameEventQueue *out, int reason)
     game_event_push(out, GAME_EVENT_DIALOGUE_GUARD, reason, 0, 0, 0, 0);
 }
 
+/*
+ * #240: one classifier owns modal command policy. ModalContext names the
+ * active modal owner; ModalDisposition is the verdict apply_command acts on:
+ *   KEEP  - run the verb inside the modal; the owning slice keeps its prompt.
+ *   BLOCK - reject the verb (guard + prompt replay only); apply_command
+ *           returns 0 so no world tick advances (blocked verbs cost no time).
+ *   CLOSE - tear the modal down first, then run the verb in explore.
+ * The classifier reads state only; teardown and replay stay with the slice.
+ */
 enum ModalContext {
     MODAL_CONTEXT_NONE = 0,
     MODAL_CONTEXT_COMBAT,
@@ -114,6 +123,8 @@ static enum ModalDisposition modal_command_disposition(
                 context == MODAL_CONTEXT_COMBAT) {
             return MODAL_BLOCK;
         }
+        /* peaceful/enemy give stays modal: the give slice owns accept vs
+         * reject and replays its own prompt on reject (no forced explore). */
         return MODAL_KEEP;
     }
     if (cmd->type == CMD_TALK) {
@@ -125,6 +136,8 @@ static enum ModalDisposition modal_command_disposition(
             return MODAL_CLOSE;
         }
     }
+    /* Any other verb: peaceful/loot/env dismiss and run it in explore;
+     * combat/enemy stay modal and block it. */
     if (context == MODAL_CONTEXT_LOOT || context == MODAL_CONTEXT_ENV ||
             context == MODAL_CONTEXT_PEACEFUL) {
         return MODAL_CLOSE;
@@ -399,6 +412,11 @@ int game_roll_percent(struct GameState *game)
     return game_roll_spread(game, CFG_ROLL_PERCENT_RANGE);
 }
 
+/*
+ * Per-context replay seam: each modal owner re-emits its live prompt so a
+ * blocked (or KEEP repeat) verb leaves the menu visible; emits events only,
+ * never mutates state or advances a tick.
+ */
 static int replay_active_modal_prompt(struct GameState *game,
                                       enum ModalContext context,
                                       GameEventQueue *out)
@@ -422,6 +440,11 @@ static int replay_active_modal_prompt(struct GameState *game,
     return 0;
 }
 
+/*
+ * BLOCK feedback: an orchestration guard reason (grendr maps it to copy) plus
+ * the owning slice's prompt replay. Pairs with apply_command returning 0, so
+ * the rejected verb produces output without changing state or passing time.
+ */
 static void push_modal_block_feedback(struct GameState *game,
                                       enum ModalContext context,
                                       const struct Command *cmd,
@@ -632,6 +655,11 @@ static int apply_command(struct GameState *game, struct Command *cmd,
     enum ModalContext context;
     enum ModalDisposition disposition;
 
+    /*
+     * Modal gate precedes slice routing: BLOCK returns 0 so the caller skips
+     * advance_world_tick (no time on a rejected verb); CLOSE tears the modal
+     * down, then the verb runs below as a normal explore command.
+     */
     context = game_modal_context(game);
     disposition = modal_command_disposition(context, cmd);
     if (disposition == MODAL_BLOCK) {
