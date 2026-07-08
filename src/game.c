@@ -389,15 +389,17 @@ static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd,
                                     GameEventQueue *out)
 {
     /*
-     * Combat is a narrow modal state: reply, bag/wield maintenance, and
-     * session verbs stay allowed; blocked verbs replay the combat menu without
-     * advancing turns. Salve use in combat stays on reply 3, not CMD_USE.
+     * Combat is a narrow modal state: reply, bag/wield maintenance, eat/use
+     * consumables, and session verbs stay allowed; blocked verbs replay the
+     * combat menu without advancing turns.
      */
     if (game->mode == GAME_MODE_COMBAT &&
             cmd->type != CMD_REPLY &&
             cmd->type != CMD_BAG &&
             cmd->type != CMD_WIELD &&
             cmd->type != CMD_UNWIELD &&
+            cmd->type != CMD_EAT &&
+            cmd->type != CMD_USE &&
             cmd->type != CMD_VERSION &&
             cmd->type != CMD_HELP &&
             cmd->type != CMD_QUIT) {
@@ -567,9 +569,15 @@ static int game_cmd_inventory(struct GameState *game, struct Command *cmd,
         return game_inv_cmd_unwield(game, out);
     }
     if (cmd->type == CMD_EAT) {
+        if (game->mode == GAME_MODE_COMBAT) {
+            return combat_cmd_eat(game, cmd->arg, out);
+        }
         return game_inv_cmd_eat(game, cmd->arg, out);
     }
     if (cmd->type == CMD_USE) {
+        if (game->mode == GAME_MODE_COMBAT) {
+            return combat_cmd_use(game, cmd->arg, out);
+        }
         return game_inv_cmd_use(game, cmd->arg, out);
     }
     if (cmd->type == CMD_CRAFT) {
@@ -758,6 +766,8 @@ int game_process_input(struct GameState *game, char *line, GameEventQueue *out)
      * the tick that CMD_LOOT would otherwise advance after apply_command.
      */
     if (command_advances_time(cmd.type) &&
+            !(prior_mode == GAME_MODE_COMBAT &&
+                (cmd.type == CMD_EAT || cmd.type == CMD_USE)) &&
             !(cmd.type == CMD_LOOT &&
                 prior_mode == GAME_MODE_DIALOGUE &&
                 prior_dialogue == DIALOGUE_LOOT)) {

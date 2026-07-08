@@ -323,6 +323,32 @@ TEST invent_eat_and_use(void)
     PASS();
 }
 
+TEST invent_eat_and_use_allowed_in_combat(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 51u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game.player_hp = 5;
+    ASSERT_EQ(1, game_inv_bag_add(&game, ITEM_BERRY));
+    ASSERT_EQ(1, game_inv_bag_add(&game, ITEM_SALVE));
+    game_set_mode_combat(&game);
+
+    ASSERT_EQ(1, inv_eat(&game, ITEM_BERRY, &out));
+    ASSERT_EQ(GAME_ITEM_ACTION_EAT, out.events[0].arg0);
+    ASSERT_EQ(GAME_ITEM_OUTCOME_OK, out.events[0].arg1);
+    ASSERT_EQ(ITEM_BERRY, out.events[0].arg2);
+    ASSERT_EQ(6, game.player_hp);
+
+    ASSERT_EQ(1, inv_use(&game, ITEM_SALVE, &out));
+    ASSERT_EQ(GAME_ITEM_ACTION_USE, out.events[0].arg0);
+    ASSERT_EQ(GAME_ITEM_OUTCOME_OK, out.events[0].arg1);
+    ASSERT_EQ(ITEM_SALVE, out.events[0].arg2);
+    ASSERT_EQ(11, game.player_hp);
+    PASS();
+}
+
 TEST invent_bag_view_event(void)
 {
     struct GameState game;
@@ -717,6 +743,7 @@ SUITE(invent) {
     RUN_TEST(invent_take_all_nothing);
     RUN_TEST(invent_take_combat_blocked);
     RUN_TEST(invent_eat_and_use);
+    RUN_TEST(invent_eat_and_use_allowed_in_combat);
     RUN_TEST(invent_bag_view_event);
     RUN_TEST(invent_eat_heals_damaged);
     RUN_TEST(invent_salve_at_max_hp);

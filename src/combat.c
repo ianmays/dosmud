@@ -173,6 +173,17 @@ static void combat_enemy_turn(struct GameState *game, GameEventQueue *out)
         game->player_hp, game->combat.enemy_hp, level);
 }
 
+static int combat_finish_player_turn(struct GameState *game,
+                                     struct GameEventQueue *out)
+{
+    combat_enemy_turn(game, out);
+    game->combat.defending = 0;
+    if (game->running && game->mode == GAME_MODE_COMBAT) {
+        push_combat_phase(out, GAME_COMBAT_PHASE_MENU, 0, 0, 0);
+    }
+    return 1;
+}
+
 void combat_start(struct GameState *game, GameEventQueue *out, int initiator)
 {
     int slot;
@@ -245,9 +256,21 @@ void combat_resolve_reply(struct GameState *game, int choice, GameEventQueue *ou
         return;
     }
 
-    combat_enemy_turn(game, out);
-    game->combat.defending = 0;
-    if (game->running && game->mode == GAME_MODE_COMBAT) {
-        push_combat_phase(out, GAME_COMBAT_PHASE_MENU, 0, 0, 0);
+    (void)combat_finish_player_turn(game, out);
+}
+
+int combat_cmd_eat(struct GameState *game, int item_arg, GameEventQueue *out)
+{
+    if (!game_inv_cmd_eat(game, item_arg, out)) {
+        return 0;
     }
+    return combat_finish_player_turn(game, out);
+}
+
+int combat_cmd_use(struct GameState *game, int item_arg, GameEventQueue *out)
+{
+    if (!game_inv_cmd_use(game, item_arg, out)) {
+        return 0;
+    }
+    return combat_finish_player_turn(game, out);
 }

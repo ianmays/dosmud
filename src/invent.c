@@ -547,11 +547,6 @@ int game_inv_cmd_bag(struct GameState *game, GameEventQueue *out)
 
 int game_inv_cmd_eat(struct GameState *game, int item_arg, GameEventQueue *out)
 {
-    if (game->mode == GAME_MODE_COMBAT) {
-        push_item_result(out, GAME_ITEM_ACTION_EAT,
-            GAME_ITEM_OUTCOME_BLOCKED_COMBAT, item_arg, 0);
-        return 1;
-    }
     if (game_inv_bag_find_index(game, item_arg) < 0) {
         push_item_result(out, GAME_ITEM_ACTION_EAT,
             GAME_ITEM_OUTCOME_NOT_CARRYING, item_arg, 0);
@@ -575,11 +570,6 @@ int game_inv_cmd_eat(struct GameState *game, int item_arg, GameEventQueue *out)
 
 int game_inv_cmd_use(struct GameState *game, int item_arg, GameEventQueue *out)
 {
-    if (game->mode == GAME_MODE_COMBAT) {
-        push_item_result(out, GAME_ITEM_ACTION_USE,
-            GAME_ITEM_OUTCOME_BLOCKED_COMBAT, item_arg, 0);
-        return 1;
-    }
     if (game_inv_bag_find_index(game, item_arg) < 0) {
         push_item_result(out, GAME_ITEM_ACTION_USE,
             GAME_ITEM_OUTCOME_NOT_CARRYING, item_arg, 0);

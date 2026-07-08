@@ -588,7 +588,7 @@ TEST game_combat_blocks_inventory_cmds(void)
     PASS();
 }
 
-TEST game_combat_use_salve_replays_modal_prompt(void)
+TEST game_combat_use_salve_allowed(void)
 {
     struct GameState game;
     GameEventQueue out;
@@ -597,14 +597,16 @@ TEST game_combat_use_salve_replays_modal_prompt(void)
     unit_game_fresh(&game, 115u);
     ASSERT_EQ(1, testharn_apply(&game, "@fixture bandit_combat_salve_ready"));
     tick_before_use = game.tick;
-    ASSERT_EQ(0, run_cmd_out(&game, "use salve", &out));
+    ASSERT_EQ(1, run_cmd_out(&game, "use salve", &out));
     ASSERT_EQ(GAME_MODE_COMBAT, game.mode);
     ASSERT_EQ(tick_before_use, game.tick);
-    ASSERT_EQ(2, out.count);
-    ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[0].kind);
-    ASSERT_EQ(GAME_DIALOGUE_GUARD_BANDIT_WAITING_REPLY, out.events[0].arg0);
+    ASSERT(out.count >= 4);
+    ASSERT_EQ(GAME_EVENT_ITEM_RESULT, out.events[0].kind);
+    ASSERT_EQ(GAME_ITEM_ACTION_USE, out.events[0].arg0);
     ASSERT_EQ(GAME_EVENT_COMBAT, out.events[1].kind);
-    ASSERT_EQ(GAME_COMBAT_PHASE_MENU, out.events[1].arg0);
+    ASSERT_EQ(GAME_COMBAT_PHASE_ENEMY_DAMAGE, out.events[1].arg0);
+    ASSERT_EQ(GAME_EVENT_COMBAT, out.events[out.count - 1].kind);
+    ASSERT_EQ(GAME_COMBAT_PHASE_MENU, out.events[out.count - 1].arg0);
     PASS();
 }
 
@@ -618,7 +620,7 @@ TEST game_combat_use_salve_skips_ambient_and_clues(void)
     unit_game_fresh(&game, 116u);
     ASSERT_EQ(1, testharn_apply(&game, "@fixture bandit_combat_salve_ready"));
     draws_before = plat_rand_draw_count();
-    ASSERT_EQ(0, run_cmd_out(&game, "use salve", &out));
+    ASSERT_EQ(1, run_cmd_out(&game, "use salve", &out));
     ASSERT_EQ(0U, game.env_room_clues[game.player.room_id]);
     ASSERT_EQ(draws_before, plat_rand_draw_count());
     for (i = 0; i < out.count; ++i) {
@@ -627,8 +629,30 @@ TEST game_combat_use_salve_skips_ambient_and_clues(void)
         ASSERT_NEQ(GAME_EVENT_ITEM_PRESENCE, out.events[i].kind);
         ASSERT_NEQ(GAME_EVENT_OBSERVATION, out.events[i].kind);
         ASSERT_NEQ(GAME_EVENT_ENV_MENU, out.events[i].kind);
-        ASSERT_NEQ(GAME_EVENT_ITEM_RESULT, out.events[i].kind);
     }
+    PASS();
+}
+
+TEST game_combat_eat_berry_allowed(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    u32 tick_before_eat;
+
+    unit_game_fresh(&game, 117u);
+    ASSERT_EQ(1, testharn_apply(&game, "@fixture bandit_combat_salve_ready"));
+    ASSERT_EQ(1, game_inv_bag_add(&game, ITEM_BERRY));
+    game.player_hp = CFG_START_MAX_HP - 2;
+    tick_before_eat = game.tick;
+
+    ASSERT_EQ(1, run_cmd_out(&game, "eat berry", &out));
+    ASSERT_EQ(GAME_MODE_COMBAT, game.mode);
+    ASSERT_EQ(tick_before_eat, game.tick);
+    ASSERT(out.count >= 4);
+    ASSERT_EQ(GAME_EVENT_ITEM_RESULT, out.events[0].kind);
+    ASSERT_EQ(GAME_ITEM_ACTION_EAT, out.events[0].arg0);
+    ASSERT_EQ(GAME_EVENT_COMBAT, out.events[out.count - 1].kind);
+    ASSERT_EQ(GAME_COMBAT_PHASE_MENU, out.events[out.count - 1].arg0);
     PASS();
 }
 
@@ -1659,8 +1683,9 @@ SUITE(game) {
     RUN_TEST(game_bag_preserves_herbalist_give_dialogue);
     RUN_TEST(game_frog_reply_branch);
     RUN_TEST(game_combat_blocks_inventory_cmds);
-    RUN_TEST(game_combat_use_salve_replays_modal_prompt);
+    RUN_TEST(game_combat_use_salve_allowed);
     RUN_TEST(game_combat_use_salve_skips_ambient_and_clues);
+    RUN_TEST(game_combat_eat_berry_allowed);
     RUN_TEST(game_inspect_none_and_inactive_kind);
     RUN_TEST(game_move_clears_departed_room_clues);
     RUN_TEST(game_unknown_command);
