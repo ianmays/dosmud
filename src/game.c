@@ -709,7 +709,7 @@ static void advance_world_tick(struct GameState *game, GameEventQueue *out)
         if (!encounter_opened) {
             npc_roaming_step(game);
             if (!gatmos_weather_blocks_roaming_encounter(game)) {
-                npc_roaming_begin_encounter_in_room(game,
+                encounter_opened = npc_roaming_begin_encounter_in_room(game,
                     game->player.room_id, out);
             }
         }

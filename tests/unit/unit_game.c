@@ -1041,6 +1041,60 @@ TEST game_move_into_bandit_defers_room_look_until_after_encounter(void)
     PASS();
 }
 
+TEST game_wait_roaming_bandit_step_open_skips_ambient(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    int slot;
+    int i;
+    int injects[2];
+    int saw_open;
+
+    unit_game_fresh(&game, 141u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 7u);
+    for (slot = 0; slot < CFG_NPC_MAX; ++slot) {
+        game.npcs[slot].flags &= ~(NPC_FLAG_ACTIVE | NPC_FLAG_ROAMING |
+            NPC_FLAG_NEEDS_SEPARATION | NPC_FLAG_HANDOVER_PICK);
+    }
+    slot = npc_find_by_actor(&game, GAME_DIALOGUE_ACTOR_BANDIT);
+    ASSERT(slot >= 0);
+    game.npcs[slot].flags |= NPC_FLAG_ACTIVE | NPC_FLAG_ROAMING;
+    game.npcs[slot].room_id = WORLD_ROOM_ROAD;
+    for (i = 0; i < DIR_NONE; ++i) {
+        game.world.rooms[WORLD_ROOM_ROAD].exits[i] = -1;
+    }
+    game.world.rooms[WORLD_ROOM_ROAD].exits[DIR_SOUTH] = WORLD_ROOM_CAMP;
+    injects[0] = 0;  /* roaming step pick; only one exit is valid */
+    injects[1] = 0;  /* would emit gust if ambient ran after encounter open */
+    game_roll_inject_begin(&game, injects, 2);
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, run_cmd_out(&game, "wait", &out));
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(DIALOGUE_ENEMY, game.dialogue);
+    saw_open = 0;
+    for (i = 0; i < out.count; ++i) {
+        if (out.events[i].kind == GAME_EVENT_ENCOUNTER &&
+                out.events[i].arg0 == GAME_ENCOUNTER_BANDIT &&
+                out.events[i].arg1 == GAME_ENCOUNTER_ACTION_OPEN) {
+            saw_open = 1;
+            continue;
+        }
+        ASSERT_NEQ(GAME_EVENT_AMBIENT_NOISE, out.events[i].kind);
+        ASSERT_NEQ(GAME_EVENT_ITEM_PRESENCE, out.events[i].kind);
+        if (out.events[i].kind == GAME_EVENT_ENVIRONMENT) {
+            ASSERT_NEQ(GAME_ENV_EVENT_GUST, out.events[i].arg0);
+            ASSERT_NEQ(GAME_ENV_EVENT_RUSTLE, out.events[i].arg0);
+            ASSERT_NEQ(GAME_ENV_EVENT_CREAK, out.events[i].arg0);
+            ASSERT_NEQ(GAME_ENV_EVENT_WATER, out.events[i].arg0);
+            ASSERT_NEQ(GAME_ENV_EVENT_GRIT, out.events[i].arg0);
+            ASSERT_NEQ(GAME_ENV_EVENT_BERRY_DROP, out.events[i].arg0);
+            ASSERT_NEQ(GAME_ENV_EVENT_REED_DROP, out.events[i].arg0);
+        }
+    }
+    ASSERT_EQ(1, saw_open);
+    PASS();
+}
+
 TEST game_roll_spread_zero(void)
 {
     struct GameState game;
@@ -1539,6 +1593,7 @@ SUITE(game) {
     RUN_TEST(game_cannot_move_emits_event);
     RUN_TEST(game_move_emits_move_then_look);
     RUN_TEST(game_move_into_bandit_defers_room_look_until_after_encounter);
+    RUN_TEST(game_wait_roaming_bandit_step_open_skips_ambient);
     RUN_TEST(game_roll_spread_zero);
     RUN_TEST(game_quit_ends_run);
     RUN_TEST(game_bandit_waiting_reply_guard_event);
