@@ -81,6 +81,12 @@ static void maybe_close_noncombat_menu(struct GameState *game,
     if (cmd_preserves_noncombat_menu(game, cmd)) {
         return;
     }
+    if (game->dialogue != DIALOGUE_LOOT &&
+            (cmd->type == CMD_LOOK ||
+             cmd->type == CMD_INSPECT ||
+             cmd->type == CMD_MAP)) {
+        return;
+    }
 
     if (game->dialogue == DIALOGUE_LOOT) {
         /* invent-owned leave; same path as loot with no corpse index. */
@@ -191,6 +197,10 @@ static void do_map(GameEventQueue *out)
     game_event_push(out, GAME_EVENT_MAP, 0, 0, 0, 0, 0);
 }
 
+/*
+ * Slice callers enqueue ROOM_LOOK after peaceful modal exit so encounter
+ * resolution copy precedes the restored room snapshot.
+ */
 void game_describe_current_room(struct GameState *game, GameEventQueue *out)
 {
     do_look(game, out);
@@ -379,21 +389,33 @@ static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd,
                                     GameEventQueue *out)
 {
     /*
-     * Combat and enemy handover are narrow modal states; only the small
-     * command set that preserves the branch is allowed until the player
-     * resolves it.
+     * Combat is a narrow modal state: reply, bag/wield maintenance, eat/use
+     * consumables, and session verbs stay allowed; blocked verbs replay the
+     * combat menu without advancing turns.
      */
     if (game->mode == GAME_MODE_COMBAT &&
             cmd->type != CMD_REPLY &&
-            cmd->type != CMD_LOOK &&
-            cmd->type != CMD_MAP &&
             cmd->type != CMD_BAG &&
             cmd->type != CMD_WIELD &&
             cmd->type != CMD_UNWIELD &&
+            cmd->type != CMD_EAT &&
+            cmd->type != CMD_USE &&
             cmd->type != CMD_VERSION &&
             cmd->type != CMD_HELP &&
             cmd->type != CMD_QUIT) {
         push_dialogue_guard(out, GAME_DIALOGUE_GUARD_BANDIT_WAITING_REPLY);
+        combat_replay_menu(out);
+        return 0;
+    }
+
+    if (game->mode == GAME_MODE_DIALOGUE &&
+            game->dialogue != DIALOGUE_LOOT &&
+            game->dialogue != DIALOGUE_ENEMY &&
+            (cmd->type == CMD_LOOK ||
+             cmd->type == CMD_INSPECT ||
+             cmd->type == CMD_MAP)) {
+        push_dialogue_guard(out, GAME_DIALOGUE_GUARD_FRIENDLY_DIALOGUE_WAITING);
+        (void)npc_replay_active_prompt(game, out);
         return 0;
     }
 
@@ -416,11 +438,14 @@ static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd,
         return 0;
     }
 
+    /*
+     * Enemy dialogue keeps the bandit prompt modal: reply, bag/wield upkeep,
+     * session verbs, and handover give stay allowed; other verbs replay the
+     * active encounter prompt after the guard.
+     */
     if (game->mode == GAME_MODE_DIALOGUE &&
             game->dialogue == DIALOGUE_ENEMY &&
             cmd->type != CMD_REPLY &&
-            cmd->type != CMD_LOOK &&
-            cmd->type != CMD_MAP &&
             cmd->type != CMD_BAG &&
             cmd->type != CMD_WIELD &&
             cmd->type != CMD_UNWIELD &&
@@ -434,6 +459,8 @@ static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd,
         } else {
             push_dialogue_guard(out, GAME_DIALOGUE_GUARD_BANDIT_WAITING_REPLY);
         }
+        /* guard plus encounter replay keeps the bandit prompt visible */
+        genc_replay_active_prompt(game, out);
         return 0;
     }
 
@@ -511,9 +538,8 @@ static int game_cmd_move(struct GameState *game, struct Command *cmd,
     }
     /* Night-lost env event before MOVE/ROOM_LOOK so announcement precedes look. */
     gatmos_try_night_lost_on_move(game, out);
-    /* room_id already updated; MOVE then ROOM_LOOK preserve render enqueue order */
+    /* room_id already updated; MOVE precedes any deferred look after the tick. */
     game_event_push(out, GAME_EVENT_MOVE, 0, 0, 0, 0, world_dir_name(cmd->dir));
-    do_look(game, out);
     return 1;
 }
 
@@ -542,9 +568,15 @@ static int game_cmd_inventory(struct GameState *game, struct Command *cmd,
         return game_inv_cmd_unwield(game, out);
     }
     if (cmd->type == CMD_EAT) {
+        if (game->mode == GAME_MODE_COMBAT) {
+            return combat_cmd_eat(game, cmd->arg, out);
+        }
         return game_inv_cmd_eat(game, cmd->arg, out);
     }
     if (cmd->type == CMD_USE) {
+        if (game->mode == GAME_MODE_COMBAT) {
+            return combat_cmd_use(game, cmd->arg, out);
+        }
         return game_inv_cmd_use(game, cmd->arg, out);
     }
     if (cmd->type == CMD_CRAFT) {
@@ -642,21 +674,21 @@ static int apply_command(struct GameState *game, struct Command *cmd,
 
 static void advance_world_tick(struct GameState *game, GameEventQueue *out)
 {
-    int fixed_opened;
-    int roll;
+    int encounter_opened;
+    int busy_before_tick;
 
     /*
      * Tick order: increment tick, advance global weather (#51) and day/night
-     * (#130), then roster maintenance, roaming encounter checks (fog may block
-     * opens only), roaming movement when no encounter opened, ambient events,
-     * then fixed slot encounters. Keeps room-based enemies world-owned, not
-     * player-site.
+     * (#130), roster maintenance, then roaming and fixed encounter opens (fog
+     * blocks opens only) before world_step. An opened encounter skips ambient
+     * output for this tick so MOVE plus encounter copy stay ahead of ROOM_LOOK.
      */
     game->tick += 1;
     gatmos_weather_tick(game, out);
     gatmos_daynight_tick(game, out);
     npc_roaming_update_separation(game);
     npc_story_tick(game);
+    busy_before_tick = game_is_busy_dialogue(game);
 #ifdef TEST_MODE
     if (game->test_quiet_ticks) {
         /* Quiet fixtures keep time moving but suppress ambient randomness. */
@@ -671,10 +703,8 @@ static void advance_world_tick(struct GameState *game, GameEventQueue *out)
      * co-located; otherwise the roster gets one movement step, then a second
      * encounter check in the new room layout. Fog blocks encounter opens only.
      */
-    if (!game_is_busy_dialogue(game)) {
-        int encounter_opened;
-
-        encounter_opened = 0;
+    encounter_opened = 0;
+    if (!busy_before_tick) {
         if (!gatmos_weather_blocks_roaming_encounter(game)) {
             encounter_opened = npc_roaming_begin_encounter_in_room(
                 game, game->player.room_id, out);
@@ -682,26 +712,29 @@ static void advance_world_tick(struct GameState *game, GameEventQueue *out)
         if (!encounter_opened) {
             npc_roaming_step(game);
             if (!gatmos_weather_blocks_roaming_encounter(game)) {
-                npc_roaming_begin_encounter_in_room(game,
+                encounter_opened = npc_roaming_begin_encounter_in_room(game,
                     game->player.room_id, out);
             }
+        }
+        if (!encounter_opened) {
+            encounter_opened = npc_fixed_begin_encounter_in_room(game,
+                game->player.room_id, out);
         }
     }
 
     world_step(&game->world, game->tick);
+    if (busy_before_tick || encounter_opened) {
+        return;
+    }
     maybe_emit_atmosphere(game, out);
     maybe_emit_animal_noise(game, out);
     gatmos_emit_deferred_atmosphere_extras(game, out);
     if (!game_is_busy_dialogue(game)) {
-        fixed_opened = npc_fixed_begin_encounter_in_room(game,
-            game->player.room_id, out);
         /*
          * Preserve the old ambient RNG cadence after removing the player-site
          * ambush spawn so unchanged seeds keep their non-encounter outputs.
          */
-        roll = plat_rand() % CFG_ROLL_PERCENT_RANGE;
-        (void)fixed_opened;
-        (void)roll;
+        (void)(plat_rand() % CFG_ROLL_PERCENT_RANGE);
     }
 }
 
@@ -732,10 +765,16 @@ int game_process_input(struct GameState *game, char *line, GameEventQueue *out)
      * the tick that CMD_LOOT would otherwise advance after apply_command.
      */
     if (command_advances_time(cmd.type) &&
+            !(prior_mode == GAME_MODE_COMBAT &&
+                (cmd.type == CMD_EAT || cmd.type == CMD_USE)) &&
             !(cmd.type == CMD_LOOT &&
                 prior_mode == GAME_MODE_DIALOGUE &&
                 prior_dialogue == DIALOGUE_LOOT)) {
         advance_world_tick(game, out);
+        /* defer look until after tick so encounter-open moves skip ROOM_LOOK */
+        if (cmd.type == CMD_MOVE && game->mode == GAME_MODE_EXPLORE) {
+            do_look(game, out);
+        }
     }
 
     return 1;

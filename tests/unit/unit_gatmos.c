@@ -96,6 +96,43 @@ TEST gatmos_clue_accumulates_on_atmosphere(void)
     PASS();
 }
 
+TEST gatmos_clear_room_clues_clears_only_target_room(void)
+{
+    struct GameState game;
+
+    reset_camp(&game);
+    room_set_clue(&game, WORLD_ROOM_CAMP, GAME_ENV_RUSTLE);
+    room_set_clue(&game, WORLD_ROOM_CAMP, GAME_ENV_WATER);
+    room_set_clue(&game, WORLD_ROOM_ROAD, GAME_ENV_CREAK);
+
+    gatmos_clear_room_clues(&game, WORLD_ROOM_CAMP);
+    ASSERT_EQ(0, game.env_room_clues[WORLD_ROOM_CAMP]);
+    ASSERT_NEQ(0, game.env_room_clues[WORLD_ROOM_ROAD]);
+
+    gatmos_clear_room_clues(&game, WORLD_ROOM_CAMP);
+    ASSERT_EQ(0, game.env_room_clues[WORLD_ROOM_CAMP]);
+    PASS();
+}
+
+TEST gatmos_clear_room_clues_ignores_out_of_range_rooms(void)
+{
+    struct GameState game;
+    u8 before_camp;
+    u8 before_road;
+
+    reset_camp(&game);
+    room_set_clue(&game, WORLD_ROOM_CAMP, GAME_ENV_RUSTLE);
+    room_set_clue(&game, WORLD_ROOM_ROAD, GAME_ENV_CREAK);
+    before_camp = game.env_room_clues[WORLD_ROOM_CAMP];
+    before_road = game.env_room_clues[WORLD_ROOM_ROAD];
+
+    gatmos_clear_room_clues(&game, -1);
+    gatmos_clear_room_clues(&game, CFG_ROOM_MAX);
+    ASSERT_EQ(before_camp, game.env_room_clues[WORLD_ROOM_CAMP]);
+    ASSERT_EQ(before_road, game.env_room_clues[WORLD_ROOM_ROAD]);
+    PASS();
+}
+
 TEST gatmos_atmosphere_skips_duplicate_clue_announce(void)
 {
     struct GameState game;
@@ -901,6 +938,8 @@ TEST gatmos_weather_roll_u32_wrap_tick13(void)
 SUITE(gatmos) {
     RUN_TEST(gatmos_seed_world_items);
     RUN_TEST(gatmos_clue_accumulates_on_atmosphere);
+    RUN_TEST(gatmos_clear_room_clues_clears_only_target_room);
+    RUN_TEST(gatmos_clear_room_clues_ignores_out_of_range_rooms);
     RUN_TEST(gatmos_atmosphere_skips_duplicate_clue_announce);
     RUN_TEST(gatmos_animal_noise_tick_gate);
     RUN_TEST(gatmos_atmosphere_branches);

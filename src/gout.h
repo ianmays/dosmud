@@ -219,8 +219,8 @@ enum GameEventDialogueGuardReason {
     GAME_DIALOGUE_GUARD_BANDIT_WAITING_HANDOVER_PICK,
     GAME_DIALOGUE_GUARD_BANDIT_BLOCKS_TALK,
     GAME_DIALOGUE_GUARD_LOOT_WAITING_REPLY,
-    /* blocks talk while traveler / lost animal / peddler await reply 1/2/3 */
-    GAME_DIALOGUE_GUARD_ROAMING_ENCOUNTER_WAITING,
+    /* blocks talk/observe while a friendly dialogue menu awaits reply 1/2/3 */
+    GAME_DIALOGUE_GUARD_FRIENDLY_DIALOGUE_WAITING,
     GAME_DIALOGUE_GUARD_NOBODY_WAITING_REPLY,
     /* non-loot dialogue dismissed by explore verb before the verb runs (#205). */
     GAME_DIALOGUE_GUARD_DIALOGUE_CLOSED,

@@ -97,6 +97,18 @@ TEST combat_start_uses_enemy_level_scaling(void)
     PASS();
 }
 
+TEST combat_replay_menu_emits_menu_phase(void)
+{
+    GameEventQueue out;
+
+    game_event_queue_reset(&out);
+    combat_replay_menu(&out);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_COMBAT, out.events[0].kind);
+    ASSERT_EQ(GAME_COMBAT_PHASE_MENU, out.events[0].arg0);
+    PASS();
+}
+
 TEST combat_enemy_initiative_strikes_before_menu(void)
 {
     /* Direct combat_start: roll0 enemy HP spread, roll1 enemy damage spread. */
@@ -406,6 +418,7 @@ SUITE(combat) {
     RUN_TEST(combat_attack_bonus);
     RUN_TEST(combat_start_mode);
     RUN_TEST(combat_start_uses_enemy_level_scaling);
+    RUN_TEST(combat_replay_menu_emits_menu_phase);
     RUN_TEST(combat_enemy_initiative_strikes_before_menu);
     RUN_TEST(combat_reply_defend_reduces_damage);
     RUN_TEST(combat_reply_salve_in_combat);

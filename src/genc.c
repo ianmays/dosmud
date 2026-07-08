@@ -57,6 +57,26 @@ static struct NpcState *active_enemy_npc(struct GameState *game)
     return &game->npcs[slot];
 }
 
+/* Re-show the active enemy prompt after a blocked modal verb without reopening the room. */
+int genc_replay_active_prompt(struct GameState *game, GameEventQueue *out)
+{
+    struct NpcState *enemy;
+
+    enemy = active_enemy_npc(game);
+    if (enemy == 0) {
+        return 0;
+    }
+    if ((enemy->flags & NPC_FLAG_HANDOVER_PICK) != 0) {
+        push_encounter(out, enemy->encounter,
+            GAME_ENCOUNTER_ACTION_HANDOVER_PROMPT,
+            GAME_ENCOUNTER_OUTCOME_NONE, 0, 0);
+        return 1;
+    }
+    push_encounter(out, enemy->encounter, GAME_ENCOUNTER_ACTION_OPEN,
+        GAME_ENCOUNTER_OUTCOME_NONE, enemy->level, 0);
+    return 1;
+}
+
 static int bandit_cmd_give(struct GameState *game, struct NpcState *enemy,
                            int item_arg, GameEventQueue *out)
 {
@@ -81,6 +101,7 @@ static int bandit_cmd_give(struct GameState *game, struct NpcState *enemy,
     }
     npc_end_encounter(game, enemy->actor);
     game_set_mode_explore(game);
+    game_describe_current_room(game, out);
     return 1;
 }
 
@@ -118,6 +139,7 @@ static int bandit_cmd_reply(struct GameState *game, struct NpcState *enemy,
                 GAME_ENCOUNTER_OUTCOME_SUCCESS, 0, 0);
             npc_end_encounter(game, enemy->actor);
             game_set_mode_explore(game);
+            game_describe_current_room(game, out);
         } else {
             push_encounter(out, GAME_ENCOUNTER_BANDIT,
                 GAME_ENCOUNTER_ACTION_INTIMIDATE,

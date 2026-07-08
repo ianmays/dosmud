@@ -245,6 +245,32 @@ TEST genc_cmd_reply_handover_pick(void)
     PASS();
 }
 
+TEST genc_replay_active_prompt_reuses_open_or_handover_copy(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    struct NpcState *enemy;
+
+    unit_game_fresh(&game, 70u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    begin_enemy_state(&game);
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, genc_replay_active_prompt(&game, &out));
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
+    ASSERT_EQ(GAME_ENCOUNTER_ACTION_OPEN, out.events[0].arg1);
+
+    enemy = active_enemy_npc(&game);
+    ASSERT(enemy != 0);
+    enemy->flags |= NPC_FLAG_HANDOVER_PICK;
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, genc_replay_active_prompt(&game, &out));
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
+    ASSERT_EQ(GAME_ENCOUNTER_ACTION_HANDOVER_PROMPT, out.events[0].arg1);
+    PASS();
+}
+
 TEST genc_cmd_reply_intimidate_clears_handover_pick(void)
 {
     struct GameState game;
@@ -403,6 +429,7 @@ SUITE(genc) {
     RUN_TEST(genc_cmd_give_wrong_context);
     RUN_TEST(genc_cmd_give_handover);
     RUN_TEST(genc_cmd_reply_handover_pick);
+    RUN_TEST(genc_replay_active_prompt_reuses_open_or_handover_copy);
     RUN_TEST(genc_cmd_reply_intimidate_clears_handover_pick);
     RUN_TEST(genc_cmd_reply_intimidate_fail);
     RUN_TEST(genc_cmd_reply_invalid_choice);

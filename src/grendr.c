@@ -1048,8 +1048,8 @@ static void render_dialogue_guard_event(const GameEvent *ev)
     case GAME_DIALOGUE_GUARD_LOOT_WAITING_REPLY:
         render_msg_loot_waiting();
         break;
-    case GAME_DIALOGUE_GUARD_ROAMING_ENCOUNTER_WAITING:
-        render_msg_roaming_encounter_waiting();
+    case GAME_DIALOGUE_GUARD_FRIENDLY_DIALOGUE_WAITING:
+        render_msg_friendly_dialogue_waiting();
         break;
     case GAME_DIALOGUE_GUARD_NOBODY_WAITING_REPLY:
         render_msg_nobody_waiting_reply();
@@ -1660,9 +1660,9 @@ void render_msg_loot_waiting(void)
     RENDER_PRINTF("%s", TXT_MSG_LOOT_WAITING);
 }
 
-void render_msg_roaming_encounter_waiting(void)
+void render_msg_friendly_dialogue_waiting(void)
 {
-    RENDER_PRINTF("%s", TXT_MSG_ROAMING_ENCOUNTER_WAITING);
+    RENDER_PRINTF("%s", TXT_MSG_FRIENDLY_DIALOGUE_WAITING);
 }
 
 /* scene is WatchmanDialogueScene (GAME_EVENT_DIALOGUE arg3 from npc.c). */

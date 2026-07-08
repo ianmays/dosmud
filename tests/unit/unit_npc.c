@@ -820,6 +820,9 @@ TEST npc_roaming_reply_cmd_explore(void)
     ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
     ASSERT_EQ(0, traveler->flags & NPC_FLAG_ACTIVE);
     ASSERT_EQ(-1, traveler->room_id);
+    ASSERT_EQ(2, out.count);
+    ASSERT_EQ(GAME_EVENT_DIALOGUE, out.events[0].kind);
+    ASSERT_EQ(GAME_EVENT_ROOM_LOOK, out.events[1].kind);
     PASS();
 }
 
@@ -879,6 +882,7 @@ TEST npc_roaming_reply_event(void)
     ASSERT_EQ(GAME_DIALOGUE_ACTOR_TRAVELER, out.events[0].arg0);
     ASSERT_EQ(GAME_DIALOGUE_PHASE_REPLY, out.events[0].arg1);
     ASSERT_EQ(2, out.events[0].arg2);
+    ASSERT_EQ(GAME_EVENT_ROOM_LOOK, out.events[1].kind);
     PASS();
 }
 

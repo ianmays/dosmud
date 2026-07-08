@@ -132,7 +132,7 @@ TEST dialogue_cmd_talk_traveler_waiting(void)
     ASSERT_EQ(1, talk_out(&game, &out));
     ASSERT_EQ(DIALOGUE_TRAVELER, game.dialogue);
     ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[0].kind);
-    ASSERT_EQ(GAME_DIALOGUE_GUARD_ROAMING_ENCOUNTER_WAITING, out.events[0].arg0);
+    ASSERT_EQ(GAME_DIALOGUE_GUARD_FRIENDLY_DIALOGUE_WAITING, out.events[0].arg0);
     PASS();
 }
 
@@ -146,7 +146,7 @@ TEST dialogue_cmd_talk_lost_animal_waiting(void)
     game_set_mode_dialogue(&game, DIALOGUE_LOST_ANIMAL);
     ASSERT_EQ(1, talk_out(&game, &out));
     ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[0].kind);
-    ASSERT_EQ(GAME_DIALOGUE_GUARD_ROAMING_ENCOUNTER_WAITING, out.events[0].arg0);
+    ASSERT_EQ(GAME_DIALOGUE_GUARD_FRIENDLY_DIALOGUE_WAITING, out.events[0].arg0);
     PASS();
 }
 
