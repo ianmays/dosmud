@@ -354,6 +354,18 @@ static int watchman_open_dialogue(struct GameState *game, GameEventQueue *out)
     return 1;
 }
 
+static void watchman_replay_dialogue(struct GameState *game, GameEventQueue *out)
+{
+    int talk_detail;
+
+    talk_detail = game->watchman_menu;
+    if (game->watchman_menu == WATCHMAN_SCENE_NEUTRAL) {
+        talk_detail = watchman_neutral_talk_detail(game);
+    }
+    npc_push_dialogue_detail(out, GAME_DIALOGUE_ACTOR_WATCHMAN,
+        GAME_DIALOGUE_PHASE_TALK, 0, talk_detail);
+}
+
 static int watchman_reply_neutral(struct GameState *game, int choice,
                                   GameEventQueue *out)
 {
@@ -468,6 +480,12 @@ static int herbalist_open_dialogue(struct GameState *game, GameEventQueue *out)
         GAME_DIALOGUE_PHASE_TALK, 0, scene);
     game_set_mode_dialogue(game, DIALOGUE_NPC_HERBALIST);
     return 1;
+}
+
+static void herbalist_replay_dialogue(struct GameState *game, GameEventQueue *out)
+{
+    npc_push_dialogue_detail(out, GAME_DIALOGUE_ACTOR_HERBALIST,
+        GAME_DIALOGUE_PHASE_TALK, 0, game->herbalist_menu);
 }
 
 /*
@@ -1049,6 +1067,38 @@ int npc_room_cmd_reply(struct GameState *game, int choice, GameEventQueue *out)
     }
     npc_push_dialogue(out, info->actor, info->reply_phase, choice);
     game_set_mode_explore(game);
+    return 1;
+}
+
+int npc_replay_active_prompt(struct GameState *game, struct GameEventQueue *out)
+{
+    const struct NpcRoomInfo *info;
+    struct NpcState *npc;
+
+    if (game->mode != GAME_MODE_DIALOGUE) {
+        return 0;
+    }
+    if (npc_is_roaming_friendly_dialogue(game->dialogue)) {
+        npc = npc_find_dialogue_slot(game, game->dialogue);
+        if (npc == 0) {
+            return 0;
+        }
+        npc_push_encounter_open(out, npc->encounter, npc->level);
+        return 1;
+    }
+    info = npc_room_dialogue_info(game->dialogue);
+    if (info == 0) {
+        return 0;
+    }
+    if (info->dialogue_kind == DIALOGUE_NPC_WATCHMAN) {
+        watchman_replay_dialogue(game, out);
+        return 1;
+    }
+    if (info->dialogue_kind == DIALOGUE_NPC_HERBALIST) {
+        herbalist_replay_dialogue(game, out);
+        return 1;
+    }
+    npc_push_dialogue(out, info->actor, info->open_phase, 0);
     return 1;
 }
 

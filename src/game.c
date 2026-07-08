@@ -81,6 +81,12 @@ static void maybe_close_noncombat_menu(struct GameState *game,
     if (cmd_preserves_noncombat_menu(game, cmd)) {
         return;
     }
+    if (game->dialogue != DIALOGUE_LOOT &&
+            (cmd->type == CMD_LOOK ||
+             cmd->type == CMD_INSPECT ||
+             cmd->type == CMD_MAP)) {
+        return;
+    }
 
     if (game->dialogue == DIALOGUE_LOOT) {
         /* invent-owned leave; same path as loot with no corpse index. */
@@ -399,6 +405,17 @@ static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd,
             cmd->type != CMD_QUIT) {
         push_dialogue_guard(out, GAME_DIALOGUE_GUARD_BANDIT_WAITING_REPLY);
         combat_replay_menu(out);
+        return 0;
+    }
+
+    if (game->mode == GAME_MODE_DIALOGUE &&
+            game->dialogue != DIALOGUE_LOOT &&
+            game->dialogue != DIALOGUE_ENEMY &&
+            (cmd->type == CMD_LOOK ||
+             cmd->type == CMD_INSPECT ||
+             cmd->type == CMD_MAP)) {
+        push_dialogue_guard(out, GAME_DIALOGUE_GUARD_ROAMING_ENCOUNTER_WAITING);
+        (void)npc_replay_active_prompt(game, out);
         return 0;
     }
 

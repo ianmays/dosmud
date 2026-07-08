@@ -985,10 +985,11 @@ TEST game_version_allowed_during_loot_menu(void)
     PASS();
 }
 
-TEST game_traveler_dialogue_inspect_closes_menu_and_runs_inspect(void)
+TEST game_traveler_dialogue_inspect_replays_modal_prompt(void)
 {
     struct GameState game;
     GameEventQueue out;
+    u32 tick_before_inspect;
 
     unit_game_fresh(&game, 48u);
     ASSERT_EQ(1, testharn_apply(&game, "@fixture traveler_dialogue"));
@@ -996,16 +997,46 @@ TEST game_traveler_dialogue_inspect_closes_menu_and_runs_inspect(void)
     ASSERT_EQ(DIALOGUE_TRAVELER, game.dialogue);
     game.env_room_clues[WORLD_ROOM_ROAD] =
         (u8)GAME_ENV_CLUE_BIT(GAME_ENV_WATER);
+    tick_before_inspect = game.tick;
 
-    ASSERT_EQ(1, run_cmd_out(&game, "inspect", &out));
-    ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
-    ASSERT_EQ(DIALOGUE_NONE, game.dialogue);
-    ASSERT_EQ(3, out.count);
+    ASSERT_EQ(0, run_cmd_out(&game, "inspect", &out));
+    ASSERT_EQ(tick_before_inspect, game.tick);
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(DIALOGUE_TRAVELER, game.dialogue);
+    ASSERT_EQ(2, out.count);
     ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[0].kind);
-    ASSERT_EQ(GAME_DIALOGUE_GUARD_DIALOGUE_CLOSED, out.events[0].arg0);
-    ASSERT_EQ(GAME_EVENT_OBSERVATION, out.events[1].kind);
-    ASSERT_EQ(GAME_EVENT_ENV_MENU, out.events[2].kind);
+    ASSERT_EQ(GAME_DIALOGUE_GUARD_ROAMING_ENCOUNTER_WAITING, out.events[0].arg0);
+    ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[1].kind);
+    ASSERT_EQ(GAME_ENCOUNTER_TRAVELER, out.events[1].arg0);
+    ASSERT_EQ(GAME_ENCOUNTER_ACTION_OPEN, out.events[1].arg1);
     ASSERT_EQ(WORLD_ROOM_ROAD, game.player.room_id);
+    PASS();
+}
+
+TEST game_watchman_map_replays_modal_prompt(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    u32 tick_before_map;
+
+    unit_game_fresh(&game, 141u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_TOWER, 0);
+    ASSERT_EQ(1, run_cmd_out(&game, "talk", &out));
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(DIALOGUE_NPC_WATCHMAN, game.dialogue);
+    tick_before_map = game.tick;
+
+    ASSERT_EQ(0, run_cmd_out(&game, "map", &out));
+    ASSERT_EQ(tick_before_map, game.tick);
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(DIALOGUE_NPC_WATCHMAN, game.dialogue);
+    ASSERT_EQ(2, out.count);
+    ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[0].kind);
+    ASSERT_EQ(GAME_DIALOGUE_GUARD_ROAMING_ENCOUNTER_WAITING, out.events[0].arg0);
+    ASSERT_EQ(GAME_EVENT_DIALOGUE, out.events[1].kind);
+    ASSERT_EQ(GAME_DIALOGUE_ACTOR_WATCHMAN, out.events[1].arg0);
+    ASSERT_EQ(GAME_DIALOGUE_PHASE_TALK, out.events[1].arg1);
+    ASSERT_EQ(WATCHMAN_SCENE_NEUTRAL, out.events[1].arg3);
     PASS();
 }
 
@@ -1647,7 +1678,8 @@ SUITE(game) {
     RUN_TEST(game_version_allowed_during_bandit_dialogue);
     RUN_TEST(game_version_allowed_during_combat);
     RUN_TEST(game_version_allowed_during_loot_menu);
-    RUN_TEST(game_traveler_dialogue_inspect_closes_menu_and_runs_inspect);
+    RUN_TEST(game_traveler_dialogue_inspect_replays_modal_prompt);
+    RUN_TEST(game_watchman_map_replays_modal_prompt);
     RUN_TEST(game_unknown_command_emits_event);
     RUN_TEST(game_cannot_move_emits_event);
     RUN_TEST(game_move_emits_move_then_look);

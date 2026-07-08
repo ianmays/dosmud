@@ -83,6 +83,8 @@ int npc_open_room_dialogue(struct GameState *game, struct GameEventQueue *out);
 /* Reply for NPC_ROOM_INFO dialogue kinds; ignores player room after talk. */
 int npc_room_cmd_reply(struct GameState *game, int choice,
                        struct GameEventQueue *out);
+/* Re-emit the current friendly dialogue or encounter menu without changing mode. */
+int npc_replay_active_prompt(struct GameState *game, struct GameEventQueue *out);
 /* Fixed room-NPC give/offering hook; returns 1 when a room NPC consumed it. */
 int npc_cmd_give(struct GameState *game, int item_arg,
                  struct GameEventQueue *out);
