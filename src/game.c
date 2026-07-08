@@ -389,17 +389,15 @@ static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd,
                                     GameEventQueue *out)
 {
     /*
-     * Combat is a narrow modal state: reply, bag/wield maintenance, eat/use
-     * consumables, and session verbs stay allowed; observe verbs replay the
-     * combat menu without advancing turns.
+     * Combat is a narrow modal state: reply, bag/wield maintenance, and
+     * session verbs stay allowed; blocked verbs replay the combat menu without
+     * advancing turns. Salve use in combat stays on reply 3, not CMD_USE.
      */
     if (game->mode == GAME_MODE_COMBAT &&
             cmd->type != CMD_REPLY &&
             cmd->type != CMD_BAG &&
             cmd->type != CMD_WIELD &&
             cmd->type != CMD_UNWIELD &&
-            cmd->type != CMD_EAT &&
-            cmd->type != CMD_USE &&
             cmd->type != CMD_VERSION &&
             cmd->type != CMD_HELP &&
             cmd->type != CMD_QUIT) {
