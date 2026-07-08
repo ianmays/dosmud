@@ -471,6 +471,15 @@ TEST txtres_encounter_narrative_key_maps_stable_scenes(void)
     PASS();
 }
 
+TEST game_dialogue_guard_env_waiting_value_is_stable(void)
+{
+    ASSERT_EQ(GAME_DIALOGUE_GUARD_PICK_123 + 1,
+        GAME_DIALOGUE_GUARD_ENV_MENU_WAITING);
+    ASSERT_EQ(GAME_DIALOGUE_GUARD_ENV_MENU_WAITING + 1,
+        GAME_DIALOGUE_GUARD_ENV_MENU_CLOSED);
+    PASS();
+}
+
 SUITE(gout) {
     RUN_TEST(game_event_queue_reset_clears_state);
     RUN_TEST(game_event_push_ignores_null_output);
@@ -494,4 +503,5 @@ SUITE(gout) {
     RUN_TEST(game_dialogue_actor_bandit_ids_are_distinct);
     RUN_TEST(txtres_dialogue_narrative_key_maps_stable_scenes);
     RUN_TEST(txtres_encounter_narrative_key_maps_stable_scenes);
+    RUN_TEST(game_dialogue_guard_env_waiting_value_is_stable);
 }

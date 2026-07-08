@@ -230,6 +230,8 @@ enum GameEventDialogueGuardReason {
     GAME_DIALOGUE_GUARD_GIVE_REJECTED,
     /* arg1 widens valid reply range; env inspect menus reuse for max_choice (#7). */
     GAME_DIALOGUE_GUARD_PICK_123,
+    /* env inspect menu blocks world/time verbs but stays open for replies. */
+    GAME_DIALOGUE_GUARD_ENV_MENU_WAITING,
     /* env inspect menu dismissed by explore verb before the verb runs (#7). */
     GAME_DIALOGUE_GUARD_ENV_MENU_CLOSED
 };

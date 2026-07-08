@@ -411,11 +411,14 @@ TEST genc_cmd_give_unsupported_encounter_kind_falls_back_to_wrong_context(void)
     ASSERT(begin_enemy_kind(&game, GAME_DIALOGUE_ACTOR_BANDIT_AMBUSH,
         GAME_ENCOUNTER_TRAVELER, &out) >= 0);
     ASSERT_EQ(1, enemy_give(&game, ITEM_STICK, &out));
-    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(2, out.count);
     ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
     ASSERT_EQ(GAME_ENCOUNTER_BANDIT, out.events[0].arg0);
     ASSERT_EQ(GAME_ENCOUNTER_ACTION_GIVE, out.events[0].arg1);
     ASSERT_EQ(GAME_ENCOUNTER_OUTCOME_WRONG_CONTEXT, out.events[0].arg2);
+    ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[1].kind);
+    ASSERT_EQ(GAME_ENCOUNTER_TRAVELER, out.events[1].arg0);
+    ASSERT_EQ(GAME_ENCOUNTER_ACTION_OPEN, out.events[1].arg1);
     PASS();
 }
 

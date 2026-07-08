@@ -221,6 +221,19 @@ TEST harness_apply_traveler_dialogue(void)
     PASS();
 }
 
+TEST harness_apply_frog_dialogue(void)
+{
+    struct GameState game;
+    int rc;
+
+    unit_game_fresh(&game, 61u);
+    rc = testharn_apply(&game, "@fixture frog_dialogue");
+    ASSERT_EQ(1, rc);
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(DIALOGUE_NPC_FROG, game.dialogue);
+    PASS();
+}
+
 TEST harness_apply_bandit_road(void)
 {
     struct GameState game;
@@ -345,6 +358,7 @@ SUITE(harness) {
     RUN_TEST(harness_apply_quiet_camp_dual_ground_full_bag);
     RUN_TEST(harness_apply_bandit_handover_pick);
     RUN_TEST(harness_apply_traveler_dialogue);
+    RUN_TEST(harness_apply_frog_dialogue);
     RUN_TEST(harness_apply_bandit_road);
     RUN_TEST(harness_apply_env_focus_water);
     RUN_TEST(harness_apply_story_orchard_ready);

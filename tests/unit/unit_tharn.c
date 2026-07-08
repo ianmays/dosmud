@@ -127,6 +127,19 @@ TEST testharn_fixture_story_orchard_ready(void)
     PASS();
 }
 
+TEST testharn_fixture_frog_dialogue(void)
+{
+    struct GameState game;
+    int rc;
+
+    unit_game_fresh(&game, 52u);
+    rc = testharn_apply(&game, "@fixture frog_dialogue");
+    ASSERT_EQ(1, rc);
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(DIALOGUE_NPC_FROG, game.dialogue);
+    PASS();
+}
+
 TEST testharn_bag_full_gate(void)
 {
     struct GameState game;
@@ -186,6 +199,14 @@ TEST testharn_fixture_sweep(void)
     rc = testharn_apply(&game, "@fixture story_marsh_root");
     ASSERT_EQ(1, rc);
     rc = testharn_apply(&game, "@fixture at_catacombs");
+    ASSERT_EQ(1, rc);
+    rc = testharn_apply(&game, "@fixture frog_dialogue");
+    ASSERT_EQ(1, rc);
+    rc = testharn_apply(&game, "@fixture watchman_dialogue");
+    ASSERT_EQ(1, rc);
+    rc = testharn_apply(&game, "@fixture herbalist_dialogue");
+    ASSERT_EQ(1, rc);
+    rc = testharn_apply(&game, "@fixture archivist_dialogue");
     ASSERT_EQ(1, rc);
     rc = testharn_apply(&game, "@fixture quiet_explore");
     ASSERT_EQ(1, rc);
@@ -342,6 +363,7 @@ SUITE(testharn) {
     RUN_TEST(testharn_fixture_world_boot);
     RUN_TEST(testharn_fixture_quiet_explore);
     RUN_TEST(testharn_fixture_story_orchard_ready);
+    RUN_TEST(testharn_fixture_frog_dialogue);
     RUN_TEST(testharn_bag_full_gate);
     RUN_TEST(testharn_fixture_sweep);
     RUN_TEST(testharn_fixture_corpse_stripped_clears_corpse_items);
