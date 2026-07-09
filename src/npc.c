@@ -319,7 +319,7 @@ static int watchman_handover_food(struct GameState *game, int item_arg,
             game->watchman_menu != WATCHMAN_SCENE_MEAL_OFFER) {
         npc_push_dialogue_guard(out, GAME_DIALOGUE_GUARD_GIVE_REJECTED);
         if (game->mode == GAME_MODE_DIALOGUE) {
-            game_set_mode_explore(game);
+            (void)npc_replay_active_prompt(game, out);
         }
         return 1;
     }
@@ -598,20 +598,26 @@ static int herbalist_exchange(struct GameState *game, int item_arg,
 
     if (game->herbalist_story != HERBALIST_STORY_REQUESTED) {
         npc_push_dialogue_guard(out, GAME_DIALOGUE_GUARD_GIVE_REJECTED);
-        game_set_mode_explore(game);
+        if (game->mode == GAME_MODE_DIALOGUE) {
+            (void)npc_replay_active_prompt(game, out);
+        }
         return 1;
     }
     if (item_arg != ITEM_MARSH_ROOT) {
         npc_push_dialogue_detail(out, GAME_DIALOGUE_ACTOR_HERBALIST,
             GAME_DIALOGUE_PHASE_REPLY, 0, HERBALIST_SCENE_GIVE_REJECTED);
-        game_set_mode_explore(game);
+        if (game->mode == GAME_MODE_DIALOGUE) {
+            herbalist_replay_dialogue(game, out);
+        }
         return 1;
     }
 
     if (!game_inv_player_has_item(game, ITEM_MARSH_ROOT)) {
         npc_push_dialogue_detail(out, GAME_DIALOGUE_ACTOR_HERBALIST,
             GAME_DIALOGUE_PHASE_REPLY, 0, HERBALIST_SCENE_GIVE_NOT_CARRYING);
-        game_set_mode_explore(game);
+        if (game->mode == GAME_MODE_DIALOGUE) {
+            herbalist_replay_dialogue(game, out);
+        }
         return 1;
     }
 
@@ -630,7 +636,9 @@ static int herbalist_exchange(struct GameState *game, int item_arg,
     if (reward_delivery == GAME_ITEM_DELIVERY_NONE) {
         npc_push_dialogue_detail(out, GAME_DIALOGUE_ACTOR_HERBALIST,
             GAME_DIALOGUE_PHASE_REPLY, 0, HERBALIST_SCENE_GIVE_REWARD_NO_SPACE);
-        game_set_mode_explore(game);
+        if (game->mode == GAME_MODE_DIALOGUE) {
+            herbalist_replay_dialogue(game, out);
+        }
         return 1;
     }
 
@@ -1113,6 +1121,24 @@ int npc_cmd_give(struct GameState *game, int item_arg, struct GameEventQueue *ou
 {
     const struct NpcRoomInfo *info;
 
+    /*
+     * The classifier keeps give modal (MODAL_KEEP), so an active dialogue owns
+     * give-routing before room presence can retarget it. A roaming dialogue
+     * with no give exchange rejects and replays its prompt, staying modal
+     * rather than dropping to explore.
+     */
+    if (game->mode == GAME_MODE_DIALOGUE) {
+        if (game->dialogue == DIALOGUE_NPC_HERBALIST) {
+            return herbalist_exchange(game, item_arg, out);
+        }
+        if (game->dialogue == DIALOGUE_NPC_WATCHMAN) {
+            return watchman_handover_food(game, item_arg, out);
+        }
+        npc_push_dialogue_guard(out, GAME_DIALOGUE_GUARD_GIVE_REJECTED);
+        (void)npc_replay_active_prompt(game, out);
+        return 1;
+    }
+
     info = npc_room_info(game->player.room_id);
     if (info == 0) {
         return 0;
@@ -1126,7 +1152,7 @@ int npc_cmd_give(struct GameState *game, int item_arg, struct GameEventQueue *ou
     }
     npc_push_dialogue_guard(out, GAME_DIALOGUE_GUARD_GIVE_REJECTED);
     if (game->mode == GAME_MODE_DIALOGUE) {
-        game_set_mode_explore(game);
+        (void)npc_replay_active_prompt(game, out);
     }
     return 1;
 }

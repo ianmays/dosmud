@@ -506,6 +506,8 @@ const char *const TXT_MSG_LOOT_WAITING =
     "Finish looting with the numbered corpse menu, or type loot to leave the body alone.\n";
 const char *const TXT_MSG_FRIENDLY_DIALOGUE_WAITING =
     "They are waiting on your move (reply 1/2/3).\n";
+const char *const TXT_MSG_ENV_MENU_WAITING =
+    "Finish the prompt with its numbered choices, or move to step away.\n";
 const char *const TXT_MSG_NOBODY_TALK = "Nobody here wants to talk.\n";
 const char *const TXT_MSG_DIALOGUE_CLOSED = "You leave the conversation and turn back to the room.\n";
 const char *const TXT_MSG_GIVE_NO_TARGET = "Nobody here is waiting for an offered item.\n";

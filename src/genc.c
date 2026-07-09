@@ -85,11 +85,13 @@ static int bandit_cmd_give(struct GameState *game, struct NpcState *enemy,
             (enemy->flags & NPC_FLAG_HANDOVER_PICK) == 0) {
         push_encounter(out, GAME_ENCOUNTER_BANDIT, GAME_ENCOUNTER_ACTION_GIVE,
             GAME_ENCOUNTER_OUTCOME_WRONG_CONTEXT, 0, 0);
+        (void)genc_replay_active_prompt(game, out);
         return 1;
     }
     if (!game_inv_player_has_item(game, item_arg)) {
         push_encounter(out, GAME_ENCOUNTER_BANDIT, GAME_ENCOUNTER_ACTION_GIVE,
             GAME_ENCOUNTER_OUTCOME_NOT_CARRYING, 0, 0);
+        (void)genc_replay_active_prompt(game, out);
         return 1;
     }
     push_encounter(out, GAME_ENCOUNTER_BANDIT, GAME_ENCOUNTER_ACTION_GIVE,
@@ -208,6 +210,7 @@ int genc_cmd_give(struct GameState *game, int item_arg, GameEventQueue *out)
      */
     push_encounter(out, GAME_ENCOUNTER_BANDIT, GAME_ENCOUNTER_ACTION_GIVE,
         GAME_ENCOUNTER_OUTCOME_WRONG_CONTEXT, 0, 0);
+    (void)genc_replay_active_prompt(game, out);
     return 1;
 }
 

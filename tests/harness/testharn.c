@@ -367,6 +367,46 @@ static void fixture_at_catacombs(struct GameState *game)
     game->room_explored[WORLD_ROOM_CATACOMBS] = 1;
 }
 
+static void fixture_frog_dialogue(struct GameState *game)
+{
+    GameEventQueue out;
+
+    fixture_at_pond(game);
+    harness_drop_output(&out);
+    (void)npc_open_room_dialogue(game, &out);
+    game_render_output(game, &out);
+}
+
+static void fixture_watchman_dialogue(struct GameState *game)
+{
+    GameEventQueue out;
+
+    fixture_at_tower(game);
+    harness_drop_output(&out);
+    (void)npc_open_room_dialogue(game, &out);
+    game_render_output(game, &out);
+}
+
+static void fixture_herbalist_dialogue(struct GameState *game)
+{
+    GameEventQueue out;
+
+    fixture_at_orchard(game);
+    harness_drop_output(&out);
+    (void)npc_open_room_dialogue(game, &out);
+    game_render_output(game, &out);
+}
+
+static void fixture_archivist_dialogue(struct GameState *game)
+{
+    GameEventQueue out;
+
+    fixture_at_catacombs(game);
+    harness_drop_output(&out);
+    (void)npc_open_room_dialogue(game, &out);
+    game_render_output(game, &out);
+}
+
 static void fixture_quiet_explore(struct GameState *game)
 {
     fixture_at_camp(game);
@@ -863,6 +903,22 @@ int testharn_apply(struct GameState *game, const char *line)
     }
     if (fixture_name_is("at_catacombs", name)) {
         fixture_at_catacombs(game);
+        return 1;
+    }
+    if (fixture_name_is("frog_dialogue", name)) {
+        fixture_frog_dialogue(game);
+        return 1;
+    }
+    if (fixture_name_is("watchman_dialogue", name)) {
+        fixture_watchman_dialogue(game);
+        return 1;
+    }
+    if (fixture_name_is("herbalist_dialogue", name)) {
+        fixture_herbalist_dialogue(game);
+        return 1;
+    }
+    if (fixture_name_is("archivist_dialogue", name)) {
+        fixture_archivist_dialogue(game);
         return 1;
     }
     if (fixture_name_is("quiet_explore", name)) {

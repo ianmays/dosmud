@@ -231,6 +231,7 @@ extern const char *const TXT_MSG_ENV_MENU_CLOSED;
 extern const char *const TXT_MSG_BANDIT_BLOCK_TALK;
 extern const char *const TXT_MSG_LOOT_WAITING;
 extern const char *const TXT_MSG_FRIENDLY_DIALOGUE_WAITING;
+extern const char *const TXT_MSG_ENV_MENU_WAITING;
 extern const char *const TXT_MSG_NOBODY_TALK;
 extern const char *const TXT_MSG_DIALOGUE_CLOSED;
 extern const char *const TXT_MSG_GIVE_NO_TARGET;

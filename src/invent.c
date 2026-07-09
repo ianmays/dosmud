@@ -500,11 +500,6 @@ int game_inv_cmd_drop(struct GameState *game, int item_arg, GameEventQueue *out)
     int room_id;
     int slot;
 
-    if (game->mode == GAME_MODE_COMBAT) {
-        push_item_result(out, GAME_ITEM_ACTION_DROP,
-            GAME_ITEM_OUTCOME_BLOCKED_COMBAT, item_arg, 0);
-        return 1;
-    }
     room_id = game->player.room_id;
     if (!game_inv_player_has_item(game, item_arg)) {
         push_item_result(out, GAME_ITEM_ACTION_DROP,
@@ -616,10 +611,6 @@ static int craft_consume_one(struct GameState *game, int item_id)
 
 int game_inv_cmd_craft(struct GameState *game, int item_arg, GameEventQueue *out)
 {
-    if (game->mode == GAME_MODE_COMBAT) {
-        push_craft_result(out, item_arg, GAME_CRAFT_OUTCOME_BLOCKED_COMBAT);
-        return 1;
-    }
     if (item_arg == ITEM_TORCH) {
         if (!game_inv_player_has_item(game, ITEM_STICK) ||
                 !game_inv_player_has_item(game, ITEM_REED)) {

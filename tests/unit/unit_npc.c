@@ -320,6 +320,58 @@ TEST npc_cmd_give_herbalist_rejects_before_request(void)
     PASS();
 }
 
+TEST npc_cmd_give_rejects_roaming_dialogue_without_closing(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    int slot;
+
+    unit_game_fresh(&game, 324u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ORCHARD, 0);
+    slot = npc_find_by_actor(&game, GAME_DIALOGUE_ACTOR_TRAVELER);
+    ASSERT(slot >= 0);
+    game.npcs[slot].room_id = WORLD_ROOM_ORCHARD;
+    game.npcs[slot].dialogue = DIALOGUE_TRAVELER;
+    game.npcs[slot].flags |= NPC_FLAG_ACTIVE;
+    game_set_mode_dialogue(&game, DIALOGUE_TRAVELER);
+    game_inv_bag_add(&game, ITEM_STICK);
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, npc_cmd_give(&game, ITEM_STICK, &out));
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(DIALOGUE_TRAVELER, game.dialogue);
+    ASSERT_EQ(2, out.count);
+    ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[0].kind);
+    ASSERT_EQ(GAME_DIALOGUE_GUARD_GIVE_REJECTED, out.events[0].arg0);
+    ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[1].kind);
+    ASSERT_EQ(GAME_ENCOUNTER_TRAVELER, out.events[1].arg0);
+    ASSERT_EQ(GAME_ENCOUNTER_ACTION_OPEN, out.events[1].arg1);
+    PASS();
+}
+
+TEST npc_cmd_give_herbalist_wrong_item_replays_modal_prompt(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 325u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ORCHARD, 0);
+    game.herbalist_story = HERBALIST_STORY_REQUESTED;
+    game_set_mode_dialogue(&game, DIALOGUE_NPC_HERBALIST);
+    game.herbalist_menu = HERBALIST_SCENE_REQUESTED;
+    game_inv_bag_add(&game, ITEM_STICK);
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, npc_cmd_give(&game, ITEM_STICK, &out));
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(DIALOGUE_NPC_HERBALIST, game.dialogue);
+    ASSERT_EQ(2, out.count);
+    ASSERT_EQ(GAME_EVENT_DIALOGUE, out.events[0].kind);
+    ASSERT_EQ(HERBALIST_SCENE_GIVE_REJECTED, out.events[0].arg3);
+    ASSERT_EQ(GAME_EVENT_DIALOGUE, out.events[1].kind);
+    ASSERT_EQ(GAME_DIALOGUE_PHASE_TALK, out.events[1].arg1);
+    ASSERT_EQ(HERBALIST_SCENE_REQUESTED, out.events[1].arg3);
+    PASS();
+}
+
 TEST npc_cmd_give_herbalist_rejects_wrong_item(void)
 {
     struct GameState game;
@@ -1008,6 +1060,8 @@ SUITE(npc) {
     RUN_TEST(npc_open_room_dialogue_herbalist_ready_scene);
     RUN_TEST(npc_room_cmd_reply_herbalist_turn_in_updates_story);
     RUN_TEST(npc_cmd_give_herbalist_rejects_before_request);
+    RUN_TEST(npc_cmd_give_rejects_roaming_dialogue_without_closing);
+    RUN_TEST(npc_cmd_give_herbalist_wrong_item_replays_modal_prompt);
     RUN_TEST(npc_cmd_give_herbalist_rejects_wrong_item);
     RUN_TEST(npc_cmd_give_herbalist_drops_reward_when_bag_full);
     RUN_TEST(npc_cmd_give_herbalist_keeps_root_when_no_reward_space);

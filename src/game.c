@@ -24,77 +24,121 @@ static void push_dialogue_guard(GameEventQueue *out, int reason)
 }
 
 /*
- * Room-NPC give/offer prompts (herbalist hand-in, watchman meal) stay modal
- * for bag inspection the same way enemy HANDOVER_PICK does in mode guards.
+ * #240: one classifier owns modal command policy. ModalContext names the
+ * active modal owner; ModalDisposition is the verdict apply_command acts on:
+ *   KEEP  - run the verb inside the modal; the owning slice keeps its prompt.
+ *   BLOCK - reject the verb (guard + prompt replay only); apply_command
+ *           returns 0 so no world tick advances (blocked verbs cost no time).
+ *   CLOSE - tear the modal down first, then run the verb in explore.
+ * The classifier reads state only; teardown and replay stay with the slice.
  */
-static int game_noncombat_give_offer_active(const struct GameState *game)
+enum ModalContext {
+    MODAL_CONTEXT_NONE = 0,
+    MODAL_CONTEXT_COMBAT,
+    MODAL_CONTEXT_ENEMY,
+    MODAL_CONTEXT_PEACEFUL,
+    MODAL_CONTEXT_LOOT,
+    MODAL_CONTEXT_ENV
+};
+
+enum ModalDisposition {
+    MODAL_KEEP = 0,
+    MODAL_BLOCK,
+    MODAL_CLOSE
+};
+
+static int command_is_session(int type)
 {
-    if (game->mode != GAME_MODE_DIALOGUE) {
-        return 0;
-    }
-    if (game->dialogue == DIALOGUE_NPC_HERBALIST) {
-        return 1;
-    }
-    return npc_watchman_give_offer_active(game);
+    return type == CMD_HELP || type == CMD_VERSION || type == CMD_QUIT;
 }
 
-/*
- * Menu-native verbs keep the modal open (numbered reply, repeat talk, repeat
- * loot-to-leave, and the active Herbalist give/offering prompt); help/version/
- * quit stay allowed like combat menus.
- */
-static int cmd_preserves_noncombat_menu(const struct GameState *game,
-                                        const struct Command *cmd)
+static int command_is_self_directed(int type)
 {
-    if (cmd->type == CMD_REPLY) {
-        return 1;
-    }
-    if (cmd->type == CMD_HELP ||
-            cmd->type == CMD_VERSION ||
-            cmd->type == CMD_QUIT) {
-        return 1;
-    }
-    if (game->dialogue != DIALOGUE_LOOT && cmd->type == CMD_TALK) {
-        return 1;
-    }
-    if (game->dialogue == DIALOGUE_LOOT && cmd->type == CMD_LOOT) {
-        return 1;
-    }
-    if (game_noncombat_give_offer_active(game) &&
-            (cmd->type == CMD_GIVE || cmd->type == CMD_BAG)) {
-        return 1;
-    }
-    return 0;
+    return type == CMD_BAG || type == CMD_WIELD || type == CMD_UNWIELD ||
+        type == CMD_EAT || type == CMD_USE || type == CMD_CRAFT ||
+        type == CMD_DROP;
 }
 
-/*
- * #205: dismiss non-enemy dialogue before mode guards so explore verbs run
- * after close. Enemy menus keep combat-like gating in game_cmd_allowed_in_mode.
- */
-static void maybe_close_noncombat_menu(struct GameState *game,
-                                       const struct Command *cmd,
-                                       GameEventQueue *out)
+static int command_is_world_directed(int type)
 {
-    if (game->mode != GAME_MODE_DIALOGUE || game->dialogue == DIALOGUE_ENEMY) {
-        return;
-    }
-    if (cmd_preserves_noncombat_menu(game, cmd)) {
-        return;
-    }
-    if (game->dialogue != DIALOGUE_LOOT &&
-            (cmd->type == CMD_LOOK ||
-             cmd->type == CMD_INSPECT ||
-             cmd->type == CMD_MAP)) {
-        return;
-    }
+    return type == CMD_LOOK || type == CMD_MAP || type == CMD_INSPECT ||
+        type == CMD_TAKE;
+}
 
-    if (game->dialogue == DIALOGUE_LOOT) {
-        /* invent-owned leave; same path as loot with no corpse index. */
-        (void)game_inv_cmd_loot(game, 0, out);
-        return;
+static enum ModalContext game_modal_context(const struct GameState *game)
+{
+    if (game->mode == GAME_MODE_COMBAT) {
+        return MODAL_CONTEXT_COMBAT;
     }
-    push_dialogue_guard(out, GAME_DIALOGUE_GUARD_DIALOGUE_CLOSED);
-    game_set_mode_explore(game);
+    if (game->mode == GAME_MODE_DIALOGUE) {
+        if (game->dialogue == DIALOGUE_ENEMY) {
+            return MODAL_CONTEXT_ENEMY;
+        }
+        if (game->dialogue == DIALOGUE_LOOT) {
+            return MODAL_CONTEXT_LOOT;
+        }
+        return MODAL_CONTEXT_PEACEFUL;
+    }
+    if (game->env_interact_active) {
+        return MODAL_CONTEXT_ENV;
+    }
+    return MODAL_CONTEXT_NONE;
+}
+
+static enum ModalDisposition modal_command_disposition(
+    enum ModalContext context, const struct Command *cmd)
+{
+    /* One classifier owns modal command policy; slices still own semantics. */
+    if (context == MODAL_CONTEXT_NONE) {
+        return MODAL_KEEP;
+    }
+    if (cmd->type == CMD_REPLY || command_is_session(cmd->type)) {
+        return MODAL_KEEP;
+    }
+    if (context == MODAL_CONTEXT_LOOT && cmd->type == CMD_LOOT) {
+        return MODAL_KEEP;
+    }
+    if (context == MODAL_CONTEXT_PEACEFUL && cmd->type == CMD_TALK) {
+        return MODAL_KEEP;
+    }
+    if (command_is_self_directed(cmd->type)) {
+        return MODAL_KEEP;
+    }
+    if (command_is_world_directed(cmd->type) || cmd->type == CMD_WAIT) {
+        return MODAL_BLOCK;
+    }
+    if (cmd->type == CMD_MOVE) {
+        if (context == MODAL_CONTEXT_COMBAT ||
+                context == MODAL_CONTEXT_ENEMY) {
+            return MODAL_BLOCK;
+        }
+        return MODAL_CLOSE;
+    }
+    if (cmd->type == CMD_GIVE) {
+        if (context == MODAL_CONTEXT_LOOT || context == MODAL_CONTEXT_ENV ||
+                context == MODAL_CONTEXT_COMBAT) {
+            return MODAL_BLOCK;
+        }
+        /* peaceful/enemy give stays modal: the give slice owns accept vs
+         * reject and replays its own prompt on reject (no forced explore). */
+        return MODAL_KEEP;
+    }
+    if (cmd->type == CMD_TALK) {
+        if (context == MODAL_CONTEXT_ENEMY ||
+                context == MODAL_CONTEXT_COMBAT) {
+            return MODAL_BLOCK;
+        }
+        if (context == MODAL_CONTEXT_ENV) {
+            return MODAL_CLOSE;
+        }
+    }
+    /* Any other verb: peaceful/loot/env dismiss and run it in explore;
+     * combat/enemy stay modal and block it. */
+    if (context == MODAL_CONTEXT_LOOT || context == MODAL_CONTEXT_ENV ||
+            context == MODAL_CONTEXT_PEACEFUL) {
+        return MODAL_CLOSE;
+    }
+    return MODAL_BLOCK;
 }
 
 /* Handover gating reads NPC_FLAG_HANDOVER_PICK on the active enemy slot. */
@@ -365,106 +409,86 @@ int game_roll_percent(struct GameState *game)
 }
 
 /*
- * #7: dismiss gatmos env inspect menu before mode guards so explore verbs run
- * after close. Reply/look/map/help/version/quit stay allowed like #205 menus.
+ * Per-context replay seam: each modal owner re-emits its live prompt so a
+ * blocked (or KEEP repeat) verb leaves the menu visible; emits events only,
+ * never mutates state or advances a tick.
  */
-static void maybe_dismiss_env_menu(struct GameState *game, struct Command *cmd,
-                                   GameEventQueue *out)
+static int replay_active_modal_prompt(struct GameState *game,
+                                      enum ModalContext context,
+                                      GameEventQueue *out)
 {
-    if (!game->env_interact_active) {
-        return;
+    switch (context) {
+    case MODAL_CONTEXT_COMBAT:
+        combat_replay_menu(out);
+        return 1;
+    case MODAL_CONTEXT_ENEMY:
+        return genc_replay_active_prompt(game, out);
+    case MODAL_CONTEXT_PEACEFUL:
+        return npc_replay_active_prompt(game, out);
+    case MODAL_CONTEXT_LOOT:
+        return game_corpse_queue_view(game, game->player.room_id, out);
+    case MODAL_CONTEXT_ENV:
+        gatmos_queue_restored_menu(game, out);
+        return 1;
+    default:
+        break;
     }
-    if (cmd->type == CMD_REPLY ||
-            cmd->type == CMD_LOOK ||
-            cmd->type == CMD_MAP ||
-            cmd->type == CMD_HELP ||
-            cmd->type == CMD_VERSION ||
-            cmd->type == CMD_QUIT) {
-        return;
-    }
-    gatmos_env_dismiss(game, out);
+    return 0;
 }
 
-static int game_cmd_allowed_in_mode(struct GameState *game, struct Command *cmd,
-                                    GameEventQueue *out)
+/*
+ * BLOCK feedback: an orchestration guard reason (grendr maps it to copy) plus
+ * the owning slice's prompt replay. Pairs with apply_command returning 0, so
+ * the rejected verb produces output without changing state or passing time.
+ */
+static void push_modal_block_feedback(struct GameState *game,
+                                      enum ModalContext context,
+                                      const struct Command *cmd,
+                                      GameEventQueue *out)
 {
-    /*
-     * Combat is a narrow modal state: reply, bag/wield maintenance, eat/use
-     * consumables, and session verbs stay allowed; blocked verbs replay the
-     * combat menu without advancing turns.
-     */
-    if (game->mode == GAME_MODE_COMBAT &&
-            cmd->type != CMD_REPLY &&
-            cmd->type != CMD_BAG &&
-            cmd->type != CMD_WIELD &&
-            cmd->type != CMD_UNWIELD &&
-            cmd->type != CMD_EAT &&
-            cmd->type != CMD_USE &&
-            cmd->type != CMD_VERSION &&
-            cmd->type != CMD_HELP &&
-            cmd->type != CMD_QUIT) {
-        push_dialogue_guard(out, GAME_DIALOGUE_GUARD_BANDIT_WAITING_REPLY);
-        combat_replay_menu(out);
-        return 0;
-    }
-
-    if (game->mode == GAME_MODE_DIALOGUE &&
-            game->dialogue != DIALOGUE_LOOT &&
-            game->dialogue != DIALOGUE_ENEMY &&
-            (cmd->type == CMD_LOOK ||
-             cmd->type == CMD_INSPECT ||
-             cmd->type == CMD_MAP)) {
-        push_dialogue_guard(out, GAME_DIALOGUE_GUARD_FRIENDLY_DIALOGUE_WAITING);
-        (void)npc_replay_active_prompt(game, out);
-        return 0;
-    }
-
-    /*
-     * Corpse menu is modal like combat; loot again while open acts as "leave".
-     * Other explore verbs exit via maybe_close_noncombat_menu before this guard.
-     */
-    if (game->mode == GAME_MODE_DIALOGUE &&
-            game->dialogue == DIALOGUE_LOOT &&
-            cmd->type != CMD_REPLY &&
-            cmd->type != CMD_LOOT &&
-            cmd->type != CMD_LOOK &&
-            cmd->type != CMD_MAP &&
-            cmd->type != CMD_BAG &&
-            cmd->type != CMD_DROP &&
-            cmd->type != CMD_VERSION &&
-            cmd->type != CMD_HELP &&
-            cmd->type != CMD_QUIT) {
-        push_dialogue_guard(out, GAME_DIALOGUE_GUARD_LOOT_WAITING_REPLY);
-        return 0;
-    }
-
-    /*
-     * Enemy dialogue keeps the bandit prompt modal: reply, bag/wield upkeep,
-     * session verbs, and handover give stay allowed; other verbs replay the
-     * active encounter prompt after the guard.
-     */
-    if (game->mode == GAME_MODE_DIALOGUE &&
-            game->dialogue == DIALOGUE_ENEMY &&
-            cmd->type != CMD_REPLY &&
-            cmd->type != CMD_BAG &&
-            cmd->type != CMD_WIELD &&
-            cmd->type != CMD_UNWIELD &&
-            cmd->type != CMD_VERSION &&
-            cmd->type != CMD_HELP &&
-            cmd->type != CMD_QUIT &&
-            !(game_enemy_handover_pick_active(game) && cmd->type == CMD_GIVE)) {
-        if (game_enemy_handover_pick_active(game)) {
+    if (context == MODAL_CONTEXT_ENEMY || context == MODAL_CONTEXT_COMBAT) {
+        if (cmd->type == CMD_TALK) {
+            push_dialogue_guard(out, GAME_DIALOGUE_GUARD_BANDIT_BLOCKS_TALK);
+        } else if (game_enemy_handover_pick_active(game)) {
             push_dialogue_guard(out,
                 GAME_DIALOGUE_GUARD_BANDIT_WAITING_HANDOVER_PICK);
         } else {
             push_dialogue_guard(out, GAME_DIALOGUE_GUARD_BANDIT_WAITING_REPLY);
         }
-        /* guard plus encounter replay keeps the bandit prompt visible */
-        genc_replay_active_prompt(game, out);
-        return 0;
+        (void)replay_active_modal_prompt(game, context, out);
+        return;
     }
+    if (context == MODAL_CONTEXT_LOOT) {
+        push_dialogue_guard(out, GAME_DIALOGUE_GUARD_LOOT_WAITING_REPLY);
+        (void)replay_active_modal_prompt(game, context, out);
+        return;
+    }
+    if (context == MODAL_CONTEXT_ENV) {
+        push_dialogue_guard(out, GAME_DIALOGUE_GUARD_ENV_MENU_WAITING);
+        (void)replay_active_modal_prompt(game, context, out);
+        return;
+    }
+    push_dialogue_guard(out, GAME_DIALOGUE_GUARD_FRIENDLY_DIALOGUE_WAITING);
+    (void)replay_active_modal_prompt(game, context, out);
+}
 
-    return 1;
+static void close_modal_before_command(struct GameState *game,
+                                       enum ModalContext context,
+                                       GameEventQueue *out)
+{
+    /* CLOSE only classifies intent; teardown stays with the owning modal. */
+    if (context == MODAL_CONTEXT_PEACEFUL) {
+        push_dialogue_guard(out, GAME_DIALOGUE_GUARD_DIALOGUE_CLOSED);
+        game_set_mode_explore(game);
+        return;
+    }
+    if (context == MODAL_CONTEXT_LOOT) {
+        (void)game_inv_cmd_loot(game, 0, out);
+        return;
+    }
+    if (context == MODAL_CONTEXT_ENV) {
+        gatmos_env_dismiss(game, out);
+    }
 }
 
 static int game_cmd_session(struct GameState *game, struct Command *cmd,
@@ -624,12 +648,22 @@ static int game_cmd_reply(struct GameState *game, struct Command *cmd,
 static int apply_command(struct GameState *game, struct Command *cmd,
                          GameEventQueue *out)
 {
-    /* Menu exit must precede mode guards so the verb is not blocked. */
-    maybe_close_noncombat_menu(game, cmd, out);
-    maybe_dismiss_env_menu(game, cmd, out);
+    enum ModalContext context;
+    enum ModalDisposition disposition;
 
-    if (!game_cmd_allowed_in_mode(game, cmd, out)) {
+    /*
+     * Modal gate precedes slice routing: BLOCK returns 0 so the caller skips
+     * advance_world_tick (no time on a rejected verb); CLOSE tears the modal
+     * down, then the verb runs below as a normal explore command.
+     */
+    context = game_modal_context(game);
+    disposition = modal_command_disposition(context, cmd);
+    if (disposition == MODAL_BLOCK) {
+        push_modal_block_feedback(game, context, cmd, out);
         return 0;
+    }
+    if (disposition == MODAL_CLOSE) {
+        close_modal_before_command(game, context, out);
     }
     if (game_cmd_session(game, cmd, out)) {
         return 1;
@@ -771,6 +805,11 @@ int game_process_input(struct GameState *game, char *line, GameEventQueue *out)
                 prior_mode == GAME_MODE_DIALOGUE &&
                 prior_dialogue == DIALOGUE_LOOT)) {
         advance_world_tick(game, out);
+        if (prior_mode == GAME_MODE_COMBAT &&
+                game->mode == GAME_MODE_COMBAT &&
+                (cmd.type == CMD_CRAFT || cmd.type == CMD_DROP)) {
+            combat_replay_menu(out);
+        }
         /* defer look until after tick so encounter-open moves skip ROOM_LOOK */
         if (cmd.type == CMD_MOVE && game->mode == GAME_MODE_EXPLORE) {
             do_look(game, out);

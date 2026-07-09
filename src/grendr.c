@@ -1066,6 +1066,9 @@ static void render_dialogue_guard_event(const GameEvent *ev)
     case GAME_DIALOGUE_GUARD_PICK_123:
         render_msg_pick_123(ev->arg1);
         break;
+    case GAME_DIALOGUE_GUARD_ENV_MENU_WAITING:
+        RENDER_PRINTF("%s", TXT_MSG_ENV_MENU_WAITING);
+        break;
     case GAME_DIALOGUE_GUARD_ENV_MENU_CLOSED:
         RENDER_PRINTF("%s", TXT_MSG_ENV_MENU_CLOSED);
         break;

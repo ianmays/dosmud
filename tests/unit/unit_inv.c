@@ -349,6 +349,46 @@ TEST invent_eat_and_use_allowed_in_combat(void)
     PASS();
 }
 
+TEST invent_drop_allowed_in_combat(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 52u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game.weapon_equipped = ITEM_STICK;
+    game_set_mode_combat(&game);
+
+    ASSERT_EQ(1, inv_drop(&game, ITEM_STICK, &out));
+    ASSERT_EQ(GAME_ITEM_ACTION_DROP, out.events[0].arg0);
+    ASSERT_EQ(GAME_ITEM_OUTCOME_OK, out.events[0].arg1);
+    ASSERT_EQ(ITEM_STICK, out.events[0].arg2);
+    ASSERT_EQ(ITEM_NONE, game.weapon_equipped);
+    ASSERT_EQ(ITEM_STICK, game.room_item[WORLD_ROOM_CAMP][0]);
+    PASS();
+}
+
+TEST invent_craft_allowed_in_combat(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 53u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game_inv_bag_add(&game, ITEM_HERB);
+    game_inv_bag_add(&game, ITEM_BERRY);
+    game_set_mode_combat(&game);
+
+    ASSERT_EQ(1, inv_craft(&game, ITEM_SALVE, &out));
+    ASSERT_EQ(GAME_EVENT_CRAFT_RESULT, out.events[0].kind);
+    ASSERT_EQ(ITEM_SALVE, out.events[0].arg0);
+    ASSERT_EQ(GAME_CRAFT_OUTCOME_OK, out.events[0].arg1);
+    ASSERT_EQ(1, game_inv_player_has_item(&game, ITEM_SALVE));
+    ASSERT_EQ(0, game_inv_player_has_item(&game, ITEM_HERB));
+    ASSERT_EQ(0, game_inv_player_has_item(&game, ITEM_BERRY));
+    PASS();
+}
+
 TEST invent_bag_view_event(void)
 {
     struct GameState game;
@@ -744,6 +784,8 @@ SUITE(invent) {
     RUN_TEST(invent_take_combat_blocked);
     RUN_TEST(invent_eat_and_use);
     RUN_TEST(invent_eat_and_use_allowed_in_combat);
+    RUN_TEST(invent_drop_allowed_in_combat);
+    RUN_TEST(invent_craft_allowed_in_combat);
     RUN_TEST(invent_bag_view_event);
     RUN_TEST(invent_eat_heals_damaged);
     RUN_TEST(invent_salve_at_max_hp);

@@ -656,6 +656,58 @@ TEST game_combat_eat_berry_allowed(void)
     PASS();
 }
 
+TEST game_combat_drop_allowed_stays_modal(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    u32 tick_before_drop;
+
+    unit_game_fresh(&game, 118u);
+    ASSERT_EQ(1, testharn_apply(&game, "@fixture bandit_combat_turn1"));
+    tick_before_drop = game.tick;
+
+    ASSERT_EQ(1, run_cmd_out(&game, "drop stick", &out));
+    ASSERT_EQ(tick_before_drop + 1U, game.tick);
+    ASSERT_EQ(GAME_MODE_COMBAT, game.mode);
+    ASSERT_EQ(2, out.count);
+    ASSERT_EQ(GAME_EVENT_ITEM_RESULT, out.events[0].kind);
+    ASSERT_EQ(GAME_ITEM_ACTION_DROP, out.events[0].arg0);
+    ASSERT_EQ(GAME_ITEM_OUTCOME_OK, out.events[0].arg1);
+    ASSERT_EQ(ITEM_STICK, out.events[0].arg2);
+    ASSERT_EQ(ITEM_NONE, game.weapon_equipped);
+    ASSERT_EQ(1, room_has_item(&game, WORLD_ROOM_CAMP, ITEM_STICK));
+    ASSERT_EQ(GAME_EVENT_COMBAT, out.events[1].kind);
+    ASSERT_EQ(GAME_COMBAT_PHASE_MENU, out.events[1].arg0);
+    PASS();
+}
+
+TEST game_combat_craft_allowed_stays_modal(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    u32 tick_before_craft;
+
+    unit_game_fresh(&game, 119u);
+    ASSERT_EQ(1, testharn_apply(&game, "@fixture bandit_combat_turn1"));
+    ASSERT_EQ(1, game_inv_bag_add(&game, ITEM_HERB));
+    ASSERT_EQ(1, game_inv_bag_add(&game, ITEM_BERRY));
+    tick_before_craft = game.tick;
+
+    ASSERT_EQ(1, run_cmd_out(&game, "craft salve", &out));
+    ASSERT_EQ(tick_before_craft + 1U, game.tick);
+    ASSERT_EQ(GAME_MODE_COMBAT, game.mode);
+    ASSERT_EQ(2, out.count);
+    ASSERT_EQ(GAME_EVENT_CRAFT_RESULT, out.events[0].kind);
+    ASSERT_EQ(ITEM_SALVE, out.events[0].arg0);
+    ASSERT_EQ(GAME_CRAFT_OUTCOME_OK, out.events[0].arg1);
+    ASSERT_EQ(1, game_inv_player_has_item(&game, ITEM_SALVE));
+    ASSERT_EQ(0, game_inv_player_has_item(&game, ITEM_HERB));
+    ASSERT_EQ(0, game_inv_player_has_item(&game, ITEM_BERRY));
+    ASSERT_EQ(GAME_EVENT_COMBAT, out.events[1].kind);
+    ASSERT_EQ(GAME_COMBAT_PHASE_MENU, out.events[1].arg0);
+    PASS();
+}
+
 TEST game_inspect_none_and_inactive_kind(void)
 {
     struct GameState game;
@@ -762,7 +814,7 @@ TEST game_give_in_enemy_dialogue_beats_room_npc_exchange(void)
     PASS();
 }
 
-TEST game_give_closes_traveler_dialogue_before_room_npc_exchange(void)
+TEST game_give_keeps_traveler_dialogue_before_room_npc_exchange(void)
 {
     struct GameState game;
     GameEventQueue out;
@@ -780,12 +832,14 @@ TEST game_give_closes_traveler_dialogue_before_room_npc_exchange(void)
     game.npcs[slot].flags |= NPC_FLAG_ACTIVE;
     game_set_mode_dialogue(&game, DIALOGUE_TRAVELER);
     ASSERT_EQ(1, run_cmd_out(&game, "give marsh-root", &out));
-    ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
-    ASSERT_EQ(HERBALIST_STORY_COMPLETE, game.herbalist_story);
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(DIALOGUE_TRAVELER, game.dialogue);
+    ASSERT_EQ(HERBALIST_STORY_REQUESTED, game.herbalist_story);
     ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[0].kind);
-    ASSERT_EQ(GAME_DIALOGUE_GUARD_DIALOGUE_CLOSED, out.events[0].arg0);
-    ASSERT_EQ(GAME_EVENT_DIALOGUE, out.events[1].kind);
-    ASSERT_EQ(HERBALIST_SCENE_GIVE_REWARD_BAG, out.events[1].arg3);
+    ASSERT_EQ(GAME_DIALOGUE_GUARD_GIVE_REJECTED, out.events[0].arg0);
+    ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[1].kind);
+    ASSERT_EQ(GAME_ENCOUNTER_TRAVELER, out.events[1].arg0);
+    ASSERT_EQ(GAME_ENCOUNTER_ACTION_OPEN, out.events[1].arg1);
     PASS();
 }
 
@@ -1281,16 +1335,13 @@ TEST game_bandit_handover_use_salve_replays_modal_prompt(void)
     ASSERT_EQ(1, game_inv_bag_add(&game, ITEM_SALVE));
     tick_before_use = game.tick;
 
-    ASSERT_EQ(0, run_cmd_out(&game, "use salve", &out));
-    ASSERT_EQ(tick_before_use, game.tick);
+    ASSERT_EQ(1, run_cmd_out(&game, "use salve", &out));
+    ASSERT_EQ(tick_before_use + 1U, game.tick);
     ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
     ASSERT_EQ(DIALOGUE_ENEMY, game.dialogue);
-    ASSERT_EQ(2, out.count);
-    ASSERT_EQ(GAME_EVENT_DIALOGUE_GUARD, out.events[0].kind);
-    ASSERT_EQ(GAME_DIALOGUE_GUARD_BANDIT_WAITING_HANDOVER_PICK,
-        out.events[0].arg0);
-    ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[1].kind);
-    ASSERT_EQ(GAME_ENCOUNTER_ACTION_HANDOVER_PROMPT, out.events[1].arg1);
+    ASSERT(out.count >= 1);
+    ASSERT_EQ(GAME_EVENT_ITEM_RESULT, out.events[0].kind);
+    ASSERT_EQ(GAME_ITEM_ACTION_USE, out.events[0].arg0);
     PASS();
 }
 
@@ -1436,19 +1487,17 @@ TEST game_drop_allowed_while_loot_menu_open_after_bag_full(void)
     tick_before_drop = game.tick;
     ASSERT_EQ(1, run_cmd_out(&game, "drop stick", &out));
     ASSERT_EQ(tick_before_drop + 1U, game.tick);
-    ASSERT(out.count >= 2);
+    ASSERT_EQ(1, out.count);
     ASSERT_EQ(GAME_EVENT_ITEM_RESULT, out.events[0].kind);
-    ASSERT_EQ(GAME_ITEM_ACTION_LOOT, out.events[0].arg0);
-    ASSERT_EQ(GAME_ITEM_OUTCOME_LEFT_BEHIND, out.events[0].arg1);
-    ASSERT_EQ(GAME_EVENT_ITEM_RESULT, out.events[1].kind);
-    ASSERT_EQ(GAME_ITEM_ACTION_DROP, out.events[1].arg0);
-    ASSERT_EQ(GAME_ITEM_OUTCOME_OK, out.events[1].arg1);
+    ASSERT_EQ(GAME_ITEM_ACTION_DROP, out.events[0].arg0);
+    ASSERT_EQ(GAME_ITEM_OUTCOME_OK, out.events[0].arg1);
     ASSERT_EQ(0, game.bag_count);
-    ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(DIALOGUE_LOOT, game.dialogue);
     PASS();
 }
 
-TEST game_loot_menu_closes_before_bag_view(void)
+TEST game_loot_menu_keeps_open_before_bag_view(void)
 {
     struct GameState game;
     GameEventQueue out;
@@ -1466,13 +1515,10 @@ TEST game_loot_menu_closes_before_bag_view(void)
     tick_before_bag = game.tick;
     ASSERT_EQ(1, run_cmd_out(&game, "bag", &out));
     ASSERT_EQ(tick_before_bag, game.tick);
-    ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
-    ASSERT_EQ(DIALOGUE_NONE, game.dialogue);
-    ASSERT_EQ(2, out.count);
-    ASSERT_EQ(GAME_EVENT_ITEM_RESULT, out.events[0].kind);
-    ASSERT_EQ(GAME_ITEM_ACTION_LOOT, out.events[0].arg0);
-    ASSERT_EQ(GAME_ITEM_OUTCOME_LEFT_BEHIND, out.events[0].arg1);
-    ASSERT_EQ(GAME_EVENT_BAG_VIEW, out.events[1].kind);
+    ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
+    ASSERT_EQ(DIALOGUE_LOOT, game.dialogue);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_BAG_VIEW, out.events[0].kind);
     ASSERT_EQ(1, game.corpse_present[WORLD_ROOM_CAMP]);
     ASSERT_EQ(ITEM_HERB, game.corpse_item[WORLD_ROOM_CAMP][0]);
     PASS();
@@ -1521,6 +1567,7 @@ TEST game_herbalist_request_then_take_root(void)
 
     game.player.room_id = WORLD_ROOM_MARSH;
     game.room_explored[WORLD_ROOM_MARSH] = 1;
+    game_set_mode_explore(&game);
     ASSERT_EQ(1, run_cmd(&game, "take marsh-root"));
     ASSERT_EQ(1, game_inv_player_has_item(&game, ITEM_MARSH_ROOT));
     ASSERT(!room_has_item(&game, WORLD_ROOM_MARSH, ITEM_MARSH_ROOT));
@@ -1584,6 +1631,7 @@ TEST game_herbalist_drop_root_outside_marsh_does_not_duplicate(void)
 
     game.player.room_id = WORLD_ROOM_MARSH;
     game.room_explored[WORLD_ROOM_MARSH] = 1;
+    game_set_mode_explore(&game);
     ASSERT_EQ(1, run_cmd(&game, "take marsh-root"));
     game.player.room_id = WORLD_ROOM_ROAD;
     game.room_explored[WORLD_ROOM_ROAD] = 1;
@@ -1710,12 +1758,14 @@ SUITE(game) {
     RUN_TEST(game_combat_use_salve_allowed);
     RUN_TEST(game_combat_use_salve_skips_ambient_and_clues);
     RUN_TEST(game_combat_eat_berry_allowed);
+    RUN_TEST(game_combat_drop_allowed_stays_modal);
+    RUN_TEST(game_combat_craft_allowed_stays_modal);
     RUN_TEST(game_inspect_none_and_inactive_kind);
     RUN_TEST(game_move_clears_departed_room_clues);
     RUN_TEST(game_unknown_command);
     RUN_TEST(game_give_after_handover_fixture);
     RUN_TEST(game_give_in_enemy_dialogue_beats_room_npc_exchange);
-    RUN_TEST(game_give_closes_traveler_dialogue_before_room_npc_exchange);
+    RUN_TEST(game_give_keeps_traveler_dialogue_before_room_npc_exchange);
     RUN_TEST(game_give_to_herbalist_routes_room_npc_exchange);
     RUN_TEST(game_give_without_npc_target_is_guarded);
     RUN_TEST(game_traveler_reply_fixture);
@@ -1747,7 +1797,7 @@ SUITE(game) {
     RUN_TEST(game_loot_leave_keeps_corpse_without_advancing_time);
     RUN_TEST(game_loot_reply_four_leaves_three_item_corpse);
     RUN_TEST(game_drop_allowed_while_loot_menu_open_after_bag_full);
-    RUN_TEST(game_loot_menu_closes_before_bag_view);
+    RUN_TEST(game_loot_menu_keeps_open_before_bag_view);
     RUN_TEST(game_loot_all_stops_at_bag_full_without_advancing_time);
     RUN_TEST(game_herbalist_request_then_take_root);
     RUN_TEST(game_herbalist_turn_in_updates_orchard_desc);

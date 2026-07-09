@@ -28,8 +28,7 @@ int dialogue_cmd_talk(struct GameState *game, GameEventQueue *out)
     }
     if (game->mode == GAME_MODE_DIALOGUE &&
             npc_is_roaming_friendly_dialogue(game->dialogue)) {
-        npc_push_dialogue_guard(out,
-            GAME_DIALOGUE_GUARD_FRIENDLY_DIALOGUE_WAITING);
+        (void)npc_replay_active_prompt(game, out);
         return 1;
     }
 
