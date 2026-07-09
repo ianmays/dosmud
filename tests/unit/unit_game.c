@@ -669,13 +669,15 @@ TEST game_combat_drop_allowed_stays_modal(void)
     ASSERT_EQ(1, run_cmd_out(&game, "drop stick", &out));
     ASSERT_EQ(tick_before_drop + 1U, game.tick);
     ASSERT_EQ(GAME_MODE_COMBAT, game.mode);
-    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(2, out.count);
     ASSERT_EQ(GAME_EVENT_ITEM_RESULT, out.events[0].kind);
     ASSERT_EQ(GAME_ITEM_ACTION_DROP, out.events[0].arg0);
-    ASSERT_EQ(GAME_ITEM_OUTCOME_BLOCKED_COMBAT, out.events[0].arg1);
+    ASSERT_EQ(GAME_ITEM_OUTCOME_OK, out.events[0].arg1);
     ASSERT_EQ(ITEM_STICK, out.events[0].arg2);
-    ASSERT_EQ(ITEM_STICK, game.weapon_equipped);
-    ASSERT_EQ(0, room_has_item(&game, WORLD_ROOM_CAMP, ITEM_STICK));
+    ASSERT_EQ(ITEM_NONE, game.weapon_equipped);
+    ASSERT_EQ(1, room_has_item(&game, WORLD_ROOM_CAMP, ITEM_STICK));
+    ASSERT_EQ(GAME_EVENT_COMBAT, out.events[1].kind);
+    ASSERT_EQ(GAME_COMBAT_PHASE_MENU, out.events[1].arg0);
     PASS();
 }
 
@@ -687,16 +689,22 @@ TEST game_combat_craft_allowed_stays_modal(void)
 
     unit_game_fresh(&game, 119u);
     ASSERT_EQ(1, testharn_apply(&game, "@fixture bandit_combat_turn1"));
+    ASSERT_EQ(1, game_inv_bag_add(&game, ITEM_HERB));
+    ASSERT_EQ(1, game_inv_bag_add(&game, ITEM_BERRY));
     tick_before_craft = game.tick;
 
     ASSERT_EQ(1, run_cmd_out(&game, "craft salve", &out));
     ASSERT_EQ(tick_before_craft + 1U, game.tick);
     ASSERT_EQ(GAME_MODE_COMBAT, game.mode);
-    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(2, out.count);
     ASSERT_EQ(GAME_EVENT_CRAFT_RESULT, out.events[0].kind);
     ASSERT_EQ(ITEM_SALVE, out.events[0].arg0);
-    ASSERT_EQ(GAME_CRAFT_OUTCOME_BLOCKED_COMBAT, out.events[0].arg1);
-    ASSERT_EQ(0, game_inv_player_has_item(&game, ITEM_SALVE));
+    ASSERT_EQ(GAME_CRAFT_OUTCOME_OK, out.events[0].arg1);
+    ASSERT_EQ(1, game_inv_player_has_item(&game, ITEM_SALVE));
+    ASSERT_EQ(0, game_inv_player_has_item(&game, ITEM_HERB));
+    ASSERT_EQ(0, game_inv_player_has_item(&game, ITEM_BERRY));
+    ASSERT_EQ(GAME_EVENT_COMBAT, out.events[1].kind);
+    ASSERT_EQ(GAME_COMBAT_PHASE_MENU, out.events[1].arg0);
     PASS();
 }
 
@@ -806,7 +814,7 @@ TEST game_give_in_enemy_dialogue_beats_room_npc_exchange(void)
     PASS();
 }
 
-TEST game_give_closes_traveler_dialogue_before_room_npc_exchange(void)
+TEST game_give_keeps_traveler_dialogue_before_room_npc_exchange(void)
 {
     struct GameState game;
     GameEventQueue out;
@@ -1757,7 +1765,7 @@ SUITE(game) {
     RUN_TEST(game_unknown_command);
     RUN_TEST(game_give_after_handover_fixture);
     RUN_TEST(game_give_in_enemy_dialogue_beats_room_npc_exchange);
-    RUN_TEST(game_give_closes_traveler_dialogue_before_room_npc_exchange);
+    RUN_TEST(game_give_keeps_traveler_dialogue_before_room_npc_exchange);
     RUN_TEST(game_give_to_herbalist_routes_room_npc_exchange);
     RUN_TEST(game_give_without_npc_target_is_guarded);
     RUN_TEST(game_traveler_reply_fixture);

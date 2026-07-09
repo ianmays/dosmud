@@ -805,6 +805,11 @@ int game_process_input(struct GameState *game, char *line, GameEventQueue *out)
                 prior_mode == GAME_MODE_DIALOGUE &&
                 prior_dialogue == DIALOGUE_LOOT)) {
         advance_world_tick(game, out);
+        if (prior_mode == GAME_MODE_COMBAT &&
+                game->mode == GAME_MODE_COMBAT &&
+                (cmd.type == CMD_CRAFT || cmd.type == CMD_DROP)) {
+            combat_replay_menu(out);
+        }
         /* defer look until after tick so encounter-open moves skip ROOM_LOOK */
         if (cmd.type == CMD_MOVE && game->mode == GAME_MODE_EXPLORE) {
             do_look(game, out);
