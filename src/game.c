@@ -102,10 +102,6 @@ static enum ModalDisposition modal_command_disposition(
         return MODAL_KEEP;
     }
     if (command_is_self_directed(cmd->type)) {
-        if (context == MODAL_CONTEXT_COMBAT &&
-                (cmd->type == CMD_CRAFT || cmd->type == CMD_DROP)) {
-            return MODAL_BLOCK;
-        }
         return MODAL_KEEP;
     }
     if (command_is_world_directed(cmd->type) || cmd->type == CMD_WAIT) {

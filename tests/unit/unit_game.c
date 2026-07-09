@@ -656,6 +656,50 @@ TEST game_combat_eat_berry_allowed(void)
     PASS();
 }
 
+TEST game_combat_drop_allowed_stays_modal(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    u32 tick_before_drop;
+
+    unit_game_fresh(&game, 118u);
+    ASSERT_EQ(1, testharn_apply(&game, "@fixture bandit_combat_turn1"));
+    tick_before_drop = game.tick;
+
+    ASSERT_EQ(1, run_cmd_out(&game, "drop stick", &out));
+    ASSERT_EQ(tick_before_drop + 1U, game.tick);
+    ASSERT_EQ(GAME_MODE_COMBAT, game.mode);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_ITEM_RESULT, out.events[0].kind);
+    ASSERT_EQ(GAME_ITEM_ACTION_DROP, out.events[0].arg0);
+    ASSERT_EQ(GAME_ITEM_OUTCOME_BLOCKED_COMBAT, out.events[0].arg1);
+    ASSERT_EQ(ITEM_STICK, out.events[0].arg2);
+    ASSERT_EQ(ITEM_STICK, game.weapon_equipped);
+    ASSERT_EQ(0, room_has_item(&game, WORLD_ROOM_CAMP, ITEM_STICK));
+    PASS();
+}
+
+TEST game_combat_craft_allowed_stays_modal(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    u32 tick_before_craft;
+
+    unit_game_fresh(&game, 119u);
+    ASSERT_EQ(1, testharn_apply(&game, "@fixture bandit_combat_turn1"));
+    tick_before_craft = game.tick;
+
+    ASSERT_EQ(1, run_cmd_out(&game, "craft salve", &out));
+    ASSERT_EQ(tick_before_craft + 1U, game.tick);
+    ASSERT_EQ(GAME_MODE_COMBAT, game.mode);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_CRAFT_RESULT, out.events[0].kind);
+    ASSERT_EQ(ITEM_SALVE, out.events[0].arg0);
+    ASSERT_EQ(GAME_CRAFT_OUTCOME_BLOCKED_COMBAT, out.events[0].arg1);
+    ASSERT_EQ(0, game_inv_player_has_item(&game, ITEM_SALVE));
+    PASS();
+}
+
 TEST game_inspect_none_and_inactive_kind(void)
 {
     struct GameState game;
@@ -1706,6 +1750,8 @@ SUITE(game) {
     RUN_TEST(game_combat_use_salve_allowed);
     RUN_TEST(game_combat_use_salve_skips_ambient_and_clues);
     RUN_TEST(game_combat_eat_berry_allowed);
+    RUN_TEST(game_combat_drop_allowed_stays_modal);
+    RUN_TEST(game_combat_craft_allowed_stays_modal);
     RUN_TEST(game_inspect_none_and_inactive_kind);
     RUN_TEST(game_move_clears_departed_room_clues);
     RUN_TEST(game_unknown_command);
