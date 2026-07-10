@@ -212,7 +212,7 @@ const char *const TXT_MAIN_TITLE = "dosmud";
 const char *const TXT_MAIN_TITLE_SEED_FMT = "%s (seed %lu)\n";
 const char *const TXT_MAIN_VERSION_FMT = "dosmud " BUILD_VERSION_STRING;
 const char *const TXT_MAIN_HELP_HINT = "Type 'help' for commands.";
-const char *const TXT_MAIN_PROMPT = "\n> ";
+const char *const TXT_MAIN_PROMPT = "> ";
 const char *const TXT_MAIN_BYE = "bye";
 
 const char *const TXT_COMMAND_HELP =

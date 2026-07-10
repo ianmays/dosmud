@@ -15,17 +15,13 @@ A small campfire burns quietly.
 Exits: north south west
 On the ground: stick. (take stick)
 [T:0] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
-
 > 
 [T:0] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
-
 > 
 [T:2] Marsh [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
-
 > You pick up the reed.
 A distant [creak] rolls across the landscape.
 [T:3] Marsh [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
-
 > You move north.
        *      *        $   * 
    *               *   $     
@@ -41,16 +37,13 @@ A small campfire burns quietly.
 Exits: north south west
 Water sounds beyond the path.
 [T:4] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
-
 > You drop the stick.
 Rain settles in, steady and insistent.
 [T:5] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
-
 > You drop the reed.
 A cool gust threads through the area and fades.
 A cricket chirps from beside the coals.
 [T:6] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
-
 > 
        *      *        $   * 
    *               *   $     
@@ -69,5 +62,4 @@ On the ground:
   reed (take reed)
 Rain needles the air. Water sounds beyond the path.
 [T:6] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
-
 > bye

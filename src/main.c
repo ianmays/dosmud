@@ -187,9 +187,15 @@ static int main_first_event_needs_leading_newline(void)
     if (g_main_out.count <= 0) {
         return 0;
     }
-    if (g_main_out.events[0].kind == GAME_EVENT_ROOM_LOOK ||
-            g_main_out.events[0].kind == GAME_EVENT_DIALOGUE ||
-            g_main_out.events[0].kind == GAME_EVENT_ENCOUNTER) {
+    if (g_main_out.events[0].kind == GAME_EVENT_ROOM_LOOK) {
+        return 1;
+    }
+    if (g_main_out.events[0].kind == GAME_EVENT_DIALOGUE &&
+            g_main_out.events[0].arg1 == GAME_DIALOGUE_PHASE_TALK) {
+        return 1;
+    }
+    if (g_main_out.events[0].kind == GAME_EVENT_ENCOUNTER &&
+            g_main_out.events[0].arg1 == GAME_ENCOUNTER_ACTION_OPEN) {
         return 1;
     }
     return 0;

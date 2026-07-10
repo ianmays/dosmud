@@ -15,7 +15,6 @@ A small campfire burns quietly.
 Exits: north south west
 On the ground: stick. (take stick)
 [T:0] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
-
 >   /\     .-'''''''-.        
   ||    / (.)..(.)  |        
   ||    |  (::::)   |        
@@ -33,11 +32,9 @@ Bandit Lv: 3.
 (Answer with 1, 2, 3, or reply <n>.)
 
 [T:1] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
-
 > Combat starts. You HP: 20, Bandit HP: 14, Bandit Lv: 3.
 You hit the bandit for 2 damage.
 You HP: 20, Bandit HP: 12, Bandit Lv: 3.
 Choose: [1] Attack  [2] Defend  [3] Use salve
 [T:1] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
-
 > bye

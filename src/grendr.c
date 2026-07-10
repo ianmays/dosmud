@@ -53,7 +53,7 @@ static void render_emit(const char *fmt, ...)
 
 /*
  * Newline tiers: txtres strings end with \n only; grendr owns gaps.
- * render_gap = scene/paragraph break; render_paragraph = gap + copy.
+ * render_gap = scene break; render_copy = tight copy passthrough.
  */
 static void render_gap(void)
 {
@@ -63,12 +63,6 @@ static void render_gap(void)
 static void render_copy(const char *text)
 {
     RENDER_PRINTF("%s", text);
-}
-
-static void render_paragraph(const char *text)
-{
-    render_gap();
-    render_copy(text);
 }
 
 /*
@@ -1556,7 +1550,7 @@ void render_traveler_scene(void)
 
 void render_traveler_reply(int choice)
 {
-    render_paragraph(txtres_traveler_reply(choice));
+    render_copy(txtres_traveler_reply(choice));
 }
 
 void render_lost_animal_scene(void)
@@ -1574,7 +1568,7 @@ void render_lost_animal_scene(void)
 
 void render_lost_animal_reply(int choice)
 {
-    render_paragraph(txtres_lost_animal_reply(choice));
+    render_copy(txtres_lost_animal_reply(choice));
 }
 
 void render_peddler_scene(void)
@@ -1592,7 +1586,7 @@ void render_peddler_scene(void)
 
 void render_peddler_reply(int choice)
 {
-    render_paragraph(txtres_peddler_reply(choice));
+    render_copy(txtres_peddler_reply(choice));
 }
 
 void render_frog_dialogue_intro(void)
@@ -1609,18 +1603,18 @@ void render_frog_dialogue_intro(void)
 void render_frog_dialogue_branch(int choice)
 {
     if (choice == 1) {
-        render_paragraph(TXT_FROG_REPLY_A1);
+        render_copy(TXT_FROG_REPLY_A1);
         render_copy(TXT_FROG_REPLY_A2);
         render_copy(TXT_FROG_REPLY_A3);
         return;
     }
     if (choice == 2) {
-        render_paragraph(TXT_FROG_REPLY_B1);
+        render_copy(TXT_FROG_REPLY_B1);
         render_copy(TXT_FROG_REPLY_B2);
         render_copy(TXT_FROG_REPLY_B3);
         return;
     }
-    render_paragraph(TXT_FROG_REPLY_C1);
+    render_copy(TXT_FROG_REPLY_C1);
     render_copy(TXT_FROG_REPLY_C2);
     render_copy(TXT_FROG_REPLY_C3);
 }

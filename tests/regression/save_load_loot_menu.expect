@@ -15,28 +15,23 @@ A small campfire burns quietly.
 Exits: north south west
 On the ground: stick. (take stick)
 [T:0] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
-
 > Combat starts. You HP: 20, Bandit HP: 8, Bandit Lv: 1.
 Choose: [1] Attack  [2] Defend  [3] Use salve
 
 [T:1] Camp [HP:20/20] [Atk:1] [Lv:1 XP:0/20]
-
 > You hit the bandit for 3 damage.
 The Lv 1 bandit falls. The body slumps into the dust.
 You gain 12 XP.
 [T:1] Camp [HP:20/20] [Atk:1] [Lv:1 XP:12/20]
-
 > On the body:
   [1] herb
   [2] Leave the rest.
 Type loot all to grab everything you can carry.
 (Answer with 1-2 or reply <n>.)
 [T:2] Camp [HP:20/20] [Atk:1] [Lv:1 XP:12/20]
-
 > Saved to save.dat.
 
 [T:2] Camp [HP:20/20] [Atk:1] [Lv:1 XP:12/20]
-
 > Loaded from save.dat.
 On the body:
   [1] herb
@@ -44,8 +39,6 @@ On the body:
 Type loot all to grab everything you can carry.
 (Answer with 1-2 or reply <n>.)
 [T:2] Camp [HP:20/20] [Atk:1] [Lv:1 XP:12/20]
-
 > You loot a herb from the body.
 [T:2] Camp [HP:20/20] [Atk:1] [Lv:1 XP:12/20]
-
 > bye
