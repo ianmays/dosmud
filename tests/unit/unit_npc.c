@@ -875,6 +875,8 @@ TEST npc_roaming_reply_cmd_explore(void)
     ASSERT_EQ(2, out.count);
     ASSERT_EQ(GAME_EVENT_DIALOGUE, out.events[0].kind);
     ASSERT_EQ(GAME_EVENT_ROOM_LOOK, out.events[1].kind);
+    ASSERT_EQ(GAME_ROOM_LOOK_FLAG_TIGHT_LEAD,
+        out.events[1].arg3 & GAME_ROOM_LOOK_FLAG_TIGHT_LEAD);
     PASS();
 }
 
@@ -935,6 +937,8 @@ TEST npc_roaming_reply_event(void)
     ASSERT_EQ(GAME_DIALOGUE_PHASE_REPLY, out.events[0].arg1);
     ASSERT_EQ(2, out.events[0].arg2);
     ASSERT_EQ(GAME_EVENT_ROOM_LOOK, out.events[1].kind);
+    ASSERT_EQ(GAME_ROOM_LOOK_FLAG_TIGHT_LEAD,
+        out.events[1].arg3 & GAME_ROOM_LOOK_FLAG_TIGHT_LEAD);
     PASS();
 }
 
@@ -1031,6 +1035,9 @@ TEST npc_lost_animal_roaming_reply_event(void)
     ASSERT_EQ(GAME_DIALOGUE_ACTOR_LOST_ANIMAL, out.events[0].arg0);
     ASSERT_EQ(GAME_DIALOGUE_PHASE_REPLY, out.events[0].arg1);
     ASSERT_EQ(1, out.events[0].arg2);
+    ASSERT_EQ(GAME_EVENT_ROOM_LOOK, out.events[1].kind);
+    ASSERT_EQ(GAME_ROOM_LOOK_FLAG_TIGHT_LEAD,
+        out.events[1].arg3 & GAME_ROOM_LOOK_FLAG_TIGHT_LEAD);
     PASS();
 }
 

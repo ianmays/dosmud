@@ -103,7 +103,7 @@ static int bandit_cmd_give(struct GameState *game, struct NpcState *enemy,
     }
     npc_end_encounter(game, enemy->actor);
     game_set_mode_explore(game);
-    game_describe_current_room(game, out);
+    game_describe_current_room_tight(game, out);
     return 1;
 }
 
@@ -141,7 +141,7 @@ static int bandit_cmd_reply(struct GameState *game, struct NpcState *enemy,
                 GAME_ENCOUNTER_OUTCOME_SUCCESS, 0, 0);
             npc_end_encounter(game, enemy->actor);
             game_set_mode_explore(game);
-            game_describe_current_room(game, out);
+            game_describe_current_room_tight(game, out);
         } else {
             push_encounter(out, GAME_ENCOUNTER_BANDIT,
                 GAME_ENCOUNTER_ACTION_INTIMIDATE,

@@ -56,7 +56,8 @@ enum GameEventKind {
  */
 enum GameEventRoomLookFlags {
     GAME_ROOM_LOOK_FLAG_NONE = 0,
-    GAME_ROOM_LOOK_FLAG_SUPPRESS_WEATHER = 1
+    GAME_ROOM_LOOK_FLAG_SUPPRESS_WEATHER = 1,
+    GAME_ROOM_LOOK_FLAG_TIGHT_LEAD = 2
 };
 
 /*

@@ -173,6 +173,8 @@ struct GameState {
 
 void game_init(struct GameState *game, u32 seed);
 void game_describe_current_room(struct GameState *game, GameEventQueue *out);
+void game_describe_current_room_tight(struct GameState *game,
+                                      GameEventQueue *out);
 int game_process_input(struct GameState *game, char *line, GameEventQueue *out);
 void game_background_step(struct GameState *game, GameEventQueue *out);
 

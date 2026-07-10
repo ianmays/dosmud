@@ -1346,7 +1346,7 @@ int npc_roaming_cmd_reply(struct GameState *game, int choice, GameEventQueue *ou
     }
     npc_push_dialogue(out, npc->actor, GAME_DIALOGUE_PHASE_REPLY, choice);
     game_set_mode_explore(game);
-    game_describe_current_room(game, out);
+    game_describe_current_room_tight(game, out);
     /* Return timing is randomized only after the player resolves the branch. */
     {
         const struct NpcProfile *profile;

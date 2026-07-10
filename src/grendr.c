@@ -105,7 +105,14 @@ static int env_event_is_stack_tier(int kind)
     if (kind == GAME_ENV_EVENT_GUST || kind == GAME_ENV_EVENT_RUSTLE ||
             kind == GAME_ENV_EVENT_BERRY_DROP || kind == GAME_ENV_EVENT_CREAK ||
             kind == GAME_ENV_EVENT_WATER || kind == GAME_ENV_EVENT_REED_DROP ||
-            kind == GAME_ENV_EVENT_GRIT) {
+            kind == GAME_ENV_EVENT_GRIT ||
+            kind == GAME_ENV_EVENT_WEATHER_RAIN ||
+            kind == GAME_ENV_EVENT_WEATHER_FOG ||
+            kind == GAME_ENV_EVENT_WEATHER_WIND ||
+            kind == GAME_ENV_EVENT_WEATHER_CLEAR ||
+            kind == GAME_ENV_EVENT_NIGHT_FALL ||
+            kind == GAME_ENV_EVENT_DAY_BREAK ||
+            kind == GAME_ENV_EVENT_NIGHT_LOST) {
         return 1;
     }
     return 0;
@@ -637,14 +644,13 @@ static void render_room_look_footer(int weather_kind, int day_phase,
         }
     }
     look_footer_capitalize(footer);
-    render_gap();
     RENDER_PRINTF("%s\n", footer);
 }
 
 static void render_room_look_snapshot(const struct GameState *game, int room_id,
                                       const int *room_items, int look_arg1,
                                       int npc_in_room_hint, u8 room_clues,
-                                      int look_flags)
+                                      int look_flags, int leading_gap)
 {
     char ground_buf[CFG_FMT_GROUND_MAX];
     const struct Room *room;
@@ -659,7 +665,11 @@ static void render_room_look_snapshot(const struct GameState *game, int room_id,
     weather_kind = (look_arg1 >> 1) & 3;
     day_phase = (look_arg1 >> 3) & 1;
     room = &game->world.rooms[room_id];
-    game_print_location_art(room_id);
+    if (leading_gap) {
+        game_print_location_art(room_id);
+    } else {
+        art_for_room(room_id);
+    }
     render_gap();
     RENDER_PRINTF("%s\n", room->name);
     RENDER_PRINTF("%s\n", room->desc);
@@ -1240,7 +1250,8 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
         switch (ev->kind) {
         case GAME_EVENT_ROOM_LOOK:
             render_room_look_snapshot(game, ev->room_id, ev->room_item,
-                ev->arg1, ev->arg0, (u8)ev->arg2, ev->arg3);
+                ev->arg1, ev->arg0, (u8)ev->arg2, ev->arg3,
+                i == 0 && (ev->arg3 & GAME_ROOM_LOOK_FLAG_TIGHT_LEAD) == 0);
             break;
         case GAME_EVENT_MOVE:
             render_msg_moved(ev->text);
@@ -1480,44 +1491,37 @@ void render_atmosphere_grit(void)
 
 void render_atmosphere_weather_rain(void)
 {
-    atmo_stack_reset();
-    render_paragraph(TXT_ATMO_WEATHER_RAIN);
+    atmo_stack_line(TXT_ATMO_WEATHER_RAIN);
 }
 
 void render_atmosphere_weather_fog(void)
 {
-    atmo_stack_reset();
-    render_paragraph(TXT_ATMO_WEATHER_FOG);
+    atmo_stack_line(TXT_ATMO_WEATHER_FOG);
 }
 
 void render_atmosphere_weather_wind(void)
 {
-    atmo_stack_reset();
-    render_paragraph(TXT_ATMO_WEATHER_WIND);
+    atmo_stack_line(TXT_ATMO_WEATHER_WIND);
 }
 
 void render_atmosphere_weather_clear(void)
 {
-    atmo_stack_reset();
-    render_paragraph(TXT_ATMO_WEATHER_CLEAR);
+    atmo_stack_line(TXT_ATMO_WEATHER_CLEAR);
 }
 
 void render_atmosphere_night_fall(void)
 {
-    atmo_stack_reset();
-    render_paragraph(TXT_ATMO_NIGHT_FALL);
+    atmo_stack_line(TXT_ATMO_NIGHT_FALL);
 }
 
 void render_atmosphere_day_break(void)
 {
-    atmo_stack_reset();
-    render_paragraph(TXT_ATMO_DAY_BREAK);
+    atmo_stack_line(TXT_ATMO_DAY_BREAK);
 }
 
 void render_atmosphere_night_lost(void)
 {
-    atmo_stack_reset();
-    render_paragraph(TXT_ATMO_NIGHT_LOST);
+    atmo_stack_line(TXT_ATMO_NIGHT_LOST);
 }
 
 void render_traveler_scene(void)

@@ -140,6 +140,9 @@ snapshot-run:
 			rm -f save.dat; \
 		elif [ "$$t" = "version" ]; then \
 			version_string=$$(sed -n 's/^#define BUILD_VERSION_STRING "\(.*\)"/\1/p' $(VERSION_HDR)); \
+			grep -q '@VERSION@' $(REGRESSION_DIR)/$$t.expect || { \
+				echo "$$t.expect must keep @VERSION@ as a template token"; exit 1; \
+			}; \
 			sed "s/@VERSION@/$$version_string/g" $(REGRESSION_DIR)/$$t.expect > $(REGRESSION_DIR)/$$t.expect.output; \
 			./$(BIN) < $(REGRESSION_DIR)/$$t.input > $(REGRESSION_DIR)/$$t.output; \
 			diff -u $(REGRESSION_DIR)/$$t.expect.output $(REGRESSION_DIR)/$$t.output; \
@@ -155,6 +158,9 @@ snapshot-run:
 	n=$$((n + 1)); \
 	echo "snapshot: version_cli"; \
 	version_string=$$(sed -n 's/^#define BUILD_VERSION_STRING "\(.*\)"/\1/p' $(VERSION_HDR)); \
+	grep -q '@VERSION@' $(REGRESSION_DIR)/version_cli.expect || { \
+		echo "version_cli.expect must keep @VERSION@ as a template token"; exit 1; \
+	}; \
 	sed "s/@VERSION@/$$version_string/g" $(REGRESSION_DIR)/version_cli.expect > $(REGRESSION_DIR)/version_cli.expect.output; \
 	./$(BIN) --version > $(REGRESSION_DIR)/version_cli.output; \
 	diff -u $(REGRESSION_DIR)/version_cli.expect.output $(REGRESSION_DIR)/version_cli.output; \

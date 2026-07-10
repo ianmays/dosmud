@@ -181,9 +181,13 @@ TEST genc_cmd_reply_intimidate_ok(void)
     game_roll_inject_begin(&game, rolls, 1);
     ASSERT_EQ(1, enemy_reply(&game, 3, &out));
     ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
+    ASSERT_EQ(2, out.count);
     ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
     ASSERT_EQ(GAME_ENCOUNTER_ACTION_INTIMIDATE, out.events[0].arg1);
     ASSERT_EQ(GAME_ENCOUNTER_OUTCOME_SUCCESS, out.events[0].arg2);
+    ASSERT_EQ(GAME_EVENT_ROOM_LOOK, out.events[1].kind);
+    ASSERT_EQ(GAME_ROOM_LOOK_FLAG_TIGHT_LEAD,
+        out.events[1].arg3 & GAME_ROOM_LOOK_FLAG_TIGHT_LEAD);
     PASS();
 }
 
@@ -216,10 +220,14 @@ TEST genc_cmd_give_handover(void)
     enemy->flags |= NPC_FLAG_HANDOVER_PICK;
     ASSERT_EQ(1, enemy_give(&game, ITEM_STICK, &out));
     ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
+    ASSERT_EQ(2, out.count);
     ASSERT_EQ(GAME_EVENT_ENCOUNTER, out.events[0].kind);
     ASSERT_EQ(GAME_ENCOUNTER_ACTION_GIVE, out.events[0].arg1);
     ASSERT_EQ(GAME_ENCOUNTER_OUTCOME_OK, out.events[0].arg2);
     ASSERT_EQ(ITEM_STICK, out.events[0].arg3);
+    ASSERT_EQ(GAME_EVENT_ROOM_LOOK, out.events[1].kind);
+    ASSERT_EQ(GAME_ROOM_LOOK_FLAG_TIGHT_LEAD,
+        out.events[1].arg3 & GAME_ROOM_LOOK_FLAG_TIGHT_LEAD);
     PASS();
 }
 
