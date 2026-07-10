@@ -1,7 +1,6 @@
 TEST MODE
 dosmud (seed 1234)
 Type 'help' for commands.
-
        *      *        $   * 
    *               *   $     
       _________        $     
@@ -38,7 +37,8 @@ The herbalist spots the marsh-root in your bag at once.
 (Answer with 1, 2, 3, or reply <n>.)
 [T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
-> She takes the marsh-root and crushes it between her stained thumbs.
+> 
+She takes the marsh-root and crushes it between her stained thumbs.
 The bitter scent clears the orchard air for a moment.
 She presses a salve into your bag before turning back to her mortar.
 "If you are still hunting answers, start with the Ruins. If the stones lie, try the Catacombs beneath them."

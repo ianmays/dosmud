@@ -1,7 +1,6 @@
 TEST MODE
 dosmud (seed 1234)
 Type 'help' for commands.
-
        *      *        $   * 
    *               *   $     
       _________        $     
@@ -24,12 +23,10 @@ On the ground: stick. (take stick)
 [T:2] Marsh [HP:20/20] [Atk:1] [Lv:1 XP:0/20]
 
 > You pick up the reed.
-
 A distant [creak] rolls across the landscape.
 [T:3] Marsh [HP:20/20] [Atk:1] [Lv:1 XP:0/20]
 
 > You bind a makeshift torch.
-
 You hear [water] moving somewhere beyond the path.
 [T:4] Marsh [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 

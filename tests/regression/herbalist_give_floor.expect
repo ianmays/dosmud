@@ -1,7 +1,6 @@
 TEST MODE
 dosmud (seed 1234)
 Type 'help' for commands.
-
        *      *        $   * 
    *               *   $     
       _________        $     
@@ -32,7 +31,8 @@ On the ground: stick. (take stick)
 > 
 [T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
-> She takes the marsh-root and crushes it between her stained thumbs.
+> 
+She takes the marsh-root and crushes it between her stained thumbs.
 The bitter scent clears the orchard air for a moment.
 Your bag is full, so she leaves a salve at your feet before returning to her mortar.
 "If you are still hunting answers, start with the Ruins. If the stones lie, try the Catacombs beneath them."

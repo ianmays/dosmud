@@ -1,7 +1,6 @@
 TEST MODE
 dosmud (seed 1234)
 Type 'help' for commands.
-
        *      *        $   * 
    *               *   $     
       _________        $     
@@ -38,7 +37,8 @@ An herbalist kneels among fallen fruit.
 (Answer with 1, 2, 3, or reply <n>.)
 [T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
-> She lowers her voice. "The marsh still grows a root that cuts fever fast. Bring me one, and I'll point you toward older answers than mine."
+> 
+She lowers her voice. "The marsh still grows a root that cuts fever fast. Bring me one, and I'll point you toward older answers than mine."
   [1] Ask where to look.
   [2] Admit you do not have it yet.
   [3] Leave and keep searching.
@@ -63,7 +63,8 @@ The herbalist brushes pulp from her palms.
 (Answer with 1, 2, 3, or reply <n>.)
 [T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
-> She smiles thinly. "Road gossip keeps longer than fruit. Marsh-root does not."
+> 
+She smiles thinly. "Road gossip keeps longer than fruit. Marsh-root does not."
 [T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
 > 
@@ -84,7 +85,8 @@ The herbalist brushes pulp from her palms.
 (Answer with 1, 2, 3, or reply <n>.)
 [T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
-> She turns back to sorting bruised fruit.
+> 
+She turns back to sorting bruised fruit.
 [T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
 > bye

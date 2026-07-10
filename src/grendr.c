@@ -84,20 +84,27 @@ static void atmo_stack_reset(void)
 
 static void atmo_stack_line(const char *text)
 {
-    if (!s_atmo_stack_open) {
-        render_gap();
-    }
     render_copy(text);
     s_atmo_stack_open = 1;
 }
 
 static void atmo_stack_animal_line(const char *line)
 {
-    if (!s_atmo_stack_open) {
-        render_gap();
-    }
     RENDER_PRINTF("%s\n", line);
     s_atmo_stack_open = 1;
+}
+
+static int env_event_owned_by_look_footer(int kind)
+{
+    if (kind == GAME_ENV_EVENT_RUSTLE || kind == GAME_ENV_EVENT_CREAK ||
+            kind == GAME_ENV_EVENT_WATER || kind == GAME_ENV_EVENT_GRIT ||
+            kind == GAME_ENV_EVENT_WEATHER_RAIN ||
+            kind == GAME_ENV_EVENT_WEATHER_FOG ||
+            kind == GAME_ENV_EVENT_WEATHER_WIND ||
+            kind == GAME_ENV_EVENT_NIGHT_FALL) {
+        return 1;
+    }
+    return 0;
 }
 
 static int env_event_is_stack_tier(int kind)
@@ -1250,8 +1257,7 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
         switch (ev->kind) {
         case GAME_EVENT_ROOM_LOOK:
             render_room_look_snapshot(game, ev->room_id, ev->room_item,
-                ev->arg1, ev->arg0, (u8)ev->arg2, ev->arg3,
-                i == 0 && (ev->arg3 & GAME_ROOM_LOOK_FLAG_TIGHT_LEAD) == 0);
+                ev->arg1, ev->arg0, (u8)ev->arg2, ev->arg3, 0);
             break;
         case GAME_EVENT_MOVE:
             render_msg_moved(ev->text);
@@ -1312,6 +1318,18 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
             break;
         /* #161 ambient/inspect: direct dispatch (gatmos no longer LEGACY). */
         case GAME_EVENT_ENVIRONMENT:
+            if (env_event_owned_by_look_footer(ev->arg0)) {
+                int j;
+
+                for (j = i + 1; j < out->count; ++j) {
+                    if (out->events[j].kind == GAME_EVENT_ROOM_LOOK) {
+                        break;
+                    }
+                }
+                if (j < out->count) {
+                    break;
+                }
+            }
             render_environment_event(ev);
             if (env_event_is_stack_tier(ev->arg0)) {
                 flavor = 1;
@@ -1345,7 +1363,6 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
 void render_bandit_encounter_open(int enemy_level)
 {
     /* enemy_level is ENCOUNTER OPEN arg3 from npc_push_encounter_open. */
-    render_gap();
     RENDER_PRINTF("  /\\     .-'''''''-.        \n");
     RENDER_PRINTF("  ||    / (.)..(.)  |        \n");
     RENDER_PRINTF("  ||    |  (::::)   |        \n");
@@ -1526,7 +1543,6 @@ void render_atmosphere_night_lost(void)
 
 void render_traveler_scene(void)
 {
-    render_gap();
     art_traveler();
     render_gap();
     render_copy(TXT_TRAVELER_INTRO);
@@ -1545,7 +1561,6 @@ void render_traveler_reply(int choice)
 
 void render_lost_animal_scene(void)
 {
-    render_gap();
     art_lost_animal();
     render_gap();
     render_copy(TXT_LOST_ANIMAL_INTRO);
@@ -1564,7 +1579,6 @@ void render_lost_animal_reply(int choice)
 
 void render_peddler_scene(void)
 {
-    render_gap();
     art_peddler();
     render_gap();
     render_copy(TXT_PEDDLER_INTRO);
@@ -1583,7 +1597,6 @@ void render_peddler_reply(int choice)
 
 void render_frog_dialogue_intro(void)
 {
-    render_gap();
     art_frog_portrait();
     render_copy(TXT_FROG_INTRO);
     RENDER_PRINTF("%s", TXT_FROG_QUOTE);
@@ -1779,7 +1792,6 @@ void render_msg_watchman_talk(int scene)
             scene == WATCHMAN_SCENE_NEUTRAL_WARNED ||
             scene == WATCHMAN_SCENE_NEUTRAL_FED ||
             scene == WATCHMAN_SCENE_NEUTRAL_WARNED_FED) {
-        render_gap();
         art_watchman_portrait();
         render_gap();
         render_copy(TXT_MSG_WATCHMAN_TALK_LINE1);
@@ -1814,7 +1826,6 @@ void render_msg_herbalist_talk(int scene)
         render_copy(TXT_MSG_HERBALIST_REQ_LINE3);
         render_copy(TXT_MSG_HERBALIST_REQ_LINE4);
     } else {
-        render_gap();
         art_herbalist_portrait();
         render_gap();
         if (scene == HERBALIST_SCENE_REQUESTED) {
@@ -1844,7 +1855,6 @@ void render_msg_herbalist_talk(int scene)
 
 void render_msg_archivist_talk(void)
 {
-    render_gap();
     art_archivist_portrait();
     render_gap();
     render_copy(TXT_MSG_ARCHIVIST_TALK_LINE1);

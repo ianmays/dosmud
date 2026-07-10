@@ -1,7 +1,6 @@
 TEST MODE
 dosmud (seed 1234)
 Type 'help' for commands.
-
        *      *        $   * 
    *               *   $     
       _________        $     
@@ -38,7 +37,8 @@ A dust-caked archivist lights a stub candle.
 (Answer with 1, 2, 3, or reply <n>.)
 [T:0] Catacombs [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
-> Archivist: "The top stones cracked first. The foundations were already wrong."
+> 
+Archivist: "The top stones cracked first. The foundations were already wrong."
 [T:0] Catacombs [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
 > 
@@ -59,7 +59,8 @@ A dust-caked archivist lights a stub candle.
 (Answer with 1, 2, 3, or reply <n>.)
 [T:0] Catacombs [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
-> Archivist: "Follow running water; dead tunnels lie to travelers."
+> 
+Archivist: "Follow running water; dead tunnels lie to travelers."
 [T:0] Catacombs [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
 > 
@@ -80,7 +81,8 @@ A dust-caked archivist lights a stub candle.
 (Answer with 1, 2, 3, or reply <n>.)
 [T:0] Catacombs [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
-> Archivist: "Go, then. Before the candle quits."
+> 
+Archivist: "Go, then. Before the candle quits."
 [T:0] Catacombs [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
 > bye

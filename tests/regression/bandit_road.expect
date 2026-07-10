@@ -1,7 +1,6 @@
 TEST MODE
 dosmud (seed 1234)
 Type 'help' for commands.
-
        *      *        $   * 
    *               *   $     
       _________        $     
@@ -21,7 +20,6 @@ On the ground: stick. (take stick)
 [T:1] Road [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
 > You wait.
-
   /\     .-'''''''-.        
   ||    / (.)..(.)  |        
   ||    |  (::::)   |        

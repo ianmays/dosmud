@@ -1,7 +1,6 @@
 TEST MODE
 dosmud (seed 1234)
 Type 'help' for commands.
-
        *      *        $   * 
    *               *   $     
       _________        $     
@@ -23,7 +22,8 @@ On the ground: stick. (take stick)
 > 
 [T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
-> She shakes her head. "Not that. Bring me a marsh-root if you mean to help."
+> 
+She shakes her head. "Not that. Bring me a marsh-root if you mean to help."
 [T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
 > bye

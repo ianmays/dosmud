@@ -1,7 +1,6 @@
 TEST MODE
 dosmud (seed 1234)
 Type 'help' for commands.
-
        *      *        $   * 
    *               *   $     
       _________        $     
@@ -38,14 +37,15 @@ The herbalist brushes pulp from her palms.
 (Answer with 1, 2, 3, or reply <n>.)
 [T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
->   [1] Ask where to look.
+> 
+  [1] Ask where to look.
   [2] Admit you do not have it yet.
   [3] Leave and keep searching.
 (Answer with 1, 2, 3, or reply <n>.)
 [T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
-> She nods once. "Then do not linger here. The marsh keeps what waits too long."
-
+> 
+She nods once. "Then do not linger here. The marsh keeps what waits too long."
         _;;;;;;_             
        / _    _ \           
       (-( )--( )-)           

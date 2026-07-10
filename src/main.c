@@ -182,6 +182,19 @@ static void main_render_and_prompt(struct GameState *game)
     }
 }
 
+static int main_first_event_needs_leading_newline(void)
+{
+    if (g_main_out.count <= 0) {
+        return 0;
+    }
+    if (g_main_out.events[0].kind == GAME_EVENT_ROOM_LOOK ||
+            g_main_out.events[0].kind == GAME_EVENT_DIALOGUE ||
+            g_main_out.events[0].kind == GAME_EVENT_ENCOUNTER) {
+        return 1;
+    }
+    return 0;
+}
+
 /* Queue the restored view so load can log before render drains it. */
 static void main_queue_loaded_game(struct GameState *game)
 {
@@ -294,6 +307,9 @@ static int main_dispatch_line(struct GameState *game, char *line,
                 return 1;
             }
             if (cmd.type == CMD_LOAD) {
+                if (main_first_event_needs_leading_newline()) {
+                    printf("\n");
+                }
                 game_render_output(game, &g_main_out);
                 if (main_check_output_overflow() != 0) {
                     return 1;
@@ -304,6 +320,9 @@ static int main_dispatch_line(struct GameState *game, char *line,
         game_process_input(game, line, &g_main_out);
         if (main_capture_replay(REPLAY_STEP_INPUT, line, game) != 0) {
             return 1;
+        }
+        if (main_first_event_needs_leading_newline()) {
+            printf("\n");
         }
         game_render_output(game, &g_main_out);
         if (main_check_output_overflow() != 0) {
@@ -324,6 +343,9 @@ static int main_dispatch_line(struct GameState *game, char *line,
             return 1;
         }
         if (cmd.type == CMD_LOAD) {
+            if (main_first_event_needs_leading_newline()) {
+                printf("\n");
+            }
             game_render_output(game, &g_main_out);
         }
         return 0;
@@ -331,6 +353,9 @@ static int main_dispatch_line(struct GameState *game, char *line,
     game_process_input(game, line, &g_main_out);
     if (main_capture_replay(REPLAY_STEP_INPUT, line, game) != 0) {
         return 1;
+    }
+    if (main_first_event_needs_leading_newline()) {
+        printf("\n");
     }
     game_render_output(game, &g_main_out);
 #endif
@@ -384,6 +409,9 @@ static int main_run_idle_ticks(struct GameState *game, time_t *last_tick_time,
         game_background_step(game, &g_main_out);
         if (main_capture_replay(REPLAY_STEP_IDLE, 0, game) != 0) {
             return -1;
+        }
+        if (g_main_out.count > 0) {
+            printf("\n");
         }
         game_render_output(game, &g_main_out);
 #ifdef TEST_MODE

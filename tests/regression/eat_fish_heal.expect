@@ -1,7 +1,6 @@
 TEST MODE
 dosmud (seed 1234)
 Type 'help' for commands.
-
        *      *        $   * 
    *               *   $     
       _________        $     
@@ -21,7 +20,6 @@ On the ground: stick. (take stick)
 [T:0] Pond [HP:15/20] [Atk:0] [Lv:1 XP:0/20]
 
 > You eat the fish. Not ideal raw, but nourishing. You recover 2 HP. HP now 17.
-
          .--------.          
         /  o    o  \        
        |     ^      |        

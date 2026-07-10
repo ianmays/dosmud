@@ -1,7 +1,6 @@
 TEST MODE
 dosmud (seed 1234)
 Type 'help' for commands.
-
        *      *        $   * 
    *               *   $     
       _________        $     
@@ -17,8 +16,7 @@ Exits: north south west
 On the ground: stick. (take stick)
 [T:0] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
-> 
-        .#######.            
+>         .#######.            
        /#########\          
        |  -- (o) |           
        |    ^    |           
@@ -40,7 +38,6 @@ A one-eyed watchman leans on the parapet.
 [T:0] Tower [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
 > They are waiting on your move (reply 1/2/3).
-
         .#######.            
        /#########\          
        |  -- (o) |           

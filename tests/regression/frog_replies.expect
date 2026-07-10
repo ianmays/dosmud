@@ -1,7 +1,6 @@
 TEST MODE
 dosmud (seed 1234)
 Type 'help' for commands.
-
        *      *        $   * 
    *               *   $     
       _________        $     
@@ -38,6 +37,7 @@ A damp frog wearing an imaginary crown clears his throat.
 [T:0] Pond [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
 > 
+
 You bow. The frog salutes with a webbed hand.
 "Finally, someone whose parents finished the tutorial. Wisdom of the pond: the water is wet, the mud is judgy, and I am technically management. You're welcome. Ribbit."
 [T:0] Pond [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
@@ -60,6 +60,7 @@ A damp frog wearing an imaginary crown clears his throat.
 [T:0] Pond [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
 > 
+
 You call his lily pad 'discount turf.' The frog clutches his chest like you stabbed Shakespeare.
 "Rude! Delicious! That's how you get warts - not magic, just bad networking. Also you're banned from handsomeness."
 [T:0] Pond [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
@@ -82,6 +83,7 @@ A damp frog wearing an imaginary crown clears his throat.
 [T:0] Pond [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
 > 
+
 You lean in and whisper that the moon is 'basically a lid.'
 The frog nods with the gravity of a tiny judge.
 "The moon knows what it did. I'm not allowed to say which phase. If anyone asks, you hallucinated this conversation. For tax reasons."

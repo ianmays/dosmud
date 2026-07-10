@@ -1,7 +1,6 @@
 TEST MODE
 dosmud (seed 1234)
 Type 'help' for commands.
-
        *      *        $   * 
    *               *   $     
       _________        $     
@@ -38,8 +37,8 @@ The herbalist ties the cut root in drying twine.
 (Answer with 1, 2, 3, or reply <n>.)
 [T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
-> She jerks her chin east. "The Ruins keep the first layer of truth. The Catacombs keep what sank beneath it."
-
+> 
+She jerks her chin east. "The Ruins keep the first layer of truth. The Catacombs keep what sank beneath it."
         _;;;;;;_             
        / _    _ \           
       (-( )--( )-)           

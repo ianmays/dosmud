@@ -1,7 +1,6 @@
 TEST MODE
 dosmud (seed 1234)
 Type 'help' for commands.
-
        *      *        $   * 
    *               *   $     
       _________        $     
@@ -17,8 +16,7 @@ Exits: north south west
 On the ground: stick. (take stick)
 [T:0] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
-> 
-            .-'''-.          
+>             .-'''-.          
            /  o o  \        
           |   \_/   |       
           |  /   \  |       
@@ -37,6 +35,7 @@ A shaggy goat trots into view, bells silent and coat dusted with meadow pollen.
 [T:0] Meadow [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
 > 
+
 The goat bleats once, then trots off with offended dignity.
     ######     #####  ###    
            ##     ###        
@@ -53,8 +52,7 @@ Exits: west
 On the ground: berry. (take berry)
 [T:0] Meadow [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
-> 
-            .-'''-.          
+>             .-'''-.          
            /  o o  \        
           |   \_/   |       
           |  /   \  |       
@@ -73,6 +71,7 @@ A shaggy goat trots into view, bells silent and coat dusted with meadow pollen.
 [T:0] Meadow [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
 > 
+
 It crunches happily, then follows a hoofbeat only it can hear.
     ######     #####  ###    
            ##     ###        
@@ -89,8 +88,7 @@ Exits: west
 On the ground: berry. (take berry)
 [T:0] Meadow [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
-> 
-            .-'''-.          
+>             .-'''-.          
            /  o o  \        
           |   \_/   |       
           |  /   \  |       
@@ -109,6 +107,7 @@ A shaggy goat trots into view, bells silent and coat dusted with meadow pollen.
 [T:0] Meadow [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
 > 
+
 It watches you go, then turns back to the tall grass.
     ######     #####  ###    
            ##     ###        

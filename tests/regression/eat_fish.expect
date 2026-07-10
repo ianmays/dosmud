@@ -1,7 +1,6 @@
 TEST MODE
 dosmud (seed 1234)
 Type 'help' for commands.
-
        *      *        $   * 
    *               *   $     
       _________        $     
@@ -22,7 +21,6 @@ On the ground: stick. (take stick)
 
 > You eat the fish. Not ideal raw, but nourishing.
 You're already at full health.
-
          .--------.          
         /  o    o  \        
        |     ^      |        

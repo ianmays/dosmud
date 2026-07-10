@@ -1,7 +1,6 @@
 TEST MODE
 dosmud (seed 1234)
 Type 'help' for commands.
-
        *      *        $   * 
    *               *   $     
       _________        $     
@@ -22,7 +21,6 @@ On the ground: stick. (take stick)
 
 > You eat the berry. Tart, but fresh.
 You're already at full health.
-
 A distant [creak] rolls across the landscape.
 [T:1] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
