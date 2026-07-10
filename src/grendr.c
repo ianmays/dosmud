@@ -65,6 +65,54 @@ static void render_copy(const char *text)
     RENDER_PRINTF("%s", text);
 }
 
+static int render_trimmed_len(const char *text)
+{
+    int len;
+
+    if (text == 0) {
+        return 0;
+    }
+    len = (int)strlen(text);
+    while (len > 0 && (text[len - 1] == '\n' || text[len - 1] == '\r')) {
+        --len;
+    }
+    return len;
+}
+
+static int render_buf_append_trimmed(char *buf, int bufsize, int pos,
+                                     const char *text)
+{
+    int len;
+
+    if (text == 0) {
+        return pos;
+    }
+    len = render_trimmed_len(text);
+    if (pos < 0 || pos + len >= bufsize) {
+        return -1;
+    }
+    memcpy(buf + pos, text, (size_t)len);
+    pos += len;
+    buf[pos] = '\0';
+    return pos;
+}
+
+static int render_buf_append_sentence(char *buf, int bufsize, int pos,
+                                      const char *text)
+{
+    if (text == 0) {
+        return pos;
+    }
+    if (pos > 0) {
+        if (pos + 1 >= bufsize) {
+            return -1;
+        }
+        buf[pos++] = ' ';
+        buf[pos] = '\0';
+    }
+    return render_buf_append_trimmed(buf, bufsize, pos, text);
+}
+
 /*
  * Tick ambient flavor (inspect clues, animal noise, gust, item drops): one leading
  * gap per block, then tight lines with no blank lines between.
@@ -127,9 +175,7 @@ static void art_room_camp(void)
     RENDER_PRINTF("     /       /|\\       $    \n");
     RENDER_PRINTF("    /       / | \\     \\|/  \n");
     RENDER_PRINTF("___/_______/__|__\\ ___XXX___\n");
-    RENDER_PRINTF("                             \n");
-    RENDER_PRINTF(" %s", g_room_art_captions[WORLD_ROOM_CAMP]);
-    RENDER_PRINTF("                             \n");
+    RENDER_PRINTF(" %s\n", g_room_art_captions[WORLD_ROOM_CAMP]);
 }
 
 static void art_room_road(void)
@@ -140,9 +186,7 @@ static void art_room_road(void)
     RENDER_PRINTF("_____________________________\n");
     RENDER_PRINTF("            /    \\          \n");
     RENDER_PRINTF("           /      \\         \n");
-    RENDER_PRINTF("                             \n");
-    RENDER_PRINTF("   %s", g_room_art_captions[WORLD_ROOM_ROAD]);
-    RENDER_PRINTF("                             \n");
+    RENDER_PRINTF("   %s\n", g_room_art_captions[WORLD_ROOM_ROAD]);
 }
 
 static void art_room_pond(void)
@@ -153,9 +197,7 @@ static void art_room_pond(void)
     RENDER_PRINTF("     |/    o       O  \\  ^  \n");
     RENDER_PRINTF("     (        O   |    )|    \n");
     RENDER_PRINTF(" ^    \\__||______o_|__/     \n");
-    RENDER_PRINTF("                             \n");
-    RENDER_PRINTF("  %s", g_room_art_captions[WORLD_ROOM_POND]);
-    RENDER_PRINTF("                             \n");
+    RENDER_PRINTF("  %s\n", g_room_art_captions[WORLD_ROOM_POND]);
 }
 
 static void art_room_forest(void)
@@ -166,9 +208,7 @@ static void art_room_forest(void)
     RENDER_PRINTF("      \\||/   \\||/   \\||/  \n");
     RENDER_PRINTF("_______||_____||_____||______\n");
     RENDER_PRINTF("    ^^       ^^^^     ^^^    \n");
-    RENDER_PRINTF("                             \n");
-    RENDER_PRINTF("%s", g_room_art_captions[WORLD_ROOM_FOREST]);
-    RENDER_PRINTF("                             \n");
+    RENDER_PRINTF("%s\n", g_room_art_captions[WORLD_ROOM_FOREST]);
 }
 
 static void art_room_stream(void)
@@ -179,9 +219,7 @@ static void art_room_stream(void)
     RENDER_PRINTF("       ooo  |         ____\\ \n");
     RENDER_PRINTF("        |        ___/        \n");
     RENDER_PRINTF("________________/            \n");
-    RENDER_PRINTF("                             \n");
-    RENDER_PRINTF("%s", g_room_art_captions[WORLD_ROOM_STREAM]);
-    RENDER_PRINTF("                             \n");
+    RENDER_PRINTF("%s\n", g_room_art_captions[WORLD_ROOM_STREAM]);
 }
 
 static void art_room_ruins(void)
@@ -192,9 +230,7 @@ static void art_room_ruins(void)
     RENDER_PRINTF("     | \\__.--''--.__/ |     \n");
     RENDER_PRINTF(" ____|_|_|________|_|_|____  \n");
     RENDER_PRINTF("/__________________________\\\n");
-    RENDER_PRINTF("                             \n");
-    RENDER_PRINTF(" %s", g_room_art_captions[WORLD_ROOM_RUINS]);
-    RENDER_PRINTF("                             \n");
+    RENDER_PRINTF(" %s\n", g_room_art_captions[WORLD_ROOM_RUINS]);
 }
 
 static void art_room_cliff(void)
@@ -205,9 +241,7 @@ static void art_room_cliff(void)
     RENDER_PRINTF("       /__\\_/____\\_/__\\   \n");
     RENDER_PRINTF("      /________________\\    \n");
     RENDER_PRINTF("     /__________________\\   \n");
-    RENDER_PRINTF("                             \n");
-    RENDER_PRINTF("      %s", g_room_art_captions[WORLD_ROOM_CLIFF]);
-    RENDER_PRINTF("                             \n");
+    RENDER_PRINTF("      %s\n", g_room_art_captions[WORLD_ROOM_CLIFF]);
 }
 
 static void art_room_marsh(void)
@@ -218,9 +252,7 @@ static void art_room_marsh(void)
     RENDER_PRINTF("  ||  .-|-.  ||  .-|-.  ||   \n");
     RENDER_PRINTF("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
     RENDER_PRINTF("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-    RENDER_PRINTF("                             \n");
-    RENDER_PRINTF("  %s", g_room_art_captions[WORLD_ROOM_MARSH]);
-    RENDER_PRINTF("                             \n");
+    RENDER_PRINTF("  %s\n", g_room_art_captions[WORLD_ROOM_MARSH]);
 }
 
 static void art_room_grove(void)
@@ -231,9 +263,7 @@ static void art_room_grove(void)
     RENDER_PRINTF("     |   &   |   &   |       \n");
     RENDER_PRINTF("  ^     ooo     ooo          \n");
     RENDER_PRINTF("         |       |     ^^    \n");
-    RENDER_PRINTF("                             \n");
-    RENDER_PRINTF("   %s", g_room_art_captions[WORLD_ROOM_GROVE]);
-    RENDER_PRINTF("                             \n");
+    RENDER_PRINTF("   %s\n", g_room_art_captions[WORLD_ROOM_GROVE]);
 }
 
 static void art_room_bridge(void)
@@ -244,9 +274,7 @@ static void art_room_bridge(void)
     RENDER_PRINTF("~~~~~~~~~~|        |~~~~~~~~~\n");
     RENDER_PRINTF("~~~~~~~~~~|        |~~~~~~~~~\n");
     RENDER_PRINTF("       ||/          \\||     \n");
-    RENDER_PRINTF("                             \n");
-    RENDER_PRINTF("    %s", g_room_art_captions[WORLD_ROOM_BRIDGE]);
-    RENDER_PRINTF("                             \n");
+    RENDER_PRINTF("    %s\n", g_room_art_captions[WORLD_ROOM_BRIDGE]);
 }
 
 static void art_room_catacombs(void)
@@ -257,9 +285,7 @@ static void art_room_catacombs(void)
     RENDER_PRINTF("oo  ooooOOooooooooooooOOOOooo\n");
     RENDER_PRINTF("oooOOOoooooooOOO OOoooooooooo\n");
     RENDER_PRINTF("ooooooooooOO oo  ooooOOOooooo\n");
-    RENDER_PRINTF("                             \n");
-    RENDER_PRINTF("   %s", g_room_art_captions[WORLD_ROOM_CATACOMBS]);
-    RENDER_PRINTF("                             \n");
+    RENDER_PRINTF("   %s\n", g_room_art_captions[WORLD_ROOM_CATACOMBS]);
 }
 
 static void art_room_meadow(void)
@@ -270,9 +296,7 @@ static void art_room_meadow(void)
     RENDER_PRINTF("- * -- * * -- -- * * -- * ---\n");
     RENDER_PRINTF("---  @  ---  @  -------  @  -\n");
     RENDER_PRINTF("------   @   ---   @   @   --\n");
-    RENDER_PRINTF("                             \n");
-    RENDER_PRINTF("%s", g_room_art_captions[WORLD_ROOM_MEADOW]);
-    RENDER_PRINTF("                             \n");
+    RENDER_PRINTF("%s\n", g_room_art_captions[WORLD_ROOM_MEADOW]);
 }
 
 static void art_room_canyon(void)
@@ -283,9 +307,7 @@ static void art_room_canyon(void)
     RENDER_PRINTF("           \\   \\ __/       \n");
     RENDER_PRINTF("           /  _/ \\          \n");
     RENDER_PRINTF("          /  /   /           \n");
-    RENDER_PRINTF("                             \n");
-    RENDER_PRINTF("  %s", g_room_art_captions[WORLD_ROOM_CANYON]);
-    RENDER_PRINTF("                             \n");
+    RENDER_PRINTF("  %s\n", g_room_art_captions[WORLD_ROOM_CANYON]);
 }
 
 static void art_room_tower(void)
@@ -296,9 +318,7 @@ static void art_room_tower(void)
     RENDER_PRINTF("___________|      |__________\n");
     RENDER_PRINTF("   \\|/     |  __  |         \n");
     RENDER_PRINTF("          /__|__|__\\   \\|/ \n");
-    RENDER_PRINTF("                             \n");
-    RENDER_PRINTF(" %s", g_room_art_captions[WORLD_ROOM_TOWER]);
-    RENDER_PRINTF("                             \n");
+    RENDER_PRINTF(" %s\n", g_room_art_captions[WORLD_ROOM_TOWER]);
 }
 
 static void art_room_orchard(void)
@@ -309,9 +329,7 @@ static void art_room_orchard(void)
     RENDER_PRINTF("        |     @'@.@@'@'@     \n");
     RENDER_PRINTF("   ^^           ' | o|''   ^ \n");
     RENDER_PRINTF("        ^^^     ..|  |.      \n");
-    RENDER_PRINTF("                             \n");
-    RENDER_PRINTF("%s", g_room_art_captions[WORLD_ROOM_ORCHARD]);
-    RENDER_PRINTF("                             \n");
+    RENDER_PRINTF("%s\n", g_room_art_captions[WORLD_ROOM_ORCHARD]);
 }
 
 static void art_room_cave(void)
@@ -322,9 +340,7 @@ static void art_room_cave(void)
     RENDER_PRINTF("  {{     |       |      }    \n");
     RENDER_PRINTF("_________|_______|___________\n");
     RENDER_PRINTF("  ''' ''          '' ''''    \n");
-    RENDER_PRINTF("                             \n");
-    RENDER_PRINTF(" %s", g_room_art_captions[WORLD_ROOM_CAVE]);
-    RENDER_PRINTF("                             \n");
+    RENDER_PRINTF(" %s\n", g_room_art_captions[WORLD_ROOM_CAVE]);
 }
 
 static void art_traveler(void)
@@ -570,82 +586,217 @@ static int look_footer_append_clue(char *buf, int bufsize, int pos,
         first_clue ? " " : "; ", clue_buf);
 }
 
-static void render_room_look_footer(int weather_kind, int day_phase,
-                                    u8 room_clues, int flags)
+static int build_room_look_footer(char *footer, int bufsize, int weather_kind,
+                                  int day_phase, u8 room_clues, int flags)
 {
-    char footer[256];
     int pos;
     int first_clue;
     const char *phrase;
 
     pos = 0;
+    if (footer == 0 || bufsize <= 0) {
+        return -1;
+    }
     footer[0] = '\0';
     /* Compact look conditions into one footer block: weather/night as short
      * sentences, then clue phrases joined tightly to reduce vertical churn.
      */
     if ((flags & GAME_ROOM_LOOK_FLAG_SUPPRESS_WEATHER) == 0) {
-        pos = look_footer_append_sep(footer, (int)sizeof(footer), pos, " ",
+        pos = look_footer_append_sep(footer, bufsize, pos, " ",
             txtres_look_weather_phrase(weather_kind));
         if (pos < 0) {
-            return;
+            return -1;
         }
     }
     if (day_phase == GAME_NIGHT) {
-        pos = look_footer_append_sep(footer, (int)sizeof(footer), pos, " ",
+        pos = look_footer_append_sep(footer, bufsize, pos, " ",
             TXT_LOOK_NIGHT);
         if (pos < 0) {
-            return;
+            return -1;
         }
     }
     first_clue = 1;
     if ((room_clues & (u8)GAME_ENV_CLUE_BIT(GAME_ENV_RUSTLE)) != 0) {
         phrase = txtres_look_clue_phrase(GAME_ENV_RUSTLE);
-        pos = look_footer_append_clue(footer, (int)sizeof(footer), pos,
+        pos = look_footer_append_clue(footer, bufsize, pos,
             phrase, first_clue);
         if (pos < 0) {
-            return;
+            return -1;
         }
         first_clue = 0;
     }
     if ((room_clues & (u8)GAME_ENV_CLUE_BIT(GAME_ENV_CREAK)) != 0) {
         phrase = txtres_look_clue_phrase(GAME_ENV_CREAK);
-        pos = look_footer_append_clue(footer, (int)sizeof(footer), pos,
+        pos = look_footer_append_clue(footer, bufsize, pos,
             phrase, first_clue);
         if (pos < 0) {
-            return;
+            return -1;
         }
         first_clue = 0;
     }
     if ((room_clues & (u8)GAME_ENV_CLUE_BIT(GAME_ENV_WATER)) != 0) {
         phrase = txtres_look_clue_phrase(GAME_ENV_WATER);
-        pos = look_footer_append_clue(footer, (int)sizeof(footer), pos,
+        pos = look_footer_append_clue(footer, bufsize, pos,
             phrase, first_clue);
         if (pos < 0) {
-            return;
+            return -1;
         }
         first_clue = 0;
     }
     if ((room_clues & (u8)GAME_ENV_CLUE_BIT(GAME_ENV_GRIT)) != 0) {
         phrase = txtres_look_clue_phrase(GAME_ENV_GRIT);
-        pos = look_footer_append_clue(footer, (int)sizeof(footer), pos,
+        pos = look_footer_append_clue(footer, bufsize, pos,
             phrase, first_clue);
         if (pos < 0) {
-            return;
+            return -1;
         }
         first_clue = 0;
     }
     if (first_clue) {
         if (pos <= 0) {
-            return;
+            return 0;
         }
     } else {
-        pos = look_footer_append(footer, (int)sizeof(footer), pos, ".");
+        pos = look_footer_append(footer, bufsize, pos, ".");
         if (pos < 0) {
-            return;
+            return -1;
         }
     }
     look_footer_capitalize(footer);
+    return pos;
+}
+
+static void render_room_look_footer(int weather_kind, int day_phase,
+                                    u8 room_clues, int flags)
+{
+    char footer[256];
+
+    if (build_room_look_footer(footer, (int)sizeof(footer), weather_kind,
+            day_phase, room_clues, flags) <= 0) {
+        return;
+    }
     RENDER_PRINTF("%s\n", footer);
+}
+
+static const char *compact_env_event_text(int kind)
+{
+    switch (kind) {
+    case GAME_ENV_EVENT_GUST:
+        return TXT_ATMO_GUST;
+    case GAME_ENV_EVENT_BERRY_DROP:
+        return TXT_ATMO_BERRY_DROP;
+    case GAME_ENV_EVENT_REED_DROP:
+        return TXT_ATMO_REED_DROP;
+    case GAME_ENV_EVENT_WEATHER_CLEAR:
+        return TXT_ATMO_WEATHER_CLEAR;
+    case GAME_ENV_EVENT_DAY_BREAK:
+        return TXT_ATMO_DAY_BREAK;
+    case GAME_ENV_EVENT_NIGHT_LOST:
+        return TXT_ATMO_NIGHT_LOST;
+    default:
+        return 0;
+    }
+}
+
+static int compact_arrival_room_look_end(const GameEventQueue *out, int move_i)
+{
+    int j;
+
+    for (j = move_i + 1; j < out->count; ++j) {
+        if (out->events[j].kind == GAME_EVENT_ROOM_LOOK) {
+            return j;
+        }
+        if (out->events[j].kind == GAME_EVENT_ENVIRONMENT ||
+                out->events[j].kind == GAME_EVENT_AMBIENT_NOISE) {
+            continue;
+        }
+        return -1;
+    }
+    return -1;
+}
+
+static void render_compact_arrival(const struct GameState *game,
+                                   const GameEventQueue *out, int move_i,
+                                   int look_i)
+{
+    char ground_buf[CFG_FMT_GROUND_MAX];
+    char body[512];
+    char footer[256];
+    const GameEvent *move_ev;
+    const GameEvent *look_ev;
+    const struct Room *room;
+    int corpse_present;
+    int weather_kind;
+    int day_phase;
+    int ground_len;
+    int pos;
+    int j;
+
+    move_ev = &out->events[move_i];
+    look_ev = &out->events[look_i];
+    room = &game->world.rooms[look_ev->room_id];
+    corpse_present = look_ev->arg1 & 1;
+    weather_kind = (look_ev->arg1 >> 1) & 3;
+    day_phase = (look_ev->arg1 >> 3) & 1;
+
+    RENDER_PRINTF("You move %s. %s.\n", move_ev->text, room->name);
+    render_gap();
+    art_for_room(look_ev->room_id);
+    render_gap();
+
+    pos = 0;
+    body[0] = '\0';
+    pos = render_buf_append_sentence(body, (int)sizeof(body), pos, room->desc);
+    if (pos >= 0 &&
+            build_room_look_footer(footer, (int)sizeof(footer), weather_kind,
+                day_phase, (u8)look_ev->arg2, look_ev->arg3) > 0) {
+        pos = render_buf_append_sentence(body, (int)sizeof(body), pos, footer);
+    }
+    for (j = move_i + 1; pos >= 0 && j < look_i; ++j) {
+        const GameEvent *ev;
+        const char *inline_text;
+
+        ev = &out->events[j];
+        if (ev->kind == GAME_EVENT_ENVIRONMENT) {
+            if (env_event_owned_by_look_footer(ev->arg0)) {
+                continue;
+            }
+            inline_text = compact_env_event_text(ev->arg0);
+        } else if (ev->kind == GAME_EVENT_AMBIENT_NOISE) {
+            inline_text = ev->text;
+        } else {
+            inline_text = 0;
+        }
+        pos = render_buf_append_sentence(body, (int)sizeof(body), pos,
+            inline_text);
+    }
+    if (pos >= 0 && body[0] != '\0') {
+        RENDER_PRINTF("%s\n", body);
+    } else {
+        RENDER_PRINTF("%s\n", room->desc);
+    }
+
+    render_gap();
+    RENDER_PRINTF("%s", TXT_UI_EXITS_LABEL);
+    for (j = 0; j < DIR_NONE; ++j) {
+        if (room->exits[j] >= 0) {
+            RENDER_PRINTF(" %s", world_dir_name(j));
+        }
+    }
+    RENDER_PRINTF("\n");
+    ground_len = fmt_room_ground_items(look_ev->room_item, ground_buf,
+        (int)sizeof(ground_buf));
+    if (ground_len > 0) {
+        RENDER_PRINTF("%s", ground_buf);
+    } else if (ground_len < 0) {
+        RENDER_PRINTF("%s", TXT_UI_GROUND_ITEMS_TOO_LONG);
+    }
+    if (corpse_present) {
+        RENDER_PRINTF("%s", TXT_UI_BANDIT_CORPSE);
+    }
+    if (look_ev->arg0 != 0) {
+        RENDER_PRINTF("%s", TXT_UI_NPC_HINT);
+    }
 }
 
 static void render_room_look_snapshot(const struct GameState *game, int room_id,
@@ -1246,8 +1397,20 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
 
     atmo_stack_reset();
     for (i = 0; i < out->count; ++i) {
+        int compact_look_i;
+
         flavor = 0;
         ev = &out->events[i];
+        compact_look_i = -1;
+        if (ev->kind == GAME_EVENT_MOVE) {
+            compact_look_i = compact_arrival_room_look_end(out, i);
+            if (compact_look_i >= 0) {
+                render_compact_arrival(game, out, i, compact_look_i);
+                i = compact_look_i;
+                atmo_stack_reset();
+                continue;
+            }
+        }
         switch (ev->kind) {
         case GAME_EVENT_ROOM_LOOK:
             render_room_look_snapshot(game, ev->room_id, ev->room_item,
