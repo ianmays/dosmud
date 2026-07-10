@@ -52,8 +52,12 @@ enum GameEventKind {
  * Room look payload (#47, #51, #130): ROOM_LOOK arg0=npc room-actor hint;
  * arg1=corpse_present (bit 0) | (weather_kind << 1) | (day_phase << 3)
  * snapshotted at enqueue; arg2=env_room_clues bitmask for current room (#234);
- * arg3 unused; room_id and room_item[] hold ground snapshot.
+ * arg3=GameEventRoomLookFlags; room_id and room_item[] hold ground snapshot.
  */
+enum GameEventRoomLookFlags {
+    GAME_ROOM_LOOK_FLAG_NONE = 0,
+    GAME_ROOM_LOOK_FLAG_SUPPRESS_WEATHER = 1
+};
 
 /*
  * Inventory/item payload contract (#158, #129):

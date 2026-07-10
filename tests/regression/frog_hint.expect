@@ -15,7 +15,6 @@ Camp
 A small campfire burns quietly.
 Exits: north south west
 On the ground: stick. (take stick)
-
 [T:0] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
 > 
@@ -36,7 +35,6 @@ A still pond reflects the dim sky.
 Exits: south east
 On the ground: fish. (take fish)
 Someone nearby might [talk].
-
 [T:0] Pond [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 
 > bye

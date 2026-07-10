@@ -1,5 +1,6 @@
 #include "txtres.h"
 #include "config.h"
+#include "game.h"
 #include "gout.h"
 #include "npc.h"
 #include "version.h"
@@ -230,7 +231,7 @@ const char *const TXT_HELP_WAIT =
     "wait (.) - pass time without moving; the world tick advances.";
 
 const char *const TXT_HELP_INSPECT =
-    "inspect <rustle|rustles|creak|creaks|water|grit> - follow a [highlighted] word from look. Synonyms: examine, investigate.";
+    "inspect <rustle|rustles|creak|creaks|water|grit> - follow a clue named in look. Synonyms: examine, investigate.";
 
 const char *const TXT_HELP_TAKE =
     "take <item> (get, pickup), or take all - pick up items from the ground into your bag.";
@@ -300,10 +301,38 @@ const char *const TXT_UI_GROUND_ITEMS_TOO_LONG =
     "Too many ground items to list here.\n";
 const char *const TXT_UI_BANDIT_CORPSE = "A bandit corpse lies here. (loot)\n";
 const char *const TXT_UI_NPC_HINT = "Someone nearby might [talk].\n";
-const char *const TXT_UI_WEATHER_RAIN = "Rain needles the air and darkens the ground.\n";
-const char *const TXT_UI_WEATHER_FOG = "Fog hangs low and shortens the horizon.\n";
-const char *const TXT_UI_WEATHER_WIND = "Wind keeps worrying the treeline.\n";
-const char *const TXT_UI_NIGHT = "Night deepens; paths are hard to hold in mind.\n";
+const char *const TXT_LOOK_NIGHT = "Night.";
+
+const char *txtres_look_weather_phrase(int kind)
+{
+    if (kind == GAME_WEATHER_RAIN) {
+        return "Rain needles the air.";
+    }
+    if (kind == GAME_WEATHER_FOG) {
+        return "Fog hangs low and shortens the horizon.";
+    }
+    if (kind == GAME_WEATHER_WIND) {
+        return "Wind keeps worrying the treeline.";
+    }
+    return 0;
+}
+
+const char *txtres_look_clue_phrase(int kind)
+{
+    if (kind == GAME_ENV_RUSTLE) {
+        return "rustling nearby";
+    }
+    if (kind == GAME_ENV_CREAK) {
+        return "creaking nearby";
+    }
+    if (kind == GAME_ENV_WATER) {
+        return "water sounds beyond the path";
+    }
+    if (kind == GAME_ENV_GRIT) {
+        return "loose grit skittering over stone";
+    }
+    return 0;
+}
 
 const char *const TXT_MAP_NIGHT_BLANK =
     "Darkness and disorientation erase the map from your mind.\n";

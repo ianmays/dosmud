@@ -1173,6 +1173,29 @@ TEST game_move_emits_move_then_look(void)
     PASS();
 }
 
+TEST game_move_arrival_suppresses_weather_in_room_look_footer(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    char line[] = "move north";
+
+    unit_game_fresh(&game, 1234u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game.test_quiet_ticks = 1;
+    disable_traveler(&game);
+    game.weather_kind = GAME_WEATHER_NONE;
+    game.weather_expires_tick = 1U;
+    game_event_queue_reset(&out);
+    ASSERT_EQ(1, game_process_input(&game, line, &out));
+    ASSERT_EQ(3, out.count);
+    ASSERT_EQ(GAME_EVENT_MOVE, out.events[0].kind);
+    ASSERT_EQ(GAME_EVENT_ENVIRONMENT, out.events[1].kind);
+    ASSERT_EQ(GAME_ENV_EVENT_WEATHER_RAIN, out.events[1].arg0);
+    ASSERT_EQ(GAME_EVENT_ROOM_LOOK, out.events[2].kind);
+    ASSERT_EQ(GAME_ROOM_LOOK_FLAG_SUPPRESS_WEATHER, out.events[2].arg3);
+    PASS();
+}
+
 /* MOVE defers ROOM_LOOK until explore resumes after an encounter-open tick. */
 TEST game_move_into_bandit_defers_room_look_until_after_encounter(void)
 {
@@ -1785,6 +1808,7 @@ SUITE(game) {
     RUN_TEST(game_unknown_command_emits_event);
     RUN_TEST(game_cannot_move_emits_event);
     RUN_TEST(game_move_emits_move_then_look);
+    RUN_TEST(game_move_arrival_suppresses_weather_in_room_look_footer);
     RUN_TEST(game_move_into_bandit_defers_room_look_until_after_encounter);
     RUN_TEST(game_wait_roaming_bandit_step_open_skips_ambient);
     RUN_TEST(game_roll_spread_zero);

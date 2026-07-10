@@ -94,10 +94,9 @@ extern const char *const TXT_UI_GROUND_ITEM_LINE_FMT;
 extern const char *const TXT_UI_GROUND_ITEMS_TOO_LONG;
 extern const char *const TXT_UI_BANDIT_CORPSE;
 extern const char *const TXT_UI_NPC_HINT;
-extern const char *const TXT_UI_WEATHER_RAIN;
-extern const char *const TXT_UI_WEATHER_FOG;
-extern const char *const TXT_UI_WEATHER_WIND;
-extern const char *const TXT_UI_NIGHT;
+extern const char *const TXT_LOOK_NIGHT;
+const char *txtres_look_weather_phrase(int kind);
+const char *txtres_look_clue_phrase(int kind);
 
 extern const char *const TXT_MAP_NIGHT_BLANK;
 extern const char *const TXT_MAP_TORCH_LIGHT;

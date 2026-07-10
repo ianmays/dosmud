@@ -169,7 +169,7 @@ static int main_startup(struct GameState *game, u32 rng_seed)
         return 1;
     }
     game_render_output(game, &g_main_out);
-    game_render(game);
+    game_render(game, g_main_out.count == 0);
     print_prompt();
     return 0;
 }
@@ -177,7 +177,7 @@ static int main_startup(struct GameState *game, u32 rng_seed)
 static void main_render_and_prompt(struct GameState *game)
 {
     if (game->running) {
-        game_render(game);
+        game_render(game, g_main_out.count == 0);
         print_prompt();
     }
 }
@@ -354,7 +354,7 @@ static int main_handle_polled_line(struct GameState *game, char *line, time_t *l
         *last_tick_time = plat_time_now();
         /* load already rendered via main_render_loaded_game. */
         if (game->running && !rendered) {
-            game_render(game);
+            game_render(game, g_main_out.count == 0);
         }
     }
     if (game->running) {

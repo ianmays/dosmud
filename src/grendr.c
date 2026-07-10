@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdarg.h>
+#include <string.h>
 
 /*
  * grendr owns terminal presentation: it consumes GameEvent records from core
@@ -500,45 +501,150 @@ static const char *env_kind_tag(int kind)
     return "trace";
 }
 
-/* Look footer: one gap before the clue block, tight lines within. */
-static void render_room_clue_hints(u8 clues)
+static int look_footer_append(char *buf, int bufsize, int pos, const char *text)
 {
-    int opened;
+    int len;
 
-    opened = 0;
-    if ((clues & (u8)GAME_ENV_CLUE_BIT(GAME_ENV_RUSTLE)) != 0) {
-        if (!opened) {
-            render_gap();
-            opened = 1;
-        }
-        render_copy(TXT_ATMO_RUSTLE);
+    if (text == 0) {
+        return pos;
     }
-    if ((clues & (u8)GAME_ENV_CLUE_BIT(GAME_ENV_CREAK)) != 0) {
-        if (!opened) {
-            render_gap();
-            opened = 1;
-        }
-        render_copy(TXT_ATMO_CREAK);
+    len = (int)strlen(text);
+    if (pos < 0 || pos + len >= bufsize) {
+        return -1;
     }
-    if ((clues & (u8)GAME_ENV_CLUE_BIT(GAME_ENV_WATER)) != 0) {
-        if (!opened) {
-            render_gap();
-            opened = 1;
-        }
-        render_copy(TXT_ATMO_WATER);
+    memcpy(buf + pos, text, (size_t)len);
+    pos += len;
+    buf[pos] = '\0';
+    return pos;
+}
+
+static int look_footer_append_sep(char *buf, int bufsize, int pos,
+                                  const char *sep, const char *text)
+{
+    if (text == 0) {
+        return pos;
     }
-    if ((clues & (u8)GAME_ENV_CLUE_BIT(GAME_ENV_GRIT)) != 0) {
-        if (!opened) {
-            render_gap();
-            opened = 1;
+    if (pos > 0) {
+        pos = look_footer_append(buf, bufsize, pos, sep);
+        if (pos < 0) {
+            return -1;
         }
-        render_copy(TXT_ATMO_GRIT);
     }
+    return look_footer_append(buf, bufsize, pos, text);
+}
+
+static void look_footer_capitalize(char *buf)
+{
+    if (buf[0] >= 'a' && buf[0] <= 'z') {
+        buf[0] = (char)(buf[0] - ('a' - 'A'));
+    }
+}
+
+static int look_footer_append_clue(char *buf, int bufsize, int pos,
+                                   const char *phrase, int first_clue)
+{
+    char clue_buf[80];
+    int clue_len;
+
+    if (phrase == 0) {
+        return pos;
+    }
+    clue_len = (int)strlen(phrase);
+    if (clue_len >= (int)sizeof(clue_buf)) {
+        return -1;
+    }
+    memcpy(clue_buf, phrase, (size_t)(clue_len + 1));
+    if (first_clue && pos > 0 &&
+            clue_buf[0] >= 'a' && clue_buf[0] <= 'z') {
+        clue_buf[0] = (char)(clue_buf[0] - ('a' - 'A'));
+    }
+    return look_footer_append_sep(buf, bufsize, pos,
+        first_clue ? " " : "; ", clue_buf);
+}
+
+static void render_room_look_footer(int weather_kind, int day_phase,
+                                    u8 room_clues, int flags)
+{
+    char footer[256];
+    int pos;
+    int first_clue;
+    const char *phrase;
+
+    pos = 0;
+    footer[0] = '\0';
+    /* Compact look conditions into one footer block: weather/night as short
+     * sentences, then clue phrases joined tightly to reduce vertical churn.
+     */
+    if ((flags & GAME_ROOM_LOOK_FLAG_SUPPRESS_WEATHER) == 0) {
+        pos = look_footer_append_sep(footer, (int)sizeof(footer), pos, " ",
+            txtres_look_weather_phrase(weather_kind));
+        if (pos < 0) {
+            return;
+        }
+    }
+    if (day_phase == GAME_NIGHT) {
+        pos = look_footer_append_sep(footer, (int)sizeof(footer), pos, " ",
+            TXT_LOOK_NIGHT);
+        if (pos < 0) {
+            return;
+        }
+    }
+    first_clue = 1;
+    if ((room_clues & (u8)GAME_ENV_CLUE_BIT(GAME_ENV_RUSTLE)) != 0) {
+        phrase = txtres_look_clue_phrase(GAME_ENV_RUSTLE);
+        pos = look_footer_append_clue(footer, (int)sizeof(footer), pos,
+            phrase, first_clue);
+        if (pos < 0) {
+            return;
+        }
+        first_clue = 0;
+    }
+    if ((room_clues & (u8)GAME_ENV_CLUE_BIT(GAME_ENV_CREAK)) != 0) {
+        phrase = txtres_look_clue_phrase(GAME_ENV_CREAK);
+        pos = look_footer_append_clue(footer, (int)sizeof(footer), pos,
+            phrase, first_clue);
+        if (pos < 0) {
+            return;
+        }
+        first_clue = 0;
+    }
+    if ((room_clues & (u8)GAME_ENV_CLUE_BIT(GAME_ENV_WATER)) != 0) {
+        phrase = txtres_look_clue_phrase(GAME_ENV_WATER);
+        pos = look_footer_append_clue(footer, (int)sizeof(footer), pos,
+            phrase, first_clue);
+        if (pos < 0) {
+            return;
+        }
+        first_clue = 0;
+    }
+    if ((room_clues & (u8)GAME_ENV_CLUE_BIT(GAME_ENV_GRIT)) != 0) {
+        phrase = txtres_look_clue_phrase(GAME_ENV_GRIT);
+        pos = look_footer_append_clue(footer, (int)sizeof(footer), pos,
+            phrase, first_clue);
+        if (pos < 0) {
+            return;
+        }
+        first_clue = 0;
+    }
+    if (first_clue) {
+        if (pos <= 0) {
+            return;
+        }
+    } else {
+        pos = look_footer_append(footer, (int)sizeof(footer), pos, ".");
+        if (pos < 0) {
+            return;
+        }
+    }
+    look_footer_capitalize(footer);
+    render_gap();
+    RENDER_PRINTF("%s\n", footer);
 }
 
 static void render_room_look_snapshot(const struct GameState *game, int room_id,
                                       const int *room_items, int look_arg1,
-                                      int npc_in_room_hint, u8 room_clues)
+                                      int npc_in_room_hint, u8 room_clues,
+                                      int look_flags)
 {
     char ground_buf[CFG_FMT_GROUND_MAX];
     const struct Room *room;
@@ -577,27 +683,19 @@ static void render_room_look_snapshot(const struct GameState *game, int room_id,
     if (npc_in_room_hint != 0) {
         RENDER_PRINTF("%s", TXT_UI_NPC_HINT);
     }
-    render_room_clue_hints(room_clues);
-    if (weather_kind == GAME_WEATHER_RAIN) {
-        RENDER_PRINTF("%s", TXT_UI_WEATHER_RAIN);
-    } else if (weather_kind == GAME_WEATHER_FOG) {
-        RENDER_PRINTF("%s", TXT_UI_WEATHER_FOG);
-    } else     if (weather_kind == GAME_WEATHER_WIND) {
-        RENDER_PRINTF("%s", TXT_UI_WEATHER_WIND);
-    }
-    if (day_phase == GAME_NIGHT) {
-        RENDER_PRINTF("%s", TXT_UI_NIGHT);
-    }
+    render_room_look_footer(weather_kind, day_phase, room_clues, look_flags);
 }
 
-void game_render(const struct GameState *game)
+void game_render(const struct GameState *game, int leading_gap)
 {
     const struct Room *room;
     int needed;
 
     room = &game->world.rooms[game->player.room_id];
     needed = game_xp_to_next_level(game->level);
-    render_gap();
+    if (leading_gap) {
+        render_gap();
+    }
     RENDER_PRINTF(TXT_HUD_FMT,
         game->tick, room->name, game->player_hp, game->max_hp,
         combat_player_attack_bonus(game),
@@ -1142,7 +1240,7 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
         switch (ev->kind) {
         case GAME_EVENT_ROOM_LOOK:
             render_room_look_snapshot(game, ev->room_id, ev->room_item,
-                ev->arg1, ev->arg0, (u8)ev->arg2);
+                ev->arg1, ev->arg0, (u8)ev->arg2, ev->arg3);
             break;
         case GAME_EVENT_MOVE:
             render_msg_moved(ev->text);

@@ -216,6 +216,43 @@ static int look_arg1_pack(int corpse_present, int weather_kind, int day_phase)
     return corpse_present | (weather_kind << 1) | (day_phase << 3);
 }
 
+static int queue_has_weather_transition(const GameEventQueue *out)
+{
+    int i;
+
+    for (i = 0; i < out->count; ++i) {
+        if (out->events[i].kind != GAME_EVENT_ENVIRONMENT) {
+            continue;
+        }
+        if (out->events[i].arg0 == GAME_ENV_EVENT_WEATHER_RAIN ||
+                out->events[i].arg0 == GAME_ENV_EVENT_WEATHER_FOG ||
+                out->events[i].arg0 == GAME_ENV_EVENT_WEATHER_WIND ||
+                out->events[i].arg0 == GAME_ENV_EVENT_WEATHER_CLEAR) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+static void mark_room_look_weather_suppressed(GameEventQueue *out)
+{
+    int i;
+
+    /* Reply/encounter slices can queue ROOM_LOOK before the tick runs. Mark
+     * those earlier snapshots after weather enqueue so same-step copy does not
+     * repeat in the compact footer.
+     */
+    if (!queue_has_weather_transition(out)) {
+        return;
+    }
+    for (i = 0; i < out->count; ++i) {
+        if (out->events[i].kind != GAME_EVENT_ROOM_LOOK) {
+            continue;
+        }
+        out->events[i].arg3 |= GAME_ROOM_LOOK_FLAG_SUPPRESS_WEATHER;
+    }
+}
+
 static void do_look(struct GameState *game, GameEventQueue *out)
 {
     int i;
@@ -225,7 +262,11 @@ static void do_look(struct GameState *game, GameEventQueue *out)
         npc_room_actor(game->player.room_id),
         look_arg1_pack(game->corpse_present[game->player.room_id],
             game->weather_kind, game->day_phase),
-        game->env_room_clues[game->player.room_id], 0, 0);
+        game->env_room_clues[game->player.room_id],
+        queue_has_weather_transition(out) ?
+            GAME_ROOM_LOOK_FLAG_SUPPRESS_WEATHER :
+            GAME_ROOM_LOOK_FLAG_NONE,
+        0);
     if (ev == 0) {
         return;
     }
@@ -805,6 +846,7 @@ int game_process_input(struct GameState *game, char *line, GameEventQueue *out)
                 prior_mode == GAME_MODE_DIALOGUE &&
                 prior_dialogue == DIALOGUE_LOOT)) {
         advance_world_tick(game, out);
+        mark_room_look_weather_suppressed(out);
         if (prior_mode == GAME_MODE_COMBAT &&
                 game->mode == GAME_MODE_COMBAT &&
                 (cmd.type == CMD_CRAFT || cmd.type == CMD_DROP)) {
