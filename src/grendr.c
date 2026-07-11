@@ -772,7 +772,8 @@ static int render_event_is_itemish_result(int kind)
 
 static int combat_phase_starts_block(int phase)
 {
-    return phase == GAME_COMBAT_PHASE_START ||
+    return phase == GAME_COMBAT_PHASE_STATUS ||
+        phase == GAME_COMBAT_PHASE_ENEMY_DEFEATED ||
         phase == GAME_COMBAT_PHASE_MENU;
 }
 
@@ -1643,8 +1644,9 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
                 const GameEvent *prev_ev;
 
                 prev_ev = &out->events[i - 1];
-                if (ev->arg0 == GAME_COMBAT_PHASE_START &&
-                        prev_ev->kind == GAME_EVENT_ENCOUNTER) {
+                if (ev->arg0 == GAME_COMBAT_PHASE_ENEMY_DAMAGE &&
+                        prev_ev->kind == GAME_EVENT_COMBAT &&
+                        prev_ev->arg0 == GAME_COMBAT_PHASE_START) {
                     render_gap();
                 } else if (combat_phase_starts_block(ev->arg0) &&
                         prev_ev->kind == GAME_EVENT_COMBAT &&
@@ -1655,6 +1657,11 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
             render_combat_event(ev);
             break;
         case GAME_EVENT_XP_GAIN:
+            if (i > 0 &&
+                    out->events[i - 1].kind == GAME_EVENT_COMBAT &&
+                    out->events[i - 1].arg0 == GAME_COMBAT_PHASE_ENEMY_DEFEATED) {
+                render_gap();
+            }
             render_xp_gained(ev->arg0);
             break;
         case GAME_EVENT_STAT_CHANGE:
