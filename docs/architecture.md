@@ -82,7 +82,7 @@ Player-facing copy lives in `txtres`; `grendr` owns when a blank line appears be
   - **Flavor stack** - tick `GAME_EVENT_ENVIRONMENT` / `GAME_EVENT_AMBIENT_NOISE` stack-tier lines merge into one sentence in `atmo_stack` and flush before non-flavor events ([#236](https://github.com/ianmays/dosmud/issues/236)).
   - **Scene** - room look art, encounters, NPC portraits: `render_gap()` once before the art block; `render_copy()` passes tight copy without an extra gap.
   - **Look footer** - `GAME_EVENT_ROOM_LOOK` appends weather, night, and active clue phrases to the room description in one block (`txtres_look_clue_phrase`, `txtres_look_weather_phrase`; `GAME_ROOM_LOOK_FLAG_SUPPRESS_WEATHER` skips weather when the same step already announced a transition).
-  - **Compact arrival/return** - `MOVE` or peaceful `ENCOUNTER` reply followed by flavor plus trailing `ROOM_LOOK` coalesces into one render block when `GAME_ROOM_LOOK_FLAG_TIGHT_LEAD` is set ([#236](https://github.com/ianmays/dosmud/issues/236)).
+  - **Compact arrival/return** - `MOVE` or peaceful `ENCOUNTER` reply followed by flavor plus trailing `ROOM_LOOK` coalesces into one render block only when that `ROOM_LOOK` carries `GAME_ROOM_LOOK_FLAG_TIGHT_LEAD`; `game_process_input` sets it on movement arrivals and `game_describe_current_room_tight` sets it on peaceful return snapshots ([#236](https://github.com/ianmays/dosmud/issues/236)).
 - **ASCII art:** the first row must be drawing, not a blank spacer row; room captions print on one line after the art with no trailing blank spacer rows. Section breaks come from `render_gap()`, not padding lines inside art.
 
 ### Platform (`main`, `platform.h`, `platdos.c` / `platpos.c` / `platwin.c`)

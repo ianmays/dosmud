@@ -869,7 +869,7 @@ int game_process_input(struct GameState *game, char *line, GameEventQueue *out)
         }
         /* defer look until after tick so encounter-open moves skip ROOM_LOOK */
         if (cmd.type == CMD_MOVE && game->mode == GAME_MODE_EXPLORE) {
-            do_look(game, out);
+            do_look_flags(game, out, GAME_ROOM_LOOK_FLAG_TIGHT_LEAD);
         }
     }
 

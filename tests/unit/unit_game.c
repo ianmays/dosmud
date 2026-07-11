@@ -1170,6 +1170,7 @@ TEST game_move_emits_move_then_look(void)
     ASSERT_EQ(GAME_EVENT_MOVE, out.events[0].kind);
     ASSERT_STR_EQ("north", out.events[0].text);
     ASSERT_EQ(GAME_EVENT_ROOM_LOOK, out.events[1].kind);
+    ASSERT_EQ(GAME_ROOM_LOOK_FLAG_TIGHT_LEAD, out.events[1].arg3);
     PASS();
 }
 
@@ -1193,7 +1194,8 @@ TEST game_move_arrival_suppresses_weather_in_room_look_footer(void)
     ASSERT_EQ(GAME_EVENT_ENVIRONMENT, out.events[1].kind);
     ASSERT_EQ(GAME_ENV_EVENT_WEATHER_RAIN, out.events[1].arg0);
     ASSERT_EQ(GAME_EVENT_ROOM_LOOK, out.events[2].kind);
-    ASSERT_EQ(GAME_ROOM_LOOK_FLAG_SUPPRESS_WEATHER, out.events[2].arg3);
+    ASSERT_EQ(GAME_ROOM_LOOK_FLAG_SUPPRESS_WEATHER |
+        GAME_ROOM_LOOK_FLAG_TIGHT_LEAD, out.events[2].arg3);
     PASS();
 }
 

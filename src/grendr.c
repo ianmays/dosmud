@@ -734,6 +734,9 @@ static int compact_arrival_room_look_end(const GameEventQueue *out, int move_i)
 
     for (j = move_i + 1; j < out->count; ++j) {
         if (out->events[j].kind == GAME_EVENT_ROOM_LOOK) {
+            if ((out->events[j].arg3 & GAME_ROOM_LOOK_FLAG_TIGHT_LEAD) == 0) {
+                return -1;
+            }
             return j;
         }
         if (out->events[j].kind == GAME_EVENT_ENVIRONMENT ||
@@ -752,6 +755,9 @@ static int compact_reply_room_look_end(const GameEventQueue *out, int lead_i)
 
     for (j = lead_i + 1; j < out->count; ++j) {
         if (out->events[j].kind == GAME_EVENT_ROOM_LOOK) {
+            if ((out->events[j].arg3 & GAME_ROOM_LOOK_FLAG_TIGHT_LEAD) == 0) {
+                return -1;
+            }
             return j;
         }
         if (out->events[j].kind == GAME_EVENT_ENVIRONMENT ||
