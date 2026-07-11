@@ -10,6 +10,7 @@
 #include "gatmos.h"
 #include "gwhok.h"
 #include "invent.h"
+#include "npc.h"
 #include "platform.h"
 #include "replay.h"
 #include "save.h"
@@ -183,6 +184,28 @@ static void main_render_and_prompt(struct GameState *game)
     }
 }
 
+static int main_dialogue_needs_leading_newline(const GameEvent *ev)
+{
+    if (ev == 0 || ev->kind != GAME_EVENT_DIALOGUE ||
+            ev->arg1 != GAME_DIALOGUE_PHASE_TALK) {
+        return 0;
+    }
+    switch (ev->arg0) {
+    case GAME_DIALOGUE_ACTOR_WATCHMAN:
+        return ev->arg3 == WATCHMAN_SCENE_NEUTRAL ||
+            ev->arg3 == WATCHMAN_SCENE_NEUTRAL_WARNED ||
+            ev->arg3 == WATCHMAN_SCENE_NEUTRAL_FED ||
+            ev->arg3 == WATCHMAN_SCENE_NEUTRAL_WARNED_FED;
+    case GAME_DIALOGUE_ACTOR_HERBALIST:
+        return ev->arg3 != HERBALIST_SCENE_REQUESTED_OPTIONS;
+    case GAME_DIALOGUE_ACTOR_FROG:
+    case GAME_DIALOGUE_ACTOR_ARCHIVIST:
+        return 1;
+    default:
+        return 0;
+    }
+}
+
 static int main_first_event_needs_leading_newline(void)
 {
     if (g_main_out.count <= 0) {
@@ -191,8 +214,7 @@ static int main_first_event_needs_leading_newline(void)
     if (g_main_out.events[0].kind == GAME_EVENT_ROOM_LOOK) {
         return !plat_input_echoes_line();
     }
-    if (g_main_out.events[0].kind == GAME_EVENT_DIALOGUE &&
-            g_main_out.events[0].arg1 == GAME_DIALOGUE_PHASE_TALK) {
+    if (main_dialogue_needs_leading_newline(&g_main_out.events[0])) {
         return 1;
     }
     if (g_main_out.events[0].kind == GAME_EVENT_ENCOUNTER &&
