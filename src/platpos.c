@@ -34,6 +34,11 @@ int plat_poll_line(char *out_line, int out_size)
     return 0;
 }
 
+int plat_input_echoes_line(void)
+{
+    return isatty(0);
+}
+
 time_t plat_time_now(void)
 {
     return time(NULL);

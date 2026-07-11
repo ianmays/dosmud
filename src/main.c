@@ -189,7 +189,7 @@ static int main_first_event_needs_leading_newline(void)
         return 0;
     }
     if (g_main_out.events[0].kind == GAME_EVENT_ROOM_LOOK) {
-        return 1;
+        return !plat_input_echoes_line();
     }
     if (g_main_out.events[0].kind == GAME_EVENT_DIALOGUE &&
             g_main_out.events[0].arg1 == GAME_DIALOGUE_PHASE_TALK) {
