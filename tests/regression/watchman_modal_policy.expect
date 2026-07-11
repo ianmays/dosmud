@@ -17,6 +17,7 @@ A small campfire burns quietly.
 Exits: north south west
 On the ground:
   stick (take stick)
+
 [T:0] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 >         .#######.            
        /#########\          
@@ -35,6 +36,7 @@ A one-eyed watchman leans on the parapet.
 
 [T:0] Tower [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 > Bag (0/5): empty
+
 [T:0] Tower [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 > They are waiting on your move (reply 1/2/3).
         .#######.            
@@ -51,5 +53,6 @@ A one-eyed watchman leans on the parapet.
   [2] Offer to share a meal.
   [3] Say nothing and move on.
 (Answer with 1, 2, 3, or reply <n>.)
+
 [T:0] Tower [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 > bye

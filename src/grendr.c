@@ -739,6 +739,25 @@ static int compact_reply_room_look_end(const GameEventQueue *out, int lead_i)
     return -1;
 }
 
+static int move_followed_by_scene_open(const GameEventQueue *out, int move_i)
+{
+    const GameEvent *next_ev;
+
+    if (move_i + 1 >= out->count) {
+        return 0;
+    }
+    next_ev = &out->events[move_i + 1];
+    if (next_ev->kind == GAME_EVENT_ENCOUNTER &&
+            next_ev->arg1 == GAME_ENCOUNTER_ACTION_OPEN) {
+        return 1;
+    }
+    if (next_ev->kind == GAME_EVENT_DIALOGUE &&
+            next_ev->arg1 == GAME_DIALOGUE_PHASE_TALK) {
+        return 1;
+    }
+    return 0;
+}
+
 static int compact_encounter_reply_text(const GameEvent *ev, char *buf,
                                         int bufsize)
 {
@@ -962,9 +981,8 @@ void game_render(const struct GameState *game, int leading_gap)
 
     room = &game->world.rooms[game->player.room_id];
     needed = game_xp_to_next_level(game->level);
-    if (leading_gap) {
-        render_gap();
-    }
+    (void)leading_gap;
+    render_gap();
     RENDER_PRINTF(TXT_HUD_FMT,
         game->tick, room->name, game->player_hp, game->max_hp,
         combat_player_attack_bonus(game),
@@ -1544,6 +1562,9 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
             break;
         case GAME_EVENT_MOVE:
             render_msg_moved(ev->text);
+            if (move_followed_by_scene_open(out, i)) {
+                render_gap();
+            }
             break;
         case GAME_EVENT_MAP:
             render_exploration_map(game);

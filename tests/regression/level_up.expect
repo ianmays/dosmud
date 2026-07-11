@@ -17,6 +17,7 @@ A small campfire burns quietly.
 Exits: north south west
 On the ground:
   stick (take stick)
+
 [T:0] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 > Combat starts. You HP: 20, Bandit HP: 8, Bandit Lv: 1.
 Choose: [1] Attack  [2] Defend  [3] Use salve
@@ -27,5 +28,6 @@ The Lv 1 bandit falls. The body slumps into the dust.
 You gain 12 XP.
 Level up! You are now level 2.
 Max HP 24, Damage bonus +1, Bag capacity 6.
+
 [T:1] Camp [HP:24/24] [Atk:2] [Lv:2 XP:11/35]
 > bye
