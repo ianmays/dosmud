@@ -96,7 +96,8 @@ Bandit Lv: 3.
 The bandit watches your hands. Name what you surrender with give <item>.
 
 [T:1] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
-> You hand over your stick. The bandit backs off and leaves. Camp.
+> You hand over your stick. The bandit backs off and leaves.
+Camp.
 
        *      *        $   * 
    *               *   $     
@@ -128,7 +129,8 @@ Bandit Lv: 3.
 (Answer with 1, 2, 3, or reply <n>.)
 
 [T:1] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
-> You keep your voice steady. The bandit grunts and withdraws. Camp.
+> You keep your voice steady. The bandit grunts and withdraws.
+Camp.
 
        *      *        $   * 
    *               *   $     

@@ -828,7 +828,8 @@ static void render_compact_arrival(const struct GameState *game,
     weather_kind = (look_ev->arg1 >> 1) & 3;
     day_phase = (look_ev->arg1 >> 3) & 1;
 
-    RENDER_PRINTF("You move %s. %s.\n", move_ev->text, room->name);
+    RENDER_PRINTF("You move %s.\n", move_ev->text);
+    RENDER_PRINTF("%s.\n", room->name);
     render_gap();
     art_for_room(look_ev->room_id);
     render_gap();
@@ -908,7 +909,8 @@ static void render_compact_reply_return(const struct GameState *game,
             room->name);
     }
     if (pos >= 0 && heading[0] != '\0') {
-        RENDER_PRINTF("%s.\n", heading);
+        RENDER_PRINTF("%s\n", lead_text);
+        RENDER_PRINTF("%s.\n", room->name);
     }
     render_gap();
     render_room_look_snapshot(game, look_ev->room_id, look_ev->room_item,

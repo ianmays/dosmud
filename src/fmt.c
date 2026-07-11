@@ -311,6 +311,10 @@ int fmt_exploration_map(const struct GameState *game, char *buf, int bufsize)
     if (pos < 0) {
         return -1;
     }
+    pos = fmt_buf_append_char(buf, bufsize, pos, '\n');
+    if (pos < 0) {
+        return -1;
+    }
     /* footer exits follow player standing room, not each grid cell */
     room = &game->world.rooms[game->player.room_id];
     pos = fmt_buf_append_room_exits(buf, bufsize, pos, room);

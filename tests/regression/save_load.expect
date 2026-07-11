@@ -26,7 +26,8 @@ On the ground:
 > Saved to save.dat.
 
 [T:0] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
-> You move south. Marsh.
+> You move south.
+Marsh.
 
    ########        ######    
                              
@@ -60,7 +61,8 @@ A small campfire burns quietly.
 Exits: north south west
 
 [T:0] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
-> You move south. Marsh.
+> You move south.
+Marsh.
 
    ########        ######    
                              
