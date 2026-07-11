@@ -783,6 +783,28 @@ static int combat_phase_is_action_line(int phase)
         phase == GAME_COMBAT_PHASE_ENEMY_DAMAGE;
 }
 
+static int dialogue_event_renders_portrait_scene(const GameEvent *ev)
+{
+    if (ev == 0 || ev->kind != GAME_EVENT_DIALOGUE ||
+            ev->arg1 != GAME_DIALOGUE_PHASE_TALK) {
+        return 0;
+    }
+    switch (ev->arg0) {
+    case GAME_DIALOGUE_ACTOR_WATCHMAN:
+        return ev->arg3 == WATCHMAN_SCENE_NEUTRAL ||
+            ev->arg3 == WATCHMAN_SCENE_NEUTRAL_WARNED ||
+            ev->arg3 == WATCHMAN_SCENE_NEUTRAL_FED ||
+            ev->arg3 == WATCHMAN_SCENE_NEUTRAL_WARNED_FED;
+    case GAME_DIALOGUE_ACTOR_HERBALIST:
+        return ev->arg3 != HERBALIST_SCENE_REQUESTED_OPTIONS;
+    case GAME_DIALOGUE_ACTOR_FROG:
+    case GAME_DIALOGUE_ACTOR_ARCHIVIST:
+        return 1;
+    default:
+        return 0;
+    }
+}
+
 static int flavor_followed_by_encounter_open(const GameEventQueue *out, int i)
 {
     int j;
@@ -1601,6 +1623,9 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
         }
         switch (ev->kind) {
         case GAME_EVENT_ROOM_LOOK:
+            if (i > 0 && out->events[i - 1].kind == GAME_EVENT_DIALOGUE) {
+                render_gap();
+            }
             render_room_look_snapshot(game, ev->room_id, ev->room_item,
                 ev->arg1, ev->arg0, (u8)ev->arg2, ev->arg3, 0, 1);
             break;
@@ -1675,6 +1700,11 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
             break;
         /* #160 dialogue/encounter: direct dispatch (slice no longer LEGACY). */
         case GAME_EVENT_DIALOGUE:
+            if (i > 0 &&
+                    out->events[i - 1].kind == GAME_EVENT_DIALOGUE &&
+                    dialogue_event_renders_portrait_scene(ev)) {
+                render_gap();
+            }
             render_dialogue_event(ev);
             break;
         case GAME_EVENT_ENCOUNTER:
