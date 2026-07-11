@@ -17,7 +17,6 @@ A small campfire burns quietly.
 Exits: north south west
 On the ground:
   stick (take stick)
-
 [T:0] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 > 
 [T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
@@ -33,7 +32,6 @@ On the ground:
 The bitter scent clears the orchard air for a moment.
 Your bag is full, so she leaves a salve at your feet before returning to her mortar.
 "If you are still hunting answers, start with the Ruins. If the stones lie, try the Catacombs beneath them."
-
 [T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 > 
 Orchard.
@@ -53,6 +51,5 @@ On the ground:
   berry (take berry)
   salve (take salve)
 Someone nearby might [talk].
-
 [T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 > bye

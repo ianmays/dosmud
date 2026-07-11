@@ -1197,6 +1197,25 @@ TEST game_move_arrival_suppresses_weather_in_room_look_footer(void)
     PASS();
 }
 
+TEST game_describe_current_room_keeps_active_weather_without_transition(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 1234u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game.tick = 5U;
+    game.weather_kind = GAME_WEATHER_RAIN;
+    game.weather_expires_tick = game.tick + (u32)CFG_WEATHER_DURATION_TICKS;
+    game_event_queue_reset(&out);
+    game_describe_current_room(&game, &out);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_ROOM_LOOK, out.events[0].kind);
+    ASSERT_EQ(GAME_ROOM_LOOK_FLAG_NONE, out.events[0].arg3);
+    ASSERT_EQ(GAME_WEATHER_RAIN << 1, out.events[0].arg1);
+    PASS();
+}
+
 /* MOVE defers ROOM_LOOK until explore resumes after an encounter-open tick. */
 TEST game_move_into_bandit_defers_room_look_until_after_encounter(void)
 {
@@ -1810,6 +1829,7 @@ SUITE(game) {
     RUN_TEST(game_cannot_move_emits_event);
     RUN_TEST(game_move_emits_move_then_look);
     RUN_TEST(game_move_arrival_suppresses_weather_in_room_look_footer);
+    RUN_TEST(game_describe_current_room_keeps_active_weather_without_transition);
     RUN_TEST(game_move_into_bandit_defers_room_look_until_after_encounter);
     RUN_TEST(game_wait_roaming_bandit_step_open_skips_ambient);
     RUN_TEST(game_roll_spread_zero);

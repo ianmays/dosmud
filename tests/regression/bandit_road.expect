@@ -17,7 +17,6 @@ A small campfire burns quietly.
 Exits: north south west
 On the ground:
   stick (take stick)
-
 [T:0] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 > 
 [T:1] Road [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
@@ -37,6 +36,5 @@ Bandit Lv: 1.
   [2] Hand over one item from your bag or what you are wielding (choose reply 2, then give <item>).
   [3] Talk it down and part ways.
 (Answer with 1, 2, 3, or reply <n>.)
-
 [T:2] Road [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 > bye

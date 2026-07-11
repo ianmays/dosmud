@@ -178,6 +178,14 @@ static int env_event_owned_by_look_footer(int kind)
     return 0;
 }
 
+static int env_event_is_weather_transition(int kind)
+{
+    return kind == GAME_ENV_EVENT_WEATHER_RAIN ||
+        kind == GAME_ENV_EVENT_WEATHER_FOG ||
+        kind == GAME_ENV_EVENT_WEATHER_WIND ||
+        kind == GAME_ENV_EVENT_WEATHER_CLEAR;
+}
+
 static int env_event_is_stack_tier(int kind)
 {
     if (kind == GAME_ENV_EVENT_GUST || kind == GAME_ENV_EVENT_RUSTLE ||
@@ -702,6 +710,12 @@ static const char *compact_env_event_text(int kind)
         return TXT_ATMO_BERRY_DROP;
     case GAME_ENV_EVENT_REED_DROP:
         return TXT_ATMO_REED_DROP;
+    case GAME_ENV_EVENT_WEATHER_RAIN:
+        return TXT_ATMO_WEATHER_RAIN;
+    case GAME_ENV_EVENT_WEATHER_FOG:
+        return TXT_ATMO_WEATHER_FOG;
+    case GAME_ENV_EVENT_WEATHER_WIND:
+        return TXT_ATMO_WEATHER_WIND;
     case GAME_ENV_EVENT_WEATHER_CLEAR:
         return TXT_ATMO_WEATHER_CLEAR;
     case GAME_ENV_EVENT_DAY_BREAK:
@@ -924,7 +938,10 @@ static void render_compact_arrival(const struct GameState *game,
 
         ev = &out->events[j];
         if (ev->kind == GAME_EVENT_ENVIRONMENT) {
-            if (env_event_owned_by_look_footer(ev->arg0)) {
+            if (env_event_owned_by_look_footer(ev->arg0) &&
+                    (!env_event_is_weather_transition(ev->arg0) ||
+                        (look_ev->arg3 &
+                            GAME_ROOM_LOOK_FLAG_SUPPRESS_WEATHER) == 0)) {
                 continue;
             }
             inline_text = compact_env_event_text(ev->arg0);
@@ -1061,9 +1078,9 @@ void game_render(const struct GameState *game, int leading_gap)
 
     room = &game->world.rooms[game->player.room_id];
     needed = game_xp_to_next_level(game->level);
-    /* leading_gap reserved for HUD spacing; main passes whether step had output. */
-    (void)leading_gap;
-    render_gap();
+    if (leading_gap) {
+        render_gap();
+    }
     RENDER_PRINTF(TXT_HUD_FMT,
         game->tick, room->name, game->player_hp, game->max_hp,
         combat_player_attack_bonus(game),

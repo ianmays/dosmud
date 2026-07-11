@@ -216,19 +216,6 @@ static int look_arg1_pack(int corpse_present, int weather_kind, int day_phase)
     return corpse_present | (weather_kind << 1) | (day_phase << 3);
 }
 
-/* Weather that began this tick is rendered via ENVIRONMENT; footer would repeat. */
-static int weather_started_this_tick(const struct GameState *game)
-{
-    if (game->tick == 0) {
-        return 0;
-    }
-    if (game->weather_kind == GAME_WEATHER_NONE) {
-        return 0;
-    }
-    return game->weather_expires_tick ==
-        game->tick + (u32)CFG_WEATHER_DURATION_TICKS;
-}
-
 static int queue_has_weather_transition(const GameEventQueue *out)
 {
     int i;
@@ -277,7 +264,7 @@ static void do_look_flags(struct GameState *game, GameEventQueue *out, int flags
             game->weather_kind, game->day_phase),
         game->env_room_clues[game->player.room_id],
         flags |
-            (queue_has_weather_transition(out) || weather_started_this_tick(game) ?
+            (queue_has_weather_transition(out) ?
                 GAME_ROOM_LOOK_FLAG_SUPPRESS_WEATHER :
                 GAME_ROOM_LOOK_FLAG_NONE),
         0);

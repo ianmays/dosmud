@@ -429,6 +429,12 @@ static void fixture_weather_rain_ready(struct GameState *game)
     game->weather_expires_tick = (u32)CFG_WEATHER_INITIAL_DELAY_TICKS;
 }
 
+static void fixture_weather_rain_ready_quiet(struct GameState *game)
+{
+    fixture_weather_rain_ready(game);
+    fixture_quiet_ticks_on(game);
+}
+
 /* #51: look snapshot shows fog HUD without waiting for a transition roll. */
 static void fixture_weather_fog(struct GameState *game)
 {
@@ -931,6 +937,10 @@ int testharn_apply(struct GameState *game, const char *line)
     }
     if (fixture_name_is("weather_rain_ready", name)) {
         fixture_weather_rain_ready(game);
+        return 1;
+    }
+    if (fixture_name_is("weather_rain_ready_quiet", name)) {
+        fixture_weather_rain_ready_quiet(game);
         return 1;
     }
     if (fixture_name_is("weather_fog", name)) {

@@ -17,7 +17,6 @@ A small campfire burns quietly.
 Exits: north south west
 On the ground:
   stick (take stick)
-
 [T:0] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 >             .-'''-.          
            /  o o  \        
@@ -52,7 +51,6 @@ Tall grass moves in waves around standing stones.
 Exits: west
 On the ground:
   berry (take berry)
-
 [T:0] Meadow [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 >             .-'''-.          
            /  o o  \        
@@ -87,7 +85,6 @@ Tall grass moves in waves around standing stones.
 Exits: west
 On the ground:
   berry (take berry)
-
 [T:0] Meadow [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 >             .-'''-.          
            /  o o  \        
@@ -122,6 +119,5 @@ Tall grass moves in waves around standing stones.
 Exits: west
 On the ground:
   berry (take berry)
-
 [T:0] Meadow [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 > bye
