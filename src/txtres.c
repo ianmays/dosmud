@@ -320,16 +320,16 @@ const char *txtres_look_weather_phrase(int kind)
 const char *txtres_look_clue_phrase(int kind)
 {
     if (kind == GAME_ENV_RUSTLE) {
-        return "rustling nearby";
+        return "[rustle] nearby";
     }
     if (kind == GAME_ENV_CREAK) {
-        return "creaking nearby";
+        return "[creak] nearby";
     }
     if (kind == GAME_ENV_WATER) {
-        return "water sounds beyond the path";
+        return "[water] sounds beyond the path";
     }
     if (kind == GAME_ENV_GRIT) {
-        return "loose grit skittering over stone";
+        return "loose [grit] skittering over stone";
     }
     return 0;
 }
