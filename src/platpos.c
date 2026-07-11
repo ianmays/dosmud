@@ -36,6 +36,7 @@ int plat_poll_line(char *out_line, int out_size)
 
 int plat_input_echoes_line(void)
 {
+    /* POSIX harness: piped stdin is not a tty; snapshots omit prompt gaps. */
     return isatty(0);
 }
 

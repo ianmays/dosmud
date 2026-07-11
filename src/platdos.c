@@ -56,6 +56,7 @@ int plat_poll_line(char *out_line, int out_size)
 
 int plat_input_echoes_line(void)
 {
+    /* DOS console always echoes typed input and advances on Enter. */
     return 1;
 }
 

@@ -118,8 +118,8 @@ static int render_buf_append_sentence(char *buf, int bufsize, int pos,
 }
 
 /*
- * Tick ambient flavor (inspect clues, animal noise, gust, item drops): one leading
- * gap per block, then tight lines with no blank lines between.
+ * Tick ambient flavor: merge stack-tier lines into one sentence in
+ * s_atmo_stack_buf (512 bytes); flush on overflow or before non-flavor events.
  */
 static int s_atmo_stack_open;
 static char s_atmo_stack_buf[512];
@@ -164,6 +164,7 @@ static void atmo_stack_animal_line(const char *line)
     s_atmo_stack_open = 1;
 }
 
+/* Kinds folded into look footer or compact arrival body; skip standalone render. */
 static int env_event_owned_by_look_footer(int kind)
 {
     if (kind == GAME_ENV_EVENT_RUSTLE || kind == GAME_ENV_EVENT_CREAK ||
@@ -712,6 +713,7 @@ static const char *compact_env_event_text(int kind)
     }
 }
 
+/* MOVE + optional flavor + ROOM_LOOK in one step: return look index or -1. */
 static int compact_arrival_room_look_end(const GameEventQueue *out, int move_i)
 {
     int j;
@@ -729,6 +731,7 @@ static int compact_arrival_room_look_end(const GameEventQueue *out, int move_i)
     return -1;
 }
 
+/* ENCOUNTER reply + optional flavor + ROOM_LOOK: return look index or -1. */
 static int compact_reply_room_look_end(const GameEventQueue *out, int lead_i)
 {
     int j;
@@ -812,6 +815,7 @@ static int dialogue_event_renders_portrait_scene(const GameEvent *ev)
     }
 }
 
+/* Skip ambient flavor when encounter OPEN follows; scene art owns the break. */
 static int flavor_followed_by_encounter_open(const GameEventQueue *out, int i)
 {
     int j;
@@ -875,6 +879,7 @@ static void render_room_look_snapshot(const struct GameState *game, int room_id,
                                       int look_flags, int leading_gap,
                                       int show_room_heading);
 
+/* Single arrival block: move line, room art, desc+footer+inline flavor, exits. */
 static void render_compact_arrival(const struct GameState *game,
                                    const GameEventQueue *out, int move_i,
                                    int look_i)
@@ -960,6 +965,7 @@ static void render_compact_arrival(const struct GameState *game,
     }
 }
 
+/* Bandit give/intimidate return: reply lead, room name, then tight look snapshot. */
 static void render_compact_reply_return(const struct GameState *game,
                                         const GameEventQueue *out, int look_i,
                                         const char *lead_text)
@@ -1012,6 +1018,7 @@ static void render_room_look_snapshot(const struct GameState *game, int room_id,
         RENDER_PRINTF("%s.\n", room->name);
         render_gap();
     }
+    /* leading_gap: 1 uses game_print_location_art prelude; 0 prints art inline. */
     if (leading_gap) {
         game_print_location_art(room_id);
     } else {
@@ -1054,6 +1061,7 @@ void game_render(const struct GameState *game, int leading_gap)
 
     room = &game->world.rooms[game->player.room_id];
     needed = game_xp_to_next_level(game->level);
+    /* leading_gap reserved for HUD spacing; main passes whether step had output. */
     (void)leading_gap;
     render_gap();
     RENDER_PRINTF(TXT_HUD_FMT,
@@ -1603,6 +1611,7 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
         if (s_atmo_stack_open && !render_event_is_flavor_kind(ev->kind)) {
             atmo_stack_flush();
         }
+        /* #236: coalesce move/reply + trailing ROOM_LOOK before per-kind dispatch. */
         if (ev->kind == GAME_EVENT_MOVE) {
             compact_look_i = compact_arrival_room_look_end(out, i);
             if (compact_look_i >= 0) {

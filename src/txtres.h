@@ -95,6 +95,7 @@ extern const char *const TXT_UI_GROUND_ITEMS_TOO_LONG;
 extern const char *const TXT_UI_BANDIT_CORPSE;
 extern const char *const TXT_UI_NPC_HINT;
 extern const char *const TXT_LOOK_NIGHT;
+/* Inline look footer phrases; grendr build_room_look_footer joins without newlines. */
 const char *txtres_look_weather_phrase(int kind);
 const char *txtres_look_clue_phrase(int kind);
 

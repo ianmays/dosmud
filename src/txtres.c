@@ -303,6 +303,7 @@ const char *const TXT_UI_BANDIT_CORPSE = "  bandit corpse (loot)\n";
 const char *const TXT_UI_NPC_HINT = "Someone nearby might [talk].\n";
 const char *const TXT_LOOK_NIGHT = "Night.";
 
+/* Short sentences for inline look footer; return 0 when kind is GAME_WEATHER_NONE. */
 const char *txtres_look_weather_phrase(int kind)
 {
     if (kind == GAME_WEATHER_RAIN) {
@@ -317,6 +318,7 @@ const char *txtres_look_weather_phrase(int kind)
     return 0;
 }
 
+/* Lower-case clue phrases; grendr capitalizes and joins in build_room_look_footer. */
 const char *txtres_look_clue_phrase(int kind)
 {
     if (kind == GAME_ENV_RUSTLE) {

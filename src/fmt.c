@@ -168,6 +168,7 @@ int fmt_room_ground_items(const int *room_items, char *buf, int bufsize)
     if (ground_count == 0) {
         return 0;
     }
+    /* Always list format (#236); single ground items use header + indented line. */
     pos = 0;
     pos = fmt_buf_append_str(buf, bufsize, pos, TXT_UI_GROUND_ITEMS_HEADER);
     if (pos < 0) {

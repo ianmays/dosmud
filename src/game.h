@@ -173,6 +173,7 @@ struct GameState {
 
 void game_init(struct GameState *game, u32 seed);
 void game_describe_current_room(struct GameState *game, GameEventQueue *out);
+/* ROOM_LOOK with TIGHT_LEAD for encounter/reply returns; grendr coalesces. */
 void game_describe_current_room_tight(struct GameState *game,
                                       GameEventQueue *out);
 int game_process_input(struct GameState *game, char *line, GameEventQueue *out);

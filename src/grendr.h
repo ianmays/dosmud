@@ -17,6 +17,7 @@ void render_set_suppress(int on);
 
 void game_print_location_art(int room_id);
 void render_exploration_map(const struct GameState *game);
+/* HUD after step output; leading_gap reserved (main passes step-had-events). */
 void game_render(const struct GameState *game, int leading_gap);
 /* Drain per-step GameEventQueue; dispatch generic GameEvent kinds to render_* helpers. */
 void game_render_output(const struct GameState *game, const GameEventQueue *out);

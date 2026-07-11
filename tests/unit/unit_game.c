@@ -1173,6 +1173,7 @@ TEST game_move_emits_move_then_look(void)
     PASS();
 }
 
+/* Same-step weather ENVIRONMENT must set SUPPRESS_WEATHER on trailing ROOM_LOOK. */
 TEST game_move_arrival_suppresses_weather_in_room_look_footer(void)
 {
     struct GameState game;

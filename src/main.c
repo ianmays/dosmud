@@ -184,6 +184,7 @@ static void main_render_and_prompt(struct GameState *game)
     }
 }
 
+/* Portrait TALK scenes need a blank line before drain when input has no echo. */
 static int main_dialogue_needs_leading_newline(const GameEvent *ev)
 {
     if (ev == 0 || ev->kind != GAME_EVENT_DIALOGUE ||
@@ -206,6 +207,7 @@ static int main_dialogue_needs_leading_newline(const GameEvent *ev)
     }
 }
 
+/* Platform edge: piped test input has no prompt gap; interactive tty echoes. */
 static int main_first_event_needs_leading_newline(void)
 {
     if (g_main_out.count <= 0) {
@@ -440,6 +442,7 @@ static int main_run_idle_ticks(struct GameState *game, time_t *last_tick_time,
             return -1;
         }
         if (g_main_out.count > 0) {
+            /* Separate idle-tick output from the prior HUD line. */
             printf("\n");
         }
         game_render_output(game, &g_main_out);

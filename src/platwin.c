@@ -62,6 +62,7 @@ int plat_poll_line(char *out_line, int out_size)
 
 int plat_input_echoes_line(void)
 {
+    /* Win32 console path matches DOS: echoed line input. */
     return 1;
 }
 

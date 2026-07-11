@@ -216,6 +216,7 @@ static int look_arg1_pack(int corpse_present, int weather_kind, int day_phase)
     return corpse_present | (weather_kind << 1) | (day_phase << 3);
 }
 
+/* Weather that began this tick is rendered via ENVIRONMENT; footer would repeat. */
 static int weather_started_this_tick(const struct GameState *game)
 {
     if (game->tick == 0) {
@@ -309,6 +310,10 @@ void game_describe_current_room(struct GameState *game, GameEventQueue *out)
     do_look(game, out);
 }
 
+/*
+ * Same ROOM_LOOK payload as game_describe_current_room; TIGHT_LEAD tells grendr
+ * to coalesce ENCOUNTER reply + ROOM_LOOK into one compact return block (#236).
+ */
 void game_describe_current_room_tight(struct GameState *game, GameEventQueue *out)
 {
     do_look_flags(game, out, GAME_ROOM_LOOK_FLAG_TIGHT_LEAD);
