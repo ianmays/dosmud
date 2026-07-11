@@ -299,7 +299,7 @@ const char *const TXT_UI_GROUND_ITEMS_HEADER = "On the ground:\n";
 const char *const TXT_UI_GROUND_ITEM_LINE_FMT = "  %s (take %s)\n";
 const char *const TXT_UI_GROUND_ITEMS_TOO_LONG =
     "Too many ground items to list here.\n";
-const char *const TXT_UI_BANDIT_CORPSE = "A bandit corpse lies here. (loot)\n";
+const char *const TXT_UI_BANDIT_CORPSE = "  bandit corpse (loot)\n";
 const char *const TXT_UI_NPC_HINT = "Someone nearby might [talk].\n";
 const char *const TXT_LOOK_NIGHT = "Night.";
 
@@ -323,7 +323,7 @@ const char *txtres_look_clue_phrase(int kind)
         return "There's a faint [rustle] nearby.";
     }
     if (kind == GAME_ENV_CREAK) {
-        return "A faint [creaking] sound can be heard.";
+        return "A faint [creaking] sound can be heard";
     }
     if (kind == GAME_ENV_WATER) {
         return "[water] sounds beyond the path";
