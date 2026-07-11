@@ -770,6 +770,12 @@ static int render_event_is_itemish_result(int kind)
         kind == GAME_EVENT_EQUIP_RESULT;
 }
 
+static int combat_phase_starts_block(int phase)
+{
+    return phase == GAME_COMBAT_PHASE_START ||
+        phase == GAME_COMBAT_PHASE_MENU;
+}
+
 static int flavor_followed_by_encounter_open(const GameEventQueue *out, int i)
 {
     int j;
@@ -1633,6 +1639,19 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
             break;
         /* #159 combat/progression: direct dispatch (combat/gprog no longer LEGACY). */
         case GAME_EVENT_COMBAT:
+            if (i > 0) {
+                const GameEvent *prev_ev;
+
+                prev_ev = &out->events[i - 1];
+                if (ev->arg0 == GAME_COMBAT_PHASE_START &&
+                        prev_ev->kind == GAME_EVENT_ENCOUNTER) {
+                    render_gap();
+                } else if (combat_phase_starts_block(ev->arg0) &&
+                        prev_ev->kind == GAME_EVENT_COMBAT &&
+                        prev_ev->arg0 != GAME_COMBAT_PHASE_MENU) {
+                    render_gap();
+                }
+            }
             render_combat_event(ev);
             break;
         case GAME_EVENT_XP_GAIN:

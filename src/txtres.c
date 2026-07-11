@@ -350,12 +350,12 @@ const char *const TXT_REPLY_PROMPT = "(Answer with 1, 2, 3, or reply <n>.)\n";
 const char *const TXT_REPLY_PROMPT_FMT = "(Answer with 1-%d or reply <n>.)\n";
 
 const char *const TXT_COMBAT_START_FMT =
-    "Combat starts. You HP: %d, Bandit HP: %d, Bandit Lv: %d.\n";
+    "Combat starts. Your HP: %d, Bandit HP: %d, Bandit Lv: %d.\n";
 const char *const TXT_COMBAT_MENU = "Choose: [1] Attack  [2] Defend  [3] Use salve\n";
 const char *const TXT_COMBAT_ENEMY_STRIKE_FMT = "The bandit strikes for %d damage.\n";
 const char *const TXT_COMBAT_PLAYER_FALLEN = "You collapse. The road takes everything.\n";
 const char *const TXT_COMBAT_STATUS_FMT =
-    "You HP: %d, Bandit HP: %d, Bandit Lv: %d.\n";
+    "Your HP: %d, Bandit HP: %d, Bandit Lv: %d.\n";
 const char *const TXT_COMBAT_PLAYER_HIT_FMT = "You hit the bandit for %d damage.\n";
 const char *const TXT_COMBAT_BRACED = "You brace for the incoming strike.\n";
 const char *const TXT_COMBAT_NO_SALVE = "You fumble for a salve, but you have none.\n";
