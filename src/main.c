@@ -168,6 +168,7 @@ static int main_startup(struct GameState *game, u32 rng_seed)
     if (main_capture_replay(REPLAY_STEP_STARTUP, 0, game) != 0) {
         return 1;
     }
+    printf("\n");
     game_render_output(game, &g_main_out);
     game_render(game, g_main_out.count == 0);
     print_prompt();

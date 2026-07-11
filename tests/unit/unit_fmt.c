@@ -123,13 +123,16 @@ TEST fmt_ground_single(void)
     struct GameState game;
     char out[UNIT_FMT_BUF];
     int len;
+    static const char expect[] =
+        "On the ground:\n"
+        "  stick (take stick)\n";
 
     unit_game_fresh(&game, 11u);
     game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
     game.room_item[WORLD_ROOM_CAMP][0] = ITEM_STICK;
     len = fmt_room_ground_items(game.room_item[WORLD_ROOM_CAMP], out, (int)sizeof(out));
-    ASSERT_EQ(35, len);
-    ASSERT_STR_EQ("On the ground: stick. (take stick)\n", out);
+    ASSERT_EQ((int)(sizeof(expect) - 1), len);
+    ASSERT_STR_EQ(expect, out);
     PASS();
 }
 

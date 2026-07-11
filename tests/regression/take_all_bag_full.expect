@@ -1,6 +1,9 @@
 TEST MODE
 dosmud (seed 1234)
 Type 'help' for commands.
+
+Camp.
+
        *      *        $   * 
    *               *   $     
       _________        $     
@@ -9,14 +12,17 @@ Type 'help' for commands.
 ___/_______/__|__\ ___XXX___
  (campfire at first watch)
 
-Camp
 A small campfire burns quietly.
+
 Exits: north south west
-On the ground: stick. (take stick)
+On the ground:
+  stick (take stick)
 [T:0] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 > 
 [T:0] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 > 
+Camp.
+
        *      *        $   * 
    *               *   $     
       _________        $     
@@ -25,8 +31,8 @@ On the ground: stick. (take stick)
 ___/_______/__|__\ ___XXX___
  (campfire at first watch)
 
-Camp
 A small campfire burns quietly.
+
 Exits: north south west
 On the ground:
   stick (take stick)
@@ -35,6 +41,8 @@ On the ground:
 > Your bag is full (5 items max).
 [T:1] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 > 
+Camp.
+
        *      *        $   * 
    *               *   $     
       _________        $     
@@ -43,8 +51,8 @@ On the ground:
 ___/_______/__|__\ ___XXX___
  (campfire at first watch)
 
-Camp
 A small campfire burns quietly.
+
 Exits: north south west
 On the ground:
   stick (take stick)
