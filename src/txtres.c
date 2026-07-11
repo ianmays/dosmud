@@ -231,7 +231,7 @@ const char *const TXT_HELP_WAIT =
     "wait (.) - pass time without moving; the world tick advances.";
 
 const char *const TXT_HELP_INSPECT =
-    "inspect <rustle|rustles|creak|creaks|water|grit> - follow a clue named in look. Synonyms: examine, investigate.";
+    "inspect <rustle|rustles|rustling|creak|creaks|creaking|water|grit> - follow a clue named in look. Synonyms: examine, investigate.";
 
 const char *const TXT_HELP_TAKE =
     "take <item> (get, pickup), or take all - pick up items from the ground into your bag.";
@@ -320,10 +320,10 @@ const char *txtres_look_weather_phrase(int kind)
 const char *txtres_look_clue_phrase(int kind)
 {
     if (kind == GAME_ENV_RUSTLE) {
-        return "[rustle] nearby";
+        return "There's a faint [rustle] nearby.";
     }
     if (kind == GAME_ENV_CREAK) {
-        return "[creak] nearby";
+        return "A faint [creaking] sound can be heard.";
     }
     if (kind == GAME_ENV_WATER) {
         return "[water] sounds beyond the path";

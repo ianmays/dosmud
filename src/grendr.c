@@ -588,6 +588,7 @@ static int look_footer_append_clue(char *buf, int bufsize, int pos,
 {
     char clue_buf[80];
     int clue_len;
+    const char *sep;
 
     if (phrase == 0) {
         return pos;
@@ -601,8 +602,14 @@ static int look_footer_append_clue(char *buf, int bufsize, int pos,
             clue_buf[0] >= 'a' && clue_buf[0] <= 'z') {
         clue_buf[0] = (char)(clue_buf[0] - ('a' - 'A'));
     }
-    return look_footer_append_sep(buf, bufsize, pos,
-        first_clue ? " " : "; ", clue_buf);
+    sep = first_clue ? " " : "; ";
+    if (!first_clue && pos > 0 &&
+            (buf[pos - 1] == '.' ||
+             buf[pos - 1] == '!' ||
+             buf[pos - 1] == '?')) {
+        sep = " ";
+    }
+    return look_footer_append_sep(buf, bufsize, pos, sep, clue_buf);
 }
 
 static int build_room_look_footer(char *footer, int bufsize, int weather_kind,
