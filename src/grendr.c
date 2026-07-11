@@ -741,19 +741,48 @@ static int compact_reply_room_look_end(const GameEventQueue *out, int lead_i)
 
 static int move_followed_by_scene_open(const GameEventQueue *out, int move_i)
 {
-    const GameEvent *next_ev;
+    int j;
 
-    if (move_i + 1 >= out->count) {
+    for (j = move_i + 1; j < out->count; ++j) {
+        const GameEvent *next_ev;
+
+        next_ev = &out->events[j];
+        if (next_ev->kind == GAME_EVENT_ENCOUNTER &&
+                next_ev->arg1 == GAME_ENCOUNTER_ACTION_OPEN) {
+            return 1;
+        }
+        if (next_ev->kind == GAME_EVENT_DIALOGUE &&
+                next_ev->arg1 == GAME_DIALOGUE_PHASE_TALK) {
+            return 1;
+        }
+        if (render_event_is_flavor_kind(next_ev->kind)) {
+            continue;
+        }
         return 0;
     }
-    next_ev = &out->events[move_i + 1];
-    if (next_ev->kind == GAME_EVENT_ENCOUNTER &&
-            next_ev->arg1 == GAME_ENCOUNTER_ACTION_OPEN) {
-        return 1;
-    }
-    if (next_ev->kind == GAME_EVENT_DIALOGUE &&
-            next_ev->arg1 == GAME_DIALOGUE_PHASE_TALK) {
-        return 1;
+    return 0;
+}
+
+static int render_event_is_itemish_result(int kind)
+{
+    return kind == GAME_EVENT_ITEM_RESULT ||
+        kind == GAME_EVENT_CRAFT_RESULT ||
+        kind == GAME_EVENT_EQUIP_RESULT;
+}
+
+static int flavor_followed_by_encounter_open(const GameEventQueue *out, int i)
+{
+    int j;
+
+    for (j = i + 1; j < out->count; ++j) {
+        if (out->events[j].kind == GAME_EVENT_ENCOUNTER &&
+                out->events[j].arg1 == GAME_ENCOUNTER_ACTION_OPEN) {
+            return 1;
+        }
+        if (render_event_is_flavor_kind(out->events[j].kind)) {
+            continue;
+        }
+        return 0;
     }
     return 0;
 }
@@ -1624,6 +1653,9 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
             break;
         /* #161 ambient/inspect: direct dispatch (gatmos no longer LEGACY). */
         case GAME_EVENT_ENVIRONMENT:
+            if (flavor_followed_by_encounter_open(out, i)) {
+                break;
+            }
             if (env_event_owned_by_look_footer(ev->arg0)) {
                 int j;
 
@@ -1636,12 +1668,23 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
                     break;
                 }
             }
+            if (i > 0 &&
+                    render_event_is_itemish_result(out->events[i - 1].kind)) {
+                render_gap();
+            }
             render_environment_event(ev);
             if (env_event_is_stack_tier(ev->arg0)) {
                 flavor = 1;
             }
             break;
         case GAME_EVENT_AMBIENT_NOISE:
+            if (flavor_followed_by_encounter_open(out, i)) {
+                break;
+            }
+            if (i > 0 &&
+                    render_event_is_itemish_result(out->events[i - 1].kind)) {
+                render_gap();
+            }
             render_ambient_noise_event(ev);
             flavor = 1;
             break;
