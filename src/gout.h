@@ -60,6 +60,24 @@ enum GameEventRoomLookFlags {
     GAME_ROOM_LOOK_FLAG_TIGHT_LEAD = 2
 };
 
+/* Shared inspect clue kind ids: room snapshots and footer copy use these. */
+#define GAME_ENV_NONE 0
+#define GAME_ENV_RUSTLE 1
+#define GAME_ENV_CREAK 2
+#define GAME_ENV_WATER 3
+#define GAME_ENV_GRIT 4
+#define GAME_ENV_CLUE_MASK 0x0Fu
+/* Bit in env_room_clues[] for kind; 0 when kind is not RUSTLE..GRIT. */
+#define GAME_ENV_CLUE_BIT(kind) \
+    (((kind) >= GAME_ENV_RUSTLE && (kind) <= GAME_ENV_GRIT) ? \
+    (1u << ((kind) - 1)) : 0u)
+
+/* Shared weather kind ids: ROOM_LOOK snapshots and txtres footer copy use these. */
+#define GAME_WEATHER_NONE 0
+#define GAME_WEATHER_RAIN 1
+#define GAME_WEATHER_FOG 2
+#define GAME_WEATHER_WIND 3
+
 /*
  * Inventory/item payload contract (#158, #129):
  * ITEM_RESULT  arg0=GameEventItemAction arg1=GameEventItemOutcome

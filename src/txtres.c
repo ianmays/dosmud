@@ -1,6 +1,5 @@
 #include "txtres.h"
 #include "config.h"
-#include "game.h"
 #include "gout.h"
 #include "npc.h"
 #include "version.h"
@@ -322,16 +321,16 @@ const char *txtres_look_weather_phrase(int kind)
 const char *txtres_look_clue_phrase(int kind)
 {
     if (kind == GAME_ENV_RUSTLE) {
-        return "There's a faint [rustle] nearby.";
+        return "rustling nearby";
     }
     if (kind == GAME_ENV_CREAK) {
-        return "A faint [creaking] sound can be heard";
+        return "faint creaking nearby";
     }
     if (kind == GAME_ENV_WATER) {
-        return "[water] sounds beyond the path";
+        return "water sounds beyond the path";
     }
     if (kind == GAME_ENV_GRIT) {
-        return "loose [grit] skittering over stone";
+        return "loose grit skittering over stone";
     }
     return 0;
 }
