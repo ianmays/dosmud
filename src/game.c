@@ -216,7 +216,44 @@ static int look_arg1_pack(int corpse_present, int weather_kind, int day_phase)
     return corpse_present | (weather_kind << 1) | (day_phase << 3);
 }
 
-static void do_look(struct GameState *game, GameEventQueue *out)
+static int queue_has_weather_transition(const GameEventQueue *out)
+{
+    int i;
+
+    for (i = 0; i < out->count; ++i) {
+        if (out->events[i].kind != GAME_EVENT_ENVIRONMENT) {
+            continue;
+        }
+        if (out->events[i].arg0 == GAME_ENV_EVENT_WEATHER_RAIN ||
+                out->events[i].arg0 == GAME_ENV_EVENT_WEATHER_FOG ||
+                out->events[i].arg0 == GAME_ENV_EVENT_WEATHER_WIND ||
+                out->events[i].arg0 == GAME_ENV_EVENT_WEATHER_CLEAR) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+static void mark_room_look_weather_suppressed(GameEventQueue *out)
+{
+    int i;
+
+    /* Reply/encounter slices can queue ROOM_LOOK before the tick runs. Mark
+     * those earlier snapshots after weather enqueue so same-step copy does not
+     * repeat in the compact footer.
+     */
+    if (!queue_has_weather_transition(out)) {
+        return;
+    }
+    for (i = 0; i < out->count; ++i) {
+        if (out->events[i].kind != GAME_EVENT_ROOM_LOOK) {
+            continue;
+        }
+        out->events[i].arg3 |= GAME_ROOM_LOOK_FLAG_SUPPRESS_WEATHER;
+    }
+}
+
+static void do_look_flags(struct GameState *game, GameEventQueue *out, int flags)
 {
     int i;
     GameEvent *ev;
@@ -225,7 +262,12 @@ static void do_look(struct GameState *game, GameEventQueue *out)
         npc_room_actor(game->player.room_id),
         look_arg1_pack(game->corpse_present[game->player.room_id],
             game->weather_kind, game->day_phase),
-        game->env_room_clues[game->player.room_id], 0, 0);
+        game->env_room_clues[game->player.room_id],
+        flags |
+            (queue_has_weather_transition(out) ?
+                GAME_ROOM_LOOK_FLAG_SUPPRESS_WEATHER :
+                GAME_ROOM_LOOK_FLAG_NONE),
+        0);
     if (ev == 0) {
         return;
     }
@@ -233,6 +275,11 @@ static void do_look(struct GameState *game, GameEventQueue *out)
     for (i = 0; i < CFG_AREA_ITEM_SLOTS; ++i) {
         ev->room_item[i] = game->room_item[game->player.room_id][i];
     }
+}
+
+static void do_look(struct GameState *game, GameEventQueue *out)
+{
+    do_look_flags(game, out, GAME_ROOM_LOOK_FLAG_NONE);
 }
 
 /* MAP: generic event only; map layout and terminal output stay in grendr. */
@@ -248,6 +295,15 @@ static void do_map(GameEventQueue *out)
 void game_describe_current_room(struct GameState *game, GameEventQueue *out)
 {
     do_look(game, out);
+}
+
+/*
+ * Same ROOM_LOOK payload as game_describe_current_room; TIGHT_LEAD tells grendr
+ * to coalesce ENCOUNTER reply + ROOM_LOOK into one compact return block (#236).
+ */
+void game_describe_current_room_tight(struct GameState *game, GameEventQueue *out)
+{
+    do_look_flags(game, out, GAME_ROOM_LOOK_FLAG_TIGHT_LEAD);
 }
 
 static void reset_mutable_state(struct GameState *game, int room_id, u32 tick)
@@ -805,6 +861,7 @@ int game_process_input(struct GameState *game, char *line, GameEventQueue *out)
                 prior_mode == GAME_MODE_DIALOGUE &&
                 prior_dialogue == DIALOGUE_LOOT)) {
         advance_world_tick(game, out);
+        mark_room_look_weather_suppressed(out);
         if (prior_mode == GAME_MODE_COMBAT &&
                 game->mode == GAME_MODE_COMBAT &&
                 (cmd.type == CMD_CRAFT || cmd.type == CMD_DROP)) {
@@ -812,7 +869,7 @@ int game_process_input(struct GameState *game, char *line, GameEventQueue *out)
         }
         /* defer look until after tick so encounter-open moves skip ROOM_LOOK */
         if (cmd.type == CMD_MOVE && game->mode == GAME_MODE_EXPLORE) {
-            do_look(game, out);
+            do_look_flags(game, out, GAME_ROOM_LOOK_FLAG_TIGHT_LEAD);
         }
     }
 

@@ -278,6 +278,14 @@ static void fixture_bandit_road(struct GameState *game)
     fixture_traveler_off(game);
 }
 
+static void fixture_weather_rain_bandit_road(struct GameState *game)
+{
+    fixture_bandit_road(game);
+    game->tick = (u32)CFG_WEATHER_INITIAL_DELAY_TICKS - 1UL;
+    game->weather_kind = GAME_WEATHER_NONE;
+    game->weather_expires_tick = (u32)CFG_WEATHER_INITIAL_DELAY_TICKS;
+}
+
 static int fixture_at_marsh_reed(struct GameState *game)
 {
     game_reset_fixture_baseline(game, WORLD_ROOM_MARSH, 2);
@@ -427,6 +435,12 @@ static void fixture_weather_rain_ready(struct GameState *game)
     game->tick = (u32)CFG_WEATHER_INITIAL_DELAY_TICKS - 1UL;
     game->weather_kind = GAME_WEATHER_NONE;
     game->weather_expires_tick = (u32)CFG_WEATHER_INITIAL_DELAY_TICKS;
+}
+
+static void fixture_weather_rain_ready_quiet(struct GameState *game)
+{
+    fixture_weather_rain_ready(game);
+    fixture_quiet_ticks_on(game);
 }
 
 /* #51: look snapshot shows fog HUD without waiting for a transition roll. */
@@ -859,6 +873,10 @@ int testharn_apply(struct GameState *game, const char *line)
         fixture_bandit_road(game);
         return 1;
     }
+    if (fixture_name_is("weather_rain_bandit_road", name)) {
+        fixture_weather_rain_bandit_road(game);
+        return 1;
+    }
     if (fixture_name_is("at_marsh_reed", name)) {
         if (!fixture_at_marsh_reed(game)) {
             return -2;
@@ -931,6 +949,10 @@ int testharn_apply(struct GameState *game, const char *line)
     }
     if (fixture_name_is("weather_rain_ready", name)) {
         fixture_weather_rain_ready(game);
+        return 1;
+    }
+    if (fixture_name_is("weather_rain_ready_quiet", name)) {
+        fixture_weather_rain_ready_quiet(game);
         return 1;
     }
     if (fixture_name_is("weather_fog", name)) {

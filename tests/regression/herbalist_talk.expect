@@ -2,25 +2,24 @@ TEST MODE
 dosmud (seed 1234)
 Type 'help' for commands.
 
+Camp.
+
        *      *        $   * 
    *               *   $     
       _________        $     
      /       /|\       $    
     /       / | \     \|/  
 ___/_______/__|__\ ___XXX___
-                             
- (campfire at first watch)                             
+ (campfire at first watch)
 
-Camp
 A small campfire burns quietly.
+
 Exits: north south west
-On the ground: stick. (take stick)
-
+On the ground:
+  stick (take stick)
 [T:0] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
-
 > 
 [T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
-
 > 
         _;;;;;;_             
        / _    _ \           
@@ -28,8 +27,7 @@ On the ground: stick. (take stick)
        |    ^   |            
         \__ - _/            
        ___|''' |___          
-                             
-  (hands stained green)                             
+  (hands stained green)
 
 An herbalist kneels among fallen fruit.
 "I could use a steady pair of hands, if you're offering them."
@@ -37,17 +35,13 @@ An herbalist kneels among fallen fruit.
   [2] Trade gossip from the road.
   [3] Leave politely.
 (Answer with 1, 2, 3, or reply <n>.)
-
 [T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
-
 > She lowers her voice. "The marsh still grows a root that cuts fever fast. Bring me one, and I'll point you toward older answers than mine."
   [1] Ask where to look.
   [2] Admit you do not have it yet.
   [3] Leave and keep searching.
 (Answer with 1, 2, 3, or reply <n>.)
-
 [T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
-
 > 
         _;;;;;;_             
        / _    _ \           
@@ -55,8 +49,7 @@ An herbalist kneels among fallen fruit.
        |    ^   |            
         \__ - _/            
        ___|''' |___          
-                             
-  (hands stained green)                             
+  (hands stained green)
 
 The herbalist brushes pulp from her palms.
 "Bring me a marsh-root from the black water marsh. Freshly cut, not drowned."
@@ -64,13 +57,9 @@ The herbalist brushes pulp from her palms.
   [2] Trade gossip from the road.
   [3] Leave politely.
 (Answer with 1, 2, 3, or reply <n>.)
-
 [T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
-
 > She smiles thinly. "Road gossip keeps longer than fruit. Marsh-root does not."
-
 [T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
-
 > 
         _;;;;;;_             
        / _    _ \           
@@ -78,8 +67,7 @@ The herbalist brushes pulp from her palms.
        |    ^   |            
         \__ - _/            
        ___|''' |___          
-                             
-  (hands stained green)                             
+  (hands stained green)
 
 The herbalist brushes pulp from her palms.
 "Bring me a marsh-root from the black water marsh. Freshly cut, not drowned."
@@ -87,11 +75,7 @@ The herbalist brushes pulp from her palms.
   [2] Trade gossip from the road.
   [3] Leave politely.
 (Answer with 1, 2, 3, or reply <n>.)
-
 [T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
-
 > She turns back to sorting bruised fruit.
-
 [T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
-
 > bye

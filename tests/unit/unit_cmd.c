@@ -117,9 +117,13 @@ TEST command_parse_inspect(void)
     ASSERT_EQ(1, cmd.arg);
     ASSERT_EQ(1, parse_line("inspect rustles", &cmd));
     ASSERT_EQ(1, cmd.arg);
+    ASSERT_EQ(1, parse_line("inspect rustling", &cmd));
+    ASSERT_EQ(1, cmd.arg);
     ASSERT_EQ(1, parse_line("inspect reeds", &cmd));
     ASSERT_EQ(1, cmd.arg);
     ASSERT_EQ(1, parse_line("inspect creak", &cmd));
+    ASSERT_EQ(2, cmd.arg);
+    ASSERT_EQ(1, parse_line("inspect creaking", &cmd));
     ASSERT_EQ(2, cmd.arg);
     ASSERT_EQ(1, parse_line("inspect water", &cmd));
     ASSERT_EQ(3, cmd.arg);

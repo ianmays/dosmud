@@ -11,6 +11,8 @@
 
 /* Poll stdin without blocking. Returns 1 line ready, 0 none, -1 EOF/error. */
 int plat_poll_line(char *out_line, int out_size);
+/* Returns non-zero when typed input is echoed and Enter advances the line. */
+int plat_input_echoes_line(void);
 
 time_t plat_time_now(void);
 

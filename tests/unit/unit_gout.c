@@ -282,6 +282,19 @@ TEST game_event_push_records_room_look_without_clue_args(void)
     PASS();
 }
 
+TEST game_event_push_records_room_look_flags(void)
+{
+    GameEventQueue out;
+    GameEvent *ev;
+
+    game_event_queue_reset(&out);
+    ev = game_event_push(&out, GAME_EVENT_ROOM_LOOK, 1, 5, 0,
+        GAME_ROOM_LOOK_FLAG_SUPPRESS_WEATHER, 0);
+    ASSERT(0 != ev);
+    ASSERT_EQ(GAME_ROOM_LOOK_FLAG_SUPPRESS_WEATHER, out.events[0].arg3);
+    PASS();
+}
+
 TEST game_event_push_records_weather_environment_kinds(void)
 {
     GameEventQueue out;
@@ -494,6 +507,7 @@ SUITE(gout) {
     RUN_TEST(game_observation_outcome_values_are_stable);
     RUN_TEST(game_event_push_records_room_look_with_clue_mask);
     RUN_TEST(game_event_push_records_room_look_without_clue_args);
+    RUN_TEST(game_event_push_records_room_look_flags);
     RUN_TEST(game_event_push_records_weather_environment_kinds);
     RUN_TEST(game_event_push_records_daynight_environment_kinds);
     RUN_TEST(game_event_push_records_dialogue_encounter_kinds);

@@ -10,6 +10,7 @@
 #include "gatmos.h"
 #include "gwhok.h"
 #include "invent.h"
+#include "npc.h"
 #include "platform.h"
 #include "replay.h"
 #include "save.h"
@@ -168,8 +169,9 @@ static int main_startup(struct GameState *game, u32 rng_seed)
     if (main_capture_replay(REPLAY_STEP_STARTUP, 0, game) != 0) {
         return 1;
     }
+    printf("\n");
     game_render_output(game, &g_main_out);
-    game_render(game);
+    game_render(game, g_main_out.count == 0);
     print_prompt();
     return 0;
 }
@@ -177,9 +179,51 @@ static int main_startup(struct GameState *game, u32 rng_seed)
 static void main_render_and_prompt(struct GameState *game)
 {
     if (game->running) {
-        game_render(game);
+        game_render(game, g_main_out.count == 0);
         print_prompt();
     }
+}
+
+/* Portrait TALK scenes need a blank line before drain when input has no echo. */
+static int main_dialogue_needs_leading_newline(const GameEvent *ev)
+{
+    if (ev == 0 || ev->kind != GAME_EVENT_DIALOGUE ||
+            ev->arg1 != GAME_DIALOGUE_PHASE_TALK) {
+        return 0;
+    }
+    switch (ev->arg0) {
+    case GAME_DIALOGUE_ACTOR_WATCHMAN:
+        return ev->arg3 == WATCHMAN_SCENE_NEUTRAL ||
+            ev->arg3 == WATCHMAN_SCENE_NEUTRAL_WARNED ||
+            ev->arg3 == WATCHMAN_SCENE_NEUTRAL_FED ||
+            ev->arg3 == WATCHMAN_SCENE_NEUTRAL_WARNED_FED;
+    case GAME_DIALOGUE_ACTOR_HERBALIST:
+        return ev->arg3 != HERBALIST_SCENE_REQUESTED_OPTIONS;
+    case GAME_DIALOGUE_ACTOR_FROG:
+    case GAME_DIALOGUE_ACTOR_ARCHIVIST:
+        return 1;
+    default:
+        return 0;
+    }
+}
+
+/* Platform edge: piped test input has no prompt gap; interactive tty echoes. */
+static int main_first_event_needs_leading_newline(void)
+{
+    if (g_main_out.count <= 0) {
+        return 0;
+    }
+    if (g_main_out.events[0].kind == GAME_EVENT_ROOM_LOOK) {
+        return !plat_input_echoes_line();
+    }
+    if (main_dialogue_needs_leading_newline(&g_main_out.events[0])) {
+        return 1;
+    }
+    if (g_main_out.events[0].kind == GAME_EVENT_ENCOUNTER &&
+            g_main_out.events[0].arg1 == GAME_ENCOUNTER_ACTION_OPEN) {
+        return 1;
+    }
+    return 0;
 }
 
 /* Queue the restored view so load can log before render drains it. */
@@ -294,6 +338,9 @@ static int main_dispatch_line(struct GameState *game, char *line,
                 return 1;
             }
             if (cmd.type == CMD_LOAD) {
+                if (main_first_event_needs_leading_newline()) {
+                    printf("\n");
+                }
                 game_render_output(game, &g_main_out);
                 if (main_check_output_overflow() != 0) {
                     return 1;
@@ -304,6 +351,9 @@ static int main_dispatch_line(struct GameState *game, char *line,
         game_process_input(game, line, &g_main_out);
         if (main_capture_replay(REPLAY_STEP_INPUT, line, game) != 0) {
             return 1;
+        }
+        if (main_first_event_needs_leading_newline()) {
+            printf("\n");
         }
         game_render_output(game, &g_main_out);
         if (main_check_output_overflow() != 0) {
@@ -324,6 +374,9 @@ static int main_dispatch_line(struct GameState *game, char *line,
             return 1;
         }
         if (cmd.type == CMD_LOAD) {
+            if (main_first_event_needs_leading_newline()) {
+                printf("\n");
+            }
             game_render_output(game, &g_main_out);
         }
         return 0;
@@ -331,6 +384,9 @@ static int main_dispatch_line(struct GameState *game, char *line,
     game_process_input(game, line, &g_main_out);
     if (main_capture_replay(REPLAY_STEP_INPUT, line, game) != 0) {
         return 1;
+    }
+    if (main_first_event_needs_leading_newline()) {
+        printf("\n");
     }
     game_render_output(game, &g_main_out);
 #endif
@@ -354,7 +410,7 @@ static int main_handle_polled_line(struct GameState *game, char *line, time_t *l
         *last_tick_time = plat_time_now();
         /* load already rendered via main_render_loaded_game. */
         if (game->running && !rendered) {
-            game_render(game);
+            game_render(game, g_main_out.count == 0);
         }
     }
     if (game->running) {
@@ -384,6 +440,10 @@ static int main_run_idle_ticks(struct GameState *game, time_t *last_tick_time,
         game_background_step(game, &g_main_out);
         if (main_capture_replay(REPLAY_STEP_IDLE, 0, game) != 0) {
             return -1;
+        }
+        if (g_main_out.count > 0) {
+            /* Separate idle-tick output from the prior HUD line. */
+            printf("\n");
         }
         game_render_output(game, &g_main_out);
 #ifdef TEST_MODE

@@ -102,10 +102,12 @@ static int help_topic_from_word(const char *w)
 static int parse_inspect_kind(const char *word)
 {
     if (strcmp(word, "rustle") == 0 || strcmp(word, "rustles") == 0 ||
+            strcmp(word, "rustling") == 0 ||
             strcmp(word, "reeds") == 0) {
         return 1;
     }
     if (strcmp(word, "creak") == 0 || strcmp(word, "creaks") == 0 ||
+            strcmp(word, "creaking") == 0 ||
             strcmp(word, "timbers") == 0) {
         return 2;
     }

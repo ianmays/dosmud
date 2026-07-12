@@ -153,7 +153,6 @@ int fmt_room_ground_items(const int *room_items, char *buf, int bufsize)
 {
     int s;
     int ground_count;
-    int first_ground;
     int pos;
 
     if (buf == 0 || bufsize <= 0 || room_items == 0) {
@@ -161,27 +160,16 @@ int fmt_room_ground_items(const int *room_items, char *buf, int bufsize)
     }
     buf[0] = '\0';
     ground_count = 0;
-    first_ground = ITEM_NONE;
     for (s = 0; s < CFG_AREA_ITEM_SLOTS; ++s) {
         if (room_items[s] != ITEM_NONE) {
-            if (ground_count == 0) {
-                first_ground = room_items[s];
-            }
             ground_count += 1;
         }
     }
     if (ground_count == 0) {
         return 0;
     }
+    /* Always list format (#236); single ground items use header + indented line. */
     pos = 0;
-    if (ground_count == 1) {
-        pos = fmt_buf_append_two_s_fmt(buf, bufsize, pos,
-            TXT_UI_GROUND_ITEM_FMT, item_name(first_ground));
-        if (pos < 0) {
-            return -1;
-        }
-        return pos;
-    }
     pos = fmt_buf_append_str(buf, bufsize, pos, TXT_UI_GROUND_ITEMS_HEADER);
     if (pos < 0) {
         return -1;
@@ -321,6 +309,10 @@ int fmt_exploration_map(const struct GameState *game, char *buf, int bufsize)
         }
     }
     pos = fmt_buf_append_str(buf, bufsize, pos, TXT_MAP_LEGEND);
+    if (pos < 0) {
+        return -1;
+    }
+    pos = fmt_buf_append_char(buf, bufsize, pos, '\n');
     if (pos < 0) {
         return -1;
     }

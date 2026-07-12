@@ -2,31 +2,29 @@ TEST MODE
 dosmud (seed 1234)
 Type 'help' for commands.
 
+Camp.
+
        *      *        $   * 
    *               *   $     
       _________        $     
      /       /|\       $    
     /       / | \     \|/  
 ___/_______/__|__\ ___XXX___
-                             
- (campfire at first watch)                             
+ (campfire at first watch)
 
-Camp
 A small campfire burns quietly.
+
 Exits: north south west
-On the ground: stick. (take stick)
-
+On the ground:
+  stick (take stick)
 [T:0] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
-
-> 
-        .-''''-.             
+>         .-''''-.             
        / o)o)   |            
       |   /_    B ------     
       |   ---  / //     \   
        \______/_//       \ 
       /        //\_______/  
-                             
- (cloak wet with road mist)                             
+ (cloak wet with road mist)
 
 You nearly bump into a hooded traveler. They straighten with a tired grin.
 "Easy there, I'm an adventurer too, working odd jobs between towns. What are you doing out here?"
@@ -36,9 +34,9 @@ You nearly bump into a hooded traveler. They straighten with a tired grin.
 (Answer with 1, 2, 3, or reply <n>.)
 
 [T:0] Road [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
+> They nod, amused. "Bold. Don't trip over your own story."
 
-> 
-They nod, amused. "Bold. Don't trip over your own story."
+Road.
 
   ##     #####      #####    
         ##########          #
@@ -46,25 +44,21 @@ They nod, amused. "Bold. Don't trip over your own story."
 _____________________________
             /    \          
            /      \         
-                             
-   (wagon ruts hold rain)                             
+   (wagon ruts hold rain)
 
-Road
 A dusty road stretches toward pale hills.
+
 Exits: south west
-On the ground: stone. (take stone)
-
+On the ground:
+  stone (take stone)
 [T:0] Road [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
-
-> 
-        .-''''-.             
+>         .-''''-.             
        / o)o)   |            
       |   /_    B ------     
       |   ---  / //     \   
        \______/_//       \ 
       /        //\_______/  
-                             
- (cloak wet with road mist)                             
+ (cloak wet with road mist)
 
 You nearly bump into a hooded traveler. They straighten with a tired grin.
 "Easy there, I'm an adventurer too, working odd jobs between towns. What are you doing out here?"
@@ -74,9 +68,9 @@ You nearly bump into a hooded traveler. They straighten with a tired grin.
 (Answer with 1, 2, 3, or reply <n>.)
 
 [T:0] Road [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
+> They relax a fraction. "Good. Miles keep liars honest."
 
-> 
-They relax a fraction. "Good. Miles keep liars honest."
+Road.
 
   ##     #####      #####    
         ##########          #
@@ -84,25 +78,21 @@ They relax a fraction. "Good. Miles keep liars honest."
 _____________________________
             /    \          
            /      \         
-                             
-   (wagon ruts hold rain)                             
+   (wagon ruts hold rain)
 
-Road
 A dusty road stretches toward pale hills.
+
 Exits: south west
-On the ground: stone. (take stone)
-
+On the ground:
+  stone (take stone)
 [T:0] Road [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
-
-> 
-        .-''''-.             
+>         .-''''-.             
        / o)o)   |            
       |   /_    B ------     
       |   ---  / //     \   
        \______/_//       \ 
       /        //\_______/  
-                             
- (cloak wet with road mist)                             
+ (cloak wet with road mist)
 
 You nearly bump into a hooded traveler. They straighten with a tired grin.
 "Easy there, I'm an adventurer too, working odd jobs between towns. What are you doing out here?"
@@ -112,9 +102,9 @@ You nearly bump into a hooded traveler. They straighten with a tired grin.
 (Answer with 1, 2, 3, or reply <n>.)
 
 [T:0] Road [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
+> They raise both hands. "Fair. The road spies on everyone anyway."
 
-> 
-They raise both hands. "Fair. The road spies on everyone anyway."
+Road.
 
   ##     #####      #####    
         ##########          #
@@ -122,14 +112,12 @@ They raise both hands. "Fair. The road spies on everyone anyway."
 _____________________________
             /    \          
            /      \         
-                             
-   (wagon ruts hold rain)                             
+   (wagon ruts hold rain)
 
-Road
 A dusty road stretches toward pale hills.
+
 Exits: south west
-On the ground: stone. (take stone)
-
+On the ground:
+  stone (take stone)
 [T:0] Road [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
-
 > bye
