@@ -182,6 +182,8 @@ TEST testharn_fixture_sweep(void)
     ASSERT_EQ(1, rc);
     rc = testharn_apply(&game, "@fixture at_road");
     ASSERT_EQ(1, rc);
+    rc = testharn_apply(&game, "@fixture weather_rain_bandit_road");
+    ASSERT_EQ(1, rc);
     rc = testharn_apply(&game, "@fixture at_marsh_reed");
     ASSERT_EQ(1, rc);
     rc = testharn_apply(&game, "@fixture at_pond");

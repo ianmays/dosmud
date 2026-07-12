@@ -278,6 +278,14 @@ static void fixture_bandit_road(struct GameState *game)
     fixture_traveler_off(game);
 }
 
+static void fixture_weather_rain_bandit_road(struct GameState *game)
+{
+    fixture_bandit_road(game);
+    game->tick = (u32)CFG_WEATHER_INITIAL_DELAY_TICKS - 1UL;
+    game->weather_kind = GAME_WEATHER_NONE;
+    game->weather_expires_tick = (u32)CFG_WEATHER_INITIAL_DELAY_TICKS;
+}
+
 static int fixture_at_marsh_reed(struct GameState *game)
 {
     game_reset_fixture_baseline(game, WORLD_ROOM_MARSH, 2);
@@ -863,6 +871,10 @@ int testharn_apply(struct GameState *game, const char *line)
     }
     if (fixture_name_is("bandit_road", name)) {
         fixture_bandit_road(game);
+        return 1;
+    }
+    if (fixture_name_is("weather_rain_bandit_road", name)) {
+        fixture_weather_rain_bandit_road(game);
         return 1;
     }
     if (fixture_name_is("at_marsh_reed", name)) {

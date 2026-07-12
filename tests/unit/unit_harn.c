@@ -114,6 +114,21 @@ TEST harness_apply_weather_rain_ready_quiet(void)
     PASS();
 }
 
+TEST harness_apply_weather_rain_bandit_road(void)
+{
+    struct GameState game;
+    int rc;
+
+    unit_game_fresh(&game, 42u);
+    rc = testharn_apply(&game, "@fixture weather_rain_bandit_road");
+    ASSERT_EQ(1, rc);
+    ASSERT_EQ(WORLD_ROOM_ROAD, game.player.room_id);
+    ASSERT_EQ((u32)CFG_WEATHER_INITIAL_DELAY_TICKS - 1UL, game.tick);
+    ASSERT_EQ(GAME_WEATHER_NONE, game.weather_kind);
+    ASSERT_EQ((u32)CFG_WEATHER_INITIAL_DELAY_TICKS, game.weather_expires_tick);
+    PASS();
+}
+
 TEST harness_apply_weather_fog(void)
 {
     struct GameState game;
@@ -366,6 +381,7 @@ SUITE(harness) {
     RUN_TEST(harness_apply_ambient_camp);
     RUN_TEST(harness_apply_weather_rain_ready);
     RUN_TEST(harness_apply_weather_rain_ready_quiet);
+    RUN_TEST(harness_apply_weather_rain_bandit_road);
     RUN_TEST(harness_apply_weather_fog);
     RUN_TEST(harness_apply_night_at_camp);
     RUN_TEST(harness_apply_night_lost);

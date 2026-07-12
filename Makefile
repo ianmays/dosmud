@@ -99,7 +99,7 @@ SNAPSHOT_TESTS = \
 	inspect_rustle inspect_creak inspect_water inspect_grit inspect_none inspect_wrong inspect_multi_clue look_clues_footer \
 	inspect_water_followup env_menu_dismiss env_menu_blocked \
 	ambient_rustle ambient_tick_order ambient_item \
-	weather_rain_ambient weather_rain_move_arrival weather_fog_look \
+	weather_rain_ambient weather_rain_move_arrival weather_rain_bandit_road weather_fog_look \
 	night_look night_map_lost night_map_nightfall night_map_torch \
 	combat_defend combat_salve combat_no_salve combat_invalid combat_take_blocked \
 	combat_victory_xp level_up \

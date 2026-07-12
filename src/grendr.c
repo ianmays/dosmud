@@ -186,6 +186,13 @@ static int env_event_is_weather_transition(int kind)
         kind == GAME_ENV_EVENT_WEATHER_CLEAR;
 }
 
+static int env_event_is_daynight_transition(int kind)
+{
+    return kind == GAME_ENV_EVENT_NIGHT_FALL ||
+        kind == GAME_ENV_EVENT_DAY_BREAK ||
+        kind == GAME_ENV_EVENT_NIGHT_LOST;
+}
+
 static int env_event_is_stack_tier(int kind)
 {
     if (kind == GAME_ENV_EVENT_GUST || kind == GAME_ENV_EVENT_RUSTLE ||
@@ -1754,7 +1761,9 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
             break;
         /* #161 ambient/inspect: direct dispatch (gatmos no longer LEGACY). */
         case GAME_EVENT_ENVIRONMENT:
-            if (flavor_followed_by_encounter_open(out, i)) {
+            if (flavor_followed_by_encounter_open(out, i) &&
+                    !env_event_is_weather_transition(ev->arg0) &&
+                    !env_event_is_daynight_transition(ev->arg0)) {
                 break;
             }
             if (env_event_owned_by_look_footer(ev->arg0)) {
