@@ -83,6 +83,7 @@ Player-facing copy lives in `txtres`; `grendr` owns when a blank line appears be
   - **Scene** - room look art, encounters, NPC portraits: `render_gap()` once before the art block; `render_copy()` passes tight copy without an extra gap.
   - **Look footer** - `GAME_EVENT_ROOM_LOOK` appends weather, night, and active clue phrases to the room description in one block (`txtres_look_clue_phrase`, `txtres_look_weather_phrase`; `GAME_ROOM_LOOK_FLAG_SUPPRESS_WEATHER` skips weather when the same step already announced a transition).
   - **Compact arrival/return** - `MOVE` or peaceful `ENCOUNTER` reply followed by flavor plus trailing `ROOM_LOOK` coalesces into one render block only when that `ROOM_LOOK` carries `GAME_ROOM_LOOK_FLAG_TIGHT_LEAD`; `game_process_input` sets it on movement arrivals and `game_describe_current_room_tight` sets it on peaceful return snapshots ([#236](https://github.com/ianmays/dosmud/issues/236)).
+  - **HUD spacing** - `game_render(game, leading_gap)` prints the HUD with no extra spacer after a step that already emitted events; `main.c` passes `g_main_out.count == 0` so blank steps get one gap before the HUD while ordinary command output does not.
 - **ASCII art:** the first row must be drawing, not a blank spacer row; room captions print on one line after the art with no trailing blank spacer rows. Section breaks come from `render_gap()`, not padding lines inside art.
 
 ### Platform (`main`, `platform.h`, `platdos.c` / `platpos.c` / `platwin.c`)
@@ -101,6 +102,8 @@ Implementations are split by toolchain (FAT 8.3 basenames):
 - [`src/platwin.c`](https://github.com/ianmays/dosmud/blob/main/src/platwin.c) - Windows console path for WSL cross-builds (`make build-win` / `make test-win`)
 
 [`src/main.c`](https://github.com/ianmays/dosmud/blob/main/src/main.c) orchestrates the main loop and may use `printf` for shell-level prompts and banners. It must not include `conio.h`, `dos.h`, or other platform headers directly.
+
+Prompt/newline ownership stays at the shell boundary in `main.c`. `plat_input_echoes_line()` tells `main_first_event_needs_leading_newline()` whether stdin already echoed the submitted command: interactive console builds usually return true, while piped snapshot input returns false. On non-echoing input, `main.c` inserts one leading `\n` before `game_render_output()` for standalone `ROOM_LOOK` drains and portrait-bearing TALK scenes so snapshot transcripts keep the same visual separation that an interactive terminal gets from the echoed prompt line.
 
 In all builds, `main.c` accepts `--replay-log [path]`, opens a deterministic text log, and records each startup, input, and idle step after simulation produces the queue and before the next reset clears it. The log includes the seed, step index, tick, input text when present, queue overflow state, and serialized `GameEvent` payloads in queue order. If the flag omits a path, logging defaults to `replay.log`.
 
