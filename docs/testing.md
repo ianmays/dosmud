@@ -74,7 +74,7 @@ Use this section when deciding what to write, not only what to run. Agents and c
 
 **For `GameEvent` producer work:** assert payload contracts where the producer owns them. Keep queue reset/overflow/order rules in `unit_gout.c`, router sequencing in `unit_game.c`, slice payload semantics in the owning `unit_*.c`, and harness fixture shape in `unit_harn.c`. Narrative key lookup (`txtres_dialogue_narrative_key`, `txtres_encounter_narrative_key`) also lives in `unit_gout.c` beside queue contracts even though the tables are authored in `txtres.c`. Snapshots should prove rendered text, not replace direct payload assertions.
 
-The 25-line output policy is enforced in `TEST_MODE`: `grendr` counts visible rows for each rendered frame and `main.c` aborts if a frame exceeds `CFG_SAFE_OUTPUT_MAX_LINES` (currently 25). Add or extend representative render-budget coverage in `tests/unit/unit_rend.c` when changing layout-heavy output.
+The 25-line output policy is enforced in `TEST_MODE` only: `grendr` counts newlines through `render_emit` for each shell frame; `main` owns `render_frame_begin` before step drain/HUD and aborts when `render_frame_over_budget` is true (count greater than `CFG_SAFE_OUTPUT_MAX_LINES`; exactly 25 is allowed). Cover layout-heavy changes in `tests/unit/unit_rend.c` and keep `tests/regression/safe_output_budget` green when player-visible frame composition drifts.
 
 ## Test gap audit (agents and CI)
 
@@ -331,6 +331,8 @@ Each process run uses one `.input` file until `quit`. `make snapshot-run` runs `
 **Usage snapshot (`usage_cli`):** runs `./dosmud --bogus`, asserts a non-zero exit, and diffs the stderr usage line against `usage_cli.expect`. The usage string is build-independent (regular and `TEST_MODE` emit the same text), so this snapshot guards the unified `--seed <unsigned>|wallclock` / `--replay-log` help copy.
 
 **Core / inventory (also in `SNAPSHOT_TESTS`):** `smoke`, `bandit_handover`, `bandit_wielded_give`, `area_items`, `map`, `equipment`, `craft_wielded`, `take_all`, `take_all_bag_full`, `bag_view`, `bag_stacks`.
+
+**Render budget:** `safe_output_budget` ([#207](https://github.com/ianmays/dosmud/issues/207); modal bag/talk plus `look`/`map` stays within the 25-line frame cap under `TEST_MODE` enforcement).
 
 **Movement / time:** `walk_north`, `walk_map`, `wait_tick`.
 
