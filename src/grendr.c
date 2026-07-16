@@ -23,6 +23,7 @@
 
 #ifdef TEST_MODE
 static int g_render_suppress;
+/* Newlines emitted via render_emit since render_frame_begin; TEST_MODE only. */
 static int g_render_frame_line_count;
 
 void render_set_suppress(int on)
@@ -46,6 +47,7 @@ int render_frame_over_budget(void)
 }
 #endif
 
+/* Format once so TEST_MODE can count newlines from the same bytes as stdout. */
 static char g_render_emit_buf[4096];
 
 static int render_count_newlines(const char *text)
@@ -73,6 +75,7 @@ static void render_emit(const char *fmt, ...)
     vsprintf(g_render_emit_buf, fmt, ap);
     va_end(ap);
 #ifdef TEST_MODE
+    /* Budget counts before suppress so unit tests can assert without printing. */
     g_render_frame_line_count += render_count_newlines(g_render_emit_buf);
     if (g_render_suppress) {
         return;

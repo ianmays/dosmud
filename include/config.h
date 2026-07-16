@@ -3,6 +3,7 @@
 
 #define CFG_INPUT_MAX 80
 #define CFG_WORD_MAX  16
+/* DOS 25-row frame budget: grendr counts emitted newlines; main enforces in TEST_MODE. */
 #define CFG_SAFE_OUTPUT_MAX_LINES 25
 
 #define CFG_ROOM_MAX  16

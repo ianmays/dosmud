@@ -26,7 +26,8 @@
  * Replay logging (--replay-log) and the deterministic default seed
  * (CFG_DEFAULT_RAND_SEED, override with --seed <n>|wallclock) are regular
  * features in every build. Only the TEST MODE banner, the @fixture/@seed
- * harness, and the output-overflow guard remain gated behind TEST_MODE.
+ * harness, and the output-limit guards (queue overflow plus #207 25-line
+ * frame budget) remain gated behind TEST_MODE.
  */
 
 /*
@@ -304,11 +305,16 @@ static void main_report_testharn_error(int th_rc)
     }
 }
 
+/*
+ * Shell owns frame boundaries: reset before drain/HUD, check after both.
+ * Idle ticks begin before game_render_output and check after main_render_and_prompt.
+ */
 static void main_begin_render_frame(void)
 {
     render_frame_begin();
 }
 
+/* Queue overflow (gout) and newline budget (grendr); either fails the harness. */
 static int main_check_output_limits(void)
 {
     if (g_main_out.overflowed) {
