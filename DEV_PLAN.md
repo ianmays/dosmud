@@ -125,7 +125,7 @@ This lane is separate from persistent authored world advancement hooks ([#220](h
 - [#235](https://github.com/ianmays/dosmud/issues/235) modal encounter presentation and command policy - ✅ Done (PR [#238](https://github.com/ianmays/dosmud/pull/238))
 - [#206](https://github.com/ianmays/dosmud/issues/206) player defeat/respawn flow
 - [#145](https://github.com/ianmays/dosmud/issues/145) local map viewport
-- [#207](https://github.com/ianmays/dosmud/issues/207) 25-line safe output mode
+- [#207](https://github.com/ianmays/dosmud/issues/207) 25-line safe output mode - ✅ Done (PR [#243](https://github.com/ianmays/dosmud/pull/243))
 
 ### Lane 4 - Tooling and showcase
 
