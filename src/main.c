@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -43,12 +44,44 @@ static ReplayLog g_replay_log;
 #ifdef TEST_MODE
 static void main_begin_render_frame(void);
 static int main_check_output_limits(void);
+static int g_main_shell_frame_lines;
 #endif
+static char g_main_emit_buf[4096];
 
 static void print_prompt(void)
 {
     printf("%s", TXT_MAIN_PROMPT);
     fflush(stdout);
+}
+
+static int main_count_newlines(const char *text)
+{
+    int count;
+
+    count = 0;
+    if (text == 0) {
+        return 0;
+    }
+    while (*text != '\0') {
+        if (*text == '\n') {
+            ++count;
+        }
+        ++text;
+    }
+    return count;
+}
+
+static void main_emit(const char *fmt, ...)
+{
+    va_list ap;
+
+    va_start(ap, fmt);
+    vsprintf(g_main_emit_buf, fmt, ap);
+    va_end(ap);
+#ifdef TEST_MODE
+    g_main_shell_frame_lines += main_count_newlines(g_main_emit_buf);
+#endif
+    fputs(g_main_emit_buf, stdout);
 }
 
 static u32 default_rng_seed(void)
@@ -171,7 +204,7 @@ static int main_startup(struct GameState *game, u32 rng_seed)
     if (main_capture_replay(REPLAY_STEP_STARTUP, 0, game) != 0) {
         return 1;
     }
-    printf("\n");
+    main_emit("\n");
 #ifdef TEST_MODE
     main_begin_render_frame();
 #endif
@@ -262,9 +295,9 @@ static int main_handle_save_load(struct GameState *game, struct Command *cmd,
     if (cmd->type == CMD_SAVE) {
         rc = save_write_game(SAVE_PATH_DEFAULT, game, plat_rand_draw_count());
         if (rc == SAVE_RESULT_OK) {
-            printf(TXT_SAVE_OK_FMT, SAVE_PATH_DEFAULT);
+            main_emit(TXT_SAVE_OK_FMT, SAVE_PATH_DEFAULT);
         } else {
-            printf(TXT_SAVE_IO_FMT, SAVE_PATH_DEFAULT);
+            main_emit(TXT_SAVE_IO_FMT, SAVE_PATH_DEFAULT);
         }
         return 0;
     }
@@ -281,14 +314,14 @@ static int main_handle_save_load(struct GameState *game, struct Command *cmd,
         /* Restore libc stream position for the loaded seed before new rolls. */
         plat_seed_rng(game->seed);
         plat_rand_advance(rng_draw_count);
-        printf(TXT_LOAD_OK_FMT, SAVE_PATH_DEFAULT);
+        main_emit(TXT_LOAD_OK_FMT, SAVE_PATH_DEFAULT);
         main_queue_loaded_game(game);
     } else if (rc == SAVE_RESULT_IO) {
-        printf(TXT_LOAD_IO_FMT, SAVE_PATH_DEFAULT);
+        main_emit(TXT_LOAD_IO_FMT, SAVE_PATH_DEFAULT);
     } else if (rc == SAVE_RESULT_RANGE) {
-        printf("%s", TXT_LOAD_BAD_RANGE);
+        main_emit("%s", TXT_LOAD_BAD_RANGE);
     } else {
-        printf("%s", TXT_LOAD_BAD_FORMAT);
+        main_emit("%s", TXT_LOAD_BAD_FORMAT);
     }
     return 0;
 }
@@ -311,6 +344,7 @@ static void main_report_testharn_error(int th_rc)
  */
 static void main_begin_render_frame(void)
 {
+    g_main_shell_frame_lines = 0;
     render_frame_begin();
 }
 
@@ -323,7 +357,15 @@ static int main_check_output_limits(void)
     }
     if (render_frame_over_budget()) {
         fprintf(stderr, "safe output overflow: %d lines (max %d)\n",
-            render_frame_line_count(), CFG_SAFE_OUTPUT_MAX_LINES);
+            render_frame_line_count() + g_main_shell_frame_lines,
+            CFG_SAFE_OUTPUT_MAX_LINES);
+        return 1;
+    }
+    if (render_frame_line_count() + g_main_shell_frame_lines >
+            CFG_SAFE_OUTPUT_MAX_LINES) {
+        fprintf(stderr, "safe output overflow: %d lines (max %d)\n",
+            render_frame_line_count() + g_main_shell_frame_lines,
+            CFG_SAFE_OUTPUT_MAX_LINES);
         return 1;
     }
     return 0;
@@ -364,7 +406,7 @@ static int main_dispatch_line(struct GameState *game, char *line,
             }
             if (cmd.type == CMD_LOAD) {
                 if (main_first_event_needs_leading_newline()) {
-                    printf("\n");
+                    main_emit("\n");
                 }
                 game_render_output(game, &g_main_out);
             }
@@ -375,7 +417,7 @@ static int main_dispatch_line(struct GameState *game, char *line,
             return 1;
         }
         if (main_first_event_needs_leading_newline()) {
-            printf("\n");
+            main_emit("\n");
         }
         game_render_output(game, &g_main_out);
     } else {
@@ -394,7 +436,7 @@ static int main_dispatch_line(struct GameState *game, char *line,
         }
         if (cmd.type == CMD_LOAD) {
             if (main_first_event_needs_leading_newline()) {
-                printf("\n");
+                main_emit("\n");
             }
             game_render_output(game, &g_main_out);
         }
@@ -463,6 +505,11 @@ static int main_run_idle_ticks(struct GameState *game, time_t *last_tick_time,
             *last_tick_time = now_time;
             break;
         }
+#ifdef TEST_MODE
+        if (!ran_tick) {
+            main_begin_render_frame();
+        }
+#endif
         game_event_queue_reset(&g_main_out);
         game_background_step(game, &g_main_out);
         if (main_capture_replay(REPLAY_STEP_IDLE, 0, game) != 0) {
@@ -470,11 +517,8 @@ static int main_run_idle_ticks(struct GameState *game, time_t *last_tick_time,
         }
         if (g_main_out.count > 0) {
             /* Separate idle-tick output from the prior HUD line. */
-            printf("\n");
+            main_emit("\n");
         }
-#ifdef TEST_MODE
-        main_begin_render_frame();
-#endif
         game_render_output(game, &g_main_out);
         *last_tick_time += idle_tick_seconds;
         ran_tick = 1;
