@@ -1,6 +1,7 @@
 /*
- * unit_rend: direct grendr frame-budget checks (#207). Mirrors the shell
- * frame (step drain plus HUD) without going through main's poll loop.
+ * unit_rend: direct grendr slice-budget checks (#207). These cover event drain
+ * plus HUD only; shell-owned spacer/status rows from main_emit stay in main.c
+ * and are covered by regression snapshots such as safe_output_budget.
  */
 #include "greatest.h"
 #include "config.h"
@@ -11,7 +12,7 @@
 #include "world.h"
 #include "unit_util.h"
 
-/* Same composition as main: begin, drain events, then HUD with blank-step gap. */
+/* Same grendr-side composition as main: begin, drain events, then HUD. */
 static int render_count_frame_lines(struct GameState *game,
                                     const GameEventQueue *out)
 {
