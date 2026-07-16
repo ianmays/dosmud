@@ -13,6 +13,10 @@ struct GameState;
 #ifdef TEST_MODE
 /* Suppress render printf during unit tests (snapshots leave this off). */
 void render_set_suppress(int on);
+/* Count visible rows emitted during one shell frame (step output plus HUD). */
+void render_frame_begin(void);
+int render_frame_line_count(void);
+int render_frame_over_budget(void);
 #endif
 
 void game_print_location_art(int room_id);

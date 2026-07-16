@@ -20,6 +20,7 @@ gstory: unit_gstry.c
 gwhok: unit_gwhok.c
 items: unit_item.c
 fmt: unit_fmt.c
+grendr: unit_rend.c
 gout: unit_gout.c
 replay: unit_rplog.c
 save: unit_save.c

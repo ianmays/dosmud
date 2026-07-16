@@ -74,6 +74,8 @@ Use this section when deciding what to write, not only what to run. Agents and c
 
 **For `GameEvent` producer work:** assert payload contracts where the producer owns them. Keep queue reset/overflow/order rules in `unit_gout.c`, router sequencing in `unit_game.c`, slice payload semantics in the owning `unit_*.c`, and harness fixture shape in `unit_harn.c`. Narrative key lookup (`txtres_dialogue_narrative_key`, `txtres_encounter_narrative_key`) also lives in `unit_gout.c` beside queue contracts even though the tables are authored in `txtres.c`. Snapshots should prove rendered text, not replace direct payload assertions.
 
+The 25-line output policy is enforced in `TEST_MODE`: `grendr` counts visible rows for each rendered frame and `main.c` aborts if a frame exceeds `CFG_SAFE_OUTPUT_MAX_LINES` (currently 25). Add or extend representative render-budget coverage in `tests/unit/unit_rend.c` when changing layout-heavy output.
+
 ## Test gap audit (agents and CI)
 
 Before a draft PR, agents run a **test-gap pass** ([`.cursor/skills/testing-gap-auditor/SKILL.md`](https://github.com/ianmays/dosmud/blob/main/.cursor/skills/testing-gap-auditor/SKILL.md), [`.cursor/rules/testing-gap-after-implement.mdc`](https://github.com/ianmays/dosmud/blob/main/.cursor/rules/testing-gap-after-implement.mdc)):

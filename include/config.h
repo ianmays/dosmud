@@ -3,6 +3,7 @@
 
 #define CFG_INPUT_MAX 80
 #define CFG_WORD_MAX  16
+#define CFG_SAFE_OUTPUT_MAX_LINES 25
 
 #define CFG_ROOM_MAX  16
 #define CFG_NAME_MAX  24

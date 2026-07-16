@@ -40,7 +40,8 @@ static struct GameState g_main_loaded_game;
 /* Optional sidecar log; static like g_main_out so the shell loop stays stack-light. */
 static ReplayLog g_replay_log;
 #ifdef TEST_MODE
-static int main_check_output_overflow(void);
+static void main_begin_render_frame(void);
+static int main_check_output_limits(void);
 #endif
 
 static void print_prompt(void)
@@ -170,8 +171,16 @@ static int main_startup(struct GameState *game, u32 rng_seed)
         return 1;
     }
     printf("\n");
+#ifdef TEST_MODE
+    main_begin_render_frame();
+#endif
     game_render_output(game, &g_main_out);
     game_render(game, g_main_out.count == 0);
+#ifdef TEST_MODE
+    if (main_check_output_limits() != 0) {
+        return 1;
+    }
+#endif
     print_prompt();
     return 0;
 }
@@ -295,13 +304,23 @@ static void main_report_testharn_error(int th_rc)
     }
 }
 
-static int main_check_output_overflow(void)
+static void main_begin_render_frame(void)
 {
-    if (!g_main_out.overflowed) {
-        return 0;
+    render_frame_begin();
+}
+
+static int main_check_output_limits(void)
+{
+    if (g_main_out.overflowed) {
+        fprintf(stderr, "game output overflow\n");
+        return 1;
     }
-    fprintf(stderr, "game output overflow\n");
-    return 1;
+    if (render_frame_over_budget()) {
+        fprintf(stderr, "safe output overflow: %d lines (max %d)\n",
+            render_frame_line_count(), CFG_SAFE_OUTPUT_MAX_LINES);
+        return 1;
+    }
+    return 0;
 }
 #endif
 
@@ -342,9 +361,6 @@ static int main_dispatch_line(struct GameState *game, char *line,
                     printf("\n");
                 }
                 game_render_output(game, &g_main_out);
-                if (main_check_output_overflow() != 0) {
-                    return 1;
-                }
             }
             return 0;
         }
@@ -356,9 +372,6 @@ static int main_dispatch_line(struct GameState *game, char *line,
             printf("\n");
         }
         game_render_output(game, &g_main_out);
-        if (main_check_output_overflow() != 0) {
-            return 1;
-        }
     } else {
         /* Harness @fixture/@seed lines adjust state only; they are not replay steps. */
         plat_seed_rng(game->seed);
@@ -404,6 +417,9 @@ static int main_handle_polled_line(struct GameState *game, char *line, time_t *l
 
     line[strcspn(line, "\r\n")] = '\0';
     if (line[0] != '\0') {
+#ifdef TEST_MODE
+        main_begin_render_frame();
+#endif
         if (main_dispatch_line(game, line, &rendered) != 0) {
             return 1;
         }
@@ -412,6 +428,11 @@ static int main_handle_polled_line(struct GameState *game, char *line, time_t *l
         if (game->running && !rendered) {
             game_render(game, g_main_out.count == 0);
         }
+#ifdef TEST_MODE
+        if (main_check_output_limits() != 0) {
+            return 1;
+        }
+#endif
     }
     if (game->running) {
         print_prompt();
@@ -445,12 +466,10 @@ static int main_run_idle_ticks(struct GameState *game, time_t *last_tick_time,
             /* Separate idle-tick output from the prior HUD line. */
             printf("\n");
         }
-        game_render_output(game, &g_main_out);
 #ifdef TEST_MODE
-        if (main_check_output_overflow() != 0) {
-            return -1;
-        }
+        main_begin_render_frame();
 #endif
+        game_render_output(game, &g_main_out);
         *last_tick_time += idle_tick_seconds;
         ran_tick = 1;
     }
@@ -514,6 +533,12 @@ int main(int argc, char **argv)
         }
         if (poll_rc > 0) {
             main_render_and_prompt(&game);
+#ifdef TEST_MODE
+            if (main_check_output_limits() != 0) {
+                replay_log_close(&g_replay_log);
+                return 1;
+            }
+#endif
         }
     }
 

@@ -23,25 +23,62 @@
 
 #ifdef TEST_MODE
 static int g_render_suppress;
+static int g_render_frame_line_count;
 
 void render_set_suppress(int on)
 {
     g_render_suppress = on ? 1 : 0;
 }
+
+void render_frame_begin(void)
+{
+    g_render_frame_line_count = 0;
+}
+
+int render_frame_line_count(void)
+{
+    return g_render_frame_line_count;
+}
+
+int render_frame_over_budget(void)
+{
+    return g_render_frame_line_count > CFG_SAFE_OUTPUT_MAX_LINES;
+}
 #endif
+
+static char g_render_emit_buf[4096];
+
+static int render_count_newlines(const char *text)
+{
+    int count;
+
+    count = 0;
+    if (text == 0) {
+        return 0;
+    }
+    while (*text != '\0') {
+        if (*text == '\n') {
+            ++count;
+        }
+        ++text;
+    }
+    return count;
+}
 
 static void render_emit(const char *fmt, ...)
 {
     va_list ap;
 
+    va_start(ap, fmt);
+    vsprintf(g_render_emit_buf, fmt, ap);
+    va_end(ap);
 #ifdef TEST_MODE
+    g_render_frame_line_count += render_count_newlines(g_render_emit_buf);
     if (g_render_suppress) {
         return;
     }
 #endif
-    va_start(ap, fmt);
-    vprintf(fmt, ap);
-    va_end(ap);
+    fputs(g_render_emit_buf, stdout);
 }
 
 #define RENDER_PRINTF render_emit
