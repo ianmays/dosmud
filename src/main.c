@@ -484,9 +484,15 @@ static int main_run_idle_ticks(struct GameState *game, time_t *last_tick_time,
 {
     time_t now_time;
     int ran_tick;
+#ifdef TEST_MODE
+    int overflowed_any;
+#endif
 
     now_time = plat_time_now();
     ran_tick = 0;
+#ifdef TEST_MODE
+    overflowed_any = 0;
+#endif
     while ((now_time - *last_tick_time) >= idle_tick_seconds && game->running) {
         if (game_is_busy_dialogue(game)) {
             *last_tick_time = now_time;
@@ -499,6 +505,11 @@ static int main_run_idle_ticks(struct GameState *game, time_t *last_tick_time,
 #endif
         game_event_queue_reset(&g_main_out);
         game_background_step(game, &g_main_out);
+#ifdef TEST_MODE
+        if (g_main_out.overflowed) {
+            overflowed_any = 1;
+        }
+#endif
         if (main_capture_replay(REPLAY_STEP_IDLE, 0, game) != 0) {
             return -1;
         }
@@ -510,6 +521,11 @@ static int main_run_idle_ticks(struct GameState *game, time_t *last_tick_time,
         *last_tick_time += idle_tick_seconds;
         ran_tick = 1;
     }
+#ifdef TEST_MODE
+    if (overflowed_any) {
+        g_main_out.overflowed = 1;
+    }
+#endif
     return ran_tick;
 }
 
