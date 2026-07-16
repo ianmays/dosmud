@@ -84,6 +84,7 @@ Player-facing copy lives in `txtres`; `grendr` owns when a blank line appears be
   - **Look footer** - `GAME_EVENT_ROOM_LOOK` appends weather, night, and active clue phrases to the room description in one block (`txtres_look_clue_phrase`, `txtres_look_weather_phrase`; `GAME_ROOM_LOOK_FLAG_SUPPRESS_WEATHER` skips weather when the same step already announced a transition).
   - **Compact arrival/return** - `MOVE` or peaceful `ENCOUNTER` reply followed by flavor plus trailing `ROOM_LOOK` coalesces into one render block only when that `ROOM_LOOK` carries `GAME_ROOM_LOOK_FLAG_TIGHT_LEAD`; `game_process_input` sets it on movement arrivals and `game_describe_current_room_tight` sets it on peaceful return snapshots ([#236](https://github.com/ianmays/dosmud/issues/236)).
   - **HUD spacing** - `game_render(game, leading_gap)` prints the HUD with no extra spacer after a step that already emitted events; `main.c` passes `g_main_out.count == 0` so blank steps get one gap before the HUD while ordinary command output does not.
+  - **25-line safety guard** - handled command frames target `CFG_SAFE_OUTPUT_MAX_LINES` visible rows (step output plus HUD; prompt and other `main` printf spacers excluded). In `TEST_MODE`, `grendr` counts newlines through `render_emit` only; `main` owns frame begin (`render_frame_begin` before drain/HUD) and the over-budget check after both (fail when count is greater than the cap; exactly 25 rows is allowed).
 - **ASCII art:** the first row must be drawing, not a blank spacer row; room captions print on one line after the art with no trailing blank spacer rows. Section breaks come from `render_gap()`, not padding lines inside art.
 
 ### Platform (`main`, `platform.h`, `platdos.c` / `platpos.c` / `platwin.c`)
@@ -173,6 +174,7 @@ Conventions:
 - `--version` CLI (all builds); prints the shared build identity via [`buildid.c`](https://github.com/ianmays/dosmud/blob/main/src/buildid.c) and exits before the game loop
 - optional replay log capture via `--replay-log [path]` (all builds)
 - `TEST_MODE`: delegates `@fixture` and `@seed` lines to `testharn`
+- `TEST_MODE`: output-limit guards - queue overflow plus the #207 frame newline budget (`render_frame_begin` before step drain/HUD; over-budget check after both)
 - in-session `save` / `load` shell commands (all builds); intercepts before `game_process_input` so ticks do not advance; after a successful load, calls `gwhok_apply_all` so persisted `world_adv_flags` reconcile authored room copy before redraw ([#220](https://github.com/ianmays/dosmud/issues/220))
 
 ### `buildid`
@@ -253,6 +255,7 @@ New `src/*.c` and `src/*.h` basenames must stay within **classic FAT 8+3** (at m
 
 - text rendering only
 - art is intentionally compact to work well with 25 line displays (DOS standard)
+- `TEST_MODE`: counts frame newlines via `render_emit` for the #207 budget; shell (`main`) begins and checks each frame
 - no gameplay mutation
 - calls [`fmt.c`](https://github.com/ianmays/dosmud/blob/main/src/fmt.c) for logic-heavy strings, then prints; static copy from [`txtres.c`](https://github.com/ianmays/dosmud/blob/main/src/txtres.c) (`TXT_*` constants and `g_room_*` arrays), not scattered literals
 - `GAME_EVENT_DIALOGUE` and `GAME_EVENT_ENCOUNTER`: resolve `TxtresNarrativeKey` via `txtres`, then call the portrait/menu or encounter `render_*` helper for that key; `GAME_EVENT_DIALOGUE` `arg3` carries authored scene detail when talk/reply/give branches need more than choice alone (Herbalist story and exchange scenes for [#76](https://github.com/ianmays/dosmud/issues/76) and [#132](https://github.com/ianmays/dosmud/issues/132); watchman and Herbalist in-menu talk menus (story root scenes with portrait; intermediate sub-menus options-only; return-to-root after non-leave replies) and reply outcomes for [#8](https://github.com/ianmays/dosmud/issues/8) and [#76](https://github.com/ianmays/dosmud/issues/76))

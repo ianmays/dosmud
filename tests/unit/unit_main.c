@@ -23,6 +23,7 @@ SUITE_EXTERN(gatmos);
 SUITE_EXTERN(fmt);
 SUITE_EXTERN(world);
 SUITE_EXTERN(game);
+SUITE_EXTERN(grendr);
 SUITE_EXTERN(testharn);
 
 #define UNIT_VERBOSE_GREATEST 1
@@ -106,6 +107,7 @@ int main(int argc, char **argv)
     RUN_SUITE(fmt);
     RUN_SUITE(world);
     RUN_SUITE(game);
+    RUN_SUITE(grendr);
     RUN_SUITE(testharn);
 
     GREATEST_PRINT_REPORT();

@@ -1,0 +1,6 @@
+@fixture traveler_dialogue
+bag
+reply 1
+look
+map
+quit

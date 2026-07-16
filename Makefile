@@ -90,6 +90,7 @@ SNAPSHOT_TESTS = \
 	walk_north walk_map wait_tick \
 	frog_hint frog_replies watchman_talk watchman_warned_followup watchman_meal_peckish watchman_meal_tower_desc traveler_replies traveler_talk_blocked lost_animal_replies lost_animal_talk_blocked peddler_replies peddler_talk_blocked herbalist_talk archivist_talk talk_nobody \
 	frog_modal_policy watchman_modal_policy herbalist_modal_policy archivist_modal_policy \
+	safe_output_budget \
 	herbalist_request herbalist_incomplete herbalist_complete herbalist_followup herbalist_save_load \
 	herbalist_give_reject herbalist_give_floor \
 	dialogue_menu_exit \
@@ -203,7 +204,7 @@ UNIT_TEST_SRC = $(UNIT_DIR)/unit_main.c $(UNIT_DIR)/unit_util.c $(UNIT_DIR)/unit
 	$(UNIT_DIR)/unit_save.c \
 	$(UNIT_DIR)/unit_cmd.c $(UNIT_DIR)/unit_harn.c $(UNIT_DIR)/unit_inv.c $(UNIT_DIR)/unit_cbt.c \
 	$(UNIT_DIR)/unit_gprog.c $(UNIT_DIR)/unit_gstry.c $(UNIT_DIR)/unit_gwhok.c $(UNIT_DIR)/unit_genc.c $(UNIT_DIR)/unit_dial.c $(UNIT_DIR)/unit_npc.c \
-	$(UNIT_DIR)/unit_gatmos.c $(UNIT_DIR)/unit_fmt.c $(UNIT_DIR)/unit_wrld.c $(UNIT_DIR)/unit_game.c $(UNIT_DIR)/unit_tharn.c
+	$(UNIT_DIR)/unit_gatmos.c $(UNIT_DIR)/unit_fmt.c $(UNIT_DIR)/unit_wrld.c $(UNIT_DIR)/unit_game.c $(UNIT_DIR)/unit_rend.c $(UNIT_DIR)/unit_tharn.c
 UNIT_CORE_OBJS = $(addprefix $(UNIT_BUILD_DIR)/,$(notdir $(UNIT_CORE_SRC:.c=.o)))
 UNIT_TEST_OBJS = $(addprefix $(UNIT_BUILD_DIR)/,$(notdir $(UNIT_TEST_SRC:.c=.o)))
 UNIT_COV_CORE_OBJS = $(addprefix $(UNIT_COV_BUILD_DIR)/,$(notdir $(UNIT_CORE_SRC:.c=.o)))

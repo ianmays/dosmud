@@ -13,6 +13,16 @@ struct GameState;
 #ifdef TEST_MODE
 /* Suppress render printf during unit tests (snapshots leave this off). */
 void render_set_suppress(int on);
+/*
+ * #207 grendr slice counters: render_frame_begin/reset and the accessors below
+ * track only newline rows emitted through render_emit. main.c owns the full
+ * shell-frame contract by adding main_emit spacer/status rows in
+ * main_check_output_limits(); prompt, startup banner, and bye stay outside the
+ * budget. render_frame_over_budget compares the grendr slice count alone.
+ */
+void render_frame_begin(void);
+int render_frame_line_count(void);
+int render_frame_over_budget(void);
 #endif
 
 void game_print_location_art(int room_id);
