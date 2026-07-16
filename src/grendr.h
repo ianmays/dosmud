@@ -15,9 +15,10 @@ struct GameState;
 void render_set_suppress(int on);
 /*
  * Frame line budget (#207): main resets before a shell render frame, then
- * checks after step drain plus HUD. Count is newlines through render_emit only
- * (main printf prompts/spacers are outside the budget). over_budget is
- * count > CFG_SAFE_OUTPUT_MAX_LINES (exactly 25 rows is allowed).
+ * checks after step drain plus HUD. Count is newlines through render_emit plus
+ * shell-owned frame rows counted in main_emit; prompt, startup banner, and bye
+ * stay outside the budget. over_budget is count > CFG_SAFE_OUTPUT_MAX_LINES
+ * (exactly 25 rows is allowed).
  */
 void render_frame_begin(void);
 int render_frame_line_count(void);

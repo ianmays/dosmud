@@ -74,7 +74,7 @@ Use this section when deciding what to write, not only what to run. Agents and c
 
 **For `GameEvent` producer work:** assert payload contracts where the producer owns them. Keep queue reset/overflow/order rules in `unit_gout.c`, router sequencing in `unit_game.c`, slice payload semantics in the owning `unit_*.c`, and harness fixture shape in `unit_harn.c`. Narrative key lookup (`txtres_dialogue_narrative_key`, `txtres_encounter_narrative_key`) also lives in `unit_gout.c` beside queue contracts even though the tables are authored in `txtres.c`. Snapshots should prove rendered text, not replace direct payload assertions.
 
-The 25-line output policy is enforced in `TEST_MODE` only: `grendr` counts newlines through `render_emit` for each shell frame; `main` owns `render_frame_begin` before step drain/HUD and aborts when `render_frame_over_budget` is true (count greater than `CFG_SAFE_OUTPUT_MAX_LINES`; exactly 25 is allowed). Cover layout-heavy changes in `tests/unit/unit_rend.c` and keep `tests/regression/safe_output_budget` green when player-visible frame composition drifts.
+The 25-line output policy is enforced in `TEST_MODE` only: `grendr` counts newlines through `render_emit`, `main` adds shell-owned frame rows from `main_emit`, and the combined shell frame must stay at or below `CFG_SAFE_OUTPUT_MAX_LINES` (exactly 25 is allowed). Cover layout-heavy changes in `tests/unit/unit_rend.c` and keep `tests/regression/safe_output_budget` green when player-visible frame composition drifts.
 
 ## Test gap audit (agents and CI)
 

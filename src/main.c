@@ -54,23 +54,6 @@ static void print_prompt(void)
     fflush(stdout);
 }
 
-static int main_count_newlines(const char *text)
-{
-    int count;
-
-    count = 0;
-    if (text == 0) {
-        return 0;
-    }
-    while (*text != '\0') {
-        if (*text == '\n') {
-            ++count;
-        }
-        ++text;
-    }
-    return count;
-}
-
 static void main_emit(const char *fmt, ...)
 {
     va_list ap;
@@ -79,7 +62,15 @@ static void main_emit(const char *fmt, ...)
     vsprintf(g_main_emit_buf, fmt, ap);
     va_end(ap);
 #ifdef TEST_MODE
-    g_main_shell_frame_lines += main_count_newlines(g_main_emit_buf);
+    {
+        const char *p;
+
+        for (p = g_main_emit_buf; *p != '\0'; ++p) {
+            if (*p == '\n') {
+                ++g_main_shell_frame_lines;
+            }
+        }
+    }
 #endif
     fputs(g_main_emit_buf, stdout);
 }
@@ -351,20 +342,16 @@ static void main_begin_render_frame(void)
 /* Queue overflow (gout) and newline budget (grendr); either fails the harness. */
 static int main_check_output_limits(void)
 {
+    int total_lines;
+
     if (g_main_out.overflowed) {
         fprintf(stderr, "game output overflow\n");
         return 1;
     }
-    if (render_frame_over_budget()) {
+    total_lines = render_frame_line_count() + g_main_shell_frame_lines;
+    if (total_lines > CFG_SAFE_OUTPUT_MAX_LINES) {
         fprintf(stderr, "safe output overflow: %d lines (max %d)\n",
-            render_frame_line_count() + g_main_shell_frame_lines,
-            CFG_SAFE_OUTPUT_MAX_LINES);
-        return 1;
-    }
-    if (render_frame_line_count() + g_main_shell_frame_lines >
-            CFG_SAFE_OUTPUT_MAX_LINES) {
-        fprintf(stderr, "safe output overflow: %d lines (max %d)\n",
-            render_frame_line_count() + g_main_shell_frame_lines,
+            total_lines,
             CFG_SAFE_OUTPUT_MAX_LINES);
         return 1;
     }

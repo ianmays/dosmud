@@ -50,6 +50,7 @@ int render_frame_over_budget(void)
 /* Format once so TEST_MODE can count newlines from the same bytes as stdout. */
 static char g_render_emit_buf[4096];
 
+#ifdef TEST_MODE
 static int render_count_newlines(const char *text)
 {
     int count;
@@ -66,6 +67,7 @@ static int render_count_newlines(const char *text)
     }
     return count;
 }
+#endif
 
 static void render_emit(const char *fmt, ...)
 {
