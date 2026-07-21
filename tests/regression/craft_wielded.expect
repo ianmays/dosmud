@@ -17,19 +17,22 @@ A small campfire burns quietly.
 Exits: north south west
 On the ground:
   stick (take stick)
+
 [T:0] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 > 
 [T:2] Marsh [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 > You ready the stick.
+
 [T:2] Marsh [HP:20/20] [Atk:1] [Lv:1 XP:0/20]
 > You pick up the reed.
-
 A distant [creak] rolls across the landscape.
+
 [T:3] Marsh [HP:20/20] [Atk:1] [Lv:1 XP:0/20]
 > You bind a makeshift torch.
-
 You hear [water] moving somewhere beyond the path.
+
 [T:4] Marsh [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 > Bag (1/5): torch
+
 [T:4] Marsh [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 > bye

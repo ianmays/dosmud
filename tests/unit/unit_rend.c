@@ -18,7 +18,7 @@ static int render_count_frame_lines(struct GameState *game,
 {
     render_frame_begin();
     game_render_output(game, out);
-    game_render(game, out->count == 0);
+    game_render(game);
     return render_frame_line_count();
 }
 
@@ -28,7 +28,7 @@ TEST render_blank_hud_frame_counts_gap_and_hud(void)
 
     unit_game_fresh(&game, 1234u);
     render_frame_begin();
-    game_render(&game, 1);
+    game_render(&game);
     ASSERT_EQ(2, render_frame_line_count());
     ASSERT_EQ(0, render_frame_over_budget());
     PASS();

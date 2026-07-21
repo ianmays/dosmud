@@ -223,7 +223,6 @@ TEST fmt_map_camp_only(void)
         "Explored locations:\n"
         "@\n"
         "(@ = you, letter = first initial of a visited place.)\n"
-        "\n"
         "Exits: north south west\n";
 
     unit_game_fresh(&game, 21u);
@@ -245,7 +244,6 @@ TEST fmt_map_camp_and_road(void)
         "@\n"
         "C\n"
         "(@ = you, letter = first initial of a visited place.)\n"
-        "\n"
         "Exits: south west\n";
 
     unit_game_fresh(&game, 22u);

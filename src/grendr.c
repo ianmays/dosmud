@@ -842,13 +842,6 @@ static int move_followed_by_scene_open(const GameEventQueue *out, int move_i)
     return 0;
 }
 
-static int render_event_is_itemish_result(int kind)
-{
-    return kind == GAME_EVENT_ITEM_RESULT ||
-        kind == GAME_EVENT_CRAFT_RESULT ||
-        kind == GAME_EVENT_EQUIP_RESULT;
-}
-
 static int combat_phase_starts_block(int phase)
 {
     return phase == GAME_COMBAT_PHASE_STATUS ||
@@ -1126,16 +1119,14 @@ static void render_room_look_snapshot(const struct GameState *game, int room_id,
     }
 }
 
-void game_render(const struct GameState *game, int leading_gap)
+void game_render(const struct GameState *game)
 {
     const struct Room *room;
     int needed;
 
     room = &game->world.rooms[game->player.room_id];
     needed = game_xp_to_next_level(game->level);
-    if (leading_gap) {
-        render_gap();
-    }
+    render_gap();
     RENDER_PRINTF(TXT_HUD_FMT,
         game->tick, room->name, game->player_hp, game->max_hp,
         combat_player_attack_bonus(game),
@@ -1820,10 +1811,6 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
                     break;
                 }
             }
-            if (i > 0 &&
-                    render_event_is_itemish_result(out->events[i - 1].kind)) {
-                render_gap();
-            }
             render_environment_event(ev);
             if (env_event_is_stack_tier(ev->arg0)) {
                 flavor = 1;
@@ -1833,18 +1820,10 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
             if (flavor_followed_by_encounter_open(out, i)) {
                 break;
             }
-            if (i > 0 &&
-                    render_event_is_itemish_result(out->events[i - 1].kind)) {
-                render_gap();
-            }
             render_ambient_noise_event(ev);
             flavor = 1;
             break;
         case GAME_EVENT_ITEM_PRESENCE:
-            if (i > 0 &&
-                    render_event_is_itemish_result(out->events[i - 1].kind)) {
-                render_gap();
-            }
             render_item_presence_event(ev);
             break;
         case GAME_EVENT_OBSERVATION:

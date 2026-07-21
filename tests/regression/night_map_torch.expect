@@ -17,6 +17,7 @@ A small campfire burns quietly.
 Exits: north south west
 On the ground:
   stick (take stick)
+
 [T:0] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 > 
 [T:0] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
@@ -24,7 +25,7 @@ On the ground:
 Explored locations:
 @
 (@ = you, letter = first initial of a visited place.)
-
 Exits: north south west
+
 [T:0] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 > bye
