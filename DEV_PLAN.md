@@ -126,7 +126,6 @@ This lane is separate from persistent authored world advancement hooks ([#220](h
 - [#206](https://github.com/ianmays/dosmud/issues/206) player defeat/respawn flow
 - [#145](https://github.com/ianmays/dosmud/issues/145) local map viewport
 - [#207](https://github.com/ianmays/dosmud/issues/207) 25-line safe output mode - ✅ Done (PR [#243](https://github.com/ianmays/dosmud/pull/243))
-- [#244](https://github.com/ianmays/dosmud/issues/244) tighten turn spacing - ✅ Done (PR [#245](https://github.com/ianmays/dosmud/pull/245))
 
 ### Lane 4 - Tooling and showcase
 
