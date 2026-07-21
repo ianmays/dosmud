@@ -85,7 +85,7 @@ git fetch origin main
 sh scripts/check-test-gaps.sh origin/main
 ```
 
-Pull requests to `main` run the same script in CI in **informative** mode (`TEST_GAP_INFORMATIVE=1`, `continue-on-error`): gaps are logged but do not fail the job. Treat reported gaps as merge blockers until fixed or the heuristics are tuned. The script reads `COVERAGE_MODULES`, `UNIT_GAMEPLAY_SRC`, `PLAT_SRC`, and `HARNESS_SRC` from the `Makefile`, resolves owning unit suites from [`tests/unit/module-map`](https://github.com/ianmays/dosmud/blob/main/tests/unit/module-map), and flags likely missing unit or snapshot updates. Unit gaps are not waived by unrelated snapshot-only changes on the same branch.
+Pull requests to `main` run the same script in CI in **informative** mode (`TEST_GAP_INFORMATIVE=1`, `continue-on-error`): gaps are logged but do not fail the job. Treat reported gaps as merge blockers until fixed or the heuristics are tuned. The script reads `COVERAGE_MODULES`, `UNIT_GAMEPLAY_SRC`, `PLAT_SRC`, and `HARNESS_SRC` from the `Makefile`, resolves owning unit suites from [`tests/unit/module-map`](https://github.com/ianmays/dosmud/blob/main/tests/unit/module-map), and flags likely missing unit or snapshot updates. Blank-line-only edits in `tests/regression/*.expect` count as snapshot coverage (player-visible spacing); the script does not treat them as whitespace-only noise. Unit gaps are not waived by unrelated snapshot-only changes on the same branch.
 
 **Local:** run without `TEST_GAP_INFORMATIVE` before a draft PR (exit 1 on gaps). **`TEST_GAP_WAIVE=1`** skips the script locally for debugging only; CI does not set it. `make test-unit-coverage` remains the branch-coverage bar; the gap script does not replace it.
 

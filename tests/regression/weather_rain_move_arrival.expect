@@ -17,6 +17,7 @@ A small campfire burns quietly.
 Exits: north south west
 On the ground:
   stick (take stick)
+
 [T:0] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 > 
 [T:4] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
@@ -36,5 +37,6 @@ A dusty road stretches toward pale hills. Rain settles in, steady and insistent.
 Exits: south west
 On the ground:
   stone (take stone)
+
 [T:5] Road [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 > bye

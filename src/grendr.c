@@ -842,11 +842,12 @@ static int move_followed_by_scene_open(const GameEventQueue *out, int move_i)
     return 0;
 }
 
-static int render_event_is_itemish_result(int kind)
+static int render_event_leads_flavor_gap(int kind)
 {
     return kind == GAME_EVENT_ITEM_RESULT ||
         kind == GAME_EVENT_CRAFT_RESULT ||
-        kind == GAME_EVENT_EQUIP_RESULT;
+        kind == GAME_EVENT_EQUIP_RESULT ||
+        kind == GAME_EVENT_WAIT;
 }
 
 static int combat_phase_starts_block(int phase)
@@ -1033,6 +1034,7 @@ static void render_compact_arrival(const struct GameState *game,
         RENDER_PRINTF("%s", TXT_UI_BANDIT_CORPSE);
     }
     if (look_ev->arg0 != 0) {
+        render_gap();
         RENDER_PRINTF("%s", TXT_UI_NPC_HINT);
     }
 }
@@ -1122,20 +1124,20 @@ static void render_room_look_snapshot(const struct GameState *game, int room_id,
         RENDER_PRINTF("%s", TXT_UI_BANDIT_CORPSE);
     }
     if (npc_in_room_hint != 0) {
+        render_gap();
         RENDER_PRINTF("%s", TXT_UI_NPC_HINT);
     }
 }
 
-void game_render(const struct GameState *game, int leading_gap)
+/* #244: always one scene-break before HUD, including after empty steps. */
+void game_render(const struct GameState *game)
 {
     const struct Room *room;
     int needed;
 
     room = &game->world.rooms[game->player.room_id];
     needed = game_xp_to_next_level(game->level);
-    if (leading_gap) {
-        render_gap();
-    }
+    render_gap();
     RENDER_PRINTF(TXT_HUD_FMT,
         game->tick, room->name, game->player_hp, game->max_hp,
         combat_player_attack_bonus(game),
@@ -1801,7 +1803,10 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
         case GAME_EVENT_DIALOGUE_GUARD:
             render_dialogue_guard_event(ev);
             break;
-        /* #161 ambient/inspect: direct dispatch (gatmos no longer LEGACY). */
+        /*
+         * #161 ambient/inspect: direct dispatch (gatmos no longer LEGACY).
+         * #244: item/craft/equip/wait keep one scene break before flavor.
+         */
         case GAME_EVENT_ENVIRONMENT:
             if (flavor_followed_by_encounter_open(out, i) &&
                     !env_event_is_weather_transition(ev->arg0) &&
@@ -1821,7 +1826,7 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
                 }
             }
             if (i > 0 &&
-                    render_event_is_itemish_result(out->events[i - 1].kind)) {
+                    render_event_leads_flavor_gap(out->events[i - 1].kind)) {
                 render_gap();
             }
             render_environment_event(ev);
@@ -1834,7 +1839,7 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
                 break;
             }
             if (i > 0 &&
-                    render_event_is_itemish_result(out->events[i - 1].kind)) {
+                    render_event_leads_flavor_gap(out->events[i - 1].kind)) {
                 render_gap();
             }
             render_ambient_noise_event(ev);
@@ -1842,7 +1847,7 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
             break;
         case GAME_EVENT_ITEM_PRESENCE:
             if (i > 0 &&
-                    render_event_is_itemish_result(out->events[i - 1].kind)) {
+                    render_event_leads_flavor_gap(out->events[i - 1].kind)) {
                 render_gap();
             }
             render_item_presence_event(ev);

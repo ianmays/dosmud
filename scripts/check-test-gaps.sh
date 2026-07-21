@@ -269,10 +269,23 @@ module_from_header() {
 
 file_changed_non_whitespace() {
     path="$1"
+    # '^[+-][^+-]' skips +++ / --- headers; blank-only +/- lines need file_changed_any.
     if git diff -w "$DIFF_RANGE" -- "$path" 2>/dev/null | grep -q '^[+-][^+-]'; then
         return 0
     fi
     if git diff -w HEAD -- "$path" 2>/dev/null | grep -q '^[+-][^+-]'; then
+        return 0
+    fi
+    return 1
+}
+
+# Any content change, including blank-line-only edits (spacing rebaselines in .expect).
+file_changed_any() {
+    path="$1"
+    if git diff --numstat "$DIFF_RANGE" -- "$path" 2>/dev/null | grep -q .; then
+        return 0
+    fi
+    if git diff --numstat HEAD -- "$path" 2>/dev/null | grep -q .; then
         return 0
     fi
     return 1
@@ -365,13 +378,15 @@ unit_touched_for_module() {
 }
 
 snapshot_coverage_touched() {
+    snap_path=
     if makefile_touches_snapshot_tests; then
         return 0
     fi
-    for path in $NAME_ONLY; do
-        case "$path" in
+    # blank lines in .expect are player-visible spacing; do not use -w / non-ws-only.
+    for snap_path in $NAME_ONLY; do
+        case "$snap_path" in
             tests/regression/*.input|tests/regression/*.expect)
-                if file_changed_non_whitespace "$path"; then
+                if file_changed_any "$snap_path"; then
                     return 0
                 fi
                 ;;
@@ -381,10 +396,11 @@ snapshot_coverage_touched() {
 }
 
 unit_tests_touched() {
-    for path in $NAME_ONLY; do
-        case "$path" in
+    unit_path=
+    for unit_path in $NAME_ONLY; do
+        case "$unit_path" in
             tests/unit/unit_*.c)
-                if file_changed_non_whitespace "$path"; then
+                if file_changed_non_whitespace "$unit_path"; then
                     return 0
                 fi
                 ;;

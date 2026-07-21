@@ -17,6 +17,7 @@ A small campfire burns quietly.
 Exits: north south west
 On the ground:
   stick (take stick)
+
 [T:0] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 > 
 [T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
@@ -35,11 +36,13 @@ The herbalist spots the marsh-root in your bag at once.
   [2] Ask why she needs it.
   [3] Keep it for now.
 (Answer with 1, 2, 3, or reply <n>.)
+
 [T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 > She takes the marsh-root and crushes it between her stained thumbs.
 The bitter scent clears the orchard air for a moment.
 She presses a salve into your bag before turning back to her mortar.
 "If you are still hunting answers, start with the Ruins. If the stones lie, try the Catacombs beneath them."
+
 [T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 > 
 Orchard.
@@ -57,6 +60,8 @@ Crooked fruit trees crowd a forgotten lane, and the bitter scent of crushed mars
 Exits: north west
 On the ground:
   berry (take berry)
+
 Someone nearby might [talk].
+
 [T:0] Orchard [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 > bye

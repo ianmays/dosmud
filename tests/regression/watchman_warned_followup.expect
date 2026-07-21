@@ -17,6 +17,7 @@ A small campfire burns quietly.
 Exits: north south west
 On the ground:
   stick (take stick)
+
 [T:0] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 > 
 [T:0] Tower [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
@@ -35,12 +36,14 @@ A one-eyed watchman leans on the parapet.
   [2] Offer to share a meal.
   [3] Say nothing and move on.
 (Answer with 1, 2, 3, or reply <n>.)
+
 [T:0] Tower [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 > He points west. "If crows go quiet, squall in ten minutes."
   [1] Ask what to do when it hits.
   [2] Change the subject.
   [3] Leave him to his watch.
 (Answer with 1, 2, 3, or reply <n>.)
+
 [T:0] Tower [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 > He barks over the wind. "Find low ground and ditch anything iron."
 
@@ -58,7 +61,9 @@ A one-eyed watchman leans on the parapet.
   [2] Offer to share a meal.
   [3] Say nothing and move on.
 (Answer with 1, 2, 3, or reply <n>.)
+
 [T:0] Tower [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 > He nods once and returns to the horizon.
+
 [T:0] Tower [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 > bye
