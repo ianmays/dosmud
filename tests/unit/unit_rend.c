@@ -22,6 +22,7 @@ static int render_count_frame_lines(struct GameState *game,
     return render_frame_line_count();
 }
 
+/* #244: empty step still counts render_gap + HUD as two grendr rows. */
 TEST render_blank_hud_frame_counts_gap_and_hud(void)
 {
     struct GameState game;

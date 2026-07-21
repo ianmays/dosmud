@@ -1119,6 +1119,7 @@ static void render_room_look_snapshot(const struct GameState *game, int room_id,
     }
 }
 
+/* #244: always one scene-break before HUD, including after empty steps. */
 void game_render(const struct GameState *game)
 {
     const struct Room *room;
@@ -1792,7 +1793,10 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
         case GAME_EVENT_DIALOGUE_GUARD:
             render_dialogue_guard_event(ev);
             break;
-        /* #161 ambient/inspect: direct dispatch (gatmos no longer LEGACY). */
+        /*
+         * #161 ambient/inspect: direct dispatch (gatmos no longer LEGACY).
+         * #244: stay tight after item/craft/equip; no render_gap before these.
+         */
         case GAME_EVENT_ENVIRONMENT:
             if (flavor_followed_by_encounter_open(out, i) &&
                     !env_event_is_weather_transition(ev->arg0) &&
