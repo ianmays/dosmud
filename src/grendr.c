@@ -842,11 +842,12 @@ static int move_followed_by_scene_open(const GameEventQueue *out, int move_i)
     return 0;
 }
 
-static int render_event_is_itemish_result(int kind)
+static int render_event_leads_flavor_gap(int kind)
 {
     return kind == GAME_EVENT_ITEM_RESULT ||
         kind == GAME_EVENT_CRAFT_RESULT ||
-        kind == GAME_EVENT_EQUIP_RESULT;
+        kind == GAME_EVENT_EQUIP_RESULT ||
+        kind == GAME_EVENT_WAIT;
 }
 
 static int combat_phase_starts_block(int phase)
@@ -1804,7 +1805,7 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
             break;
         /*
          * #161 ambient/inspect: direct dispatch (gatmos no longer LEGACY).
-         * #244: item/craft/equip results keep one scene break before flavor.
+         * #244: item/craft/equip/wait keep one scene break before flavor.
          */
         case GAME_EVENT_ENVIRONMENT:
             if (flavor_followed_by_encounter_open(out, i) &&
@@ -1825,7 +1826,7 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
                 }
             }
             if (i > 0 &&
-                    render_event_is_itemish_result(out->events[i - 1].kind)) {
+                    render_event_leads_flavor_gap(out->events[i - 1].kind)) {
                 render_gap();
             }
             render_environment_event(ev);
@@ -1838,7 +1839,7 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
                 break;
             }
             if (i > 0 &&
-                    render_event_is_itemish_result(out->events[i - 1].kind)) {
+                    render_event_leads_flavor_gap(out->events[i - 1].kind)) {
                 render_gap();
             }
             render_ambient_noise_event(ev);
@@ -1846,7 +1847,7 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
             break;
         case GAME_EVENT_ITEM_PRESENCE:
             if (i > 0 &&
-                    render_event_is_itemish_result(out->events[i - 1].kind)) {
+                    render_event_leads_flavor_gap(out->events[i - 1].kind)) {
                 render_gap();
             }
             render_item_presence_event(ev);

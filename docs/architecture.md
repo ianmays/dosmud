@@ -84,9 +84,9 @@ Player-facing copy lives in `txtres`; `grendr` owns when a blank line appears be
   - **Look footer** - `GAME_EVENT_ROOM_LOOK` appends weather, night, and active clue phrases to the room description in one block (`txtres_look_clue_phrase`, `txtres_look_weather_phrase`; `GAME_ROOM_LOOK_FLAG_SUPPRESS_WEATHER` skips weather when the same step already announced a transition).
   - **Compact arrival/return** - `MOVE` or peaceful `ENCOUNTER` reply followed by flavor plus trailing `ROOM_LOOK` coalesces into one render block only when that `ROOM_LOOK` carries `GAME_ROOM_LOOK_FLAG_TIGHT_LEAD`; `game_process_input` sets it on movement arrivals and `game_describe_current_room_tight` sets it on peaceful return snapshots ([#236](https://github.com/ianmays/dosmud/issues/236)).
   - **HUD spacing** - `game_render(game)` always prints one blank line before `TXT_HUD_FMT` so the status line is separated from turn body output (including after empty steps).
-  - **Action then atmosphere** - item/craft/equip results get one `render_gap` before following environment, ambient, or item-presence lines.
+  - **Action then atmosphere** - item/craft/equip results and `wait` get one `render_gap` before following environment, ambient, or item-presence lines.
   - **Look talk hint** - when a room look prints `TXT_UI_NPC_HINT`, one `render_gap` precedes it after exits / ground / corpse lines.
-  - **Map legend** - exploration map prints `TXT_MAP_LEGEND` then room exits with no blank line between them.
+  - **Map legend** - exploration map prints `TXT_MAP_LEGEND`, then one blank line, then room exits.
   - **25-line safety guard** - handled command frames target `CFG_SAFE_OUTPUT_MAX_LINES` visible rows (step output plus HUD; prompt and other `main` printf spacers excluded). In `TEST_MODE`, `grendr` counts newlines through `render_emit` only; `main` owns frame begin (`render_frame_begin` before drain/HUD) and the over-budget check after both (fail when count is greater than the cap; exactly 25 rows is allowed).
 - **ASCII art:** the first row must be drawing, not a blank spacer row; room captions print on one line after the art with no trailing blank spacer rows. Section breaks come from `render_gap()`, not padding lines inside art.
 

@@ -19,7 +19,7 @@ int fmt_inv_bag_items(const struct GameState *game, char *buf, int bufsize);
 int fmt_room_ground_items(const int *room_items, char *buf, int bufsize);
 
 /* Exploration map text (header, grid or none-explored message, legend,
- * then open exits for player's current room with no blank after legend;
+ * blank line, then open exits for player's current room;
  * label/dir order match look).
  * Returns bytes written excluding NUL, or -1 if bufsize too small. */
 int fmt_exploration_map(const struct GameState *game, char *buf, int bufsize);

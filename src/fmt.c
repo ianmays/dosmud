@@ -312,7 +312,11 @@ int fmt_exploration_map(const struct GameState *game, char *buf, int bufsize)
     if (pos < 0) {
         return -1;
     }
-    /* #244: exits follow legend with no blank; room is player standing, not cells */
+    /* #244: blank above exits; footer uses player standing room, not cells */
+    pos = fmt_buf_append_char(buf, bufsize, pos, '\n');
+    if (pos < 0) {
+        return -1;
+    }
     room = &game->world.rooms[game->player.room_id];
     pos = fmt_buf_append_room_exits(buf, bufsize, pos, room);
     if (pos < 0) {
