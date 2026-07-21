@@ -842,6 +842,13 @@ static int move_followed_by_scene_open(const GameEventQueue *out, int move_i)
     return 0;
 }
 
+static int render_event_is_itemish_result(int kind)
+{
+    return kind == GAME_EVENT_ITEM_RESULT ||
+        kind == GAME_EVENT_CRAFT_RESULT ||
+        kind == GAME_EVENT_EQUIP_RESULT;
+}
+
 static int combat_phase_starts_block(int phase)
 {
     return phase == GAME_COMBAT_PHASE_STATUS ||
@@ -1026,6 +1033,7 @@ static void render_compact_arrival(const struct GameState *game,
         RENDER_PRINTF("%s", TXT_UI_BANDIT_CORPSE);
     }
     if (look_ev->arg0 != 0) {
+        render_gap();
         RENDER_PRINTF("%s", TXT_UI_NPC_HINT);
     }
 }
@@ -1115,6 +1123,7 @@ static void render_room_look_snapshot(const struct GameState *game, int room_id,
         RENDER_PRINTF("%s", TXT_UI_BANDIT_CORPSE);
     }
     if (npc_in_room_hint != 0) {
+        render_gap();
         RENDER_PRINTF("%s", TXT_UI_NPC_HINT);
     }
 }
@@ -1795,7 +1804,7 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
             break;
         /*
          * #161 ambient/inspect: direct dispatch (gatmos no longer LEGACY).
-         * #244: stay tight after item/craft/equip; no render_gap before these.
+         * #244: item/craft/equip results keep one scene break before flavor.
          */
         case GAME_EVENT_ENVIRONMENT:
             if (flavor_followed_by_encounter_open(out, i) &&
@@ -1815,6 +1824,10 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
                     break;
                 }
             }
+            if (i > 0 &&
+                    render_event_is_itemish_result(out->events[i - 1].kind)) {
+                render_gap();
+            }
             render_environment_event(ev);
             if (env_event_is_stack_tier(ev->arg0)) {
                 flavor = 1;
@@ -1824,10 +1837,18 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
             if (flavor_followed_by_encounter_open(out, i)) {
                 break;
             }
+            if (i > 0 &&
+                    render_event_is_itemish_result(out->events[i - 1].kind)) {
+                render_gap();
+            }
             render_ambient_noise_event(ev);
             flavor = 1;
             break;
         case GAME_EVENT_ITEM_PRESENCE:
+            if (i > 0 &&
+                    render_event_is_itemish_result(out->events[i - 1].kind)) {
+                render_gap();
+            }
             render_item_presence_event(ev);
             break;
         case GAME_EVENT_OBSERVATION:
