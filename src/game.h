@@ -172,6 +172,7 @@ void game_background_step(struct GameState *game, GameEventQueue *out);
 void game_set_mode_explore(struct GameState *game);
 void game_set_mode_dialogue(struct GameState *game, enum DialogueKind kind);
 void game_set_mode_combat(struct GameState *game);
+/* Cross-slice defeat: invent + gprog mutate, then camp explore + PLAYER_DEFEAT. */
 void game_handle_player_defeat(struct GameState *game,
                                struct GameEventQueue *out);
 

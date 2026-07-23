@@ -95,6 +95,11 @@ void progression_rebuild_from_cumulative_xp(struct GameState *game,
     }
 }
 
+/*
+ * Mutates level and derived stats only; game.c emits GAME_EVENT_PLAYER_DEFEAT
+ * rather than XP_GAIN/STAT_CHANGE so camp copy stays on the defeat path.
+ * Integer percent avoids float and keeps loss deterministic for the same total.
+ */
 u32 progression_apply_defeat_penalty(struct GameState *game)
 {
     u32 total;

@@ -253,7 +253,11 @@ static int fixture_bandit_fight_ready(struct GameState *game)
 
 static int fixture_player_defeat_ready(struct GameState *game)
 {
-    /* Player hit spread 0 leaves combat active; enemy damage spread 3 is lethal. */
+    /*
+     * Deterministic lethal reply: hit spread 0 keeps combat open, then enemy
+     * damage spread 3 drops HP 1 to zero. Quiet ticks and a fixed cumulative XP
+     * total keep ambient RNG and defeat copy stable for snapshots.
+     */
     static const int rolls[2] = { 0, 3 };
     int slot;
 

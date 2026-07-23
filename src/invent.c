@@ -1,7 +1,7 @@
 /*
  * Inventory and ground-slot ownership live here; the module keeps bag, hand,
- * and room storage explicit so the DOS-sized buffers stay predictable.
- * #158: command handlers queue GAME_EVENT_* outcomes; grendr maps them to text.
+ * room storage, and the one global player corpse explicit so DOS-sized buffers
+ * stay predictable. #158: handlers queue GAME_EVENT_* outcomes; grendr prints.
  */
 
 #include "config.h"
@@ -37,8 +37,10 @@ int game_player_corpse_is_in_room(const struct GameState *game, int room_id)
 }
 
 /*
- * Snapshot corpse slots into a CORPSE_VIEW event; invent owns corpse_item[].
- * arg0/arg1 drive menu numbering in grendr; pad room_item[] to CFG_AREA_ITEM_SLOTS.
+ * Snapshot the active corpse into CORPSE_VIEW. Player corpse takes the room when
+ * present; otherwise invent owns per-room corpse_item[]. arg0/arg1 number the
+ * menu in grendr; arg2 is GameEventCorpseKind. Player storage can exceed the
+ * menu page, so only the first CFG_CORPSE_ITEM_SLOTS items are visible.
  */
 static void push_corpse_view(GameEventQueue *out, struct GameState *game,
                              int room_id)
@@ -63,6 +65,7 @@ static void push_corpse_view(GameEventQueue *out, struct GameState *game,
             }
         }
     }
+    /* Menu page size matches enemy corpse slots; extras stay for loot all. */
     visible_count = item_count;
     if (visible_count > CFG_CORPSE_ITEM_SLOTS) {
         visible_count = CFG_CORPSE_ITEM_SLOTS;
@@ -301,6 +304,10 @@ void game_player_corpse_replace_from_inventory(struct GameState *game,
     *transferred_count = corpse_slot;
 }
 
+/*
+ * When both bodies share a room, loot/view always bind the player corpse first
+ * so recovery cannot be blocked by an enemy corpse still on the ground.
+ */
 static int loot_source_for_room(struct GameState *game, int room_id)
 {
     if (game_player_corpse_is_in_room(game, room_id)) {

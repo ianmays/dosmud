@@ -70,6 +70,10 @@ int item_weapon_damage_bonus(int item_id)
     return 0;
 }
 
+/*
+ * invent consults this policy when splitting bag/weapon into the player corpse;
+ * keep the keep-list here so combat and progression stay free of item rules.
+ */
 int item_is_retained_on_defeat(int item_id)
 {
     return item_id == ITEM_MARSH_ROOT;

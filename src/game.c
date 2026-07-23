@@ -181,8 +181,9 @@ void game_set_mode_combat(struct GameState *game)
 }
 
 /*
- * game.c owns the cross-slice defeat transaction: inventory and progression
- * mutate their state first, then orchestration restores camp exploration.
+ * game.c owns the cross-slice defeat transaction: invent and gprog mutate
+ * first, then orchestration restores camp exploration and queues PLAYER_DEFEAT
+ * for grendr (payload layout in gout.h).
  */
 void game_handle_player_defeat(struct GameState *game, GameEventQueue *out)
 {

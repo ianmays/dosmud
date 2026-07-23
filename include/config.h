@@ -85,6 +85,7 @@
 #define CFG_LEVELUP_MAX_HP_DELTA 4
 #define CFG_LEVELUP_DAMAGE_BONUS_DELTA 1
 #define CFG_LEVELUP_BAG_CAPACITY_DELTA 1
+/* Percent of lifetime cumulative XP removed on player defeat (#206). */
 #define CFG_PLAYER_DEFEAT_XP_PERCENT 20
 
 /* Starting player */
