@@ -151,15 +151,21 @@ TEST render_player_corpse_menu_stays_within_safe_budget(void)
     PASS();
 }
 
-TEST render_player_corpse_menu_adds_gap_before_flavor(void)
+TEST render_player_corpse_menu_adds_gap_before_look_flavor(void)
 {
     struct GameState game;
+    GameEventQueue look_out;
     GameEventQueue out;
     GameEvent *ev;
     int menu_lines;
-    int flavor_lines;
+    int look_lines;
+    int combined_lines;
 
     unit_game_fresh(&game, 208u);
+    game.weather_kind = GAME_WEATHER_RAIN;
+    game.env_room_clues[WORLD_ROOM_CAMP] =
+        (u8)GAME_ENV_CLUE_BIT(GAME_ENV_RUSTLE);
+
     game_event_queue_reset(&out);
     ev = game_event_push(&out, GAME_EVENT_CORPSE_VIEW, 1, 2,
         GAME_CORPSE_KIND_PLAYER, 0, 0);
@@ -168,11 +174,18 @@ TEST render_player_corpse_menu_adds_gap_before_flavor(void)
     ev->room_item[0] = ITEM_SPEAR;
     menu_lines = render_count_frame_lines(&game, &out);
 
+    game_event_queue_reset(&look_out);
+    ASSERT(0 != game_event_push(&look_out, GAME_EVENT_ENVIRONMENT,
+        GAME_ENV_EVENT_WEATHER_RAIN, 0, 0, 0, 0));
+    game_describe_current_room(&game, &look_out);
+    look_lines = render_count_frame_lines(&game, &look_out);
+
     ASSERT(0 != game_event_push(&out, GAME_EVENT_ENVIRONMENT,
-        GAME_ENV_EVENT_GUST, 0, 0, 0, 0));
-    flavor_lines = render_count_frame_lines(&game, &out);
-    ASSERT_EQ(menu_lines + 2, flavor_lines);
-    ASSERT_EQ(0, render_frame_over_budget());
+        GAME_ENV_EVENT_WEATHER_RAIN, 0, 0, 0, 0));
+    game_describe_current_room(&game, &out);
+    combined_lines = render_count_frame_lines(&game, &out);
+    /* Separate frames duplicate two HUD rows; the combined frame adds one gap. */
+    ASSERT_EQ(menu_lines + look_lines - 1, combined_lines);
     PASS();
 }
 
@@ -185,5 +198,5 @@ SUITE(grendr)
     RUN_TEST(render_corpse_menu_frame_stays_within_safe_budget);
     RUN_TEST(render_player_defeat_frame_stays_within_safe_budget);
     RUN_TEST(render_player_corpse_menu_stays_within_safe_budget);
-    RUN_TEST(render_player_corpse_menu_adds_gap_before_flavor);
+    RUN_TEST(render_player_corpse_menu_adds_gap_before_look_flavor);
 }

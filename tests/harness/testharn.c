@@ -683,6 +683,14 @@ static void fixture_corpse_stripped(struct GameState *game)
     game->corpse_item[WORLD_ROOM_CAMP][2] = ITEM_NONE;
 }
 
+/* Corpse menu followed by the first scheduled rain transition (#206). */
+static void fixture_corpse_loot_weather_rain(struct GameState *game)
+{
+    fixture_weather_rain_ready(game);
+    game->corpse_present[WORLD_ROOM_CAMP] = 1;
+    game->corpse_item[WORLD_ROOM_CAMP][0] = ITEM_STICK;
+}
+
 /* Full bag plus one corpse item for bag-full-drop during loot reply. */
 static int fixture_corpse_loot_full_bag(struct GameState *game, int loot_item)
 {
@@ -1107,6 +1115,10 @@ int testharn_apply(struct GameState *game, const char *line)
     }
     if (fixture_name_is("corpse_stripped", name)) {
         fixture_corpse_stripped(game);
+        return 1;
+    }
+    if (fixture_name_is("corpse_loot_weather_rain", name)) {
+        fixture_corpse_loot_weather_rain(game);
         return 1;
     }
     if (fixture_name_is("corpse_loot_full_bag", name)) {
