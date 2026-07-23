@@ -1053,14 +1053,14 @@ TEST game_version_allowed_during_loot_menu(void)
     game.corpse_present[WORLD_ROOM_CAMP] = 1;
     game.corpse_item[WORLD_ROOM_CAMP][0] = ITEM_HERB;
     ASSERT_EQ(1, run_cmd_out(&game, "loot", &out));
-    ASSERT_EQ(1, game.tick);
+    ASSERT_EQ(0, game.tick);
     ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
     ASSERT_EQ(DIALOGUE_LOOT, game.dialogue);
     game_event_queue_reset(&out);
     ASSERT_EQ(1, game_process_input(&game, line, &out));
     ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
     ASSERT_EQ(DIALOGUE_LOOT, game.dialogue);
-    ASSERT_EQ(1, game.tick);
+    ASSERT_EQ(0, game.tick);
     ASSERT_EQ(1, out.count);
     ASSERT_EQ(GAME_EVENT_VERSION, out.events[0].kind);
     PASS();
@@ -1431,12 +1431,12 @@ TEST game_post_combat_reply_guard_keeps_loot_available(void)
     ASSERT_EQ(1, game.corpse_present[WORLD_ROOM_CAMP]);
 
     ASSERT_EQ(1, run_cmd_out(&game, "loot", &out));
-    ASSERT_EQ(tick_before_reply + 1, game.tick);
+    ASSERT_EQ(tick_before_reply, game.tick);
     ASSERT(out.count >= 1);
     ASSERT_EQ(GAME_EVENT_CORPSE_VIEW, out.events[0].kind);
     ASSERT_EQ(1, out.events[0].arg0);
     ASSERT_EQ(1, run_cmd_out(&game, "1", &out));
-    ASSERT_EQ(tick_before_reply + 1, game.tick);
+    ASSERT_EQ(tick_before_reply, game.tick);
     ASSERT_EQ(GAME_EVENT_ITEM_RESULT, out.events[0].kind);
     ASSERT_EQ(GAME_ITEM_ACTION_LOOT, out.events[0].arg0);
     ASSERT_EQ(GAME_ITEM_OUTCOME_OK, out.events[0].arg1);
@@ -1460,7 +1460,7 @@ TEST game_loot_leave_keeps_corpse_without_advancing_time(void)
     game.corpse_item[WORLD_ROOM_CAMP][2] = ITEM_NONE;
 
     ASSERT_EQ(1, run_cmd_out(&game, "loot", &out));
-    ASSERT_EQ(1, game.tick);
+    ASSERT_EQ(0, game.tick);
     ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
     ASSERT_EQ(DIALOGUE_LOOT, game.dialogue);
     ASSERT_EQ(GAME_EVENT_CORPSE_VIEW, out.events[0].kind);

@@ -374,19 +374,29 @@ const char *const TXT_LEVEL_UP_FMT = "Level up! You are now level %d.\n";
 const char *const TXT_LEVEL_STATS_FMT = "Max HP %d, Damage bonus +%d, Bag capacity %d.\n";
 const char *const TXT_DEFEAT_CAMP = "You wake at camp, bruised but alive.\n";
 const char *const TXT_DEFEAT_XP_FMT = "You lose %d cumulative XP.\n";
+const char *const TXT_DEFEAT_XP_HELD_FMT =
+    "You lose %d cumulative XP and remain level %d.\n";
+const char *const TXT_DEFEAT_XP_LEVEL_FMT =
+    "You lose %d cumulative XP. Your level falls from %d to %d; your derived stats are recalculated.\n";
 const char *const TXT_DEFEAT_LEVEL_FMT =
     "Your level falls from %d to %d; your derived stats are recalculated.\n";
 const char *const TXT_DEFEAT_LEVEL_HELD_FMT = "You remain level %d.\n";
 const char *const TXT_DEFEAT_REPLACED_FMT =
     "Your previous corpse and its %d remaining item(s) are lost.\n";
+const char *const TXT_DEFEAT_REPLACED_CORPSE_FMT =
+    "Your previous corpse and its %d remaining item(s) are lost. %d item(s) remain on your body in %s. Return and type loot or loot all.\n";
 const char *const TXT_DEFEAT_EQUIPPED_FMT =
     "Your equipped %s falls with the rest of your gear.\n";
+const char *const TXT_DEFEAT_EQUIPPED_RETAINED_FMT =
+    "Your equipped %s falls with the rest of your gear, but your %s is retained on defeat and stays with you.\n";
+const char *const TXT_DEFEAT_EQUIPPED_RETAINED_MORE_FMT =
+    "Your equipped %s falls with the rest of your gear, but your %s and %d other retained item(s) stay with you.\n";
 const char *const TXT_DEFEAT_RETAINED_FMT =
     "Your %s is retained on defeat and stays with you.\n";
 const char *const TXT_DEFEAT_RETAINED_MORE_FMT =
     "Your %s and %d other retained item(s) stay with you.\n";
 const char *const TXT_DEFEAT_CORPSE_FMT =
-    "%d item(s) remain on your body in %s. Return and type loot or loot all.\n";
+    "%d item(s) remain on your body in %s.\n";
 const char *const TXT_DEFEAT_NO_CORPSE =
     "You carried no recoverable items, so no body remains.\n";
 const char *const TXT_HUD_FMT =

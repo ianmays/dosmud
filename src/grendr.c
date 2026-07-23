@@ -15,6 +15,7 @@
 #include "gout.h"
 #include "combat.h"
 #include "items.h"
+#include "invent.h"
 #include "command.h"
 #include "world.h"
 #include "txtres.h"
@@ -1686,27 +1687,37 @@ static void render_player_defeat_event(const struct GameState *game,
                                        const GameEvent *ev)
 {
     RENDER_PRINTF("%s", TXT_DEFEAT_CAMP);
-    RENDER_PRINTF(TXT_DEFEAT_XP_FMT, ev->arg0);
     if (ev->arg2 < ev->arg1) {
-        RENDER_PRINTF(TXT_DEFEAT_LEVEL_FMT, ev->arg1, ev->arg2);
+        RENDER_PRINTF(TXT_DEFEAT_XP_LEVEL_FMT, ev->arg0, ev->arg1, ev->arg2);
     } else {
-        RENDER_PRINTF(TXT_DEFEAT_LEVEL_HELD_FMT, ev->arg2);
+        RENDER_PRINTF(TXT_DEFEAT_XP_HELD_FMT, ev->arg0, ev->arg2);
     }
-    if (ev->room_item[3] > 0) {
+    if (ev->room_item[0] != ITEM_NONE && ev->room_item[2] == 1) {
+        RENDER_PRINTF(TXT_DEFEAT_EQUIPPED_RETAINED_FMT,
+            item_name(ev->room_item[0]), item_name(ev->room_item[1]));
+    } else if (ev->room_item[0] != ITEM_NONE && ev->room_item[2] > 1) {
+        RENDER_PRINTF(TXT_DEFEAT_EQUIPPED_RETAINED_MORE_FMT,
+            item_name(ev->room_item[0]), item_name(ev->room_item[1]),
+            ev->room_item[2] - 1);
+    } else {
+        if (ev->room_item[0] != ITEM_NONE) {
+            RENDER_PRINTF(TXT_DEFEAT_EQUIPPED_FMT,
+                item_name(ev->room_item[0]));
+        }
+        if (ev->room_item[2] == 1) {
+            RENDER_PRINTF(TXT_DEFEAT_RETAINED_FMT,
+                item_name(ev->room_item[1]));
+        } else if (ev->room_item[2] > 1) {
+            RENDER_PRINTF(TXT_DEFEAT_RETAINED_MORE_FMT,
+                item_name(ev->room_item[1]), ev->room_item[2] - 1);
+        }
+    }
+    if (ev->room_item[3] > 0 && ev->arg3 > 0) {
+        RENDER_PRINTF(TXT_DEFEAT_REPLACED_CORPSE_FMT, ev->room_item[3],
+            ev->arg3, game->world.rooms[ev->room_id].name);
+    } else if (ev->room_item[3] > 0) {
         RENDER_PRINTF(TXT_DEFEAT_REPLACED_FMT, ev->room_item[3]);
-    }
-    if (ev->room_item[0] != ITEM_NONE) {
-        RENDER_PRINTF(TXT_DEFEAT_EQUIPPED_FMT,
-            item_name(ev->room_item[0]));
-    }
-    if (ev->room_item[2] == 1) {
-        RENDER_PRINTF(TXT_DEFEAT_RETAINED_FMT,
-            item_name(ev->room_item[1]));
-    } else if (ev->room_item[2] > 1) {
-        RENDER_PRINTF(TXT_DEFEAT_RETAINED_MORE_FMT,
-            item_name(ev->room_item[1]), ev->room_item[2] - 1);
-    }
-    if (ev->arg3 > 0) {
+    } else if (ev->arg3 > 0) {
         RENDER_PRINTF(TXT_DEFEAT_CORPSE_FMT, ev->arg3,
             game->world.rooms[ev->room_id].name);
     } else {
@@ -1830,9 +1841,7 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
             break;
         case GAME_EVENT_WAIT:
             render_msg_wait();
-#ifndef __WATCOMC__
             scene_flavor_gap_pending = 1;
-#endif
             break;
         case GAME_EVENT_CANNOT_MOVE:
             render_msg_cannot_move(ev->text);

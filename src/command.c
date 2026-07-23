@@ -337,7 +337,6 @@ int command_advances_time(int type)
     if (type == CMD_EAT) return 1;
     if (type == CMD_USE) return 1;
     if (type == CMD_CRAFT) return 1;
-    if (type == CMD_LOOT) return 1;
     return 0;
 }
 

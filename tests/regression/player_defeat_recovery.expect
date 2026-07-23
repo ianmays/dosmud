@@ -30,11 +30,9 @@ The bandit strikes for 4 damage.
 You collapse.
 
 You wake at camp, bruised but alive.
-You lose 25 cumulative XP.
-Your level falls from 4 to 3; your derived stats are recalculated.
-Your equipped spear falls with the rest of your gear.
-Your marsh-root is retained on defeat and stays with you.
-3 item(s) remain on your body in Road. Return and type loot or loot all.
+You lose 25 cumulative XP. Your level falls from 4 to 3; your derived stats are recalculated.
+Your equipped spear falls with the rest of your gear, but your marsh-root is retained on defeat and stays with you.
+3 item(s) remain on your body in Road.
 
 [T:2] Camp [HP:28/28] [Atk:2] [Lv:3 XP:45/50]
 > Saved to save.dat.
@@ -105,13 +103,13 @@ On the ground:
 Type loot all to grab everything you can carry.
 (Answer with 1-4 or reply <n>.)
 
-[T:4] Road [HP:28/28] [Atk:2] [Lv:3 XP:45/50]
+[T:3] Road [HP:28/28] [Atk:2] [Lv:3 XP:45/50]
 > You loot a berry from the body.
 You loot a herb from the body.
 You loot a spear from the body.
 
-[T:4] Road [HP:28/28] [Atk:2] [Lv:3 XP:45/50]
+[T:3] Road [HP:28/28] [Atk:2] [Lv:3 XP:45/50]
 > Bag (4/7): marsh-root, berry, herb, spear
 
-[T:4] Road [HP:28/28] [Atk:2] [Lv:3 XP:45/50]
+[T:3] Road [HP:28/28] [Atk:2] [Lv:3 XP:45/50]
 > bye
