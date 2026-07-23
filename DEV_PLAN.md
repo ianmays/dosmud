@@ -2,7 +2,7 @@
 
 ## Current phase
 
-**Playable authored adventure spine.**
+**Playability and text-output discipline**
 
 Roadmap v1 established the engine foundation:
 
@@ -71,7 +71,7 @@ GitHub milestones group Roadmap v2 lanes (Authored Interaction Spine v1, World R
 
 ## Lanes
 
-### Lane 1 - Authored interaction spine [Active]
+### Lane 1 - Authored interaction spine
 
 **Purpose:** Make authored story interaction repeatable without building a generic quest engine.
 
@@ -116,7 +116,7 @@ Frameworks last.
 
 This lane is separate from persistent authored world advancement hooks ([#220](https://github.com/ianmays/dosmud/issues/220)).
 
-### Lane 3 - Playability and text-output discipline
+### Lane 3 - Playability and text-output discipline [Active]
 
 **Purpose:** Make the current text game easier to play, read, fail, recover, and navigate.
 
