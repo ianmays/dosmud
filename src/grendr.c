@@ -842,14 +842,6 @@ static int move_followed_by_scene_open(const GameEventQueue *out, int move_i)
     return 0;
 }
 
-static int render_event_leads_flavor_gap(int kind)
-{
-    return kind == GAME_EVENT_ITEM_RESULT ||
-        kind == GAME_EVENT_CRAFT_RESULT ||
-        kind == GAME_EVENT_EQUIP_RESULT ||
-        kind == GAME_EVENT_WAIT;
-}
-
 static int combat_phase_starts_block(int phase)
 {
     return phase == GAME_COMBAT_PHASE_STATUS ||
@@ -1711,11 +1703,11 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
 {
     int i;
     int flavor;
-    int corpse_flavor_gap_pending;
+    int scene_flavor_gap_pending;
     const GameEvent *ev;
 
     atmo_stack_reset();
-    corpse_flavor_gap_pending = 0;
+    scene_flavor_gap_pending = 0;
     for (i = 0; i < out->count; ++i) {
         int compact_look_i;
 
@@ -1730,9 +1722,9 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
             compact_look_i = compact_arrival_room_look_end(out, i);
             if (compact_look_i >= 0) {
                 atmo_stack_flush();
-                if (corpse_flavor_gap_pending) {
+                if (scene_flavor_gap_pending) {
                     render_gap();
-                    corpse_flavor_gap_pending = 0;
+                    scene_flavor_gap_pending = 0;
                 }
                 render_compact_arrival(game, out, i, compact_look_i);
                 i = compact_look_i;
@@ -1748,9 +1740,9 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
                     compact_encounter_reply_text(ev, lead_text,
                         (int)sizeof(lead_text)) > 0) {
                 atmo_stack_flush();
-                if (corpse_flavor_gap_pending) {
+                if (scene_flavor_gap_pending) {
                     render_gap();
-                    corpse_flavor_gap_pending = 0;
+                    scene_flavor_gap_pending = 0;
                 }
                 render_compact_reply_return(game, out, compact_look_i,
                     lead_text);
@@ -1761,9 +1753,9 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
         }
         switch (ev->kind) {
         case GAME_EVENT_ROOM_LOOK:
-            if (corpse_flavor_gap_pending) {
+            if (scene_flavor_gap_pending) {
                 render_gap();
-                corpse_flavor_gap_pending = 0;
+                scene_flavor_gap_pending = 0;
             }
             if (i > 0 && out->events[i - 1].kind == GAME_EVENT_DIALOGUE) {
                 render_gap();
@@ -1788,6 +1780,7 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
             break;
         case GAME_EVENT_WAIT:
             render_msg_wait();
+            scene_flavor_gap_pending = 1;
             break;
         case GAME_EVENT_CANNOT_MOVE:
             render_msg_cannot_move(ev->text);
@@ -1798,6 +1791,7 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
         /* #158 inventory: direct dispatch (invent no longer wraps LEGACY). */
         case GAME_EVENT_ITEM_RESULT:
             render_item_result_event(ev);
+            scene_flavor_gap_pending = 1;
             break;
         case GAME_EVENT_CORPSE_VIEW:
             render_inv_corpse_menu(ev);
@@ -1806,16 +1800,18 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
              * so carry the menu break until the first rendered look, flavor,
              * or inspect block consumes it.
              */
-            corpse_flavor_gap_pending = 1;
+            scene_flavor_gap_pending = 1;
             break;
         case GAME_EVENT_BAG_VIEW:
             render_inv_bag(game);
             break;
         case GAME_EVENT_CRAFT_RESULT:
             render_craft_result_event(ev);
+            scene_flavor_gap_pending = 1;
             break;
         case GAME_EVENT_EQUIP_RESULT:
             render_equip_result_event(ev);
+            scene_flavor_gap_pending = 1;
             break;
         /* #159 combat/progression: direct dispatch (combat/gprog no longer LEGACY). */
         case GAME_EVENT_COMBAT:
@@ -1887,12 +1883,9 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
                     break;
                 }
             }
-            if (corpse_flavor_gap_pending) {
+            if (scene_flavor_gap_pending) {
                 render_gap();
-                corpse_flavor_gap_pending = 0;
-            } else if (i > 0 &&
-                    render_event_leads_flavor_gap(out->events[i - 1].kind)) {
-                render_gap();
+                scene_flavor_gap_pending = 0;
             }
             render_environment_event(ev);
             if (env_event_is_stack_tier(ev->arg0)) {
@@ -1903,44 +1896,38 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
             if (flavor_followed_by_encounter_open(out, i)) {
                 break;
             }
-            if (corpse_flavor_gap_pending) {
+            if (scene_flavor_gap_pending) {
                 render_gap();
-                corpse_flavor_gap_pending = 0;
-            } else if (i > 0 &&
-                    render_event_leads_flavor_gap(out->events[i - 1].kind)) {
-                render_gap();
+                scene_flavor_gap_pending = 0;
             }
             render_ambient_noise_event(ev);
             flavor = 1;
             break;
         case GAME_EVENT_ITEM_PRESENCE:
-            if (corpse_flavor_gap_pending) {
+            if (scene_flavor_gap_pending) {
                 render_gap();
-                corpse_flavor_gap_pending = 0;
-            } else if (i > 0 &&
-                    render_event_leads_flavor_gap(out->events[i - 1].kind)) {
-                render_gap();
+                scene_flavor_gap_pending = 0;
             }
             render_item_presence_event(ev);
             break;
         case GAME_EVENT_OBSERVATION:
-            if (corpse_flavor_gap_pending) {
+            if (scene_flavor_gap_pending) {
                 render_gap();
-                corpse_flavor_gap_pending = 0;
+                scene_flavor_gap_pending = 0;
             }
             render_observation_event(ev);
             break;
         case GAME_EVENT_ENV_MENU:
-            if (corpse_flavor_gap_pending) {
+            if (scene_flavor_gap_pending) {
                 render_gap();
-                corpse_flavor_gap_pending = 0;
+                scene_flavor_gap_pending = 0;
             }
             render_env_menu_event(ev);
             break;
         case GAME_EVENT_ENV_RESULT:
-            if (corpse_flavor_gap_pending) {
+            if (scene_flavor_gap_pending) {
                 render_gap();
-                corpse_flavor_gap_pending = 0;
+                scene_flavor_gap_pending = 0;
             }
             render_env_result_event(ev);
             break;

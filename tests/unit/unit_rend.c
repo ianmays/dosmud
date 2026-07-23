@@ -189,6 +189,43 @@ TEST render_player_corpse_menu_adds_gap_before_look_flavor(void)
     PASS();
 }
 
+TEST render_item_result_adds_gap_before_compact_arrival_flavor(void)
+{
+    struct GameState game;
+    GameEventQueue move_out;
+    GameEventQueue out;
+    GameEvent *ev;
+    int result_lines;
+    int move_lines;
+    int combined_lines;
+
+    unit_game_fresh(&game, 209u);
+    game.weather_kind = GAME_WEATHER_RAIN;
+
+    game_event_queue_reset(&out);
+    ev = game_event_push(&out, GAME_EVENT_ITEM_RESULT,
+        GAME_ITEM_ACTION_LOOT, GAME_ITEM_OUTCOME_LEFT_BEHIND, ITEM_NONE, 0, 0);
+    ASSERT(0 != ev);
+    result_lines = render_count_frame_lines(&game, &out);
+
+    game_event_queue_reset(&move_out);
+    ev = game_event_push(&move_out, GAME_EVENT_MOVE, 0, 0, 0, 0, 0);
+    ASSERT(0 != ev);
+    ev->text = "north";
+    game.player.room_id = WORLD_ROOM_ROAD;
+    game_describe_current_room_tight(&game, &move_out);
+    move_lines = render_count_frame_lines(&game, &move_out);
+
+    ASSERT(0 != game_event_push(&out, GAME_EVENT_MOVE, 0, 0, 0, 0, 0));
+    out.events[out.count - 1].text = "north";
+    game_describe_current_room_tight(&game, &out);
+    combined_lines = render_count_frame_lines(&game, &out);
+
+    /* Separate frames duplicate two HUD rows; the combined frame adds one gap. */
+    ASSERT_EQ(result_lines + move_lines - 1, combined_lines);
+    PASS();
+}
+
 SUITE(grendr)
 {
     RUN_TEST(render_blank_hud_frame_counts_gap_and_hud);
@@ -199,4 +236,5 @@ SUITE(grendr)
     RUN_TEST(render_player_defeat_frame_stays_within_safe_budget);
     RUN_TEST(render_player_corpse_menu_stays_within_safe_budget);
     RUN_TEST(render_player_corpse_menu_adds_gap_before_look_flavor);
+    RUN_TEST(render_item_result_adds_gap_before_compact_arrival_flavor);
 }
