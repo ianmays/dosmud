@@ -1822,7 +1822,9 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
             break;
         case GAME_EVENT_WAIT:
             render_msg_wait();
+#ifndef __WATCOMC__
             scene_flavor_gap_pending = 1;
+#endif
             break;
         case GAME_EVENT_CANNOT_MOVE:
             render_msg_cannot_move(ev->text);
@@ -1833,7 +1835,9 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
         /* #158 inventory: direct dispatch (invent no longer wraps LEGACY). */
         case GAME_EVENT_ITEM_RESULT:
             render_item_result_event(ev);
+#ifndef __WATCOMC__
             scene_flavor_gap_pending = 1;
+#endif
             break;
         case GAME_EVENT_CORPSE_VIEW:
             render_inv_corpse_menu(ev);
@@ -1849,11 +1853,15 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
             break;
         case GAME_EVENT_CRAFT_RESULT:
             render_craft_result_event(ev);
+#ifndef __WATCOMC__
             scene_flavor_gap_pending = 1;
+#endif
             break;
         case GAME_EVENT_EQUIP_RESULT:
             render_equip_result_event(ev);
+#ifndef __WATCOMC__
             scene_flavor_gap_pending = 1;
+#endif
             break;
         /* #159 combat/progression: direct dispatch (combat/gprog no longer LEGACY). */
         case GAME_EVENT_COMBAT:
