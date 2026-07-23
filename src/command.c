@@ -328,6 +328,10 @@ int command_parse(char *line, struct Command *out_cmd)
     return 0;
 }
 
+/*
+ * Quiet verbs (look, loot, help, reply, ...) return 0 so game.c skips ambient
+ * ticks. Loot opens or drains corpse menus without advancing weather/day (#206).
+ */
 int command_advances_time(int type)
 {
     if (type == CMD_WAIT) return 1;

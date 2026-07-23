@@ -902,8 +902,9 @@ int game_process_input(struct GameState *game, char *line, GameEventQueue *out)
     }
 
     /*
-     * Loot replies during DIALOGUE_LOOT are menu picks, not world time. Defeat
-     * also consumes the combat turn itself, so its camp respawn must not run a
+     * CMD_LOOT is quiet via command_advances_time (menu open and replies);
+     * the DIALOGUE_LOOT guard below remains defense-in-depth. Defeat also
+     * consumes the combat turn itself, so its camp respawn must not run a
      * second ambient tick in the same command step.
      */
     player_defeated = 0;

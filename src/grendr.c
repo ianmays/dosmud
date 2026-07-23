@@ -167,6 +167,11 @@ static int render_buf_append_sentence(char *buf, int bufsize, int pos,
 static int s_atmo_stack_open;
 static char s_atmo_stack_buf[512];
 #ifndef __WATCOMC__
+/*
+ * GCC only: after a deferred scene break is emitted before compact arrival or
+ * ROOM_LOOK, hold one extra body gap so flavor sits below the break rather than
+ * only above the arrival block. Unused on Watcom, which skips compact coalesce.
+ */
 static int s_room_body_gap_pending;
 #endif
 
@@ -781,6 +786,10 @@ static const char *compact_env_event_text(int kind)
 }
 
 #ifndef __WATCOMC__
+/*
+ * Compact move/reply + ROOM_LOOK coalescing is Linux/GCC only. Open Watcom DOS
+ * builds omit these helpers to shrink the renderer code segment.
+ */
 /* MOVE + optional flavor + ROOM_LOOK in one step: return look index or -1. */
 static int compact_arrival_room_look_end(const GameEventQueue *out, int move_i)
 {
@@ -1683,6 +1692,11 @@ static void render_combat_event(const GameEvent *ev)
     }
 }
 
+/*
+ * Maps GAME_EVENT_PLAYER_DEFEAT fields (gout.h): folds XP+level and
+ * equipped+retained into single lines when both apply; corpse replace may
+ * share a line with the new body location hint.
+ */
 static void render_player_defeat_event(const struct GameState *game,
                                        const GameEvent *ev)
 {
@@ -1733,6 +1747,13 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
 {
     int i;
     int flavor;
+    /*
+     * Deferred one blank line before the next look, flavor, or inspect consumer.
+     * Corpse menus and wait arm on all builds (menus must stay separate from
+     * atmosphere even when weather events are skipped into a later ROOM_LOOK).
+     * Item/craft/equip arm only off Watcom, where compact arrival can also
+     * promote the break into s_room_body_gap_pending.
+     */
     int scene_flavor_gap_pending;
     const GameEvent *ev;
 
@@ -1930,7 +1951,8 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
             break;
         /*
          * #161 ambient/inspect: direct dispatch (gatmos no longer LEGACY).
-         * #244: item/craft/equip/corpse menus/wait lead one break before flavor.
+         * #244/#206: wait and corpse menus arm scene_flavor_gap_pending on all
+         * builds; item/craft/equip arm only when compact arrival exists (GCC).
          */
         case GAME_EVENT_ENVIRONMENT:
             if (flavor_followed_by_encounter_open(out, i) &&
