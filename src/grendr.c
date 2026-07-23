@@ -847,6 +847,7 @@ static int render_event_leads_flavor_gap(int kind)
     return kind == GAME_EVENT_ITEM_RESULT ||
         kind == GAME_EVENT_CRAFT_RESULT ||
         kind == GAME_EVENT_EQUIP_RESULT ||
+        kind == GAME_EVENT_CORPSE_VIEW ||
         kind == GAME_EVENT_WAIT;
 }
 
@@ -1847,7 +1848,7 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
             break;
         /*
          * #161 ambient/inspect: direct dispatch (gatmos no longer LEGACY).
-         * #244: item/craft/equip/wait keep one scene break before flavor.
+         * #244: item/craft/equip/corpse menus/wait lead one break before flavor.
          */
         case GAME_EVENT_ENVIRONMENT:
             if (flavor_followed_by_encounter_open(out, i) &&
