@@ -184,8 +184,11 @@ TEST render_player_corpse_menu_adds_gap_before_look_flavor(void)
         GAME_ENV_EVENT_WEATHER_RAIN, 0, 0, 0, 0));
     game_describe_current_room(&game, &out);
     combined_lines = render_count_frame_lines(&game, &out);
-    /* Separate frames duplicate two HUD rows; the combined frame adds one gap. */
-    ASSERT_EQ(menu_lines + look_lines - 1, combined_lines);
+    /*
+     * Separate frames duplicate two HUD rows; the combined frame keeps the
+     * scene break and adds one extra body gap before folded look flavor.
+     */
+    ASSERT_EQ(menu_lines + look_lines, combined_lines);
     PASS();
 }
 
@@ -221,8 +224,11 @@ TEST render_item_result_adds_gap_before_compact_arrival_flavor(void)
     game_describe_current_room_tight(&game, &out);
     combined_lines = render_count_frame_lines(&game, &out);
 
-    /* Separate frames duplicate two HUD rows; the combined frame adds one gap. */
-    ASSERT_EQ(result_lines + move_lines - 1, combined_lines);
+    /*
+     * Separate frames duplicate two HUD rows; the combined frame keeps the
+     * scene break and adds one extra body gap before folded arrival flavor.
+     */
+    ASSERT_EQ(result_lines + move_lines, combined_lines);
     PASS();
 }
 

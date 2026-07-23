@@ -939,12 +939,13 @@ static void render_room_look_snapshot(const struct GameState *game, int room_id,
                                       const int *room_items, int look_arg1,
                                       int npc_in_room_hint, u8 room_clues,
                                       int look_flags, int leading_gap,
+                                      int body_leading_gap,
                                       int show_room_heading);
 
 /* Single arrival block: move line, room art, desc+footer+inline flavor, exits. */
 static void render_compact_arrival(const struct GameState *game,
                                    const GameEventQueue *out, int move_i,
-                                   int look_i)
+                                   int look_i, int body_leading_gap)
 {
     char ground_buf[CFG_FMT_GROUND_MAX];
     char body[512];
@@ -971,6 +972,9 @@ static void render_compact_arrival(const struct GameState *game,
     render_gap();
     art_for_room(look_ev->room_id);
     render_gap();
+    if (body_leading_gap) {
+        render_gap();
+    }
 
     pos = 0;
     body[0] = '\0';
@@ -1037,7 +1041,8 @@ static void render_compact_arrival(const struct GameState *game,
 /* Bandit give/intimidate return: reply lead, room name, then tight look snapshot. */
 static void render_compact_reply_return(const struct GameState *game,
                                         const GameEventQueue *out, int look_i,
-                                        const char *lead_text)
+                                        const char *lead_text,
+                                        int body_leading_gap)
 {
     char heading[256];
     const GameEvent *look_ev;
@@ -1060,13 +1065,15 @@ static void render_compact_reply_return(const struct GameState *game,
     }
     render_gap();
     render_room_look_snapshot(game, look_ev->room_id, look_ev->room_item,
-        look_ev->arg1, look_ev->arg0, (u8)look_ev->arg2, look_ev->arg3, 0, 0);
+        look_ev->arg1, look_ev->arg0, (u8)look_ev->arg2, look_ev->arg3, 0,
+        body_leading_gap, 0);
 }
 
 static void render_room_look_snapshot(const struct GameState *game, int room_id,
                                       const int *room_items, int look_arg1,
                                       int npc_in_room_hint, u8 room_clues,
                                       int look_flags, int leading_gap,
+                                      int body_leading_gap,
                                       int show_room_heading)
 {
     char ground_buf[CFG_FMT_GROUND_MAX];
@@ -1094,6 +1101,9 @@ static void render_room_look_snapshot(const struct GameState *game, int room_id,
         art_for_room(room_id);
     }
     render_gap();
+    if (body_leading_gap) {
+        render_gap();
+    }
     RENDER_PRINTF("%s", room->desc);
     if (build_room_look_footer(footer, (int)sizeof(footer), weather_kind,
             day_phase, room_clues, look_flags) > 0) {
@@ -1719,14 +1729,17 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
         }
         /* #236: coalesce move/reply + trailing ROOM_LOOK before per-kind dispatch. */
         if (ev->kind == GAME_EVENT_MOVE) {
+            int body_gap;
+
             compact_look_i = compact_arrival_room_look_end(out, i);
             if (compact_look_i >= 0) {
                 atmo_stack_flush();
+                body_gap = scene_flavor_gap_pending;
                 if (scene_flavor_gap_pending) {
                     render_gap();
                     scene_flavor_gap_pending = 0;
                 }
-                render_compact_arrival(game, out, i, compact_look_i);
+                render_compact_arrival(game, out, i, compact_look_i, body_gap);
                 i = compact_look_i;
                 atmo_stack_reset();
                 continue;
@@ -1734,18 +1747,20 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
         }
         if (ev->kind == GAME_EVENT_ENCOUNTER) {
             char lead_text[160];
+            int body_gap;
 
             compact_look_i = compact_reply_room_look_end(out, i);
             if (compact_look_i >= 0 &&
                     compact_encounter_reply_text(ev, lead_text,
                         (int)sizeof(lead_text)) > 0) {
                 atmo_stack_flush();
+                body_gap = scene_flavor_gap_pending;
                 if (scene_flavor_gap_pending) {
                     render_gap();
                     scene_flavor_gap_pending = 0;
                 }
                 render_compact_reply_return(game, out, compact_look_i,
-                    lead_text);
+                    lead_text, body_gap);
                 i = compact_look_i;
                 atmo_stack_reset();
                 continue;
@@ -1753,6 +1768,10 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
         }
         switch (ev->kind) {
         case GAME_EVENT_ROOM_LOOK:
+        {
+            int body_gap;
+
+            body_gap = scene_flavor_gap_pending;
             if (scene_flavor_gap_pending) {
                 render_gap();
                 scene_flavor_gap_pending = 0;
@@ -1761,8 +1780,9 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
                 render_gap();
             }
             render_room_look_snapshot(game, ev->room_id, ev->room_item,
-                ev->arg1, ev->arg0, (u8)ev->arg2, ev->arg3, 0, 1);
+                ev->arg1, ev->arg0, (u8)ev->arg2, ev->arg3, 0, body_gap, 1);
             break;
+        }
         case GAME_EVENT_MOVE:
             render_msg_moved(ev->text);
             if (move_followed_by_scene_open(out, i)) {
