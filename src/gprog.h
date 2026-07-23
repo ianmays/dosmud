@@ -6,6 +6,8 @@
 #ifndef GPROG_H
 #define GPROG_H
 
+#include "base.h"
+
 struct GameState;
 struct GameEventQueue;
 
@@ -18,5 +20,13 @@ void progression_gain_xp(struct GameState *game, int amount, struct GameEventQue
 /* Defeat path: scales amount from enemy_level then queues XP_GAIN / STAT_CHANGE. */
 void progression_gain_enemy_xp(struct GameState *game, int enemy_level,
                                int spread_roll, struct GameEventQueue *out);
+/*
+ * Defeat uses lifetime cumulative XP so a percentage loss can cross level
+ * boundaries, then rebuilds every level-derived stat from the remaining total.
+ */
+u32 progression_cumulative_xp(int level, int xp);
+void progression_rebuild_from_cumulative_xp(struct GameState *game,
+                                             u32 cumulative_xp);
+u32 progression_apply_defeat_penalty(struct GameState *game);
 
 #endif

@@ -22,6 +22,20 @@ static void push_item_result(GameEventQueue *out, int action, int outcome,
         value, 0);
 }
 
+#define CORPSE_SOURCE_NONE GAME_CORPSE_KIND_NONE
+#define CORPSE_SOURCE_ENEMY GAME_CORPSE_KIND_ENEMY
+#define CORPSE_SOURCE_PLAYER GAME_CORPSE_KIND_PLAYER
+
+static void corpse_remove_slot_compact(struct GameState *game, int room_id,
+                                       int slot);
+
+int game_player_corpse_is_in_room(const struct GameState *game, int room_id)
+{
+    return game->player_corpse_present &&
+        game->player_corpse_room == room_id &&
+        game->player_corpse_item_count > 0;
+}
+
 /*
  * Snapshot corpse slots into a CORPSE_VIEW event; invent owns corpse_item[].
  * arg0/arg1 drive menu numbering in grendr; pad room_item[] to CFG_AREA_ITEM_SLOTS.
@@ -31,25 +45,48 @@ static void push_corpse_view(GameEventQueue *out, struct GameState *game,
 {
     int slot;
     int item_count;
+    int visible_count;
+    int source;
     GameEvent *ev;
 
-    item_count = 0;
+    source = CORPSE_SOURCE_ENEMY;
+    if (game_player_corpse_is_in_room(game, room_id)) {
+        source = CORPSE_SOURCE_PLAYER;
+    }
+    if (source == CORPSE_SOURCE_PLAYER) {
+        item_count = game->player_corpse_item_count;
+    } else {
+        item_count = 0;
+        for (slot = 0; slot < CFG_CORPSE_ITEM_SLOTS; ++slot) {
+            if (game->corpse_item[room_id][slot] != ITEM_NONE) {
+                item_count++;
+            }
+        }
+    }
+    visible_count = item_count;
+    if (visible_count > CFG_CORPSE_ITEM_SLOTS) {
+        visible_count = CFG_CORPSE_ITEM_SLOTS;
+    }
     ev = game_event_push(out, GAME_EVENT_CORPSE_VIEW, 0, 0, 0, 0, 0);
     if (ev == 0) {
         return;
     }
     ev->room_id = room_id;
-    for (slot = 0; slot < CFG_CORPSE_ITEM_SLOTS; ++slot) {
-        ev->room_item[slot] = game->corpse_item[room_id][slot];
-        if (game->corpse_item[room_id][slot] != ITEM_NONE) {
-            item_count++;
+    if (source == CORPSE_SOURCE_PLAYER) {
+        for (slot = 0; slot < visible_count; ++slot) {
+            ev->room_item[slot] = game->player_corpse_item[slot];
+        }
+    } else {
+        for (slot = 0; slot < CFG_CORPSE_ITEM_SLOTS; ++slot) {
+            ev->room_item[slot] = game->corpse_item[room_id][slot];
         }
     }
     for (; slot < CFG_AREA_ITEM_SLOTS; ++slot) {
         ev->room_item[slot] = ITEM_NONE;
     }
-    ev->arg0 = item_count;
-    ev->arg1 = item_count + 1;
+    ev->arg0 = visible_count;
+    ev->arg1 = visible_count + 1;
+    ev->arg2 = source;
 }
 
 static void push_craft_result(GameEventQueue *out, int item_id, int outcome)
@@ -145,7 +182,9 @@ static int corpse_item_count(struct GameState *game, int room_id)
 int game_corpse_queue_view(struct GameState *game, int room_id,
                            GameEventQueue *out)
 {
-    if (!game->corpse_present[room_id] || !game_corpse_has_loot(game, room_id)) {
+    if (!game_player_corpse_is_in_room(game, room_id) &&
+            (!game->corpse_present[room_id] ||
+                !game_corpse_has_loot(game, room_id))) {
         return 0;
     }
     push_corpse_view(out, game, room_id);
@@ -178,6 +217,144 @@ void game_corpse_clear(struct GameState *game, int room_id)
     for (slot = 0; slot < CFG_CORPSE_ITEM_SLOTS; ++slot) {
         game->corpse_item[room_id][slot] = ITEM_NONE;
     }
+}
+
+static void player_corpse_clear(struct GameState *game)
+{
+    int slot;
+
+    game->player_corpse_present = 0;
+    game->player_corpse_room = -1;
+    game->player_corpse_item_count = 0;
+    for (slot = 0; slot < CFG_PLAYER_CORPSE_ITEM_SLOTS; ++slot) {
+        game->player_corpse_item[slot] = ITEM_NONE;
+    }
+}
+
+void game_player_corpse_replace_from_inventory(struct GameState *game,
+                                               int room_id,
+                                               int *transferred_count,
+                                               int *retained_count,
+                                               int *retained_item,
+                                               int *equipped_item,
+                                               int *replaced_count)
+{
+    int old_bag_count;
+    int old_weapon;
+    int read_slot;
+    int keep_slot;
+    int corpse_slot;
+
+    *replaced_count = game->player_corpse_item_count;
+    player_corpse_clear(game);
+    old_bag_count = game->bag_count;
+    old_weapon = game->weapon_equipped;
+    keep_slot = 0;
+    corpse_slot = 0;
+    *retained_count = 0;
+    *retained_item = ITEM_NONE;
+    *equipped_item = ITEM_NONE;
+
+    /*
+     * Preserve bag order for both retained items and recovery; append the
+     * separately equipped weapon last so numbered loot stays deterministic.
+     */
+    for (read_slot = 0; read_slot < old_bag_count; ++read_slot) {
+        int item_id;
+
+        item_id = game->bag[read_slot];
+        if (item_is_retained_on_defeat(item_id)) {
+            game->bag[keep_slot] = item_id;
+            keep_slot++;
+            *retained_count += 1;
+            if (*retained_item == ITEM_NONE) {
+                *retained_item = item_id;
+            }
+        } else {
+            game->player_corpse_item[corpse_slot] = item_id;
+            corpse_slot++;
+        }
+    }
+    for (read_slot = keep_slot; read_slot < CFG_BAG_MAX; ++read_slot) {
+        game->bag[read_slot] = ITEM_NONE;
+    }
+    game->bag_count = keep_slot;
+
+    if (old_weapon != ITEM_NONE) {
+        if (item_is_retained_on_defeat(old_weapon)) {
+            *retained_count += 1;
+            if (*retained_item == ITEM_NONE) {
+                *retained_item = old_weapon;
+            }
+        } else {
+            game->player_corpse_item[corpse_slot] = old_weapon;
+            corpse_slot++;
+            *equipped_item = old_weapon;
+            game->weapon_equipped = ITEM_NONE;
+        }
+    }
+
+    game->player_corpse_item_count = corpse_slot;
+    game->player_corpse_present = corpse_slot > 0;
+    game->player_corpse_room =
+        game->player_corpse_present ? room_id : -1;
+    *transferred_count = corpse_slot;
+}
+
+static int loot_source_for_room(struct GameState *game, int room_id)
+{
+    if (game_player_corpse_is_in_room(game, room_id)) {
+        return CORPSE_SOURCE_PLAYER;
+    }
+    if (game->corpse_present[room_id] && game_corpse_has_loot(game, room_id)) {
+        return CORPSE_SOURCE_ENEMY;
+    }
+    return CORPSE_SOURCE_NONE;
+}
+
+static int loot_source_count(struct GameState *game, int room_id, int source)
+{
+    if (source == CORPSE_SOURCE_PLAYER) {
+        return game->player_corpse_item_count;
+    }
+    if (source == CORPSE_SOURCE_ENEMY) {
+        return corpse_item_count(game, room_id);
+    }
+    return 0;
+}
+
+static int loot_source_item(struct GameState *game, int room_id, int source,
+                            int slot)
+{
+    if (source == CORPSE_SOURCE_PLAYER) {
+        return game->player_corpse_item[slot];
+    }
+    return game->corpse_item[room_id][slot];
+}
+
+static void loot_source_remove_slot(struct GameState *game, int room_id,
+                                    int source, int slot)
+{
+    int i;
+
+    if (source == CORPSE_SOURCE_PLAYER) {
+        for (i = slot; i < game->player_corpse_item_count - 1; ++i) {
+            game->player_corpse_item[i] = game->player_corpse_item[i + 1];
+        }
+        game->player_corpse_item_count -= 1;
+        game->player_corpse_item[game->player_corpse_item_count] = ITEM_NONE;
+        return;
+    }
+    corpse_remove_slot_compact(game, room_id, slot);
+}
+
+static void loot_source_clear(struct GameState *game, int room_id, int source)
+{
+    if (source == CORPSE_SOURCE_PLAYER) {
+        player_corpse_clear(game);
+        return;
+    }
+    game_corpse_clear(game, room_id);
 }
 
 static void corpse_remove_slot_compact(struct GameState *game, int room_id, int slot)
@@ -295,16 +472,18 @@ int game_inv_deliver_room_item(struct GameState *game, int room_id, int item_id)
 }
 
 /*
- * Bulk loot stays invent-owned: drains corpse_item[] from slot 0 in visible
- * order; on bag full, re-queues CORPSE_VIEW like game_inv_cmd_loot_reply.
+ * Bulk loot stays invent-owned: drains the selected corpse from slot zero in
+ * stable order; on bag full, re-queues CORPSE_VIEW like the reply path.
  */
 static int loot_all_from_corpse(struct GameState *game, int room_id,
                                 GameEventQueue *out)
 {
     int item_id;
+    int source;
 
-    while (game_corpse_has_loot(game, room_id)) {
-        item_id = game->corpse_item[room_id][0];
+    source = loot_source_for_room(game, room_id);
+    while (loot_source_count(game, room_id, source) > 0) {
+        item_id = loot_source_item(game, room_id, source, 0);
         if (!game_inv_bag_add(game, item_id)) {
             push_item_result(out, GAME_ITEM_ACTION_LOOT,
                 GAME_ITEM_OUTCOME_BAG_FULL_DROP, item_id, 0);
@@ -312,12 +491,12 @@ static int loot_all_from_corpse(struct GameState *game, int room_id,
             return 1;
         }
 
-        corpse_remove_slot_compact(game, room_id, 0);
+        loot_source_remove_slot(game, room_id, source, 0);
         push_item_result(out, GAME_ITEM_ACTION_LOOT, GAME_ITEM_OUTCOME_OK,
             item_id, 0);
     }
 
-    game_corpse_clear(game, room_id);
+    loot_source_clear(game, room_id, source);
     game_set_mode_explore(game);
     return 1;
 }
@@ -330,6 +509,7 @@ static int loot_all_from_corpse(struct GameState *game, int room_id,
 int game_inv_cmd_loot(struct GameState *game, int loot_all, GameEventQueue *out)
 {
     int room_id;
+    int source;
 
     room_id = game->player.room_id;
     if (game->mode == GAME_MODE_DIALOGUE && game->dialogue == DIALOGUE_LOOT) {
@@ -342,12 +522,13 @@ int game_inv_cmd_loot(struct GameState *game, int loot_all, GameEventQueue *out)
         game_set_mode_explore(game);
         return 1;
     }
-    if (!game->corpse_present[room_id]) {
+    source = loot_source_for_room(game, room_id);
+    if (source == CORPSE_SOURCE_NONE && !game->corpse_present[room_id]) {
         push_item_result(out, GAME_ITEM_ACTION_LOOT, GAME_ITEM_OUTCOME_NO_BODY,
             ITEM_NONE, 0);
         return 1;
     }
-    if (!game_corpse_has_loot(game, room_id)) {
+    if (source == CORPSE_SOURCE_NONE) {
         push_item_result(out, GAME_ITEM_ACTION_LOOT,
             GAME_ITEM_OUTCOME_BODY_STRIPPED, ITEM_NONE, 0);
         return 1;
@@ -370,33 +551,40 @@ int game_inv_cmd_loot_reply(struct GameState *game, int choice, GameEventQueue *
 {
     int room_id;
     int item_count;
+    int visible_count;
     int item_id;
+    int source;
 
     if (game->mode != GAME_MODE_DIALOGUE || game->dialogue != DIALOGUE_LOOT) {
         return 0;
     }
 
     room_id = game->player.room_id;
-    item_count = corpse_item_count(game, room_id);
+    source = loot_source_for_room(game, room_id);
+    item_count = loot_source_count(game, room_id, source);
     if (item_count <= 0) {
         game_set_mode_explore(game);
         push_item_result(out, GAME_ITEM_ACTION_LOOT,
             GAME_ITEM_OUTCOME_BODY_STRIPPED, ITEM_NONE, 0);
         return 1;
     }
-    if (choice == item_count + 1) {
+    visible_count = item_count;
+    if (visible_count > CFG_CORPSE_ITEM_SLOTS) {
+        visible_count = CFG_CORPSE_ITEM_SLOTS;
+    }
+    if (choice == visible_count + 1) {
         push_item_result(out, GAME_ITEM_ACTION_LOOT,
             GAME_ITEM_OUTCOME_LEFT_BEHIND, ITEM_NONE, 0);
         game_set_mode_explore(game);
         return 1;
     }
-    if (choice < 1 || choice > item_count) {
+    if (choice < 1 || choice > visible_count) {
         game_event_push(out, GAME_EVENT_DIALOGUE_GUARD,
-            GAME_DIALOGUE_GUARD_PICK_123, item_count + 1, 0, 0, 0);
+            GAME_DIALOGUE_GUARD_PICK_123, visible_count + 1, 0, 0, 0);
         return 1;
     }
 
-    item_id = game->corpse_item[room_id][choice - 1];
+    item_id = loot_source_item(game, room_id, source, choice - 1);
     if (!game_inv_bag_add(game, item_id)) {
         push_item_result(out, GAME_ITEM_ACTION_LOOT,
             GAME_ITEM_OUTCOME_BAG_FULL_DROP, item_id, 0);
@@ -404,11 +592,11 @@ int game_inv_cmd_loot_reply(struct GameState *game, int choice, GameEventQueue *
         return 1;
     }
 
-    corpse_remove_slot_compact(game, room_id, choice - 1);
+    loot_source_remove_slot(game, room_id, source, choice - 1);
     push_item_result(out, GAME_ITEM_ACTION_LOOT, GAME_ITEM_OUTCOME_OK, item_id,
         0);
-    if (!game_corpse_has_loot(game, room_id)) {
-        game_corpse_clear(game, room_id);
+    if (loot_source_count(game, room_id, source) <= 0) {
+        loot_source_clear(game, room_id, source);
         game_set_mode_explore(game);
         return 1;
     }

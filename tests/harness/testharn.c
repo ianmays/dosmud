@@ -251,6 +251,42 @@ static int fixture_bandit_fight_ready(struct GameState *game)
     return 1;
 }
 
+static int fixture_player_defeat_ready(struct GameState *game)
+{
+    /* Player hit spread 0 leaves combat active; enemy damage spread 3 is lethal. */
+    static const int rolls[2] = { 0, 3 };
+    int slot;
+
+    game_reset_fixture_baseline(game, WORLD_ROOM_ROAD, 2);
+    fixture_quiet_ticks_on(game);
+    progression_rebuild_from_cumulative_xp(game, 125UL);
+    if (!game_inv_bag_add(game, ITEM_BERRY) ||
+            !game_inv_bag_add(game, ITEM_MARSH_ROOT) ||
+            !game_inv_bag_add(game, ITEM_HERB)) {
+        return 0;
+    }
+    game->marsh_root_spawned = 1;
+    game->weapon_equipped = ITEM_SPEAR;
+    slot = npc_find_by_actor(game, GAME_DIALOGUE_ACTOR_BANDIT);
+    if (slot < 0) {
+        return 0;
+    }
+    game->npcs[slot].room_id = WORLD_ROOM_ROAD;
+    game->npcs[slot].dialogue = DIALOGUE_ENEMY;
+    game->npcs[slot].flags |= NPC_FLAG_ACTIVE | NPC_FLAG_ROAMING |
+        NPC_FLAG_NEEDS_SEPARATION;
+    game_set_mode_combat(game);
+    game->player_hp = 1;
+    game->combat.enemy_hp = 50;
+    game->combat.enemy_level = game->npcs[slot].level;
+    game->combat.defending = 0;
+    game_roll_inject_begin(game, rolls, 2);
+    render_combat_start(game->player_hp, game->combat.enemy_hp,
+        game->combat.enemy_level);
+    render_combat_menu();
+    return 1;
+}
+
 static void fixture_world_boot(struct GameState *game)
 {
     harness_world_boot_graph(game);
@@ -795,6 +831,12 @@ int testharn_apply(struct GameState *game, const char *line)
     }
     if (fixture_name_is("bandit_combat_level_ready", name)) {
         fixture_bandit_combat_level_ready(game);
+        return 1;
+    }
+    if (fixture_name_is("player_defeat_ready", name)) {
+        if (!fixture_player_defeat_ready(game)) {
+            return -2;
+        }
         return 1;
     }
     if (fixture_name_is("bandit_fight_ready", name)) {

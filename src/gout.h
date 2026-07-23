@@ -34,6 +34,7 @@ enum GameEventKind {
     GAME_EVENT_COMBAT,
     GAME_EVENT_XP_GAIN,
     GAME_EVENT_STAT_CHANGE,
+    GAME_EVENT_PLAYER_DEFEAT,
     /* #160: dialogue, roaming NPC, and encounter slice emit actor/dialogue payloads. */
     GAME_EVENT_DIALOGUE,
     GAME_EVENT_ENCOUNTER,
@@ -57,7 +58,8 @@ enum GameEventKind {
 enum GameEventRoomLookFlags {
     GAME_ROOM_LOOK_FLAG_NONE = 0,
     GAME_ROOM_LOOK_FLAG_SUPPRESS_WEATHER = 1,
-    GAME_ROOM_LOOK_FLAG_TIGHT_LEAD = 2
+    GAME_ROOM_LOOK_FLAG_TIGHT_LEAD = 2,
+    GAME_ROOM_LOOK_FLAG_PLAYER_CORPSE = 4
 };
 
 /* Shared inspect clue kind ids: room snapshots and footer copy use these. */
@@ -82,8 +84,9 @@ enum GameEventRoomLookFlags {
  * Inventory/item payload contract (#158, #129):
  * ITEM_RESULT  arg0=GameEventItemAction arg1=GameEventItemOutcome
  *              arg2=item id or ITEM_NONE arg3=value/capacity/slots when needed
- * CORPSE_VIEW  arg0=non-empty corpse item count arg1=leave-menu choice number
- *              room_id=corpse room; room_item[]=dense corpse slot snapshot
+ * CORPSE_VIEW  arg0=visible item count arg1=leave-menu choice number
+ *              arg2=GameEventCorpseKind; room_id=corpse room
+ *              room_item[]=first player-corpse page, or enemy corpse slots
  *              (grendr prints 1..arg0; arg1 is the "leave body" reply index)
  * CRAFT_RESULT arg0=crafted/attempted item id arg1=GameEventCraftOutcome
  * EQUIP_RESULT arg0=item id or ITEM_NONE arg1=GameEventEquipOutcome
@@ -109,6 +112,12 @@ enum GameEventItemAction {
     GAME_ITEM_ACTION_DROP,
     GAME_ITEM_ACTION_EAT,
     GAME_ITEM_ACTION_USE
+};
+
+enum GameEventCorpseKind {
+    GAME_CORPSE_KIND_NONE = 0,
+    GAME_CORPSE_KIND_ENEMY,
+    GAME_CORPSE_KIND_PLAYER
 };
 
 enum GameEventItemOutcome {
@@ -162,6 +171,10 @@ enum GameEventEquipOutcome {
  *   (other phases leave arg1/arg2/arg3 zero unless noted)
  * XP_GAIN     arg0=amount
  * STAT_CHANGE arg0=level arg1=max_hp arg2=damage_bonus arg3=bag_capacity
+ * PLAYER_DEFEAT arg0=XP lost arg1=old level arg2=new level
+ *             arg3=corpse item count room_id=defeat room
+ *             room_item[0]=lost equipped item room_item[1]=first retained item
+ *             room_item[2]=retained count room_item[3]=replaced corpse count
  */
 enum GameEventCombatPhase {
     GAME_COMBAT_PHASE_NONE = 0,

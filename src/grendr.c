@@ -1033,6 +1033,9 @@ static void render_compact_arrival(const struct GameState *game,
     if (corpse_present) {
         RENDER_PRINTF("%s", TXT_UI_BANDIT_CORPSE);
     }
+    if ((look_ev->arg3 & GAME_ROOM_LOOK_FLAG_PLAYER_CORPSE) != 0) {
+        RENDER_PRINTF("%s", TXT_UI_PLAYER_CORPSE);
+    }
     if (look_ev->arg0 != 0) {
         render_gap();
         RENDER_PRINTF("%s", TXT_UI_NPC_HINT);
@@ -1122,6 +1125,9 @@ static void render_room_look_snapshot(const struct GameState *game, int room_id,
     }
     if (corpse_present) {
         RENDER_PRINTF("%s", TXT_UI_BANDIT_CORPSE);
+    }
+    if ((look_flags & GAME_ROOM_LOOK_FLAG_PLAYER_CORPSE) != 0) {
+        RENDER_PRINTF("%s", TXT_UI_PLAYER_CORPSE);
     }
     if (npc_in_room_hint != 0) {
         render_gap();
@@ -1665,6 +1671,38 @@ static void render_combat_event(const GameEvent *ev)
     }
 }
 
+static void render_player_defeat_event(const struct GameState *game,
+                                       const GameEvent *ev)
+{
+    RENDER_PRINTF("%s", TXT_DEFEAT_CAMP);
+    RENDER_PRINTF(TXT_DEFEAT_XP_FMT, ev->arg0);
+    if (ev->arg2 < ev->arg1) {
+        RENDER_PRINTF(TXT_DEFEAT_LEVEL_FMT, ev->arg1, ev->arg2);
+    } else {
+        RENDER_PRINTF(TXT_DEFEAT_LEVEL_HELD_FMT, ev->arg2);
+    }
+    if (ev->room_item[3] > 0) {
+        RENDER_PRINTF(TXT_DEFEAT_REPLACED_FMT, ev->room_item[3]);
+    }
+    if (ev->room_item[0] != ITEM_NONE) {
+        RENDER_PRINTF(TXT_DEFEAT_EQUIPPED_FMT,
+            item_name(ev->room_item[0]));
+    }
+    if (ev->room_item[2] == 1) {
+        RENDER_PRINTF(TXT_DEFEAT_RETAINED_FMT,
+            item_name(ev->room_item[1]));
+    } else if (ev->room_item[2] > 1) {
+        RENDER_PRINTF(TXT_DEFEAT_RETAINED_MORE_FMT,
+            item_name(ev->room_item[1]), ev->room_item[2] - 1);
+    }
+    if (ev->arg3 > 0) {
+        RENDER_PRINTF(TXT_DEFEAT_CORPSE_FMT, ev->arg3,
+            game->world.rooms[ev->room_id].name);
+    } else {
+        RENDER_PRINTF("%s", TXT_DEFEAT_NO_CORPSE);
+    }
+}
+
 /*
  * Drain the per-step event queue in enqueue order. Core must not print; this is
  * the DOSMUD text adapter for generic GameEvent kinds from the simulation queue.
@@ -1787,6 +1825,10 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
             break;
         case GAME_EVENT_STAT_CHANGE:
             render_level_up(ev->arg0, ev->arg1, ev->arg2, ev->arg3);
+            break;
+        case GAME_EVENT_PLAYER_DEFEAT:
+            render_gap();
+            render_player_defeat_event(game, ev);
             break;
         /* #160 dialogue/encounter: direct dispatch (slice no longer LEGACY). */
         case GAME_EVENT_DIALOGUE:
@@ -2455,7 +2497,11 @@ void render_inv_corpse_menu(const GameEvent *ev)
 {
     int slot;
 
-    RENDER_PRINTF("%s", TXT_INV_CORPSE_HEADER);
+    if (ev->arg2 == GAME_CORPSE_KIND_PLAYER) {
+        RENDER_PRINTF("%s", TXT_INV_PLAYER_CORPSE_HEADER);
+    } else {
+        RENDER_PRINTF("%s", TXT_INV_CORPSE_HEADER);
+    }
     for (slot = 0; slot < ev->arg0; ++slot) {
         RENDER_PRINTF(TXT_INV_CORPSE_LINE_FMT, slot + 1,
             item_name(ev->room_item[slot]));

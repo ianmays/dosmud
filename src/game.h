@@ -143,6 +143,14 @@ struct GameState {
     int corpse_present[CFG_ROOM_MAX];
     /* Per-room corpse loot; invent owns slot layout and compact-on-take (#129). */
     int corpse_item[CFG_ROOM_MAX][CFG_CORPSE_ITEM_SLOTS];
+    /*
+     * invent owns the one global player corpse. Present implies a valid room,
+     * a positive count, and dense items; absent uses room -1 and count zero.
+     */
+    int player_corpse_present;
+    int player_corpse_room;
+    int player_corpse_item_count;
+    int player_corpse_item[CFG_PLAYER_CORPSE_ITEM_SLOTS];
     u8 room_explored[CFG_ROOM_MAX];
 #ifdef TEST_MODE
     int roll_inject_active;
@@ -164,6 +172,8 @@ void game_background_step(struct GameState *game, GameEventQueue *out);
 void game_set_mode_explore(struct GameState *game);
 void game_set_mode_dialogue(struct GameState *game, enum DialogueKind kind);
 void game_set_mode_combat(struct GameState *game);
+void game_handle_player_defeat(struct GameState *game,
+                               struct GameEventQueue *out);
 
 /* True while dialogue or combat blocks ambient encounters. */
 int game_is_busy_dialogue(struct GameState *game);

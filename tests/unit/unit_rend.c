@@ -107,6 +107,50 @@ TEST render_corpse_menu_frame_stays_within_safe_budget(void)
     PASS();
 }
 
+TEST render_player_defeat_frame_stays_within_safe_budget(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    GameEvent *ev;
+    int lines;
+
+    unit_game_fresh(&game, 206u);
+    game_event_queue_reset(&out);
+    ev = game_event_push(&out, GAME_EVENT_PLAYER_DEFEAT, 25, 4, 3, 3, 0);
+    ASSERT(0 != ev);
+    ev->room_id = WORLD_ROOM_ROAD;
+    ev->room_item[0] = ITEM_SPEAR;
+    ev->room_item[1] = ITEM_MARSH_ROOT;
+    ev->room_item[2] = 1;
+    ev->room_item[3] = 2;
+    lines = render_count_frame_lines(&game, &out);
+    ASSERT(lines <= CFG_SAFE_OUTPUT_MAX_LINES);
+    ASSERT_EQ(0, render_frame_over_budget());
+    PASS();
+}
+
+TEST render_player_corpse_menu_stays_within_safe_budget(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    GameEvent *ev;
+    int lines;
+
+    unit_game_fresh(&game, 207u);
+    game_event_queue_reset(&out);
+    ev = game_event_push(&out, GAME_EVENT_CORPSE_VIEW, 3, 4,
+        GAME_CORPSE_KIND_PLAYER, 0, 0);
+    ASSERT(0 != ev);
+    ev->room_id = WORLD_ROOM_ROAD;
+    ev->room_item[0] = ITEM_SPEAR;
+    ev->room_item[1] = ITEM_BERRY;
+    ev->room_item[2] = ITEM_HERB;
+    lines = render_count_frame_lines(&game, &out);
+    ASSERT(lines <= CFG_SAFE_OUTPUT_MAX_LINES);
+    ASSERT_EQ(0, render_frame_over_budget());
+    PASS();
+}
+
 SUITE(grendr)
 {
     RUN_TEST(render_blank_hud_frame_counts_gap_and_hud);
@@ -114,4 +158,6 @@ SUITE(grendr)
     RUN_TEST(render_map_frame_stays_within_safe_budget);
     RUN_TEST(render_bandit_open_frame_stays_within_safe_budget);
     RUN_TEST(render_corpse_menu_frame_stays_within_safe_budget);
+    RUN_TEST(render_player_defeat_frame_stays_within_safe_budget);
+    RUN_TEST(render_player_corpse_menu_stays_within_safe_budget);
 }

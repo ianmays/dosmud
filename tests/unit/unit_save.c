@@ -75,6 +75,11 @@ static void save_fill_fixture(struct GameState *game)
     game->corpse_item[WORLD_ROOM_ROAD][0] = ITEM_HERB;
     game->corpse_item[WORLD_ROOM_ROAD][1] = ITEM_FISH;
     game->corpse_item[WORLD_ROOM_ROAD][2] = ITEM_NONE;
+    game->player_corpse_present = 1;
+    game->player_corpse_room = WORLD_ROOM_MARSH;
+    game->player_corpse_item_count = 2;
+    game->player_corpse_item[0] = ITEM_STONE;
+    game->player_corpse_item[1] = ITEM_STICK;
     game->room_explored[WORLD_ROOM_ROAD] = 1;
     game->room_explored[WORLD_ROOM_TOWER] = 1;
     game->day_phase = GAME_NIGHT;
@@ -177,7 +182,10 @@ static int save_games_equal(const struct GameState *a,
             a->player_hp != b->player_hp ||
             a->combat.enemy_hp != b->combat.enemy_hp ||
             a->combat.enemy_level != b->combat.enemy_level ||
-            a->combat.defending != b->combat.defending) {
+            a->combat.defending != b->combat.defending ||
+            a->player_corpse_present != b->player_corpse_present ||
+            a->player_corpse_room != b->player_corpse_room ||
+            a->player_corpse_item_count != b->player_corpse_item_count) {
         return 0;
     }
     if (!save_worlds_equal(&a->world, &b->world) ||
@@ -188,6 +196,8 @@ static int save_games_equal(const struct GameState *a,
                 sizeof(a->corpse_present)) != 0 ||
             memcmp(a->corpse_item, b->corpse_item,
                 sizeof(a->corpse_item)) != 0 ||
+            memcmp(a->player_corpse_item, b->player_corpse_item,
+                sizeof(a->player_corpse_item)) != 0 ||
             memcmp(a->room_explored, b->room_explored,
                 sizeof(a->room_explored)) != 0) {
         return 0;
@@ -921,6 +931,27 @@ TEST save_round_trip_preserves_daynight_state(void)
     PASS();
 }
 
+TEST save_rejects_retained_item_on_player_corpse(void)
+{
+    struct GameState game;
+    struct GameState loaded;
+    u32 loaded_draws;
+
+    save_cleanup_file();
+    unit_game_fresh(&game, 206U);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game.player_corpse_present = 1;
+    game.player_corpse_room = WORLD_ROOM_ROAD;
+    game.player_corpse_item_count = 1;
+    game.player_corpse_item[0] = ITEM_MARSH_ROOT;
+    ASSERT_EQ(SAVE_RESULT_OK,
+        save_write_game(save_test_path(), &game, 0U));
+    ASSERT_EQ(SAVE_RESULT_RANGE,
+        save_read_game(save_test_path(), &loaded, &loaded_draws));
+    save_cleanup_file();
+    PASS();
+}
+
 SUITE(save)
 {
     RUN_TEST(save_round_trip_preserves_state_and_rng_count);
@@ -948,4 +979,5 @@ SUITE(save)
     RUN_TEST(save_round_trip_preserves_env_interact_state);
     RUN_TEST(save_round_trip_preserves_weather_state);
     RUN_TEST(save_round_trip_preserves_daynight_state);
+    RUN_TEST(save_rejects_retained_item_on_player_corpse);
 }

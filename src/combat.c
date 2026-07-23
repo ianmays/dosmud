@@ -9,7 +9,8 @@
 
 /*
  * combat.c resolves the short battle loop only: opening initiative, reply
- * resolution, enemy turn, and defeat into corpse state plus XP.
+ * resolution, enemy turn, and enemy defeat into corpse state plus XP. Lethal
+ * player damage delegates the cross-slice respawn transaction to game.c.
  * #159: queues GAME_EVENT_COMBAT phases; grendr maps them to combat copy.
  */
 
@@ -166,7 +167,7 @@ static void combat_enemy_turn(struct GameState *game, GameEventQueue *out)
     if (game->player_hp <= 0) {
         game->player_hp = 0;
         push_combat_phase(out, GAME_COMBAT_PHASE_PLAYER_DOWN, 0, 0, 0);
-        game->running = 0;
+        game_handle_player_defeat(game, out);
         return;
     }
     push_combat_phase(out, GAME_COMBAT_PHASE_STATUS,

@@ -24,9 +24,10 @@
  * v17: CFG_NPC_MAX 8 and lost animal / peddler roster profiles (#54).
  * v18: day_phase, day_expires_tick, and night_lost (#130).
  * v19: env_room_clues[CFG_ROOM_MAX] replaces env_focus_* (#234).
+ * v20: one durable player corpse with full carried-item storage (#206).
  * Append-only bumps; loads reject below SAVE_VERSION.
  */
-#define SAVE_VERSION 19
+#define SAVE_VERSION 20
 #define SAVE_PATH_BUF_MAX 260
 
 /*
@@ -314,6 +315,11 @@ static int save_write_game_arrays(FILE *fp, const struct GameState *game)
             return 0;
         }
     }
+    for (i = 0; i < CFG_PLAYER_CORPSE_ITEM_SLOTS; ++i) {
+        if (!save_write_s16(fp, game->player_corpse_item[i])) {
+            return 0;
+        }
+    }
     for (i = 0; i < CFG_ROOM_MAX; ++i) {
         if (!save_write_s16(fp, game->corpse_present[i])) {
             return 0;
@@ -351,6 +357,11 @@ static int save_read_game_arrays(FILE *fp, struct GameState *game)
     }
     for (i = 0; i < CFG_BAG_MAX; ++i) {
         if (!save_read_s16(fp, &game->bag[i])) {
+            return 0;
+        }
+    }
+    for (i = 0; i < CFG_PLAYER_CORPSE_ITEM_SLOTS; ++i) {
+        if (!save_read_s16(fp, &game->player_corpse_item[i])) {
             return 0;
         }
     }
@@ -452,7 +463,11 @@ static int save_write_game_state(FILE *fp, const struct GameState *game,
             !save_write_s16(fp, game->player_hp) ||
             !save_write_s16(fp, game->combat.enemy_hp) ||
             !save_write_s16(fp, game->combat.enemy_level) ||
-            !save_write_s16(fp, game->combat.defending)) {
+            !save_write_s16(fp, game->combat.defending) ||
+            /* v20: globally unique recoverable player corpse (#206). */
+            !save_write_s16(fp, game->player_corpse_present) ||
+            !save_write_s16(fp, game->player_corpse_room) ||
+            !save_write_s16(fp, game->player_corpse_item_count)) {
         return 0;
     }
 #ifdef TEST_MODE
@@ -512,7 +527,10 @@ static int save_read_game_state(FILE *fp, struct GameState *game,
             !save_read_s16(fp, &game->combat.enemy_level)) {
         return 0;
     }
-    if (!save_read_s16(fp, &game->combat.defending)) {
+    if (!save_read_s16(fp, &game->combat.defending) ||
+            !save_read_s16(fp, &game->player_corpse_present) ||
+            !save_read_s16(fp, &game->player_corpse_room) ||
+            !save_read_s16(fp, &game->player_corpse_item_count)) {
         return 0;
     }
 #ifdef TEST_MODE
@@ -760,7 +778,17 @@ static int save_validate_game(const struct GameState *game)
             !save_valid_boolish(game->combat.defending) ||
             (game->mode == GAME_MODE_COMBAT &&
                 game->combat.enemy_hp > 0 &&
-                !save_valid_bandit_level(game->combat.enemy_level))) {
+                !save_valid_bandit_level(game->combat.enemy_level)) ||
+            !save_valid_boolish(game->player_corpse_present) ||
+            game->player_corpse_item_count < 0 ||
+            game->player_corpse_item_count > CFG_PLAYER_CORPSE_ITEM_SLOTS ||
+            (game->player_corpse_present &&
+                (game->player_corpse_room < 0 ||
+                    game->player_corpse_room >= room_count ||
+                    game->player_corpse_item_count == 0)) ||
+            (!game->player_corpse_present &&
+                (game->player_corpse_room != -1 ||
+                    game->player_corpse_item_count != 0))) {
         return 0;
     }
     for (slot = 0; slot < CFG_NPC_MAX; ++slot) {
@@ -792,6 +820,18 @@ static int save_validate_game(const struct GameState *game)
     }
     for (i = 0; i < CFG_BAG_MAX; ++i) {
         if (!save_valid_item(game->bag[i])) {
+            return 0;
+        }
+    }
+    for (i = 0; i < CFG_PLAYER_CORPSE_ITEM_SLOTS; ++i) {
+        /* Player corpse storage is dense and cannot contain retained items. */
+        if (!save_valid_item(game->player_corpse_item[i]) ||
+                (i < game->player_corpse_item_count &&
+                    (game->player_corpse_item[i] == ITEM_NONE ||
+                        item_is_retained_on_defeat(
+                            game->player_corpse_item[i]))) ||
+                (i >= game->player_corpse_item_count &&
+                    game->player_corpse_item[i] != ITEM_NONE)) {
             return 0;
         }
     }

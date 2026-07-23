@@ -69,3 +69,8 @@ int item_weapon_damage_bonus(int item_id)
     if (item_id == ITEM_SPEAR) return CFG_WEAPON_SPEAR_DAMAGE_BONUS;
     return 0;
 }
+
+int item_is_retained_on_defeat(int item_id)
+{
+    return item_id == ITEM_MARSH_ROOT;
+}

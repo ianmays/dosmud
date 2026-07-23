@@ -67,8 +67,17 @@ TEST items_name_and_flags(void)
     PASS();
 }
 
+TEST items_retained_on_defeat_policy(void)
+{
+    ASSERT_EQ(1, item_is_retained_on_defeat(ITEM_MARSH_ROOT));
+    ASSERT_EQ(0, item_is_retained_on_defeat(ITEM_STICK));
+    ASSERT_EQ(0, item_is_retained_on_defeat(ITEM_NONE));
+    PASS();
+}
+
 SUITE(items) {
     RUN_TEST(items_from_word_aliases);
     RUN_TEST(items_from_word_unknown);
     RUN_TEST(items_name_and_flags);
+    RUN_TEST(items_retained_on_defeat_policy);
 }

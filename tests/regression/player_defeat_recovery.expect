@@ -1,0 +1,117 @@
+TEST MODE
+dosmud (seed 1234)
+Type 'help' for commands.
+
+Camp.
+
+       *      *        $   * 
+   *               *   $     
+      _________        $     
+     /       /|\       $    
+    /       / | \     \|/  
+___/_______/__|__\ ___XXX___
+ (campfire at first watch)
+
+A small campfire burns quietly.
+
+Exits: north south west
+On the ground:
+  stick (take stick)
+
+[T:0] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
+> 
+[T:0] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
+> Combat starts. Your HP: 1, Bandit HP: 50, Bandit Lv: 1.
+Choose: [1] Attack  [2] Defend  [3] Use salve
+
+[T:2] Road [HP:1/32] [Atk:6] [Lv:4 XP:20/65]
+> You hit the bandit for 8 damage.
+The bandit strikes for 4 damage.
+You collapse.
+
+You wake at camp, bruised but alive.
+You lose 25 cumulative XP.
+Your level falls from 4 to 3; your derived stats are recalculated.
+Your equipped spear falls with the rest of your gear.
+Your marsh-root is retained on defeat and stays with you.
+3 item(s) remain on your body in Road. Return and type loot or loot all.
+
+[T:2] Camp [HP:28/28] [Atk:2] [Lv:3 XP:45/50]
+> Saved to save.dat.
+
+[T:2] Camp [HP:28/28] [Atk:2] [Lv:3 XP:45/50]
+> Loaded from save.dat.
+
+Camp.
+
+       *      *        $   * 
+   *               *   $     
+      _________        $     
+     /       /|\       $    
+    /       / | \     \|/  
+___/_______/__|__\ ___XXX___
+ (campfire at first watch)
+
+A small campfire burns quietly.
+
+Exits: north south west
+On the ground:
+  stick (take stick)
+
+[T:2] Camp [HP:28/28] [Atk:2] [Lv:3 XP:45/50]
+> You move north.
+Road.
+
+  ##     #####      #####    
+        ##########          #
+   ####         ###          
+_____________________________
+            /    \          
+           /      \         
+   (wagon ruts hold rain)
+
+A dusty road stretches toward pale hills.
+
+Exits: south west
+On the ground:
+  stone (take stone)
+  your fallen body (loot)
+
+[T:3] Road [HP:28/28] [Atk:2] [Lv:3 XP:45/50]
+> 
+Road.
+
+  ##     #####      #####    
+        ##########          #
+   ####         ###          
+_____________________________
+            /    \          
+           /      \         
+   (wagon ruts hold rain)
+
+A dusty road stretches toward pale hills.
+
+Exits: south west
+On the ground:
+  stone (take stone)
+  your fallen body (loot)
+
+[T:3] Road [HP:28/28] [Atk:2] [Lv:3 XP:45/50]
+> On your fallen body:
+  [1] berry
+  [2] herb
+  [3] spear
+  [4] Leave the rest.
+Type loot all to grab everything you can carry.
+(Answer with 1-4 or reply <n>.)
+
+[T:4] Road [HP:28/28] [Atk:2] [Lv:3 XP:45/50]
+> You loot a berry from the body.
+You loot a herb from the body.
+You loot a spear from the body.
+
+[T:4] Road [HP:28/28] [Atk:2] [Lv:3 XP:45/50]
+> Bag (4/7): marsh-root, berry, herb, spear
+
+[T:4] Road [HP:28/28] [Atk:2] [Lv:3 XP:45/50]
+> bye

@@ -299,6 +299,7 @@ const char *const TXT_UI_GROUND_ITEM_LINE_FMT = "  %s (take %s)\n";
 const char *const TXT_UI_GROUND_ITEMS_TOO_LONG =
     "Too many ground items to list here.\n";
 const char *const TXT_UI_BANDIT_CORPSE = "  bandit corpse (loot)\n";
+const char *const TXT_UI_PLAYER_CORPSE = "  your fallen body (loot)\n";
 const char *const TXT_UI_NPC_HINT = "Someone nearby might [talk].\n";
 const char *const TXT_LOOK_NIGHT = "Night.";
 
@@ -354,7 +355,7 @@ const char *const TXT_COMBAT_START_FMT =
     "Combat starts. Your HP: %d, Bandit HP: %d, Bandit Lv: %d.\n";
 const char *const TXT_COMBAT_MENU = "Choose: [1] Attack  [2] Defend  [3] Use salve\n";
 const char *const TXT_COMBAT_ENEMY_STRIKE_FMT = "The bandit strikes for %d damage.\n";
-const char *const TXT_COMBAT_PLAYER_FALLEN = "You collapse. The road takes everything.\n";
+const char *const TXT_COMBAT_PLAYER_FALLEN = "You collapse.\n";
 const char *const TXT_COMBAT_STATUS_FMT =
     "Your HP: %d, Bandit HP: %d, Bandit Lv: %d.\n";
 const char *const TXT_COMBAT_PLAYER_HIT_FMT = "You hit the bandit for %d damage.\n";
@@ -371,6 +372,23 @@ const char *const TXT_COMBAT_BANDIT_DEFEATED_FMT =
 const char *const TXT_XP_GAIN_FMT = "You gain %d XP.\n";
 const char *const TXT_LEVEL_UP_FMT = "Level up! You are now level %d.\n";
 const char *const TXT_LEVEL_STATS_FMT = "Max HP %d, Damage bonus +%d, Bag capacity %d.\n";
+const char *const TXT_DEFEAT_CAMP = "You wake at camp, bruised but alive.\n";
+const char *const TXT_DEFEAT_XP_FMT = "You lose %d cumulative XP.\n";
+const char *const TXT_DEFEAT_LEVEL_FMT =
+    "Your level falls from %d to %d; your derived stats are recalculated.\n";
+const char *const TXT_DEFEAT_LEVEL_HELD_FMT = "You remain level %d.\n";
+const char *const TXT_DEFEAT_REPLACED_FMT =
+    "Your previous corpse and its %d remaining item(s) are lost.\n";
+const char *const TXT_DEFEAT_EQUIPPED_FMT =
+    "Your equipped %s falls with the rest of your gear.\n";
+const char *const TXT_DEFEAT_RETAINED_FMT =
+    "Your %s is retained on defeat and stays with you.\n";
+const char *const TXT_DEFEAT_RETAINED_MORE_FMT =
+    "Your %s and %d other retained item(s) stay with you.\n";
+const char *const TXT_DEFEAT_CORPSE_FMT =
+    "%d item(s) remain on your body in %s. Return and type loot or loot all.\n";
+const char *const TXT_DEFEAT_NO_CORPSE =
+    "You carried no recoverable items, so no body remains.\n";
 const char *const TXT_HUD_FMT =
     "[T:%lu] %s [HP:%d/%d] [Atk:%d] [Lv:%d XP:%d/%d]\n";
 const char *const TXT_NEARBY_ITEM_FMT = "A %s catches your eye nearby.\n";
@@ -702,6 +720,7 @@ const char *const TXT_INV_BODY_STRIPPED = "The body has already been stripped cl
 const char *const TXT_INV_BAG_FULL_DROP = "Your bag is full. Drop something first.\n";
 const char *const TXT_INV_LEAVE_BODY = "You leave the rest on the body.\n";
 const char *const TXT_INV_CORPSE_HEADER = "On the body:\n";
+const char *const TXT_INV_PLAYER_CORPSE_HEADER = "On your fallen body:\n";
 const char *const TXT_INV_CORPSE_LINE_FMT = "  [%d] %s\n";
 const char *const TXT_INV_CORPSE_LEAVE_FMT = "  [%d] Leave the rest.\n";
 const char *const TXT_INV_CORPSE_ALL = "Type loot all to grab everything you can carry.\n";

@@ -771,6 +771,109 @@ TEST invent_unwield_to_ground(void)
     PASS();
 }
 
+TEST invent_player_corpse_transfer_is_stable_and_retains_root(void)
+{
+    struct GameState game;
+    int transferred;
+    int retained;
+    int retained_item;
+    int equipped;
+    int replaced;
+
+    unit_game_fresh(&game, 60u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ROAD, 0);
+    game.bag_capacity = CFG_BAG_MAX;
+    ASSERT_EQ(1, game_inv_bag_add(&game, ITEM_BERRY));
+    ASSERT_EQ(1, game_inv_bag_add(&game, ITEM_MARSH_ROOT));
+    ASSERT_EQ(1, game_inv_bag_add(&game, ITEM_HERB));
+    game.weapon_equipped = ITEM_SPEAR;
+    game.player_corpse_present = 1;
+    game.player_corpse_room = WORLD_ROOM_MARSH;
+    game.player_corpse_item_count = 2;
+    game.player_corpse_item[0] = ITEM_STONE;
+    game.player_corpse_item[1] = ITEM_FISH;
+
+    game_player_corpse_replace_from_inventory(&game, WORLD_ROOM_ROAD,
+        &transferred, &retained, &retained_item, &equipped, &replaced);
+    ASSERT_EQ(3, transferred);
+    ASSERT_EQ(1, retained);
+    ASSERT_EQ(ITEM_MARSH_ROOT, retained_item);
+    ASSERT_EQ(ITEM_SPEAR, equipped);
+    ASSERT_EQ(2, replaced);
+    ASSERT_EQ(1, game.player_corpse_present);
+    ASSERT_EQ(WORLD_ROOM_ROAD, game.player_corpse_room);
+    ASSERT_EQ(ITEM_BERRY, game.player_corpse_item[0]);
+    ASSERT_EQ(ITEM_HERB, game.player_corpse_item[1]);
+    ASSERT_EQ(ITEM_SPEAR, game.player_corpse_item[2]);
+    ASSERT_EQ(1, game.bag_count);
+    ASSERT_EQ(ITEM_MARSH_ROOT, game.bag[0]);
+    ASSERT_EQ(ITEM_NONE, game.weapon_equipped);
+    PASS();
+}
+
+TEST invent_player_corpse_holds_full_bag_plus_weapon(void)
+{
+    struct GameState game;
+    int transferred;
+    int retained;
+    int retained_item;
+    int equipped;
+    int replaced;
+    int i;
+
+    unit_game_fresh(&game, 61u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ROAD, 0);
+    game.bag_capacity = CFG_BAG_MAX;
+    for (i = 0; i < CFG_BAG_MAX; ++i) {
+        ASSERT_EQ(1, game_inv_bag_add(&game, ITEM_STONE));
+    }
+    game.weapon_equipped = ITEM_STICK;
+    game_player_corpse_replace_from_inventory(&game, WORLD_ROOM_ROAD,
+        &transferred, &retained, &retained_item, &equipped, &replaced);
+    ASSERT_EQ(CFG_PLAYER_CORPSE_ITEM_SLOTS, transferred);
+    ASSERT_EQ(ITEM_STICK,
+        game.player_corpse_item[CFG_PLAYER_CORPSE_ITEM_SLOTS - 1]);
+    ASSERT_EQ(0, game.bag_count);
+    PASS();
+}
+
+TEST invent_player_corpse_pages_and_precedes_enemy_corpse(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 62u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ROAD, 0);
+    game.bag_capacity = CFG_BAG_MAX;
+    game.player_corpse_present = 1;
+    game.player_corpse_room = WORLD_ROOM_ROAD;
+    game.player_corpse_item_count = 5;
+    game.player_corpse_item[0] = ITEM_STICK;
+    game.player_corpse_item[1] = ITEM_HERB;
+    game.player_corpse_item[2] = ITEM_FISH;
+    game.player_corpse_item[3] = ITEM_SALVE;
+    game.player_corpse_item[4] = ITEM_SPEAR;
+    game.corpse_present[WORLD_ROOM_ROAD] = 1;
+    game.corpse_item[WORLD_ROOM_ROAD][0] = ITEM_BERRY;
+
+    ASSERT_EQ(1, game_player_corpse_is_in_room(&game, WORLD_ROOM_ROAD));
+    ASSERT_EQ(1, inv_loot(&game, &out));
+    ASSERT_EQ(GAME_CORPSE_KIND_PLAYER, out.events[0].arg2);
+    ASSERT_EQ(3, out.events[0].arg0);
+    ASSERT_EQ(1, inv_loot_reply(&game, 3, &out));
+    ASSERT_EQ(ITEM_FISH, game.bag[0]);
+    ASSERT_EQ(4, game.player_corpse_item_count);
+    ASSERT_EQ(ITEM_SALVE, game.player_corpse_item[2]);
+    ASSERT_EQ(1, inv_loot_all(&game, &out));
+    ASSERT_EQ(0, game.player_corpse_present);
+    ASSERT_EQ(1, game.corpse_present[WORLD_ROOM_ROAD]);
+
+    ASSERT_EQ(1, inv_loot(&game, &out));
+    ASSERT_EQ(GAME_CORPSE_KIND_ENEMY, out.events[0].arg2);
+    ASSERT_EQ(ITEM_BERRY, out.events[0].room_item[0]);
+    PASS();
+}
+
 SUITE(invent) {
     RUN_TEST(invent_ground_slots);
     RUN_TEST(invent_bag_add_remove);
@@ -805,4 +908,7 @@ SUITE(invent) {
     RUN_TEST(invent_drop_not_carrying);
     RUN_TEST(invent_wield_swap_weapons);
     RUN_TEST(invent_unwield_to_ground);
+    RUN_TEST(invent_player_corpse_transfer_is_stable_and_retains_root);
+    RUN_TEST(invent_player_corpse_holds_full_bag_plus_weapon);
+    RUN_TEST(invent_player_corpse_pages_and_precedes_enemy_corpse);
 }

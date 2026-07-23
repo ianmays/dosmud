@@ -319,9 +319,18 @@ TEST combat_player_death(void)
     struct GameState game;
     GameEventQueue out;
     int rolls[2];
+    int slot;
 
     unit_game_fresh(&game, 6u);
-    game_reset_fixture_baseline(&game, WORLD_ROOM_CAMP, 0);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ROAD, 0);
+    slot = npc_find_by_actor(&game, GAME_DIALOGUE_ACTOR_BANDIT);
+    ASSERT(slot >= 0);
+    game.npcs[slot].room_id = WORLD_ROOM_ROAD;
+    game.npcs[slot].dialogue = DIALOGUE_ENEMY;
+    game.npcs[slot].flags |= NPC_FLAG_ACTIVE;
+    ASSERT_EQ(1, game_inv_bag_add(&game, ITEM_MARSH_ROOT));
+    ASSERT_EQ(1, game_inv_bag_add(&game, ITEM_HERB));
+    game.weapon_equipped = ITEM_STICK;
     game_set_mode_combat(&game);
     game.combat.enemy_hp = 50;
     game.combat.enemy_level = 1;
@@ -330,9 +339,22 @@ TEST combat_player_death(void)
     rolls[1] = 99;
     game_roll_inject_begin(&game, rolls, 2);
     resolve_reply_out(&game, 1, &out);
-    ASSERT_EQ(0, game.running);
-    ASSERT_EQ(GAME_EVENT_COMBAT, out.events[out.count - 1].kind);
-    ASSERT_EQ(GAME_COMBAT_PHASE_PLAYER_DOWN, out.events[out.count - 1].arg0);
+    ASSERT_EQ(1, game.running);
+    ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
+    ASSERT_EQ(WORLD_ROOM_CAMP, game.player.room_id);
+    ASSERT_EQ(game.max_hp, game.player_hp);
+    ASSERT_EQ(1, game.player_corpse_present);
+    ASSERT_EQ(WORLD_ROOM_ROAD, game.player_corpse_room);
+    ASSERT_EQ(2, game.player_corpse_item_count);
+    ASSERT_EQ(ITEM_HERB, game.player_corpse_item[0]);
+    ASSERT_EQ(ITEM_STICK, game.player_corpse_item[1]);
+    ASSERT_EQ(1, game.bag_count);
+    ASSERT_EQ(ITEM_MARSH_ROOT, game.bag[0]);
+    ASSERT_EQ(ITEM_NONE, game.weapon_equipped);
+    ASSERT_EQ(WORLD_ROOM_ROAD, game.npcs[slot].room_id);
+    ASSERT((game.npcs[slot].flags & NPC_FLAG_ACTIVE) != 0);
+    ASSERT_EQ(GAME_EVENT_PLAYER_DEFEAT, out.events[out.count - 1].kind);
+    ASSERT_EQ(WORLD_ROOM_ROAD, out.events[out.count - 1].room_id);
     PASS();
 }
 
