@@ -165,7 +165,9 @@ static int render_buf_append_sentence(char *buf, int bufsize, int pos,
  */
 static int s_atmo_stack_open;
 static char s_atmo_stack_buf[512];
+#ifndef __WATCOMC__
 static int s_room_body_gap_pending;
+#endif
 
 static void atmo_stack_reset(void)
 {
@@ -972,10 +974,12 @@ static void render_compact_arrival(const struct GameState *game,
     render_gap();
     art_for_room(look_ev->room_id);
     render_gap();
+#ifndef __WATCOMC__
     if (s_room_body_gap_pending) {
         render_gap();
         s_room_body_gap_pending = 0;
     }
+#endif
 
     pos = 0;
     body[0] = '\0';
@@ -1099,10 +1103,12 @@ static void render_room_look_snapshot(const struct GameState *game, int room_id,
         art_for_room(room_id);
     }
     render_gap();
+#ifndef __WATCOMC__
     if (s_room_body_gap_pending) {
         render_gap();
         s_room_body_gap_pending = 0;
     }
+#endif
     RENDER_PRINTF("%s", room->desc);
     if (build_room_look_footer(footer, (int)sizeof(footer), weather_kind,
             day_phase, room_clues, look_flags) > 0) {
@@ -1717,7 +1723,9 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
 
     atmo_stack_reset();
     scene_flavor_gap_pending = 0;
+#ifndef __WATCOMC__
     s_room_body_gap_pending = 0;
+#endif
     for (i = 0; i < out->count; ++i) {
         int compact_look_i;
 
@@ -1735,10 +1743,15 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
                 if (scene_flavor_gap_pending) {
                     render_gap();
                     scene_flavor_gap_pending = 0;
+#ifndef __WATCOMC__
                     s_room_body_gap_pending = 1;
-                } else {
+#endif
+                }
+#ifndef __WATCOMC__
+                else {
                     s_room_body_gap_pending = 0;
                 }
+#endif
                 render_compact_arrival(game, out, i, compact_look_i);
                 i = compact_look_i;
                 atmo_stack_reset();
@@ -1756,10 +1769,15 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
                 if (scene_flavor_gap_pending) {
                     render_gap();
                     scene_flavor_gap_pending = 0;
+#ifndef __WATCOMC__
                     s_room_body_gap_pending = 1;
-                } else {
+#endif
+                }
+#ifndef __WATCOMC__
+                else {
                     s_room_body_gap_pending = 0;
                 }
+#endif
                 render_compact_reply_return(game, out, compact_look_i,
                     lead_text);
                 i = compact_look_i;
@@ -1772,10 +1790,15 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
             if (scene_flavor_gap_pending) {
                 render_gap();
                 scene_flavor_gap_pending = 0;
+#ifndef __WATCOMC__
                 s_room_body_gap_pending = 1;
-            } else {
+#endif
+            }
+#ifndef __WATCOMC__
+            else {
                 s_room_body_gap_pending = 0;
             }
+#endif
             if (i > 0 && out->events[i - 1].kind == GAME_EVENT_DIALOGUE) {
                 render_gap();
             }
