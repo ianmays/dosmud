@@ -71,6 +71,7 @@ test-all:
 	$(MAKE) test-run
 	$(MAKE) test-unit-coverage
 	$(MAKE) test-soak
+	$(MAKE) test-win
 
 # deterministic
 test: $(VERSION_HDR)
