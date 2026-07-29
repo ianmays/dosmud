@@ -1393,18 +1393,20 @@ static void render_combat_event(const GameEvent *ev)
 }
 
 /*
- * Maps GAME_EVENT_PLAYER_DEFEAT fields (gout.h): folds XP+level and
- * equipped+retained into single lines when both apply; corpse replace may
- * share a line with the new body location hint.
+ * Maps GAME_EVENT_PLAYER_DEFEAT fields (gout.h): value0 is XP loss (u32);
+ * folds XP+level and equipped+retained into single lines when both apply;
+ * corpse replace may share a line with the new body location hint.
  */
 static void render_player_defeat_event(const struct GameState *game,
                                        const GameEvent *ev)
 {
     RENDER_PRINTF("%s", TXT_DEFEAT_CAMP);
     if (ev->arg2 < ev->arg1) {
-        RENDER_PRINTF(TXT_DEFEAT_XP_LEVEL_FMT, ev->arg0, ev->arg1, ev->arg2);
+        RENDER_PRINTF(TXT_DEFEAT_XP_LEVEL_FMT, (unsigned long)ev->value0,
+            ev->arg1, ev->arg2);
     } else {
-        RENDER_PRINTF(TXT_DEFEAT_XP_HELD_FMT, ev->arg0, ev->arg2);
+        RENDER_PRINTF(TXT_DEFEAT_XP_HELD_FMT, (unsigned long)ev->value0,
+            ev->arg2);
     }
     if (ev->room_item[0] != ITEM_NONE && ev->room_item[2] == 1) {
         RENDER_PRINTF(TXT_DEFEAT_EQUIPPED_RETAINED_FMT,
@@ -1574,7 +1576,15 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
                         break;
                     }
                 }
-                if (j < out->count) {
+                /*
+                 * Same-tick weather transitions set SUPPRESS_WEATHER on the
+                 * trailing look so the footer does not repeat them. Keep the
+                 * standalone ENVIRONMENT line when that flag is set.
+                 */
+                if (j < out->count &&
+                        !(env_event_is_weather_transition(ev->arg0) &&
+                            (out->events[j].arg3 &
+                                GAME_ROOM_LOOK_FLAG_SUPPRESS_WEATHER) != 0)) {
                     break;
                 }
             }

@@ -177,7 +177,8 @@ TEST game_event_push_records_combat_progression_kinds(void)
     ASSERT(0 != game_event_push(&out, GAME_EVENT_STAT_CHANGE,
         2, 14, 1, 6, 0));
     ASSERT(0 != game_event_push(&out, GAME_EVENT_PLAYER_DEFEAT,
-        10, 3, 2, 4, 0));
+        0, 3, 2, 4, 0));
+    out.events[3].value0 = 10UL;
     ASSERT_EQ(4, out.count);
     ASSERT_EQ(GAME_EVENT_COMBAT, out.events[0].kind);
     ASSERT_EQ(GAME_COMBAT_PHASE_START, out.events[0].arg0);
@@ -190,7 +191,7 @@ TEST game_event_push_records_combat_progression_kinds(void)
     ASSERT_EQ(2, out.events[2].arg0);
     ASSERT_EQ(14, out.events[2].arg1);
     ASSERT_EQ(GAME_EVENT_PLAYER_DEFEAT, out.events[3].kind);
-    ASSERT_EQ(10, out.events[3].arg0);
+    ASSERT_EQ(10UL, out.events[3].value0);
     ASSERT_EQ(3, out.events[3].arg1);
     ASSERT_EQ(2, out.events[3].arg2);
     ASSERT_EQ(4, out.events[3].arg3);

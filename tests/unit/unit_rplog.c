@@ -179,6 +179,7 @@ TEST replay_log_capture_step_modes_kinds_and_escapes(void)
         GAME_EVENT_COMBAT,
         GAME_EVENT_XP_GAIN,
         GAME_EVENT_STAT_CHANGE,
+        GAME_EVENT_PLAYER_DEFEAT,
         GAME_EVENT_DIALOGUE,
         GAME_EVENT_ENCOUNTER,
         GAME_EVENT_DIALOGUE_GUARD,
@@ -231,6 +232,7 @@ TEST replay_log_capture_step_modes_kinds_and_escapes(void)
     ASSERT(0 != strstr(text, "kind=GAME_EVENT_MAP"));
     ASSERT(0 != strstr(text, "kind=GAME_EVENT_VERSION"));
     ASSERT(0 != strstr(text, "kind=GAME_EVENT_COMBAT"));
+    ASSERT(0 != strstr(text, "kind=GAME_EVENT_PLAYER_DEFEAT"));
     ASSERT(0 != strstr(text, "kind=GAME_EVENT_OBSERVATION"));
     ASSERT(0 != strstr(text, "kind=GAME_EVENT_ENV_MENU"));
     ASSERT(0 != strstr(text, "kind=GAME_EVENT_ENV_RESULT"));

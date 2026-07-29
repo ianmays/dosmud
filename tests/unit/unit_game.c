@@ -1828,11 +1828,39 @@ TEST game_handle_player_defeat_direct_with_no_recoverable_items(void)
     ASSERT_EQ(0, game.player_corpse_item_count);
     ASSERT_EQ(1, out.count);
     ASSERT_EQ(GAME_EVENT_PLAYER_DEFEAT, out.events[0].kind);
-    ASSERT_EQ(0, out.events[0].arg0);
+    ASSERT_EQ(0UL, out.events[0].value0);
     ASSERT_EQ(CFG_START_LEVEL, out.events[0].arg1);
     ASSERT_EQ(CFG_START_LEVEL, out.events[0].arg2);
     ASSERT_EQ(0, out.events[0].arg3);
     ASSERT_EQ(WORLD_ROOM_MARSH, out.events[0].room_id);
+    PASS();
+}
+
+/*
+ * 20% of 163840 cumulative XP is 32768, past signed 16-bit int range. value0
+ * must keep the full u32 so DOS render does not wrap the loss display.
+ */
+TEST game_handle_player_defeat_preserves_wide_xp_loss(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    u32 expected_loss;
+
+    unit_game_fresh(&game, 209u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ROAD, 0);
+    progression_rebuild_from_cumulative_xp(&game, 163840UL);
+    expected_loss = progression_cumulative_xp(game.level, game.xp);
+    expected_loss = ((expected_loss / 100UL) * (u32)CFG_PLAYER_DEFEAT_XP_PERCENT) +
+        (((expected_loss % 100UL) * (u32)CFG_PLAYER_DEFEAT_XP_PERCENT) / 100UL);
+    ASSERT(expected_loss > 32767UL);
+    game_event_queue_reset(&out);
+
+    game_handle_player_defeat(&game, &out);
+
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_PLAYER_DEFEAT, out.events[0].kind);
+    ASSERT_EQ(expected_loss, out.events[0].value0);
+    ASSERT_EQ(0, out.events[0].arg0);
     PASS();
 }
 
@@ -1906,6 +1934,7 @@ SUITE(game) {
     RUN_TEST(game_fog_blocks_encounter_still_roams);
     RUN_TEST(game_player_defeat_skips_world_tick_and_rng);
     RUN_TEST(game_handle_player_defeat_direct_with_no_recoverable_items);
+    RUN_TEST(game_handle_player_defeat_preserves_wide_xp_loss);
     RUN_TEST(game_player_corpse_is_snapshotted_in_room_look);
     RUN_TEST(game_handle_player_defeat_resets_modal_state);
     RUN_TEST(game_bandit_intimidate_success);

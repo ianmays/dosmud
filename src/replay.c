@@ -76,6 +76,8 @@ static const char *replay_event_name(int kind)
         return "GAME_EVENT_XP_GAIN";
     case GAME_EVENT_STAT_CHANGE:
         return "GAME_EVENT_STAT_CHANGE";
+    case GAME_EVENT_PLAYER_DEFEAT:
+        return "GAME_EVENT_PLAYER_DEFEAT";
     case GAME_EVENT_DIALOGUE:
         return "GAME_EVENT_DIALOGUE";
     case GAME_EVENT_ENCOUNTER:

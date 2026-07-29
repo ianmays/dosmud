@@ -1,6 +1,7 @@
 #ifndef GOUT_H
 #define GOUT_H
 
+#include "base.h"
 #include "config.h"
 
 /*
@@ -170,8 +171,9 @@ enum GameEventEquipOutcome {
  *   (other phases leave arg1/arg2/arg3 zero unless noted)
  * XP_GAIN     arg0=amount
  * STAT_CHANGE arg0=level arg1=max_hp arg2=damage_bonus arg3=bag_capacity
- * PLAYER_DEFEAT arg0=XP lost arg1=old level arg2=new level
- *             arg3=corpse item count room_id=defeat room
+ * PLAYER_DEFEAT value0=XP lost (u32; keep wide for 16-bit int hosts)
+ *             arg1=old level arg2=new level arg3=corpse item count
+ *             room_id=defeat room
  *             room_item[0]=lost equipped item room_item[1]=first retained item
  *             room_item[2]=retained count room_item[3]=replaced corpse count
  */
@@ -328,6 +330,7 @@ struct GameEvent {
     int arg3;
     int room_id;
     int room_item[CFG_AREA_ITEM_SLOTS];
+    u32 value0; /* wide payload (PLAYER_DEFEAT XP loss); 0 when unused */
     const char *text;
 };
 

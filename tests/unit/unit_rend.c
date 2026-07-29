@@ -116,8 +116,9 @@ TEST render_player_defeat_frame_stays_within_safe_budget(void)
 
     unit_game_fresh(&game, 206u);
     game_event_queue_reset(&out);
-    ev = game_event_push(&out, GAME_EVENT_PLAYER_DEFEAT, 25, 4, 3, 3, 0);
+    ev = game_event_push(&out, GAME_EVENT_PLAYER_DEFEAT, 0, 4, 3, 3, 0);
     ASSERT(0 != ev);
+    ev->value0 = 25UL;
     ev->room_id = WORLD_ROOM_ROAD;
     ev->room_item[0] = ITEM_SPEAR;
     ev->room_item[1] = ITEM_MARSH_ROOT;

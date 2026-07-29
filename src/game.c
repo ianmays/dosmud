@@ -209,9 +209,11 @@ void game_handle_player_defeat(struct GameState *game, GameEventQueue *out)
     game->player_hp = game->max_hp;
     game->running = 1;
 
-    ev = game_event_push(out, GAME_EVENT_PLAYER_DEFEAT, (int)xp_lost,
+    /* value0 carries XP loss as u32 so 16-bit int hosts do not narrow it. */
+    ev = game_event_push(out, GAME_EVENT_PLAYER_DEFEAT, 0,
         old_level, game->level, transferred_count, 0);
     if (ev != 0) {
+        ev->value0 = xp_lost;
         ev->room_id = defeat_room;
         ev->room_item[0] = equipped_item;
         ev->room_item[1] = retained_item;

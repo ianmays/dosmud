@@ -373,11 +373,11 @@ const char *const TXT_XP_GAIN_FMT = "You gain %d XP.\n";
 const char *const TXT_LEVEL_UP_FMT = "Level up! You are now level %d.\n";
 const char *const TXT_LEVEL_STATS_FMT = "Max HP %d, Damage bonus +%d, Bag capacity %d.\n";
 const char *const TXT_DEFEAT_CAMP = "You wake at camp, bruised but alive.\n";
-const char *const TXT_DEFEAT_XP_FMT = "You lose %d cumulative XP.\n";
+const char *const TXT_DEFEAT_XP_FMT = "You lose %lu cumulative XP.\n";
 const char *const TXT_DEFEAT_XP_HELD_FMT =
-    "You lose %d cumulative XP and remain level %d.\n";
+    "You lose %lu cumulative XP and remain level %d.\n";
 const char *const TXT_DEFEAT_XP_LEVEL_FMT =
-    "You lose %d cumulative XP. Your level falls from %d to %d; your derived stats are recalculated.\n";
+    "You lose %lu cumulative XP. Your level falls from %d to %d; your derived stats are recalculated.\n";
 const char *const TXT_DEFEAT_LEVEL_FMT =
     "Your level falls from %d to %d; your derived stats are recalculated.\n";
 const char *const TXT_DEFEAT_LEVEL_HELD_FMT = "You remain level %d.\n";
