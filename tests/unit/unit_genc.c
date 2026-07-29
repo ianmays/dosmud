@@ -186,8 +186,7 @@ TEST genc_cmd_reply_intimidate_ok(void)
     ASSERT_EQ(GAME_ENCOUNTER_ACTION_INTIMIDATE, out.events[0].arg1);
     ASSERT_EQ(GAME_ENCOUNTER_OUTCOME_SUCCESS, out.events[0].arg2);
     ASSERT_EQ(GAME_EVENT_ROOM_LOOK, out.events[1].kind);
-    ASSERT_EQ(GAME_ROOM_LOOK_FLAG_TIGHT_LEAD,
-        out.events[1].arg3 & GAME_ROOM_LOOK_FLAG_TIGHT_LEAD);
+    ASSERT_EQ(GAME_ROOM_LOOK_FLAG_NONE, out.events[1].arg3);
     PASS();
 }
 
@@ -226,8 +225,7 @@ TEST genc_cmd_give_handover(void)
     ASSERT_EQ(GAME_ENCOUNTER_OUTCOME_OK, out.events[0].arg2);
     ASSERT_EQ(ITEM_STICK, out.events[0].arg3);
     ASSERT_EQ(GAME_EVENT_ROOM_LOOK, out.events[1].kind);
-    ASSERT_EQ(GAME_ROOM_LOOK_FLAG_TIGHT_LEAD,
-        out.events[1].arg3 & GAME_ROOM_LOOK_FLAG_TIGHT_LEAD);
+    ASSERT_EQ(GAME_ROOM_LOOK_FLAG_NONE, out.events[1].arg3);
     PASS();
 }
 

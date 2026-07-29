@@ -18,12 +18,22 @@ struct GameEventQueue;
 int game_room_ground_try_add(struct GameState *game, int room_id, int item_id);
 /* Returns 1 when at least one ground slot is empty in this room. */
 int game_room_ground_has_space(struct GameState *game, int room_id);
-/* Corpse loot slots (CFG_CORPSE_ITEM_SLOTS); owned by invent, mutated on defeat/loot. */
+/* Enemy corpse loot slots (CFG_CORPSE_ITEM_SLOTS); invent-owned on defeat/loot. */
 int game_corpse_try_add(struct GameState *game, int room_id, int item_id);
 int game_corpse_has_loot(struct GameState *game, int room_id);
 void game_corpse_clear(struct GameState *game, int room_id);
+/* Queues CORPSE_VIEW for the player corpse when present, else the enemy body. */
 int game_corpse_queue_view(struct GameState *game, int room_id,
                            struct GameEventQueue *out);
+int game_player_corpse_is_in_room(const struct GameState *game, int room_id);
+/* Replaces the globally unique player corpse; reports details for defeat copy. */
+void game_player_corpse_replace_from_inventory(struct GameState *game,
+                                               int room_id,
+                                               int *transferred_count,
+                                               int *retained_count,
+                                               int *retained_item,
+                                               int *equipped_item,
+                                               int *replaced_count);
 
 int game_inv_bag_find_index(const struct GameState *game, int item_id);
 /* True when the item is in the bag or is the wielded weapon. */

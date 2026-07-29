@@ -148,6 +148,7 @@ TEST command_advances_time_matrix(void)
     ASSERT_EQ(1, command_advances_time(CMD_WAIT));
     ASSERT_EQ(1, command_advances_time(CMD_MOVE));
     ASSERT_EQ(1, command_advances_time(CMD_TAKE));
+    ASSERT_EQ(0, command_advances_time(CMD_LOOT));
     ASSERT_EQ(0, command_advances_time(CMD_LOOK));
     ASSERT_EQ(0, command_advances_time(CMD_HELP));
     ASSERT_EQ(0, command_advances_time(CMD_REPLY));

@@ -1,0 +1,11 @@
+@fixture world_boot
+@fixture player_defeat_ready
+1
+save
+load
+move north
+look
+loot
+loot all
+bag
+quit

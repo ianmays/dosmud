@@ -2,7 +2,8 @@
 call \watcom\owsetenv
 
 set LOG=build.log
-set WFL=-bt=dos -I. -Iinclude -Isrc
+REM -os keeps the DOS real-mode text layout under the 64k linker ceiling.
+set WFL=-bt=dos -os -I. -Iinclude -Isrc
 
 echo dosmud Open Watcom build log > %LOG%
 echo. >> %LOG%

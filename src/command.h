@@ -72,6 +72,7 @@ struct Command {
 };
 
 int command_parse(char *line, struct Command *out_cmd);
+/* 1 when game.c should run an ambient world tick after routing this verb. */
 int command_advances_time(int type);
 const char *command_help_text(void);
 const char *command_help_line(int topic);

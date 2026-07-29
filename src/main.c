@@ -218,30 +218,11 @@ static void main_render_and_prompt(struct GameState *game)
     }
 }
 
-/* Portrait TALK scenes need a blank line before drain when input has no echo. */
-static int main_dialogue_needs_leading_newline(const GameEvent *ev)
-{
-    if (ev == 0 || ev->kind != GAME_EVENT_DIALOGUE ||
-            ev->arg1 != GAME_DIALOGUE_PHASE_TALK) {
-        return 0;
-    }
-    switch (ev->arg0) {
-    case GAME_DIALOGUE_ACTOR_WATCHMAN:
-        return ev->arg3 == WATCHMAN_SCENE_NEUTRAL ||
-            ev->arg3 == WATCHMAN_SCENE_NEUTRAL_WARNED ||
-            ev->arg3 == WATCHMAN_SCENE_NEUTRAL_FED ||
-            ev->arg3 == WATCHMAN_SCENE_NEUTRAL_WARNED_FED;
-    case GAME_DIALOGUE_ACTOR_HERBALIST:
-        return ev->arg3 != HERBALIST_SCENE_REQUESTED_OPTIONS;
-    case GAME_DIALOGUE_ACTOR_FROG:
-    case GAME_DIALOGUE_ACTOR_ARCHIVIST:
-        return 1;
-    default:
-        return 0;
-    }
-}
-
-/* Platform edge: piped test input has no prompt gap; interactive tty echoes. */
+/*
+ * Platform edge: piped test input has no prompt gap; interactive tty echoes.
+ * Character portrait / encounter art owns its leading blank in grendr, so this
+ * only backfills standalone ROOM_LOOK drains on non-echoing stdin.
+ */
 static int main_first_event_needs_leading_newline(void)
 {
     if (g_main_out.count <= 0) {
@@ -249,13 +230,6 @@ static int main_first_event_needs_leading_newline(void)
     }
     if (g_main_out.events[0].kind == GAME_EVENT_ROOM_LOOK) {
         return !plat_input_echoes_line();
-    }
-    if (main_dialogue_needs_leading_newline(&g_main_out.events[0])) {
-        return 1;
-    }
-    if (g_main_out.events[0].kind == GAME_EVENT_ENCOUNTER &&
-            g_main_out.events[0].arg1 == GAME_ENCOUNTER_ACTION_OPEN) {
-        return 1;
     }
     return 0;
 }

@@ -1053,14 +1053,14 @@ TEST game_version_allowed_during_loot_menu(void)
     game.corpse_present[WORLD_ROOM_CAMP] = 1;
     game.corpse_item[WORLD_ROOM_CAMP][0] = ITEM_HERB;
     ASSERT_EQ(1, run_cmd_out(&game, "loot", &out));
-    ASSERT_EQ(1, game.tick);
+    ASSERT_EQ(0, game.tick);
     ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
     ASSERT_EQ(DIALOGUE_LOOT, game.dialogue);
     game_event_queue_reset(&out);
     ASSERT_EQ(1, game_process_input(&game, line, &out));
     ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
     ASSERT_EQ(DIALOGUE_LOOT, game.dialogue);
-    ASSERT_EQ(1, game.tick);
+    ASSERT_EQ(0, game.tick);
     ASSERT_EQ(1, out.count);
     ASSERT_EQ(GAME_EVENT_VERSION, out.events[0].kind);
     PASS();
@@ -1170,7 +1170,7 @@ TEST game_move_emits_move_then_look(void)
     ASSERT_EQ(GAME_EVENT_MOVE, out.events[0].kind);
     ASSERT_STR_EQ("north", out.events[0].text);
     ASSERT_EQ(GAME_EVENT_ROOM_LOOK, out.events[1].kind);
-    ASSERT_EQ(GAME_ROOM_LOOK_FLAG_TIGHT_LEAD, out.events[1].arg3);
+    ASSERT_EQ(GAME_ROOM_LOOK_FLAG_NONE, out.events[1].arg3);
     PASS();
 }
 
@@ -1194,8 +1194,7 @@ TEST game_move_arrival_suppresses_weather_in_room_look_footer(void)
     ASSERT_EQ(GAME_EVENT_ENVIRONMENT, out.events[1].kind);
     ASSERT_EQ(GAME_ENV_EVENT_WEATHER_RAIN, out.events[1].arg0);
     ASSERT_EQ(GAME_EVENT_ROOM_LOOK, out.events[2].kind);
-    ASSERT_EQ(GAME_ROOM_LOOK_FLAG_SUPPRESS_WEATHER |
-        GAME_ROOM_LOOK_FLAG_TIGHT_LEAD, out.events[2].arg3);
+    ASSERT_EQ(GAME_ROOM_LOOK_FLAG_SUPPRESS_WEATHER, out.events[2].arg3);
     PASS();
 }
 
@@ -1431,12 +1430,12 @@ TEST game_post_combat_reply_guard_keeps_loot_available(void)
     ASSERT_EQ(1, game.corpse_present[WORLD_ROOM_CAMP]);
 
     ASSERT_EQ(1, run_cmd_out(&game, "loot", &out));
-    ASSERT_EQ(tick_before_reply + 1, game.tick);
+    ASSERT_EQ(tick_before_reply, game.tick);
     ASSERT(out.count >= 1);
     ASSERT_EQ(GAME_EVENT_CORPSE_VIEW, out.events[0].kind);
     ASSERT_EQ(1, out.events[0].arg0);
     ASSERT_EQ(1, run_cmd_out(&game, "1", &out));
-    ASSERT_EQ(tick_before_reply + 1, game.tick);
+    ASSERT_EQ(tick_before_reply, game.tick);
     ASSERT_EQ(GAME_EVENT_ITEM_RESULT, out.events[0].kind);
     ASSERT_EQ(GAME_ITEM_ACTION_LOOT, out.events[0].arg0);
     ASSERT_EQ(GAME_ITEM_OUTCOME_OK, out.events[0].arg1);
@@ -1460,7 +1459,7 @@ TEST game_loot_leave_keeps_corpse_without_advancing_time(void)
     game.corpse_item[WORLD_ROOM_CAMP][2] = ITEM_NONE;
 
     ASSERT_EQ(1, run_cmd_out(&game, "loot", &out));
-    ASSERT_EQ(1, game.tick);
+    ASSERT_EQ(0, game.tick);
     ASSERT_EQ(GAME_MODE_DIALOGUE, game.mode);
     ASSERT_EQ(DIALOGUE_LOOT, game.dialogue);
     ASSERT_EQ(GAME_EVENT_CORPSE_VIEW, out.events[0].kind);
@@ -1766,6 +1765,159 @@ TEST game_fog_blocks_encounter_still_roams(void)
     PASS();
 }
 
+TEST game_player_defeat_skips_world_tick_and_rng(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    int rolls[2];
+    int bandit_slot;
+    int i;
+    int defeat_events;
+
+    unit_game_fresh(&game, 206u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ROAD, 9);
+    bandit_slot = npc_find_by_actor(&game, GAME_DIALOGUE_ACTOR_BANDIT);
+    ASSERT(bandit_slot >= 0);
+    game.npcs[bandit_slot].room_id = WORLD_ROOM_ROAD;
+    game.npcs[bandit_slot].dialogue = DIALOGUE_ENEMY;
+    game.npcs[bandit_slot].flags |= NPC_FLAG_ACTIVE | NPC_FLAG_ROAMING |
+        NPC_FLAG_NEEDS_SEPARATION;
+    game_set_mode_combat(&game);
+    game.combat.enemy_hp = 50;
+    game.combat.enemy_level = 1;
+    game.player_hp = 1;
+    rolls[0] = 0;
+    rolls[1] = 3;
+    game_roll_inject_begin(&game, rolls, 2);
+
+    ASSERT_EQ(1, run_cmd_out(&game, "1", &out));
+    ASSERT_EQ(9U, game.tick);
+    ASSERT_EQ(1, game_roll_inject_fully_consumed(&game));
+    ASSERT_EQ(WORLD_ROOM_CAMP, game.player.room_id);
+    ASSERT_EQ(WORLD_ROOM_ROAD, game.npcs[bandit_slot].room_id);
+    ASSERT((game.npcs[bandit_slot].flags & NPC_FLAG_ACTIVE) != 0);
+    defeat_events = 0;
+    for (i = 0; i < out.count; ++i) {
+        if (out.events[i].kind == GAME_EVENT_PLAYER_DEFEAT) {
+            defeat_events++;
+        }
+    }
+    ASSERT_EQ(1, defeat_events);
+    PASS();
+}
+
+TEST game_handle_player_defeat_direct_with_no_recoverable_items(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 208u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_MARSH, 4);
+    game.player_hp = 0;
+    game.running = 0;
+    game_event_queue_reset(&out);
+
+    game_handle_player_defeat(&game, &out);
+
+    ASSERT_EQ(1, game.running);
+    ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
+    ASSERT_EQ(WORLD_ROOM_CAMP, game.player.room_id);
+    ASSERT_EQ(game.max_hp, game.player_hp);
+    ASSERT_EQ(0, game.player_corpse_present);
+    ASSERT_EQ(-1, game.player_corpse_room);
+    ASSERT_EQ(0, game.player_corpse_item_count);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_PLAYER_DEFEAT, out.events[0].kind);
+    ASSERT_EQ(0UL, out.events[0].value0);
+    ASSERT_EQ(CFG_START_LEVEL, out.events[0].arg1);
+    ASSERT_EQ(CFG_START_LEVEL, out.events[0].arg2);
+    ASSERT_EQ(0, out.events[0].arg3);
+    ASSERT_EQ(WORLD_ROOM_MARSH, out.events[0].room_id);
+    PASS();
+}
+
+/*
+ * 20% of 163840 cumulative XP is 32768, past signed 16-bit int range. value0
+ * must keep the full u32 so DOS render does not wrap the loss display.
+ */
+TEST game_handle_player_defeat_preserves_wide_xp_loss(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    u32 expected_loss;
+
+    unit_game_fresh(&game, 209u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ROAD, 0);
+    progression_rebuild_from_cumulative_xp(&game, 163840UL);
+    expected_loss = progression_cumulative_xp(game.level, game.xp);
+    expected_loss = ((expected_loss / 100UL) * (u32)CFG_PLAYER_DEFEAT_XP_PERCENT) +
+        (((expected_loss % 100UL) * (u32)CFG_PLAYER_DEFEAT_XP_PERCENT) / 100UL);
+    ASSERT(expected_loss > 32767UL);
+    game_event_queue_reset(&out);
+
+    game_handle_player_defeat(&game, &out);
+
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_PLAYER_DEFEAT, out.events[0].kind);
+    ASSERT_EQ(expected_loss, out.events[0].value0);
+    ASSERT_EQ(0, out.events[0].arg0);
+    PASS();
+}
+
+TEST game_player_corpse_is_snapshotted_in_room_look(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 207u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_ROAD, 0);
+    game.player_corpse_present = 1;
+    game.player_corpse_room = WORLD_ROOM_ROAD;
+    game.player_corpse_item_count = 1;
+    game.player_corpse_item[0] = ITEM_STICK;
+    game_event_queue_reset(&out);
+    game_describe_current_room(&game, &out);
+    ASSERT_EQ(1, out.count);
+    ASSERT((out.events[0].arg3 & GAME_ROOM_LOOK_FLAG_PLAYER_CORPSE) != 0);
+    PASS();
+}
+
+TEST game_handle_player_defeat_resets_modal_state(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+
+    unit_game_fresh(&game, 208u);
+    game_reset_fixture_baseline(&game, WORLD_ROOM_TOWER, 4);
+    game.env_interact_active = 1;
+    game.env_interact_kind = GAME_ENV_WATER;
+    game.env_interact_room = WORLD_ROOM_TOWER;
+    game.watchman_menu = WATCHMAN_SCENE_MEAL_OFFER;
+    game.herbalist_menu = HERBALIST_SCENE_REQUESTED;
+    game.combat.enemy_hp = 20;
+    game.combat.enemy_level = 2;
+    game.combat.defending = 1;
+    game_set_mode_combat(&game);
+    ASSERT_EQ(1, game_inv_bag_add(&game, ITEM_STICK));
+    game_event_queue_reset(&out);
+
+    game_handle_player_defeat(&game, &out);
+    ASSERT_EQ(GAME_MODE_EXPLORE, game.mode);
+    ASSERT_EQ(DIALOGUE_NONE, game.dialogue);
+    ASSERT_EQ(0, game.env_interact_active);
+    ASSERT_EQ(0, game.watchman_menu);
+    ASSERT_EQ(0, game.herbalist_menu);
+    ASSERT_EQ(0, game.combat.enemy_hp);
+    ASSERT_EQ(0, game.combat.enemy_level);
+    ASSERT_EQ(0, game.combat.defending);
+    ASSERT_EQ(WORLD_ROOM_CAMP, game.player.room_id);
+    ASSERT_EQ(game.max_hp, game.player_hp);
+    ASSERT_EQ(1, out.count);
+    ASSERT_EQ(GAME_EVENT_PLAYER_DEFEAT, out.events[0].kind);
+    ASSERT_EQ(WORLD_ROOM_TOWER, out.events[0].room_id);
+    PASS();
+}
+
 SUITE(game) {
     RUN_TEST(game_heal_player_applies);
     RUN_TEST(game_heal_player_at_max);
@@ -1780,6 +1932,11 @@ SUITE(game) {
     RUN_TEST(game_reset_fixture_baseline_initializes_daynight);
     RUN_TEST(game_night_move_without_torch_sets_lost);
     RUN_TEST(game_fog_blocks_encounter_still_roams);
+    RUN_TEST(game_player_defeat_skips_world_tick_and_rng);
+    RUN_TEST(game_handle_player_defeat_direct_with_no_recoverable_items);
+    RUN_TEST(game_handle_player_defeat_preserves_wide_xp_loss);
+    RUN_TEST(game_player_corpse_is_snapshotted_in_room_look);
+    RUN_TEST(game_handle_player_defeat_resets_modal_state);
     RUN_TEST(game_bandit_intimidate_success);
     RUN_TEST(game_inspect_with_focus);
     RUN_TEST(game_env_inspect_reply);

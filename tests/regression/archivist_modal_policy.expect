@@ -19,7 +19,8 @@ On the ground:
   stick (take stick)
 
 [T:0] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
->        /|||||||||\          
+> 
+       /|||||||||\          
       ||/ _   _ \||         
       ||  0   0  ||          
       ||    _    ||          
@@ -39,6 +40,7 @@ A dust-caked archivist lights a stub candle.
 
 [T:0] Catacombs [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 > They are waiting on your move (reply 1/2/3).
+
        /|||||||||\          
       ||/ _   _ \||         
       ||  0   0  ||          

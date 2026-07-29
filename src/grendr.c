@@ -15,6 +15,7 @@
 #include "gout.h"
 #include "combat.h"
 #include "items.h"
+#include "invent.h"
 #include "command.h"
 #include "world.h"
 #include "txtres.h"
@@ -96,6 +97,8 @@ static void render_emit(const char *fmt, ...)
 /*
  * Newline tiers: txtres strings end with \n only; grendr owns gaps.
  * render_gap = scene break; render_copy = tight copy passthrough.
+ * Character portraits and encounter opens always lead with render_gap
+ * (same on every toolchain); main only backfills ROOM_LOOK on non-echo stdin.
  */
 static void render_gap(void)
 {
@@ -165,7 +168,6 @@ static int render_buf_append_sentence(char *buf, int bufsize, int pos,
  */
 static int s_atmo_stack_open;
 static char s_atmo_stack_buf[512];
-
 static void atmo_stack_reset(void)
 {
     s_atmo_stack_open = 0;
@@ -206,7 +208,7 @@ static void atmo_stack_animal_line(const char *line)
     s_atmo_stack_open = 1;
 }
 
-/* Kinds folded into look footer or compact arrival body; skip standalone render. */
+/* Kinds folded into the look footer; skip standalone render. */
 static int env_event_owned_by_look_footer(int kind)
 {
     if (kind == GAME_ENV_EVENT_RUSTLE || kind == GAME_ENV_EVENT_CREAK ||
@@ -750,105 +752,6 @@ static int build_room_look_footer(char *footer, int bufsize, int weather_kind,
     return pos;
 }
 
-static const char *compact_env_event_text(int kind)
-{
-    switch (kind) {
-    case GAME_ENV_EVENT_GUST:
-        return TXT_ATMO_GUST;
-    case GAME_ENV_EVENT_BERRY_DROP:
-        return TXT_ATMO_BERRY_DROP;
-    case GAME_ENV_EVENT_REED_DROP:
-        return TXT_ATMO_REED_DROP;
-    case GAME_ENV_EVENT_WEATHER_RAIN:
-        return TXT_ATMO_WEATHER_RAIN;
-    case GAME_ENV_EVENT_WEATHER_FOG:
-        return TXT_ATMO_WEATHER_FOG;
-    case GAME_ENV_EVENT_WEATHER_WIND:
-        return TXT_ATMO_WEATHER_WIND;
-    case GAME_ENV_EVENT_WEATHER_CLEAR:
-        return TXT_ATMO_WEATHER_CLEAR;
-    case GAME_ENV_EVENT_DAY_BREAK:
-        return TXT_ATMO_DAY_BREAK;
-    case GAME_ENV_EVENT_NIGHT_LOST:
-        return TXT_ATMO_NIGHT_LOST;
-    default:
-        return 0;
-    }
-}
-
-/* MOVE + optional flavor + ROOM_LOOK in one step: return look index or -1. */
-static int compact_arrival_room_look_end(const GameEventQueue *out, int move_i)
-{
-    int j;
-
-    for (j = move_i + 1; j < out->count; ++j) {
-        if (out->events[j].kind == GAME_EVENT_ROOM_LOOK) {
-            if ((out->events[j].arg3 & GAME_ROOM_LOOK_FLAG_TIGHT_LEAD) == 0) {
-                return -1;
-            }
-            return j;
-        }
-        if (out->events[j].kind == GAME_EVENT_ENVIRONMENT ||
-                out->events[j].kind == GAME_EVENT_AMBIENT_NOISE) {
-            continue;
-        }
-        return -1;
-    }
-    return -1;
-}
-
-/* ENCOUNTER reply + optional flavor + ROOM_LOOK: return look index or -1. */
-static int compact_reply_room_look_end(const GameEventQueue *out, int lead_i)
-{
-    int j;
-
-    for (j = lead_i + 1; j < out->count; ++j) {
-        if (out->events[j].kind == GAME_EVENT_ROOM_LOOK) {
-            if ((out->events[j].arg3 & GAME_ROOM_LOOK_FLAG_TIGHT_LEAD) == 0) {
-                return -1;
-            }
-            return j;
-        }
-        if (out->events[j].kind == GAME_EVENT_ENVIRONMENT ||
-                out->events[j].kind == GAME_EVENT_AMBIENT_NOISE) {
-            continue;
-        }
-        return -1;
-    }
-    return -1;
-}
-
-static int move_followed_by_scene_open(const GameEventQueue *out, int move_i)
-{
-    int j;
-
-    for (j = move_i + 1; j < out->count; ++j) {
-        const GameEvent *next_ev;
-
-        next_ev = &out->events[j];
-        if (next_ev->kind == GAME_EVENT_ENCOUNTER &&
-                next_ev->arg1 == GAME_ENCOUNTER_ACTION_OPEN) {
-            return 1;
-        }
-        if (next_ev->kind == GAME_EVENT_DIALOGUE &&
-                next_ev->arg1 == GAME_DIALOGUE_PHASE_TALK) {
-            return 1;
-        }
-        if (render_event_is_flavor_kind(next_ev->kind)) {
-            continue;
-        }
-        return 0;
-    }
-    return 0;
-}
-
-static int render_event_leads_flavor_gap(int kind)
-{
-    return kind == GAME_EVENT_ITEM_RESULT ||
-        kind == GAME_EVENT_CRAFT_RESULT ||
-        kind == GAME_EVENT_EQUIP_RESULT ||
-        kind == GAME_EVENT_WAIT;
-}
 
 static int combat_phase_starts_block(int phase)
 {
@@ -863,29 +766,7 @@ static int combat_phase_is_action_line(int phase)
         phase == GAME_COMBAT_PHASE_ENEMY_DAMAGE;
 }
 
-static int dialogue_event_renders_portrait_scene(const GameEvent *ev)
-{
-    if (ev == 0 || ev->kind != GAME_EVENT_DIALOGUE ||
-            ev->arg1 != GAME_DIALOGUE_PHASE_TALK) {
-        return 0;
-    }
-    switch (ev->arg0) {
-    case GAME_DIALOGUE_ACTOR_WATCHMAN:
-        return ev->arg3 == WATCHMAN_SCENE_NEUTRAL ||
-            ev->arg3 == WATCHMAN_SCENE_NEUTRAL_WARNED ||
-            ev->arg3 == WATCHMAN_SCENE_NEUTRAL_FED ||
-            ev->arg3 == WATCHMAN_SCENE_NEUTRAL_WARNED_FED;
-    case GAME_DIALOGUE_ACTOR_HERBALIST:
-        return ev->arg3 != HERBALIST_SCENE_REQUESTED_OPTIONS;
-    case GAME_DIALOGUE_ACTOR_FROG:
-    case GAME_DIALOGUE_ACTOR_ARCHIVIST:
-        return 1;
-    default:
-        return 0;
-    }
-}
-
-/* Skip ambient flavor when encounter OPEN follows; scene art owns the break. */
+/* Skip ambient flavor when encounter OPEN follows; open helper's leading gap owns the break. */
 static int flavor_followed_by_encounter_open(const GameEventQueue *out, int i)
 {
     int j;
@@ -903,170 +784,11 @@ static int flavor_followed_by_encounter_open(const GameEventQueue *out, int i)
     return 0;
 }
 
-static int compact_encounter_reply_text(const GameEvent *ev, char *buf,
-                                        int bufsize)
-{
-    int key;
-    int pos;
-
-    if (buf == 0 || bufsize <= 0) {
-        return 0;
-    }
-    buf[0] = '\0';
-    key = txtres_encounter_narrative_key(ev->arg0, ev->arg1, ev->arg2);
-    switch (key) {
-    case TXTRES_NARRATIVE_BANDIT_INTIMIDATE_SUCCESS:
-        return render_buf_append_trimmed(buf, bufsize, 0,
-            TXT_MSG_INTIMIDATE_SUCCESS);
-    case TXTRES_NARRATIVE_BANDIT_INTIMIDATE_FAIL:
-        return render_buf_append_trimmed(buf, bufsize, 0,
-            TXT_MSG_INTIMIDATE_FAIL);
-    case TXTRES_NARRATIVE_BANDIT_GIVE_OK:
-        if (ev->text == 0) {
-            return 0;
-        }
-        pos = 0;
-        pos = render_buf_append_trimmed(buf, bufsize, pos,
-            "You hand over your ");
-        if (pos < 0) {
-            return 0;
-        }
-        pos = render_buf_append_trimmed(buf, bufsize, pos, ev->text);
-        if (pos < 0) {
-            return 0;
-        }
-        pos = render_buf_append_trimmed(buf, bufsize, pos,
-            ". The bandit backs off and leaves.");
-        return pos;
-    default:
-        return 0;
-    }
-}
-
 static void render_room_look_snapshot(const struct GameState *game, int room_id,
                                       const int *room_items, int look_arg1,
                                       int npc_in_room_hint, u8 room_clues,
                                       int look_flags, int leading_gap,
                                       int show_room_heading);
-
-/* Single arrival block: move line, room art, desc+footer+inline flavor, exits. */
-static void render_compact_arrival(const struct GameState *game,
-                                   const GameEventQueue *out, int move_i,
-                                   int look_i)
-{
-    char ground_buf[CFG_FMT_GROUND_MAX];
-    char body[512];
-    char footer[256];
-    const GameEvent *move_ev;
-    const GameEvent *look_ev;
-    const struct Room *room;
-    int corpse_present;
-    int weather_kind;
-    int day_phase;
-    int ground_len;
-    int pos;
-    int j;
-
-    move_ev = &out->events[move_i];
-    look_ev = &out->events[look_i];
-    room = &game->world.rooms[look_ev->room_id];
-    corpse_present = look_ev->arg1 & 1;
-    weather_kind = (look_ev->arg1 >> 1) & 3;
-    day_phase = (look_ev->arg1 >> 3) & 1;
-
-    RENDER_PRINTF("You move %s.\n", move_ev->text);
-    RENDER_PRINTF("%s.\n", room->name);
-    render_gap();
-    art_for_room(look_ev->room_id);
-    render_gap();
-
-    pos = 0;
-    body[0] = '\0';
-    pos = render_buf_append_sentence(body, (int)sizeof(body), pos, room->desc);
-    if (pos >= 0 &&
-            build_room_look_footer(footer, (int)sizeof(footer), weather_kind,
-                day_phase, (u8)look_ev->arg2, look_ev->arg3) > 0) {
-        pos = render_buf_append_sentence(body, (int)sizeof(body), pos, footer);
-    }
-    for (j = move_i + 1; pos >= 0 && j < look_i; ++j) {
-        const GameEvent *ev;
-        const char *inline_text;
-
-        ev = &out->events[j];
-        if (ev->kind == GAME_EVENT_ENVIRONMENT) {
-            if (env_event_owned_by_look_footer(ev->arg0) &&
-                    (!env_event_is_weather_transition(ev->arg0) ||
-                        (look_ev->arg3 &
-                            GAME_ROOM_LOOK_FLAG_SUPPRESS_WEATHER) == 0)) {
-                continue;
-            }
-            inline_text = compact_env_event_text(ev->arg0);
-        } else if (ev->kind == GAME_EVENT_AMBIENT_NOISE) {
-            inline_text = ev->text;
-        } else {
-            inline_text = 0;
-        }
-        pos = render_buf_append_sentence(body, (int)sizeof(body), pos,
-            inline_text);
-    }
-    if (pos >= 0 && body[0] != '\0') {
-        RENDER_PRINTF("%s\n", body);
-    } else {
-        RENDER_PRINTF("%s\n", room->desc);
-    }
-
-    render_gap();
-    RENDER_PRINTF("%s", TXT_UI_EXITS_LABEL);
-    for (j = 0; j < DIR_NONE; ++j) {
-        if (room->exits[j] >= 0) {
-            RENDER_PRINTF(" %s", world_dir_name(j));
-        }
-    }
-    RENDER_PRINTF("\n");
-    ground_len = fmt_room_ground_items(look_ev->room_item, ground_buf,
-        (int)sizeof(ground_buf));
-    if (ground_len > 0) {
-        RENDER_PRINTF("%s", ground_buf);
-    } else if (ground_len < 0) {
-        RENDER_PRINTF("%s", TXT_UI_GROUND_ITEMS_TOO_LONG);
-    }
-    if (corpse_present) {
-        RENDER_PRINTF("%s", TXT_UI_BANDIT_CORPSE);
-    }
-    if (look_ev->arg0 != 0) {
-        render_gap();
-        RENDER_PRINTF("%s", TXT_UI_NPC_HINT);
-    }
-}
-
-/* Bandit give/intimidate return: reply lead, room name, then tight look snapshot. */
-static void render_compact_reply_return(const struct GameState *game,
-                                        const GameEventQueue *out, int look_i,
-                                        const char *lead_text)
-{
-    char heading[256];
-    const GameEvent *look_ev;
-    const struct Room *room;
-    int pos;
-
-    look_ev = &out->events[look_i];
-    room = &game->world.rooms[look_ev->room_id];
-    pos = 0;
-    heading[0] = '\0';
-    pos = render_buf_append_sentence(heading, (int)sizeof(heading), pos,
-        lead_text);
-    if (pos >= 0) {
-        pos = render_buf_append_sentence(heading, (int)sizeof(heading), pos,
-            room->name);
-    }
-    if (pos >= 0 && heading[0] != '\0') {
-        RENDER_PRINTF("%s\n", lead_text);
-        RENDER_PRINTF("%s.\n", room->name);
-    }
-    render_gap();
-    render_room_look_snapshot(game, look_ev->room_id, look_ev->room_item,
-        look_ev->arg1, look_ev->arg0, (u8)look_ev->arg2, look_ev->arg3, 0, 0);
-}
 
 static void render_room_look_snapshot(const struct GameState *game, int room_id,
                                       const int *room_items, int look_arg1,
@@ -1123,8 +845,11 @@ static void render_room_look_snapshot(const struct GameState *game, int room_id,
     if (corpse_present) {
         RENDER_PRINTF("%s", TXT_UI_BANDIT_CORPSE);
     }
+    if ((look_flags & GAME_ROOM_LOOK_FLAG_PLAYER_CORPSE) != 0) {
+        RENDER_PRINTF("%s", TXT_UI_PLAYER_CORPSE);
+    }
     if (npc_in_room_hint != 0) {
-        render_gap();
+        /* Talk hint follows exits/ground/corpse tightly; no render_gap before it. */
         RENDER_PRINTF("%s", TXT_UI_NPC_HINT);
     }
 }
@@ -1355,6 +1080,8 @@ static void render_equip_result_event(const GameEvent *ev)
  * arg3 carries authored scene detail for branches that need more than choice.
  * txtres owns the stable actor/phase -> narrative key lookup; grendr only
  * dispatches the resolved key to the matching portrait/menu or reply helper.
+ * Portrait leading blanks live in those helpers (render_gap before art); drain
+ * does not insert consecutive-DIALOGUE gaps.
  */
 static void render_dialogue_event(const GameEvent *ev)
 {
@@ -1666,6 +1393,55 @@ static void render_combat_event(const GameEvent *ev)
 }
 
 /*
+ * Maps GAME_EVENT_PLAYER_DEFEAT fields (gout.h): value0 is XP loss (u32);
+ * folds XP+level and equipped+retained into single lines when both apply;
+ * corpse replace may share a line with the new body location hint.
+ */
+static void render_player_defeat_event(const struct GameState *game,
+                                       const GameEvent *ev)
+{
+    RENDER_PRINTF("%s", TXT_DEFEAT_CAMP);
+    if (ev->arg2 < ev->arg1) {
+        RENDER_PRINTF(TXT_DEFEAT_XP_LEVEL_FMT, (unsigned long)ev->value0,
+            ev->arg1, ev->arg2);
+    } else {
+        RENDER_PRINTF(TXT_DEFEAT_XP_HELD_FMT, (unsigned long)ev->value0,
+            ev->arg2);
+    }
+    if (ev->room_item[0] != ITEM_NONE && ev->room_item[2] == 1) {
+        RENDER_PRINTF(TXT_DEFEAT_EQUIPPED_RETAINED_FMT,
+            item_name(ev->room_item[0]), item_name(ev->room_item[1]));
+    } else if (ev->room_item[0] != ITEM_NONE && ev->room_item[2] > 1) {
+        RENDER_PRINTF(TXT_DEFEAT_EQUIPPED_RETAINED_MORE_FMT,
+            item_name(ev->room_item[0]), item_name(ev->room_item[1]),
+            ev->room_item[2] - 1);
+    } else {
+        if (ev->room_item[0] != ITEM_NONE) {
+            RENDER_PRINTF(TXT_DEFEAT_EQUIPPED_FMT,
+                item_name(ev->room_item[0]));
+        }
+        if (ev->room_item[2] == 1) {
+            RENDER_PRINTF(TXT_DEFEAT_RETAINED_FMT,
+                item_name(ev->room_item[1]));
+        } else if (ev->room_item[2] > 1) {
+            RENDER_PRINTF(TXT_DEFEAT_RETAINED_MORE_FMT,
+                item_name(ev->room_item[1]), ev->room_item[2] - 1);
+        }
+    }
+    if (ev->room_item[3] > 0 && ev->arg3 > 0) {
+        RENDER_PRINTF(TXT_DEFEAT_REPLACED_CORPSE_FMT, ev->room_item[3],
+            ev->arg3, game->world.rooms[ev->room_id].name);
+    } else if (ev->room_item[3] > 0) {
+        RENDER_PRINTF(TXT_DEFEAT_REPLACED_FMT, ev->room_item[3]);
+    } else if (ev->arg3 > 0) {
+        RENDER_PRINTF(TXT_DEFEAT_CORPSE_FMT, ev->arg3,
+            game->world.rooms[ev->room_id].name);
+    } else {
+        RENDER_PRINTF("%s", TXT_DEFEAT_NO_CORPSE);
+    }
+}
+
+/*
  * Drain the per-step event queue in enqueue order. Core must not print; this is
  * the DOSMUD text adapter for generic GameEvent kinds from the simulation queue.
  */
@@ -1673,57 +1449,34 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
 {
     int i;
     int flavor;
+    /*
+     * Deferred one blank line before the next look, flavor, or inspect
+     * consumer. Only corpse menus arm this; menu must stay visually separate
+     * from weather/atmosphere even when a transition folds into a later
+     * ROOM_LOOK.
+     */
+    int scene_flavor_gap_pending;
     const GameEvent *ev;
 
     atmo_stack_reset();
+    scene_flavor_gap_pending = 0;
     for (i = 0; i < out->count; ++i) {
-        int compact_look_i;
-
         flavor = 0;
         ev = &out->events[i];
-        compact_look_i = -1;
         if (s_atmo_stack_open && !render_event_is_flavor_kind(ev->kind)) {
             atmo_stack_flush();
         }
-        /* #236: coalesce move/reply + trailing ROOM_LOOK before per-kind dispatch. */
-        if (ev->kind == GAME_EVENT_MOVE) {
-            compact_look_i = compact_arrival_room_look_end(out, i);
-            if (compact_look_i >= 0) {
-                atmo_stack_flush();
-                render_compact_arrival(game, out, i, compact_look_i);
-                i = compact_look_i;
-                atmo_stack_reset();
-                continue;
-            }
-        }
-        if (ev->kind == GAME_EVENT_ENCOUNTER) {
-            char lead_text[160];
-
-            compact_look_i = compact_reply_room_look_end(out, i);
-            if (compact_look_i >= 0 &&
-                    compact_encounter_reply_text(ev, lead_text,
-                        (int)sizeof(lead_text)) > 0) {
-                atmo_stack_flush();
-                render_compact_reply_return(game, out, compact_look_i,
-                    lead_text);
-                i = compact_look_i;
-                atmo_stack_reset();
-                continue;
-            }
-        }
         switch (ev->kind) {
         case GAME_EVENT_ROOM_LOOK:
-            if (i > 0 && out->events[i - 1].kind == GAME_EVENT_DIALOGUE) {
+            if (scene_flavor_gap_pending) {
                 render_gap();
+                scene_flavor_gap_pending = 0;
             }
             render_room_look_snapshot(game, ev->room_id, ev->room_item,
                 ev->arg1, ev->arg0, (u8)ev->arg2, ev->arg3, 0, 1);
             break;
         case GAME_EVENT_MOVE:
             render_msg_moved(ev->text);
-            if (move_followed_by_scene_open(out, i)) {
-                render_gap();
-            }
             break;
         case GAME_EVENT_MAP:
             render_exploration_map(game);
@@ -1749,6 +1502,12 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
             break;
         case GAME_EVENT_CORPSE_VIEW:
             render_inv_corpse_menu(ev);
+            /*
+             * Weather/day-night events can be skipped into a later ROOM_LOOK,
+             * so carry the menu break until the first rendered look, flavor,
+             * or inspect block consumes it.
+             */
+            scene_flavor_gap_pending = 1;
             break;
         case GAME_EVENT_BAG_VIEW:
             render_inv_bag(game);
@@ -1788,13 +1547,12 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
         case GAME_EVENT_STAT_CHANGE:
             render_level_up(ev->arg0, ev->arg1, ev->arg2, ev->arg3);
             break;
+        case GAME_EVENT_PLAYER_DEFEAT:
+            render_gap();
+            render_player_defeat_event(game, ev);
+            break;
         /* #160 dialogue/encounter: direct dispatch (slice no longer LEGACY). */
         case GAME_EVENT_DIALOGUE:
-            if (i > 0 &&
-                    out->events[i - 1].kind == GAME_EVENT_DIALOGUE &&
-                    dialogue_event_renders_portrait_scene(ev)) {
-                render_gap();
-            }
             render_dialogue_event(ev);
             break;
         case GAME_EVENT_ENCOUNTER:
@@ -1803,10 +1561,7 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
         case GAME_EVENT_DIALOGUE_GUARD:
             render_dialogue_guard_event(ev);
             break;
-        /*
-         * #161 ambient/inspect: direct dispatch (gatmos no longer LEGACY).
-         * #244: item/craft/equip/wait keep one scene break before flavor.
-         */
+        /* #161 ambient/inspect: direct dispatch (gatmos no longer LEGACY). */
         case GAME_EVENT_ENVIRONMENT:
             if (flavor_followed_by_encounter_open(out, i) &&
                     !env_event_is_weather_transition(ev->arg0) &&
@@ -1821,13 +1576,21 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
                         break;
                     }
                 }
-                if (j < out->count) {
+                /*
+                 * Same-tick weather transitions set SUPPRESS_WEATHER on the
+                 * trailing look so the footer does not repeat them. Keep the
+                 * standalone ENVIRONMENT line when that flag is set.
+                 */
+                if (j < out->count &&
+                        !(env_event_is_weather_transition(ev->arg0) &&
+                            (out->events[j].arg3 &
+                                GAME_ROOM_LOOK_FLAG_SUPPRESS_WEATHER) != 0)) {
                     break;
                 }
             }
-            if (i > 0 &&
-                    render_event_leads_flavor_gap(out->events[i - 1].kind)) {
+            if (scene_flavor_gap_pending) {
                 render_gap();
+                scene_flavor_gap_pending = 0;
             }
             render_environment_event(ev);
             if (env_event_is_stack_tier(ev->arg0)) {
@@ -1838,27 +1601,39 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
             if (flavor_followed_by_encounter_open(out, i)) {
                 break;
             }
-            if (i > 0 &&
-                    render_event_leads_flavor_gap(out->events[i - 1].kind)) {
+            if (scene_flavor_gap_pending) {
                 render_gap();
+                scene_flavor_gap_pending = 0;
             }
             render_ambient_noise_event(ev);
             flavor = 1;
             break;
         case GAME_EVENT_ITEM_PRESENCE:
-            if (i > 0 &&
-                    render_event_leads_flavor_gap(out->events[i - 1].kind)) {
+            if (scene_flavor_gap_pending) {
                 render_gap();
+                scene_flavor_gap_pending = 0;
             }
             render_item_presence_event(ev);
             break;
         case GAME_EVENT_OBSERVATION:
+            if (scene_flavor_gap_pending) {
+                render_gap();
+                scene_flavor_gap_pending = 0;
+            }
             render_observation_event(ev);
             break;
         case GAME_EVENT_ENV_MENU:
+            if (scene_flavor_gap_pending) {
+                render_gap();
+                scene_flavor_gap_pending = 0;
+            }
             render_env_menu_event(ev);
             break;
         case GAME_EVENT_ENV_RESULT:
+            if (scene_flavor_gap_pending) {
+                render_gap();
+                scene_flavor_gap_pending = 0;
+            }
             render_env_result_event(ev);
             break;
         default:
@@ -1874,6 +1649,8 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
 void render_bandit_encounter_open(int enemy_level)
 {
     /* enemy_level is ENCOUNTER OPEN arg3 from npc_push_encounter_open. */
+    /* Leading render_gap: character-art seam shared across toolchains. */
+    render_gap();
     RENDER_PRINTF("  /\\     .-'''''''-.        \n");
     RENDER_PRINTF("  ||    / (.)..(.)  |        \n");
     RENDER_PRINTF("  ||    |  (::::)   |        \n");
@@ -2052,8 +1829,10 @@ void render_atmosphere_night_lost(void)
     atmo_stack_line(TXT_ATMO_NIGHT_LOST);
 }
 
+/* Portrait scene pattern: render_gap, art, render_gap, then body copy. */
 void render_traveler_scene(void)
 {
+    render_gap();
     art_traveler();
     render_gap();
     render_copy(TXT_TRAVELER_INTRO);
@@ -2072,6 +1851,7 @@ void render_traveler_reply(int choice)
 
 void render_lost_animal_scene(void)
 {
+    render_gap();
     art_lost_animal();
     render_gap();
     render_copy(TXT_LOST_ANIMAL_INTRO);
@@ -2090,6 +1870,7 @@ void render_lost_animal_reply(int choice)
 
 void render_peddler_scene(void)
 {
+    render_gap();
     art_peddler();
     render_gap();
     render_copy(TXT_PEDDLER_INTRO);
@@ -2108,6 +1889,7 @@ void render_peddler_reply(int choice)
 
 void render_frog_dialogue_intro(void)
 {
+    render_gap();
     art_frog_portrait();
     render_gap();
     render_copy(TXT_FROG_INTRO);
@@ -2304,6 +2086,7 @@ void render_msg_watchman_talk(int scene)
             scene == WATCHMAN_SCENE_NEUTRAL_WARNED ||
             scene == WATCHMAN_SCENE_NEUTRAL_FED ||
             scene == WATCHMAN_SCENE_NEUTRAL_WARNED_FED) {
+        render_gap();
         art_watchman_portrait();
         render_gap();
         render_copy(TXT_MSG_WATCHMAN_TALK_LINE1);
@@ -2338,6 +2121,7 @@ void render_msg_herbalist_talk(int scene)
         render_copy(TXT_MSG_HERBALIST_REQ_LINE3);
         render_copy(TXT_MSG_HERBALIST_REQ_LINE4);
     } else {
+        render_gap();
         art_herbalist_portrait();
         render_gap();
         if (scene == HERBALIST_SCENE_REQUESTED) {
@@ -2367,6 +2151,7 @@ void render_msg_herbalist_talk(int scene)
 
 void render_msg_archivist_talk(void)
 {
+    render_gap();
     art_archivist_portrait();
     render_gap();
     render_copy(TXT_MSG_ARCHIVIST_TALK_LINE1);
@@ -2455,7 +2240,11 @@ void render_inv_corpse_menu(const GameEvent *ev)
 {
     int slot;
 
-    RENDER_PRINTF("%s", TXT_INV_CORPSE_HEADER);
+    if (ev->arg2 == GAME_CORPSE_KIND_PLAYER) {
+        RENDER_PRINTF("%s", TXT_INV_PLAYER_CORPSE_HEADER);
+    } else {
+        RENDER_PRINTF("%s", TXT_INV_CORPSE_HEADER);
+    }
     for (slot = 0; slot < ev->arg0; ++slot) {
         RENDER_PRINTF(TXT_INV_CORPSE_LINE_FMT, slot + 1,
             item_name(ev->room_item[slot]));

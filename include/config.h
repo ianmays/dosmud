@@ -13,6 +13,8 @@
 #define CFG_DIR_MAX   4
 
 #define CFG_BAG_MAX   12
+/* One player corpse can hold a full bag plus the separately equipped weapon. */
+#define CFG_PLAYER_CORPSE_ITEM_SLOTS (CFG_BAG_MAX + 1)
 #define CFG_GAME_EVENT_MAX 64
 /* Max chars for fmt_inv_bag_items output (worst case full bag with stack suffixes). */
 #define CFG_FMT_BAG_LIST_MAX 128
@@ -83,6 +85,8 @@
 #define CFG_LEVELUP_MAX_HP_DELTA 4
 #define CFG_LEVELUP_DAMAGE_BONUS_DELTA 1
 #define CFG_LEVELUP_BAG_CAPACITY_DELTA 1
+/* Percent of lifetime cumulative XP removed on player defeat (#206). */
+#define CFG_PLAYER_DEFEAT_XP_PERCENT 20
 
 /* Starting player */
 #define CFG_START_BAG_CAPACITY 5

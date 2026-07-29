@@ -19,7 +19,8 @@ On the ground:
   stick (take stick)
 
 [T:0] Camp [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
->         ___---___            
+> 
+        ___---___            
       (|)  . .  (|)          
        \_________/          
       //          \\       
@@ -39,6 +40,7 @@ A damp frog wearing an imaginary crown clears his throat.
 
 [T:0] Pond [HP:20/20] [Atk:0] [Lv:1 XP:0/20]
 > They are waiting on your move (reply 1/2/3).
+
         ___---___            
       (|)  . .  (|)          
        \_________/          

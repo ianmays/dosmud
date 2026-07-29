@@ -107,6 +107,130 @@ TEST render_corpse_menu_frame_stays_within_safe_budget(void)
     PASS();
 }
 
+TEST render_player_defeat_frame_stays_within_safe_budget(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    GameEvent *ev;
+    int lines;
+
+    unit_game_fresh(&game, 206u);
+    game_event_queue_reset(&out);
+    ev = game_event_push(&out, GAME_EVENT_PLAYER_DEFEAT, 0, 4, 3, 3, 0);
+    ASSERT(0 != ev);
+    ev->value0 = 25UL;
+    ev->room_id = WORLD_ROOM_ROAD;
+    ev->room_item[0] = ITEM_SPEAR;
+    ev->room_item[1] = ITEM_MARSH_ROOT;
+    ev->room_item[2] = 1;
+    ev->room_item[3] = 2;
+    lines = render_count_frame_lines(&game, &out);
+    ASSERT(lines <= CFG_SAFE_OUTPUT_MAX_LINES);
+    ASSERT_EQ(0, render_frame_over_budget());
+    PASS();
+}
+
+TEST render_player_corpse_menu_stays_within_safe_budget(void)
+{
+    struct GameState game;
+    GameEventQueue out;
+    GameEvent *ev;
+    int lines;
+
+    unit_game_fresh(&game, 207u);
+    game_event_queue_reset(&out);
+    ev = game_event_push(&out, GAME_EVENT_CORPSE_VIEW, 3, 4,
+        GAME_CORPSE_KIND_PLAYER, 0, 0);
+    ASSERT(0 != ev);
+    ev->room_id = WORLD_ROOM_ROAD;
+    ev->room_item[0] = ITEM_SPEAR;
+    ev->room_item[1] = ITEM_BERRY;
+    ev->room_item[2] = ITEM_HERB;
+    lines = render_count_frame_lines(&game, &out);
+    ASSERT(lines <= CFG_SAFE_OUTPUT_MAX_LINES);
+    ASSERT_EQ(0, render_frame_over_budget());
+    PASS();
+}
+
+TEST render_player_corpse_menu_adds_gap_before_look_flavor(void)
+{
+    struct GameState game;
+    GameEventQueue look_out;
+    GameEventQueue out;
+    GameEvent *ev;
+    int menu_lines;
+    int look_lines;
+    int combined_lines;
+
+    unit_game_fresh(&game, 208u);
+    game.weather_kind = GAME_WEATHER_RAIN;
+    game.env_room_clues[WORLD_ROOM_CAMP] =
+        (u8)GAME_ENV_CLUE_BIT(GAME_ENV_RUSTLE);
+
+    game_event_queue_reset(&out);
+    ev = game_event_push(&out, GAME_EVENT_CORPSE_VIEW, 1, 2,
+        GAME_CORPSE_KIND_PLAYER, 0, 0);
+    ASSERT(0 != ev);
+    ev->room_id = WORLD_ROOM_ROAD;
+    ev->room_item[0] = ITEM_SPEAR;
+    menu_lines = render_count_frame_lines(&game, &out);
+
+    game_event_queue_reset(&look_out);
+    ASSERT(0 != game_event_push(&look_out, GAME_EVENT_ENVIRONMENT,
+        GAME_ENV_EVENT_WEATHER_RAIN, 0, 0, 0, 0));
+    game_describe_current_room(&game, &look_out);
+    look_lines = render_count_frame_lines(&game, &look_out);
+
+    ASSERT(0 != game_event_push(&out, GAME_EVENT_ENVIRONMENT,
+        GAME_ENV_EVENT_WEATHER_RAIN, 0, 0, 0, 0));
+    game_describe_current_room(&game, &out);
+    combined_lines = render_count_frame_lines(&game, &out);
+    /*
+     * Separate frames duplicate two HUD rows; the combined frame keeps one
+     * deferred corpse gap before the following flavor/look.
+     */
+    ASSERT_EQ(menu_lines + look_lines - 2 + 1, combined_lines);
+    PASS();
+}
+
+TEST render_wait_does_not_add_deferred_gap_before_flavor(void)
+{
+    struct GameState game;
+    GameEventQueue wait_out;
+    GameEventQueue look_out;
+    GameEventQueue out;
+    int wait_lines;
+    int look_lines;
+    int combined_lines;
+
+    unit_game_fresh(&game, 209u);
+    game.weather_kind = GAME_WEATHER_RAIN;
+
+    game_event_queue_reset(&wait_out);
+    ASSERT(0 != game_event_push(&wait_out, GAME_EVENT_WAIT, 0, 0, 0, 0, 0));
+    wait_lines = render_count_frame_lines(&game, &wait_out);
+
+    game_event_queue_reset(&look_out);
+    ASSERT(0 != game_event_push(&look_out, GAME_EVENT_ENVIRONMENT,
+        GAME_ENV_EVENT_WEATHER_RAIN, 0, 0, 0, 0));
+    game_describe_current_room(&game, &look_out);
+    look_lines = render_count_frame_lines(&game, &look_out);
+
+    game_event_queue_reset(&out);
+    ASSERT(0 != game_event_push(&out, GAME_EVENT_WAIT, 0, 0, 0, 0, 0));
+    ASSERT(0 != game_event_push(&out, GAME_EVENT_ENVIRONMENT,
+        GAME_ENV_EVENT_WEATHER_RAIN, 0, 0, 0, 0));
+    game_describe_current_room(&game, &out);
+    combined_lines = render_count_frame_lines(&game, &out);
+
+    /*
+     * Separate frames duplicate two HUD rows; the combined frame must NOT
+     * add a deferred gap between wait and the following flavor/look.
+     */
+    ASSERT_EQ(wait_lines + look_lines - 2, combined_lines);
+    PASS();
+}
+
 SUITE(grendr)
 {
     RUN_TEST(render_blank_hud_frame_counts_gap_and_hud);
@@ -114,4 +238,8 @@ SUITE(grendr)
     RUN_TEST(render_map_frame_stays_within_safe_budget);
     RUN_TEST(render_bandit_open_frame_stays_within_safe_budget);
     RUN_TEST(render_corpse_menu_frame_stays_within_safe_budget);
+    RUN_TEST(render_player_defeat_frame_stays_within_safe_budget);
+    RUN_TEST(render_player_corpse_menu_stays_within_safe_budget);
+    RUN_TEST(render_player_corpse_menu_adds_gap_before_look_flavor);
+    RUN_TEST(render_wait_does_not_add_deferred_gap_before_flavor);
 }

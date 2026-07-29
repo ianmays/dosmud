@@ -140,6 +140,23 @@ TEST testharn_fixture_frog_dialogue(void)
     PASS();
 }
 
+TEST testharn_fixture_player_defeat_ready(void)
+{
+    struct GameState game;
+    int rc;
+
+    unit_game_fresh(&game, 53u);
+    rc = testharn_apply(&game, "@fixture player_defeat_ready");
+    ASSERT_EQ(1, rc);
+    ASSERT_EQ(GAME_MODE_COMBAT, game.mode);
+    ASSERT_EQ(WORLD_ROOM_ROAD, game.player.room_id);
+    ASSERT_EQ(1, game.player_hp);
+    ASSERT_EQ(ITEM_SPEAR, game.weapon_equipped);
+    ASSERT_EQ(1, game_inv_player_has_item(&game, ITEM_MARSH_ROOT));
+    ASSERT_EQ(2, game.roll_queue_len);
+    PASS();
+}
+
 TEST testharn_bag_full_gate(void)
 {
     struct GameState game;
@@ -366,6 +383,7 @@ SUITE(testharn) {
     RUN_TEST(testharn_fixture_quiet_explore);
     RUN_TEST(testharn_fixture_story_orchard_ready);
     RUN_TEST(testharn_fixture_frog_dialogue);
+    RUN_TEST(testharn_fixture_player_defeat_ready);
     RUN_TEST(testharn_bag_full_gate);
     RUN_TEST(testharn_fixture_sweep);
     RUN_TEST(testharn_fixture_corpse_stripped_clears_corpse_items);

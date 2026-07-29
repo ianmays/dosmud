@@ -180,6 +180,48 @@ void game_set_mode_combat(struct GameState *game)
     game->dialogue = DIALOGUE_NONE;
 }
 
+/*
+ * game.c owns the cross-slice defeat transaction: invent and gprog mutate
+ * first, then orchestration restores camp exploration and queues PLAYER_DEFEAT
+ * for grendr (payload layout in gout.h).
+ */
+void game_handle_player_defeat(struct GameState *game, GameEventQueue *out)
+{
+    GameEvent *ev;
+    u32 xp_lost;
+    int defeat_room;
+    int old_level;
+    int transferred_count;
+    int retained_count;
+    int retained_item;
+    int equipped_item;
+    int replaced_count;
+
+    defeat_room = game->player.room_id;
+    old_level = game->level;
+    game_player_corpse_replace_from_inventory(game, defeat_room,
+        &transferred_count, &retained_count, &retained_item, &equipped_item,
+        &replaced_count);
+    xp_lost = progression_apply_defeat_penalty(game);
+    game->player.room_id = WORLD_ROOM_CAMP;
+    game->room_explored[WORLD_ROOM_CAMP] = 1;
+    game_set_mode_explore(game);
+    game->player_hp = game->max_hp;
+    game->running = 1;
+
+    /* value0 carries XP loss as u32 so 16-bit int hosts do not narrow it. */
+    ev = game_event_push(out, GAME_EVENT_PLAYER_DEFEAT, 0,
+        old_level, game->level, transferred_count, 0);
+    if (ev != 0) {
+        ev->value0 = xp_lost;
+        ev->room_id = defeat_room;
+        ev->room_item[0] = equipped_item;
+        ev->room_item[1] = retained_item;
+        ev->room_item[2] = retained_count;
+        ev->room_item[3] = replaced_count;
+    }
+}
+
 int game_is_busy_dialogue(struct GameState *game)
 {
     /* Any non-explore mode suppresses ambient encounters and background prompts. */
@@ -240,7 +282,7 @@ static void mark_room_look_weather_suppressed(GameEventQueue *out)
 
     /* Reply/encounter slices can queue ROOM_LOOK before the tick runs. Mark
      * those earlier snapshots after weather enqueue so same-step copy does not
-     * repeat in the compact footer.
+     * repeat in the look footer.
      */
     if (!queue_has_weather_transition(out)) {
         return;
@@ -258,6 +300,9 @@ static void do_look_flags(struct GameState *game, GameEventQueue *out, int flags
     int i;
     GameEvent *ev;
 
+    if (game_player_corpse_is_in_room(game, game->player.room_id)) {
+        flags |= GAME_ROOM_LOOK_FLAG_PLAYER_CORPSE;
+    }
     ev = game_event_push(out, GAME_EVENT_ROOM_LOOK,
         npc_room_actor(game->player.room_id),
         look_arg1_pack(game->corpse_present[game->player.room_id],
@@ -295,15 +340,6 @@ static void do_map(GameEventQueue *out)
 void game_describe_current_room(struct GameState *game, GameEventQueue *out)
 {
     do_look(game, out);
-}
-
-/*
- * Same ROOM_LOOK payload as game_describe_current_room; TIGHT_LEAD tells grendr
- * to coalesce ENCOUNTER reply + ROOM_LOOK into one compact return block (#236).
- */
-void game_describe_current_room_tight(struct GameState *game, GameEventQueue *out)
-{
-    do_look_flags(game, out, GAME_ROOM_LOOK_FLAG_TIGHT_LEAD);
 }
 
 static void reset_mutable_state(struct GameState *game, int room_id, u32 tick)
@@ -364,6 +400,12 @@ static void reset_mutable_state(struct GameState *game, int room_id, u32 tick)
             game->corpse_item[i][j] = ITEM_NONE;
         }
         game->room_explored[i] = 0;
+    }
+    game->player_corpse_present = 0;
+    game->player_corpse_room = -1;
+    game->player_corpse_item_count = 0;
+    for (j = 0; j < CFG_PLAYER_CORPSE_ITEM_SLOTS; ++j) {
+        game->player_corpse_item[j] = ITEM_NONE;
     }
     seed_world_items(game);
     game->room_explored[room_id] = 1;
@@ -835,6 +877,8 @@ int game_process_input(struct GameState *game, char *line, GameEventQueue *out)
     int applied;
     int prior_mode;
     int prior_dialogue;
+    int player_defeated;
+    int i;
 
     parsed = command_parse(line, &cmd);
     if (!parsed) {
@@ -851,10 +895,19 @@ int game_process_input(struct GameState *game, char *line, GameEventQueue *out)
     }
 
     /*
-     * Loot replies during DIALOGUE_LOOT are menu picks, not world time; skip
-     * the tick that CMD_LOOT would otherwise advance after apply_command.
+     * CMD_LOOT is quiet via command_advances_time (menu open and replies);
+     * the DIALOGUE_LOOT guard below remains defense-in-depth. Defeat also
+     * consumes the combat turn itself, so its camp respawn must not run a
+     * second ambient tick in the same command step.
      */
-    if (command_advances_time(cmd.type) &&
+    player_defeated = 0;
+    for (i = 0; i < out->count; ++i) {
+        if (out->events[i].kind == GAME_EVENT_PLAYER_DEFEAT) {
+            player_defeated = 1;
+            break;
+        }
+    }
+    if (!player_defeated && command_advances_time(cmd.type) &&
             !(prior_mode == GAME_MODE_COMBAT &&
                 (cmd.type == CMD_EAT || cmd.type == CMD_USE)) &&
             !(cmd.type == CMD_LOOT &&
@@ -869,7 +922,7 @@ int game_process_input(struct GameState *game, char *line, GameEventQueue *out)
         }
         /* defer look until after tick so encounter-open moves skip ROOM_LOOK */
         if (cmd.type == CMD_MOVE && game->mode == GAME_MODE_EXPLORE) {
-            do_look_flags(game, out, GAME_ROOM_LOOK_FLAG_TIGHT_LEAD);
+            do_look(game, out);
         }
     }
 

@@ -71,9 +71,9 @@ TEST replay_log_capture_serializes_step_metadata_and_events(void)
     ASSERT(0 != strstr(text,
         "step=0 kind=input tick=0 running=1 mode=explore events=2 overflow=1 input=\"move north\""));
     ASSERT(0 != strstr(text,
-        "event=0 kind=GAME_EVENT_ROOM_LOOK arg0=0 arg1=0 arg2=0 arg3=0 room=0 room_items=[7,0,3,0] text=null"));
+        "event=0 kind=GAME_EVENT_ROOM_LOOK arg0=0 arg1=0 arg2=0 arg3=0 value0=0 room=0 room_items=[7,0,3,0] text=null"));
     ASSERT(0 != strstr(text,
-        "event=1 kind=GAME_EVENT_MOVE arg0=0 arg1=0 arg2=0 arg3=0 room=-1 room_items=[0,0,0,0] text=\"north \\\"east\\\"\\\\path\""));
+        "event=1 kind=GAME_EVENT_MOVE arg0=0 arg1=0 arg2=0 arg3=0 value0=0 room=-1 room_items=[0,0,0,0] text=\"north \\\"east\\\"\\\\path\""));
     ASSERT_EQ(1, log.next_step);
 
     fclose(fp);
@@ -111,13 +111,13 @@ TEST replay_log_open_writes_header_and_capture_increments_steps(void)
     fclose(fp);
     remove(path);
 
-    ASSERT(0 != strstr(text, "dosmud-replay-v1 seed=99"));
+    ASSERT(0 != strstr(text, "dosmud-replay-v2 seed=99"));
     ASSERT(0 != strstr(text,
         "step=0 kind=idle tick=2 running=1 mode=explore events=1 overflow=0 input=null"));
     ASSERT(0 != strstr(text,
         "step=1 kind=input tick=3 running=1 mode=explore events=1 overflow=0 input=\"help move\""));
     ASSERT(0 != strstr(text,
-        "event=0 kind=GAME_EVENT_HELP arg0=2 arg1=0 arg2=0 arg3=0 room=-1 room_items=[0,0,0,0] text=null"));
+        "event=0 kind=GAME_EVENT_HELP arg0=2 arg1=0 arg2=0 arg3=0 value0=0 room=-1 room_items=[0,0,0,0] text=null"));
     PASS();
 }
 
@@ -179,6 +179,7 @@ TEST replay_log_capture_step_modes_kinds_and_escapes(void)
         GAME_EVENT_COMBAT,
         GAME_EVENT_XP_GAIN,
         GAME_EVENT_STAT_CHANGE,
+        GAME_EVENT_PLAYER_DEFEAT,
         GAME_EVENT_DIALOGUE,
         GAME_EVENT_ENCOUNTER,
         GAME_EVENT_DIALOGUE_GUARD,
@@ -204,6 +205,10 @@ TEST replay_log_capture_step_modes_kinds_and_escapes(void)
     for (i = 0; i < (int)(sizeof(kinds) / sizeof(kinds[0])); ++i) {
         ev = game_event_push(&out, kinds[i], -1, -2, -3, -4, 0);
         ASSERT(ev != 0);
+        if (kinds[i] == GAME_EVENT_PLAYER_DEFEAT) {
+            /* Wide XP loss must appear in the sidecar, not only arg0..arg3. */
+            ev->value0 = 32768UL;
+        }
     }
     ev = game_event_push(&out, GAME_EVENT_WAIT, 0, 0, 0, 0, escaped);
     ASSERT(ev != 0);
@@ -231,6 +236,8 @@ TEST replay_log_capture_step_modes_kinds_and_escapes(void)
     ASSERT(0 != strstr(text, "kind=GAME_EVENT_MAP"));
     ASSERT(0 != strstr(text, "kind=GAME_EVENT_VERSION"));
     ASSERT(0 != strstr(text, "kind=GAME_EVENT_COMBAT"));
+    ASSERT(0 != strstr(text,
+        "kind=GAME_EVENT_PLAYER_DEFEAT arg0=-1 arg1=-2 arg2=-3 arg3=-4 value0=32768"));
     ASSERT(0 != strstr(text, "kind=GAME_EVENT_OBSERVATION"));
     ASSERT(0 != strstr(text, "kind=GAME_EVENT_ENV_MENU"));
     ASSERT(0 != strstr(text, "kind=GAME_EVENT_ENV_RESULT"));

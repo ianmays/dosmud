@@ -101,9 +101,10 @@ SNAPSHOT_TESTS = \
 	inspect_water_followup env_menu_dismiss env_menu_blocked \
 	ambient_rustle ambient_tick_order ambient_item \
 	weather_rain_ambient weather_rain_move_arrival weather_rain_bandit_road weather_fog_look \
+	loot_menu_weather_rain \
 	night_look night_map_lost night_map_nightfall night_map_torch \
 	combat_defend combat_salve combat_no_salve combat_invalid combat_take_blocked \
-	combat_victory_xp level_up \
+	combat_victory_xp level_up player_defeat_recovery \
 	loot_spear loot_stick loot_berry loot_herb loot_fish loot_empty loot_stripped loot_bag_full loot_multi \
 	loot_menu_exit \
 	loot_all_multi loot_all_bag_full \
@@ -129,7 +130,7 @@ snapshot-run:
 			diff -u $(REGRESSION_DIR)/replay_save_load.expect $(REGRESSION_DIR)/replay_save_load.output; \
 			diff -u $(REGRESSION_DIR)/replay_save_load_log.expect $(REGRESSION_DIR)/replay_save_load_log.output; \
 			rm -f save.dat; \
-		elif [ "$$t" = "save_load" ]; then \
+		elif [ "$$t" = "save_load" ] || [ "$$t" = "player_defeat_recovery" ]; then \
 			rm -f save.dat; \
 			./$(BIN) < $(REGRESSION_DIR)/$$t.input > $(REGRESSION_DIR)/$$t.output; \
 			diff -u $(REGRESSION_DIR)/$$t.expect $(REGRESSION_DIR)/$$t.output; \

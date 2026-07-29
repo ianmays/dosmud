@@ -40,6 +40,7 @@ GameEvent *game_event_push(GameEventQueue *out, int kind, int arg0, int arg1,
     for (i = 0; i < CFG_AREA_ITEM_SLOTS; ++i) {
         ev->room_item[i] = 0;
     }
+    ev->value0 = 0UL;
     ev->text = text;
     out->count += 1;
     return ev;
