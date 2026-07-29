@@ -111,17 +111,16 @@ Frameworks last.
 
 This lane is separate from persistent authored world advancement hooks ([#220](https://github.com/ianmays/dosmud/issues/220)).
 
-### Lane 3 - Playability and text-output discipline
+### Lane 3 - Playability and Text UX
 
 **Purpose:** Make the current text game easier to play, read, fail, recover, and navigate.
 
 **Contains / currently expected:**
 
-- [#235](https://github.com/ianmays/dosmud/issues/235) modal encounter presentation and command policy - ✅ Done (PR [#238](https://github.com/ianmays/dosmud/pull/238))
 - [#206](https://github.com/ianmays/dosmud/issues/206) player defeat/respawn flow - ✅ Done (PR [#246](https://github.com/ianmays/dosmud/pull/246))
 - [#207](https://github.com/ianmays/dosmud/issues/207) 25-line safe output mode - ✅ Done (PR [#243](https://github.com/ianmays/dosmud/pull/243))
 
-### Lane 4 - Tooling and showcase
+### Lane 4 - Workflow and Tooling Maturity
 
 **Purpose:** Improve agent/reviewer visibility and repeatable playtest evidence.
 
@@ -131,7 +130,7 @@ This lane is separate from persistent authored world advancement hooks ([#220](h
 
 Tooling should support delivery. It should not block the authored-content spine unless explicitly chosen.
 
-### Lane 5 - Presentation platform
+### Lane 5 - Renderer
 
 **Purpose:** Alternative front-end/presentation work.
 
@@ -141,7 +140,7 @@ Tooling should support delivery. It should not block the authored-content spine 
 
 SDL is parked/later unless presentation work is explicitly prioritised. It must not own gameplay, simulation, combat logic, or world state.
 
-### Lane 6 - Long-term platform vision
+### Lane 6 - Multiplayer
 
 **Purpose:** Large architecture direction beyond the current single-player authored spine.
 
