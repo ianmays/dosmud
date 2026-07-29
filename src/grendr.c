@@ -97,6 +97,8 @@ static void render_emit(const char *fmt, ...)
 /*
  * Newline tiers: txtres strings end with \n only; grendr owns gaps.
  * render_gap = scene break; render_copy = tight copy passthrough.
+ * Character portraits and encounter opens always lead with render_gap
+ * (same on every toolchain); main only backfills ROOM_LOOK on non-echo stdin.
  */
 static void render_gap(void)
 {
@@ -764,7 +766,7 @@ static int combat_phase_is_action_line(int phase)
         phase == GAME_COMBAT_PHASE_ENEMY_DAMAGE;
 }
 
-/* Skip ambient flavor when encounter OPEN follows; scene art owns the break. */
+/* Skip ambient flavor when encounter OPEN follows; open helper's leading gap owns the break. */
 static int flavor_followed_by_encounter_open(const GameEventQueue *out, int i)
 {
     int j;
@@ -847,6 +849,7 @@ static void render_room_look_snapshot(const struct GameState *game, int room_id,
         RENDER_PRINTF("%s", TXT_UI_PLAYER_CORPSE);
     }
     if (npc_in_room_hint != 0) {
+        /* Talk hint follows exits/ground/corpse tightly; no render_gap before it. */
         RENDER_PRINTF("%s", TXT_UI_NPC_HINT);
     }
 }
@@ -1077,6 +1080,8 @@ static void render_equip_result_event(const GameEvent *ev)
  * arg3 carries authored scene detail for branches that need more than choice.
  * txtres owns the stable actor/phase -> narrative key lookup; grendr only
  * dispatches the resolved key to the matching portrait/menu or reply helper.
+ * Portrait leading blanks live in those helpers (render_gap before art); drain
+ * does not insert consecutive-DIALOGUE gaps.
  */
 static void render_dialogue_event(const GameEvent *ev)
 {
@@ -1634,6 +1639,7 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
 void render_bandit_encounter_open(int enemy_level)
 {
     /* enemy_level is ENCOUNTER OPEN arg3 from npc_push_encounter_open. */
+    /* Leading render_gap: character-art seam shared across toolchains. */
     render_gap();
     RENDER_PRINTF("  /\\     .-'''''''-.        \n");
     RENDER_PRINTF("  ||    / (.)..(.)  |        \n");
@@ -1813,6 +1819,7 @@ void render_atmosphere_night_lost(void)
     atmo_stack_line(TXT_ATMO_NIGHT_LOST);
 }
 
+/* Portrait scene pattern: render_gap, art, render_gap, then body copy. */
 void render_traveler_scene(void)
 {
     render_gap();

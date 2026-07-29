@@ -280,7 +280,7 @@ static void mark_room_look_weather_suppressed(GameEventQueue *out)
 
     /* Reply/encounter slices can queue ROOM_LOOK before the tick runs. Mark
      * those earlier snapshots after weather enqueue so same-step copy does not
-     * repeat in the compact footer.
+     * repeat in the look footer.
      */
     if (!queue_has_weather_transition(out)) {
         return;
