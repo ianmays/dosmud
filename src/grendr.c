@@ -206,7 +206,7 @@ static void atmo_stack_animal_line(const char *line)
     s_atmo_stack_open = 1;
 }
 
-/* Kinds folded into look footer or compact arrival body; skip standalone render. */
+/* Kinds folded into the look footer; skip standalone render. */
 static int env_event_owned_by_look_footer(int kind)
 {
     if (kind == GAME_ENV_EVENT_RUSTLE || kind == GAME_ENV_EVENT_CREAK ||
