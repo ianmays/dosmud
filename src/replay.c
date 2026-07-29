@@ -244,6 +244,8 @@ static int replay_write_event(FILE *fp, int index, const GameEvent *ev)
     dst = replay_append_int(dst, ev->arg2);
     dst = replay_append_literal(dst, " arg3=");
     dst = replay_append_int(dst, ev->arg3);
+    dst = replay_append_literal(dst, " value0=");
+    dst = replay_append_ulong(dst, (unsigned long)ev->value0);
     dst = replay_append_literal(dst, " room=");
     dst = replay_append_int(dst, ev->room_id);
     dst = replay_append_literal(dst, " room_items=[");
@@ -306,8 +308,8 @@ int replay_log_open(ReplayLog *log, const char *path, u32 seed)
         char *dst;
 
         dst = buf;
-        /* dosmud-replay-v1 is the on-disk format tag; bump when fields change. */
-        dst = replay_append_literal(dst, "dosmud-replay-v1 seed=");
+        /* dosmud-replay-v2 is the on-disk format tag; bump when fields change. */
+        dst = replay_append_literal(dst, "dosmud-replay-v2 seed=");
         dst = replay_append_ulong(dst, (unsigned long)seed);
         *dst = '\n';
         ++dst;

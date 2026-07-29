@@ -190,7 +190,7 @@ Conventions:
 ### `replay`
 
 - shell-edge serialization in [`replay.c`](https://github.com/ianmays/dosmud/blob/main/src/replay.c) (all builds); opened and driven from `main.c`
-- writes a deterministic sidecar text log (`dosmud-replay-v1`) of startup, input, and idle steps
+- writes a deterministic sidecar text log (`dosmud-replay-v2`) of startup, input, and idle steps
 - captures each step's `GameEventQueue` after simulation and before the next queue reset; does not mutate gameplay or render state
 - I/O failure surfaces through `main.c` stderr and exits non-zero
 
