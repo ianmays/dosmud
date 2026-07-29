@@ -764,28 +764,6 @@ static int combat_phase_is_action_line(int phase)
         phase == GAME_COMBAT_PHASE_ENEMY_DAMAGE;
 }
 
-static int dialogue_event_renders_portrait_scene(const GameEvent *ev)
-{
-    if (ev == 0 || ev->kind != GAME_EVENT_DIALOGUE ||
-            ev->arg1 != GAME_DIALOGUE_PHASE_TALK) {
-        return 0;
-    }
-    switch (ev->arg0) {
-    case GAME_DIALOGUE_ACTOR_WATCHMAN:
-        return ev->arg3 == WATCHMAN_SCENE_NEUTRAL ||
-            ev->arg3 == WATCHMAN_SCENE_NEUTRAL_WARNED ||
-            ev->arg3 == WATCHMAN_SCENE_NEUTRAL_FED ||
-            ev->arg3 == WATCHMAN_SCENE_NEUTRAL_WARNED_FED;
-    case GAME_DIALOGUE_ACTOR_HERBALIST:
-        return ev->arg3 != HERBALIST_SCENE_REQUESTED_OPTIONS;
-    case GAME_DIALOGUE_ACTOR_FROG:
-    case GAME_DIALOGUE_ACTOR_ARCHIVIST:
-        return 1;
-    default:
-        return 0;
-    }
-}
-
 /* Skip ambient flavor when encounter OPEN follows; scene art owns the break. */
 static int flavor_followed_by_encounter_open(const GameEventQueue *out, int i)
 {
@@ -869,7 +847,6 @@ static void render_room_look_snapshot(const struct GameState *game, int room_id,
         RENDER_PRINTF("%s", TXT_UI_PLAYER_CORPSE);
     }
     if (npc_in_room_hint != 0) {
-        render_gap();
         RENDER_PRINTF("%s", TXT_UI_NPC_HINT);
     }
 }
@@ -1569,11 +1546,6 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
             break;
         /* #160 dialogue/encounter: direct dispatch (slice no longer LEGACY). */
         case GAME_EVENT_DIALOGUE:
-            if (i > 0 &&
-                    out->events[i - 1].kind == GAME_EVENT_DIALOGUE &&
-                    dialogue_event_renders_portrait_scene(ev)) {
-                render_gap();
-            }
             render_dialogue_event(ev);
             break;
         case GAME_EVENT_ENCOUNTER:
@@ -1662,6 +1634,7 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
 void render_bandit_encounter_open(int enemy_level)
 {
     /* enemy_level is ENCOUNTER OPEN arg3 from npc_push_encounter_open. */
+    render_gap();
     RENDER_PRINTF("  /\\     .-'''''''-.        \n");
     RENDER_PRINTF("  ||    / (.)..(.)  |        \n");
     RENDER_PRINTF("  ||    |  (::::)   |        \n");
@@ -1842,6 +1815,7 @@ void render_atmosphere_night_lost(void)
 
 void render_traveler_scene(void)
 {
+    render_gap();
     art_traveler();
     render_gap();
     render_copy(TXT_TRAVELER_INTRO);
@@ -1860,6 +1834,7 @@ void render_traveler_reply(int choice)
 
 void render_lost_animal_scene(void)
 {
+    render_gap();
     art_lost_animal();
     render_gap();
     render_copy(TXT_LOST_ANIMAL_INTRO);
@@ -1878,6 +1853,7 @@ void render_lost_animal_reply(int choice)
 
 void render_peddler_scene(void)
 {
+    render_gap();
     art_peddler();
     render_gap();
     render_copy(TXT_PEDDLER_INTRO);
@@ -1896,6 +1872,7 @@ void render_peddler_reply(int choice)
 
 void render_frog_dialogue_intro(void)
 {
+    render_gap();
     art_frog_portrait();
     render_gap();
     render_copy(TXT_FROG_INTRO);
@@ -2092,6 +2069,7 @@ void render_msg_watchman_talk(int scene)
             scene == WATCHMAN_SCENE_NEUTRAL_WARNED ||
             scene == WATCHMAN_SCENE_NEUTRAL_FED ||
             scene == WATCHMAN_SCENE_NEUTRAL_WARNED_FED) {
+        render_gap();
         art_watchman_portrait();
         render_gap();
         render_copy(TXT_MSG_WATCHMAN_TALK_LINE1);
@@ -2126,6 +2104,7 @@ void render_msg_herbalist_talk(int scene)
         render_copy(TXT_MSG_HERBALIST_REQ_LINE3);
         render_copy(TXT_MSG_HERBALIST_REQ_LINE4);
     } else {
+        render_gap();
         art_herbalist_portrait();
         render_gap();
         if (scene == HERBALIST_SCENE_REQUESTED) {
@@ -2155,6 +2134,7 @@ void render_msg_herbalist_talk(int scene)
 
 void render_msg_archivist_talk(void)
 {
+    render_gap();
     art_archivist_portrait();
     render_gap();
     render_copy(TXT_MSG_ARCHIVIST_TALK_LINE1);
