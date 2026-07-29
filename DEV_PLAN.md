@@ -1,9 +1,5 @@
 # DOSMUD Roadmap v2
 
-## Current phase
-
-**Playability and text-output discipline**
-
 Roadmap v1 established the engine foundation:
 
 - ANSI C89 / OpenWatcom-compatible architecture discipline
@@ -116,7 +112,7 @@ Frameworks last.
 
 This lane is separate from persistent authored world advancement hooks ([#220](https://github.com/ianmays/dosmud/issues/220)).
 
-### Lane 3 - Playability and text-output discipline [Active]
+### Lane 3 - Playability and text-output discipline
 
 **Purpose:** Make the current text game easier to play, read, fail, recover, and navigate.
 
@@ -124,7 +120,6 @@ This lane is separate from persistent authored world advancement hooks ([#220](h
 
 - [#235](https://github.com/ianmays/dosmud/issues/235) modal encounter presentation and command policy - ✅ Done (PR [#238](https://github.com/ianmays/dosmud/pull/238))
 - [#206](https://github.com/ianmays/dosmud/issues/206) player defeat/respawn flow - ✅ Done (PR [#246](https://github.com/ianmays/dosmud/pull/246))
-- [#145](https://github.com/ianmays/dosmud/issues/145) local map viewport
 - [#207](https://github.com/ianmays/dosmud/issues/207) 25-line safe output mode - ✅ Done (PR [#243](https://github.com/ianmays/dosmud/pull/243))
 
 ### Lane 4 - Tooling and showcase
@@ -167,6 +162,7 @@ Parked unless current authored content creates real pressure:
 - [#15](https://github.com/ianmays/dosmud/issues/15) stats and rolls
 - [#31](https://github.com/ianmays/dosmud/issues/31) easy / hard mode
 - [#55](https://github.com/ianmays/dosmud/issues/55) larger worlds
+- [#145](https://github.com/ianmays/dosmud/issues/145) local map viewport
 - [#131](https://github.com/ianmays/dosmud/issues/131) cooking skill
 - [#221](https://github.com/ianmays/dosmud/issues/221) narration triggers v1
 - [#222](https://github.com/ianmays/dosmud/issues/222) cutscene-style scene beat v1
