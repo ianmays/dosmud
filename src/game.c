@@ -340,15 +340,6 @@ void game_describe_current_room(struct GameState *game, GameEventQueue *out)
     do_look(game, out);
 }
 
-/*
- * Same ROOM_LOOK payload as game_describe_current_room; TIGHT_LEAD tells grendr
- * to coalesce ENCOUNTER reply + ROOM_LOOK into one compact return block (#236).
- */
-void game_describe_current_room_tight(struct GameState *game, GameEventQueue *out)
-{
-    do_look_flags(game, out, GAME_ROOM_LOOK_FLAG_TIGHT_LEAD);
-}
-
 static void reset_mutable_state(struct GameState *game, int room_id, u32 tick)
 {
     int i;
@@ -929,7 +920,7 @@ int game_process_input(struct GameState *game, char *line, GameEventQueue *out)
         }
         /* defer look until after tick so encounter-open moves skip ROOM_LOOK */
         if (cmd.type == CMD_MOVE && game->mode == GAME_MODE_EXPLORE) {
-            do_look_flags(game, out, GAME_ROOM_LOOK_FLAG_TIGHT_LEAD);
+            do_look(game, out);
         }
     }
 

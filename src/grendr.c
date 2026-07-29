@@ -166,15 +166,6 @@ static int render_buf_append_sentence(char *buf, int bufsize, int pos,
  */
 static int s_atmo_stack_open;
 static char s_atmo_stack_buf[512];
-#ifndef __WATCOMC__
-/*
- * GCC only: after a deferred scene break is emitted before compact arrival or
- * ROOM_LOOK, hold one extra body gap so flavor sits below the break rather than
- * only above the arrival block. Unused on Watcom, which skips compact coalesce.
- */
-static int s_room_body_gap_pending;
-#endif
-
 static void atmo_stack_reset(void)
 {
     s_atmo_stack_open = 0;
@@ -759,103 +750,6 @@ static int build_room_look_footer(char *footer, int bufsize, int weather_kind,
     return pos;
 }
 
-static const char *compact_env_event_text(int kind)
-{
-    switch (kind) {
-    case GAME_ENV_EVENT_GUST:
-        return TXT_ATMO_GUST;
-    case GAME_ENV_EVENT_BERRY_DROP:
-        return TXT_ATMO_BERRY_DROP;
-    case GAME_ENV_EVENT_REED_DROP:
-        return TXT_ATMO_REED_DROP;
-    case GAME_ENV_EVENT_WEATHER_RAIN:
-        return TXT_ATMO_WEATHER_RAIN;
-    case GAME_ENV_EVENT_WEATHER_FOG:
-        return TXT_ATMO_WEATHER_FOG;
-    case GAME_ENV_EVENT_WEATHER_WIND:
-        return TXT_ATMO_WEATHER_WIND;
-    case GAME_ENV_EVENT_WEATHER_CLEAR:
-        return TXT_ATMO_WEATHER_CLEAR;
-    case GAME_ENV_EVENT_DAY_BREAK:
-        return TXT_ATMO_DAY_BREAK;
-    case GAME_ENV_EVENT_NIGHT_LOST:
-        return TXT_ATMO_NIGHT_LOST;
-    default:
-        return 0;
-    }
-}
-
-#ifndef __WATCOMC__
-/*
- * Compact move/reply + ROOM_LOOK coalescing is Linux/GCC only. Open Watcom DOS
- * builds omit these helpers to shrink the renderer code segment.
- */
-/* MOVE + optional flavor + ROOM_LOOK in one step: return look index or -1. */
-static int compact_arrival_room_look_end(const GameEventQueue *out, int move_i)
-{
-    int j;
-
-    for (j = move_i + 1; j < out->count; ++j) {
-        if (out->events[j].kind == GAME_EVENT_ROOM_LOOK) {
-            if ((out->events[j].arg3 & GAME_ROOM_LOOK_FLAG_TIGHT_LEAD) == 0) {
-                return -1;
-            }
-            return j;
-        }
-        if (out->events[j].kind == GAME_EVENT_ENVIRONMENT ||
-                out->events[j].kind == GAME_EVENT_AMBIENT_NOISE) {
-            continue;
-        }
-        return -1;
-    }
-    return -1;
-}
-
-/* ENCOUNTER reply + optional flavor + ROOM_LOOK: return look index or -1. */
-static int compact_reply_room_look_end(const GameEventQueue *out, int lead_i)
-{
-    int j;
-
-    for (j = lead_i + 1; j < out->count; ++j) {
-        if (out->events[j].kind == GAME_EVENT_ROOM_LOOK) {
-            if ((out->events[j].arg3 & GAME_ROOM_LOOK_FLAG_TIGHT_LEAD) == 0) {
-                return -1;
-            }
-            return j;
-        }
-        if (out->events[j].kind == GAME_EVENT_ENVIRONMENT ||
-                out->events[j].kind == GAME_EVENT_AMBIENT_NOISE) {
-            continue;
-        }
-        return -1;
-    }
-    return -1;
-}
-
-static int move_followed_by_scene_open(const GameEventQueue *out, int move_i)
-{
-    int j;
-
-    for (j = move_i + 1; j < out->count; ++j) {
-        const GameEvent *next_ev;
-
-        next_ev = &out->events[j];
-        if (next_ev->kind == GAME_EVENT_ENCOUNTER &&
-                next_ev->arg1 == GAME_ENCOUNTER_ACTION_OPEN) {
-            return 1;
-        }
-        if (next_ev->kind == GAME_EVENT_DIALOGUE &&
-                next_ev->arg1 == GAME_DIALOGUE_PHASE_TALK) {
-            return 1;
-        }
-        if (render_event_is_flavor_kind(next_ev->kind)) {
-            continue;
-        }
-        return 0;
-    }
-    return 0;
-}
-#endif
 
 static int combat_phase_starts_block(int phase)
 {
@@ -910,181 +804,11 @@ static int flavor_followed_by_encounter_open(const GameEventQueue *out, int i)
     return 0;
 }
 
-static int compact_encounter_reply_text(const GameEvent *ev, char *buf,
-                                        int bufsize)
-{
-    int key;
-    int pos;
-
-    if (buf == 0 || bufsize <= 0) {
-        return 0;
-    }
-    buf[0] = '\0';
-    key = txtres_encounter_narrative_key(ev->arg0, ev->arg1, ev->arg2);
-    switch (key) {
-    case TXTRES_NARRATIVE_BANDIT_INTIMIDATE_SUCCESS:
-        return render_buf_append_trimmed(buf, bufsize, 0,
-            TXT_MSG_INTIMIDATE_SUCCESS);
-    case TXTRES_NARRATIVE_BANDIT_INTIMIDATE_FAIL:
-        return render_buf_append_trimmed(buf, bufsize, 0,
-            TXT_MSG_INTIMIDATE_FAIL);
-    case TXTRES_NARRATIVE_BANDIT_GIVE_OK:
-        if (ev->text == 0) {
-            return 0;
-        }
-        pos = 0;
-        pos = render_buf_append_trimmed(buf, bufsize, pos,
-            "You hand over your ");
-        if (pos < 0) {
-            return 0;
-        }
-        pos = render_buf_append_trimmed(buf, bufsize, pos, ev->text);
-        if (pos < 0) {
-            return 0;
-        }
-        pos = render_buf_append_trimmed(buf, bufsize, pos,
-            ". The bandit backs off and leaves.");
-        return pos;
-    default:
-        return 0;
-    }
-}
-
 static void render_room_look_snapshot(const struct GameState *game, int room_id,
                                       const int *room_items, int look_arg1,
                                       int npc_in_room_hint, u8 room_clues,
                                       int look_flags, int leading_gap,
                                       int show_room_heading);
-
-/* Single arrival block: move line, room art, desc+footer+inline flavor, exits. */
-#ifndef __WATCOMC__
-static void render_compact_arrival(const struct GameState *game,
-                                   const GameEventQueue *out, int move_i,
-                                   int look_i)
-{
-    char ground_buf[CFG_FMT_GROUND_MAX];
-    char body[512];
-    char footer[256];
-    const GameEvent *move_ev;
-    const GameEvent *look_ev;
-    const struct Room *room;
-    int corpse_present;
-    int weather_kind;
-    int day_phase;
-    int ground_len;
-    int pos;
-    int j;
-
-    move_ev = &out->events[move_i];
-    look_ev = &out->events[look_i];
-    room = &game->world.rooms[look_ev->room_id];
-    corpse_present = look_ev->arg1 & 1;
-    weather_kind = (look_ev->arg1 >> 1) & 3;
-    day_phase = (look_ev->arg1 >> 3) & 1;
-
-    RENDER_PRINTF("You move %s.\n", move_ev->text);
-    RENDER_PRINTF("%s.\n", room->name);
-    render_gap();
-    art_for_room(look_ev->room_id);
-    render_gap();
-#ifndef __WATCOMC__
-    if (s_room_body_gap_pending) {
-        render_gap();
-        s_room_body_gap_pending = 0;
-    }
-#endif
-
-    pos = 0;
-    body[0] = '\0';
-    pos = render_buf_append_sentence(body, (int)sizeof(body), pos, room->desc);
-    if (pos >= 0 &&
-            build_room_look_footer(footer, (int)sizeof(footer), weather_kind,
-                day_phase, (u8)look_ev->arg2, look_ev->arg3) > 0) {
-        pos = render_buf_append_sentence(body, (int)sizeof(body), pos, footer);
-    }
-    for (j = move_i + 1; pos >= 0 && j < look_i; ++j) {
-        const GameEvent *ev;
-        const char *inline_text;
-
-        ev = &out->events[j];
-        if (ev->kind == GAME_EVENT_ENVIRONMENT) {
-            if (env_event_owned_by_look_footer(ev->arg0) &&
-                    (!env_event_is_weather_transition(ev->arg0) ||
-                        (look_ev->arg3 &
-                            GAME_ROOM_LOOK_FLAG_SUPPRESS_WEATHER) == 0)) {
-                continue;
-            }
-            inline_text = compact_env_event_text(ev->arg0);
-        } else if (ev->kind == GAME_EVENT_AMBIENT_NOISE) {
-            inline_text = ev->text;
-        } else {
-            inline_text = 0;
-        }
-        pos = render_buf_append_sentence(body, (int)sizeof(body), pos,
-            inline_text);
-    }
-    if (pos >= 0 && body[0] != '\0') {
-        RENDER_PRINTF("%s\n", body);
-    } else {
-        RENDER_PRINTF("%s\n", room->desc);
-    }
-
-    render_gap();
-    RENDER_PRINTF("%s", TXT_UI_EXITS_LABEL);
-    for (j = 0; j < DIR_NONE; ++j) {
-        if (room->exits[j] >= 0) {
-            RENDER_PRINTF(" %s", world_dir_name(j));
-        }
-    }
-    RENDER_PRINTF("\n");
-    ground_len = fmt_room_ground_items(look_ev->room_item, ground_buf,
-        (int)sizeof(ground_buf));
-    if (ground_len > 0) {
-        RENDER_PRINTF("%s", ground_buf);
-    } else if (ground_len < 0) {
-        RENDER_PRINTF("%s", TXT_UI_GROUND_ITEMS_TOO_LONG);
-    }
-    if (corpse_present) {
-        RENDER_PRINTF("%s", TXT_UI_BANDIT_CORPSE);
-    }
-    if ((look_ev->arg3 & GAME_ROOM_LOOK_FLAG_PLAYER_CORPSE) != 0) {
-        RENDER_PRINTF("%s", TXT_UI_PLAYER_CORPSE);
-    }
-    if (look_ev->arg0 != 0) {
-        render_gap();
-        RENDER_PRINTF("%s", TXT_UI_NPC_HINT);
-    }
-}
-
-/* Bandit give/intimidate return: reply lead, room name, then tight look snapshot. */
-static void render_compact_reply_return(const struct GameState *game,
-                                        const GameEventQueue *out, int look_i,
-                                        const char *lead_text)
-{
-    char heading[256];
-    const GameEvent *look_ev;
-    const struct Room *room;
-    int pos;
-
-    look_ev = &out->events[look_i];
-    room = &game->world.rooms[look_ev->room_id];
-    pos = 0;
-    heading[0] = '\0';
-    pos = render_buf_append_sentence(heading, (int)sizeof(heading), pos,
-        lead_text);
-    if (pos >= 0) {
-        pos = render_buf_append_sentence(heading, (int)sizeof(heading), pos,
-            room->name);
-    }
-    if (pos >= 0 && heading[0] != '\0') {
-        RENDER_PRINTF("%s\n", lead_text);
-        RENDER_PRINTF("%s.\n", room->name);
-    }
-    render_gap();
-    render_room_look_snapshot(game, look_ev->room_id, look_ev->room_item,
-        look_ev->arg1, look_ev->arg0, (u8)look_ev->arg2, look_ev->arg3, 0, 0);
-}
-#endif
 
 static void render_room_look_snapshot(const struct GameState *game, int room_id,
                                       const int *room_items, int look_arg1,
@@ -1117,12 +841,6 @@ static void render_room_look_snapshot(const struct GameState *game, int room_id,
         art_for_room(room_id);
     }
     render_gap();
-#ifndef __WATCOMC__
-    if (s_room_body_gap_pending) {
-        render_gap();
-        s_room_body_gap_pending = 0;
-    }
-#endif
     RENDER_PRINTF("%s", room->desc);
     if (build_room_look_footer(footer, (int)sizeof(footer), weather_kind,
             day_phase, room_clues, look_flags) > 0) {
@@ -1748,108 +1466,33 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
     int i;
     int flavor;
     /*
-     * Deferred one blank line before the next look, flavor, or inspect consumer.
-     * Corpse menus and wait arm on all builds (menus must stay separate from
-     * atmosphere even when weather events are skipped into a later ROOM_LOOK).
-     * Item/craft/equip arm only off Watcom, where compact arrival can also
-     * promote the break into s_room_body_gap_pending.
+     * Deferred one blank line before the next look, flavor, or inspect
+     * consumer. Only corpse menus arm this; menu must stay visually separate
+     * from weather/atmosphere even when a transition folds into a later
+     * ROOM_LOOK.
      */
     int scene_flavor_gap_pending;
     const GameEvent *ev;
 
     atmo_stack_reset();
     scene_flavor_gap_pending = 0;
-#ifndef __WATCOMC__
-    s_room_body_gap_pending = 0;
-#endif
     for (i = 0; i < out->count; ++i) {
-        int compact_look_i;
-
         flavor = 0;
         ev = &out->events[i];
-        compact_look_i = -1;
         if (s_atmo_stack_open && !render_event_is_flavor_kind(ev->kind)) {
             atmo_stack_flush();
         }
-#ifndef __WATCOMC__
-        /* #236: coalesce move/reply + trailing ROOM_LOOK before per-kind dispatch. */
-        if (ev->kind == GAME_EVENT_MOVE) {
-            compact_look_i = compact_arrival_room_look_end(out, i);
-            if (compact_look_i >= 0) {
-                atmo_stack_flush();
-                if (scene_flavor_gap_pending) {
-                    render_gap();
-                    scene_flavor_gap_pending = 0;
-#ifndef __WATCOMC__
-                    s_room_body_gap_pending = 1;
-#endif
-                }
-#ifndef __WATCOMC__
-                else {
-                    s_room_body_gap_pending = 0;
-                }
-#endif
-                render_compact_arrival(game, out, i, compact_look_i);
-                i = compact_look_i;
-                atmo_stack_reset();
-                continue;
-            }
-        }
-        if (ev->kind == GAME_EVENT_ENCOUNTER) {
-            char lead_text[160];
-
-            compact_look_i = compact_reply_room_look_end(out, i);
-            if (compact_look_i >= 0 &&
-                    compact_encounter_reply_text(ev, lead_text,
-                        (int)sizeof(lead_text)) > 0) {
-                atmo_stack_flush();
-                if (scene_flavor_gap_pending) {
-                    render_gap();
-                    scene_flavor_gap_pending = 0;
-#ifndef __WATCOMC__
-                    s_room_body_gap_pending = 1;
-#endif
-                }
-#ifndef __WATCOMC__
-                else {
-                    s_room_body_gap_pending = 0;
-                }
-#endif
-                render_compact_reply_return(game, out, compact_look_i,
-                    lead_text);
-                i = compact_look_i;
-                atmo_stack_reset();
-                continue;
-            }
-        }
-#endif
         switch (ev->kind) {
         case GAME_EVENT_ROOM_LOOK:
             if (scene_flavor_gap_pending) {
                 render_gap();
                 scene_flavor_gap_pending = 0;
-#ifndef __WATCOMC__
-                s_room_body_gap_pending = 1;
-#endif
-            }
-#ifndef __WATCOMC__
-            else {
-                s_room_body_gap_pending = 0;
-            }
-#endif
-            if (i > 0 && out->events[i - 1].kind == GAME_EVENT_DIALOGUE) {
-                render_gap();
             }
             render_room_look_snapshot(game, ev->room_id, ev->room_item,
                 ev->arg1, ev->arg0, (u8)ev->arg2, ev->arg3, 0, 1);
             break;
         case GAME_EVENT_MOVE:
             render_msg_moved(ev->text);
-#ifndef __WATCOMC__
-            if (move_followed_by_scene_open(out, i)) {
-                render_gap();
-            }
-#endif
             break;
         case GAME_EVENT_MAP:
             render_exploration_map(game);
@@ -1862,7 +1505,6 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
             break;
         case GAME_EVENT_WAIT:
             render_msg_wait();
-            scene_flavor_gap_pending = 1;
             break;
         case GAME_EVENT_CANNOT_MOVE:
             render_msg_cannot_move(ev->text);
@@ -1873,9 +1515,6 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
         /* #158 inventory: direct dispatch (invent no longer wraps LEGACY). */
         case GAME_EVENT_ITEM_RESULT:
             render_item_result_event(ev);
-#ifndef __WATCOMC__
-            scene_flavor_gap_pending = 1;
-#endif
             break;
         case GAME_EVENT_CORPSE_VIEW:
             render_inv_corpse_menu(ev);
@@ -1891,15 +1530,9 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
             break;
         case GAME_EVENT_CRAFT_RESULT:
             render_craft_result_event(ev);
-#ifndef __WATCOMC__
-            scene_flavor_gap_pending = 1;
-#endif
             break;
         case GAME_EVENT_EQUIP_RESULT:
             render_equip_result_event(ev);
-#ifndef __WATCOMC__
-            scene_flavor_gap_pending = 1;
-#endif
             break;
         /* #159 combat/progression: direct dispatch (combat/gprog no longer LEGACY). */
         case GAME_EVENT_COMBAT:
@@ -1949,11 +1582,7 @@ void game_render_output(const struct GameState *game, const GameEventQueue *out)
         case GAME_EVENT_DIALOGUE_GUARD:
             render_dialogue_guard_event(ev);
             break;
-        /*
-         * #161 ambient/inspect: direct dispatch (gatmos no longer LEGACY).
-         * #244/#206: wait and corpse menus arm scene_flavor_gap_pending on all
-         * builds; item/craft/equip arm only when compact arrival exists (GCC).
-         */
+        /* #161 ambient/inspect: direct dispatch (gatmos no longer LEGACY). */
         case GAME_EVENT_ENVIRONMENT:
             if (flavor_followed_by_encounter_open(out, i) &&
                     !env_event_is_weather_transition(ev->arg0) &&

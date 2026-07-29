@@ -185,50 +185,48 @@ TEST render_player_corpse_menu_adds_gap_before_look_flavor(void)
     game_describe_current_room(&game, &out);
     combined_lines = render_count_frame_lines(&game, &out);
     /*
-     * Separate frames duplicate two HUD rows; the combined frame keeps the
-     * scene break and adds one extra body gap before folded look flavor.
+     * Separate frames duplicate two HUD rows; the combined frame keeps one
+     * deferred corpse gap before the following flavor/look.
      */
-    ASSERT_EQ(menu_lines + look_lines, combined_lines);
+    ASSERT_EQ(menu_lines + look_lines - 2 + 1, combined_lines);
     PASS();
 }
 
-TEST render_item_result_adds_gap_before_compact_arrival_flavor(void)
+TEST render_wait_does_not_add_deferred_gap_before_flavor(void)
 {
     struct GameState game;
-    GameEventQueue move_out;
+    GameEventQueue wait_out;
+    GameEventQueue look_out;
     GameEventQueue out;
-    GameEvent *ev;
-    int result_lines;
-    int move_lines;
+    int wait_lines;
+    int look_lines;
     int combined_lines;
 
     unit_game_fresh(&game, 209u);
     game.weather_kind = GAME_WEATHER_RAIN;
 
+    game_event_queue_reset(&wait_out);
+    ASSERT(0 != game_event_push(&wait_out, GAME_EVENT_WAIT, 0, 0, 0, 0, 0));
+    wait_lines = render_count_frame_lines(&game, &wait_out);
+
+    game_event_queue_reset(&look_out);
+    ASSERT(0 != game_event_push(&look_out, GAME_EVENT_ENVIRONMENT,
+        GAME_ENV_EVENT_WEATHER_RAIN, 0, 0, 0, 0));
+    game_describe_current_room(&game, &look_out);
+    look_lines = render_count_frame_lines(&game, &look_out);
+
     game_event_queue_reset(&out);
-    ev = game_event_push(&out, GAME_EVENT_ITEM_RESULT,
-        GAME_ITEM_ACTION_LOOT, GAME_ITEM_OUTCOME_LEFT_BEHIND, ITEM_NONE, 0, 0);
-    ASSERT(0 != ev);
-    result_lines = render_count_frame_lines(&game, &out);
-
-    game_event_queue_reset(&move_out);
-    ev = game_event_push(&move_out, GAME_EVENT_MOVE, 0, 0, 0, 0, 0);
-    ASSERT(0 != ev);
-    ev->text = "north";
-    game.player.room_id = WORLD_ROOM_ROAD;
-    game_describe_current_room_tight(&game, &move_out);
-    move_lines = render_count_frame_lines(&game, &move_out);
-
-    ASSERT(0 != game_event_push(&out, GAME_EVENT_MOVE, 0, 0, 0, 0, 0));
-    out.events[out.count - 1].text = "north";
-    game_describe_current_room_tight(&game, &out);
+    ASSERT(0 != game_event_push(&out, GAME_EVENT_WAIT, 0, 0, 0, 0, 0));
+    ASSERT(0 != game_event_push(&out, GAME_EVENT_ENVIRONMENT,
+        GAME_ENV_EVENT_WEATHER_RAIN, 0, 0, 0, 0));
+    game_describe_current_room(&game, &out);
     combined_lines = render_count_frame_lines(&game, &out);
 
     /*
-     * Separate frames duplicate two HUD rows; the combined frame keeps the
-     * scene break and adds one extra body gap before folded arrival flavor.
+     * Separate frames duplicate two HUD rows; the combined frame must NOT
+     * add a deferred gap between wait and the following flavor/look.
      */
-    ASSERT_EQ(result_lines + move_lines, combined_lines);
+    ASSERT_EQ(wait_lines + look_lines - 2, combined_lines);
     PASS();
 }
 
@@ -242,5 +240,5 @@ SUITE(grendr)
     RUN_TEST(render_player_defeat_frame_stays_within_safe_budget);
     RUN_TEST(render_player_corpse_menu_stays_within_safe_budget);
     RUN_TEST(render_player_corpse_menu_adds_gap_before_look_flavor);
-    RUN_TEST(render_item_result_adds_gap_before_compact_arrival_flavor);
+    RUN_TEST(render_wait_does_not_add_deferred_gap_before_flavor);
 }
